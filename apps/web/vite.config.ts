@@ -9,6 +9,9 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  optimizeDeps: {
+    include: ['@verdin/api-client', '@verdin/shared', '@verdin/ui', '@verdin/validation'],
+  },
   server: {
     port: 5173,
     host: true,

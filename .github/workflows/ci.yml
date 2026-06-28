@@ -37,10 +37,7 @@ jobs:
           node-version: 20
           cache: pnpm
       - run: pnpm install
-      - run: pnpm --filter @verdin/shared build
-      - run: pnpm --filter @verdin/ui build
-      - run: pnpm --filter @verdin/validation build
-      - run: pnpm typecheck
+      - run: pnpm turbo run typecheck
 
   python-tests:
     name: Python Tests
@@ -87,10 +84,7 @@ jobs:
           node-version: 20
           cache: pnpm
       - run: pnpm install
-      - run: pnpm --filter @verdin/shared build
-      - run: pnpm --filter @verdin/ui build
-      - run: pnpm --filter @verdin/validation build
-      - run: pnpm --filter @verdin/web build
+      - run: pnpm turbo run build --filter=@verdin/web
 
   build-backend:
     name: Build Backend
