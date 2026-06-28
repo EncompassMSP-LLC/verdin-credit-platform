@@ -1,0 +1,13 @@
+---
+description: Authentication and security requirements
+globs: apps/api/**
+alwaysApply: false
+---
+
+# Authentication
+
+- All endpoints require authentication unless explicitly marked public
+- Public endpoints: `/health`, `/version`, `/auth/login`, `/auth/refresh`
+- Use `get_current_user` dependency for protected routes
+- Use `require_role()` for role-based access control
+- Never hardcode secrets — use environment variables via pydantic-settings

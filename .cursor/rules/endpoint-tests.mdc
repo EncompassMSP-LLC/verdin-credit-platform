@@ -1,0 +1,12 @@
+---
+description: Every endpoint must have tests
+globs: apps/api/api/routers/**
+alwaysApply: false
+---
+
+# Endpoint Testing
+
+- Every new endpoint MUST have corresponding tests in `apps/api/tests/`
+- Test both success and error paths
+- Use FastAPI TestClient for integration tests
+- Mock external services, not the database layer in integration tests

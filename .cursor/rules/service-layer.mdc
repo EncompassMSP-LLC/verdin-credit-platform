@@ -1,0 +1,12 @@
+---
+description: Always use service classes for business logic
+globs: apps/api/**
+alwaysApply: false
+---
+
+# Service Layer
+
+- All business logic belongs in `api/services/`
+- Services orchestrate repositories and external integrations
+- Services raise domain-appropriate HTTP exceptions
+- Routers are thin — they validate input, call services, and return responses
