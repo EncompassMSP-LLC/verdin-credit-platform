@@ -1,0 +1,14 @@
+---
+description: Database migration and model conventions
+globs: apps/api/**
+alwaysApply: false
+---
+
+# Migrations and Models
+
+- Always create Alembic migrations for schema changes
+- Use UUID primary keys for all entities
+- Use UTC timestamps (`DateTime(timezone=True)`)
+- Include audit fields (`created_by_id`, `updated_by_id`)
+- Support soft delete via `deleted_at` column
+- Every feature that changes schema MUST update documentation

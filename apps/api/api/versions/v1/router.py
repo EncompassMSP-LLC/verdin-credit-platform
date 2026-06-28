@@ -1,0 +1,12 @@
+"""Versioned API router for v1."""
+
+from fastapi import APIRouter
+
+from api.core.router import router as system_router
+from api.modules.auth.router import router as auth_router
+
+router = APIRouter()
+router.include_router(system_router)
+router.include_router(auth_router)
+
+__all__ = ["router"]

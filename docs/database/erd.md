@@ -1,0 +1,118 @@
+# Database Schema
+
+## Entity Relationship Diagram
+
+```mermaid
+erDiagram
+    Organization ||--o{ User : has
+    Organization ||--o{ Case : has
+    Organization ||--o{ Account : has
+    Account ||--o{ Case : has
+    User ||--o{ Case : "assigned to"
+    Case ||--o{ Document : contains
+    Case ||--o{ Task : contains
+    Case ||--o{ Communication : contains
+    Case ||--o{ TimelineEvent : contains
+    User ||--o{ Task : "assigned to"
+
+    Organization {
+        uuid id PK
+        string name
+        string slug UK
+        boolean is_active
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+
+    User {
+        uuid id PK
+        string email UK
+        string hashed_password
+        string first_name
+        string last_name
+        enum role
+        boolean is_active
+        uuid organization_id FK
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+
+    Account {
+        uuid id PK
+        string name
+        string account_number
+        string email
+        string phone
+        uuid organization_id FK
+    }
+
+    Case {
+        uuid id PK
+        string title
+        text description
+        enum status
+        string case_number UK
+        uuid organization_id FK
+        uuid account_id FK
+        uuid assigned_to_id FK
+    }
+
+    Document {
+        uuid id PK
+        string title
+        string file_name
+        string file_path
+        string mime_type
+        int file_size
+        uuid case_id FK
+    }
+
+    Task {
+        uuid id PK
+        string title
+        text description
+        enum status
+        enum priority
+        timestamp due_date
+        uuid case_id FK
+        uuid assigned_to_id FK
+    }
+
+    Communication {
+        uuid id PK
+        string subject
+        text body
+        string channel
+        string direction
+        uuid case_id FK
+    }
+
+    TimelineEvent {
+        uuid id PK
+        string event_type
+        string title
+        text description
+        text metadata_json
+        timestamp occurred_at
+        uuid case_id FK
+    }
+```
+
+## Conventions
+
+- All tables use UUID primary keys
+- All business entities support soft delete (`deleted_at`)
+- All entities include audit fields (`created_by_id`, `updated_by_id`)
+- All timestamps are UTC with timezone
+
+## Migrations
+
+Migrations are managed with Alembic in `apps/api/alembic/`.
+
+```bash
+cd apps/api
+alembic upgrade head        # Apply migrations
+alembic revision --autogenerate -m "description"  # Create new migration
+```

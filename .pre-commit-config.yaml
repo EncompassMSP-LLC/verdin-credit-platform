@@ -1,0 +1,63 @@
+# See https://pre-commit.com for more information
+default_language_version:
+  python: python3
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: ^(.*\.md)$
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+        args: [--maxkb=1000]
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.4
+    hooks:
+      - id: ruff
+        name: ruff (lint)
+        args: [--fix]
+        files: ^apps/(api|worker)/
+      - id: ruff-format
+        name: ruff (format)
+        files: ^apps/(api|worker)/
+
+  - repo: local
+    hooks:
+      - id: mypy-api
+        name: mypy (api)
+        entry: python infrastructure/scripts/run-mypy.py
+        language: python
+        pass_filenames: false
+        files: ^apps/api/
+        additional_dependencies:
+          - mypy>=1.14.0
+          - fastapi>=0.115.6
+          - pydantic[email]>=2.10.3
+          - pydantic-settings>=2.7.0
+          - sqlalchemy[asyncio]>=2.0.36
+          - python-jose[cryptography]>=3.3.0
+          - passlib[bcrypt]>=1.7.4
+          - structlog>=24.4.0
+          - redis>=5.2.1
+          - httpx>=0.28.1
+          - python-multipart>=0.0.20
+          - asyncpg>=0.30.0
+          - alembic>=1.14.0
+          - types-passlib
+
+      - id: prettier
+        name: prettier
+        entry: pnpm exec prettier --write --ignore-unknown
+        language: system
+        files: \.(ts|tsx|js|jsx|json|md|ya?ml)$
+        exclude: ^(pnpm-lock\.yaml|.*dist/|\.turbo/)
+
+      - id: eslint
+        name: eslint
+        entry: pnpm exec eslint
+        language: system
+        files: \.(ts|tsx)$
+        exclude: (^|.*/)(dist|node_modules)/

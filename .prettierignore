@@ -1,0 +1,8 @@
+node_modules
+dist
+.turbo
+pnpm-lock.yaml
+coverage
+.ruff_cache
+.mypy_cache
+__pycache__

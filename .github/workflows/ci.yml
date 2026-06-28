@@ -1,0 +1,129 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  SECRET_KEY: ci-secret-key-minimum-32-characters-long
+  DATABASE_URL: postgresql+asyncpg://verdin:verdin@localhost:5432/verdin_credit_test
+  DATABASE_URL_SYNC: postgresql://verdin:verdin@localhost:5432/verdin_credit_test
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install
+      - run: pnpm format:check
+      - run: pnpm lint
+
+  typecheck:
+    name: Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install
+      - run: pnpm turbo run typecheck
+
+  python-tests:
+    name: Python Tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: verdin
+          POSTGRES_PASSWORD: verdin
+          POSTGRES_DB: verdin_credit_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install dependencies
+        working-directory: apps/api
+        run: |
+          pip install -r requirements.txt
+      - name: Run tests
+        working-directory: apps/api
+        run: pytest tests/ -v --tb=short
+      - name: Lint Python
+        working-directory: apps/api
+        run: pip install ruff && ruff check .
+
+  build-frontend:
+    name: Build Frontend
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install
+      - run: pnpm turbo run build --filter=@verdin/web
+
+  build-backend:
+    name: Build Backend
+    runs-on: ubuntu-latest
+    needs: [python-tests]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Verify API imports
+        working-directory: apps/api
+        run: |
+          pip install -r requirements.txt
+          python -c "from main import app; print(app.title)"
+
+  docker-build:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    needs: [build-frontend, build-backend]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build API image
+        uses: docker/build-push-action@v6
+        with:
+          context: apps/api
+          push: false
+          tags: verdin-api:ci
+      - name: Build Worker image
+        uses: docker/build-push-action@v6
+        with:
+          context: apps/worker
+          push: false
+          tags: verdin-worker:ci
+      - name: Build Web image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/web/Dockerfile
+          push: false
+          tags: verdin-web:ci
