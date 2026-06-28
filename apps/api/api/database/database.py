@@ -1,6 +1,7 @@
 """Database module exports."""
 
-from api.database.base import AuditMixin, Base, SoftDeleteMixin, TimestampMixin
+from api.core.audit import AuditMixin, SoftDeleteMixin, TimestampMixin
+from api.database.base import Base
 from api.database.session import AsyncSessionLocal, engine, get_db
 
 __all__ = [

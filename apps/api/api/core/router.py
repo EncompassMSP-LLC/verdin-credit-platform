@@ -1,9 +1,9 @@
-"""Health and version endpoints."""
+"""System health and version endpoints."""
 
 from fastapi import APIRouter
 
 from api.core.config import get_settings
-from api.schemas import HealthResponse, VersionResponse
+from api.core.responses import HealthResponse, VersionResponse
 
 router = APIRouter(tags=["System"])
 settings = get_settings()

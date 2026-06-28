@@ -23,18 +23,18 @@ docker compose exec api python scripts/seed.py
 
 ### Access
 
-| Service | URL |
-|---------|-----|
-| App (via Nginx) | http://localhost |
-| Frontend | http://localhost:3000 |
-| API | http://localhost:8000 |
-| API Docs | http://localhost:8000/docs |
-| MinIO Console | http://localhost:9001 |
+| Service         | URL                        |
+| --------------- | -------------------------- |
+| App (via Nginx) | http://localhost           |
+| Frontend        | http://localhost:3000      |
+| API             | http://localhost:8000      |
+| API Docs        | http://localhost:8000/docs |
+| MinIO Console   | http://localhost:9001      |
 
 ### Demo Login
 
-| Email | Password | Role |
-|-------|----------|------|
+| Email             | Password    | Role  |
+| ----------------- | ----------- | ----- |
 | owner@verdin.demo | changeme123 | Owner |
 | admin@verdin.demo | changeme123 | Admin |
 
@@ -80,19 +80,53 @@ cd apps/api && pytest
 pnpm format
 ```
 
+### Pre-commit Hooks
+
+Install [pre-commit](https://pre-commit.com/) once per clone to run lint and format checks before each commit:
+
+```bash
+# Install pre-commit (Python 3.13+)
+pip install pre-commit
+
+# Install Node dependencies (required for ESLint and Prettier hooks)
+pnpm install
+
+# Install API Python dependencies (recommended for local mypy/ruff)
+cd apps/api && pip install -r requirements.txt
+
+# Register git hooks
+pre-commit install
+```
+
+Run all hooks manually against the full repository:
+
+```bash
+pre-commit run --all-files
+```
+
+Hooks included:
+
+| Hook          | Tool        | Scope                                                      |
+| ------------- | ----------- | ---------------------------------------------------------- |
+| `ruff`        | Ruff lint   | `apps/api`, `apps/worker`                                  |
+| `ruff-format` | Ruff format | `apps/api`, `apps/worker`                                  |
+| `mypy-api`    | mypy        | `apps/api`                                                 |
+| `prettier`    | Prettier    | TypeScript, JSON, Markdown, YAML (requires `pnpm install`) |
+| `eslint`      | ESLint      | `.ts`, `.tsx` files (requires `pnpm install`)              |
+
 ## Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
+| Layer    | Technology                                        |
+| -------- | ------------------------------------------------- |
 | Frontend | React, Vite, TypeScript, Tailwind, TanStack Query |
-| Backend | FastAPI, Python 3.13, Pydantic v2, SQLAlchemy 2.x |
-| Database | PostgreSQL 16, Alembic |
-| Cache | Redis 7 |
-| Storage | MinIO |
-| Auth | JWT + Refresh Tokens, RBAC |
-| Infra | Docker Compose, Nginx |
-| CI/CD | GitHub Actions |
-| Monorepo | pnpm workspaces, Turborepo |
+| Backend  | FastAPI, Python 3.13, Pydantic v2, SQLAlchemy 2.x |
+| Database | PostgreSQL 16, Alembic                            |
+| Cache    | Redis 7                                           |
+| Storage  | MinIO                                             |
+| Auth     | JWT + Refresh Tokens, RBAC                        |
+| Infra    | Docker Compose, Nginx                             |
+| CI/CD    | GitHub Actions                                    |
+| Monorepo | pnpm workspaces, Turborepo                        |
 
 ## Documentation
 
@@ -103,6 +137,7 @@ pnpm format
 - [Deployment](docs/deployment/guide.md)
 - [Developer Guide](docs/developer-guide.md)
 - [Coding Standards](docs/coding-standards.md)
+- [Contributing](CONTRIBUTING.md)
 - [Release Notes](docs/release-notes/v4.2.0.md)
 - [AGENTS.md](AGENTS.md) — AI development instructions
 

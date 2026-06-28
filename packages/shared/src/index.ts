@@ -1,20 +1,9 @@
 export const APP_NAME = 'Verdin Credit Platform';
 export const APP_VERSION = '4.2.0';
 
-export type UserRole =
-  | 'owner'
-  | 'admin'
-  | 'case_manager'
-  | 'reviewer'
-  | 'read_only';
+export type UserRole = 'owner' | 'admin' | 'case_manager' | 'reviewer' | 'read_only';
 
-export const USER_ROLES: UserRole[] = [
-  'owner',
-  'admin',
-  'case_manager',
-  'reviewer',
-  'read_only',
-];
+export const USER_ROLES: UserRole[] = ['owner', 'admin', 'case_manager', 'reviewer', 'read_only'];
 
 export const ROLE_LABELS: Record<UserRole, string> = {
   owner: 'Owner',

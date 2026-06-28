@@ -32,6 +32,7 @@ Thumbs.db
 
 # Build outputs
 apps/web/dist/
+apps/web/*.tsbuildinfo
 apps/api/.pytest_cache/
 .coverage
 htmlcov/

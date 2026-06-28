@@ -24,9 +24,7 @@ export function SettingsPage() {
           </div>
           <div className="flex justify-between">
             <dt className="text-gray-500">Role</dt>
-            <dd className="font-medium">
-              {user?.role ? ROLE_LABELS[user.role as UserRole] : '—'}
-            </dd>
+            <dd className="font-medium">{user?.role ? ROLE_LABELS[user.role as UserRole] : '—'}</dd>
           </div>
         </dl>
       </Card>

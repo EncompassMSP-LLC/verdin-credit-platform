@@ -1,12 +1,6 @@
 import { z } from 'zod';
 
-export const userRoleSchema = z.enum([
-  'owner',
-  'admin',
-  'case_manager',
-  'reviewer',
-  'read_only',
-]);
+export const userRoleSchema = z.enum(['owner', 'admin', 'case_manager', 'reviewer', 'read_only']);
 
 export const loginSchema = z.object({
   email: z.string().email('Invalid email address'),

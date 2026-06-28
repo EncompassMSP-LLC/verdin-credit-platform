@@ -51,9 +51,9 @@ async def get_case(case_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
 
 ## File Naming
 
-| Type | Convention | Example |
-|------|-----------|---------|
-| Python modules | snake_case | `auth_service.py` |
-| React components | PascalCase | `LoginPage.tsx` |
-| TypeScript utils | camelCase | `api.ts` |
-| Docs | kebab-case | `developer-guide.md` |
+| Type             | Convention | Example              |
+| ---------------- | ---------- | -------------------- |
+| Python modules   | snake_case | `auth_service.py`    |
+| React components | PascalCase | `LoginPage.tsx`      |
+| TypeScript utils | camelCase  | `api.ts`             |
+| Docs             | kebab-case | `developer-guide.md` |

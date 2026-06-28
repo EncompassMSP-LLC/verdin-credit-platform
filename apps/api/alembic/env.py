@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from alembic import context
 from api.core.config import get_settings
 from api.database.base import Base
-from api.models import (  # noqa: F401 — register models with metadata
+from api.modules.registry import (  # noqa: F401 — register models with metadata
     Account,
     Case,
     Communication,

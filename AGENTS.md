@@ -17,6 +17,7 @@ Verdin Credit Platform is an enterprise SaaS application for credit operations: 
 **Scope:** `apps/api/`, `apps/worker/`
 
 **Responsibilities:**
+
 - Implement FastAPI routers, services, repositories, and schemas
 - Write Alembic migrations for all schema changes
 - Implement JWT authentication and RBAC
@@ -24,6 +25,7 @@ Verdin Credit Platform is an enterprise SaaS application for credit operations: 
 - Maintain OpenAPI documentation accuracy
 
 **Rules:**
+
 - Routers never access SQLAlchemy directly
 - All business logic belongs in services
 - Repositories own database access
@@ -36,6 +38,7 @@ Verdin Credit Platform is an enterprise SaaS application for credit operations: 
 **Scope:** `apps/web/`, `packages/ui/`
 
 **Responsibilities:**
+
 - Build React pages and components with TypeScript
 - Use TanStack Query for server state
 - Use React Hook Form + Zod for forms
@@ -43,6 +46,7 @@ Verdin Credit Platform is an enterprise SaaS application for credit operations: 
 - Maintain responsive, accessible UI
 
 **Rules:**
+
 - Shared types live in `@verdin/shared`
 - Validation schemas live in `@verdin/validation`
 - Reusable UI components live in `@verdin/ui`
@@ -54,12 +58,14 @@ Verdin Credit Platform is an enterprise SaaS application for credit operations: 
 **Scope:** `apps/api/api/models/`, `apps/api/alembic/`, `infrastructure/postgres/`
 
 **Responsibilities:**
+
 - Design and maintain SQLAlchemy models
 - Create Alembic migrations for every schema change
 - Maintain seed scripts
 - Document ERD and schema decisions
 
 **Rules:**
+
 - UUID primary keys on all entities
 - UTC timestamps (`DateTime(timezone=True)`)
 - Soft delete via `deleted_at`
@@ -71,12 +77,14 @@ Verdin Credit Platform is an enterprise SaaS application for credit operations: 
 **Scope:** Future `apps/ai/`, worker tasks, document processing
 
 **Responsibilities:**
+
 - Design AI pipeline integrations
 - Implement document OCR and classification
 - Build embedding and retrieval systems
 - Ensure AI features are auditable
 
 **Rules:**
+
 - AI outputs must be traceable (model, version, timestamp)
 - Never send PII to external APIs without explicit configuration
 - All AI endpoints require authentication and appropriate RBAC
@@ -86,12 +94,14 @@ Verdin Credit Platform is an enterprise SaaS application for credit operations: 
 **Scope:** `tests/`, `apps/api/tests/`, CI workflows
 
 **Responsibilities:**
+
 - Write and maintain test suites
 - Ensure CI passes on every PR
 - Define test plans for new features
 - Monitor test coverage
 
 **Rules:**
+
 - Every endpoint must have tests
 - Test both success and failure paths
 - Integration tests use TestClient
@@ -102,12 +112,14 @@ Verdin Credit Platform is an enterprise SaaS application for credit operations: 
 **Scope:** `docs/`, `README.md`, `AGENTS.md`, release notes
 
 **Responsibilities:**
+
 - Maintain architecture documentation
 - Update API docs when endpoints change
 - Write ADRs for significant decisions
 - Keep developer guide current
 
 **Rules:**
+
 - Every feature updates documentation
 - Document breaking changes in release notes
 - Keep ERD in sync with models
@@ -163,25 +175,21 @@ Before merging any PR:
 
 ## Testing Expectations
 
-| Layer | Tool | Coverage Target |
-|-------|------|-----------------|
-| API endpoints | pytest + TestClient | Every endpoint |
-| Services | pytest (unit) | Critical paths |
-| Frontend | Vitest (Sprint 2+) | Key flows |
-| E2E | Playwright (Sprint 3+) | Auth + CRUD |
+| Layer         | Tool                   | Coverage Target |
+| ------------- | ---------------------- | --------------- |
+| API endpoints | pytest + TestClient    | Every endpoint  |
+| Services      | pytest (unit)          | Critical paths  |
+| Frontend      | Vitest (Sprint 2+)     | Key flows       |
+| E2E           | Playwright (Sprint 3+) | Auth + CRUD     |
 
 ## Directory Reference
 
 ```
 apps/api/api/
-  routers/      # HTTP endpoints (thin)
-  services/     # Business logic
-  repositories/ # Database access
-  models/       # SQLAlchemy ORM
-  schemas/      # Pydantic request/response
-  auth/         # JWT + RBAC
-  core/         # Config, logging
-  database/     # Engine, session, base
+  core/         # Shared utilities (config, security, permissions, pagination, audit, exceptions, responses)
+  modules/      # Domain modules (auth, cases, accounts, documents, tasks, timeline, ...)
+    <domain>/   # router, service, repository, schemas, models
+  database/     # Engine, session, declarative base
   middleware/   # Request logging, etc.
 
 apps/web/src/
@@ -216,7 +224,7 @@ cd apps/web && pnpm dev
 
 ## Demo Credentials (after seed)
 
-| Email | Password | Role |
-|-------|----------|------|
+| Email             | Password    | Role  |
+| ----------------- | ----------- | ----- |
 | owner@verdin.demo | changeme123 | Owner |
 | admin@verdin.demo | changeme123 | Admin |

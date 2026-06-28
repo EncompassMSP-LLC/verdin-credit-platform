@@ -6,10 +6,10 @@ Verdin uses JWT (JSON Web Tokens) for stateless authentication with refresh toke
 
 ## Token Types
 
-| Token | Lifetime | Purpose |
-|-------|----------|---------|
-| Access Token | 30 minutes | API authorization |
-| Refresh Token | 7 days | Obtain new access tokens |
+| Token         | Lifetime   | Purpose                  |
+| ------------- | ---------- | ------------------------ |
+| Access Token  | 30 minutes | API authorization        |
+| Refresh Token | 7 days     | Obtain new access tokens |
 
 ## Flow
 
@@ -23,13 +23,13 @@ Verdin uses JWT (JSON Web Tokens) for stateless authentication with refresh toke
 
 ## Role-Based Access Control
 
-| Role | Level | Permissions |
-|------|-------|-------------|
-| Owner | 5 | Full platform access |
-| Admin | 4 | Organization management |
-| Case Manager | 3 | Case CRUD, task assignment |
-| Reviewer | 2 | Read cases, add reviews |
-| Read Only | 1 | View-only access |
+| Role         | Level | Permissions                |
+| ------------ | ----- | -------------------------- |
+| Owner        | 5     | Full platform access       |
+| Admin        | 4     | Organization management    |
+| Case Manager | 3     | Case CRUD, task assignment |
+| Reviewer     | 2     | Read cases, add reviews    |
+| Read Only    | 1     | View-only access           |
 
 Higher roles inherit permissions of lower roles.
 

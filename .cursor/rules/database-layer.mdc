@@ -6,7 +6,7 @@ alwaysApply: false
 
 # Database Logic
 
-- All database access MUST go through repository classes in `api/repositories/`
+- All database access MUST go through repository classes in `api/modules/<domain>/repository.py`
 - Services MUST NOT import SQLAlchemy query constructs directly
 - Routers MUST NOT access the database or ORM models directly
 - Use async SQLAlchemy sessions via dependency injection

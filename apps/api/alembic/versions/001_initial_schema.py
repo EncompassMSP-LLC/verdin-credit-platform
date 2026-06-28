@@ -19,27 +19,48 @@ branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
 user_role = postgresql.ENUM(
-    "owner", "admin", "case_manager", "reviewer", "read_only",
-    name="user_role", create_type=False,
+    "owner",
+    "admin",
+    "case_manager",
+    "reviewer",
+    "read_only",
+    name="user_role",
+    create_type=False,
 )
 case_status = postgresql.ENUM(
-    "open", "in_review", "closed", "archived",
-    name="case_status", create_type=False,
+    "open",
+    "in_review",
+    "closed",
+    "archived",
+    name="case_status",
+    create_type=False,
 )
 task_status = postgresql.ENUM(
-    "pending", "in_progress", "completed", "cancelled",
-    name="task_status", create_type=False,
+    "pending",
+    "in_progress",
+    "completed",
+    "cancelled",
+    name="task_status",
+    create_type=False,
 )
 task_priority = postgresql.ENUM(
-    "low", "medium", "high", "urgent",
-    name="task_priority", create_type=False,
+    "low",
+    "medium",
+    "high",
+    "urgent",
+    name="task_priority",
+    create_type=False,
 )
 
 
 def upgrade() -> None:
-    op.execute("CREATE TYPE user_role AS ENUM ('owner', 'admin', 'case_manager', 'reviewer', 'read_only')")
+    op.execute(
+        "CREATE TYPE user_role AS ENUM ('owner', 'admin', 'case_manager', 'reviewer', 'read_only')"
+    )
     op.execute("CREATE TYPE case_status AS ENUM ('open', 'in_review', 'closed', 'archived')")
-    op.execute("CREATE TYPE task_status AS ENUM ('pending', 'in_progress', 'completed', 'cancelled')")
+    op.execute(
+        "CREATE TYPE task_status AS ENUM ('pending', 'in_progress', 'completed', 'cancelled')"
+    )
     op.execute("CREATE TYPE task_priority AS ENUM ('low', 'medium', 'high', 'urgent')")
 
     op.create_table(
@@ -48,8 +69,18 @@ def upgrade() -> None:
         sa.Column("name", sa.String(255), nullable=False),
         sa.Column("slug", sa.String(100), nullable=False),
         sa.Column("is_active", sa.Boolean(), nullable=False, server_default="true"),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
         sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("created_by_id", postgresql.UUID(as_uuid=True), nullable=True),
         sa.Column("updated_by_id", postgresql.UUID(as_uuid=True), nullable=True),
@@ -68,8 +99,18 @@ def upgrade() -> None:
         sa.Column("role", user_role, nullable=False, server_default="read_only"),
         sa.Column("is_active", sa.Boolean(), nullable=False, server_default="true"),
         sa.Column("organization_id", postgresql.UUID(as_uuid=True), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
         sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("created_by_id", postgresql.UUID(as_uuid=True), nullable=True),
         sa.Column("updated_by_id", postgresql.UUID(as_uuid=True), nullable=True),
@@ -87,8 +128,18 @@ def upgrade() -> None:
         sa.Column("email", sa.String(255), nullable=True),
         sa.Column("phone", sa.String(50), nullable=True),
         sa.Column("organization_id", postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
         sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("created_by_id", postgresql.UUID(as_uuid=True), nullable=True),
         sa.Column("updated_by_id", postgresql.UUID(as_uuid=True), nullable=True),
@@ -107,8 +158,18 @@ def upgrade() -> None:
         sa.Column("organization_id", postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column("account_id", postgresql.UUID(as_uuid=True), nullable=True),
         sa.Column("assigned_to_id", postgresql.UUID(as_uuid=True), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
         sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("created_by_id", postgresql.UUID(as_uuid=True), nullable=True),
         sa.Column("updated_by_id", postgresql.UUID(as_uuid=True), nullable=True),
@@ -129,8 +190,18 @@ def upgrade() -> None:
         sa.Column("mime_type", sa.String(100), nullable=True),
         sa.Column("file_size", sa.Integer(), nullable=True),
         sa.Column("case_id", postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
         sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("created_by_id", postgresql.UUID(as_uuid=True), nullable=True),
         sa.Column("updated_by_id", postgresql.UUID(as_uuid=True), nullable=True),
@@ -148,8 +219,18 @@ def upgrade() -> None:
         sa.Column("due_date", sa.DateTime(timezone=True), nullable=True),
         sa.Column("case_id", postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column("assigned_to_id", postgresql.UUID(as_uuid=True), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
         sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("created_by_id", postgresql.UUID(as_uuid=True), nullable=True),
         sa.Column("updated_by_id", postgresql.UUID(as_uuid=True), nullable=True),
@@ -166,8 +247,18 @@ def upgrade() -> None:
         sa.Column("channel", sa.String(50), nullable=False, server_default="email"),
         sa.Column("direction", sa.String(20), nullable=False, server_default="outbound"),
         sa.Column("case_id", postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
         sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("created_by_id", postgresql.UUID(as_uuid=True), nullable=True),
         sa.Column("updated_by_id", postgresql.UUID(as_uuid=True), nullable=True),
@@ -182,10 +273,25 @@ def upgrade() -> None:
         sa.Column("title", sa.String(255), nullable=False),
         sa.Column("description", sa.Text(), nullable=True),
         sa.Column("metadata_json", sa.Text(), nullable=True),
-        sa.Column("occurred_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column(
+            "occurred_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
         sa.Column("case_id", postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
         sa.Column("created_by_id", postgresql.UUID(as_uuid=True), nullable=True),
         sa.Column("updated_by_id", postgresql.UUID(as_uuid=True), nullable=True),
         sa.ForeignKeyConstraint(["case_id"], ["cases.id"]),

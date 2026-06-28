@@ -24,25 +24,25 @@ docker compose exec api python scripts/seed.py
 
 ### Services
 
-| Service | Port | Description |
-|---------|------|-------------|
-| nginx | 80 | Reverse proxy |
-| web | 3000 | React frontend |
-| api | 8000 | FastAPI backend |
-| postgres | 5432 | PostgreSQL database |
-| redis | 6379 | Cache and job queue |
-| minio | 9000/9001 | Object storage |
-| worker | — | Background jobs |
+| Service  | Port      | Description         |
+| -------- | --------- | ------------------- |
+| nginx    | 80        | Reverse proxy       |
+| web      | 3000      | React frontend      |
+| api      | 8000      | FastAPI backend     |
+| postgres | 5432      | PostgreSQL database |
+| redis    | 6379      | Cache and job queue |
+| minio    | 9000/9001 | Object storage      |
+| worker   | —         | Background jobs     |
 
 ## Environment Variables
 
 See `.env.example` for all required variables. Critical production settings:
 
-| Variable | Description |
-|----------|-------------|
-| `SECRET_KEY` | JWT signing key (min 32 chars) |
-| `DATABASE_URL` | PostgreSQL connection string |
-| `CORS_ORIGINS` | Allowed frontend origins |
+| Variable       | Description                    |
+| -------------- | ------------------------------ |
+| `SECRET_KEY`   | JWT signing key (min 32 chars) |
+| `DATABASE_URL` | PostgreSQL connection string   |
+| `CORS_ORIGINS` | Allowed frontend origins       |
 
 ## Production Checklist
 

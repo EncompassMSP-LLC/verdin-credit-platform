@@ -3,16 +3,17 @@
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.auth.security import (
+from api.core.constants import TOKEN_TYPE_REFRESH
+from api.core.security import (
     create_access_token,
     create_refresh_token,
     decode_token,
     hash_password,
     verify_password,
 )
-from api.models import User
-from api.repositories.user_repository import UserRepository
-from api.schemas import LoginRequest, TokenResponse, UserCreate, UserResponse
+from api.modules.auth.models import User
+from api.modules.auth.repository import UserRepository
+from api.modules.auth.schemas import LoginRequest, TokenResponse, UserCreate, UserResponse
 
 
 class AuthService:
@@ -38,7 +39,7 @@ class AuthService:
 
     async def refresh(self, refresh_token: str) -> TokenResponse:
         payload = decode_token(refresh_token)
-        if payload is None or payload.get("type") != "refresh":
+        if payload is None or payload.get("type") != TOKEN_TYPE_REFRESH:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid refresh token",

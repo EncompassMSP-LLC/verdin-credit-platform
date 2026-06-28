@@ -5,24 +5,21 @@ import uuid
 
 from sqlalchemy import select
 
-from api.auth.security import hash_password
+from api.core.audit import apply_audit_on_create
+from api.core.constants import UserRole
+from api.core.security import hash_password
 from api.database.session import AsyncSessionLocal
-from api.models import (
-    Account,
-    Case,
-    CaseStatus,
-    Organization,
-    Task,
-    TaskPriority,
-    TaskStatus,
-    User,
-    UserRole,
-)
+from api.modules.accounts.models import Account
+from api.modules.auth.models import Organization, User
+from api.modules.cases.models import Case, CaseStatus
+from api.modules.tasks.models import Task, TaskPriority, TaskStatus
 
 
 async def seed() -> None:
     async with AsyncSessionLocal() as session:
-        result = await session.execute(select(Organization).where(Organization.slug == "verdin-demo"))
+        result = await session.execute(
+            select(Organization).where(Organization.slug == "verdin-demo")
+        )
         if result.scalar_one_or_none() is not None:
             print("Seed data already exists, skipping.")
             return
@@ -65,8 +62,8 @@ async def seed() -> None:
             account_number="ACC-001",
             email="contact@acme.example",
             organization_id=org.id,
-            created_by_id=owner.id,
         )
+        apply_audit_on_create(account, owner.id)
         session.add(account)
         await session.flush()
 
@@ -79,8 +76,8 @@ async def seed() -> None:
             organization_id=org.id,
             account_id=account.id,
             assigned_to_id=admin.id,
-            created_by_id=owner.id,
         )
+        apply_audit_on_create(case, owner.id)
         session.add(case)
         await session.flush()
 
@@ -92,8 +89,8 @@ async def seed() -> None:
             priority=TaskPriority.HIGH,
             case_id=case.id,
             assigned_to_id=admin.id,
-            created_by_id=owner.id,
         )
+        apply_audit_on_create(task, owner.id)
         session.add(task)
 
         await session.commit()

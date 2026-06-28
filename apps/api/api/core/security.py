@@ -1,4 +1,4 @@
-"""JWT authentication and password utilities."""
+"""Security helpers — password hashing and JWT token management."""
 
 from datetime import UTC, datetime, timedelta
 from typing import Any
@@ -7,7 +7,7 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 
 from api.core.config import get_settings
-from api.models import UserRole
+from api.core.constants import TOKEN_TYPE_ACCESS, TOKEN_TYPE_REFRESH, UserRole
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 settings = get_settings()
@@ -32,7 +32,7 @@ def create_access_token(
     payload: dict[str, Any] = {
         "sub": subject,
         "role": role.value,
-        "type": "access",
+        "type": TOKEN_TYPE_ACCESS,
         "exp": expire,
     }
     return jwt.encode(payload, settings.secret_key, algorithm=settings.algorithm)
@@ -42,7 +42,7 @@ def create_refresh_token(subject: str) -> str:
     expire = datetime.now(UTC) + timedelta(days=settings.refresh_token_expire_days)
     payload: dict[str, Any] = {
         "sub": subject,
-        "type": "refresh",
+        "type": TOKEN_TYPE_REFRESH,
         "exp": expire,
     }
     return jwt.encode(payload, settings.secret_key, algorithm=settings.algorithm)

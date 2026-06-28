@@ -4,11 +4,11 @@ Thank you for contributing. This document defines our Git workflow and commit me
 
 ## Branch Strategy
 
-| Branch | Purpose |
-|--------|---------|
-| `main` | Production-ready releases |
-| `develop` | Integration branch for active sprint work |
-| `feature/*`, `fix/*`, etc. | Short-lived topic branches |
+| Branch                     | Purpose                                   |
+| -------------------------- | ----------------------------------------- |
+| `main`                     | Production-ready releases                 |
+| `develop`                  | Integration branch for active sprint work |
+| `feature/*`, `fix/*`, etc. | Short-lived topic branches                |
 
 **Always branch from `develop`** unless you are preparing a hotfix for `main`.
 
@@ -20,15 +20,15 @@ Use lowercase, hyphen-separated names with a type prefix:
 <type>/<short-description>
 ```
 
-| Prefix | Use when |
-|--------|----------|
-| `feature/` | New functionality |
-| `fix/` | Bug fixes |
+| Prefix      | Use when                                   |
+| ----------- | ------------------------------------------ |
+| `feature/`  | New functionality                          |
+| `fix/`      | Bug fixes                                  |
 | `refactor/` | Code restructuring without behavior change |
-| `docs/` | Documentation only |
-| `test/` | Test additions or fixes |
-| `ci/` | CI/CD pipeline changes |
-| `chore/` | Tooling, dependencies, housekeeping |
+| `docs/`     | Documentation only                         |
+| `test/`     | Test additions or fixes                    |
+| `ci/`       | CI/CD pipeline changes                     |
+| `chore/`    | Tooling, dependencies, housekeeping        |
 
 **Examples**
 
@@ -131,17 +131,17 @@ We follow the [Conventional Commits](https://www.conventionalcommits.org/) speci
 
 ### Commit Types
 
-| Type | When to use |
-|------|-------------|
-| `feat` | New feature or user-facing capability |
-| `fix` | Bug fix |
-| `docs` | Documentation only |
+| Type       | When to use                                             |
+| ---------- | ------------------------------------------------------- |
+| `feat`     | New feature or user-facing capability                   |
+| `fix`      | Bug fix                                                 |
+| `docs`     | Documentation only                                      |
 | `refactor` | Code change that neither fixes a bug nor adds a feature |
-| `test` | Adding or correcting tests |
-| `ci` | CI/CD configuration and scripts |
-| `build` | Build system, dependencies, or packaging |
-| `perf` | Performance improvement |
-| `chore` | Maintenance that doesn't fit other types |
+| `test`     | Adding or correcting tests                              |
+| `ci`       | CI/CD configuration and scripts                         |
+| `build`    | Build system, dependencies, or packaging                |
+| `perf`     | Performance improvement                                 |
+| `chore`    | Maintenance that doesn't fit other types                |
 
 ### Examples
 

@@ -27,9 +27,7 @@ export function DashboardPage() {
 
       <div className="mt-8">
         <Card title="Recent Activity">
-          <p className="text-sm text-gray-500">
-            Activity feed will be populated in Sprint 2.
-          </p>
+          <p className="text-sm text-gray-500">Activity feed will be populated in Sprint 2.</p>
         </Card>
       </div>
     </div>

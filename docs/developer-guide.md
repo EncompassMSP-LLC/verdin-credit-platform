@@ -6,6 +6,10 @@
 # Install Node dependencies
 pnpm install
 
+# Install pre-commit hooks (recommended)
+pip install pre-commit
+pre-commit install
+
 # Set up environment
 cp .env.example .env
 
@@ -32,24 +36,26 @@ pnpm dev
 
 ## Development URLs
 
-| Service | URL |
-|---------|-----|
-| Frontend | http://localhost:5173 |
-| API | http://localhost:8000 |
-| API Docs | http://localhost:8000/docs |
-| PostgreSQL | localhost:5432 |
+| Service    | URL                        |
+| ---------- | -------------------------- |
+| Frontend   | http://localhost:5173      |
+| API        | http://localhost:8000      |
+| API Docs   | http://localhost:8000/docs |
+| PostgreSQL | localhost:5432             |
 
 ## Common Tasks
 
 ### Create a new API endpoint
 
-1. Add Pydantic schema in `api/schemas/`
-2. Add repository method in `api/repositories/`
-3. Add service method in `api/services/`
-4. Add router endpoint in `api/routers/`
-5. Register router in `api/routers/__init__.py`
+1. Add Pydantic schema in `api/modules/<domain>/schemas.py`
+2. Add repository method in `api/modules/<domain>/repository.py`
+3. Add service method in `api/modules/<domain>/service.py`
+4. Add router endpoint in `api/modules/<domain>/router.py`
+5. Register router in `api/modules/__init__.py`
 6. Write tests in `tests/`
 7. Update `docs/api/reference.md`
+
+Reuse shared utilities from `api/core/` (responses, pagination, permissions, security, audit, exceptions).
 
 ### Create a database migration
 
@@ -72,5 +78,40 @@ pnpm lint          # ESLint
 pnpm typecheck     # TypeScript
 pnpm format        # Prettier
 cd apps/api && ruff check .   # Python lint
+cd apps/api && ruff format .  # Python format
+cd apps/api && mypy --config-file=pyproject.toml api main.py  # Python types
 cd apps/api && pytest         # Python tests
 ```
+
+### Pre-commit Hooks
+
+The repository uses [pre-commit](https://pre-commit.com/) to enforce formatting and linting before commits.
+
+**Setup (once per clone):**
+
+```bash
+pip install pre-commit
+pnpm install
+cd apps/api && pip install -r requirements.txt
+pre-commit install
+```
+
+**Run manually:**
+
+```bash
+pre-commit run --all-files
+```
+
+**Hooks:**
+
+| Hook          | Tool                        | Files                                  |
+| ------------- | --------------------------- | -------------------------------------- |
+| `ruff`        | Python lint (with auto-fix) | `apps/api/`, `apps/worker/`            |
+| `ruff-format` | Python format               | `apps/api/`, `apps/worker/`            |
+| `mypy-api`    | Python type check           | `apps/api/`                            |
+| `prettier`    | Frontend & docs format      | `.ts`, `.tsx`, `.json`, `.md`, `.yaml` |
+| `eslint`      | Frontend lint               | `.ts`, `.tsx`                          |
+
+ESLint and Prettier hooks require `pnpm install` so `pnpm exec` is available. The mypy hook installs its own Python dependencies in an isolated pre-commit environment.
+
+Configuration: `.pre-commit-config.yaml`

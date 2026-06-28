@@ -7,9 +7,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.core.config import get_settings
+from api.core.exceptions import register_exception_handlers
 from api.core.logging import setup_logging
 from api.middleware.logging import RequestLoggingMiddleware
-from api.routers import api_router
+from api.versions import configure_openapi, discovery_router, mount_api_versions
+from api.versions.constants import CURRENT_API_VERSION
+from api.versions.docs import register_version_docs
 
 settings = get_settings()
 
@@ -38,7 +41,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.add_middleware(RequestLoggingMiddleware)
-app.include_router(api_router)
+register_exception_handlers(app)
+
+mount_api_versions(app)
+app.include_router(discovery_router)
+register_version_docs(app, settings)
+configure_openapi(app, settings)
 
 
 @app.get("/", tags=["Root"])
@@ -46,5 +54,9 @@ async def root() -> dict[str, str]:
     return {
         "name": settings.app_name,
         "version": settings.app_version,
+        "api_version": CURRENT_API_VERSION,
+        "api_base": "/api/v1",
+        "api_versions": "/api/versions",
         "docs": "/docs",
+        "docs_v1": "/api/v1/docs",
     }

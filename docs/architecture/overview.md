@@ -43,14 +43,14 @@ SQLAlchemy ORM → PostgreSQL
 
 ## Monorepo Structure
 
-| Package | Purpose |
-|---------|---------|
-| `apps/api` | FastAPI backend |
-| `apps/web` | React frontend |
-| `apps/worker` | Background job processor |
-| `packages/shared` | Shared TypeScript types |
-| `packages/ui` | Shared React components |
-| `packages/validation` | Shared Zod schemas |
+| Package               | Purpose                  |
+| --------------------- | ------------------------ |
+| `apps/api`            | FastAPI backend          |
+| `apps/web`            | React frontend           |
+| `apps/worker`         | Background job processor |
+| `packages/shared`     | Shared TypeScript types  |
+| `packages/ui`         | Shared React components  |
+| `packages/validation` | Shared Zod schemas       |
 
 ## Key Design Decisions
 

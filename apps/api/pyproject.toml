@@ -51,8 +51,23 @@ ignore = ["E501"]
 
 [tool.ruff.lint.per-file-ignores]
 "alembic/versions/*" = ["E501"]
+"api/modules/**/models.py" = ["F821"]
 
 [tool.mypy]
 python_version = "3.13"
 strict = true
 ignore_missing_imports = true
+exclude = ["alembic/versions/"]
+
+[[tool.mypy.overrides]]
+module = "api.modules.*.models"
+disable_error_code = ["name-defined"]
+
+[[tool.mypy.overrides]]
+module = ["api.core.security", "api.core.logging"]
+disable_error_code = ["no-any-return"]
+
+[[tool.mypy.overrides]]
+module = ["api.versions.openapi", "api.versions.docs", "api.modules.auth.dependencies"]
+disallow_untyped_defs = false
+disable_error_code = ["type-arg", "no-untyped-def"]

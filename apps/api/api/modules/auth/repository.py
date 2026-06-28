@@ -5,7 +5,7 @@ import uuid
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.models import User
+from api.modules.auth.models import User
 
 
 class UserRepository:
