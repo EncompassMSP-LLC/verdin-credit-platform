@@ -161,3 +161,79 @@ if (featureFlags.enableAi) {
 ```
 
 Set flags in `.env` (see `.env.example`). Restart the dev server after changing Vite variables.
+
+## Background Jobs
+
+The worker (`apps/worker`) processes asynchronous jobs from a Redis queue. Sprint 1 provides the architecture only; job implementations are placeholders until Sprint 2.
+
+### Layout
+
+```
+apps/worker/
+  main.py                 # Entry point
+  worker/
+    config.py             # WorkerSettings (Redis URL, queue name, poll interval)
+    constants.py          # JobType, JobStatus
+    base.py               # BaseJob, JobContext, JobResult
+    registry.py           # @register_job decorator and lookup
+    queue.py              # enqueue_job / dequeue_job (Redis LPUSH / BRPOP)
+    runner.py             # Poll loop and dispatch
+    jobs/                 # One module per job type
+```
+
+### Registered job types (placeholders)
+
+| JobType          | Module                   | Purpose                      |
+| ---------------- | ------------------------ | ---------------------------- |
+| `ocr`            | `jobs/ocr.py`            | Document text extraction     |
+| `report_import`  | `jobs/report_import.py`  | Bulk credit report ingestion |
+| `ai_summary`     | `jobs/ai_summary.py`     | Case/document summarization  |
+| `monthly_review` | `jobs/monthly_review.py` | Scheduled portfolio review   |
+
+### Job status values
+
+`pending` → `queued` → `running` → `completed` | `failed` | `cancelled`
+
+Statuses are defined in `worker/constants.py` (`JobStatus`). Sprint 2 will persist status transitions in PostgreSQL; the queue message currently carries an initial `queued` status.
+
+### Running the worker locally
+
+```bash
+# Redis must be running
+docker compose up redis -d
+
+cd apps/worker
+pip install -r requirements.txt
+python main.py
+```
+
+### Sprint 2: triggering jobs from the API
+
+Jobs will **not** be triggered directly from FastAPI route handlers in Sprint 1. In Sprint 2:
+
+1. **API service layer** validates the request, creates a job record (PostgreSQL), and enqueues work.
+2. **Enqueue** pushes a JSON message to Redis list `verdin:jobs` (configurable via `WORKER_QUEUE_NAME`):
+
+   ```json
+   {
+     "job_id": "uuid",
+     "job_type": "ocr",
+     "payload": { "document_id": "uuid" },
+     "status": "queued"
+   }
+   ```
+
+3. The API can call the same contract using `redis-py` (mirror `worker/queue.py`) or a shared enqueue helper extracted to a common package.
+4. **Worker** blocks on `BRPOP`, resolves `job_type` via `worker/registry.py`, and invokes `BaseJob.run()`.
+5. **Status updates** — the worker (or job implementation) writes `running` / `completed` / `failed` back to the job record; the API exposes `GET /api/v1/jobs/{id}` for polling.
+
+Example enqueue (development / tests):
+
+```python
+from worker.constants import JobType
+from worker.queue import enqueue_job
+
+message = enqueue_job(JobType.OCR, {"document_id": "..."})
+```
+
+Feature flags (`ENABLE_AI`, `ENABLE_IMPORTS`) will gate which API endpoints enqueue jobs in Sprint 2.
