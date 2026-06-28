@@ -7,7 +7,13 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { api, type User } from './api';
+import {
+  getCurrentUser,
+  login as apiLogin,
+  refreshToken as apiRefreshToken,
+  setAccessToken,
+  type User,
+} from '@verdin/api-client';
 
 interface AuthContextValue {
   user: User | null;
@@ -29,41 +35,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(() => {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     localStorage.removeItem(REFRESH_TOKEN_KEY);
-    api.setToken(null);
+    setAccessToken(null);
     setUser(null);
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
-    const tokens = await api.login(email, password);
+    const tokens = await apiLogin({ email, password });
     localStorage.setItem(ACCESS_TOKEN_KEY, tokens.access_token);
     localStorage.setItem(REFRESH_TOKEN_KEY, tokens.refresh_token);
-    api.setToken(tokens.access_token);
-    const me = await api.getMe();
+    setAccessToken(tokens.access_token);
+    const me = await getCurrentUser();
     setUser(me);
   }, []);
 
   useEffect(() => {
     const init = async () => {
-      const accessToken = localStorage.getItem(ACCESS_TOKEN_KEY);
-      const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+      const storedAccessToken = localStorage.getItem(ACCESS_TOKEN_KEY);
+      const storedRefreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
 
-      if (!accessToken) {
+      if (!storedAccessToken) {
         setIsLoading(false);
         return;
       }
 
-      api.setToken(accessToken);
+      setAccessToken(storedAccessToken);
       try {
-        const me = await api.getMe();
+        const me = await getCurrentUser();
         setUser(me);
       } catch {
-        if (refreshToken) {
+        if (storedRefreshToken) {
           try {
-            const tokens = await api.refresh(refreshToken);
+            const tokens = await apiRefreshToken(storedRefreshToken);
             localStorage.setItem(ACCESS_TOKEN_KEY, tokens.access_token);
             localStorage.setItem(REFRESH_TOKEN_KEY, tokens.refresh_token);
-            api.setToken(tokens.access_token);
-            const me = await api.getMe();
+            setAccessToken(tokens.access_token);
+            const me = await getCurrentUser();
             setUser(me);
           } catch {
             logout();

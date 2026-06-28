@@ -14,6 +14,7 @@
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
     "@tanstack/react-query": "^5.62.8",
+    "@verdin/api-client": "workspace:*",
     "@verdin/shared": "workspace:*",
     "@verdin/ui": "workspace:*",
     "@verdin/validation": "workspace:*",

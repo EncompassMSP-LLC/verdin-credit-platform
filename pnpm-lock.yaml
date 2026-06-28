@@ -38,6 +38,9 @@ importers:
       '@tanstack/react-query':
         specifier: ^5.62.8
         version: 5.101.2(react@18.3.1)
+      '@verdin/api-client':
+        specifier: workspace:*
+        version: link:../../packages/api-client
       '@verdin/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -87,6 +90,16 @@ importers:
       vite:
         specifier: ^6.0.6
         version: 6.4.3(jiti@1.21.7)
+
+  packages/api-client:
+    dependencies:
+      '@verdin/shared':
+        specifier: workspace:*
+        version: link:../shared
+    devDependencies:
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
 
   packages/shared:
     devDependencies:
