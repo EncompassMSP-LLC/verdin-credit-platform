@@ -9,6 +9,8 @@ from api.modules.auth.models import User
 
 
 class UserRepository:
+    """SQLAlchemy implementation of :class:`UserRepositoryProtocol`."""
+
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 

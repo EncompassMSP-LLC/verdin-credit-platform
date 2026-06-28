@@ -10,6 +10,7 @@ from api.core.security import decode_token
 from api.database.session import get_db
 from api.modules.auth.models import User
 from api.modules.auth.repository import UserRepository
+from api.repositories.user import UserRepositoryProtocol
 
 security = HTTPBearer()
 
@@ -32,7 +33,7 @@ async def get_current_user(
     if user_id is None:
         raise credentials_exception
 
-    repo = UserRepository(db)
+    repo: UserRepositoryProtocol = UserRepository(db)
     user = await repo.get_by_id(user_id)
     if user is None or not user.is_active or user.is_deleted:
         raise credentials_exception

@@ -14,11 +14,19 @@ from api.core.security import (
 from api.modules.auth.models import User
 from api.modules.auth.repository import UserRepository
 from api.modules.auth.schemas import LoginRequest, TokenResponse, UserCreate, UserResponse
+from api.repositories.user import UserRepositoryProtocol
 
 
 class AuthService:
-    def __init__(self, session: AsyncSession) -> None:
-        self._repo = UserRepository(session)
+    def __init__(
+        self,
+        session: AsyncSession,
+        *,
+        user_repo: UserRepositoryProtocol | None = None,
+    ) -> None:
+        self._repo: UserRepositoryProtocol = (
+            user_repo if user_repo is not None else UserRepository(session)
+        )
 
     async def login(self, credentials: LoginRequest) -> TokenResponse:
         user = await self._repo.get_by_email(credentials.email)
