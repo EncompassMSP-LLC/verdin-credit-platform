@@ -115,3 +115,49 @@ pre-commit run --all-files
 ESLint and Prettier hooks require `pnpm install` so `pnpm exec` is available. The mypy hook installs its own Python dependencies in an isolated pre-commit environment.
 
 Configuration: `.pre-commit-config.yaml`
+
+## Feature Flags
+
+Feature flags gate optional platform capabilities. Backend and frontend each read their own environment variables; keep both sides aligned when toggling a feature for end users.
+
+### Available flags
+
+| Flag                   | Description                                  |
+| ---------------------- | -------------------------------------------- |
+| `ENABLE_AI`            | AI-powered features (summaries, suggestions) |
+| `ENABLE_IMPORTS`       | Data import pipeline                         |
+| `ENABLE_ENTERPRISE`    | Enterprise-tier capabilities                 |
+| `ENABLE_CLIENT_PORTAL` | Client-facing portal                         |
+
+### Backend
+
+Flags are defined in `api/core/feature_flags.py` and loaded from `ENABLE_*` variables in `.env`.
+
+```python
+from api.core.feature_flags import FeatureFlag, get_feature_flags, is_feature_enabled
+
+if is_feature_enabled(FeatureFlag.ENABLE_AI):
+    ...
+
+flags = get_feature_flags()
+if flags.enable_imports:
+    ...
+```
+
+### Frontend
+
+Flags are exposed via Vite environment variables (`VITE_ENABLE_*`) and accessed through `apps/web/src/lib/feature-flags.ts`.
+
+```typescript
+import { featureFlags, isFeatureEnabled } from '@/lib/feature-flags';
+
+if (isFeatureEnabled('ENABLE_CLIENT_PORTAL')) {
+  ...
+}
+
+if (featureFlags.enableAi) {
+  ...
+}
+```
+
+Set flags in `.env` (see `.env.example`). Restart the dev server after changing Vite variables.
