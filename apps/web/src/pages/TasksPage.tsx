@@ -1,13 +1,12 @@
-import { Card } from '@verdin/ui';
+import { Card, EmptyState, PageHeader, ShellContent } from '@verdin/ui';
 
 export function TasksPage() {
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold text-gray-900">Tasks</h1>
-      <p className="mt-1 text-gray-500">Track and assign case tasks.</p>
+    <ShellContent>
+      <PageHeader title="Tasks" description="Track and assign case tasks." />
       <Card className="mt-8">
-        <p className="text-sm text-gray-500">Task management UI coming in Sprint 2.</p>
+        <EmptyState title="No tasks yet" description="Task management UI coming in Sprint 2." />
       </Card>
-    </div>
+    </ShellContent>
   );
 }

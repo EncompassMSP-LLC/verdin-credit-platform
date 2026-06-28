@@ -1,13 +1,15 @@
-import { Card } from '@verdin/ui';
+import { Card, EmptyState, PageHeader, ShellContent } from '@verdin/ui';
 
 export function AccountsPage() {
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold text-gray-900">Accounts</h1>
-      <p className="mt-1 text-gray-500">Manage client accounts.</p>
+    <ShellContent>
+      <PageHeader title="Accounts" description="Manage client accounts." />
       <Card className="mt-8">
-        <p className="text-sm text-gray-500">Account management UI coming in Sprint 2.</p>
+        <EmptyState
+          title="No accounts yet"
+          description="Account management UI coming in Sprint 2."
+        />
       </Card>
-    </div>
+    </ShellContent>
   );
 }

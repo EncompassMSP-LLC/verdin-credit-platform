@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from 'react-router-dom';
 import { APP_NAME } from '@verdin/shared';
+import { AppShell, Main, Sidebar } from '@verdin/ui';
 import { useAuth } from '../lib/auth';
 
 const navItems = [
@@ -15,13 +16,13 @@ export function AppLayout() {
   const { user, logout } = useAuth();
 
   return (
-    <div className="flex min-h-screen">
-      <aside className="w-64 bg-brand-900 text-white">
+    <AppShell>
+      <Sidebar className="bg-brand-900 text-white">
         <div className="border-b border-brand-700 px-6 py-5">
           <h1 className="text-lg font-bold">{APP_NAME}</h1>
           <p className="text-xs text-brand-100">v4.2.0</p>
         </div>
-        <nav className="px-3 py-4">
+        <nav className="flex-1 px-3 py-4">
           {navItems.map((item) => (
             <NavLink
               key={item.to}
@@ -39,7 +40,7 @@ export function AppLayout() {
             </NavLink>
           ))}
         </nav>
-        <div className="absolute bottom-0 w-64 border-t border-brand-700 p-4">
+        <div className="border-t border-brand-700 p-4">
           <p className="truncate text-sm text-brand-100">
             {user?.first_name} {user?.last_name}
           </p>
@@ -51,10 +52,10 @@ export function AppLayout() {
             Sign out
           </button>
         </div>
-      </aside>
-      <main className="flex-1 overflow-auto">
+      </Sidebar>
+      <Main>
         <Outlet />
-      </main>
-    </div>
+      </Main>
+    </AppShell>
   );
 }

@@ -1,35 +1,39 @@
-import { Card } from '@verdin/ui';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  PageHeader,
+  ShellContent,
+  StatCard,
+} from '@verdin/ui';
 import { useAuth } from '../lib/auth';
 
 export function DashboardPage() {
   const { user } = useAuth();
 
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-      <p className="mt-1 text-gray-500">
-        Welcome back, {user?.first_name}. Here is your credit operations overview.
-      </p>
+    <ShellContent>
+      <PageHeader
+        title="Dashboard"
+        description={`Welcome back, ${user?.first_name}. Here is your credit operations overview.`}
+      />
 
       <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {[
-          { label: 'Open Cases', value: '—', color: 'text-blue-600' },
-          { label: 'Active Accounts', value: '—', color: 'text-green-600' },
-          { label: 'Pending Tasks', value: '—', color: 'text-yellow-600' },
-          { label: 'Documents', value: '—', color: 'text-purple-600' },
-        ].map((stat) => (
-          <Card key={stat.label}>
-            <p className="text-sm text-gray-500">{stat.label}</p>
-            <p className={`mt-1 text-3xl font-bold ${stat.color}`}>{stat.value}</p>
-          </Card>
-        ))}
+        <StatCard label="Open Cases" value="—" valueClassName="text-blue-600" />
+        <StatCard label="Active Accounts" value="—" valueClassName="text-green-600" />
+        <StatCard label="Pending Tasks" value="—" valueClassName="text-yellow-600" />
+        <StatCard label="Documents" value="—" valueClassName="text-purple-600" />
       </div>
 
-      <div className="mt-8">
-        <Card title="Recent Activity">
+      <Card className="mt-8">
+        <CardHeader>
+          <CardTitle>Recent Activity</CardTitle>
+        </CardHeader>
+        <CardContent>
           <p className="text-sm text-gray-500">Activity feed will be populated in Sprint 2.</p>
-        </Card>
-      </div>
-    </div>
+        </CardContent>
+      </Card>
+    </ShellContent>
   );
 }

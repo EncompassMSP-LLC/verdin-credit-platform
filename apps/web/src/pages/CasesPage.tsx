@@ -1,13 +1,12 @@
-import { Card } from '@verdin/ui';
+import { Card, EmptyState, PageHeader, ShellContent } from '@verdin/ui';
 
 export function CasesPage() {
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold text-gray-900">Cases</h1>
-      <p className="mt-1 text-gray-500">Manage credit review cases.</p>
+    <ShellContent>
+      <PageHeader title="Cases" description="Manage credit review cases." />
       <Card className="mt-8">
-        <p className="text-sm text-gray-500">Case management UI coming in Sprint 2.</p>
+        <EmptyState title="No cases yet" description="Case management UI coming in Sprint 2." />
       </Card>
-    </div>
+    </ShellContent>
   );
 }
