@@ -1,0 +1,20 @@
+# Default owner
+* @EncompassMSP-LLC
+
+# Backend
+/apps/api/ @EncompassMSP-LLC
+
+# Frontend
+/apps/web/ @EncompassMSP-LLC
+
+# Shared packages
+/packages/ @EncompassMSP-LLC
+
+# Infrastructure
+/infrastructure/ @EncompassMSP-LLC
+
+# Documentation
+/docs/ @EncompassMSP-LLC
+
+# GitHub config
+/.github/ @EncompassMSP-LLC
