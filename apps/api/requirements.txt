@@ -3,6 +3,7 @@
 -e ../../packages/entity-resolution
 -e ../../packages/event-bus
 -e ../../packages/event-types
+-e ../../packages/report-parsers
 fastapi>=0.115.6
 uvicorn[standard]>=0.34.0
 pydantic[email]>=2.10.3
