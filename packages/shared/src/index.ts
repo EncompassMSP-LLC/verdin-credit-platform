@@ -277,3 +277,67 @@ export const DOCUMENT_PROCESSING_STATUS_LABELS: Record<DocumentProcessingStatus,
   failed: 'OCR Failed',
   skipped: 'Not applicable',
 };
+
+export type DocumentType =
+  | 'credit_report'
+  | 'collection_letter'
+  | 'bureau_response'
+  | 'identity_document'
+  | 'proof_of_address'
+  | 'bankruptcy'
+  | 'court_record'
+  | 'medical_collection'
+  | 'utility_bill'
+  | 'unknown';
+
+export type ClassificationMethod = 'rules' | 'ai';
+
+export type ClassificationStatus = 'classified' | 'unclassified' | 'unknown';
+
+export const DOCUMENT_TYPES: DocumentType[] = [
+  'credit_report',
+  'collection_letter',
+  'bureau_response',
+  'identity_document',
+  'proof_of_address',
+  'bankruptcy',
+  'court_record',
+  'medical_collection',
+  'utility_bill',
+  'unknown',
+];
+
+export const CLASSIFICATION_STATUSES: ClassificationStatus[] = [
+  'classified',
+  'unclassified',
+  'unknown',
+];
+
+export const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
+  credit_report: 'Credit Report',
+  collection_letter: 'Collection Letter',
+  bureau_response: 'Bureau Response',
+  identity_document: 'Identity Document',
+  proof_of_address: 'Proof of Address',
+  bankruptcy: 'Bankruptcy Filing',
+  court_record: 'Court Record',
+  medical_collection: 'Medical Collection',
+  utility_bill: 'Utility Bill',
+  unknown: 'Unknown',
+};
+
+export const CLASSIFICATION_METHOD_LABELS: Record<ClassificationMethod, string> = {
+  rules: 'Rules',
+  ai: 'AI',
+};
+
+export const CLASSIFICATION_STATUS_LABELS: Record<ClassificationStatus, string> = {
+  classified: 'Classified',
+  unclassified: 'Unclassified',
+  unknown: 'Unknown',
+};
+
+export function formatConfidenceScore(score: number | null | undefined): string {
+  if (score === null || score === undefined) return '—';
+  return `${Math.round(score * 100)}%`;
+}

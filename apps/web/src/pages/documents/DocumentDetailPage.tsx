@@ -11,6 +11,7 @@ import {
 import { Badge, Button, Card } from '@verdin/ui';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { DocumentDeleteDialog } from '../../components/documents/DocumentDeleteDialog';
+import { DocumentClassificationPanel } from '../../components/documents/DocumentClassificationPanel';
 import { DocumentProcessingBadge } from '../../components/documents/DocumentProcessingBadge';
 
 function formatFileSize(bytes: number | null) {
@@ -214,6 +215,16 @@ export function DocumentDetailPage() {
             <p className="text-sm text-gray-500">No text was extracted from this document.</p>
           ) : null}
         </Card>
+
+        <div className="lg:col-span-3">
+          <DocumentClassificationPanel
+            documentId={documentId}
+            documentType={data.document_type}
+            confidenceScore={data.confidence_score}
+            classificationMethod={data.classification_method}
+            classifiedAt={data.classified_at}
+          />
+        </div>
 
         {data.versions && data.versions.length > 0 ? (
           <Card title="Version history" className="lg:col-span-3">

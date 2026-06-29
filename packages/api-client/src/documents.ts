@@ -1,4 +1,10 @@
-import type { DocumentProcessingStatus, PaginatedResponse } from '@verdin/shared';
+import type {
+  ClassificationMethod,
+  ClassificationStatus,
+  DocumentProcessingStatus,
+  DocumentType,
+  PaginatedResponse,
+} from '@verdin/shared';
 
 import { apiPath, getApiBaseUrl, request, uploadRequest } from './http';
 
@@ -31,6 +37,10 @@ export interface Document {
   processing_status: DocumentProcessingStatus;
   ocr_processed_at: string | null;
   ocr_version_number: number | null;
+  document_type: DocumentType | null;
+  confidence_score: number | null;
+  classification_method: ClassificationMethod | null;
+  classified_at: string | null;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
@@ -61,6 +71,8 @@ export interface ListDocumentsParams {
   account_id?: string;
   is_duplicate?: boolean;
   processing_status?: DocumentProcessingStatus;
+  document_type?: DocumentType;
+  classification_status?: ClassificationStatus;
   sort_by?: string;
   sort_order?: 'asc' | 'desc';
 }
@@ -72,6 +84,15 @@ export interface DocumentOcrResult {
   ocr_error: string | null;
   ocr_processed_at: string | null;
   ocr_version_number: number | null;
+}
+
+export interface DocumentClassificationResult {
+  document_id: string;
+  document_type: DocumentType | null;
+  confidence_score: number | null;
+  classification_method: ClassificationMethod | null;
+  classified_at: string | null;
+  classified_by_id: string | null;
 }
 
 function buildQuery(params: Record<string, unknown>): string {
@@ -141,4 +162,23 @@ export async function retryDocumentOcr(documentId: string): Promise<DocumentOcrR
   return request<DocumentOcrResult>(apiPath(`/documents/${documentId}/ocr/retry`), {
     method: 'POST',
   });
+}
+
+export async function getClassification(documentId: string): Promise<DocumentClassificationResult> {
+  return request<DocumentClassificationResult>(apiPath(`/documents/${documentId}/classification`));
+}
+
+export async function classifyDocument(documentId: string): Promise<DocumentClassificationResult> {
+  return request<DocumentClassificationResult>(apiPath(`/documents/${documentId}/classification`), {
+    method: 'POST',
+  });
+}
+
+export async function reclassifyDocument(
+  documentId: string,
+): Promise<DocumentClassificationResult> {
+  return request<DocumentClassificationResult>(
+    apiPath(`/documents/${documentId}/classification/reclassify`),
+    { method: 'POST' },
+  );
 }

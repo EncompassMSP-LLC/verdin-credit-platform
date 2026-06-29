@@ -3,17 +3,21 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { listDocuments } from '@verdin/api-client';
 import { Badge, Button, Card } from '@verdin/ui';
+import { DocumentClassificationBadge } from '../../components/documents/DocumentClassificationBadge';
 import {
   DocumentFilters,
   type DocumentFiltersValue,
 } from '../../components/documents/DocumentFilters';
 import { DocumentProcessingBadge } from '../../components/documents/DocumentProcessingBadge';
+import { formatConfidenceScore } from '@verdin/shared';
 
 const defaultFilters: DocumentFiltersValue = {
   search: '',
   case_id: '',
   is_duplicate: '',
   processing_status: '',
+  document_type: '',
+  classification_status: '',
   sort_by: 'created_at',
   sort_order: 'desc',
 };
@@ -41,6 +45,8 @@ export function DocumentsListPage() {
       case_id: filters.case_id || undefined,
       is_duplicate: filters.is_duplicate === 'true' ? true : undefined,
       processing_status: filters.processing_status || undefined,
+      document_type: filters.document_type || undefined,
+      classification_status: filters.classification_status || undefined,
       sort_by: filters.sort_by,
       sort_order: filters.sort_order,
     }),
@@ -114,6 +120,8 @@ export function DocumentsListPage() {
                   <th className="px-4 py-3 font-medium">File</th>
                   <th className="px-4 py-3 font-medium">Size</th>
                   <th className="px-4 py-3 font-medium">Version</th>
+                  <th className="px-4 py-3 font-medium">Type</th>
+                  <th className="px-4 py-3 font-medium">Confidence</th>
                   <th className="px-4 py-3 font-medium">Status</th>
                   <th className="px-4 py-3 font-medium">Uploaded</th>
                 </tr>
@@ -132,6 +140,15 @@ export function DocumentsListPage() {
                     <td className="px-4 py-3 text-gray-700">{doc.file_name}</td>
                     <td className="px-4 py-3 text-gray-700">{formatFileSize(doc.file_size)}</td>
                     <td className="px-4 py-3 text-gray-700">v{doc.version_number}</td>
+                    <td className="px-4 py-3">
+                      <DocumentClassificationBadge
+                        documentType={doc.document_type}
+                        classificationMethod={doc.classification_method}
+                      />
+                    </td>
+                    <td className="px-4 py-3 text-gray-700">
+                      {formatConfidenceScore(doc.confidence_score)}
+                    </td>
                     <td className="px-4 py-3">
                       <div className="flex flex-wrap gap-1">
                         {doc.is_duplicate ? (

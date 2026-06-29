@@ -2,7 +2,7 @@
 
 **Executive view** of Verdin platform capabilities — what exists, what version introduced it, readiness by layer, and dependencies.
 
-**Last updated:** 2026-06-28  
+**Last updated:** 2026-06-29  
 **Maintainers:** Update this document in every epic PR that ships or materially advances a capability.
 
 ## Status legend
@@ -27,31 +27,21 @@
 
 ---
 
-## Version 4.2 — Platform Foundation
+## Version 4.3 — Operational Core (in progress)
 
-| Capability                 | Version | Status | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                              |
-| -------------------------- | ------- | ------ | ------- | -------- | --- | --- | ----- | ------------ | ---------------------------------- |
-| Monorepo & CI/CD           | 4.2     | ✅     | ✅      | ✅       | ✅  | —   | ✅    | —            | pnpm, Turborepo, GitHub Actions    |
-| Authentication (JWT)       | 4.2     | ✅     | ✅      | ✅       | ✅  | —   | ✅    | —            | Login, refresh, `/auth/me`         |
-| RBAC (5 roles)             | 4.2     | ✅     | ✅      | ✅       | ✅  | —   | ✅    | Auth         | Enforced in services               |
-| Organization tenancy       | 4.2     | ✅     | ✅      | —        | ✅  | —   | ✅    | Auth         | `organization_id` scoping          |
-| Domain module pattern      | 4.2     | ✅     | —       | —        | —   | —   | —     | —            | router → service → repository      |
-| Background worker scaffold | 4.2     | ✅     | —       | —        | —   | —   | —     | Redis        | Job registry; placeholder jobs     |
-| Feature flags              | 4.2     | ✅     | ✅      | —        | —   | —   | —     | —            | `ENABLE_AI`, `ENABLE_IMPORTS`      |
-| Shared packages            | 4.2     | ✅     | —       | ✅       | ✅  | —   | —     | —            | shared, ui, validation, api-client |
-
----
-
-## Version 4.3 — Operational Core
-
-| Capability                      | Version | Status | Backend | Frontend | API | AI      | Tests | Dependencies                     | Notes                                                                         |
-| ------------------------------- | ------- | ------ | ------- | -------- | --- | ------- | ----- | -------------------------------- | ----------------------------------------------------------------------------- |
-| **Case Management**             | 4.3     | ✅     | ✅      | ✅       | ✅  | Planned | ✅    | Auth, Org                        | CRUD, filters, RBAC, full UI                                                  |
-| **Credit Account Intelligence** | 4.3     | ✅     | ✅      | ✅       | ✅  | Partial | ✅    | Cases                            | Risk/readiness scoring, intelligence summary, heuristics in `intelligence.py` |
-| Timeline & Audit Engine         | 4.3     | 🚧     | 🚧      | —        | —   | —       | —     | Cases                            | `TimelineEvent` model; no API yet                                             |
-| Task Management                 | 4.3     | 🚧     | 🚧      | 🚧       | 🚧  | —       | —     | Cases                            | Model + seed data; no router/tests                                            |
-| Operational Dashboard           | 4.3     | 🚧     | —       | 🚧       | —   | —       | —     | Cases, Accounts, Tasks, Timeline | Placeholder stats; no live metrics                                            |
-| Client Management               | 4.3     | —      | —       | —        | —   | —       | —     | Org                              | Clients/contacts deferred to 4.8                                              |
+| Capability                      | Version | Status | Backend | Frontend | API | AI      | Tests | Notes                                                               |
+| ------------------------------- | ------- | ------ | ------- | -------- | --- | ------- | ----- | ------------------------------------------------------------------- |
+| Platform Foundation             | 4.2     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | Shipped in 4.2 — monorepo, auth, RBAC, CI                           |
+| **Case Management**             | 4.3     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | CRUD, filters, RBAC, full UI                                        |
+| **Credit Account Intelligence** | 4.3     | ✅     | ✅      | ✅       | ✅  | Partial | ✅    | Heuristic risk/readiness scoring in `intelligence.py`               |
+| **Document Foundation**         | 4.3     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | Upload, versioning, MinIO, duplicate detection                      |
+| **OCR Pipeline**                | 4.3     | ✅     | ✅      | ✅       | ✅  | ✅      | ✅    | Async worker extraction; pypdf + tesseract                          |
+| **AI Classification**           | 4.3     | ✅     | ✅      | ✅       | ✅  | Partial | ✅    | Rule-based engine in `packages/document-classification`; LLM in 4.5 |
+| **Metadata Extraction**         | 4.3     | 🚧     | —       | —        | —   | Planned | —     | Milestone 4 — `feature/document-metadata`                           |
+| Timeline & Audit Engine         | 4.3     | 🚧     | 🚧      | —        | —   | —       | —     | `TimelineEvent` model; no API yet                                   |
+| Task Management                 | 4.3     | 🚧     | 🚧      | 🚧       | 🚧  | —       | —     | Model + seed data; no router/tests                                  |
+| Operational Dashboard           | 4.3     | 🚧     | —       | 🚧       | —   | —       | —     | Placeholder stats; no live metrics                                  |
+| Client Management               | 4.3     | —      | —       | —        | —   | —       | —     | Deferred to 4.8                                                     |
 
 ### Document Intelligence Platform (4.3 epic)
 
@@ -60,8 +50,8 @@ Epic plan: [`docs/epics/document-intelligence-platform.md`](../epics/document-in
 | Milestone                    | Version | Status  | Backend | Frontend | API | AI      | Tests | Branch                            |
 | ---------------------------- | ------- | ------- | ------- | -------- | --- | ------- | ----- | --------------------------------- |
 | **M1 — Document Foundation** | 4.3     | ✅      | ✅      | ✅       | ✅  | —       | ✅    | `feature/document-foundation`     |
-| M2 — OCR Pipeline            | 4.3     | 🚧      | 🚧      | 🚧       | 🚧  | 🚧      | 🚧    | `feature/document-ocr`            |
-| M3 — AI Classification       | 4.3     | Planned | —       | —        | —   | Planned | —     | `feature/document-classification` |
+| **M2 — OCR Pipeline**        | 4.3     | ✅      | ✅      | ✅       | ✅  | ✅      | ✅    | `feature/document-ocr`            |
+| M3 — AI Classification       | 4.3     | ✅      | ✅      | ✅       | ✅  | Partial | ✅    | `feature/document-classification` |
 | M4 — Metadata Extraction     | 4.3     | Planned | —       | —        | —   | Planned | —     | `feature/document-metadata`       |
 | M5 — Timeline Integration    | 4.3     | Planned | —       | —        | —   | —       | —     | `feature/document-timeline`       |
 | M6 — Intelligence Dashboard  | 4.3     | Planned | —       | —        | —   | Partial | —     | `feature/document-dashboard`      |
@@ -70,10 +60,30 @@ Epic plan: [`docs/epics/document-intelligence-platform.md`](../epics/document-in
 
 - [x] Case Management
 - [x] Credit Account Intelligence
-- [ ] Document Intelligence Platform (M1 ✅ — M2–M6 remaining)
+- [x] Document Foundation (M1)
+- [x] OCR Pipeline (M2)
+- [x] AI Classification (M3)
+- [ ] Metadata Extraction (M4)
 - [ ] Timeline & Audit Engine
 - [ ] Task Management (full module)
 - [ ] Operational Dashboard (live metrics)
+
+> **Release strategy:** Version 4.3 is the **Operational Core** milestone. Freeze 4.3 as a stable production release once classification, metadata extraction, timeline, tasks, and dashboard are complete. Version 4.5 then focuses on automation (import wizard, AI summaries, workflow, dispute generation) without revisiting platform architecture.
+
+---
+
+## Version 4.2 — Platform Foundation (shipped)
+
+| Capability                 | Version | Status | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                              |
+| -------------------------- | ------- | ------ | ------- | -------- | --- | --- | ----- | ------------ | ---------------------------------- |
+| Monorepo & CI/CD           | 4.2     | ✅     | ✅      | ✅       | ✅  | —   | ✅    | —            | pnpm, Turborepo, GitHub Actions    |
+| Authentication (JWT)       | 4.2     | ✅     | ✅      | ✅       | ✅  | —   | ✅    | —            | Login, refresh, `/auth/me`         |
+| RBAC (5 roles)             | 4.2     | ✅     | ✅      | ✅       | ✅  | —   | ✅    | Auth         | Enforced in services               |
+| Organization tenancy       | 4.2     | ✅     | ✅      | —        | ✅  | —   | ✅    | Auth         | `organization_id` scoping          |
+| Domain module pattern      | 4.2     | ✅     | —       | —        | —   | —   | —     | —            | router → service → repository      |
+| Background worker scaffold | 4.2     | ✅     | —       | —        | —   | —   | —     | Redis        | Job registry; OCR + classify jobs  |
+| Feature flags              | 4.2     | ✅     | ✅      | —        | —   | —   | —     | —            | `ENABLE_AI`, `ENABLE_IMPORTS`      |
+| Shared packages            | 4.2     | ✅     | —       | ✅       | ✅  | —   | —     | —            | shared, ui, validation, api-client |
 
 ---
 
@@ -83,8 +93,8 @@ Epic plan: [`docs/epics/document-intelligence-platform.md`](../epics/document-in
 | ------------------------------- | ------- | ------- | ------- | -------- | --- | ------- | ----- | ------------------- | ---------------------------------------------- |
 | Workflow Automation             | 4.5     | Planned | —       | —        | —   | —       | —     | Timeline, Tasks     | —                                              |
 | Credit Report Import Wizard     | 4.5     | Planned | —       | —        | —   | Planned | —     | Documents, OCR      | —                                              |
-| OCR Pipeline                    | 4.5     | Planned | —       | —        | —   | ✅      | —     | Documents, Worker   | Phase 1 AI                                     |
-| Document Classification         | 4.5     | Planned | —       | —        | —   | ✅      | —     | OCR                 | Phase 1 AI                                     |
+| OCR Pipeline                    | 4.3     | ✅      | ✅      | ✅       | ✅  | ✅      | ✅    | Documents, Worker   | Shipped in 4.3 Operational Core                |
+| Document Classification         | 4.3     | ✅      | ✅      | ✅       | ✅  | Partial | ✅    | OCR                 | Rules engine in 4.3; LLM augmentation in 4.5   |
 | Entity Extraction               | 4.5     | Planned | —       | —        | —   | ✅      | —     | OCR, Accounts       | Links tradelines to accounts                   |
 | AI Case Summaries               | 4.5     | Planned | —       | —        | —   | ✅      | —     | Cases, Documents    | Phase 2 AI                                     |
 | AI Recommendation Engine        | 4.5     | Partial | 🚧      | —        | —   | Partial | ✅    | Accounts            | Heuristic recommendations shipped; LLM planned |
@@ -92,88 +102,23 @@ Epic plan: [`docs/epics/document-intelligence-platform.md`](../epics/document-in
 
 ---
 
-## Version 4.8 — Operations
-
-| Capability                | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies     | Notes                        |
-| ------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ---------------- | ---------------------------- |
-| Reporting & Analytics     | 4.8     | Planned | —       | —        | —   | —   | —     | All 4.3 domains  | Dashboards, resolution rates |
-| Client Portal             | 4.8     | Planned | —       | —        | —   | —   | —     | Cases, Documents | Separate auth realm          |
-| Notifications             | 4.8     | Planned | —       | —        | —   | —   | —     | Timeline, Worker | Email/SMS                    |
-| Communications Center     | 4.8     | Planned | 🚧      | —        | —   | —   | —     | Cases            | `Communication` model only   |
-| Dispute Generation (full) | 4.8     | Planned | —       | —        | —   | ✅  | —     | 4.5 foundation   | Bureau, furnisher, CFPB      |
-
----
-
-## Version 5.0 — Enterprise Edition
-
-| Capability                | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies      | Notes                                               |
-| ------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ----------------- | --------------------------------------------------- |
-| Enterprise Multi-tenancy  | 5.0     | Partial | ✅      | —        | ✅  | —   | ✅    | Auth              | Single org per user today; 5.0 enhancements planned |
-| Compliance Center         | 5.0     | Planned | —       | —        | —   | —   | —     | Timeline, Audit   | CROA, FCRA, FDCPA, retention                        |
-| AI Case Assistant         | 5.0     | Planned | —       | —        | —   | 🚧  | —     | 4.5 AI, Documents | Phase 3–4 AI                                        |
-| Predictive Analytics      | 5.0     | Planned | —       | —        | —   | ✅  | —     | Analytics, AI     | Dispute success, prioritization                     |
-| Enterprise Administration | 5.0     | Planned | —       | —        | —   | —   | —     | Auth              | SSO, API keys, billing                              |
-| MFA / SSO                 | 5.0     | Planned | —       | —        | —   | —   | —     | Auth              | —                                                   |
-| Immutable Audit Store     | 5.0     | Planned | —       | —        | —   | —   | —     | Timeline          | Append-only compliance log                          |
-| Enterprise Integrations   | 5.0     | Planned | —       | —        | —   | —   | —     | API gateway       | Bureaus, Twilio, Stripe, etc.                       |
-
----
-
-## Dependency graph (simplified)
-
-```
-Platform Foundation (4.2)
-        │
-        ├── Case Management ──┬── Credit Account Intelligence
-        │                     │
-        │                     ├── Document Intelligence ◄── NEXT EPIC
-        │                     │         │
-        │                     │         ├── OCR / Classification (4.5)
-        │                     │         ├── Import Wizard (4.5)
-        │                     │         └── Entity Extraction (4.5)
-        │                     │
-        │                     ├── Timeline Engine
-        │                     │         │
-        │                     │         └── Workflow Automation (4.5)
-        │                     │
-        │                     └── Task Management
-        │                               │
-        └───────────────────────────────┴── Dashboard (4.3)
-                                              │
-                                              └── Analytics (4.8)
-                                                        │
-                                                        └── Enterprise (5.0)
-```
-
----
-
 ## AI capability tracker
 
-| AI feature                   | Phase | Version | Status  | Location                   |
-| ---------------------------- | ----- | ------- | ------- | -------------------------- |
-| Risk score (heuristic)       | —     | 4.3     | ✅      | `accounts/intelligence.py` |
-| Readiness score (heuristic)  | —     | 4.3     | ✅      | `accounts/intelligence.py` |
-| Dispute readiness rules      | —     | 4.3     | ✅      | `accounts/intelligence.py` |
-| Next action recommendations  | —     | 4.3     | ✅      | Heuristic text; LLM in 4.5 |
-| OCR                          | 1     | 4.5     | Planned | Worker                     |
-| Document classification      | 1     | 4.5     | Planned | Worker                     |
-| Metadata / entity extraction | 1     | 4.5     | Planned | Worker                     |
-| Case summaries (LLM)         | 2     | 4.5     | Planned | Worker + API               |
-| AI workflow orchestration    | 3     | 5.0     | Planned | —                          |
-| Predictive outcomes          | 3     | 5.0     | Planned | —                          |
-| Autonomous dispute prep      | 4     | 5.0+    | Planned | Compliance gates required  |
+| AI feature                   | Phase | Version | Status  | Location                           |
+| ---------------------------- | ----- | ------- | ------- | ---------------------------------- |
+| Risk score (heuristic)       | —     | 4.3     | ✅      | `accounts/intelligence.py`         |
+| Readiness score (heuristic)  | —     | 4.3     | ✅      | `accounts/intelligence.py`         |
+| Dispute readiness rules      | —     | 4.3     | ✅      | `accounts/intelligence.py`         |
+| Next action recommendations  | —     | 4.3     | ✅      | Heuristic text; LLM in 4.5         |
+| OCR                          | 1     | 4.3     | ✅      | `worker/jobs/ocr.py`               |
+| Document classification      | 1     | 4.3     | ✅      | `packages/document-classification` |
+| Metadata / entity extraction | 1     | 4.5     | Planned | Worker                             |
+| Case summaries (LLM)         | 2     | 4.5     | Planned | Worker + API                       |
+| AI workflow orchestration    | 3     | 5.0     | Planned | —                                  |
+| Predictive outcomes          | 3     | 5.0     | Planned | —                                  |
+| Autonomous dispute prep      | 4     | 5.0+    | Planned | Compliance gates required          |
 
 See [AI Architecture](../architecture/ai-architecture.md).
-
----
-
-## How to update this matrix
-
-1. Open or create the epic PR.
-2. When the capability reaches **Definition of done** ([governance README](README.md#definition-of-done-capability-row)), update the row.
-3. Set **Status** to ✅ only when all applicable layer columns are ✅ (or — where N/A).
-4. Add a note if status is **Partial** or **🚧**.
-5. Update the **4.3 completion checklist** if relevant.
 
 ---
 
@@ -181,5 +126,5 @@ See [AI Architecture](../architecture/ai-architecture.md).
 
 - [Governance hub](README.md) — lifecycle and build order
 - [V5.0 Enterprise Roadmap](../roadmap/v5.0-enterprise.md)
+- [Release notes — M2 OCR](../release-notes/v4.3-m2-ocr-pipeline.md)
 - [Architecture constitution](../architecture/README.md)
-- [ADR index](../adr/README.md)

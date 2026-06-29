@@ -135,18 +135,21 @@ Accounts automatically compute `risk_score`, `readiness_score`, `next_eligible_d
 
 Secure document storage with MinIO, SHA-256 hashing, versioning, and duplicate detection. See [`docs/epics/document-intelligence-platform.md`](../epics/document-intelligence-platform.md).
 
-| Method | Path                                 | Min role     | Description                        |
-| ------ | ------------------------------------ | ------------ | ---------------------------------- |
-| POST   | `/documents`                         | case_manager | Upload document (multipart)        |
-| GET    | `/documents`                         | read_only    | List documents                     |
-| GET    | `/documents/{document_id}`           | read_only    | Get document with versions         |
-| PATCH  | `/documents/{document_id}`           | case_manager | Update metadata                    |
-| DELETE | `/documents/{document_id}`           | admin        | Soft-delete document               |
-| GET    | `/documents/{document_id}/ocr`       | read_only    | OCR status and extracted text      |
-| POST   | `/documents/{document_id}/ocr/retry` | case_manager | Re-queue OCR for failed document   |
-| GET    | `/documents/{document_id}/download`  | read_only    | Download file (optional `version`) |
-| POST   | `/documents/{document_id}/versions`  | case_manager | Upload new version                 |
-| GET    | `/documents/{document_id}/versions`  | read_only    | List version history               |
+| Method | Path                                                 | Min role     | Description                        |
+| ------ | ---------------------------------------------------- | ------------ | ---------------------------------- |
+| POST   | `/documents`                                         | case_manager | Upload document (multipart)        |
+| GET    | `/documents`                                         | read_only    | List documents                     |
+| GET    | `/documents/{document_id}`                           | read_only    | Get document with versions         |
+| PATCH  | `/documents/{document_id}`                           | case_manager | Update metadata                    |
+| DELETE | `/documents/{document_id}`                           | admin        | Soft-delete document               |
+| GET    | `/documents/{document_id}/classification`            | read_only    | Classification result              |
+| POST   | `/documents/{document_id}/classification`            | case_manager | Run rule-based classification      |
+| POST   | `/documents/{document_id}/classification/reclassify` | case_manager | Re-run classification              |
+| GET    | `/documents/{document_id}/ocr`                       | read_only    | OCR status and extracted text      |
+| POST   | `/documents/{document_id}/ocr/retry`                 | case_manager | Re-queue OCR for failed document   |
+| GET    | `/documents/{document_id}/download`                  | read_only    | Download file (optional `version`) |
+| POST   | `/documents/{document_id}/versions`                  | case_manager | Upload new version                 |
+| GET    | `/documents/{document_id}/versions`                  | read_only    | List version history               |
 
 ### Upload (multipart form)
 
@@ -154,7 +157,28 @@ Fields: `file` (required), `title` (required), `case_id` (required), `descriptio
 
 ### List query parameters
 
-`page`, `page_size`, `search`, `case_id`, `account_id`, `is_duplicate`, `sort_by`, `sort_order`
+`page`, `page_size`, `search`, `case_id`, `account_id`, `is_duplicate`, `processing_status`, `document_type`, `classification_status`, `sort_by`, `sort_order`
+
+`classification_status` values: `classified`, `unclassified`, `unknown`
+
+### Classification
+
+`POST /documents/{document_id}/classification` runs the rule-based classifier registry against OCR text, file name, and title. Results persist `document_type`, `confidence_score`, `classification_method`, `classified_at`, and `classified_by_id`.
+
+**Response (200):**
+
+```json
+{
+  "document_id": "uuid",
+  "document_type": "credit_report",
+  "confidence_score": 0.85,
+  "classification_method": "rules",
+  "classified_at": "2026-06-29T12:00:00Z",
+  "classified_by_id": "uuid"
+}
+```
+
+**Errors:** `401` unauthenticated, `403` insufficient role, `404` document not found.
 
 Duplicate detection: uploading a file with the same SHA-256 hash as an existing org document sets `is_duplicate: true` and `duplicate_of_id`.
 

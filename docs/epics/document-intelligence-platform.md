@@ -2,7 +2,7 @@
 
 **Target version:** 4.3 (Operational Core)  
 **Branch strategy:** One feature branch per milestone  
-**Status:** Milestone 2 in progress — OCR Pipeline on `feature/document-ocr`
+**Status:** Milestone 3 complete — Metadata Extraction (M4) is next
 
 ## Epic goal
 
@@ -94,30 +94,76 @@ Workers update `processing_status` asynchronously — never block upload request
 
 ### Definition of done
 
-- [ ] Eligible uploads enqueue OCR without blocking HTTP response
-- [ ] Worker extracts PDF text and persists to PostgreSQL
-- [ ] Processing status visible in API and UI
-- [ ] Retry OCR endpoint works
-- [ ] Integration + worker unit tests pass
-- [ ] Capability matrix row updated
+- [x] Eligible uploads enqueue OCR without blocking HTTP response
+- [x] Worker extracts PDF text and persists to PostgreSQL
+- [x] Processing status visible in API and UI
+- [x] Retry OCR endpoint works
+- [x] Integration + worker unit tests pass
+- [x] Capability matrix row updated
 
 ---
 
 ## Milestone 3 — AI Classification
 
-Auto-classify document types:
+**Goal:** Rule-based document type classification with confidence scoring. Designed as an extensible classifier framework so AI-based classifiers can plug in alongside deterministic rules in 4.5+.
 
-Credit Report, Collection Letter, Bureau Response, Driver License, Identity Proof, Medical Collection, Utility Bill, Bankruptcy, Court Filing, Unknown
+**Branch:** `feature/document-classification`
 
-Start with rules/heuristics; LLM augmentation in 4.5+.
+### Architecture
+
+```
+apps/api/api/modules/documents/classification/
+    base.py          # DocumentClassifier protocol, ClassificationResult
+    registry.py      # Evaluates all classifiers; selects highest confidence
+    classifiers/
+        credit_report.py
+        bureau_response.py
+        collection_letter.py
+        identity_document.py
+        proof_of_address.py
+        bankruptcy.py
+        court_record.py
+        medical_collection.py
+        utility_bill.py
+        unknown.py
+```
+
+Each classifier implements:
+
+```python
+class DocumentClassifier(Protocol):
+    def classify(self, context: ClassificationContext) -> ClassificationResult | None: ...
+```
+
+### Document types
+
+Credit Report, Collection Letter, Bureau Response, Identity Document, Proof of Address, Bankruptcy Filing, Court Record, Medical Collection, Utility Bill, Unknown
+
+### Backend
+
+- `document_type`, `confidence_score`, `classification_method`, `classified_at`, `classified_by_id` on `documents`
+- `GET /documents/{id}/classification`, `POST /documents/{id}/classify`
+- Worker `DocumentClassifyJob` runs after OCR completes
+- Deterministic keyword/heuristic rules only (no LLM in M3)
+
+### Definition of done
+
+- [x] Classifier framework with registry and per-type classifiers
+- [x] Classification persists to PostgreSQL after OCR or manual classify
+- [x] API endpoints with integration tests
+- [x] Worker auto-classifies after OCR success
+- [x] Frontend classification UI + api-client functions
+- [x] Capability matrix row updated
 
 ---
 
 ## Milestone 4 — Metadata & Entity Extraction
 
-Extract: consumer name, bureau, creditor, masked account number, report date, collection agency, balance, addresses, phone numbers.
+**Goal:** Extract structured metadata and reconcile entities with Cases and Credit Accounts via an Entity Resolution Engine (confidence-scored matches, manual review for uncertain links).
 
-Link to Cases and Accounts when confidence is high; flag uncertain matches for review.
+**Branch:** `feature/document-metadata`
+
+Extract: consumer name, bureau, creditor, masked account number, report date, collection agency, balance, addresses, phone numbers. Link to Cases and Accounts when confidence is high.
 
 ---
 

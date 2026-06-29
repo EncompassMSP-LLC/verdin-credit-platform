@@ -16,6 +16,13 @@ from api.core.permissions import has_permission
 from api.modules.accounts.repository import AccountRepository
 from api.modules.auth.models import User
 from api.modules.cases.repository import CaseRepository
+from api.modules.documents.classification import (
+    ClassificationContext,
+)
+from api.modules.documents.classification import (
+    classify_document as run_document_classification,
+)
+from api.modules.documents.classification.base import ClassificationResult
 from api.modules.documents.constants import DocumentProcessingStatus, is_ocr_eligible
 from api.modules.documents.models import Document, DocumentVersion
 from api.modules.documents.permissions import (
@@ -24,6 +31,7 @@ from api.modules.documents.permissions import (
 )
 from api.modules.documents.repository import DocumentListFilters, DocumentRepository
 from api.modules.documents.schemas import (
+    DocumentClassificationResponse,
     DocumentListParams,
     DocumentOcrResponse,
     DocumentResponse,
@@ -193,6 +201,8 @@ class DocumentService:
             account_id=params.account_id,
             is_duplicate=params.is_duplicate,
             processing_status=params.processing_status,
+            document_type=params.document_type,
+            classification_status=params.classification_status,
             skip=params.offset,
             limit=params.page_size,
             sort_by=params.sort_by,
@@ -339,8 +349,14 @@ class DocumentService:
         document.file_hash = file_hash
         document.version_number = new_version_number
         document.ocr_text = None
+        document.ocr_error = None
         document.ocr_processed_at = None
         document.ocr_version_number = None
+        document.document_type = None
+        document.confidence_score = None
+        document.classification_method = None
+        document.classified_at = None
+        document.classified_by_id = None
         self._apply_initial_processing_status(document)
         apply_audit_on_update(document, user.id)
         updated = await self._documents.update(document)
@@ -454,6 +470,11 @@ class DocumentService:
         document.ocr_error = None
         document.ocr_processed_at = None
         document.ocr_version_number = None
+        document.document_type = None
+        document.confidence_score = None
+        document.classification_method = None
+        document.classified_at = None
+        document.classified_by_id = None
         self._apply_initial_processing_status(document)
         apply_audit_on_update(document, user.id)
         await self._documents.update(document)
@@ -461,3 +482,62 @@ class DocumentService:
         self._queue_ocr_job(document)
         await self._documents.update(document)
         return DocumentOcrResponse.from_model(document)
+
+    def _build_classification_context(self, document: Document) -> ClassificationContext:
+        return ClassificationContext(
+            ocr_text=document.ocr_text,
+            file_name=document.file_name,
+            title=document.title,
+            mime_type=document.mime_type,
+        )
+
+    def _apply_classification_result(
+        self,
+        document: Document,
+        result: ClassificationResult,
+        *,
+        classified_by_id: uuid.UUID | None,
+    ) -> None:
+        document.document_type = result.document_type.value
+        document.confidence_score = result.confidence_score
+        document.classification_method = result.classification_method.value
+        document.classified_at = datetime.now(UTC)
+        document.classified_by_id = classified_by_id
+
+    def _queue_classify_job(self, document: Document) -> None:
+        settings = get_settings()
+        if not settings.document_classification_enabled:
+            return
+        try:
+            enqueue_job(JobType.DOCUMENT_CLASSIFY, {"document_id": str(document.id)})
+        except Exception:
+            logger.exception("Failed to enqueue classification job for document %s", document.id)
+
+    async def classify_document(
+        self,
+        user: User,
+        document_id: uuid.UUID,
+    ) -> DocumentClassificationResponse:
+        self._require_write(user)
+        document = await self._get_document_for_user(document_id, user)
+
+        result = run_document_classification(self._build_classification_context(document))
+        self._apply_classification_result(document, result, classified_by_id=user.id)
+        apply_audit_on_update(document, user.id)
+        await self._documents.update(document)
+        return DocumentClassificationResponse.from_model(document)
+
+    async def reclassify_document(
+        self,
+        user: User,
+        document_id: uuid.UUID,
+    ) -> DocumentClassificationResponse:
+        return await self.classify_document(user, document_id)
+
+    async def get_classification(
+        self,
+        user: User,
+        document_id: uuid.UUID,
+    ) -> DocumentClassificationResponse:
+        document = await self._get_document_for_user(document_id, user)
+        return DocumentClassificationResponse.from_model(document)

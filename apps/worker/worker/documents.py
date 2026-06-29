@@ -81,3 +81,60 @@ def save_ocr_failure(session: Session, document_id: UUID, error: str) -> None:
             ocr_processed_at=datetime.now(UTC),
         )
     )
+
+
+@dataclass(frozen=True, slots=True)
+class ClassificationDocumentRecord:
+    id: UUID
+    ocr_text: str | None
+    file_name: str
+    title: str
+    mime_type: str | None
+    deleted_at: datetime | None
+
+
+def get_document_for_classification(
+    session: Session,
+    document_id: UUID,
+) -> ClassificationDocumentRecord | None:
+    row = session.execute(
+        select(
+            documents_table.c.id,
+            documents_table.c.ocr_text,
+            documents_table.c.file_name,
+            documents_table.c.title,
+            documents_table.c.mime_type,
+            documents_table.c.deleted_at,
+        ).where(documents_table.c.id == document_id)
+    ).one_or_none()
+    if row is None:
+        return None
+    return ClassificationDocumentRecord(
+        id=row.id,
+        ocr_text=row.ocr_text,
+        file_name=row.file_name,
+        title=row.title,
+        mime_type=row.mime_type,
+        deleted_at=row.deleted_at,
+    )
+
+
+def save_classification(
+    session: Session,
+    document_id: UUID,
+    *,
+    document_type: str,
+    confidence_score: float,
+    classification_method: str,
+) -> None:
+    session.execute(
+        update(documents_table)
+        .where(documents_table.c.id == document_id)
+        .values(
+            document_type=document_type,
+            confidence_score=confidence_score,
+            classification_method=classification_method,
+            classified_at=datetime.now(UTC),
+            classified_by_id=None,
+        )
+    )

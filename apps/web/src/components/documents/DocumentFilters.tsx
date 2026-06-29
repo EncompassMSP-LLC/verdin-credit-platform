@@ -1,8 +1,18 @@
+import type { ClassificationStatus, DocumentType } from '@verdin/shared';
+import {
+  DOCUMENT_TYPES,
+  DOCUMENT_TYPE_LABELS,
+  CLASSIFICATION_STATUSES,
+  CLASSIFICATION_STATUS_LABELS,
+} from '@verdin/shared';
+
 export interface DocumentFiltersValue {
   search: string;
   case_id: string;
   is_duplicate: '' | 'true';
   processing_status: '' | 'pending' | 'queued' | 'processing' | 'completed' | 'failed' | 'skipped';
+  document_type: '' | DocumentType;
+  classification_status: '' | ClassificationStatus;
   sort_by: string;
   sort_order: 'asc' | 'desc';
 }
@@ -19,7 +29,7 @@ export function DocumentFilters({ value, onChange }: DocumentFiltersProps) {
   const update = (patch: Partial<DocumentFiltersValue>) => onChange({ ...value, ...patch });
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-6">
       <div className="lg:col-span-2">
         <label htmlFor="doc-search" className="mb-1 block text-sm font-medium text-gray-700">
           Search
@@ -67,6 +77,49 @@ export function DocumentFilters({ value, onChange }: DocumentFiltersProps) {
           <option value="completed">OCR complete</option>
           <option value="failed">OCR failed</option>
           <option value="skipped">Skipped</option>
+        </select>
+      </div>
+      <div>
+        <label htmlFor="doc-type" className="mb-1 block text-sm font-medium text-gray-700">
+          Document type
+        </label>
+        <select
+          id="doc-type"
+          className={inputClass}
+          value={value.document_type}
+          onChange={(e) => update({ document_type: e.target.value as '' | DocumentType })}
+        >
+          <option value="">All types</option>
+          {DOCUMENT_TYPES.map((type) => (
+            <option key={type} value={type}>
+              {DOCUMENT_TYPE_LABELS[type]}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div>
+        <label
+          htmlFor="doc-classification"
+          className="mb-1 block text-sm font-medium text-gray-700"
+        >
+          Classification
+        </label>
+        <select
+          id="doc-classification"
+          className={inputClass}
+          value={value.classification_status}
+          onChange={(e) =>
+            update({
+              classification_status: e.target.value as '' | ClassificationStatus,
+            })
+          }
+        >
+          <option value="">All</option>
+          {CLASSIFICATION_STATUSES.map((status) => (
+            <option key={status} value={status}>
+              {CLASSIFICATION_STATUS_LABELS[status]}
+            </option>
+          ))}
         </select>
       </div>
       <div>

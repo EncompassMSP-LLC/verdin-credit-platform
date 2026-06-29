@@ -8,7 +8,11 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import InstrumentedAttribute, selectinload
 
-from api.modules.documents.constants import DocumentProcessingStatus
+from api.modules.documents.constants import (
+    ClassificationStatus,
+    DocumentProcessingStatus,
+    DocumentType,
+)
 from api.modules.documents.models import Document, DocumentVersion
 from api.modules.documents.schemas import DocumentSortField, DocumentSortOrder
 
@@ -21,6 +25,8 @@ class DocumentListFilters:
     account_id: uuid.UUID | None = None
     is_duplicate: bool | None = None
     processing_status: DocumentProcessingStatus | None = None
+    document_type: DocumentType | None = None
+    classification_status: ClassificationStatus | None = None
     skip: int = 0
     limit: int = 20
     sort_by: DocumentSortField = "created_at"
@@ -84,6 +90,17 @@ class DocumentRepository:
             base = base.where(Document.is_duplicate == filters.is_duplicate)
         if filters.processing_status is not None:
             base = base.where(Document.processing_status == filters.processing_status.value)
+        if filters.document_type is not None:
+            base = base.where(Document.document_type == filters.document_type.value)
+        if filters.classification_status == ClassificationStatus.UNCLASSIFIED:
+            base = base.where(Document.document_type.is_(None))
+        elif filters.classification_status == ClassificationStatus.UNKNOWN:
+            base = base.where(Document.document_type == DocumentType.UNKNOWN.value)
+        elif filters.classification_status == ClassificationStatus.CLASSIFIED:
+            base = base.where(
+                Document.document_type.is_not(None),
+                Document.document_type != DocumentType.UNKNOWN.value,
+            )
         if filters.search:
             term = f"%{filters.search.strip()}%"
             base = base.where(

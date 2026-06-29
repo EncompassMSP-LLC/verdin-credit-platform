@@ -2,6 +2,21 @@
 
 from enum import StrEnum
 
+from verdin_document_classification.constants import (
+    ClassificationMethod,
+    ClassificationStatus,
+    DocumentType,
+)
+
+__all__ = [
+    "ClassificationMethod",
+    "ClassificationStatus",
+    "DocumentProcessingStatus",
+    "DocumentType",
+    "OCR_MIME_TYPES",
+    "is_ocr_eligible",
+]
+
 
 class DocumentProcessingStatus(StrEnum):
     PENDING = "pending"

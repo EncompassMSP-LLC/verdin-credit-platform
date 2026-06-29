@@ -50,8 +50,8 @@ services:
 
   api:
     build:
-      context: ./apps/api
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apps/api/Dockerfile
     container_name: verdin-api
     environment:
       APP_ENV: development
@@ -64,6 +64,7 @@ services:
       - '8000:8000'
     volumes:
       - ./apps/api:/app
+      - ./packages/document-classification:/packages/document-classification
     depends_on:
       postgres:
         condition: service_healthy
@@ -83,8 +84,8 @@ services:
 
   worker:
     build:
-      context: ./apps/worker
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apps/worker/Dockerfile
     container_name: verdin-worker
     environment:
       REDIS_URL: redis://redis:6379/0

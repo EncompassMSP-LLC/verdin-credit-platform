@@ -10,8 +10,13 @@ from api.core.pagination import PaginatedResponse
 from api.database.session import get_db
 from api.modules.auth.dependencies import get_current_user
 from api.modules.auth.models import User
-from api.modules.documents.constants import DocumentProcessingStatus
+from api.modules.documents.constants import (
+    ClassificationStatus,
+    DocumentProcessingStatus,
+    DocumentType,
+)
 from api.modules.documents.schemas import (
+    DocumentClassificationResponse,
     DocumentListParams,
     DocumentOcrResponse,
     DocumentResponse,
@@ -45,6 +50,8 @@ def get_document_list_params(
     account_id: uuid.UUID | None = None,
     is_duplicate: bool | None = None,
     processing_status: DocumentProcessingStatus | None = None,
+    document_type: DocumentType | None = None,
+    classification_status: ClassificationStatus | None = None,
     sort_by: DocumentSortField = "created_at",
     sort_order: DocumentSortOrder = "desc",
 ) -> DocumentListParams:
@@ -56,6 +63,8 @@ def get_document_list_params(
         account_id=account_id,
         is_duplicate=is_duplicate,
         processing_status=processing_status,
+        document_type=document_type,
+        classification_status=classification_status,
         sort_by=sort_by,
         sort_order=sort_order,
     )
@@ -116,6 +125,36 @@ async def delete_document(
     service: DocumentService = Depends(get_document_service),
 ) -> None:
     await service.delete_document(current_user, document_id)
+
+
+@router.get("/{document_id}/classification", response_model=DocumentClassificationResponse)
+async def get_document_classification(
+    document_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> DocumentClassificationResponse:
+    return await service.get_classification(current_user, document_id)
+
+
+@router.post("/{document_id}/classification", response_model=DocumentClassificationResponse)
+async def classify_document_endpoint(
+    document_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> DocumentClassificationResponse:
+    return await service.classify_document(current_user, document_id)
+
+
+@router.post(
+    "/{document_id}/classification/reclassify",
+    response_model=DocumentClassificationResponse,
+)
+async def reclassify_document_endpoint(
+    document_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> DocumentClassificationResponse:
+    return await service.reclassify_document(current_user, document_id)
 
 
 @router.get("/{document_id}/ocr", response_model=DocumentOcrResponse)

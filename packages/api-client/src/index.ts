@@ -54,17 +54,21 @@ export {
 } from './accounts';
 
 export {
+  classifyDocument,
   deleteDocument,
+  getClassification,
   getDocument,
   getDocumentDownloadUrl,
   getDocumentOcr,
   listDocumentVersions,
   listDocuments,
+  reclassifyDocument,
   retryDocumentOcr,
   updateDocument,
   uploadDocument,
   uploadDocumentVersion,
   type Document,
+  type DocumentClassificationResult,
   type DocumentOcrResult,
   type DocumentVersion,
   type ListDocumentsParams,
