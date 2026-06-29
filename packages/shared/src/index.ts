@@ -13,7 +13,57 @@ export const ROLE_LABELS: Record<UserRole, string> = {
   read_only: 'Read Only',
 };
 
-export type CaseStatus = 'open' | 'in_review' | 'closed' | 'archived';
+export type CaseStatus = 'open' | 'active' | 'on_hold' | 'resolved' | 'closed';
+
+export type CaseStage =
+  | 'intake'
+  | 'review'
+  | 'evidence_gathering'
+  | 'dispute_preparation'
+  | 'awaiting_response'
+  | 'monitoring'
+  | 'complete';
+
+export type CasePriority = 'low' | 'medium' | 'high' | 'critical';
+
+export const CASE_STATUSES: CaseStatus[] = ['open', 'active', 'on_hold', 'resolved', 'closed'];
+
+export const CASE_STAGES: CaseStage[] = [
+  'intake',
+  'review',
+  'evidence_gathering',
+  'dispute_preparation',
+  'awaiting_response',
+  'monitoring',
+  'complete',
+];
+
+export const CASE_PRIORITIES: CasePriority[] = ['low', 'medium', 'high', 'critical'];
+
+export const CASE_STATUS_LABELS: Record<CaseStatus, string> = {
+  open: 'Open',
+  active: 'Active',
+  on_hold: 'On Hold',
+  resolved: 'Resolved',
+  closed: 'Closed',
+};
+
+export const CASE_STAGE_LABELS: Record<CaseStage, string> = {
+  intake: 'Intake',
+  review: 'Review',
+  evidence_gathering: 'Evidence Gathering',
+  dispute_preparation: 'Dispute Preparation',
+  awaiting_response: 'Awaiting Response',
+  monitoring: 'Monitoring',
+  complete: 'Complete',
+};
+
+export const CASE_PRIORITY_LABELS: Record<CasePriority, string> = {
+  low: 'Low',
+  medium: 'Medium',
+  high: 'High',
+  critical: 'Critical',
+};
 
 export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
 

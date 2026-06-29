@@ -20,14 +20,34 @@ export const createUserSchema = z.object({
   organization_id: z.string().uuid().optional(),
 });
 
-export const caseStatusSchema = z.enum(['open', 'in_review', 'closed', 'archived']);
+export const caseStatusSchema = z.enum(['open', 'active', 'on_hold', 'resolved', 'closed']);
+
+export const caseStageSchema = z.enum([
+  'intake',
+  'review',
+  'evidence_gathering',
+  'dispute_preparation',
+  'awaiting_response',
+  'monitoring',
+  'complete',
+]);
+
+export const casePrioritySchema = z.enum(['low', 'medium', 'high', 'critical']);
 
 export const createCaseSchema = z.object({
-  title: z.string().min(1).max(255),
-  description: z.string().optional(),
-  account_id: z.string().uuid().optional(),
-  assigned_to_id: z.string().uuid().optional(),
+  title: z.string().min(1, 'Title is required').max(255),
+  client_name: z.string().min(1, 'Client name is required').max(255),
+  client_email: z.string().email('Invalid email').optional().or(z.literal('')),
+  case_number: z.string().max(50).optional(),
+  status: caseStatusSchema.default('open'),
+  stage: caseStageSchema.default('intake'),
+  priority: casePrioritySchema.default('medium'),
+  assigned_user_id: z.string().uuid().optional().nullable(),
+  summary: z.string().optional(),
+  notes: z.string().optional(),
 });
+
+export const updateCaseSchema = createCaseSchema.partial();
 
 export const paginationSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
@@ -38,4 +58,5 @@ export type LoginInput = z.infer<typeof loginSchema>;
 export type RefreshTokenInput = z.infer<typeof refreshTokenSchema>;
 export type CreateUserInput = z.infer<typeof createUserSchema>;
 export type CreateCaseInput = z.infer<typeof createCaseSchema>;
+export type UpdateCaseInput = z.infer<typeof updateCaseSchema>;
 export type PaginationInput = z.infer<typeof paginationSchema>;

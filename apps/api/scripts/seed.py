@@ -2,6 +2,7 @@
 
 import asyncio
 import uuid
+from datetime import UTC, datetime
 
 from sqlalchemy import select
 
@@ -11,7 +12,7 @@ from api.core.security import hash_password
 from api.database.session import AsyncSessionLocal
 from api.modules.accounts.models import Account
 from api.modules.auth.models import Organization, User
-from api.modules.cases.models import Case, CaseStatus
+from api.modules.cases.models import Case, CasePriority, CaseStage, CaseStatus
 from api.modules.tasks.models import Task, TaskPriority, TaskStatus
 
 
@@ -53,7 +54,17 @@ async def seed() -> None:
             organization_id=org.id,
             is_active=True,
         )
-        session.add_all([owner, admin])
+        case_manager = User(
+            id=uuid.uuid4(),
+            email="manager@verdin.demo",
+            hashed_password=hash_password("changeme123"),
+            first_name="Demo",
+            last_name="Manager",
+            role=UserRole.CASE_MANAGER,
+            organization_id=org.id,
+            is_active=True,
+        )
+        session.add_all([owner, admin, case_manager])
         await session.flush()
 
         account = Account(
@@ -67,15 +78,21 @@ async def seed() -> None:
         session.add(account)
         await session.flush()
 
+        now = datetime.now(UTC)
         case = Case(
             id=uuid.uuid4(),
             title="Credit Review - Acme Corporation",
-            description="Initial credit review for new account onboarding.",
+            client_name="Acme Corporation",
+            client_email="contact@acme.example",
+            summary="Initial credit review for new account onboarding.",
             status=CaseStatus.OPEN,
+            stage=CaseStage.INTAKE,
+            priority=CasePriority.HIGH,
             case_number="CASE-2026-001",
             organization_id=org.id,
             account_id=account.id,
-            assigned_to_id=admin.id,
+            assigned_to_id=case_manager.id,
+            opened_at=now,
         )
         apply_audit_on_create(case, owner.id)
         session.add(case)
@@ -96,8 +113,9 @@ async def seed() -> None:
         await session.commit()
         print("Seed data created successfully.")
         print(f"  Organization: {org.name} ({org.slug})")
-        print("  Owner login:  owner@verdin.demo / changeme123")
-        print("  Admin login:  admin@verdin.demo / changeme123")
+        print("  Owner login:         owner@verdin.demo / changeme123")
+        print("  Admin login:         admin@verdin.demo / changeme123")
+        print("  Case manager login:  manager@verdin.demo / changeme123")
 
 
 if __name__ == "__main__":
