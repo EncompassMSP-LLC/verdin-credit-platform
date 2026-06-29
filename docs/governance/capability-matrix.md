@@ -39,9 +39,9 @@
 | **AI Classification**           | 4.3     | 🚧     | 🚧      | —        | 🚧  | 🚧      | 🚧    | Rule-based classifier framework on `feature/document-classification` |
 | **Metadata Extraction**         | 4.3     | ✅     | ✅      | ✅       | ✅  | Partial | ✅    | Rule-based extraction; `packages/document-metadata`                  |
 | **Entity Resolution**           | 4.3     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | Deterministic matching; `packages/entity-resolution`                 |
-| Timeline & Audit Engine         | 4.3     | 🚧     | ✅      | ✅       | ✅  | —       | 🚧    | Event bus + append-only timeline on `feature/document-timeline`      |
-| Task Management                 | 4.3     | 🚧     | 🚧      | 🚧       | 🚧  | —       | —     | Model + seed data; no router/tests                                   |
-| Operational Dashboard           | 4.3     | 🚧     | —       | 🚧       | —   | —       | —     | Placeholder stats; no live metrics                                   |
+| Timeline & Audit Engine         | 4.3     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | Event bus + append-only timeline                                     |
+| Task Management                 | 4.3     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | CRUD, complete/reopen, filters, timeline events, UI                  |
+| Operational Dashboard           | 4.3     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | Single `GET /dashboard` aggregation; command center UI               |
 | Client Management               | 4.3     | —      | —       | —        | —   | —       | —     | Deferred to 4.8                                                      |
 
 ### Document Intelligence Platform (4.3 epic)
@@ -65,9 +65,9 @@ Epic plan: [`docs/epics/document-intelligence-platform.md`](../epics/document-in
 - [x] OCR Pipeline (M2)
 - [ ] AI Classification (M3 — in progress)
 - [x] Metadata & Entity Resolution (M4)
-- [ ] Timeline & Audit Engine
-- [ ] Task Management (full module)
-- [ ] Operational Dashboard (live metrics)
+- [x] Timeline & Audit Engine
+- [x] Task Management (full module)
+- [x] Operational Dashboard (live metrics)
 
 > **Release strategy:** Version 4.3 is the **Operational Core** milestone. Freeze 4.3 as a stable production release once classification, metadata extraction, timeline, tasks, and dashboard are complete. Version 4.5 then focuses on automation (import wizard, AI summaries, workflow, dispute generation) without revisiting platform architecture.
 

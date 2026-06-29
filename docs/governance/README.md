@@ -69,7 +69,7 @@ A capability may be marked **✅ Production** in the [capability matrix](capabil
 | 2        | M4 — Metadata & entity extraction                                 | Planned     | `feature/document-metadata`     |
 | 3        | Timeline & Audit Engine                                           | Planned     | —                               |
 | 4        | Task Management (full module)                                     | Planned     | —                               |
-| 5        | Operational Dashboard                                             | Planned     | —                               |
+| 5        | Operational Dashboard                                             | ✅ Shipped  | `GET /dashboard` aggregation    |
 
 > **Version 4.3** is the **Operational Core** release. Freeze 4.3 as a stable production milestone once classification, metadata extraction, timeline, tasks, and dashboard are complete. **Version 4.5** then focuses on automation without revisiting platform architecture.
 
