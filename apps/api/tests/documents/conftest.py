@@ -2,7 +2,7 @@
 
 import io
 import uuid
-from collections.abc import AsyncGenerator, Generator
+from collections.abc import Generator
 from unittest.mock import patch
 
 import pytest
@@ -13,14 +13,12 @@ import api.models  # noqa: F401 — register all ORM mappers
 from api.core.constants import UserRole
 from api.core.job_queue import JobMessage, JobType
 from api.core.security import hash_password
-from api.database.session import AsyncSessionLocal, get_db
 from api.modules.auth.models import Organization, User
 from api.modules.documents.storage import (
     MemoryDocumentStorage,
     reset_document_storage,
     set_document_storage,
 )
-from main import app
 
 
 def _fake_enqueue(job_type: JobType, payload: dict | None = None) -> JobMessage:
@@ -40,24 +38,6 @@ def memory_storage() -> Generator[MemoryDocumentStorage]:
     set_document_storage(storage)
     yield storage
     reset_document_storage()
-
-
-@pytest.fixture
-async def db_session() -> AsyncGenerator[AsyncSession]:
-    async with AsyncSessionLocal() as session:
-        yield session
-        await session.rollback()
-
-
-@pytest.fixture
-def api_client(db_session: AsyncSession) -> Generator[TestClient]:
-    async def override_get_db() -> AsyncGenerator[AsyncSession]:
-        yield db_session
-
-    app.dependency_overrides[get_db] = override_get_db
-    with TestClient(app) as client:
-        yield client
-    app.dependency_overrides.clear()
 
 
 @pytest.fixture

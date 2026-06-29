@@ -1,7 +1,6 @@
 """Fixtures for account management integration tests."""
 
 import uuid
-from collections.abc import AsyncGenerator, Generator
 
 import pytest
 from fastapi.testclient import TestClient
@@ -10,27 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 import api.models  # noqa: F401 — register all ORM mappers
 from api.core.constants import UserRole
 from api.core.security import hash_password
-from api.database.session import AsyncSessionLocal, get_db
 from api.modules.auth.models import Organization, User
-from main import app
-
-
-@pytest.fixture
-async def db_session() -> AsyncGenerator[AsyncSession]:
-    async with AsyncSessionLocal() as session:
-        yield session
-        await session.rollback()
-
-
-@pytest.fixture
-def api_client(db_session: AsyncSession) -> Generator[TestClient]:
-    async def override_get_db() -> AsyncGenerator[AsyncSession]:
-        yield db_session
-
-    app.dependency_overrides[get_db] = override_get_db
-    with TestClient(app) as client:
-        yield client
-    app.dependency_overrides.clear()
 
 
 @pytest.fixture
