@@ -10,6 +10,7 @@ This directory is the **governance hub** for the Verdin Credit Platform. It conn
 | **Capability matrix** | [`capability-matrix.md`](capability-matrix.md)                                                                             | All stakeholders            | What exists today? What is production-ready? |
 | **Architecture**      | [`../architecture/README.md`](../architecture/README.md)                                                                   | Engineers, architects       | How is it built? What rules apply?           |
 | **ADRs**              | [`../adr/README.md`](../adr/README.md)                                                                                     | Engineers                   | Why was it built this way?                   |
+| **Engineering log**   | [`../engineering/changelog.md`](../engineering/changelog.md)                                                               | Engineers                   | Why did implementation choices evolve?       |
 | **Standards**         | [`../coding-standards.md`](../coding-standards.md), [`../architecture/api-standards.md`](../architecture/api-standards.md) | Engineers                   | What conventions must we follow?             |
 
 ## Feature lifecycle
@@ -78,6 +79,8 @@ A capability may be marked **✅ Production** in the [capability matrix](capabil
 
 Credit Report Import Wizard → Advanced OCR & bureau parsing → Workflow Automation Engine → Dispute Generation Engine → AI Case Assistant → Client Portal → Notifications & Messaging
 
+4.5 planning should use four release epics: Credit Report Intelligence, Workflow Automation, AI Assistance, and Client Experience. The engineering decision log also records the recommendation to introduce a unified `packages/job-orchestrator/` layer before background automation becomes fragmented.
+
 ### Phase 3 — Intelligence (4.8)
 
 Dispute generation (full) → analytics → client portal → notifications
@@ -90,6 +93,7 @@ Multi-tenancy → compliance center → AI case assistant → predictive analyti
 
 - [Capability matrix (executive view)](capability-matrix.md)
 - [Roadmap index](../roadmap/README.md)
+- [Engineering Decision Log](../engineering/changelog.md)
 - [Sprint 4.3.1 stabilization](../sprint-4.3.1/operational-core-stabilization.md)
 - [Release notes — M2 OCR](../release-notes/v4.3-m2-ocr-pipeline.md)
 - [Developer guide](../developer-guide.md)

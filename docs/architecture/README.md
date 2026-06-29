@@ -44,6 +44,7 @@ Before merging substantial work, confirm:
 - [Governance hub](../governance/README.md) — feature lifecycle
 - [Capability matrix](../governance/capability-matrix.md) — production readiness
 - [Product roadmap](../roadmap/README.md)
+- [Engineering Decision Log](../engineering/changelog.md) — sprint-level technical rationale
 - [v4.3.0 Architecture Snapshot](v4.3.0-snapshot.md) — as-built Operational Core reference
 - [Developer guide](../developer-guide.md)
 - [Database ERD](../database/erd.md) — diagram reference (see data-model for authoritative lifecycle detail)

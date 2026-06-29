@@ -10,7 +10,8 @@ This directory is the **master planning layer** for the Verdin Credit Platform. 
 2. **Read the domain section** in [`v5.0-enterprise.md`](v5.0-enterprise.md) for long-term intent.
 3. **Check [`../architecture/README.md`](../architecture/README.md)** before designing features — architecture docs are the technical constitution.
 4. **Record significant decisions** as ADRs in [`../adr/`](../adr/).
-5. **Ship with engineering standards** — documentation, tests, RBAC, audit events, API reference, frontend integration, CI validation.
+5. **Record sprint-level engineering context** in [`../engineering/changelog.md`](../engineering/changelog.md).
+6. **Ship with engineering standards** — documentation, tests, RBAC, audit events, API reference, frontend integration, CI validation.
 
 ## Version milestones
 
@@ -56,15 +57,16 @@ Sprint 4.3.1 validates that the Operational Core works as one product before 4.5
 
 Every 4.5 feature should leverage the Operational Core rather than modify its foundations.
 
-Suggested epic order:
+Organize Version 4.5 into four focused epics:
 
-1. Credit Report Import Wizard
-2. Advanced OCR & Bureau Parsing
-3. Workflow Automation Engine
-4. Dispute Generation Engine
-5. AI Case Assistant
-6. Client Portal
-7. Notifications & Messaging
+| Epic | Theme                      | Included capabilities                                                                                              |
+| ---- | -------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| 1    | Credit Report Intelligence | Import Wizard, bureau-specific parsers, historical report comparison, duplicate detection                          |
+| 2    | Workflow Automation        | Workflow engine, scheduled jobs, SLA monitoring, automatic task generation, reminder engine                        |
+| 3    | AI Assistance              | Case summaries, document summaries, dispute recommendations, missing evidence detection, next-best-action guidance |
+| 4    | Client Experience          | Client Portal, secure messaging, notifications, uploads, progress tracking                                         |
+
+Architectural recommendation: introduce a unified `packages/job-orchestrator/` layer during Version 4.5 so OCR, classification, metadata extraction, entity resolution, workflows, notifications, AI summaries, and imports share retry policies, scheduling, metrics, and queue abstractions.
 
 ## Sprint → version mapping
 
@@ -96,6 +98,7 @@ Suggested epic order:
 
 - [Platform Capability Matrix](../governance/capability-matrix.md) — executive readiness view
 - [Governance hub](../governance/README.md) — feature lifecycle and build order
+- [Engineering Decision Log](../engineering/changelog.md) — technical rationale across milestones
 - [Sprint 4.3.1 stabilization](../sprint-4.3.1/operational-core-stabilization.md)
 - [Release notes — M2 OCR](../release-notes/v4.3-m2-ocr-pipeline.md)
 - [Architecture](../architecture/README.md) — technical constitution
