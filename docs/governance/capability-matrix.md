@@ -27,35 +27,35 @@
 
 ---
 
-## Version 4.3 — Operational Core (in progress)
+## Version 4.3.0 — Operational Core (shipped)
 
-| Capability                      | Version | Status | Backend | Frontend | API | AI      | Tests | Notes                                                                |
-| ------------------------------- | ------- | ------ | ------- | -------- | --- | ------- | ----- | -------------------------------------------------------------------- |
-| Platform Foundation             | 4.2     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | Shipped in 4.2 — monorepo, auth, RBAC, CI                            |
-| **Case Management**             | 4.3     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | CRUD, filters, RBAC, full UI                                         |
-| **Credit Account Intelligence** | 4.3     | ✅     | ✅      | ✅       | ✅  | Partial | ✅    | Heuristic risk/readiness scoring in `intelligence.py`                |
-| **Document Foundation**         | 4.3     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | Upload, versioning, MinIO, duplicate detection                       |
-| **OCR Pipeline**                | 4.3     | ✅     | ✅      | ✅       | ✅  | ✅      | ✅    | Async worker extraction; pypdf + tesseract                           |
-| **AI Classification**           | 4.3     | 🚧     | 🚧      | —        | 🚧  | 🚧      | 🚧    | Rule-based classifier framework on `feature/document-classification` |
-| **Metadata Extraction**         | 4.3     | ✅     | ✅      | ✅       | ✅  | Partial | ✅    | Rule-based extraction; `packages/document-metadata`                  |
-| **Entity Resolution**           | 4.3     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | Deterministic matching; `packages/entity-resolution`                 |
-| Timeline & Audit Engine         | 4.3     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | Event bus + append-only timeline                                     |
-| Task Management                 | 4.3     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | CRUD, complete/reopen, filters, timeline events, UI                  |
-| Operational Dashboard           | 4.3     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | Single `GET /dashboard` aggregation; command center UI               |
-| Client Management               | 4.3     | —      | —       | —        | —   | —       | —     | Deferred to 4.8                                                      |
+| Capability                      | Version | Status | Backend | Frontend | API | AI      | Tests | Notes                                                 |
+| ------------------------------- | ------- | ------ | ------- | -------- | --- | ------- | ----- | ----------------------------------------------------- |
+| Platform Foundation             | 4.2     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | Shipped in 4.2 — monorepo, auth, RBAC, CI             |
+| **Case Management**             | 4.3     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | CRUD, filters, RBAC, full UI                          |
+| **Credit Account Intelligence** | 4.3     | ✅     | ✅      | ✅       | ✅  | Partial | ✅    | Heuristic risk/readiness scoring in `intelligence.py` |
+| **Document Foundation**         | 4.3     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | Upload, versioning, MinIO, duplicate detection        |
+| **OCR Pipeline**                | 4.3     | ✅     | ✅      | ✅       | ✅  | ✅      | ✅    | Async worker extraction; pypdf + tesseract            |
+| **AI Classification**           | 4.3     | ✅     | ✅      | Partial  | ✅  | Partial | ✅    | Rule-based classifier framework                       |
+| **Metadata Extraction**         | 4.3     | ✅     | ✅      | ✅       | ✅  | Partial | ✅    | Rule-based extraction; `packages/document-metadata`   |
+| **Entity Resolution**           | 4.3     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | Deterministic matching; `packages/entity-resolution`  |
+| Timeline & Audit Engine         | 4.3     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | Event bus + append-only timeline                      |
+| Task Management                 | 4.3     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | CRUD, complete/reopen, filters, timeline events, UI   |
+| Operational Dashboard           | 4.3     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | Mission Control — single `GET /dashboard` product API |
+| Client Management               | 4.3     | —      | —       | —        | —   | —       | —     | Deferred to 4.8                                       |
 
 ### Document Intelligence Platform (4.3 epic)
 
 Epic plan: [`docs/epics/document-intelligence-platform.md`](../epics/document-intelligence-platform.md)
 
-| Milestone                         | Version | Status  | Backend | Frontend | API | AI      | Tests | Branch                               |
-| --------------------------------- | ------- | ------- | ------- | -------- | --- | ------- | ----- | ------------------------------------ |
-| **M1 — Document Foundation**      | 4.3     | ✅      | ✅      | ✅       | ✅  | —       | ✅    | `feature/document-foundation`        |
-| **M2 — OCR Pipeline**             | 4.3     | ✅      | ✅      | ✅       | ✅  | ✅      | ✅    | `feature/document-ocr`               |
-| M3 — AI Classification            | 4.3     | 🚧      | 🚧      | —        | 🚧  | 🚧      | 🚧    | `feature/document-classification`    |
-| M4 — Metadata & Entity Resolution | 4.3     | ✅      | ✅      | ✅       | ✅  | Partial | ✅    | `feature/document-entity-resolution` |
-| M5 — Timeline Integration         | 4.3     | 🚧      | ✅      | ✅       | —   | —       | 🚧    | `feature/document-timeline`          |
-| M6 — Intelligence Dashboard       | 4.3     | Planned | —       | —        | —   | Partial | —     | `feature/document-dashboard`         |
+| Milestone                         | Version | Status | Backend | Frontend | API | AI      | Tests | Branch                               |
+| --------------------------------- | ------- | ------ | ------- | -------- | --- | ------- | ----- | ------------------------------------ |
+| **M1 — Document Foundation**      | 4.3     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | `feature/document-foundation`        |
+| **M2 — OCR Pipeline**             | 4.3     | ✅     | ✅      | ✅       | ✅  | ✅      | ✅    | `feature/document-ocr`               |
+| M3 — AI Classification            | 4.3     | ✅     | ✅      | Partial  | ✅  | Partial | ✅    | `feature/document-classification`    |
+| M4 — Metadata & Entity Resolution | 4.3     | ✅     | ✅      | ✅       | ✅  | Partial | ✅    | `feature/document-entity-resolution` |
+| M5 — Timeline Integration         | 4.3     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | `feature/document-timeline`          |
+| M6 — Mission Control Dashboard    | 4.3     | ✅     | ✅      | ✅       | ✅  | Partial | ✅    | `feature/task-management`            |
 
 ### 4.3 completion checklist
 
@@ -63,13 +63,24 @@ Epic plan: [`docs/epics/document-intelligence-platform.md`](../epics/document-in
 - [x] Credit Account Intelligence
 - [x] Document Foundation (M1)
 - [x] OCR Pipeline (M2)
-- [ ] AI Classification (M3 — in progress)
+- [x] AI Classification (M3 — rules engine)
 - [x] Metadata & Entity Resolution (M4)
 - [x] Timeline & Audit Engine
 - [x] Task Management (full module)
-- [x] Operational Dashboard (live metrics)
+- [x] Operational Dashboard (Mission Control)
 
-> **Release strategy:** Version 4.3 is the **Operational Core** milestone. Freeze 4.3 as a stable production release once classification, metadata extraction, timeline, tasks, and dashboard are complete. Version 4.5 then focuses on automation (import wizard, AI summaries, workflow, dispute generation) without revisiting platform architecture.
+> **Release strategy:** Version 4.3.0 is the **Operational Core** GA milestone. Sprint 4.3.1 stabilizes that release with end-to-end validation, performance baselines, security review, and coverage improvements before Version 4.5 automation begins.
+
+### Sprint 4.3.1 — Stabilization
+
+Plan: [`docs/sprint-4.3.1/operational-core-stabilization.md`](../sprint-4.3.1/operational-core-stabilization.md)
+
+| Focus Area              | Status  | Outcome                                                                    |
+| ----------------------- | ------- | -------------------------------------------------------------------------- |
+| End-to-end validation   | Planned | Exercise case → document → OCR → intelligence → tasks → dashboard flow     |
+| Performance baselines   | Planned | Record dashboard, OCR, entity resolution, timeline, and task query metrics |
+| Security review         | Planned | Review RBAC, JWTs, uploads, object storage, dependencies, secrets          |
+| Test coverage expansion | Planned | Cover cross-module workflows, event bus, dashboard alerts, retry paths     |
 
 ---
 

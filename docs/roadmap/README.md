@@ -14,15 +14,16 @@ This directory is the **master planning layer** for the Verdin Credit Platform. 
 
 ## Version milestones
 
-| Version | Theme               | Status          | Focus                                                                    |
-| ------- | ------------------- | --------------- | ------------------------------------------------------------------------ |
-| **4.2** | Platform Foundation | **Shipped**     | Monorepo, auth, RBAC, domain module pattern, worker scaffold, CI/CD      |
-| **4.3** | Operational Core    | **In progress** | Cases, accounts, documents (foundation + OCR + classification), timeline |
-| **4.5** | Automation          | Planned         | Workflow engine, import wizard, AI summaries, dispute generation         |
-| **4.8** | Operations          | Planned         | Reporting, dashboards, client portal, notifications                      |
-| **5.0** | Enterprise Edition  | Planned         | Multi-tenancy, compliance center, enterprise admin, predictive analytics |
+| Version   | Theme                          | Status             | Focus                                                                     |
+| --------- | ------------------------------ | ------------------ | ------------------------------------------------------------------------- |
+| **4.2**   | Platform Foundation            | **Shipped**        | Monorepo, auth, RBAC, domain module pattern, worker scaffold, CI/CD       |
+| **4.3.0** | Operational Core               | **Shipped**        | Cases, accounts, documents, OCR, intelligence, timeline, tasks, dashboard |
+| **4.3.1** | Operational Core Stabilization | **Current sprint** | E2E validation, performance baselines, security review, coverage          |
+| **4.5**   | Automation                     | Planned            | Import wizard, bureau parsing, workflow, disputes, AI assistant           |
+| **4.8**   | Operations                     | Planned            | Client portal, notifications, reporting expansions                        |
+| **5.0**   | Enterprise Edition             | Planned            | Multi-tenancy, compliance center, enterprise admin, predictive analytics  |
 
-### Version 4.3 — Operational Core progress
+### Version 4.3.0 — Operational Core complete
 
 | Capability                  | Status |
 | --------------------------- | ------ |
@@ -31,15 +32,39 @@ This directory is the **master planning layer** for the Verdin Credit Platform. 
 | Credit Account Intelligence | ✅     |
 | Document Foundation         | ✅     |
 | OCR Pipeline                | ✅     |
-| AI Classification           | 🚧     |
-| Metadata Extraction         | 🚧     |
-| Timeline Engine             | 🚧     |
-| Task Management             | 🚧     |
-| Dashboard                   | 🚧     |
+| AI Classification           | ✅     |
+| Metadata Extraction         | ✅     |
+| Entity Resolution           | ✅     |
+| Timeline Engine             | ✅     |
+| Task Management             | ✅     |
+| Mission Control Dashboard   | ✅     |
 
-**Current work:** Milestone 3 — Document Classification Engine on `feature/document-classification`.
+**Release strategy:** tag **v4.3.0** after the Mission Control dashboard PR is merged to `main`.
 
-**Release strategy:** Complete remaining 4.3 capabilities, then tag **4.3.0** as the stable Operational Core release. Version 4.5 builds automation on top without architectural rework.
+### Version 4.3.1 — Stabilization sprint
+
+Current sprint plan: [`docs/sprint-4.3.1/operational-core-stabilization.md`](../sprint-4.3.1/operational-core-stabilization.md)
+
+Sprint 4.3.1 validates that the Operational Core works as one product before 4.5 begins:
+
+- End-to-end workflow validation from case creation through Mission Control.
+- Performance baselines for dashboard aggregation, OCR, entity resolution, timeline, and tasks.
+- Security review across RBAC, JWTs, uploads, object storage, dependencies, and secrets.
+- Test coverage for cross-module workflows, event bus interactions, dashboard aggregation, failures, and retries.
+
+### Version 4.5 — Automation focus
+
+Every 4.5 feature should leverage the Operational Core rather than modify its foundations.
+
+Suggested epic order:
+
+1. Credit Report Import Wizard
+2. Advanced OCR & Bureau Parsing
+3. Workflow Automation Engine
+4. Dispute Generation Engine
+5. AI Case Assistant
+6. Client Portal
+7. Notifications & Messaging
 
 ## Sprint → version mapping
 
@@ -50,12 +75,16 @@ This directory is the **master planning layer** for the Verdin Credit Platform. 
 | Document Intelligence M1 — Foundation     | 4.3     | Document Foundation                          |
 | Document Intelligence M2 — OCR            | 4.3     | OCR Pipeline                                 |
 | Document Intelligence M3 — Classification | 4.3     | AI Classification (rules engine)             |
-| Timeline & audit events (planned)         | 4.3     | Timeline & Audit Engine                      |
-| Task management completion (planned)      | 4.3     | Task Management                              |
+| Timeline & audit events                   | 4.3     | Timeline & Audit Engine                      |
+| Task management completion                | 4.3     | Task Management                              |
+| Mission Control Dashboard                 | 4.3     | Operational Dashboard                        |
+| Operational Core stabilization            | 4.3.1   | Validation, performance, security, coverage  |
 | Workflow automation (planned)             | 4.5     | Workflow Automation                          |
 | Credit report import (planned)            | 4.5     | Credit Report Import                         |
+| Advanced OCR & bureau parsing (planned)   | 4.5     | Document Intelligence                        |
 | Dispute generation (planned)              | 4.5     | Dispute Generation                           |
-| Reporting & dashboards (planned)          | 4.8     | Reporting & Analytics                        |
+| AI case assistant (planned)               | 4.5     | AI Assistant                                 |
+| Notifications & messaging (planned)       | 4.5     | Communications                               |
 | Client portal (planned)                   | 4.8     | Client Portal                                |
 | Enterprise admin & compliance (planned)   | 5.0     | Enterprise Administration, Compliance Center |
 
@@ -67,6 +96,7 @@ This directory is the **master planning layer** for the Verdin Credit Platform. 
 
 - [Platform Capability Matrix](../governance/capability-matrix.md) — executive readiness view
 - [Governance hub](../governance/README.md) — feature lifecycle and build order
+- [Sprint 4.3.1 stabilization](../sprint-4.3.1/operational-core-stabilization.md)
 - [Release notes — M2 OCR](../release-notes/v4.3-m2-ocr-pipeline.md)
 - [Architecture](../architecture/README.md) — technical constitution
 - [ADR index](../adr/README.md) — architecture decision records
