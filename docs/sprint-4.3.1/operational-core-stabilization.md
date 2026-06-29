@@ -4,6 +4,19 @@
 
 Version 4.3.0 establishes the Operational Core: cases, accounts, documents, OCR, classification, metadata, entity resolution, timeline, tasks, and Mission Control. Sprint 4.3.1 should validate that those capabilities work as one product, establish performance baselines, and close reliability or security gaps before new automation features build on top.
 
+## Workstreams
+
+Sprint 4.3.1 is organized into measurable workstreams rather than miscellaneous cleanup:
+
+| Workstream            | Goal                                                                              |
+| --------------------- | --------------------------------------------------------------------------------- |
+| Quality               | E2E workflow tests, cross-module coverage, eliminate flaky tests                  |
+| Performance           | Benchmark dashboard aggregation, profile document pipeline, capture baselines     |
+| Security              | RBAC coverage, authentication audit, upload/storage validation, dependency review |
+| Operational Readiness | Logging, health checks, observability, deployment docs, backup/recovery           |
+
+The execution order below maps to these workstreams.
+
 ## Execution Order
 
 ### 1. End-to-End Workflow Validation
@@ -118,6 +131,18 @@ Architecture snapshot:
 - [ ] Include module map, package dependencies, event flow, database entities, API surface, active ADRs, and v4.3.0 capability matrix.
 - [ ] Treat the snapshot as the as-built reference for regression investigations during Version 4.5.
 
+### 6. Operational Readiness
+
+Confirm the Operational Core is deployable, observable, and recoverable before automation expands the surface area:
+
+- [ ] Verify structured logging is consistent across API, worker, and background jobs.
+- [ ] Verify health checks for API, database, Redis, and object storage.
+- [ ] Confirm observability for request latency, errors, and job outcomes (metrics or logs).
+- [ ] Ensure deployment documentation (Docker Compose and environment setup) is current.
+- [ ] Validate PostgreSQL backup and restore procedure.
+- [ ] Validate object storage (MinIO) backup and recovery procedure.
+- [ ] Document any operational gaps with owners and follow-up actions.
+
 ## Definition of Done
 
 - End-to-end workflow has been exercised and documented.
@@ -125,6 +150,7 @@ Architecture snapshot:
 - Security review findings are triaged.
 - New tests cover the highest-risk cross-module and failure paths.
 - Architecture review is complete and the v4.3.0 architecture snapshot is saved.
+- Operational readiness is verified: logging, health checks, observability, deployment docs, and backup/recovery.
 - Any release-blocking defects are fixed or explicitly deferred with owner and rationale.
 - Version 4.5 planning starts from stable Operational Core contracts, not foundational rewrites.
 
@@ -149,3 +175,4 @@ Suggested epic order:
 - Keep AI outputs auditable: model/version, confidence, source document, timestamp.
 - Preserve 4.3 public API contracts unless a formal migration is documented.
 - Avoid foundational data-model churn during the first automation sprint.
+- Establish a dedicated **Job Orchestration** capability early in 4.5 so OCR, automation, AI processing, notifications, and imports share one execution model (see [`docs/engineering/changelog.md`](../engineering/changelog.md)) instead of evolving independently.
