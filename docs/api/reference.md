@@ -166,6 +166,17 @@ Fields: `file` (required), `title` (required), `case_id` (required), `descriptio
 
 Duplicate detection: uploading a file with the same SHA-256 hash as an existing org document sets `is_duplicate: true` and `duplicate_of_id`.
 
+## Timeline
+
+| Method | Path             | Role      | Description                       |
+| ------ | ---------------- | --------- | --------------------------------- |
+| GET    | `/timeline`      | read_only | List timeline events (filterable) |
+| GET    | `/timeline/{id}` | read_only | Get a single timeline event       |
+
+**List query parameters:** `case_id`, `account_id`, `document_id`, `event_type`, `event_category`, `performed_by`, `occurred_from`, `occurred_to`, `sort_by`, `sort_order`.
+
+Timeline events are **append-only** — no update or delete endpoints.
+
 ## Error Responses
 
 All errors follow this format:

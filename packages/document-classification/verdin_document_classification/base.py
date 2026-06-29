@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from typing import Protocol, runtime_checkable
 
-from api.modules.documents.constants import ClassificationMethod, DocumentType
+from verdin_document_classification.constants import ClassificationMethod, DocumentType
 
 
 @dataclass(frozen=True, slots=True)

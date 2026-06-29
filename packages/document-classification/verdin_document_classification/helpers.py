@@ -1,10 +1,10 @@
 """Shared helpers for keyword-based classifiers."""
 
-from api.modules.documents.classification.base import (
+from verdin_document_classification.base import (
     ClassificationContext,
     ClassificationResult,
 )
-from api.modules.documents.constants import ClassificationMethod, DocumentType
+from verdin_document_classification.constants import ClassificationMethod, DocumentType
 
 
 def keyword_match(

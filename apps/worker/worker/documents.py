@@ -20,6 +20,42 @@ class DocumentRecord:
     deleted_at: datetime | None
 
 
+@dataclass(frozen=True, slots=True)
+class DocumentTimelineContext:
+    id: UUID
+    organization_id: UUID
+    case_id: UUID
+    account_id: UUID | None
+    title: str
+    file_name: str
+
+
+def get_document_timeline_context(
+    session: Session,
+    document_id: UUID,
+) -> DocumentTimelineContext | None:
+    row = session.execute(
+        select(
+            documents_table.c.id,
+            documents_table.c.organization_id,
+            documents_table.c.case_id,
+            documents_table.c.account_id,
+            documents_table.c.title,
+            documents_table.c.file_name,
+        ).where(documents_table.c.id == document_id)
+    ).one_or_none()
+    if row is None:
+        return None
+    return DocumentTimelineContext(
+        id=row.id,
+        organization_id=row.organization_id,
+        case_id=row.case_id,
+        account_id=row.account_id,
+        title=row.title,
+        file_name=row.file_name,
+    )
+
+
 def get_document(session: Session, document_id: UUID) -> DocumentRecord | None:
     row = session.execute(
         select(

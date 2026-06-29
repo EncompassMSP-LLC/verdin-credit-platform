@@ -1,7 +1,7 @@
 """Fallback classifier when no rule matches with sufficient confidence."""
 
-from api.modules.documents.classification.base import ClassificationContext, ClassificationResult
-from api.modules.documents.constants import ClassificationMethod, DocumentType
+from verdin_document_classification.base import ClassificationContext, ClassificationResult
+from verdin_document_classification.constants import ClassificationMethod, DocumentType
 
 
 class UnknownClassifier:

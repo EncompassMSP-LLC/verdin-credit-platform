@@ -6,6 +6,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.core.audit import apply_audit_on_create, apply_audit_on_update
+from api.core.events import publish_platform_event
 from api.core.pagination import PaginatedResponse, paginate
 from api.core.permissions import has_permission
 from api.modules.accounts.intelligence import apply_account_intelligence, recommend_next_action
@@ -22,6 +23,11 @@ from api.modules.accounts.schemas import (
 )
 from api.modules.auth.models import User
 from api.modules.cases.repository import CaseRepository
+from api.modules.timeline.builders import (
+    account_created_event,
+    account_status_changed_event,
+    account_updated_event,
+)
 from api.repositories.account import AccountRepositoryProtocol
 
 
@@ -30,13 +36,15 @@ class AccountService:
         self,
         account_repo: AccountRepositoryProtocol,
         case_repo: CaseRepository | None = None,
+        session: AsyncSession | None = None,
     ) -> None:
         self._accounts = account_repo
         self._cases = case_repo
+        self._session = session
 
     @classmethod
     def from_session(cls, session: AsyncSession) -> "AccountService":
-        return cls(AccountRepository(session), CaseRepository(session))
+        return cls(AccountRepository(session), CaseRepository(session), session=session)
 
     def _require_organization(self, user: User) -> uuid.UUID:
         if user.organization_id is None:
@@ -147,6 +155,8 @@ class AccountService:
         apply_account_intelligence(account)
         apply_audit_on_create(account, user.id)
         created = await self._accounts.create(account)
+        if self._session is not None:
+            await publish_platform_event(self._session, account_created_event(created, user.id))
         return AccountResponse.from_model(created)
 
     async def list_accounts(
@@ -187,6 +197,8 @@ class AccountService:
     ) -> AccountResponse:
         self._require_write(user)
         account = await self._get_account_for_user(account_id, user)
+        previous_account_status = account.account_status
+        previous_payment_status = account.payment_status
 
         update_data = data.model_dump(exclude_unset=True)
         preserved_dispute = update_data.pop("dispute_status", None)
@@ -201,6 +213,25 @@ class AccountService:
             account.ai_recommended_next_action = preserved_action
         apply_audit_on_update(account, user.id)
         updated = await self._accounts.update(account)
+        if self._session is not None:
+            await publish_platform_event(self._session, account_updated_event(updated, user.id))
+            status_changed = (
+                "account_status" in update_data
+                and updated.account_status != previous_account_status
+            ) or (
+                "payment_status" in update_data
+                and updated.payment_status != previous_payment_status
+            )
+            if status_changed:
+                prev = (
+                    previous_account_status.value
+                    if hasattr(previous_account_status, "value")
+                    else str(previous_account_status)
+                )
+                await publish_platform_event(
+                    self._session,
+                    account_status_changed_event(updated, user.id, previous_status=prev),
+                )
         return AccountResponse.from_model(updated)
 
     async def delete_account(self, user: User, account_id: uuid.UUID) -> None:

@@ -1,8 +1,8 @@
 """Proof of address classifier."""
 
-from api.modules.documents.classification.base import ClassificationContext, ClassificationResult
-from api.modules.documents.classification.helpers import keyword_match
-from api.modules.documents.constants import DocumentType
+from verdin_document_classification.base import ClassificationContext, ClassificationResult
+from verdin_document_classification.constants import DocumentType
+from verdin_document_classification.helpers import keyword_match
 
 
 class ProofOfAddressClassifier:

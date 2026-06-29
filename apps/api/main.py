@@ -7,6 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.core.config import get_settings
+from api.core.events import configure_event_bus
 from api.core.exceptions import register_exception_handlers
 from api.core.logging import setup_logging
 from api.middleware.logging import RequestLoggingMiddleware
@@ -20,6 +21,7 @@ settings = get_settings()
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
     setup_logging(debug=settings.debug)
+    configure_event_bus()
     yield
 
 

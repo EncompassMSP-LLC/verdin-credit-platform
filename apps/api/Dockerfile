@@ -7,8 +7,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY apps/api/requirements.txt .
-COPY packages/document-metadata packages/document-metadata
-COPY packages/entity-resolution packages/entity-resolution
+COPY packages/document-classification /packages/document-classification
+COPY packages/document-metadata /packages/document-metadata
+COPY packages/entity-resolution /packages/entity-resolution
+COPY packages/event-bus /packages/event-bus
+COPY packages/event-types /packages/event-types
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY apps/api .
