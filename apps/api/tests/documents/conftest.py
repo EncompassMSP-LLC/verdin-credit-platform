@@ -49,7 +49,7 @@ async def test_org(db_session: AsyncSession) -> Organization:
         is_active=True,
     )
     db_session.add(org)
-    await db_session.flush()
+    await db_session.commit()
     return org
 
 
@@ -66,7 +66,7 @@ async def case_manager_user(db_session: AsyncSession, test_org: Organization) ->
         is_active=True,
     )
     db_session.add(user)
-    await db_session.flush()
+    await db_session.commit()
     return user
 
 
@@ -83,7 +83,7 @@ async def owner_user(db_session: AsyncSession, test_org: Organization) -> User:
         is_active=True,
     )
     db_session.add(user)
-    await db_session.flush()
+    await db_session.commit()
     return user
 
 
