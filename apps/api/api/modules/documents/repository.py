@@ -4,11 +4,16 @@ import uuid
 from dataclasses import dataclass
 from typing import Any
 
-from sqlalchemy import func, or_, select
+from sqlalchemy import exists, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import InstrumentedAttribute, selectinload
 
-from api.modules.documents.constants import DocumentProcessingStatus
+from api.modules.documents.constants import (
+    DocumentProcessingStatus,
+    MetadataStatus,
+    ResolutionStatus,
+)
+from api.modules.documents.metadata_models import DocumentEntityResolution, DocumentMetadata
 from api.modules.documents.models import Document, DocumentVersion
 from api.modules.documents.schemas import DocumentSortField, DocumentSortOrder
 
@@ -21,6 +26,8 @@ class DocumentListFilters:
     account_id: uuid.UUID | None = None
     is_duplicate: bool | None = None
     processing_status: DocumentProcessingStatus | None = None
+    metadata_status: MetadataStatus | None = None
+    resolution_status: ResolutionStatus | None = None
     skip: int = 0
     limit: int = 20
     sort_by: DocumentSortField = "created_at"
@@ -84,6 +91,18 @@ class DocumentRepository:
             base = base.where(Document.is_duplicate == filters.is_duplicate)
         if filters.processing_status is not None:
             base = base.where(Document.processing_status == filters.processing_status.value)
+        if filters.metadata_status is not None:
+            base = base.join(
+                DocumentMetadata,
+                DocumentMetadata.document_id == Document.id,
+            ).where(DocumentMetadata.metadata_status == filters.metadata_status.value)
+        if filters.resolution_status is not None:
+            base = base.where(
+                exists().where(
+                    DocumentEntityResolution.document_id == Document.id,
+                    DocumentEntityResolution.resolution_status == filters.resolution_status.value,
+                )
+            )
         if filters.search:
             term = f"%{filters.search.strip()}%"
             base = base.where(
@@ -101,7 +120,10 @@ class DocumentRepository:
         order = sort_column.asc() if filters.sort_order == "asc" else sort_column.desc()
 
         result = await self._session.execute(
-            base.order_by(order).offset(filters.skip).limit(filters.limit)
+            base.options(selectinload(Document.extracted_metadata))
+            .order_by(order)
+            .offset(filters.skip)
+            .limit(filters.limit)
         )
         return list(result.scalars().all()), total
 

@@ -10,7 +10,17 @@ from api.core.pagination import PaginatedResponse
 from api.database.session import get_db
 from api.modules.auth.dependencies import get_current_user
 from api.modules.auth.models import User
-from api.modules.documents.constants import DocumentProcessingStatus
+from api.modules.documents.constants import (
+    DocumentProcessingStatus,
+    MetadataStatus,
+    ResolutionStatus,
+)
+from api.modules.documents.metadata_schemas import (
+    DocumentMetadataResponse,
+    DocumentResolutionsResponse,
+    ResolutionConfirmRequest,
+    ResolutionRejectRequest,
+)
 from api.modules.documents.schemas import (
     DocumentClassificationResponse,
     DocumentListParams,
@@ -46,6 +56,8 @@ def get_document_list_params(
     account_id: uuid.UUID | None = None,
     is_duplicate: bool | None = None,
     processing_status: DocumentProcessingStatus | None = None,
+    metadata_status: MetadataStatus | None = None,
+    resolution_status: ResolutionStatus | None = None,
     sort_by: DocumentSortField = "created_at",
     sort_order: DocumentSortOrder = "desc",
 ) -> DocumentListParams:
@@ -57,6 +69,8 @@ def get_document_list_params(
         account_id=account_id,
         is_duplicate=is_duplicate,
         processing_status=processing_status,
+        metadata_status=metadata_status,
+        resolution_status=resolution_status,
         sort_by=sort_by,
         sort_order=sort_order,
     )
@@ -135,6 +149,80 @@ async def classify_document(
     service: DocumentService = Depends(get_document_service),
 ) -> DocumentClassificationResponse:
     return await service.classify_document(current_user, document_id)
+
+
+@router.get("/{document_id}/metadata", response_model=DocumentMetadataResponse)
+async def get_document_metadata(
+    document_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> DocumentMetadataResponse:
+    return await service.get_metadata(current_user, document_id)
+
+
+@router.post("/{document_id}/metadata/extract", response_model=DocumentMetadataResponse)
+async def extract_document_metadata(
+    document_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> DocumentMetadataResponse:
+    return await service.extract_metadata(current_user, document_id)
+
+
+@router.get("/{document_id}/resolutions", response_model=DocumentResolutionsResponse)
+async def get_document_resolutions(
+    document_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> DocumentResolutionsResponse:
+    return await service.get_resolutions(current_user, document_id)
+
+
+@router.post("/{document_id}/resolutions/resolve", response_model=DocumentResolutionsResponse)
+async def resolve_document_entities(
+    document_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> DocumentResolutionsResponse:
+    return await service.resolve_entities(current_user, document_id)
+
+
+@router.post(
+    "/{document_id}/resolutions/{resolution_id}/confirm",
+    response_model=DocumentResolutionsResponse,
+)
+async def confirm_document_resolution(
+    document_id: uuid.UUID,
+    resolution_id: uuid.UUID,
+    body: ResolutionConfirmRequest,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> DocumentResolutionsResponse:
+    return await service.confirm_resolution(
+        current_user,
+        document_id,
+        resolution_id,
+        body,
+    )
+
+
+@router.post(
+    "/{document_id}/resolutions/{resolution_id}/reject",
+    response_model=DocumentResolutionsResponse,
+)
+async def reject_document_resolution(
+    document_id: uuid.UUID,
+    resolution_id: uuid.UUID,
+    body: ResolutionRejectRequest,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> DocumentResolutionsResponse:
+    return await service.reject_resolution(
+        current_user,
+        document_id,
+        resolution_id,
+        body,
+    )
 
 
 @router.get("/{document_id}/ocr", response_model=DocumentOcrResponse)

@@ -40,7 +40,7 @@ packages = ["api"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 testpaths = ["tests"]
-pythonpath = ["."]
+pythonpath = [".", "../../packages/document-metadata", "../../packages/entity-resolution"]
 
 [tool.ruff]
 line-length = 100

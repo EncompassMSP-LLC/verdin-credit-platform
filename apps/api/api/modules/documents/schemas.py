@@ -12,6 +12,8 @@ from api.modules.documents.constants import (
     ClassificationMethod,
     DocumentProcessingStatus,
     DocumentType,
+    MetadataStatus,
+    ResolutionStatus,
 )
 from api.modules.documents.models import Document, DocumentVersion
 
@@ -31,6 +33,8 @@ class DocumentListParams(PaginationParams):
     account_id: uuid.UUID | None = None
     is_duplicate: bool | None = None
     processing_status: DocumentProcessingStatus | None = None
+    metadata_status: MetadataStatus | None = None
+    resolution_status: ResolutionStatus | None = None
     sort_by: DocumentSortField = "created_at"
     sort_order: DocumentSortOrder = "desc"
 
@@ -81,6 +85,7 @@ class DocumentResponse(BaseSchema):
     document_type: DocumentType | None = None
     confidence_score: float | None = None
     classified_at: datetime | None = None
+    metadata_status: MetadataStatus | None = None
     created_at: datetime
     updated_at: datetime
     deleted_at: datetime | None
@@ -122,6 +127,11 @@ class DocumentResponse(BaseSchema):
             if document.confidence_score is not None
             else None,
             classified_at=document.classified_at,
+            metadata_status=(
+                MetadataStatus(document.extracted_metadata.metadata_status)
+                if document.extracted_metadata is not None
+                else None
+            ),
             created_at=document.created_at,
             updated_at=document.updated_at,
             deleted_at=document.deleted_at,

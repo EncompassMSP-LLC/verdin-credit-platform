@@ -2,7 +2,7 @@
 
 **Target version:** 4.3 (Operational Core)  
 **Branch strategy:** One feature branch per milestone  
-**Status:** Milestone 3 in progress — Document Classification on `feature/document-classification`
+**Status:** Milestone 4 complete — Metadata & Entity Resolution on `feature/document-entity-resolution`
 
 ## Epic goal
 
@@ -156,11 +156,47 @@ Credit Report, Collection Letter, Bureau Response, Identity Document, Proof of A
 
 ---
 
-## Milestone 4 — Metadata & Entity Extraction
+## Milestone 4 — Metadata & Entity Resolution Engine
 
-Extract: consumer name, bureau, creditor, masked account number, report date, collection agency, balance, addresses, phone numbers.
+**Goal:** Extract structured metadata from OCR text and classification results, then resolve/link entities to existing Cases and Credit Accounts using deterministic rules. Flag ambiguous matches for manual review.
 
-Link to Cases and Accounts when confidence is high; flag uncertain matches for review.
+**Branch:** `feature/document-entity-resolution`
+
+### Shared packages
+
+```
+packages/document-metadata/verdin_document_metadata/
+    extractor.py     # Rule-based field extraction (no LLM)
+packages/entity-resolution/verdin_entity_resolution/
+    registry.py      # Resolver pipeline
+    resolvers/       # case, account, person, organization
+```
+
+### Extracted fields
+
+Consumer name, bureau, creditor, collection agency, masked account number, report date, balance, payment status, addresses, phone numbers, SSN (masked).
+
+### Resolution fields
+
+`confidence_score`, `resolution_status`, `resolution_method`, `matched_entity_id`, `matched_entity_type`, `candidate_entity_ids`, `reasoning`.
+
+### Backend
+
+- Tables: `document_metadata`, `document_entity_resolutions`
+- Migration: `007_document_metadata_resolution.py`
+- Worker jobs: `DocumentMetadataExtractJob` (after classification), `DocumentEntityResolveJob` (after extraction)
+- API: metadata CRUD + resolution confirm/reject
+- On matched account resolution, `documents.account_id` is set automatically
+
+### Definition of done
+
+- [x] `packages/entity-resolution` reusable shared package
+- [x] `packages/document-metadata` rule-based extraction service
+- [x] Deterministic resolution with ambiguous/unmatched handling
+- [x] API endpoints with integration tests
+- [x] Document Detail UI metadata + entity match panels
+- [x] Document Library metadata/resolution filters
+- [x] Capability matrix and API docs updated
 
 ---
 

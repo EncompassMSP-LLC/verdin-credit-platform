@@ -11,6 +11,9 @@ import {
 import { Badge, Button, Card } from '@verdin/ui';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { DocumentDeleteDialog } from '../../components/documents/DocumentDeleteDialog';
+import { DocumentEntityResolutionPanel } from '../../components/documents/DocumentEntityResolutionPanel';
+import { DocumentMetadataPanel } from '../../components/documents/DocumentMetadataPanel';
+import { DocumentMetadataStatusBadge } from '../../components/documents/DocumentMetadataStatusBadge';
 import { DocumentProcessingBadge } from '../../components/documents/DocumentProcessingBadge';
 
 function formatFileSize(bytes: number | null) {
@@ -131,6 +134,7 @@ export function DocumentDetailPage() {
             )}
             <Badge variant="info">v{data.version_number}</Badge>
             <DocumentProcessingBadge status={processingStatus} />
+            <DocumentMetadataStatusBadge status={data.metadata_status} />
           </div>
         </div>
         <div className="flex gap-2">
@@ -153,7 +157,7 @@ export function DocumentDetailPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <Card title="Metadata" className="lg:col-span-1">
+        <Card title="File details" className="lg:col-span-1">
           <dl className="space-y-3 text-sm">
             <div>
               <dt className="text-gray-500">File size</dt>
@@ -191,7 +195,14 @@ export function DocumentDetailPage() {
           ) : null}
         </Card>
 
-        <Card title="Extracted text" className="lg:col-span-2">
+        <DocumentMetadataPanel documentId={documentId} hasOcrText={Boolean(ocrData?.ocr_text)} />
+
+        <DocumentEntityResolutionPanel
+          documentId={documentId}
+          hasMetadata={data.metadata_status === 'extracted'}
+        />
+
+        <Card title="Extracted text" className="lg:col-span-2 lg:row-start-1 lg:col-start-2">
           {processingStatus === 'skipped' ? (
             <p className="text-sm text-gray-500">This file format is not processed by OCR.</p>
           ) : null}

@@ -23,7 +23,22 @@ from api.modules.documents.classification import (
     classify_document as run_document_classification,
 )
 from api.modules.documents.classification.base import ClassificationResult
-from api.modules.documents.constants import DocumentProcessingStatus, is_ocr_eligible
+from api.modules.documents.constants import (
+    DocumentProcessingStatus,
+    MatchedEntityType,
+    ResolutionMethod,
+    ResolutionStatus,
+    is_ocr_eligible,
+)
+from api.modules.documents.metadata_repository import DocumentMetadataRepository
+from api.modules.documents.metadata_schemas import (
+    DocumentEntityResolutionResponse,
+    DocumentMetadataResponse,
+    DocumentResolutionsResponse,
+    ResolutionConfirmRequest,
+    ResolutionRejectRequest,
+)
+from api.modules.documents.metadata_service import run_entity_resolution, run_metadata_extraction
 from api.modules.documents.models import Document, DocumentVersion
 from api.modules.documents.permissions import (
     DOCUMENT_DELETE_ROLE,
@@ -67,11 +82,13 @@ class DocumentService:
         document_repo: DocumentRepositoryProtocol,
         case_repo: CaseRepository,
         account_repo: AccountRepository,
+        metadata_repo: DocumentMetadataRepository,
         storage: DocumentStorage,
     ) -> None:
         self._documents = document_repo
         self._cases = case_repo
         self._accounts = account_repo
+        self._metadata = metadata_repo
         self._storage = storage
 
     @classmethod
@@ -84,6 +101,7 @@ class DocumentService:
             DocumentRepository(session),
             CaseRepository(session),
             AccountRepository(session),
+            DocumentMetadataRepository(session),
             storage or get_document_storage(),
         )
 
@@ -201,6 +219,8 @@ class DocumentService:
             account_id=params.account_id,
             is_duplicate=params.is_duplicate,
             processing_status=params.processing_status,
+            metadata_status=params.metadata_status,
+            resolution_status=params.resolution_status,
             skip=params.offset,
             limit=params.page_size,
             sort_by=params.sort_by,
@@ -523,6 +543,7 @@ class DocumentService:
         self._apply_classification_result(document, result, classified_by_id=user.id)
         apply_audit_on_update(document, user.id)
         await self._documents.update(document)
+        self._queue_metadata_extract_job(document)
         return DocumentClassificationResponse.from_model(document)
 
     async def get_classification(
@@ -532,3 +553,165 @@ class DocumentService:
     ) -> DocumentClassificationResponse:
         document = await self._get_document_for_user(document_id, user)
         return DocumentClassificationResponse.from_model(document)
+
+    def _queue_metadata_extract_job(self, document: Document) -> None:
+        settings = get_settings()
+        if not settings.document_metadata_enabled:
+            return
+        try:
+            enqueue_job(JobType.DOCUMENT_METADATA_EXTRACT, {"document_id": str(document.id)})
+        except Exception:
+            logger.exception("Failed to enqueue metadata extraction for document %s", document.id)
+
+    async def get_metadata(
+        self,
+        user: User,
+        document_id: uuid.UUID,
+    ) -> DocumentMetadataResponse:
+        document = await self._get_document_for_user(document_id, user)
+        metadata = await self._metadata.get_metadata_by_document(
+            document.id,
+            organization_id=document.organization_id,
+        )
+        if metadata is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Document metadata not found",
+            )
+        return DocumentMetadataResponse.from_model(metadata)
+
+    def _queue_entity_resolve_job(self, document: Document) -> None:
+        settings = get_settings()
+        if not settings.document_entity_resolution_enabled:
+            return
+        try:
+            enqueue_job(JobType.DOCUMENT_ENTITY_RESOLVE, {"document_id": str(document.id)})
+        except Exception:
+            logger.exception("Failed to enqueue entity resolution for document %s", document.id)
+
+    async def extract_metadata(
+        self,
+        user: User,
+        document_id: uuid.UUID,
+    ) -> DocumentMetadataResponse:
+        self._require_write(user)
+        document = await self._get_document_for_user(document_id, user)
+        if not document.ocr_text:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="OCR text is required before metadata extraction",
+            )
+        response = await run_metadata_extraction(document, self._metadata)
+        apply_audit_on_update(document, user.id)
+        await self._documents.update(document)
+        self._queue_entity_resolve_job(document)
+        return response
+
+    async def get_resolutions(
+        self,
+        user: User,
+        document_id: uuid.UUID,
+    ) -> DocumentResolutionsResponse:
+        document = await self._get_document_for_user(document_id, user)
+        rows = await self._metadata.list_resolutions(
+            document.id,
+            organization_id=document.organization_id,
+        )
+        return DocumentResolutionsResponse(
+            document_id=document.id,
+            resolutions=[DocumentEntityResolutionResponse.from_model(row) for row in rows],
+        )
+
+    async def resolve_entities(
+        self,
+        user: User,
+        document_id: uuid.UUID,
+    ) -> DocumentResolutionsResponse:
+        self._require_write(user)
+        document = await self._get_document_for_user(document_id, user)
+        try:
+            response = await run_entity_resolution(
+                document,
+                self._metadata,
+                self._cases,
+                self._accounts,
+            )
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=str(exc),
+            ) from exc
+        apply_audit_on_update(document, user.id)
+        await self._documents.update(document)
+        return response
+
+    async def confirm_resolution(
+        self,
+        user: User,
+        document_id: uuid.UUID,
+        resolution_id: uuid.UUID,
+        body: ResolutionConfirmRequest,
+    ) -> DocumentResolutionsResponse:
+        self._require_write(user)
+        document = await self._get_document_for_user(document_id, user)
+        resolution = await self._metadata.get_resolution(
+            resolution_id,
+            organization_id=document.organization_id,
+        )
+        if resolution is None or resolution.document_id != document.id:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Resolution not found"
+            )
+
+        if resolution.resolution_status == ResolutionStatus.AMBIGUOUS.value:
+            if body.matched_entity_id is None:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail="matched_entity_id is required for ambiguous resolutions",
+                )
+            resolution.matched_entity_id = body.matched_entity_id
+        elif resolution.matched_entity_id is None and body.matched_entity_id is not None:
+            resolution.matched_entity_id = body.matched_entity_id
+
+        resolution.resolution_status = ResolutionStatus.CONFIRMED.value
+        resolution.resolution_method = ResolutionMethod.MANUAL.value
+        resolution.reviewed_at = datetime.now(UTC)
+        resolution.reviewed_by_id = user.id
+        await self._metadata.update_resolution(resolution)
+
+        if (
+            resolution.entity_type == MatchedEntityType.ACCOUNT.value
+            and resolution.matched_entity_id is not None
+        ):
+            document.account_id = resolution.matched_entity_id
+            apply_audit_on_update(document, user.id)
+            await self._documents.update(document)
+
+        return await self.get_resolutions(user, document_id)
+
+    async def reject_resolution(
+        self,
+        user: User,
+        document_id: uuid.UUID,
+        resolution_id: uuid.UUID,
+        body: ResolutionRejectRequest,
+    ) -> DocumentResolutionsResponse:
+        self._require_write(user)
+        document = await self._get_document_for_user(document_id, user)
+        resolution = await self._metadata.get_resolution(
+            resolution_id,
+            organization_id=document.organization_id,
+        )
+        if resolution is None or resolution.document_id != document.id:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Resolution not found"
+            )
+
+        resolution.resolution_status = ResolutionStatus.REJECTED.value
+        resolution.resolution_method = ResolutionMethod.MANUAL.value
+        resolution.matched_entity_id = None
+        resolution.reasoning = body.reason or resolution.reasoning
+        resolution.reviewed_at = datetime.now(UTC)
+        resolution.reviewed_by_id = user.id
+        await self._metadata.update_resolution(resolution)
+        return await self.get_resolutions(user, document_id)

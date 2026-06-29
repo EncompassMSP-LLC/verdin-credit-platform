@@ -70,6 +70,13 @@ class Document(Base, TimestampMixin, SoftDeleteMixin, AuditMixin):
     case: Mapped["Case"] = relationship(back_populates="documents")
     account: Mapped["Account | None"] = relationship()
     duplicate_of: Mapped["Document | None"] = relationship(remote_side=[id])
+    extracted_metadata: Mapped["DocumentMetadata | None"] = relationship(
+        back_populates="document",
+        uselist=False,
+    )
+    entity_resolutions: Mapped[list["DocumentEntityResolution"]] = relationship(
+        back_populates="document",
+    )
     versions: Mapped[list["DocumentVersion"]] = relationship(
         back_populates="document",
         order_by="DocumentVersion.version_number.desc()",

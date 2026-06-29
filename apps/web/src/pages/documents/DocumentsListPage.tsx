@@ -7,6 +7,7 @@ import {
   DocumentFilters,
   type DocumentFiltersValue,
 } from '../../components/documents/DocumentFilters';
+import { DocumentMetadataStatusBadge } from '../../components/documents/DocumentMetadataStatusBadge';
 import { DocumentProcessingBadge } from '../../components/documents/DocumentProcessingBadge';
 
 const defaultFilters: DocumentFiltersValue = {
@@ -14,6 +15,8 @@ const defaultFilters: DocumentFiltersValue = {
   case_id: '',
   is_duplicate: '',
   processing_status: '',
+  metadata_status: '',
+  resolution_status: '',
   sort_by: 'created_at',
   sort_order: 'desc',
 };
@@ -41,6 +44,8 @@ export function DocumentsListPage() {
       case_id: filters.case_id || undefined,
       is_duplicate: filters.is_duplicate === 'true' ? true : undefined,
       processing_status: filters.processing_status || undefined,
+      metadata_status: filters.metadata_status || undefined,
+      resolution_status: filters.resolution_status || undefined,
       sort_by: filters.sort_by,
       sort_order: filters.sort_order,
     }),
@@ -115,6 +120,7 @@ export function DocumentsListPage() {
                   <th className="px-4 py-3 font-medium">Size</th>
                   <th className="px-4 py-3 font-medium">Version</th>
                   <th className="px-4 py-3 font-medium">Status</th>
+                  <th className="px-4 py-3 font-medium">Metadata</th>
                   <th className="px-4 py-3 font-medium">Uploaded</th>
                 </tr>
               </thead>
@@ -140,6 +146,7 @@ export function DocumentsListPage() {
                           <Badge variant="success">Original</Badge>
                         )}
                         <DocumentProcessingBadge status={doc.processing_status} />
+                        <DocumentMetadataStatusBadge status={doc.metadata_status} />
                       </div>
                     </td>
                     <td className="px-4 py-3 text-gray-700">{formatDate(doc.created_at)}</td>
