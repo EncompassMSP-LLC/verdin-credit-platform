@@ -43,6 +43,33 @@ Release notes
 Capability matrix update   ← required before epic is "done"
 ```
 
+## Release Cadence
+
+Use a predictable release model now that the platform has a stable Operational Core:
+
+| Channel         | Policy                                                                           |
+| --------------- | -------------------------------------------------------------------------------- |
+| `main`          | Always releasable. Only merge work that has passed CI and is ready to ship.      |
+| `feature/*`     | Individual capabilities or tightly scoped product changes.                       |
+| `sprint/*`      | Stabilization, integration, and release-hardening work.                          |
+| Semantic tags   | Use annotated semantic version tags such as `v4.3.0`, `v4.3.1`, `v4.5.0`.        |
+| GitHub Releases | Every tagged version gets release notes and a summary of delivered capabilities. |
+
+Release flow:
+
+1. Complete feature or sprint work on a branch.
+2. Merge through PR after CI, review, release notes, and capability matrix updates.
+3. Pull `main` locally after merge.
+4. Create an annotated tag from `main`.
+5. Push the tag.
+6. Publish a GitHub Release from the tag with delivered capabilities, upgrade notes, and known risks.
+
+For Version 4.3:
+
+- `v4.3.0` marks Operational Core GA after Mission Control is merged to `main`.
+- `v4.3.1` marks the stabilization sprint once all checklist items are complete and passing consistently in CI.
+- Version 4.5 begins only after 4.3.1 exit criteria are satisfied.
+
 ### Definition of done (capability row)
 
 A capability may be marked **✅ Production** in the [capability matrix](capability-matrix.md) only when:

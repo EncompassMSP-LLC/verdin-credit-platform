@@ -113,6 +113,31 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 ## Version 4.5 Planning
 
+### Decision: Adopt Predictable Release Cadence
+
+**Decision:** Use `main` as always releasable, `feature/*` for individual capabilities, `sprint/*` for stabilization and integration, semantic tags for releases, and GitHub Releases for every tagged version.
+
+**Reason:** The platform has matured from scaffold to Operational Core. A predictable cadence preserves a clean, auditable history while Version 4.5 adds larger automation and AI capabilities.
+
+**Alternatives considered:**
+
+- Continue merging all work directly through feature branches without stabilization branches
+- Tag only major releases and skip patch/stabilization tags
+- Use release notes in the repo without GitHub Releases
+
+**Technical debt introduced:** None intentionally. The process adds lightweight release ceremony that must be kept current.
+
+**Follow-up work:**
+
+- Tag `v4.3.0` from `main` after Mission Control is merged.
+- Publish a GitHub Release for `v4.3.0` using the GA release notes.
+- Use a `sprint/4.3.1-stabilization` branch for the stabilization checklist if multiple fixes or test suites are needed.
+- Tag `v4.3.1` only after end-to-end workflow tests, baselines, security review, and coverage goals pass consistently in CI.
+
+**Performance observations:** Release tags should reference the baseline metrics captured in Sprint 4.3.1 so future versions can compare dashboard, OCR, entity resolution, timeline, and task performance.
+
+**Risks:** If `main` is allowed to drift from releasable status, tags and GitHub Releases lose trust as audit artifacts. If stabilization work is mixed into broad feature branches, 4.5 may inherit unresolved Operational Core issues.
+
 ### Decision: Group 4.5 Into Four Focused Epics
 
 **Decision:** Organize Version 4.5 around four cohesive epics:

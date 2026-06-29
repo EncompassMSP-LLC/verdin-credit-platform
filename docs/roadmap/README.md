@@ -11,7 +11,8 @@ This directory is the **master planning layer** for the Verdin Credit Platform. 
 3. **Check [`../architecture/README.md`](../architecture/README.md)** before designing features — architecture docs are the technical constitution.
 4. **Record significant decisions** as ADRs in [`../adr/`](../adr/).
 5. **Record sprint-level engineering context** in [`../engineering/changelog.md`](../engineering/changelog.md).
-6. **Ship with engineering standards** — documentation, tests, RBAC, audit events, API reference, frontend integration, CI validation.
+6. **Follow the [release cadence](../governance/README.md#release-cadence)** — `main` releasable, `feature/*` capabilities, `sprint/*` stabilization, semantic tags, GitHub Releases.
+7. **Ship with engineering standards** — documentation, tests, RBAC, audit events, API reference, frontend integration, CI validation.
 
 ## Version milestones
 
