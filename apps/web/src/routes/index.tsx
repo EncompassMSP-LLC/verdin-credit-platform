@@ -3,7 +3,10 @@ import { useAuth } from '../lib/auth';
 import { AppLayout } from '../components/AppLayout';
 import { LoginPage } from '../pages/LoginPage';
 import { DashboardPage } from '../pages/DashboardPage';
-import { CasesPage } from '../pages/CasesPage';
+import { CasesListPage } from '../pages/cases/CasesListPage';
+import { CaseCreatePage } from '../pages/cases/CaseCreatePage';
+import { CaseDetailPage } from '../pages/cases/CaseDetailPage';
+import { CaseEditPage } from '../pages/cases/CaseEditPage';
 import { AccountsPage } from '../pages/AccountsPage';
 import { DocumentsPage } from '../pages/DocumentsPage';
 import { TasksPage } from '../pages/TasksPage';
@@ -44,7 +47,10 @@ export function AppRoutes() {
         }
       >
         <Route index element={<DashboardPage />} />
-        <Route path="cases" element={<CasesPage />} />
+        <Route path="cases" element={<CasesListPage />} />
+        <Route path="cases/new" element={<CaseCreatePage />} />
+        <Route path="cases/:caseId" element={<CaseDetailPage />} />
+        <Route path="cases/:caseId/edit" element={<CaseEditPage />} />
         <Route path="accounts" element={<AccountsPage />} />
         <Route path="documents" element={<DocumentsPage />} />
         <Route path="tasks" element={<TasksPage />} />

@@ -69,6 +69,28 @@ GET /api/v1/auth/me
 Authorization: Bearer <access_token>
 ```
 
+## Cases
+
+All case endpoints require authentication. Users are scoped to their organization.
+
+| Method | Path               | Min role     | Description        |
+| ------ | ------------------ | ------------ | ------------------ |
+| POST   | `/cases`           | case_manager | Create a case      |
+| GET    | `/cases`           | read_only    | List cases         |
+| GET    | `/cases/{case_id}` | read_only    | Get case by ID     |
+| PATCH  | `/cases/{case_id}` | case_manager | Update a case      |
+| DELETE | `/cases/{case_id}` | admin        | Soft-delete a case |
+
+### List query parameters
+
+`page`, `page_size`, `search`, `status`, `stage`, `priority`, `assigned_user_id`, `sort_by`, `sort_order`
+
+### Enums
+
+- **status:** `open`, `active`, `on_hold`, `resolved`, `closed`
+- **stage:** `intake`, `review`, `evidence_gathering`, `dispute_preparation`, `awaiting_response`, `monitoring`, `complete`
+- **priority:** `low`, `medium`, `high`, `critical`
+
 ## Error Responses
 
 All errors follow this format:

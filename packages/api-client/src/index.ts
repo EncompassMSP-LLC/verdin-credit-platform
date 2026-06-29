@@ -24,7 +24,17 @@ export {
   type User,
 } from './auth';
 
-export { getCase, listCases, type Case, type ListCasesParams } from './cases';
+export {
+  createCase,
+  deleteCase,
+  getCase,
+  listCases,
+  updateCase,
+  type Case,
+  type CreateCaseInput,
+  type ListCasesParams,
+  type UpdateCaseInput,
+} from './cases';
 
 export { getAccount, listAccounts, type Account, type ListAccountsParams } from './accounts';
 

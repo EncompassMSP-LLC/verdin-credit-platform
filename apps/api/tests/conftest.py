@@ -1,4 +1,4 @@
-"""API test suite."""
+"""Shared pytest configuration."""
 
 import os
 
@@ -7,4 +7,8 @@ os.environ.setdefault("APP_ENV", "test")
 os.environ.setdefault(
     "DATABASE_URL",
     "postgresql+asyncpg://verdin:verdin@localhost:5432/verdin_credit_test",
+)
+os.environ.setdefault(
+    "DATABASE_URL_SYNC",
+    "postgresql://verdin:verdin@localhost:5432/verdin_credit_test",
 )

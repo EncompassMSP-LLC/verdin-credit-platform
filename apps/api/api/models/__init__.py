@@ -3,7 +3,7 @@
 from api.core.constants import UserRole
 from api.modules.accounts.models import Account
 from api.modules.auth.models import Organization, User
-from api.modules.cases.models import Case, CaseStatus
+from api.modules.cases.models import Case, CasePriority, CaseStage, CaseStatus
 from api.modules.documents.models import Document
 from api.modules.tasks.models import Task, TaskPriority, TaskStatus
 from api.modules.timeline.models import Communication, TimelineEvent
@@ -11,6 +11,8 @@ from api.modules.timeline.models import Communication, TimelineEvent
 __all__ = [
     "Account",
     "Case",
+    "CasePriority",
+    "CaseStage",
     "CaseStatus",
     "Communication",
     "Document",

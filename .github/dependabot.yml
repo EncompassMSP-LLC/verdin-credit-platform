@@ -1,0 +1,112 @@
+# Dependabot — weekly dependency updates with grouped patch PRs.
+# https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+
+updates:
+  # pnpm workspace (package.json + pnpm-lock.yaml at repo root)
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      npm-patch-updates:
+        patterns:
+          - '*'
+        update-types:
+          - patch
+    open-pull-requests-limit: 10
+
+  # GitHub Actions workflows
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      github-actions-patch-updates:
+        patterns:
+          - '*'
+        update-types:
+          - patch
+    open-pull-requests-limit: 5
+
+  # Docker Compose (root stack images)
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      docker-patch-updates:
+        patterns:
+          - '*'
+        update-types:
+          - patch
+    open-pull-requests-limit: 5
+
+  # Application Dockerfiles
+  - package-ecosystem: docker
+    directory: /apps/api
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      docker-patch-updates:
+        patterns:
+          - '*'
+        update-types:
+          - patch
+
+  - package-ecosystem: docker
+    directory: /apps/worker
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      docker-patch-updates:
+        patterns:
+          - '*'
+        update-types:
+          - patch
+
+  - package-ecosystem: docker
+    directory: /apps/web
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      docker-patch-updates:
+        patterns:
+          - '*'
+        update-types:
+          - patch
+
+  # Python (apps/api)
+  - package-ecosystem: pip
+    directory: /apps/api
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      pip-patch-updates:
+        patterns:
+          - '*'
+        update-types:
+          - patch
+    open-pull-requests-limit: 10
+
+  # Python (apps/worker)
+  - package-ecosystem: pip
+    directory: /apps/worker
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      pip-patch-updates:
+        patterns:
+          - '*'
+        update-types:
+          - patch
+    open-pull-requests-limit: 10

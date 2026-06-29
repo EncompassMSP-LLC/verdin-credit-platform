@@ -51,7 +51,7 @@ pnpm dev
 2. Add repository method in `api/modules/<domain>/repository.py`
 3. Add service method in `api/modules/<domain>/service.py`
 4. Add router endpoint in `api/modules/<domain>/router.py`
-5. Register router in `api/modules/__init__.py`
+5. Register router in `api/versions/v1/router.py`
 6. Write tests in `tests/`
 7. Update `docs/api/reference.md`
 
@@ -70,6 +70,19 @@ alembic upgrade head
 1. Add to `packages/shared/src/index.ts`
 2. Run `pnpm --filter @verdin/shared build`
 3. Import in frontend: `import { ... } from '@verdin/shared'`
+
+### Run case management locally
+
+```bash
+cd apps/api
+alembic upgrade head
+python scripts/seed.py
+uvicorn main:app --reload
+```
+
+Use `manager@verdin.demo / changeme123` to create cases and `admin@verdin.demo` to delete.
+
+See `docs/release-notes/sprint-2-epic-1-cases.md` for Sprint 2 Epic 1 details.
 
 ## Code Quality
 
