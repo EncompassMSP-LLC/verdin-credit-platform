@@ -2,7 +2,7 @@
 
 **Target version:** 4.3 (Operational Core)  
 **Branch strategy:** One feature branch per milestone  
-**Status:** Milestone 1 complete — Milestone 2 (OCR) next
+**Status:** Milestone 2 in progress — OCR Pipeline on `feature/document-ocr`
 
 ## Epic goal
 
@@ -66,15 +66,40 @@ Update [`capability-matrix.md`](../governance/capability-matrix.md) as each mile
 
 ## Milestone 2 — OCR Pipeline
 
+**Goal:** Async text extraction for PDF and image documents without blocking upload requests.
+
 **Pipeline:**
 
 ```
 Upload → (Virus scan, future) → OCR Queue → Worker → Extract Text → Store OCR Result
 ```
 
-**Formats:** PDF, JPG, PNG, TIFF
+**Formats:** PDF, JPG, PNG, TIFF (DOCX/TXT marked `skipped`)
 
-Workers update processing status asynchronously — never block upload requests.
+Workers update `processing_status` asynchronously — never block upload requests.
+
+### Backend
+
+- `processing_status`, `ocr_text`, `ocr_error`, `ocr_processed_at` on `documents`
+- API enqueues `ocr` job to Redis after upload / version upload
+- Worker `OcrJob` reads MinIO, extracts text (pypdf / pytesseract), persists result
+- `GET /documents/{id}/ocr`, `POST /documents/{id}/ocr/retry`
+- List filter by `processing_status`
+
+### Frontend
+
+- Processing status badges on list and detail
+- Extracted text panel with auto-refresh while queued/processing
+- Retry OCR action on failure
+
+### Definition of done
+
+- [ ] Eligible uploads enqueue OCR without blocking HTTP response
+- [ ] Worker extracts PDF text and persists to PostgreSQL
+- [ ] Processing status visible in API and UI
+- [ ] Retry OCR endpoint works
+- [ ] Integration + worker unit tests pass
+- [ ] Capability matrix row updated
 
 ---
 

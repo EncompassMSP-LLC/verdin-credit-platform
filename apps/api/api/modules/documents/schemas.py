@@ -8,6 +8,7 @@ from pydantic import Field
 
 from api.core.pagination import PaginationParams
 from api.core.responses import BaseSchema
+from api.modules.documents.constants import DocumentProcessingStatus
 from api.modules.documents.models import Document, DocumentVersion
 
 DocumentSortField = Literal["created_at", "title", "file_name", "file_size"]
@@ -25,6 +26,7 @@ class DocumentListParams(PaginationParams):
     case_id: uuid.UUID | None = None
     account_id: uuid.UUID | None = None
     is_duplicate: bool | None = None
+    processing_status: DocumentProcessingStatus | None = None
     sort_by: DocumentSortField = "created_at"
     sort_order: DocumentSortOrder = "desc"
 
@@ -69,6 +71,9 @@ class DocumentResponse(BaseSchema):
     version_number: int
     is_duplicate: bool
     duplicate_of_id: uuid.UUID | None
+    processing_status: DocumentProcessingStatus
+    ocr_processed_at: datetime | None
+    ocr_version_number: int | None
     created_at: datetime
     updated_at: datetime
     deleted_at: datetime | None
@@ -100,10 +105,33 @@ class DocumentResponse(BaseSchema):
             version_number=document.version_number,
             is_duplicate=document.is_duplicate,
             duplicate_of_id=document.duplicate_of_id,
+            processing_status=DocumentProcessingStatus(document.processing_status),
+            ocr_processed_at=document.ocr_processed_at,
+            ocr_version_number=document.ocr_version_number,
             created_at=document.created_at,
             updated_at=document.updated_at,
             deleted_at=document.deleted_at,
             created_by_id=document.created_by_id,
             updated_by_id=document.updated_by_id,
             versions=versions,
+        )
+
+
+class DocumentOcrResponse(BaseSchema):
+    document_id: uuid.UUID
+    processing_status: DocumentProcessingStatus
+    ocr_text: str | None
+    ocr_error: str | None
+    ocr_processed_at: datetime | None
+    ocr_version_number: int | None
+
+    @classmethod
+    def from_model(cls, document: Document) -> "DocumentOcrResponse":
+        return cls(
+            document_id=document.id,
+            processing_status=DocumentProcessingStatus(document.processing_status),
+            ocr_text=document.ocr_text,
+            ocr_error=document.ocr_error,
+            ocr_processed_at=document.ocr_processed_at,
+            ocr_version_number=document.ocr_version_number,
         )

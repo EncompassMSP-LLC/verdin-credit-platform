@@ -1,4 +1,4 @@
-import type { PaginatedResponse } from '@verdin/shared';
+import type { DocumentProcessingStatus, PaginatedResponse } from '@verdin/shared';
 
 import { apiPath, getApiBaseUrl, request, uploadRequest } from './http';
 
@@ -28,6 +28,9 @@ export interface Document {
   version_number: number;
   is_duplicate: boolean;
   duplicate_of_id: string | null;
+  processing_status: DocumentProcessingStatus;
+  ocr_processed_at: string | null;
+  ocr_version_number: number | null;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
@@ -57,8 +60,18 @@ export interface ListDocumentsParams {
   case_id?: string;
   account_id?: string;
   is_duplicate?: boolean;
+  processing_status?: DocumentProcessingStatus;
   sort_by?: string;
   sort_order?: 'asc' | 'desc';
+}
+
+export interface DocumentOcrResult {
+  document_id: string;
+  processing_status: DocumentProcessingStatus;
+  ocr_text: string | null;
+  ocr_error: string | null;
+  ocr_processed_at: string | null;
+  ocr_version_number: number | null;
 }
 
 function buildQuery(params: Record<string, unknown>): string {
@@ -118,4 +131,14 @@ export function getDocumentDownloadUrl(documentId: string, version?: number): st
 
 export async function listDocumentVersions(documentId: string): Promise<DocumentVersion[]> {
   return request<DocumentVersion[]>(apiPath(`/documents/${documentId}/versions`));
+}
+
+export async function getDocumentOcr(documentId: string): Promise<DocumentOcrResult> {
+  return request<DocumentOcrResult>(apiPath(`/documents/${documentId}/ocr`));
+}
+
+export async function retryDocumentOcr(documentId: string): Promise<DocumentOcrResult> {
+  return request<DocumentOcrResult>(apiPath(`/documents/${documentId}/ocr/retry`), {
+    method: 'POST',
+  });
 }

@@ -10,8 +10,10 @@ from api.core.pagination import PaginatedResponse
 from api.database.session import get_db
 from api.modules.auth.dependencies import get_current_user
 from api.modules.auth.models import User
+from api.modules.documents.constants import DocumentProcessingStatus
 from api.modules.documents.schemas import (
     DocumentListParams,
+    DocumentOcrResponse,
     DocumentResponse,
     DocumentSortField,
     DocumentSortOrder,
@@ -42,6 +44,7 @@ def get_document_list_params(
     case_id: uuid.UUID | None = None,
     account_id: uuid.UUID | None = None,
     is_duplicate: bool | None = None,
+    processing_status: DocumentProcessingStatus | None = None,
     sort_by: DocumentSortField = "created_at",
     sort_order: DocumentSortOrder = "desc",
 ) -> DocumentListParams:
@@ -52,6 +55,7 @@ def get_document_list_params(
         case_id=case_id,
         account_id=account_id,
         is_duplicate=is_duplicate,
+        processing_status=processing_status,
         sort_by=sort_by,
         sort_order=sort_order,
     )
@@ -112,6 +116,24 @@ async def delete_document(
     service: DocumentService = Depends(get_document_service),
 ) -> None:
     await service.delete_document(current_user, document_id)
+
+
+@router.get("/{document_id}/ocr", response_model=DocumentOcrResponse)
+async def get_document_ocr(
+    document_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> DocumentOcrResponse:
+    return await service.get_ocr_result(current_user, document_id)
+
+
+@router.post("/{document_id}/ocr/retry", response_model=DocumentOcrResponse)
+async def retry_document_ocr(
+    document_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> DocumentOcrResponse:
+    return await service.retry_ocr(current_user, document_id)
 
 
 @router.get("/{document_id}/download")

@@ -2,6 +2,7 @@ export interface DocumentFiltersValue {
   search: string;
   case_id: string;
   is_duplicate: '' | 'true';
+  processing_status: '' | 'pending' | 'queued' | 'processing' | 'completed' | 'failed' | 'skipped';
   sort_by: string;
   sort_order: 'asc' | 'desc';
 }
@@ -18,7 +19,7 @@ export function DocumentFilters({ value, onChange }: DocumentFiltersProps) {
   const update = (patch: Partial<DocumentFiltersValue>) => onChange({ ...value, ...patch });
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
       <div className="lg:col-span-2">
         <label htmlFor="doc-search" className="mb-1 block text-sm font-medium text-gray-700">
           Search
@@ -44,6 +45,28 @@ export function DocumentFilters({ value, onChange }: DocumentFiltersProps) {
         >
           <option value="">All documents</option>
           <option value="true">Duplicates only</option>
+        </select>
+      </div>
+      <div>
+        <label htmlFor="doc-ocr" className="mb-1 block text-sm font-medium text-gray-700">
+          OCR status
+        </label>
+        <select
+          id="doc-ocr"
+          className={inputClass}
+          value={value.processing_status}
+          onChange={(e) =>
+            update({
+              processing_status: e.target.value as DocumentFiltersValue['processing_status'],
+            })
+          }
+        >
+          <option value="">All statuses</option>
+          <option value="queued">Queued</option>
+          <option value="processing">Processing</option>
+          <option value="completed">OCR complete</option>
+          <option value="failed">OCR failed</option>
+          <option value="skipped">Skipped</option>
         </select>
       </div>
       <div>

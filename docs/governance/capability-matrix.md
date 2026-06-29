@@ -60,7 +60,7 @@ Epic plan: [`docs/epics/document-intelligence-platform.md`](../epics/document-in
 | Milestone                    | Version | Status  | Backend | Frontend | API | AI      | Tests | Branch                            |
 | ---------------------------- | ------- | ------- | ------- | -------- | --- | ------- | ----- | --------------------------------- |
 | **M1 — Document Foundation** | 4.3     | ✅      | ✅      | ✅       | ✅  | —       | ✅    | `feature/document-foundation`     |
-| M2 — OCR Pipeline            | 4.3     | Planned | —       | —        | —   | —       | —     | `feature/document-ocr`            |
+| M2 — OCR Pipeline            | 4.3     | 🚧      | 🚧      | 🚧       | 🚧  | 🚧      | 🚧    | `feature/document-ocr`            |
 | M3 — AI Classification       | 4.3     | Planned | —       | —        | —   | Planned | —     | `feature/document-classification` |
 | M4 — Metadata Extraction     | 4.3     | Planned | —       | —        | —   | Planned | —     | `feature/document-metadata`       |
 | M5 — Timeline Integration    | 4.3     | Planned | —       | —        | —   | —       | —     | `feature/document-timeline`       |

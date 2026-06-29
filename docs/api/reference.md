@@ -135,16 +135,18 @@ Accounts automatically compute `risk_score`, `readiness_score`, `next_eligible_d
 
 Secure document storage with MinIO, SHA-256 hashing, versioning, and duplicate detection. See [`docs/epics/document-intelligence-platform.md`](../epics/document-intelligence-platform.md).
 
-| Method | Path                                | Min role     | Description                        |
-| ------ | ----------------------------------- | ------------ | ---------------------------------- |
-| POST   | `/documents`                        | case_manager | Upload document (multipart)        |
-| GET    | `/documents`                        | read_only    | List documents                     |
-| GET    | `/documents/{document_id}`          | read_only    | Get document with versions         |
-| PATCH  | `/documents/{document_id}`          | case_manager | Update metadata                    |
-| DELETE | `/documents/{document_id}`          | admin        | Soft-delete document               |
-| GET    | `/documents/{document_id}/download` | read_only    | Download file (optional `version`) |
-| POST   | `/documents/{document_id}/versions` | case_manager | Upload new version                 |
-| GET    | `/documents/{document_id}/versions` | read_only    | List version history               |
+| Method | Path                                 | Min role     | Description                        |
+| ------ | ------------------------------------ | ------------ | ---------------------------------- |
+| POST   | `/documents`                         | case_manager | Upload document (multipart)        |
+| GET    | `/documents`                         | read_only    | List documents                     |
+| GET    | `/documents/{document_id}`           | read_only    | Get document with versions         |
+| PATCH  | `/documents/{document_id}`           | case_manager | Update metadata                    |
+| DELETE | `/documents/{document_id}`           | admin        | Soft-delete document               |
+| GET    | `/documents/{document_id}/ocr`       | read_only    | OCR status and extracted text      |
+| POST   | `/documents/{document_id}/ocr/retry` | case_manager | Re-queue OCR for failed document   |
+| GET    | `/documents/{document_id}/download`  | read_only    | Download file (optional `version`) |
+| POST   | `/documents/{document_id}/versions`  | case_manager | Upload new version                 |
+| GET    | `/documents/{document_id}/versions`  | read_only    | List version history               |
 
 ### Upload (multipart form)
 

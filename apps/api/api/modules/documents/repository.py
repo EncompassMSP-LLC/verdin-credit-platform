@@ -8,6 +8,7 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import InstrumentedAttribute, selectinload
 
+from api.modules.documents.constants import DocumentProcessingStatus
 from api.modules.documents.models import Document, DocumentVersion
 from api.modules.documents.schemas import DocumentSortField, DocumentSortOrder
 
@@ -19,6 +20,7 @@ class DocumentListFilters:
     case_id: uuid.UUID | None = None
     account_id: uuid.UUID | None = None
     is_duplicate: bool | None = None
+    processing_status: DocumentProcessingStatus | None = None
     skip: int = 0
     limit: int = 20
     sort_by: DocumentSortField = "created_at"
@@ -80,6 +82,8 @@ class DocumentRepository:
             base = base.where(Document.account_id == filters.account_id)
         if filters.is_duplicate is not None:
             base = base.where(Document.is_duplicate == filters.is_duplicate)
+        if filters.processing_status is not None:
+            base = base.where(Document.processing_status == filters.processing_status.value)
         if filters.search:
             term = f"%{filters.search.strip()}%"
             base = base.where(
