@@ -21,6 +21,9 @@ class EventBus:
 
         return unsubscribe
 
+    def is_subscribed(self, handler: EventHandler) -> bool:
+        return handler in self._handlers
+
     async def publish(self, event: PlatformEvent, *, context: dict | None = None) -> None:
         payload = context or {}
         for handler in self._handlers:
