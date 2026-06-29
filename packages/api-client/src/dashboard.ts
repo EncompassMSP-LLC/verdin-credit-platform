@@ -1,42 +1,57 @@
 import { apiPath, request } from './http';
 
-export interface DashboardKpis {
+export interface DashboardOverview {
   open_cases: number;
   active_accounts: number;
-  pending_tasks: number;
-  documents_processing: number;
-  ocr_queue: number;
+  documents: number;
+  tasks_due_today: number;
+  overdue_tasks: number;
+  alert_count: number;
+}
+
+export interface DashboardCases {
+  open: number;
+  high_priority: number;
+  created_today: number;
+  closed_today: number;
   average_resolution_time_hours: number | null;
 }
 
+export interface DashboardAccounts {
+  active: number;
+  total: number;
+  per_case: number;
+}
+
+export interface DashboardDocuments {
+  total: number;
+  processing: number;
+  classification_confidence: number | null;
+  entity_resolution_confidence: number | null;
+  ai_ready: number;
+  unresolved: number;
+}
+
+export interface DashboardTasks {
+  pending: number;
+  due_today: number;
+  overdue: number;
+}
+
 export interface DashboardProcessing {
-  uploads_today: number;
-  ocr_running: number;
+  ocr_queue: number;
   ocr_failed: number;
   classification_pending: number;
   metadata_pending: number;
   entity_resolution_pending: number;
 }
 
-export type DashboardQueueEntityType = 'task' | 'case' | 'document';
-
-export interface DashboardQueueItem {
-  id: string;
-  title: string;
-  subtitle: string | null;
-  entity_type: DashboardQueueEntityType;
-  priority: string | null;
-  due_date: string | null;
-  case_id: string | null;
-  case_number: string | null;
-}
-
-export interface DashboardWorkQueue {
-  overdue_tasks: DashboardQueueItem[];
-  high_priority_cases: DashboardQueueItem[];
-  documents_requiring_review: DashboardQueueItem[];
-  ocr_failures: DashboardQueueItem[];
-  unresolved_entity_matches: DashboardQueueItem[];
+export interface DashboardPerformance {
+  cases_created_today: number;
+  cases_closed_today: number;
+  average_resolution_time_hours: number | null;
+  documents_per_case: number;
+  accounts_per_case: number;
 }
 
 export interface DashboardTimelineItem {
@@ -48,35 +63,45 @@ export interface DashboardTimelineItem {
   case_id: string | null;
   case_number: string | null;
   document_id: string | null;
+  document_title: string | null;
+  file_name: string | null;
   metadata: Record<string, unknown>;
 }
 
-export interface DashboardAi {
-  documents_classified: number;
-  metadata_extracted: number;
-  entity_resolution_rate: number;
-  average_confidence: number | null;
-  ai_ready_documents: number;
+export type DashboardAlertType =
+  'ocr_failure' | 'unmatched_entity' | 'document_review' | 'overdue_task';
+
+export type DashboardAlertSeverity = 'critical' | 'high' | 'medium';
+
+export interface DashboardAlertItem {
+  id: string;
+  alert_type: DashboardAlertType;
+  severity: DashboardAlertSeverity;
+  title: string;
+  message: string;
+  entity_type: 'task' | 'case' | 'document';
+  entity_id: string;
+  case_id: string | null;
+  case_number: string | null;
 }
 
-export interface DashboardPerformance {
-  average_accounts_per_case: number;
-  average_documents_per_case: number;
-  cases_opened_this_week: number;
-  cases_completed_this_month: number;
-  resolution_rate: number;
-  processing_throughput: number;
+export interface DashboardAlerts {
+  total: number;
+  items: DashboardAlertItem[];
 }
 
 export interface DashboardResponse {
   generated_at: string;
   refresh_seconds: number;
-  kpis: DashboardKpis;
-  processing: DashboardProcessing;
-  tasks: DashboardWorkQueue;
+  overview: DashboardOverview;
+  cases: DashboardCases;
+  accounts: DashboardAccounts;
+  documents: DashboardDocuments;
   timeline: DashboardTimelineItem[];
-  ai: DashboardAi;
+  tasks: DashboardTasks;
+  processing: DashboardProcessing;
   performance: DashboardPerformance;
+  alerts: DashboardAlerts;
 }
 
 export async function getDashboard(): Promise<DashboardResponse> {

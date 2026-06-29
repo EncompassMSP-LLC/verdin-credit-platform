@@ -27,14 +27,19 @@ export {
 
 export {
   getDashboard,
-  type DashboardAi,
-  type DashboardKpis,
+  type DashboardAccounts,
+  type DashboardAlertItem,
+  type DashboardAlerts,
+  type DashboardAlertSeverity,
+  type DashboardAlertType,
+  type DashboardCases,
+  type DashboardDocuments,
+  type DashboardOverview,
   type DashboardPerformance,
   type DashboardProcessing,
-  type DashboardQueueItem,
   type DashboardResponse,
+  type DashboardTasks,
   type DashboardTimelineItem,
-  type DashboardWorkQueue,
 } from './dashboard';
 
 export {

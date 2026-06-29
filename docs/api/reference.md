@@ -195,11 +195,22 @@ Task lifecycle events (`TASK_CREATED`, `TASK_UPDATED`, `TASK_COMPLETED`, `TASK_R
 
 ## Dashboard
 
-| Method | Path         | Role      | Description                                   |
-| ------ | ------------ | --------- | --------------------------------------------- |
-| GET    | `/dashboard` | read_only | Aggregated operations command center snapshot |
+| Method | Path         | Role      | Description                         |
+| ------ | ------------ | --------- | ----------------------------------- |
+| GET    | `/dashboard` | read_only | Mission Control operations snapshot |
 
-Returns a single payload with `kpis`, `processing`, `tasks` (work queue), `timeline`, `ai`, and `performance` sections. The response includes `generated_at` and `refresh_seconds` (default 30) for polling clients; the contract is designed for future WebSocket push without breaking changes.
+Returns a single payload with `overview`, `cases`, `accounts`, `documents`, `timeline`, `tasks`, `processing`, `performance`, and `alerts`. The response includes `generated_at` and `refresh_seconds` (default 30) for polling clients; the contract is designed for future WebSocket push without breaking changes.
+
+**Card groups surfaced in the UI:**
+
+| Section      | Metrics                                                                                   |
+| ------------ | ----------------------------------------------------------------------------------------- |
+| Operations   | Open cases, active accounts, documents, tasks due today, overdue tasks                    |
+| Processing   | OCR queue, OCR failed, classification/metadata/entity resolution pending                  |
+| Performance  | Cases created/closed today, avg resolution time, docs/accounts per case                   |
+| Intelligence | Classification confidence, entity resolution confidence, AI-ready, unresolved             |
+| Timeline     | Recent activity with case and document context                                            |
+| Alerts       | OCR failures, unmatched entities, documents requiring review, high-priority overdue tasks |
 
 ## Error Responses
 

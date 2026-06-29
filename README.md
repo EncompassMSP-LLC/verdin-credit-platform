@@ -1,8 +1,10 @@
 # Verdin Credit Platform
 
-> Version 4.2.0 — Platform Foundation
+> Version 4.3.0 — Operational Core (Current Stable)
 
 Production-grade credit operations platform featuring case management, document intelligence, automation, analytics, and AI-assisted workflows.
+
+**Current stable release:** `v4.3.0` — Operational Core (cases, accounts, documents, OCR, metadata, entity resolution, timeline, tasks, Mission Control dashboard).
 
 ## Quick Start
 

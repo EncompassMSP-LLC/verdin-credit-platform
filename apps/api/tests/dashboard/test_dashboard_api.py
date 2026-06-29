@@ -8,7 +8,7 @@ def test_dashboard_requires_auth(api_client: TestClient) -> None:
     assert response.status_code == 401
 
 
-def test_dashboard_returns_aggregated_snapshot(
+def test_dashboard_returns_mission_control_snapshot(
     api_client: TestClient,
     manager_headers: dict[str, str],
 ) -> None:
@@ -26,14 +26,24 @@ def test_dashboard_returns_aggregated_snapshot(
     assert body["refresh_seconds"] == 30
     assert "generated_at" in body
 
-    for section in ("kpis", "processing", "tasks", "timeline", "ai", "performance"):
+    for section in (
+        "overview",
+        "cases",
+        "accounts",
+        "documents",
+        "timeline",
+        "tasks",
+        "processing",
+        "performance",
+        "alerts",
+    ):
         assert section in body
 
-    assert body["kpis"]["open_cases"] >= 1
-    assert isinstance(body["tasks"]["overdue_tasks"], list)
+    assert body["overview"]["open_cases"] >= 1
+    assert body["cases"]["open"] >= 1
     assert isinstance(body["timeline"], list)
-    assert body["ai"]["entity_resolution_rate"] >= 0
-    assert body["performance"]["resolution_rate"] >= 0
+    assert isinstance(body["alerts"]["items"], list)
+    assert body["alerts"]["total"] == len(body["alerts"]["items"])
 
 
 def test_dashboard_readable_by_read_only_user(
@@ -42,4 +52,4 @@ def test_dashboard_readable_by_read_only_user(
 ) -> None:
     response = api_client.get("/api/v1/dashboard", headers=readonly_headers)
     assert response.status_code == 200, response.text
-    assert "kpis" in response.json()
+    assert "overview" in response.json()
