@@ -7,11 +7,13 @@ import {
   DocumentFilters,
   type DocumentFiltersValue,
 } from '../../components/documents/DocumentFilters';
+import { DocumentProcessingBadge } from '../../components/documents/DocumentProcessingBadge';
 
 const defaultFilters: DocumentFiltersValue = {
   search: '',
   case_id: '',
   is_duplicate: '',
+  processing_status: '',
   sort_by: 'created_at',
   sort_order: 'desc',
 };
@@ -38,6 +40,7 @@ export function DocumentsListPage() {
       search: filters.search || undefined,
       case_id: filters.case_id || undefined,
       is_duplicate: filters.is_duplicate === 'true' ? true : undefined,
+      processing_status: filters.processing_status || undefined,
       sort_by: filters.sort_by,
       sort_order: filters.sort_order,
     }),
@@ -130,11 +133,14 @@ export function DocumentsListPage() {
                     <td className="px-4 py-3 text-gray-700">{formatFileSize(doc.file_size)}</td>
                     <td className="px-4 py-3 text-gray-700">v{doc.version_number}</td>
                     <td className="px-4 py-3">
-                      {doc.is_duplicate ? (
-                        <Badge variant="warning">Duplicate</Badge>
-                      ) : (
-                        <Badge variant="success">Original</Badge>
-                      )}
+                      <div className="flex flex-wrap gap-1">
+                        {doc.is_duplicate ? (
+                          <Badge variant="warning">Duplicate</Badge>
+                        ) : (
+                          <Badge variant="success">Original</Badge>
+                        )}
+                        <DocumentProcessingBadge status={doc.processing_status} />
+                      </div>
                     </td>
                     <td className="px-4 py-3 text-gray-700">{formatDate(doc.created_at)}</td>
                   </tr>

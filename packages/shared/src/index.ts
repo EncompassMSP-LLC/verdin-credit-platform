@@ -256,3 +256,24 @@ export interface ApiError {
   detail: string;
   code?: string;
 }
+
+export type DocumentProcessingStatus =
+  'pending' | 'queued' | 'processing' | 'completed' | 'failed' | 'skipped';
+
+export const DOCUMENT_PROCESSING_STATUSES: DocumentProcessingStatus[] = [
+  'pending',
+  'queued',
+  'processing',
+  'completed',
+  'failed',
+  'skipped',
+];
+
+export const DOCUMENT_PROCESSING_STATUS_LABELS: Record<DocumentProcessingStatus, string> = {
+  pending: 'Pending',
+  queued: 'Queued',
+  processing: 'Processing',
+  completed: 'OCR Complete',
+  failed: 'OCR Failed',
+  skipped: 'Not applicable',
+};

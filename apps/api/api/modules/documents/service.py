@@ -1,6 +1,7 @@
 """Document management service — upload, storage, versioning, duplicate detection."""
 
 import hashlib
+import logging
 import uuid
 from datetime import UTC, datetime
 
@@ -9,11 +10,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.core.audit import apply_audit_on_create, apply_audit_on_update
 from api.core.config import get_settings
+from api.core.job_queue import JobType, enqueue_job
 from api.core.pagination import PaginatedResponse, paginate
 from api.core.permissions import has_permission
 from api.modules.accounts.repository import AccountRepository
 from api.modules.auth.models import User
 from api.modules.cases.repository import CaseRepository
+from api.modules.documents.constants import DocumentProcessingStatus, is_ocr_eligible
 from api.modules.documents.models import Document, DocumentVersion
 from api.modules.documents.permissions import (
     DOCUMENT_DELETE_ROLE,
@@ -22,6 +25,7 @@ from api.modules.documents.permissions import (
 from api.modules.documents.repository import DocumentListFilters, DocumentRepository
 from api.modules.documents.schemas import (
     DocumentListParams,
+    DocumentOcrResponse,
     DocumentResponse,
     DocumentUpdate,
     DocumentVersionResponse,
@@ -33,6 +37,8 @@ from api.modules.documents.storage import (
     get_document_storage,
 )
 from api.repositories.document import DocumentRepositoryProtocol
+
+logger = logging.getLogger(__name__)
 
 ALLOWED_MIME_TYPES = frozenset(
     {
@@ -186,11 +192,40 @@ class DocumentService:
             case_id=params.case_id,
             account_id=params.account_id,
             is_duplicate=params.is_duplicate,
+            processing_status=params.processing_status,
             skip=params.offset,
             limit=params.page_size,
             sort_by=params.sort_by,
             sort_order=params.sort_order,
         )
+
+    def _apply_initial_processing_status(self, document: Document) -> None:
+        if not is_ocr_eligible(document.mime_type):
+            document.processing_status = DocumentProcessingStatus.SKIPPED.value
+            return
+        document.processing_status = DocumentProcessingStatus.PENDING.value
+
+    def _queue_ocr_job(self, document: Document) -> None:
+        settings = get_settings()
+        if not settings.document_ocr_enabled:
+            return
+        if not is_ocr_eligible(document.mime_type):
+            return
+
+        try:
+            message = enqueue_job(
+                JobType.OCR,
+                {
+                    "document_id": str(document.id),
+                    "version_number": document.version_number,
+                },
+            )
+            document.processing_status = DocumentProcessingStatus.QUEUED.value
+            document.ocr_job_id = message.job_id
+            document.ocr_error = None
+        except Exception:
+            logger.exception("Failed to enqueue OCR job for document %s", document.id)
+            document.processing_status = DocumentProcessingStatus.PENDING.value
 
     async def upload_document(
         self,
@@ -237,6 +272,7 @@ class DocumentService:
             duplicate_of_id=duplicate_of_id,
         )
         apply_audit_on_create(document, user.id)
+        self._apply_initial_processing_status(document)
         await self._documents.create(document)
 
         version = DocumentVersion(
@@ -252,6 +288,9 @@ class DocumentService:
             created_by_id=user.id,
         )
         await self._documents.create_version(version)
+
+        self._queue_ocr_job(document)
+        await self._documents.update(document)
 
         return DocumentResponse.from_model(document)
 
@@ -299,8 +338,15 @@ class DocumentService:
         document.file_size = len(data)
         document.file_hash = file_hash
         document.version_number = new_version_number
+        document.ocr_text = None
+        document.ocr_processed_at = None
+        document.ocr_version_number = None
+        self._apply_initial_processing_status(document)
         apply_audit_on_update(document, user.id)
         updated = await self._documents.update(document)
+
+        self._queue_ocr_job(updated)
+        updated = await self._documents.update(updated)
         return DocumentResponse.from_model(updated)
 
     async def list_documents(
@@ -389,3 +435,29 @@ class DocumentService:
         await self._get_document_for_user(document_id, user)
         versions = await self._documents.list_versions(document_id)
         return [DocumentVersionResponse.from_model(v) for v in versions]
+
+    async def get_ocr_result(self, user: User, document_id: uuid.UUID) -> DocumentOcrResponse:
+        document = await self._get_document_for_user(document_id, user)
+        return DocumentOcrResponse.from_model(document)
+
+    async def retry_ocr(self, user: User, document_id: uuid.UUID) -> DocumentOcrResponse:
+        self._require_write(user)
+        document = await self._get_document_for_user(document_id, user)
+
+        if not is_ocr_eligible(document.mime_type):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Document format is not eligible for OCR",
+            )
+
+        document.ocr_text = None
+        document.ocr_error = None
+        document.ocr_processed_at = None
+        document.ocr_version_number = None
+        self._apply_initial_processing_status(document)
+        apply_audit_on_update(document, user.id)
+        await self._documents.update(document)
+
+        self._queue_ocr_job(document)
+        await self._documents.update(document)
+        return DocumentOcrResponse.from_model(document)

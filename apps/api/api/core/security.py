@@ -3,22 +3,42 @@
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
+import bcrypt
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 
 from api.core.config import get_settings
 from api.core.constants import TOKEN_TYPE_ACCESS, TOKEN_TYPE_REFRESH, UserRole
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 settings = get_settings()
+
+# bcrypt only hashes the first 72 bytes of a password. Rather than silently
+# truncating (which would let two distinct long passwords sharing a 72-byte
+# prefix authenticate as one another), we reject over-length passwords at hash
+# time. Callers should also validate length at the schema boundary so clients
+# get a 422 instead of a 500.
+MAX_PASSWORD_BYTES = 72
+
+
+def password_within_bcrypt_limit(password: str) -> bool:
+    return len(password.encode("utf-8")) <= MAX_PASSWORD_BYTES
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+    # A password longer than the bcrypt limit could never have been stored, so it
+    # cannot match. Short-circuit to avoid bcrypt raising on over-length input
+    # while remaining compatible with every existing stored hash.
+    if not password_within_bcrypt_limit(plain_password):
+        return False
+    try:
+        return bcrypt.checkpw(plain_password.encode("utf-8"), hashed_password.encode("utf-8"))
+    except ValueError:
+        return False
 
 
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    if not password_within_bcrypt_limit(password):
+        raise ValueError(f"Password must not exceed {MAX_PASSWORD_BYTES} bytes when UTF-8 encoded")
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
 
 def create_access_token(

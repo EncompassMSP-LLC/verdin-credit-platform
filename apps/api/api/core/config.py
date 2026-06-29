@@ -36,6 +36,8 @@ class Settings(BaseSettings):
     )
 
     redis_url: str = "redis://localhost:6379/0"
+    worker_queue_name: str = "verdin:jobs"
+    document_ocr_enabled: bool = True
 
     minio_endpoint: str = "localhost:9000"
     minio_access_key: str = "minioadmin"

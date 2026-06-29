@@ -1,14 +1,17 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   deleteDocument,
-  getDocument,
   getAccessToken,
+  getDocument,
   getDocumentDownloadUrl,
+  getDocumentOcr,
+  retryDocumentOcr,
 } from '@verdin/api-client';
 import { Badge, Button, Card } from '@verdin/ui';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { DocumentDeleteDialog } from '../../components/documents/DocumentDeleteDialog';
+import { DocumentProcessingBadge } from '../../components/documents/DocumentProcessingBadge';
 
 function formatFileSize(bytes: number | null) {
   if (!bytes) return '—';
@@ -21,6 +24,8 @@ function formatDateTime(value: string) {
   return new Date(value).toLocaleString();
 }
 
+const ACTIVE_OCR_STATUSES = new Set(['pending', 'queued', 'processing']);
+
 export function DocumentDetailPage() {
   const { documentId } = useParams<{ documentId: string }>();
   const navigate = useNavigate();
@@ -31,6 +36,24 @@ export function DocumentDetailPage() {
     queryKey: ['document', documentId],
     queryFn: () => getDocument(documentId!),
     enabled: Boolean(documentId),
+  });
+
+  const { data: ocrData } = useQuery({
+    queryKey: ['document-ocr', documentId],
+    queryFn: () => getDocumentOcr(documentId!),
+    enabled: Boolean(documentId) && Boolean(data) && data?.processing_status !== 'skipped',
+    refetchInterval: (query) => {
+      const status = query.state.data?.processing_status;
+      return status && ACTIVE_OCR_STATUSES.has(status) ? 3000 : false;
+    },
+  });
+
+  const retryMutation = useMutation({
+    mutationFn: () => retryDocumentOcr(documentId!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['document', documentId] });
+      queryClient.invalidateQueries({ queryKey: ['document-ocr', documentId] });
+    },
   });
 
   const deleteMutation = useMutation({
@@ -73,6 +96,7 @@ export function DocumentDetailPage() {
     );
   }
 
+  const processingStatus = ocrData?.processing_status ?? data.processing_status;
   const downloadUrl = getDocumentDownloadUrl(documentId);
   const token = getAccessToken();
 
@@ -99,16 +123,26 @@ export function DocumentDetailPage() {
           </Link>
           <h1 className="mt-2 text-2xl font-bold text-gray-900">{data.title}</h1>
           <p className="text-sm text-gray-500">{data.file_name}</p>
-          <div className="mt-2 flex gap-2">
+          <div className="mt-2 flex flex-wrap gap-2">
             {data.is_duplicate ? (
               <Badge variant="warning">Duplicate</Badge>
             ) : (
               <Badge variant="success">Original</Badge>
             )}
             <Badge variant="info">v{data.version_number}</Badge>
+            <DocumentProcessingBadge status={processingStatus} />
           </div>
         </div>
         <div className="flex gap-2">
+          {processingStatus === 'failed' ? (
+            <Button
+              variant="secondary"
+              onClick={() => retryMutation.mutate()}
+              disabled={retryMutation.isPending}
+            >
+              Retry OCR
+            </Button>
+          ) : null}
           <Button variant="secondary" onClick={handleDownload}>
             Download
           </Button>
@@ -137,6 +171,12 @@ export function DocumentDetailPage() {
               <dt className="text-gray-500">Uploaded</dt>
               <dd>{formatDateTime(data.created_at)}</dd>
             </div>
+            {ocrData?.ocr_processed_at ? (
+              <div>
+                <dt className="text-gray-500">OCR processed</dt>
+                <dd>{formatDateTime(ocrData.ocr_processed_at)}</dd>
+              </div>
+            ) : null}
             <div>
               <dt className="text-gray-500">Case</dt>
               <dd>
@@ -151,16 +191,28 @@ export function DocumentDetailPage() {
           ) : null}
         </Card>
 
-        <Card title="Preview" className="lg:col-span-2">
-          <div className="flex min-h-[240px] items-center justify-center rounded-md border border-dashed border-gray-300 bg-gray-50 p-8 text-center">
-            <div>
-              <p className="text-sm font-medium text-gray-700">Preview coming in Milestone 2+</p>
-              <p className="mt-1 text-sm text-gray-500">
-                OCR and inline preview will be available after the document processing pipeline
-                ships.
-              </p>
-            </div>
-          </div>
+        <Card title="Extracted text" className="lg:col-span-2">
+          {processingStatus === 'skipped' ? (
+            <p className="text-sm text-gray-500">This file format is not processed by OCR.</p>
+          ) : null}
+          {ACTIVE_OCR_STATUSES.has(processingStatus) ? (
+            <p className="text-sm text-gray-500">
+              OCR is running in the background. This page refreshes automatically.
+            </p>
+          ) : null}
+          {processingStatus === 'failed' && ocrData?.ocr_error ? (
+            <p className="mb-4 text-sm text-red-600">{ocrData.ocr_error}</p>
+          ) : null}
+          {ocrData?.ocr_text ? (
+            <pre className="max-h-[480px] overflow-auto whitespace-pre-wrap rounded-md bg-gray-50 p-4 text-sm text-gray-800">
+              {ocrData.ocr_text}
+            </pre>
+          ) : null}
+          {!ocrData?.ocr_text &&
+          processingStatus !== 'skipped' &&
+          !ACTIVE_OCR_STATUSES.has(processingStatus) ? (
+            <p className="text-sm text-gray-500">No text was extracted from this document.</p>
+          ) : null}
         </Card>
 
         {data.versions && data.versions.length > 0 ? (

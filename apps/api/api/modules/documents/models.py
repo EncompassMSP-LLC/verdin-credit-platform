@@ -9,6 +9,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from api.core.audit import AuditMixin, SoftDeleteMixin, TimestampMixin
 from api.database.base import Base
+from api.modules.documents.constants import DocumentProcessingStatus
 
 
 class Document(Base, TimestampMixin, SoftDeleteMixin, AuditMixin):
@@ -36,6 +37,19 @@ class Document(Base, TimestampMixin, SoftDeleteMixin, AuditMixin):
         UUID(as_uuid=True), ForeignKey("documents.id"), nullable=True
     )
     is_duplicate: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    processing_status: Mapped[str] = mapped_column(
+        String(20),
+        nullable=False,
+        default=DocumentProcessingStatus.PENDING.value,
+        index=True,
+    )
+    ocr_text: Mapped[str | None] = mapped_column(Text, nullable=True)
+    ocr_error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    ocr_processed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    ocr_job_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    ocr_version_number: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     case: Mapped["Case"] = relationship(back_populates="documents")
     account: Mapped["Account | None"] = relationship()

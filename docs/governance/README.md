@@ -60,13 +60,13 @@ With governance in place, prioritize features in this order:
 
 ### Phase 1 — Operational Core (complete 4.3)
 
-| Priority | Capability                                     | Rationale                                                   |
-| -------- | ---------------------------------------------- | ----------------------------------------------------------- |
-| **Next** | **M2 — OCR Pipeline** (`feature/document-ocr`) | Async text extraction; unblocks classification and metadata |
-| 2        | M3–M4 — Classification & metadata extraction   | Structured fields linked to accounts                        |
-| 3        | Timeline & Audit Engine                        | Document events feed audit trail                            |
-| 4        | Task Management (full module)                  | Operational queues depend on tasks                          |
-| 5        | Operational Dashboard                          | Live metrics from cases, accounts, tasks, timeline          |
+| Priority | Capability                                        | Rationale                                                   |
+| -------- | ------------------------------------------------- | ----------------------------------------------------------- |
+| **Next** | **M2 — OCR Pipeline** (`feature/document-ocr`) 🚧 | Async text extraction; unblocks classification and metadata |
+| 2        | M3–M4 — Classification & metadata extraction      | Structured fields linked to accounts                        |
+| 3        | Timeline & Audit Engine                           | Document events feed audit trail                            |
+| 4        | Task Management (full module)                     | Operational queues depend on tasks                          |
+| 5        | Operational Dashboard                             | Live metrics from cases, accounts, tasks, timeline          |
 
 > **Note:** Milestone 1 (Document Foundation) is complete. Continue the epic on `feature/document-ocr`.
 
