@@ -84,6 +84,23 @@ Use `manager@verdin.demo / changeme123` to create cases and `admin@verdin.demo` 
 
 See `docs/release-notes/sprint-2-epic-1-cases.md` for Sprint 2 Epic 1 details.
 
+### Run account intelligence locally
+
+```bash
+cd apps/api
+alembic upgrade head   # includes 003_credit_accounts migration
+python scripts/seed.py
+uvicorn main:app --reload
+```
+
+Use `manager@verdin.demo / changeme123` to create accounts and `admin@verdin.demo` to delete.
+
+Frontend routes: `/accounts`, `/accounts/new`, `/accounts/:id`, `/cases/:caseId/accounts`
+
+Intelligence scoring lives in `api/modules/accounts/intelligence.py`. The service recalculates scores on every create/update.
+
+See `docs/sprint-2/account-intelligence.md` for Sprint 2 Epic 2 details.
+
 ## Code Quality
 
 ```bash

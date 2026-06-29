@@ -65,6 +65,181 @@ export const CASE_PRIORITY_LABELS: Record<CasePriority, string> = {
   critical: 'Critical',
 };
 
+export type AccountBureau = 'equifax' | 'experian' | 'transunion' | 'innovis' | 'unknown';
+
+export type AccountType =
+  | 'mortgage'
+  | 'auto'
+  | 'credit_card'
+  | 'collection'
+  | 'personal_loan'
+  | 'student_loan'
+  | 'medical'
+  | 'utility'
+  | 'telecom'
+  | 'other';
+
+export type AccountStatus =
+  | 'open'
+  | 'closed'
+  | 'collection'
+  | 'charge_off'
+  | 'repossession'
+  | 'foreclosure'
+  | 'transferred'
+  | 'paid'
+  | 'settled'
+  | 'deleted'
+  | 'unknown';
+
+export type PaymentStatus =
+  | 'current'
+  | 'late_30'
+  | 'late_60'
+  | 'late_90'
+  | 'late_120'
+  | 'charge_off'
+  | 'collection'
+  | 'repossession'
+  | 'foreclosure'
+  | 'unknown';
+
+export type DisputeStatus =
+  | 'not_started'
+  | 'evidence_needed'
+  | 'ready_for_dispute'
+  | 'dispute_sent'
+  | 'awaiting_response'
+  | 'verified'
+  | 'corrected'
+  | 'deleted'
+  | 'escalated'
+  | 'monitoring';
+
+export type InvestigationStatus = 'none' | 'pending' | 'completed' | 'overdue' | 'escalated';
+
+export const ACCOUNT_BUREAUS: AccountBureau[] = [
+  'equifax',
+  'experian',
+  'transunion',
+  'innovis',
+  'unknown',
+];
+
+export const ACCOUNT_TYPES: AccountType[] = [
+  'mortgage',
+  'auto',
+  'credit_card',
+  'collection',
+  'personal_loan',
+  'student_loan',
+  'medical',
+  'utility',
+  'telecom',
+  'other',
+];
+
+export const ACCOUNT_STATUSES: AccountStatus[] = [
+  'open',
+  'closed',
+  'collection',
+  'charge_off',
+  'repossession',
+  'foreclosure',
+  'transferred',
+  'paid',
+  'settled',
+  'deleted',
+  'unknown',
+];
+
+export const PAYMENT_STATUSES: PaymentStatus[] = [
+  'current',
+  'late_30',
+  'late_60',
+  'late_90',
+  'late_120',
+  'charge_off',
+  'collection',
+  'repossession',
+  'foreclosure',
+  'unknown',
+];
+
+export const DISPUTE_STATUSES: DisputeStatus[] = [
+  'not_started',
+  'evidence_needed',
+  'ready_for_dispute',
+  'dispute_sent',
+  'awaiting_response',
+  'verified',
+  'corrected',
+  'deleted',
+  'escalated',
+  'monitoring',
+];
+
+export const BUREAU_LABELS: Record<AccountBureau, string> = {
+  equifax: 'Equifax',
+  experian: 'Experian',
+  transunion: 'TransUnion',
+  innovis: 'Innovis',
+  unknown: 'Unknown',
+};
+
+export const ACCOUNT_TYPE_LABELS: Record<AccountType, string> = {
+  mortgage: 'Mortgage',
+  auto: 'Auto',
+  credit_card: 'Credit Card',
+  collection: 'Collection',
+  personal_loan: 'Personal Loan',
+  student_loan: 'Student Loan',
+  medical: 'Medical',
+  utility: 'Utility',
+  telecom: 'Telecom',
+  other: 'Other',
+};
+
+export const ACCOUNT_STATUS_LABELS: Record<AccountStatus, string> = {
+  open: 'Open',
+  closed: 'Closed',
+  collection: 'Collection',
+  charge_off: 'Charge Off',
+  repossession: 'Repossession',
+  foreclosure: 'Foreclosure',
+  transferred: 'Transferred',
+  paid: 'Paid',
+  settled: 'Settled',
+  deleted: 'Deleted',
+  unknown: 'Unknown',
+};
+
+export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
+  current: 'Current',
+  late_30: '30 Days Late',
+  late_60: '60 Days Late',
+  late_90: '90 Days Late',
+  late_120: '120+ Days Late',
+  charge_off: 'Charge Off',
+  collection: 'Collection',
+  repossession: 'Repossession',
+  foreclosure: 'Foreclosure',
+  unknown: 'Unknown',
+};
+
+export const DISPUTE_STATUS_LABELS: Record<DisputeStatus, string> = {
+  not_started: 'Not Started',
+  evidence_needed: 'Evidence Needed',
+  ready_for_dispute: 'Ready for Dispute',
+  dispute_sent: 'Dispute Sent',
+  awaiting_response: 'Awaiting Response',
+  verified: 'Verified',
+  corrected: 'Corrected',
+  deleted: 'Deleted',
+  escalated: 'Escalated',
+  monitoring: 'Monitoring',
+};
+
 export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
 
 export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';

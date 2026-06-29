@@ -2,7 +2,8 @@
 
 import asyncio
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
+from decimal import Decimal
 
 from sqlalchemy import select
 
@@ -10,7 +11,14 @@ from api.core.audit import apply_audit_on_create
 from api.core.constants import UserRole
 from api.core.security import hash_password
 from api.database.session import AsyncSessionLocal
-from api.modules.accounts.models import Account
+from api.modules.accounts.intelligence import apply_account_intelligence
+from api.modules.accounts.models import (
+    Account,
+    AccountBureau,
+    AccountStatus,
+    AccountType,
+    PaymentStatus,
+)
 from api.modules.auth.models import Organization, User
 from api.modules.cases.models import Case, CasePriority, CaseStage, CaseStatus
 from api.modules.tasks.models import Task, TaskPriority, TaskStatus
@@ -67,17 +75,6 @@ async def seed() -> None:
         session.add_all([owner, admin, case_manager])
         await session.flush()
 
-        account = Account(
-            id=uuid.uuid4(),
-            name="Acme Corporation",
-            account_number="ACC-001",
-            email="contact@acme.example",
-            organization_id=org.id,
-        )
-        apply_audit_on_create(account, owner.id)
-        session.add(account)
-        await session.flush()
-
         now = datetime.now(UTC)
         case = Case(
             id=uuid.uuid4(),
@@ -90,13 +87,32 @@ async def seed() -> None:
             priority=CasePriority.HIGH,
             case_number="CASE-2026-001",
             organization_id=org.id,
-            account_id=account.id,
             assigned_to_id=case_manager.id,
             opened_at=now,
         )
         apply_audit_on_create(case, owner.id)
         session.add(case)
         await session.flush()
+
+        account = Account(
+            id=uuid.uuid4(),
+            organization_id=org.id,
+            case_id=case.id,
+            bureau=AccountBureau.EQUIFAX,
+            creditor_name="Example National Bank",
+            original_creditor="Example National Bank",
+            account_number_masked="****4521",
+            account_type=AccountType.CREDIT_CARD,
+            account_status=AccountStatus.OPEN,
+            payment_status=PaymentStatus.LATE_60,
+            balance=Decimal("2450.00"),
+            past_due_amount=Decimal("420.00"),
+            date_opened=date(2019, 3, 15),
+            date_reported=date(2026, 5, 1),
+        )
+        apply_account_intelligence(account)
+        apply_audit_on_create(account, owner.id)
+        session.add(account)
 
         task = Task(
             id=uuid.uuid4(),

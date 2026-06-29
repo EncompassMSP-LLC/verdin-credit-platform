@@ -91,6 +91,46 @@ All case endpoints require authentication. Users are scoped to their organizatio
 - **stage:** `intake`, `review`, `evidence_gathering`, `dispute_preparation`, `awaiting_response`, `monitoring`, `complete`
 - **priority:** `low`, `medium`, `high`, `critical`
 
+### Case accounts
+
+| Method | Path                        | Min role  | Description              |
+| ------ | --------------------------- | --------- | ------------------------ |
+| GET    | `/cases/{case_id}/accounts` | read_only | List accounts for a case |
+
+## Accounts
+
+Credit tradeline accounts with intelligence scoring. All endpoints require authentication and organization scoping.
+
+| Method | Path                             | Min role     | Description               |
+| ------ | -------------------------------- | ------------ | ------------------------- |
+| POST   | `/accounts`                      | case_manager | Create a credit account   |
+| GET    | `/accounts`                      | read_only    | List accounts             |
+| GET    | `/accounts/intelligence/summary` | read_only    | Organization intelligence |
+| GET    | `/accounts/{account_id}`         | read_only    | Get account by ID         |
+| PATCH  | `/accounts/{account_id}`         | case_manager | Update an account         |
+| DELETE | `/accounts/{account_id}`         | admin        | Soft-delete an account    |
+
+### List query parameters
+
+`page`, `page_size`, `search`, `case_id`, `bureau`, `account_type`, `account_status`, `payment_status`, `dispute_status`, `min_risk_score`, `max_risk_score`, `min_readiness_score`, `dispute_ready`, `sort_by`, `sort_order`
+
+### Intelligence summary query parameters
+
+`case_id` (optional) — scope summary to a single case
+
+### Enums
+
+- **bureau:** `equifax`, `experian`, `transunion`, `innovis`, `unknown`
+- **account_type:** `mortgage`, `auto`, `credit_card`, `collection`, `personal_loan`, `student_loan`, `medical`, `utility`, `telecom`, `other`
+- **account_status:** `open`, `closed`, `collection`, `charge_off`, `repossession`, `foreclosure`, `transferred`, `paid`, `settled`, `deleted`, `unknown`
+- **payment_status:** `current`, `late_30`, `late_60`, `late_90`, `late_120`, `charge_off`, `collection`, `repossession`, `foreclosure`, `unknown`
+- **dispute_status:** `not_started`, `evidence_needed`, `ready_for_dispute`, `dispute_sent`, `awaiting_response`, `verified`, `corrected`, `deleted`, `escalated`, `monitoring`
+- **investigation_status:** `none`, `pending`, `completed`, `overdue`, `escalated`
+
+### Intelligence fields
+
+Accounts automatically compute `risk_score`, `readiness_score`, `next_eligible_dispute_date`, and `ai_recommended_next_action` on create/update via `api/modules/accounts/intelligence.py`.
+
 ## Error Responses
 
 All errors follow this format:

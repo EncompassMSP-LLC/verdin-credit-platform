@@ -49,6 +49,70 @@ export const createCaseSchema = z.object({
 
 export const updateCaseSchema = createCaseSchema.partial();
 
+export const accountBureauSchema = z.enum([
+  'equifax',
+  'experian',
+  'transunion',
+  'innovis',
+  'unknown',
+]);
+
+export const accountTypeSchema = z.enum([
+  'mortgage',
+  'auto',
+  'credit_card',
+  'collection',
+  'personal_loan',
+  'student_loan',
+  'medical',
+  'utility',
+  'telecom',
+  'other',
+]);
+
+export const accountStatusSchema = z.enum([
+  'open',
+  'closed',
+  'collection',
+  'charge_off',
+  'repossession',
+  'foreclosure',
+  'transferred',
+  'paid',
+  'settled',
+  'deleted',
+  'unknown',
+]);
+
+export const paymentStatusSchema = z.enum([
+  'current',
+  'late_30',
+  'late_60',
+  'late_90',
+  'late_120',
+  'charge_off',
+  'collection',
+  'repossession',
+  'foreclosure',
+  'unknown',
+]);
+
+export const createAccountSchema = z.object({
+  case_id: z.string().uuid('Case is required'),
+  bureau: accountBureauSchema.default('unknown'),
+  creditor_name: z.string().min(1, 'Creditor name is required').max(255),
+  original_creditor: z.string().max(255).optional(),
+  account_number_masked: z.string().max(50).optional(),
+  account_type: accountTypeSchema.default('other'),
+  account_status: accountStatusSchema.default('unknown'),
+  payment_status: paymentStatusSchema.default('unknown'),
+  balance: z.string().optional(),
+  past_due_amount: z.string().optional(),
+  remarks: z.string().optional(),
+});
+
+export const updateAccountSchema = createAccountSchema.omit({ case_id: true }).partial();
+
 export const paginationSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   page_size: z.coerce.number().int().min(1).max(100).default(20),
@@ -59,4 +123,6 @@ export type RefreshTokenInput = z.infer<typeof refreshTokenSchema>;
 export type CreateUserInput = z.infer<typeof createUserSchema>;
 export type CreateCaseInput = z.infer<typeof createCaseSchema>;
 export type UpdateCaseInput = z.infer<typeof updateCaseSchema>;
+export type CreateAccountInput = z.infer<typeof createAccountSchema>;
+export type UpdateAccountInput = z.infer<typeof updateAccountSchema>;
 export type PaginationInput = z.infer<typeof paginationSchema>;

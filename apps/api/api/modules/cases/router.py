@@ -7,6 +7,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.core.pagination import PaginatedResponse
 from api.database.session import get_db
+from api.modules.accounts.schemas import (
+    AccountListParams,
+    AccountResponse,
+    AccountSortField,
+    AccountSortOrder,
+)
+from api.modules.accounts.service import AccountService
 from api.modules.auth.dependencies import get_current_user
 from api.modules.auth.models import User
 from api.modules.cases.models import CasePriority, CaseStage, CaseStatus
@@ -25,6 +32,24 @@ router = APIRouter(prefix="/cases", tags=["Cases"])
 
 def get_case_service(db: AsyncSession = Depends(get_db)) -> CaseService:
     return CaseService.from_session(db)
+
+
+def get_account_service(db: AsyncSession = Depends(get_db)) -> AccountService:
+    return AccountService.from_session(db)
+
+
+def get_case_account_list_params(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    sort_by: AccountSortField = "created_at",
+    sort_order: AccountSortOrder = "desc",
+) -> AccountListParams:
+    return AccountListParams(
+        page=page,
+        page_size=page_size,
+        sort_by=sort_by,
+        sort_order=sort_order,
+    )
 
 
 def get_case_list_params(
@@ -67,6 +92,16 @@ async def list_cases(
     service: CaseService = Depends(get_case_service),
 ) -> PaginatedResponse[CaseResponse]:
     return await service.list_cases(current_user, params)
+
+
+@router.get("/{case_id}/accounts", response_model=PaginatedResponse[AccountResponse])
+async def list_case_accounts(
+    case_id: uuid.UUID,
+    params: AccountListParams = Depends(get_case_account_list_params),
+    current_user: User = Depends(get_current_user),
+    service: AccountService = Depends(get_account_service),
+) -> PaginatedResponse[AccountResponse]:
+    return await service.list_case_accounts(current_user, case_id, params)
 
 
 @router.get("/{case_id}", response_model=CaseResponse)

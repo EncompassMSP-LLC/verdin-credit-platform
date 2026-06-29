@@ -7,7 +7,11 @@ import { CasesListPage } from '../pages/cases/CasesListPage';
 import { CaseCreatePage } from '../pages/cases/CaseCreatePage';
 import { CaseDetailPage } from '../pages/cases/CaseDetailPage';
 import { CaseEditPage } from '../pages/cases/CaseEditPage';
-import { AccountsPage } from '../pages/AccountsPage';
+import { AccountsListPage } from '../pages/accounts/AccountsListPage';
+import { AccountCreatePage } from '../pages/accounts/AccountCreatePage';
+import { AccountDetailPage } from '../pages/accounts/AccountDetailPage';
+import { AccountEditPage } from '../pages/accounts/AccountEditPage';
+import { CaseAccountsPage } from '../pages/accounts/CaseAccountsPage';
 import { DocumentsPage } from '../pages/DocumentsPage';
 import { TasksPage } from '../pages/TasksPage';
 import { SettingsPage } from '../pages/SettingsPage';
@@ -51,7 +55,11 @@ export function AppRoutes() {
         <Route path="cases/new" element={<CaseCreatePage />} />
         <Route path="cases/:caseId" element={<CaseDetailPage />} />
         <Route path="cases/:caseId/edit" element={<CaseEditPage />} />
-        <Route path="accounts" element={<AccountsPage />} />
+        <Route path="cases/:caseId/accounts" element={<CaseAccountsPage />} />
+        <Route path="accounts" element={<AccountsListPage />} />
+        <Route path="accounts/new" element={<AccountCreatePage />} />
+        <Route path="accounts/:accountId" element={<AccountDetailPage />} />
+        <Route path="accounts/:accountId/edit" element={<AccountEditPage />} />
         <Route path="documents" element={<DocumentsPage />} />
         <Route path="tasks" element={<TasksPage />} />
         <Route path="settings" element={<SettingsPage />} />
