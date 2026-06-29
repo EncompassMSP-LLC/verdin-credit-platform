@@ -10,6 +10,7 @@ export {
   notImplemented,
   request,
   setAccessToken,
+  uploadRequest,
   type ApiClientConfig,
   type RequestOptions,
 } from './http';
@@ -52,7 +53,21 @@ export {
   type UpdateAccountInput,
 } from './accounts';
 
-export { getDocument, listDocuments, type Document, type ListDocumentsParams } from './documents';
+export {
+  deleteDocument,
+  getDocument,
+  getDocumentDownloadUrl,
+  listDocumentVersions,
+  listDocuments,
+  updateDocument,
+  uploadDocument,
+  uploadDocumentVersion,
+  type Document,
+  type DocumentVersion,
+  type ListDocumentsParams,
+  type UpdateDocumentInput,
+  type UploadDocumentInput,
+} from './documents';
 
 export { getTask, listTasks, type ListTasksParams, type Task } from './tasks';
 
