@@ -1,11 +1,11 @@
 """Classifier registry — evaluates all classifiers and picks the best result."""
 
-from api.modules.documents.classification.base import (
+from verdin_document_classification.base import (
     ClassificationContext,
     ClassificationResult,
     DocumentClassifier,
 )
-from api.modules.documents.classification.classifiers import (
+from verdin_document_classification.classifiers import (
     BankruptcyClassifier,
     BureauResponseClassifier,
     CollectionLetterClassifier,
@@ -17,7 +17,7 @@ from api.modules.documents.classification.classifiers import (
     UnknownClassifier,
     UtilityBillClassifier,
 )
-from api.modules.documents.constants import DocumentType
+from verdin_document_classification.constants import DocumentType
 
 _MIN_CONFIDENCE = 0.5
 

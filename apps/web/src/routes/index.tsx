@@ -15,6 +15,7 @@ import { CaseAccountsPage } from '../pages/accounts/CaseAccountsPage';
 import { DocumentsListPage } from '../pages/documents/DocumentsListPage';
 import { DocumentUploadPage } from '../pages/documents/DocumentUploadPage';
 import { DocumentDetailPage } from '../pages/documents/DocumentDetailPage';
+import { TimelinePage } from '../pages/timeline/TimelinePage';
 import { TasksPage } from '../pages/TasksPage';
 import { SettingsPage } from '../pages/SettingsPage';
 
@@ -65,6 +66,7 @@ export function AppRoutes() {
         <Route path="documents" element={<DocumentsListPage />} />
         <Route path="documents/upload" element={<DocumentUploadPage />} />
         <Route path="documents/:documentId" element={<DocumentDetailPage />} />
+        <Route path="timeline" element={<TimelinePage />} />
         <Route path="tasks" element={<TasksPage />} />
         <Route path="settings" element={<SettingsPage />} />
       </Route>

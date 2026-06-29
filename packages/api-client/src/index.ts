@@ -83,6 +83,13 @@ export {
 
 export { getTask, listTasks, type ListTasksParams, type Task } from './tasks';
 
+export {
+  getTimelineEvent,
+  listTimelineEvents,
+  type ListTimelineParams,
+  type TimelineEvent,
+} from './timeline';
+
 export interface HealthResponse {
   status: string;
   version: string;

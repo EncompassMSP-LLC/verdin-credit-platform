@@ -1,5 +1,8 @@
+-e ../../packages/document-classification
 -e ../../packages/document-metadata
 -e ../../packages/entity-resolution
+-e ../../packages/event-bus
+-e ../../packages/event-types
 pydantic>=2.10.3
 pydantic-settings>=2.7.0
 redis>=5.2.1

@@ -21,6 +21,7 @@ from worker.metadata_documents import (
     list_cases,
     replace_resolutions,
 )
+from worker.timeline import append_timeline_event
 from worker.registry import register_job
 
 logger = structlog.get_logger(__name__)
@@ -140,6 +141,20 @@ class DocumentEntityResolveJob(BaseJob):
                     document_id,
                     account_resolution["matched_entity_id"],
                 )
+
+            append_timeline_event(
+                session,
+                organization_id=document.organization_id,
+                event_type="ENTITY_RESOLVED",
+                event_category="document",
+                title="Entity resolution completed",
+                description="Worker resolved document entities to platform records.",
+                source_module="worker",
+                case_id=document.case_id,
+                account_id=document.account_id,
+                document_id=document.id,
+                metadata={"resolution_count": len(results)},
+            )
 
         logger.info(
             "document_entities_resolved",

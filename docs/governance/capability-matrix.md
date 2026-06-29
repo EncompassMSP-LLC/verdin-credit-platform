@@ -39,7 +39,7 @@
 | **AI Classification**           | 4.3     | 🚧     | 🚧      | —        | 🚧  | 🚧      | 🚧    | Rule-based classifier framework on `feature/document-classification` |
 | **Metadata Extraction**         | 4.3     | ✅     | ✅      | ✅       | ✅  | Partial | ✅    | Rule-based extraction; `packages/document-metadata`                  |
 | **Entity Resolution**           | 4.3     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | Deterministic matching; `packages/entity-resolution`                 |
-| Timeline & Audit Engine         | 4.3     | 🚧     | 🚧      | —        | —   | —       | —     | `TimelineEvent` model; no API yet                                    |
+| Timeline & Audit Engine         | 4.3     | 🚧     | ✅      | ✅       | ✅  | —       | 🚧    | Event bus + append-only timeline on `feature/document-timeline`      |
 | Task Management                 | 4.3     | 🚧     | 🚧      | 🚧       | 🚧  | —       | —     | Model + seed data; no router/tests                                   |
 | Operational Dashboard           | 4.3     | 🚧     | —       | 🚧       | —   | —       | —     | Placeholder stats; no live metrics                                   |
 | Client Management               | 4.3     | —      | —       | —        | —   | —       | —     | Deferred to 4.8                                                      |
@@ -54,7 +54,7 @@ Epic plan: [`docs/epics/document-intelligence-platform.md`](../epics/document-in
 | **M2 — OCR Pipeline**             | 4.3     | ✅      | ✅      | ✅       | ✅  | ✅      | ✅    | `feature/document-ocr`               |
 | M3 — AI Classification            | 4.3     | 🚧      | 🚧      | —        | 🚧  | 🚧      | 🚧    | `feature/document-classification`    |
 | M4 — Metadata & Entity Resolution | 4.3     | ✅      | ✅      | ✅       | ✅  | Partial | ✅    | `feature/document-entity-resolution` |
-| M5 — Timeline Integration         | 4.3     | Planned | —       | —        | —   | —       | —     | `feature/document-timeline`          |
+| M5 — Timeline Integration         | 4.3     | 🚧      | ✅      | ✅       | —   | —       | 🚧    | `feature/document-timeline`          |
 | M6 — Intelligence Dashboard       | 4.3     | Planned | —       | —        | —   | Partial | —     | `feature/document-dashboard`         |
 
 ### 4.3 completion checklist

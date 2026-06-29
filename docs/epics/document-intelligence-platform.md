@@ -200,16 +200,32 @@ Consumer name, bureau, creditor, collection agency, masked account number, repor
 
 ---
 
-## Milestone 5 — Timeline Integration
+## Milestone 5 — Timeline & Audit Engine
 
-Auto-create timeline events:
+**Goal:** Single immutable event stream for compliance, debugging, and operational visibility. Domain services publish typed events through a shared event bus; the Timeline module subscribes and persists append-only records.
 
-- Uploaded
-- OCR complete
-- Classified
-- Metadata extracted
-- Linked to case / account
-- Deleted (soft delete)
+**Branch:** `feature/document-timeline`
+
+### Shared packages
+
+- `packages/event-bus` — in-process publish/subscribe (`PlatformEvent`, `EventBus`)
+- `packages/event-types` — typed constants for case, account, document, auth, and task events
+
+### Backend
+
+- Extended `timeline_events` schema (organization, entity links, JSON metadata, performer, source module)
+- `GET /timeline` with filters; events are append-only (no edit/delete)
+- Publishers wired in case, account, document, and auth services
+- Worker emits OCR, classification, metadata, and entity resolution events
+
+### Definition of done
+
+- [x] Event bus + event-types packages
+- [x] Timeline API with filters
+- [x] Automatic publishing from core domain services
+- [x] Worker pipeline timeline events
+- [x] Timeline UI page
+- [ ] Task module publishers (when task CRUD ships)
 
 ---
 

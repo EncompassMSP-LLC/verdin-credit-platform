@@ -51,7 +51,7 @@ class DocumentMetadata(Base, TimestampMixin):
     extracted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     extraction_error: Mapped[str | None] = mapped_column(Text, nullable=True)
 
-    document: Mapped[Document] = relationship(back_populates="metadata")
+    document: Mapped[Document] = relationship(back_populates="extracted_metadata")
 
     def as_resolution_metadata(self) -> dict[str, str | float | list[str] | None]:
         return {
