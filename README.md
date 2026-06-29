@@ -1,10 +1,10 @@
 # Verdin Credit Platform
 
-> Version 4.3.0 — Operational Core
+> Version 4.3.1 — Operational Core
 
 Production-grade credit operations platform featuring case management, document intelligence, automation, analytics, and AI-assisted workflows.
 
-**Current stable:** `v4.3.0` — Operational Core. Sprint `4.3.1` is the stabilization cycle before Version 4.5 automation.
+**Current stable:** `v4.3.1` — Operational Core completion (Mission Control). **Sprint 4.3.1** (Operational Core Stabilization) is the current engineering milestone before Version 4.5 automation.
 
 ## Quick Start
 

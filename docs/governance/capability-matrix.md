@@ -27,6 +27,16 @@
 
 ---
 
+## Version 4.3.1 — Operational Core completion (shipped)
+
+Mission Control dashboard and governance refinements shipped in tag `v4.3.1`. See [`docs/release-notes/v4.3.1.md`](../release-notes/v4.3.1.md).
+
+| Capability                | Version | Status | Backend | Frontend | API | AI  | Tests | Notes                               |
+| ------------------------- | ------- | ------ | ------- | -------- | --- | --- | ----- | ----------------------------------- |
+| Mission Control Dashboard | 4.3.1   | ✅     | ✅      | ✅       | ✅  | —   | ✅    | Single `GET /dashboard` product API |
+
+---
+
 ## Version 4.3.0 — Operational Core (shipped)
 
 | Capability                      | Version | Status | Backend | Frontend | API | AI      | Tests | Notes                                                 |
@@ -41,21 +51,21 @@
 | **Entity Resolution**           | 4.3     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | Deterministic matching; `packages/entity-resolution`  |
 | Timeline & Audit Engine         | 4.3     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | Event bus + append-only timeline                      |
 | Task Management                 | 4.3     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | CRUD, complete/reopen, filters, timeline events, UI   |
-| Operational Dashboard           | 4.3     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | Mission Control — single `GET /dashboard` product API |
+| Operational Dashboard           | 4.3.1   | ✅     | ✅      | ✅       | ✅  | —       | ✅    | Mission Control — shipped in v4.3.1                   |
 | Client Management               | 4.3     | —      | —       | —        | —   | —       | —     | Deferred to 4.8                                       |
 
 ### Document Intelligence Platform (4.3 epic)
 
 Epic plan: [`docs/epics/document-intelligence-platform.md`](../epics/document-intelligence-platform.md)
 
-| Milestone                         | Version | Status | Backend | Frontend | API | AI      | Tests | Branch                               |
-| --------------------------------- | ------- | ------ | ------- | -------- | --- | ------- | ----- | ------------------------------------ |
-| **M1 — Document Foundation**      | 4.3     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | `feature/document-foundation`        |
-| **M2 — OCR Pipeline**             | 4.3     | ✅     | ✅      | ✅       | ✅  | ✅      | ✅    | `feature/document-ocr`               |
-| M3 — AI Classification            | 4.3     | ✅     | ✅      | Partial  | ✅  | Partial | ✅    | `feature/document-classification`    |
-| M4 — Metadata & Entity Resolution | 4.3     | ✅     | ✅      | ✅       | ✅  | Partial | ✅    | `feature/document-entity-resolution` |
-| M5 — Timeline Integration         | 4.3     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | `feature/document-timeline`          |
-| M6 — Mission Control Dashboard    | 4.3     | ✅     | ✅      | ✅       | ✅  | Partial | ✅    | `feature/task-management`            |
+| Milestone                         | Version | Status | Backend | Frontend | API | AI      | Tests | Branch                                   |
+| --------------------------------- | ------- | ------ | ------- | -------- | --- | ------- | ----- | ---------------------------------------- |
+| **M1 — Document Foundation**      | 4.3     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | `feature/document-foundation`            |
+| **M2 — OCR Pipeline**             | 4.3     | ✅     | ✅      | ✅       | ✅  | ✅      | ✅    | `feature/document-ocr`                   |
+| M3 — AI Classification            | 4.3     | ✅     | ✅      | Partial  | ✅  | Partial | ✅    | `feature/document-classification`        |
+| M4 — Metadata & Entity Resolution | 4.3     | ✅     | ✅      | ✅       | ✅  | Partial | ✅    | `feature/document-entity-resolution`     |
+| M5 — Timeline Integration         | 4.3     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | `feature/document-timeline`              |
+| M6 — Mission Control Dashboard    | 4.3.1   | ✅     | ✅      | ✅       | ✅  | Partial | ✅    | `feature/task-management` — tag `v4.3.1` |
 
 ### 4.3 completion checklist
 
@@ -67,20 +77,23 @@ Epic plan: [`docs/epics/document-intelligence-platform.md`](../epics/document-in
 - [x] Metadata & Entity Resolution (M4)
 - [x] Timeline & Audit Engine
 - [x] Task Management (full module)
-- [x] Operational Dashboard (Mission Control)
+- [x] Operational Dashboard (Mission Control) — v4.3.1
 
-> **Release strategy:** Version 4.3.0 is the **Operational Core** GA milestone. Sprint 4.3.1 stabilizes that release with end-to-end validation, performance baselines, security review, and coverage improvements before Version 4.5 automation begins.
+> **Release history:** `v4.3.0` is the initial Operational Core GA. `v4.3.1` completes it with Mission Control and governance refinements. **Sprint 4.3.1** validates the release before Version 4.5 automation begins.
 
-### Sprint 4.3.1 — Stabilization
+### Sprint 4.3.1 — Operational Core Stabilization (in progress)
+
+Engineering milestone — not a semantic version.
 
 Plan: [`docs/sprint-4.3.1/operational-core-stabilization.md`](../sprint-4.3.1/operational-core-stabilization.md)
 
-| Focus Area              | Status  | Outcome                                                                    |
-| ----------------------- | ------- | -------------------------------------------------------------------------- |
-| End-to-end validation   | Planned | Exercise case → document → OCR → intelligence → tasks → dashboard flow     |
-| Performance baselines   | Planned | Record dashboard, OCR, entity resolution, timeline, and task query metrics |
-| Security review         | Planned | Review RBAC, JWTs, uploads, object storage, dependencies, secrets          |
-| Test coverage expansion | Planned | Cover cross-module workflows, event bus, dashboard alerts, retry paths     |
+| Focus Area              | Status      | Outcome                                                                    |
+| ----------------------- | ----------- | -------------------------------------------------------------------------- |
+| End-to-end validation   | In progress | 100% CI pass rate for complete case lifecycle workflow                     |
+| Performance baselines   | Planned     | Record dashboard, OCR, entity resolution, timeline, and task query metrics |
+| Security review         | Planned     | Review RBAC, JWTs, uploads, object storage, dependencies, secrets          |
+| Test coverage expansion | Planned     | 85–90% on core services and critical workflows                             |
+| Defect gate             | Planned     | No critical or high-severity defects before Version 4.5                    |
 
 ---
 
