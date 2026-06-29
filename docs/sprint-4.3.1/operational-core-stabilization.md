@@ -4,14 +4,18 @@
 
 Version 4.3.0 establishes the Operational Core: cases, accounts, documents, OCR, classification, metadata, entity resolution, timeline, tasks, and Mission Control. Sprint 4.3.1 should validate that those capabilities work as one product, establish performance baselines, and close reliability or security gaps before new automation features build on top.
 
-## Objectives
+## Execution Order
 
 ### 1. End-to-End Workflow Validation
 
-Exercise the full operational workflow:
+Automate the complete operational workflow as an integration test suite that can run in CI:
 
 ```text
+Create Organization
+    ↓
 Create Case
+    ↓
+Add Credit Account
     ↓
 Upload Credit Report
     ↓
@@ -25,27 +29,39 @@ Entity Resolution
     ↓
 Timeline Events
     ↓
-Automatic Task Creation
+Task Creation
     ↓
 Mission Control Dashboard
 ```
 
-Validation outputs:
+Checklist:
 
-- Document gaps, inconsistent statuses, missing timeline events, and any data that fails to surface in Mission Control.
-- Confirm each module preserves organization scoping and RBAC through the workflow.
-- Confirm failed OCR, unresolved entities, review-required documents, and overdue high-priority tasks appear as dashboard alerts.
-- Confirm task and timeline events are created exactly once per relevant domain action.
+- [ ] Create a dedicated backend integration suite for the full workflow.
+- [ ] Seed organization and users with representative roles.
+- [ ] Create a case and linked credit account.
+- [ ] Upload a credit report fixture and assert document metadata, storage key, hash, and version state.
+- [ ] Run or simulate OCR and assert status transitions and extracted text.
+- [ ] Run classification and assert document type, confidence, method, and timestamp.
+- [ ] Run metadata extraction and assert extracted fields.
+- [ ] Run entity resolution and assert matched, ambiguous, and unmatched outcomes where fixtures support them.
+- [ ] Assert timeline events exist exactly once for key domain actions.
+- [ ] Assert task creation is triggered for operational work items.
+- [ ] Assert Mission Control includes the case, document, task, processing, timeline, and alert data.
+- [ ] Document gaps, inconsistent statuses, missing events, or data not surfacing in Mission Control.
 
 ### 2. Performance Baselines
 
-Measure and record baseline metrics before adding more automation:
+Capture baseline metrics before optimizing. These numbers become the comparison point for Version 4.5 automation.
 
-- Dashboard aggregation latency for `GET /api/v1/dashboard`
-- OCR throughput by file count, file size, and document type
-- Entity resolution execution time per document and per candidate set
-- Timeline query speed for common filters and recent activity feed
-- Task query speed for list, overdue, due-today, and high-priority filters
+| Metric            | Initial Target                         |
+| ----------------- | -------------------------------------- |
+| Dashboard API     | `<500 ms`                              |
+| Case creation     | `<200 ms`                              |
+| Document upload   | `<500 ms` excluding OCR                |
+| OCR processing    | Record baseline by file type and size  |
+| Entity resolution | Record baseline by candidate set size  |
+| Timeline query    | `<250 ms` for recent activity/filter   |
+| Task query        | Record list/overdue/due-today baseline |
 
 Capture:
 
@@ -56,26 +72,51 @@ Capture:
 
 ### 3. Security Review
 
-Review the shipped Operational Core for:
+Create and execute a security checklist covering:
 
-- RBAC enforcement on every protected endpoint
-- JWT access/refresh lifecycle and inactive-user handling
-- File upload validation: MIME type, size, extension, duplicate hash, malformed PDFs/images
-- Object storage access: bucket policy, presigned URL scope, storage key predictability
-- Dependency updates and known vulnerabilities
-- Secrets management: environment variables, examples, Docker Compose defaults, CI secrets
+- [ ] RBAC verification for all endpoints
+- [ ] JWT expiry, refresh, inactive user, and invalid token behavior
+- [ ] File upload validation: MIME type, size, extension, duplicate hash, malformed PDF/image handling
+- [ ] MinIO bucket policies and object access controls
+- [ ] Secret management: `.env.example`, Docker Compose defaults, CI secrets, no committed credentials
+- [ ] Dependency audit: `npm audit`, `pip-audit`, or equivalent
+- [ ] CORS and security headers
+- [ ] Rate limiting for authentication and uploads
 
 Expected output: security findings with severity, affected paths, and recommended fixes.
 
 ### 4. Test Coverage
 
-Raise automated coverage where the Operational Core crosses module boundaries:
+Expand from endpoint coverage into cross-module scenarios:
 
-- Cross-module workflows from case creation through Mission Control
-- Event bus interactions and timeline persistence
-- Dashboard aggregation shape and alert generation
-- Failure and retry scenarios for OCR, metadata extraction, entity resolution, and task creation
-- RBAC denial paths for dashboard, tasks, documents, and timeline endpoints
+- [ ] Case → Document → OCR → Timeline
+- [ ] OCR failure → Retry → Success
+- [ ] Entity resolution ambiguity
+- [ ] Task creation from events
+- [ ] Dashboard aggregation and alert generation
+- [ ] Event bus interactions and timeline persistence
+- [ ] RBAC denial paths for dashboard, tasks, documents, and timeline endpoints
+- [ ] Failure and retry scenarios for metadata extraction, entity resolution, and task creation
+
+### 5. Architecture Review
+
+Review the current implementation against the architecture and governance docs before introducing Version 4.5 complexity.
+
+For each major module (`auth`, `cases`, `accounts`, `documents`, `timeline`, `tasks`, `dashboard`, worker jobs):
+
+- [ ] Follows router → service → repository; routers do not query SQLAlchemy directly.
+- [ ] Business logic lives in services, database access in repositories.
+- [ ] Publishes events instead of tightly coupling modules when actions are user-visible or workflow-relevant.
+- [ ] Complies with accepted ADRs.
+- [ ] Avoids duplicate business logic across modules.
+- [ ] Preserves organization scoping and role checks.
+- [ ] Has clear test coverage for success, failure, and RBAC paths.
+
+Architecture snapshot:
+
+- [ ] Generate and save [`docs/architecture/v4.3.0-snapshot.md`](../architecture/v4.3.0-snapshot.md).
+- [ ] Include module map, package dependencies, event flow, database entities, API surface, active ADRs, and v4.3.0 capability matrix.
+- [ ] Treat the snapshot as the as-built reference for regression investigations during Version 4.5.
 
 ## Definition of Done
 
@@ -83,6 +124,7 @@ Raise automated coverage where the Operational Core crosses module boundaries:
 - Performance baselines are recorded for dashboard, OCR, entity resolution, timeline, and tasks.
 - Security review findings are triaged.
 - New tests cover the highest-risk cross-module and failure paths.
+- Architecture review is complete and the v4.3.0 architecture snapshot is saved.
 - Any release-blocking defects are fixed or explicitly deferred with owner and rationale.
 - Version 4.5 planning starts from stable Operational Core contracts, not foundational rewrites.
 
@@ -93,12 +135,12 @@ Version 4.5 should intentionally shift from foundational CRUD to automation and 
 Suggested epic order:
 
 1. Credit Report Import Wizard
-2. Advanced OCR & Bureau Parsing
+2. Bureau-specific parsers
 3. Workflow Automation Engine
 4. Dispute Generation Engine
 5. AI Case Assistant
 6. Client Portal
-7. Notifications & Messaging
+7. Notifications
 
 ## Recommended 4.5 Principles
 
