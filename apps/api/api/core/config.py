@@ -39,6 +39,8 @@ class Settings(BaseSettings):
     worker_queue_name: str = "verdin:jobs"
     document_ocr_enabled: bool = True
     document_classification_enabled: bool = True
+    document_metadata_enabled: bool = True
+    document_entity_resolution_enabled: bool = True
 
     minio_endpoint: str = "localhost:9000"
     minio_access_key: str = "minioadmin"

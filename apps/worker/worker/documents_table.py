@@ -34,6 +34,9 @@ documents_table = Table(
     Column("classification_method", String(20)),
     Column("classified_at", DateTime(timezone=True)),
     Column("classified_by_id", UUID(as_uuid=True)),
+    Column("organization_id", UUID(as_uuid=True)),
+    Column("case_id", UUID(as_uuid=True)),
+    Column("account_id", UUID(as_uuid=True)),
     Column("deleted_at", DateTime(timezone=True)),
     Column("is_duplicate", Boolean),
 )

@@ -37,7 +37,8 @@
 | **Document Foundation**         | 4.3     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | Upload, versioning, MinIO, duplicate detection                       |
 | **OCR Pipeline**                | 4.3     | ✅     | ✅      | ✅       | ✅  | ✅      | ✅    | Async worker extraction; pypdf + tesseract                           |
 | **AI Classification**           | 4.3     | 🚧     | 🚧      | —        | 🚧  | 🚧      | 🚧    | Rule-based classifier framework on `feature/document-classification` |
-| **Metadata Extraction**         | 4.3     | 🚧     | —       | —        | —   | Planned | —     | Milestone 4 — `feature/document-metadata`                            |
+| **Metadata Extraction**         | 4.3     | ✅     | ✅      | ✅       | ✅  | Partial | ✅    | Rule-based extraction; `packages/document-metadata`                  |
+| **Entity Resolution**           | 4.3     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | Deterministic matching; `packages/entity-resolution`                 |
 | Timeline & Audit Engine         | 4.3     | 🚧     | 🚧      | —        | —   | —       | —     | `TimelineEvent` model; no API yet                                    |
 | Task Management                 | 4.3     | 🚧     | 🚧      | 🚧       | 🚧  | —       | —     | Model + seed data; no router/tests                                   |
 | Operational Dashboard           | 4.3     | 🚧     | —       | 🚧       | —   | —       | —     | Placeholder stats; no live metrics                                   |
@@ -47,14 +48,14 @@
 
 Epic plan: [`docs/epics/document-intelligence-platform.md`](../epics/document-intelligence-platform.md)
 
-| Milestone                    | Version | Status  | Backend | Frontend | API | AI      | Tests | Branch                            |
-| ---------------------------- | ------- | ------- | ------- | -------- | --- | ------- | ----- | --------------------------------- |
-| **M1 — Document Foundation** | 4.3     | ✅      | ✅      | ✅       | ✅  | —       | ✅    | `feature/document-foundation`     |
-| **M2 — OCR Pipeline**        | 4.3     | ✅      | ✅      | ✅       | ✅  | ✅      | ✅    | `feature/document-ocr`            |
-| M3 — AI Classification       | 4.3     | 🚧      | 🚧      | —        | 🚧  | 🚧      | 🚧    | `feature/document-classification` |
-| M4 — Metadata Extraction     | 4.3     | Planned | —       | —        | —   | Planned | —     | `feature/document-metadata`       |
-| M5 — Timeline Integration    | 4.3     | Planned | —       | —        | —   | —       | —     | `feature/document-timeline`       |
-| M6 — Intelligence Dashboard  | 4.3     | Planned | —       | —        | —   | Partial | —     | `feature/document-dashboard`      |
+| Milestone                         | Version | Status  | Backend | Frontend | API | AI      | Tests | Branch                               |
+| --------------------------------- | ------- | ------- | ------- | -------- | --- | ------- | ----- | ------------------------------------ |
+| **M1 — Document Foundation**      | 4.3     | ✅      | ✅      | ✅       | ✅  | —       | ✅    | `feature/document-foundation`        |
+| **M2 — OCR Pipeline**             | 4.3     | ✅      | ✅      | ✅       | ✅  | ✅      | ✅    | `feature/document-ocr`               |
+| M3 — AI Classification            | 4.3     | 🚧      | 🚧      | —        | 🚧  | 🚧      | 🚧    | `feature/document-classification`    |
+| M4 — Metadata & Entity Resolution | 4.3     | ✅      | ✅      | ✅       | ✅  | Partial | ✅    | `feature/document-entity-resolution` |
+| M5 — Timeline Integration         | 4.3     | Planned | —       | —        | —   | —       | —     | `feature/document-timeline`          |
+| M6 — Intelligence Dashboard       | 4.3     | Planned | —       | —        | —   | Partial | —     | `feature/document-dashboard`         |
 
 ### 4.3 completion checklist
 
@@ -63,7 +64,7 @@ Epic plan: [`docs/epics/document-intelligence-platform.md`](../epics/document-in
 - [x] Document Foundation (M1)
 - [x] OCR Pipeline (M2)
 - [ ] AI Classification (M3 — in progress)
-- [ ] Metadata Extraction (M4)
+- [x] Metadata & Entity Resolution (M4)
 - [ ] Timeline & Audit Engine
 - [ ] Task Management (full module)
 - [ ] Operational Dashboard (live metrics)

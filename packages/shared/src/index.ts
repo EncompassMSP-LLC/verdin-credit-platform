@@ -277,3 +277,43 @@ export const DOCUMENT_PROCESSING_STATUS_LABELS: Record<DocumentProcessingStatus,
   failed: 'OCR Failed',
   skipped: 'Not applicable',
 };
+
+export type MetadataStatus = 'pending' | 'extracted' | 'failed';
+
+export const METADATA_STATUSES: MetadataStatus[] = ['pending', 'extracted', 'failed'];
+
+export const METADATA_STATUS_LABELS: Record<MetadataStatus, string> = {
+  pending: 'Pending',
+  extracted: 'Extracted',
+  failed: 'Failed',
+};
+
+export type ResolutionStatus = 'matched' | 'ambiguous' | 'unmatched' | 'confirmed' | 'rejected';
+
+export const RESOLUTION_STATUSES: ResolutionStatus[] = [
+  'matched',
+  'ambiguous',
+  'unmatched',
+  'confirmed',
+  'rejected',
+];
+
+export const RESOLUTION_STATUS_LABELS: Record<ResolutionStatus, string> = {
+  matched: 'Matched',
+  ambiguous: 'Needs review',
+  unmatched: 'Unmatched',
+  confirmed: 'Confirmed',
+  rejected: 'Rejected',
+};
+
+export type MatchedEntityType = 'case' | 'account' | 'organization' | 'person';
+
+export const MATCHED_ENTITY_TYPE_LABELS: Record<MatchedEntityType, string> = {
+  case: 'Case',
+  account: 'Account',
+  organization: 'Organization',
+  person: 'Person',
+};
+
+export type ExtractionMethod = 'rules' | 'ai';
+export type ResolutionMethod = 'rules' | 'manual' | 'ai';

@@ -10,6 +10,7 @@ from worker.base import BaseJob, JobContext, JobResult
 from worker.constants import JobStatus, JobType
 from worker.db import session_scope
 from worker.documents import get_document_for_classification, save_classification
+from worker.queue import enqueue_job
 from worker.registry import register_job
 
 logger = structlog.get_logger(__name__)
@@ -77,6 +78,10 @@ class DocumentClassifyJob(BaseJob):
                 confidence_score=result.confidence_score,
                 classification_method=result.classification_method.value,
             )
+
+        enqueue_job(
+            JobType.DOCUMENT_METADATA_EXTRACT, {"document_id": str(document_id)}
+        )
 
         logger.info(
             "document_classified",

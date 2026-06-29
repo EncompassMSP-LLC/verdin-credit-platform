@@ -1,4 +1,12 @@
-import type { DocumentProcessingStatus, PaginatedResponse } from '@verdin/shared';
+import type {
+  DocumentProcessingStatus,
+  ExtractionMethod,
+  MatchedEntityType,
+  MetadataStatus,
+  PaginatedResponse,
+  ResolutionMethod,
+  ResolutionStatus,
+} from '@verdin/shared';
 
 import { apiPath, getApiBaseUrl, request, uploadRequest } from './http';
 
@@ -31,6 +39,7 @@ export interface Document {
   processing_status: DocumentProcessingStatus;
   ocr_processed_at: string | null;
   ocr_version_number: number | null;
+  metadata_status?: MetadataStatus | null;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
@@ -61,6 +70,8 @@ export interface ListDocumentsParams {
   account_id?: string;
   is_duplicate?: boolean;
   processing_status?: DocumentProcessingStatus;
+  metadata_status?: MetadataStatus;
+  resolution_status?: ResolutionStatus;
   sort_by?: string;
   sort_order?: 'asc' | 'desc';
 }
@@ -72,6 +83,46 @@ export interface DocumentOcrResult {
   ocr_error: string | null;
   ocr_processed_at: string | null;
   ocr_version_number: number | null;
+}
+
+export interface DocumentMetadata {
+  document_id: string;
+  consumer_name: string | null;
+  bureau: string | null;
+  creditor: string | null;
+  collection_agency: string | null;
+  account_number_masked: string | null;
+  report_date: string | null;
+  open_date: string | null;
+  balance: number | null;
+  payment_status: string | null;
+  addresses: string[];
+  phone_numbers: string[];
+  ssn_masked: string | null;
+  confidence_score: number | null;
+  extraction_method: ExtractionMethod;
+  metadata_status: MetadataStatus;
+  extracted_at: string | null;
+  extraction_error: string | null;
+}
+
+export interface DocumentEntityResolution {
+  id: string;
+  document_id: string;
+  entity_type: MatchedEntityType;
+  matched_entity_id: string | null;
+  confidence_score: number;
+  resolution_status: ResolutionStatus;
+  resolution_method: ResolutionMethod;
+  reasoning: string | null;
+  candidate_entity_ids: string[];
+  reviewed_at: string | null;
+  reviewed_by_id: string | null;
+}
+
+export interface DocumentResolutions {
+  document_id: string;
+  resolutions: DocumentEntityResolution[];
 }
 
 function buildQuery(params: Record<string, unknown>): string {
@@ -141,4 +192,52 @@ export async function retryDocumentOcr(documentId: string): Promise<DocumentOcrR
   return request<DocumentOcrResult>(apiPath(`/documents/${documentId}/ocr/retry`), {
     method: 'POST',
   });
+}
+
+export async function getDocumentMetadata(documentId: string): Promise<DocumentMetadata> {
+  return request<DocumentMetadata>(apiPath(`/documents/${documentId}/metadata`));
+}
+
+export async function extractDocumentMetadata(documentId: string): Promise<DocumentMetadata> {
+  return request<DocumentMetadata>(apiPath(`/documents/${documentId}/metadata/extract`), {
+    method: 'POST',
+  });
+}
+
+export async function getDocumentResolutions(documentId: string): Promise<DocumentResolutions> {
+  return request<DocumentResolutions>(apiPath(`/documents/${documentId}/resolutions`));
+}
+
+export async function resolveDocumentEntities(documentId: string): Promise<DocumentResolutions> {
+  return request<DocumentResolutions>(apiPath(`/documents/${documentId}/resolutions/resolve`), {
+    method: 'POST',
+  });
+}
+
+export async function confirmDocumentResolution(
+  documentId: string,
+  resolutionId: string,
+  matchedEntityId?: string,
+): Promise<DocumentResolutions> {
+  return request<DocumentResolutions>(
+    apiPath(`/documents/${documentId}/resolutions/${resolutionId}/confirm`),
+    {
+      method: 'POST',
+      body: matchedEntityId ? { matched_entity_id: matchedEntityId } : {},
+    },
+  );
+}
+
+export async function rejectDocumentResolution(
+  documentId: string,
+  resolutionId: string,
+  reason?: string,
+): Promise<DocumentResolutions> {
+  return request<DocumentResolutions>(
+    apiPath(`/documents/${documentId}/resolutions/${resolutionId}/reject`),
+    {
+      method: 'POST',
+      body: reason ? { reason } : {},
+    },
+  );
 }
