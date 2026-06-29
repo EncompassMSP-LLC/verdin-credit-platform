@@ -2,15 +2,22 @@ import { useQuery } from '@tanstack/react-query';
 import { getDashboard } from '@verdin/api-client';
 import { Button, Card } from '@verdin/ui';
 import { useAuth } from '../lib/auth';
-import { AiReadiness } from '../components/dashboard/AiReadiness';
-import { BusinessMetrics } from '../components/dashboard/BusinessMetrics';
-import { KpiRow } from '../components/dashboard/KpiRow';
-import { ProcessingHealth } from '../components/dashboard/ProcessingHealth';
+import { AlertsPanel } from '../components/dashboard/AlertsPanel';
+import { DashboardMetricCard } from '../components/dashboard/DashboardMetricCard';
+import { DashboardSection } from '../components/dashboard/DashboardSection';
+import { MissionControlOverview } from '../components/dashboard/MissionControlOverview';
 import { TimelineFeed } from '../components/dashboard/TimelineFeed';
-import { WorkQueuePanel } from '../components/dashboard/WorkQueuePanel';
 
 function formatGeneratedAt(value: string) {
   return new Date(value).toLocaleString();
+}
+
+function formatHours(value: number | null) {
+  return value != null ? `${value}h` : '—';
+}
+
+function formatConfidence(value: number | null) {
+  return value != null ? `${(value * 100).toFixed(1)}%` : '—';
 }
 
 export function DashboardPage() {
@@ -25,13 +32,16 @@ export function DashboardPage() {
   const refreshSeconds = data?.refresh_seconds ?? 30;
 
   return (
-    <div className="p-8">
+    <div className="min-h-screen bg-gray-50 p-8">
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Operations Command Center</h1>
-          <p className="mt-1 text-gray-500">
-            Welcome back, {user?.first_name}. What is happening, what needs attention, and how the
-            business is performing — at a glance.
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-600">
+            Mission Control
+          </p>
+          <h1 className="mt-1 text-3xl font-bold text-gray-900">Operations Command Center</h1>
+          <p className="mt-2 max-w-3xl text-gray-600">
+            Welcome back, {user?.first_name}. One live snapshot of what is happening, what needs
+            attention, and how the business is performing.
           </p>
           {data ? (
             <p className="mt-2 text-xs text-gray-400">
@@ -47,7 +57,7 @@ export function DashboardPage() {
 
       {isLoading ? (
         <Card>
-          <p className="py-12 text-center text-sm text-gray-500">Loading operations snapshot…</p>
+          <p className="py-12 text-center text-sm text-gray-500">Loading mission control…</p>
         </Card>
       ) : null}
 
@@ -64,49 +74,98 @@ export function DashboardPage() {
 
       {data ? (
         <div className="space-y-8">
-          <KpiRow kpis={data.kpis} />
+          <MissionControlOverview overview={data.overview} />
 
-          <section aria-label="Operational work queue">
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
-              What Needs Attention
-            </h2>
-            <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-              <WorkQueuePanel
-                title="Overdue Tasks"
-                items={data.tasks.overdue_tasks}
-                emptyMessage="No overdue tasks."
+          <div className="grid grid-cols-1 gap-8 xl:grid-cols-2">
+            <DashboardSection title="Operations" description="Workload across the platform.">
+              <DashboardMetricCard
+                label="Open Cases"
+                value={data.overview.open_cases}
+                tone="info"
               />
-              <WorkQueuePanel
-                title="High Priority Cases"
-                items={data.tasks.high_priority_cases}
-                emptyMessage="No high-priority open cases."
+              <DashboardMetricCard
+                label="Active Accounts"
+                value={data.overview.active_accounts}
+                tone="success"
               />
-              <WorkQueuePanel
-                title="Documents Requiring Review"
-                items={data.tasks.documents_requiring_review}
-                emptyMessage="No ambiguous entity matches awaiting review."
+              <DashboardMetricCard label="Documents" value={data.overview.documents} />
+              <DashboardMetricCard
+                label="Tasks Due Today"
+                value={data.tasks.due_today}
+                tone="warning"
               />
-              <WorkQueuePanel
-                title="OCR Failures"
-                items={data.tasks.ocr_failures}
-                emptyMessage="No OCR failures."
-              />
-              <WorkQueuePanel
-                title="Unresolved Entity Matches"
-                items={data.tasks.unresolved_entity_matches}
-                emptyMessage="No unresolved entity matches."
-              />
-            </div>
-          </section>
+              <DashboardMetricCard label="Overdue Tasks" value={data.tasks.overdue} tone="danger" />
+            </DashboardSection>
 
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <ProcessingHealth processing={data.processing} />
-            <AiReadiness ai={data.ai} />
+            <DashboardSection title="Processing" description="Document pipeline health.">
+              <DashboardMetricCard label="OCR Queue" value={data.processing.ocr_queue} />
+              <DashboardMetricCard
+                label="OCR Failed"
+                value={data.processing.ocr_failed}
+                tone={data.processing.ocr_failed > 0 ? 'danger' : 'default'}
+              />
+              <DashboardMetricCard
+                label="Classification Pending"
+                value={data.processing.classification_pending}
+              />
+              <DashboardMetricCard
+                label="Metadata Pending"
+                value={data.processing.metadata_pending}
+              />
+              <DashboardMetricCard
+                label="Entity Resolution Pending"
+                value={data.processing.entity_resolution_pending}
+              />
+            </DashboardSection>
+
+            <DashboardSection title="Performance" description="Business throughput today.">
+              <DashboardMetricCard
+                label="Cases Created Today"
+                value={data.performance.cases_created_today}
+              />
+              <DashboardMetricCard
+                label="Cases Closed"
+                value={data.performance.cases_closed_today}
+              />
+              <DashboardMetricCard
+                label="Avg Resolution Time"
+                value={formatHours(data.performance.average_resolution_time_hours)}
+              />
+              <DashboardMetricCard
+                label="Documents Per Case"
+                value={data.performance.documents_per_case}
+              />
+              <DashboardMetricCard
+                label="Accounts Per Case"
+                value={data.performance.accounts_per_case}
+              />
+            </DashboardSection>
+
+            <DashboardSection title="Intelligence" description="Document AI readiness.">
+              <DashboardMetricCard
+                label="Classification Confidence"
+                value={formatConfidence(data.documents.classification_confidence)}
+              />
+              <DashboardMetricCard
+                label="Entity Resolution Confidence"
+                value={formatConfidence(data.documents.entity_resolution_confidence)}
+              />
+              <DashboardMetricCard label="AI Ready Documents" value={data.documents.ai_ready} />
+              <DashboardMetricCard
+                label="Unresolved Documents"
+                value={data.documents.unresolved}
+                tone={data.documents.unresolved > 0 ? 'warning' : 'default'}
+              />
+              <DashboardMetricCard label="Processing" value={data.documents.processing} />
+            </DashboardSection>
           </div>
 
-          <TimelineFeed items={data.timeline} />
-
-          <BusinessMetrics performance={data.performance} />
+          <div className="grid grid-cols-1 gap-8 xl:grid-cols-3">
+            <div className="xl:col-span-2">
+              <TimelineFeed items={data.timeline} />
+            </div>
+            <AlertsPanel alerts={data.alerts.items} total={data.alerts.total} />
+          </div>
         </div>
       ) : null}
     </div>

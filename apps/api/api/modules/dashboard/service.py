@@ -1,4 +1,4 @@
-"""Dashboard aggregation service — single snapshot for the operations command center."""
+"""Dashboard aggregation service — Mission Control snapshot."""
 
 import uuid
 from datetime import UTC, datetime
@@ -11,17 +11,19 @@ from api.modules.auth.models import User
 from api.modules.dashboard.permissions import DASHBOARD_READ_ROLE
 from api.modules.dashboard.repository import DashboardRepository
 from api.modules.dashboard.schemas import (
-    DashboardAi,
-    DashboardKpis,
+    DashboardAccounts,
+    DashboardAlertItem,
+    DashboardAlerts,
+    DashboardCases,
+    DashboardDocuments,
+    DashboardOverview,
     DashboardPerformance,
     DashboardProcessing,
-    DashboardQueueItem,
     DashboardResponse,
+    DashboardTasks,
     DashboardTimelineItem,
-    DashboardWorkQueue,
 )
 
-# Polling interval hint for clients; future WebSocket push can reuse the same payload.
 DASHBOARD_REFRESH_SECONDS = 30
 
 
@@ -56,25 +58,16 @@ class DashboardService:
         return DashboardResponse(
             generated_at=datetime.now(UTC),
             refresh_seconds=DASHBOARD_REFRESH_SECONDS,
-            kpis=DashboardKpis(**raw["kpis"]),
-            processing=DashboardProcessing(**raw["processing"]),
-            tasks=DashboardWorkQueue(
-                overdue_tasks=[
-                    DashboardQueueItem(**item) for item in raw["tasks"]["overdue_tasks"]
-                ],
-                high_priority_cases=[
-                    DashboardQueueItem(**item) for item in raw["tasks"]["high_priority_cases"]
-                ],
-                documents_requiring_review=[
-                    DashboardQueueItem(**item)
-                    for item in raw["tasks"]["documents_requiring_review"]
-                ],
-                ocr_failures=[DashboardQueueItem(**item) for item in raw["tasks"]["ocr_failures"]],
-                unresolved_entity_matches=[
-                    DashboardQueueItem(**item) for item in raw["tasks"]["unresolved_entity_matches"]
-                ],
-            ),
+            overview=DashboardOverview(**raw["overview"]),
+            cases=DashboardCases(**raw["cases"]),
+            accounts=DashboardAccounts(**raw["accounts"]),
+            documents=DashboardDocuments(**raw["documents"]),
             timeline=[DashboardTimelineItem(**item) for item in raw["timeline"]],
-            ai=DashboardAi(**raw["ai"]),
+            tasks=DashboardTasks(**raw["tasks"]),
+            processing=DashboardProcessing(**raw["processing"]),
             performance=DashboardPerformance(**raw["performance"]),
+            alerts=DashboardAlerts(
+                total=raw["alerts"]["total"],
+                items=[DashboardAlertItem(**item) for item in raw["alerts"]["items"]],
+            ),
         )
