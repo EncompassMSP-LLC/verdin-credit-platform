@@ -1,29 +1,121 @@
 import type { PaginatedResponse } from '@verdin/shared';
 
-import { apiPath, notImplemented } from './http';
+import { apiPath, getApiBaseUrl, request, uploadRequest } from './http';
 
-export interface Document {
+export interface DocumentVersion {
   id: string;
-  title: string;
+  document_id: string;
+  version_number: number;
   file_name: string;
   mime_type: string | null;
   file_size: number | null;
-  case_id: string;
+  file_hash: string;
   created_at: string;
+  created_by_id: string | null;
+}
+
+export interface Document {
+  id: string;
+  organization_id: string;
+  case_id: string;
+  account_id: string | null;
+  title: string;
+  description: string | null;
+  file_name: string;
+  mime_type: string | null;
+  file_size: number | null;
+  file_hash: string;
+  version_number: number;
+  is_duplicate: boolean;
+  duplicate_of_id: string | null;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+  created_by_id: string | null;
+  updated_by_id: string | null;
+  versions?: DocumentVersion[];
+}
+
+export interface UploadDocumentInput {
+  file: File;
+  title: string;
+  case_id: string;
+  description?: string | null;
+  account_id?: string | null;
+}
+
+export interface UpdateDocumentInput {
+  title?: string;
+  description?: string | null;
+  account_id?: string | null;
 }
 
 export interface ListDocumentsParams {
-  case_id?: string;
   page?: number;
   page_size?: number;
+  search?: string;
+  case_id?: string;
+  account_id?: string;
+  is_duplicate?: boolean;
+  sort_by?: string;
+  sort_order?: 'asc' | 'desc';
+}
+
+function buildQuery(params: Record<string, unknown>): string {
+  const search = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      search.set(key, String(value));
+    }
+  });
+  const query = search.toString();
+  return query ? `?${query}` : '';
+}
+
+export async function uploadDocument(input: UploadDocumentInput): Promise<Document> {
+  const form = new FormData();
+  form.append('file', input.file);
+  form.append('title', input.title);
+  form.append('case_id', input.case_id);
+  if (input.description) form.append('description', input.description);
+  if (input.account_id) form.append('account_id', input.account_id);
+  return uploadRequest<Document>(apiPath('/documents'), form);
 }
 
 export async function listDocuments(
-  _params: ListDocumentsParams = {},
+  params: ListDocumentsParams = {},
 ): Promise<PaginatedResponse<Document>> {
-  notImplemented(`GET ${apiPath('/documents')}`);
+  return request<PaginatedResponse<Document>>(
+    `${apiPath('/documents')}${buildQuery(params as Record<string, unknown>)}`,
+  );
 }
 
-export async function getDocument(_documentId: string): Promise<Document> {
-  notImplemented(`GET ${apiPath('/documents/:id')}`);
+export async function getDocument(documentId: string): Promise<Document> {
+  return request<Document>(apiPath(`/documents/${documentId}`));
+}
+
+export async function updateDocument(
+  documentId: string,
+  input: UpdateDocumentInput,
+): Promise<Document> {
+  return request<Document>(apiPath(`/documents/${documentId}`), { method: 'PATCH', body: input });
+}
+
+export async function deleteDocument(documentId: string): Promise<void> {
+  await request<void>(apiPath(`/documents/${documentId}`), { method: 'DELETE' });
+}
+
+export async function uploadDocumentVersion(documentId: string, file: File): Promise<Document> {
+  const form = new FormData();
+  form.append('file', file);
+  return uploadRequest<Document>(apiPath(`/documents/${documentId}/versions`), form);
+}
+
+export function getDocumentDownloadUrl(documentId: string, version?: number): string {
+  const base = `${getApiBaseUrl()}${apiPath(`/documents/${documentId}/download`)}`;
+  return version ? `${base}?version=${version}` : base;
+}
+
+export async function listDocumentVersions(documentId: string): Promise<DocumentVersion[]> {
+  return request<DocumentVersion[]>(apiPath(`/documents/${documentId}/versions`));
 }

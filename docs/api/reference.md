@@ -131,6 +131,31 @@ Credit tradeline accounts with intelligence scoring. All endpoints require authe
 
 Accounts automatically compute `risk_score`, `readiness_score`, `next_eligible_dispute_date`, and `ai_recommended_next_action` on create/update via `api/modules/accounts/intelligence.py`.
 
+## Documents
+
+Secure document storage with MinIO, SHA-256 hashing, versioning, and duplicate detection. See [`docs/epics/document-intelligence-platform.md`](../epics/document-intelligence-platform.md).
+
+| Method | Path                                | Min role     | Description                        |
+| ------ | ----------------------------------- | ------------ | ---------------------------------- |
+| POST   | `/documents`                        | case_manager | Upload document (multipart)        |
+| GET    | `/documents`                        | read_only    | List documents                     |
+| GET    | `/documents/{document_id}`          | read_only    | Get document with versions         |
+| PATCH  | `/documents/{document_id}`          | case_manager | Update metadata                    |
+| DELETE | `/documents/{document_id}`          | admin        | Soft-delete document               |
+| GET    | `/documents/{document_id}/download` | read_only    | Download file (optional `version`) |
+| POST   | `/documents/{document_id}/versions` | case_manager | Upload new version                 |
+| GET    | `/documents/{document_id}/versions` | read_only    | List version history               |
+
+### Upload (multipart form)
+
+Fields: `file` (required), `title` (required), `case_id` (required), `description`, `account_id`
+
+### List query parameters
+
+`page`, `page_size`, `search`, `case_id`, `account_id`, `is_duplicate`, `sort_by`, `sort_order`
+
+Duplicate detection: uploading a file with the same SHA-256 hash as an existing org document sets `is_duplicate: true` and `duplicate_of_id`.
+
 ## Error Responses
 
 All errors follow this format:

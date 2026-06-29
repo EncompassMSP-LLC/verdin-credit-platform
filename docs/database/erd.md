@@ -7,7 +7,7 @@ erDiagram
     Organization ||--o{ User : has
     Organization ||--o{ Case : has
     Organization ||--o{ Account : has
-    Account ||--o{ Case : has
+    Case ||--o{ Account : "credit tradelines"
     User ||--o{ Case : "assigned to"
     Case ||--o{ Document : contains
     Case ||--o{ Task : contains
@@ -41,21 +41,28 @@ erDiagram
 
     Account {
         uuid id PK
-        string name
-        string account_number
-        string email
-        string phone
         uuid organization_id FK
+        uuid case_id FK
+        enum bureau
+        string creditor_name
+        enum account_type
+        enum account_status
+        enum payment_status
+        numeric balance
+        enum dispute_status
+        int risk_score
+        int readiness_score
     }
 
     Case {
         uuid id PK
         string title
-        text description
+        string client_name
         enum status
+        enum stage
+        enum priority
         string case_number UK
         uuid organization_id FK
-        uuid account_id FK
         uuid assigned_to_id FK
     }
 
@@ -106,6 +113,8 @@ erDiagram
 - All business entities support soft delete (`deleted_at`)
 - All entities include audit fields (`created_by_id`, `updated_by_id`)
 - All timestamps are UTC with timezone
+
+For authoritative lifecycle and relationship detail, see [Data Model](../architecture/data-model.md).
 
 ## Migrations
 

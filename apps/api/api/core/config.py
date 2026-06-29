@@ -37,6 +37,14 @@ class Settings(BaseSettings):
 
     redis_url: str = "redis://localhost:6379/0"
 
+    minio_endpoint: str = "localhost:9000"
+    minio_access_key: str = "minioadmin"
+    minio_secret_key: str = "minioadmin"
+    minio_bucket: str = "verdin-documents"
+    minio_secure: bool = False
+
+    document_max_upload_bytes: int = 25 * 1024 * 1024
+
     cors_origins: str = "http://localhost:5173,http://localhost:3000"
 
     @field_validator("cors_origins", mode="before")

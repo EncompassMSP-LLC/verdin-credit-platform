@@ -1,5 +1,15 @@
 # Developer Guide
 
+## Platform direction
+
+Verdin is evolving from v4.2 Platform Foundation toward **[Version 5.0 Enterprise](roadmap/v5.0-enterprise.md)**. Before starting work:
+
+1. Check which **[roadmap milestone](roadmap/README.md#version-milestones)** your sprint targets (usually 4.3 Operational Core).
+2. Review **[capability status](governance/capability-matrix.md)** — what is done vs in progress.
+3. Read the relevant **[architecture document](architecture/README.md)** for the domain you are changing.
+4. Follow the **[feature lifecycle](governance/README.md#feature-lifecycle)** and record significant decisions as an **[ADR](adr/README.md)**.
+5. **Update the capability matrix** when the epic reaches definition of done.
+
 ## Quick Start
 
 ```bash

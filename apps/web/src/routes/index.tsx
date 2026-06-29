@@ -12,7 +12,9 @@ import { AccountCreatePage } from '../pages/accounts/AccountCreatePage';
 import { AccountDetailPage } from '../pages/accounts/AccountDetailPage';
 import { AccountEditPage } from '../pages/accounts/AccountEditPage';
 import { CaseAccountsPage } from '../pages/accounts/CaseAccountsPage';
-import { DocumentsPage } from '../pages/DocumentsPage';
+import { DocumentsListPage } from '../pages/documents/DocumentsListPage';
+import { DocumentUploadPage } from '../pages/documents/DocumentUploadPage';
+import { DocumentDetailPage } from '../pages/documents/DocumentDetailPage';
 import { TasksPage } from '../pages/TasksPage';
 import { SettingsPage } from '../pages/SettingsPage';
 
@@ -60,7 +62,9 @@ export function AppRoutes() {
         <Route path="accounts/new" element={<AccountCreatePage />} />
         <Route path="accounts/:accountId" element={<AccountDetailPage />} />
         <Route path="accounts/:accountId/edit" element={<AccountEditPage />} />
-        <Route path="documents" element={<DocumentsPage />} />
+        <Route path="documents" element={<DocumentsListPage />} />
+        <Route path="documents/upload" element={<DocumentUploadPage />} />
+        <Route path="documents/:documentId" element={<DocumentDetailPage />} />
         <Route path="tasks" element={<TasksPage />} />
         <Route path="settings" element={<SettingsPage />} />
       </Route>
