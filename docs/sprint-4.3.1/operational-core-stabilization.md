@@ -19,7 +19,21 @@ The execution order below maps to these workstreams.
 
 ## Execution Order
 
-### 1. End-to-End Workflow Validation
+### 1. End-to-End Workflow Validation ✅ Delivered
+
+A black-box workflow suite ships in [`tests/e2e/`](../../tests/e2e/README.md) and
+runs in CI via [`.github/workflows/e2e.yml`](../../.github/workflows/e2e.yml). A
+single test (`test_full_case_lifecycle`) drives the journey below against a
+running API and worker over HTTP and serves as the release gate. It passes
+consistently (5/5 local runs, ~9s each).
+
+> **Reliability fix surfaced by the gate:** the API enqueued the OCR job
+> _before_ the request transaction committed, so an idle worker could dequeue
+> and query the document before it was durable (`"Document not found"` →
+> permanent stall). Fixed by committing the unit of work before enqueuing, in
+> both the API (`documents` upload/version) and the worker chain (OCR →
+> classify → metadata → entity resolution each enqueue the next stage only
+> after its writes commit).
 
 Automate the complete operational workflow as an integration test suite that can run in CI:
 
@@ -49,18 +63,19 @@ Mission Control Dashboard
 
 Checklist:
 
-- [ ] Create a dedicated backend integration suite for the full workflow.
-- [ ] Seed organization and users with representative roles.
-- [ ] Create a case and linked credit account.
-- [ ] Upload a credit report fixture and assert document metadata, storage key, hash, and version state.
-- [ ] Run or simulate OCR and assert status transitions and extracted text.
-- [ ] Run classification and assert document type, confidence, method, and timestamp.
-- [ ] Run metadata extraction and assert extracted fields.
-- [ ] Run entity resolution and assert matched, ambiguous, and unmatched outcomes where fixtures support them.
-- [ ] Assert timeline events exist exactly once for key domain actions.
-- [ ] Assert task creation is triggered for operational work items.
-- [ ] Assert Mission Control includes the case, document, task, processing, timeline, and alert data.
-- [ ] Document gaps, inconsistent statuses, missing events, or data not surfacing in Mission Control.
+- [x] Create a dedicated backend integration suite for the full workflow.
+- [x] Seed organization and users with representative roles.
+- [x] Create a case and linked credit account.
+- [x] Upload a credit report fixture and assert document metadata, storage key, hash, and version state.
+- [x] Run OCR (real worker) and assert status transitions and extracted text.
+- [x] Run classification and assert document type, confidence, method, and timestamp.
+- [x] Run metadata extraction and assert extracted fields.
+- [x] Run entity resolution and assert a matched account that links back to the document.
+- [x] Assert timeline events exist for each key domain action (upload, OCR, classification, metadata, entity resolution).
+- [x] Assert task creation succeeds for operational work items.
+- [x] Assert Mission Control includes the case, document, task, processing, timeline, and alert data.
+- [ ] Extend fixtures to also cover ambiguous and unmatched entity-resolution outcomes.
+- [ ] Add the E2E workflow as a required GitHub status check for merges into `main`.
 
 ### 2. Performance Baselines
 

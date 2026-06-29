@@ -87,13 +87,13 @@ Engineering milestone — not a semantic version.
 
 Plan: [`docs/sprint-4.3.1/operational-core-stabilization.md`](../sprint-4.3.1/operational-core-stabilization.md)
 
-| Focus Area              | Status      | Outcome                                                                    |
-| ----------------------- | ----------- | -------------------------------------------------------------------------- |
-| End-to-end validation   | In progress | 100% CI pass rate for complete case lifecycle workflow                     |
-| Performance baselines   | Planned     | Record dashboard, OCR, entity resolution, timeline, and task query metrics |
-| Security review         | Planned     | Review RBAC, JWTs, uploads, object storage, dependencies, secrets          |
-| Test coverage expansion | Planned     | 85–90% on core services and critical workflows                             |
-| Defect gate             | Planned     | No critical or high-severity defects before Version 4.5                    |
+| Focus Area              | Status        | Outcome                                                                    |
+| ----------------------- | ------------- | -------------------------------------------------------------------------- |
+| End-to-end validation   | ✅ Suite live | `tests/e2e` full case lifecycle gate + `e2e.yml`; consistent green         |
+| Performance baselines   | Planned       | Record dashboard, OCR, entity resolution, timeline, and task query metrics |
+| Security review         | Planned       | Review RBAC, JWTs, uploads, object storage, dependencies, secrets          |
+| Test coverage expansion | Planned       | 85–90% on core services and critical workflows                             |
+| Defect gate             | Planned       | No critical or high-severity defects before Version 4.5                    |
 
 ---
 

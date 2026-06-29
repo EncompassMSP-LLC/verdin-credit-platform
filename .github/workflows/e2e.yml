@@ -1,0 +1,143 @@
+name: E2E
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  SECRET_KEY: e2e-secret-key-minimum-32-characters-long
+  APP_ENV: test
+  DATABASE_URL: postgresql+asyncpg://verdin:verdin@localhost:5432/verdin_credit_test
+  DATABASE_URL_SYNC: postgresql://verdin:verdin@localhost:5432/verdin_credit_test
+  REDIS_URL: redis://localhost:6379/0
+  WORKER_QUEUE_NAME: verdin:jobs
+  MINIO_ENDPOINT: localhost:9000
+  MINIO_ACCESS_KEY: minioadmin
+  MINIO_SECRET_KEY: minioadmin
+  MINIO_BUCKET: verdin-documents
+  MINIO_SECURE: 'false'
+  E2E_BASE_URL: http://localhost:8000
+  E2E_REQUIRE: '1'
+
+jobs:
+  build-frontend:
+    name: Build Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install
+      - run: pnpm turbo run build --filter=@verdin/web
+
+  e2e:
+    name: E2E Workflow
+    runs-on: ubuntu-latest
+    needs: [build-frontend]
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: verdin
+          POSTGRES_PASSWORD: verdin
+          POSTGRES_DB: verdin_credit_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      # MinIO needs a custom server command, which GitHub service containers do
+      # not support, so it runs as a plain background container instead.
+      - name: Start MinIO
+        run: |
+          docker run -d --name minio \
+            -p 9000:9000 -p 9001:9001 \
+            -e MINIO_ROOT_USER=minioadmin \
+            -e MINIO_ROOT_PASSWORD=minioadmin \
+            minio/minio:latest server /data --console-address ":9001"
+
+      - name: Wait for MinIO
+        run: |
+          for _ in $(seq 1 30); do
+            if curl -fsS http://localhost:9000/minio/health/live; then exit 0; fi
+            sleep 2
+          done
+          echo "MinIO did not become healthy in time" >&2
+          exit 1
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r apps/api/requirements.txt
+          pip install -r apps/worker/requirements.txt
+          pip install -r tests/e2e/requirements.txt
+
+      - name: Run database migrations
+        working-directory: apps/api
+        run: alembic upgrade head
+
+      - name: Start worker
+        working-directory: apps/worker
+        run: |
+          nohup python main.py > "$GITHUB_WORKSPACE/worker.log" 2>&1 &
+          echo "Worker started (pid $!)"
+
+      - name: Start API
+        working-directory: apps/api
+        run: |
+          nohup uvicorn main:app --host 0.0.0.0 --port 8000 \
+            > "$GITHUB_WORKSPACE/api.log" 2>&1 &
+          echo "API started (pid $!)"
+
+      - name: Wait for API health
+        run: |
+          for _ in $(seq 1 45); do
+            if curl -fsS http://localhost:8000/api/v1/health; then exit 0; fi
+            sleep 2
+          done
+          echo "API did not become healthy in time" >&2
+          cat "$GITHUB_WORKSPACE/api.log" || true
+          exit 1
+
+      - name: Run E2E workflow suite
+        run: pytest tests/e2e -v --tb=short
+
+      - name: Collect service logs
+        if: always()
+        run: |
+          mkdir -p tests/e2e/_artifacts
+          cp "$GITHUB_WORKSPACE/api.log" tests/e2e/_artifacts/ 2>/dev/null || true
+          cp "$GITHUB_WORKSPACE/worker.log" tests/e2e/_artifacts/ 2>/dev/null || true
+          docker logs minio > tests/e2e/_artifacts/minio.log 2>&1 || true
+
+      - name: Upload diagnostic artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-artifacts
+          path: tests/e2e/_artifacts/
+          if-no-files-found: ignore
+          retention-days: 7
