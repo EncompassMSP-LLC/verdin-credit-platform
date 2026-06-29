@@ -4,14 +4,17 @@ This directory is the **governance hub** for the Verdin Credit Platform. It conn
 
 ## Governance layers
 
-| Layer                 | Document                                                                                                                   | Audience                    | Answers                                      |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------------- | --------------------------- | -------------------------------------------- |
-| **Product roadmap**   | [`../roadmap/v5.0-enterprise.md`](../roadmap/v5.0-enterprise.md)                                                           | Executives, PM, engineering | Where are we going? What domains matter?     |
-| **Capability matrix** | [`capability-matrix.md`](capability-matrix.md)                                                                             | All stakeholders            | What exists today? What is production-ready? |
-| **Architecture**      | [`../architecture/README.md`](../architecture/README.md)                                                                   | Engineers, architects       | How is it built? What rules apply?           |
-| **ADRs**              | [`../adr/README.md`](../adr/README.md)                                                                                     | Engineers                   | Why was it built this way?                   |
-| **Engineering log**   | [`../engineering/changelog.md`](../engineering/changelog.md)                                                               | Engineers                   | Why did implementation choices evolve?       |
-| **Standards**         | [`../coding-standards.md`](../coding-standards.md), [`../architecture/api-standards.md`](../architecture/api-standards.md) | Engineers                   | What conventions must we follow?             |
+| Layer                 | Document                                                                                                                   | Audience                    | Answers                                                    |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------- | --------------------------- | ---------------------------------------------------------- |
+| **Product roadmap**   | [`../roadmap/v5.0-enterprise.md`](../roadmap/v5.0-enterprise.md)                                                           | Executives, PM, engineering | Where are we going? What domains matter?                   |
+| **Capability matrix** | [`capability-matrix.md`](capability-matrix.md)                                                                             | All stakeholders            | What exists today? What is production-ready?               |
+| **Architecture**      | [`../architecture/README.md`](../architecture/README.md)                                                                   | Engineers, architects       | How is it built? What rules apply?                         |
+| **ADRs**              | [`../adr/README.md`](../adr/README.md)                                                                                     | Engineers                   | Why was it built this way?                                 |
+| **Engineering log**   | [`../engineering/changelog.md`](../engineering/changelog.md)                                                               | Engineers                   | Why did implementation choices evolve?                     |
+| **Quality**           | [`../quality/README.md`](../quality/README.md)                                                                             | Engineers, QA               | How do we validate performance, security, and reliability? |
+| **Release review**    | [`architecture-scorecard.md`](architecture-scorecard.md)                                                                   | Engineering leads           | Is the architecture healthy for this release?              |
+| **Repository health** | [`repository-health.md`](repository-health.md)                                                                             | All stakeholders            | What is the current engineering health snapshot?           |
+| **Standards**         | [`../coding-standards.md`](../coding-standards.md), [`../architecture/api-standards.md`](../architecture/api-standards.md) | Engineers                   | What conventions must we follow?                           |
 
 ## Feature lifecycle
 
@@ -147,6 +150,9 @@ Multi-tenancy → compliance center → AI case assistant → predictive analyti
 
 ## Quick links
 
+- [Architecture scorecard (release review)](architecture-scorecard.md)
+- [Repository health dashboard](repository-health.md)
+- [Quality hub](../quality/README.md)
 - [Capability matrix (executive view)](capability-matrix.md)
 - [Roadmap index](../roadmap/README.md)
 - [Engineering Decision Log](../engineering/changelog.md)

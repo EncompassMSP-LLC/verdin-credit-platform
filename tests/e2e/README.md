@@ -13,6 +13,14 @@ The organization and owner user are seeded directly in the database (there is
 no public sign-up endpoint); **every other step runs through the HTTP API**,
 and the asynchronous document pipeline is processed by the **real worker**.
 
+Keep `test_full_case_lifecycle.py` as the fast, deterministic golden path.
+Additional edge cases should be separate tests so CI failures stay isolated:
+
+- `test_entity_resolution_ambiguous.py` — ambiguous match
+- `test_entity_resolution_unmatched.py` — no match
+- `test_ocr_failure_recovery.py` — OCR retry
+- `test_worker_restart.py` — worker resilience
+
 ## Layout
 
 ```

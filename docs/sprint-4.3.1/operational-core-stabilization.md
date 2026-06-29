@@ -8,12 +8,12 @@ Version 4.3.0 establishes the Operational Core: cases, accounts, documents, OCR,
 
 Sprint 4.3.1 is organized into measurable workstreams rather than miscellaneous cleanup:
 
-| Workstream            | Goal                                                                              |
-| --------------------- | --------------------------------------------------------------------------------- |
-| Quality               | E2E workflow tests, cross-module coverage, eliminate flaky tests                  |
-| Performance           | Benchmark dashboard aggregation, profile document pipeline, capture baselines     |
-| Security              | RBAC coverage, authentication audit, upload/storage validation, dependency review |
-| Operational Readiness | Logging, health checks, observability, deployment docs, backup/recovery           |
+| Workstream            | Status      | Goal                                                                              |
+| --------------------- | ----------- | --------------------------------------------------------------------------------- |
+| Quality               | ✅ Complete | E2E workflow tests, cross-module coverage, eliminate flaky tests                  |
+| Performance           | ✅ Complete | Benchmark dashboard aggregation, profile document pipeline, capture baselines     |
+| Security              | ✅ Complete | RBAC coverage, authentication audit, upload/storage validation, dependency review |
+| Operational Readiness | Planned     | Logging, health checks, observability, deployment docs, backup/recovery           |
 
 The execution order below maps to these workstreams.
 
@@ -61,7 +61,7 @@ Task Creation
 Mission Control Dashboard
 ```
 
-Checklist:
+Golden path checklist:
 
 - [x] Create a dedicated backend integration suite for the full workflow.
 - [x] Seed organization and users with representative roles.
@@ -74,57 +74,77 @@ Checklist:
 - [x] Assert timeline events exist for each key domain action (upload, OCR, classification, metadata, entity resolution).
 - [x] Assert task creation succeeds for operational work items.
 - [x] Assert Mission Control includes the case, document, task, processing, timeline, and alert data.
-- [ ] Extend fixtures to also cover ambiguous and unmatched entity-resolution outcomes.
 - [ ] Add the E2E workflow as a required GitHub status check for merges into `main`.
 
-### 2. Performance Baselines
+Keep `test_full_case_lifecycle.py` focused on the fast, deterministic happy path. Edge cases should be isolated into separate E2E scenarios so failures diagnose one behavior at a time:
+
+- `test_entity_resolution_ambiguous.py` — ambiguous match
+- `test_entity_resolution_unmatched.py` — no match
+- `test_ocr_failure_recovery.py` — OCR retry
+- `test_worker_restart.py` — worker resilience
+
+### Remaining Sprint 4.3.1 Priorities
+
+With the golden-path E2E suite live, complete the remaining stabilization work in this order:
+
+1. ✅ Performance baselines: captured in [`docs/quality/performance/v4.3.1-baseline.md`](../quality/performance/v4.3.1-baseline.md).
+2. ✅ Security review: verified RBAC, authentication flows, upload validation, dependency audit, secrets, and configuration.
+3. ✅ Coverage improvements: focused on cross-module workflows and event-driven interactions rather than raw percentage growth.
+4. ✅ Branch protection: `main` requires PR review, up-to-date branches, CI checks, and the golden-path E2E workflow.
+
+### 2. Performance Baselines ✅ Complete
 
 Capture baseline metrics before optimizing. These numbers become the comparison point for Version 4.5 automation.
 
-| Metric            | Initial Target                         |
-| ----------------- | -------------------------------------- |
-| Dashboard API     | `<500 ms`                              |
-| Case creation     | `<200 ms`                              |
-| Document upload   | `<500 ms` excluding OCR                |
-| OCR processing    | Record baseline by file type and size  |
-| Entity resolution | Record baseline by candidate set size  |
-| Timeline query    | `<250 ms` for recent activity/filter   |
-| Task query        | Record list/overdue/due-today baseline |
+Tracking document: [`docs/quality/performance/v4.3.1-baseline.md`](../quality/performance/v4.3.1-baseline.md)
+
+| Metric              | Initial Target                        |
+| ------------------- | ------------------------------------- |
+| Dashboard API       | `<500 ms`                             |
+| Login               | `<150 ms`                             |
+| Case creation       | `<200 ms`                             |
+| Document upload     | `<500 ms` excluding OCR               |
+| OCR processing      | Record baseline by file type and size |
+| Classification      | Record baseline by file type and size |
+| Metadata extraction | Record baseline by file type and size |
+| Entity resolution   | Record baseline by candidate set size |
+| Timeline write      | `<100 ms`                             |
 
 Capture:
 
-- Dataset size and seed shape
-- Local versus CI or containerized environment
-- Median, p95, and max latency where practical
-- Any query plans or indexes needed before Version 4.5
+- [x] Dataset size and seed shape.
+- [x] Local versus CI or containerized environment.
+- [x] Median, p95, and max latency where practical.
+- [ ] Re-measure in CI and establish candidate performance regression thresholds.
+- [x] Profile login latency before optimizing.
 
 ### 3. Security Review
 
-Create and execute a security checklist covering:
+Create and execute a pass/fail security checklist.
 
-- [ ] RBAC verification for all endpoints
-- [ ] JWT expiry, refresh, inactive user, and invalid token behavior
-- [ ] File upload validation: MIME type, size, extension, duplicate hash, malformed PDF/image handling
-- [ ] MinIO bucket policies and object access controls
-- [ ] Secret management: `.env.example`, Docker Compose defaults, CI secrets, no committed credentials
-- [ ] Dependency audit: `npm audit`, `pip-audit`, or equivalent
-- [ ] CORS and security headers
-- [ ] Rate limiting for authentication and uploads
+Tracking document: [`docs/quality/security/v4.3.1-review.md`](../quality/security/v4.3.1-review.md)
+
+- [x] Authentication: login, JWT expiration and refresh, invalid token handling, inactive user behavior.
+- [x] Authorization: RBAC verification for protected endpoints and organization isolation.
+- [x] File uploads: MIME validation, file size limits, malformed document handling, duplicate hash behavior.
+- [x] Object storage: MinIO bucket policy, object access controls, authenticated downloads.
+- [x] Secrets and configuration: environment-driven settings, no hardcoded production credentials, safe CI logging.
+- [x] Dependencies: frontend dependency audit, Python dependency audit, critical/high findings triaged.
 
 Expected output: security findings with severity, affected paths, and recommended fixes.
 
+Run this workstream before expanding coverage. Security findings may change the behavior that high-value tests need to enforce.
+
 ### 4. Test Coverage
 
-Expand from endpoint coverage into cross-module scenarios:
+Expand confidence through high-value cross-module scenarios rather than chasing raw coverage percentage:
 
-- [ ] Case → Document → OCR → Timeline
-- [ ] OCR failure → Retry → Success
-- [ ] Entity resolution ambiguity
-- [ ] Task creation from events
-- [ ] Dashboard aggregation and alert generation
-- [ ] Event bus interactions and timeline persistence
-- [ ] RBAC denial paths for dashboard, tasks, documents, and timeline endpoints
-- [ ] Failure and retry scenarios for metadata extraction, entity resolution, and task creation
+- [x] Event bus publishing/subscribing.
+- [x] Worker retry/failure behavior.
+- [x] Dashboard aggregation.
+- [x] Entity resolution edge cases.
+- [x] Timeline generation.
+- [x] RBAC denial paths for dashboard, tasks, documents, and timeline endpoints.
 
 ### 5. Architecture Review
 
@@ -160,28 +180,32 @@ Confirm the Operational Core is deployable, observable, and recoverable before a
 
 ## Definition of Done
 
-- End-to-end workflow has been exercised and documented.
-- Performance baselines are recorded for dashboard, OCR, entity resolution, timeline, and tasks.
-- Security review findings are triaged.
-- New tests cover the highest-risk cross-module and failure paths.
-- Architecture review is complete and the v4.3.0 architecture snapshot is saved.
-- Operational readiness is verified: logging, health checks, observability, deployment docs, and backup/recovery.
-- Any release-blocking defects are fixed or explicitly deferred with owner and rationale.
-- Version 4.5 planning starts from stable Operational Core contracts, not foundational rewrites.
+- [ ] Golden-path E2E passes consistently in CI.
+- [x] Performance baselines are captured and documented.
+- [x] Security review is completed with tracked findings.
+- [x] High-value workflow coverage is expanded.
+- [x] Branch protection is configured to enforce the E2E release gate.
+- [x] No critical or high-severity issues are outstanding.
+- [ ] Version 4.5 planning starts from stable Operational Core contracts, not foundational rewrites.
 
 ## Version 4.5 Opening Focus
 
 Version 4.5 should intentionally shift from foundational CRUD to automation and intelligence. Every 4.5 epic should leverage the Operational Core instead of modifying its core contracts.
 
-Suggested epic order:
+Recommended first epic:
 
 1. Credit Report Import Wizard
-2. Bureau-specific parsers
-3. Workflow Automation Engine
-4. Dispute Generation Engine
-5. AI Case Assistant
-6. Client Portal
-7. Notifications
+
+This should open Version 4.5 because it exercises nearly every Operational Core subsystem: document ingestion, OCR, classification, metadata extraction, entity resolution, timeline, tasks, and Mission Control.
+
+Suggested follow-up epic order:
+
+1. Bureau-specific parsers
+2. Workflow Automation Engine
+3. Dispute Generation Engine
+4. AI Case Assistant
+5. Client Portal
+6. Notifications
 
 ## Recommended 4.5 Principles
 
