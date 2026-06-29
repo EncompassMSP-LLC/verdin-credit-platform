@@ -14,6 +14,7 @@ from worker.documents import (
     save_ocr_failure,
     save_ocr_success,
 )
+from worker.queue import enqueue_job
 from worker.ocr.extractor import (
     OcrExtractionError,
     UnsupportedOcrFormatError,
@@ -83,6 +84,9 @@ class OcrJob(BaseJob):
                     document_id,
                     text=result.data["text"],
                     version_number=result.data["version_number"],
+                )
+                enqueue_job(
+                    JobType.DOCUMENT_CLASSIFY, {"document_id": str(document_id)}
                 )
             elif result.status == JobStatus.FAILED:
                 save_ocr_failure(session, document_id, result.message)

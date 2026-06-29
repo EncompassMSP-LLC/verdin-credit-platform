@@ -8,7 +8,11 @@ from pydantic import Field
 
 from api.core.pagination import PaginationParams
 from api.core.responses import BaseSchema
-from api.modules.documents.constants import DocumentProcessingStatus
+from api.modules.documents.constants import (
+    ClassificationMethod,
+    DocumentProcessingStatus,
+    DocumentType,
+)
 from api.modules.documents.models import Document, DocumentVersion
 
 DocumentSortField = Literal["created_at", "title", "file_name", "file_size"]
@@ -74,6 +78,9 @@ class DocumentResponse(BaseSchema):
     processing_status: DocumentProcessingStatus
     ocr_processed_at: datetime | None
     ocr_version_number: int | None
+    document_type: DocumentType | None = None
+    confidence_score: float | None = None
+    classified_at: datetime | None = None
     created_at: datetime
     updated_at: datetime
     deleted_at: datetime | None
@@ -108,6 +115,13 @@ class DocumentResponse(BaseSchema):
             processing_status=DocumentProcessingStatus(document.processing_status),
             ocr_processed_at=document.ocr_processed_at,
             ocr_version_number=document.ocr_version_number,
+            document_type=(
+                DocumentType(document.document_type) if document.document_type else None
+            ),
+            confidence_score=float(document.confidence_score)
+            if document.confidence_score is not None
+            else None,
+            classified_at=document.classified_at,
             created_at=document.created_at,
             updated_at=document.updated_at,
             deleted_at=document.deleted_at,
@@ -134,4 +148,32 @@ class DocumentOcrResponse(BaseSchema):
             ocr_error=document.ocr_error,
             ocr_processed_at=document.ocr_processed_at,
             ocr_version_number=document.ocr_version_number,
+        )
+
+
+class DocumentClassificationResponse(BaseSchema):
+    document_id: uuid.UUID
+    document_type: DocumentType | None
+    confidence_score: float | None
+    classification_method: ClassificationMethod | None
+    classified_at: datetime | None
+    classified_by_id: uuid.UUID | None
+
+    @classmethod
+    def from_model(cls, document: Document) -> "DocumentClassificationResponse":
+        return cls(
+            document_id=document.id,
+            document_type=(
+                DocumentType(document.document_type) if document.document_type else None
+            ),
+            confidence_score=float(document.confidence_score)
+            if document.confidence_score is not None
+            else None,
+            classification_method=(
+                ClassificationMethod(document.classification_method)
+                if document.classification_method
+                else None
+            ),
+            classified_at=document.classified_at,
+            classified_by_id=document.classified_by_id,
         )

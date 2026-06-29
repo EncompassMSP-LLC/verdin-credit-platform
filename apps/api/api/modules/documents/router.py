@@ -12,6 +12,7 @@ from api.modules.auth.dependencies import get_current_user
 from api.modules.auth.models import User
 from api.modules.documents.constants import DocumentProcessingStatus
 from api.modules.documents.schemas import (
+    DocumentClassificationResponse,
     DocumentListParams,
     DocumentOcrResponse,
     DocumentResponse,
@@ -116,6 +117,24 @@ async def delete_document(
     service: DocumentService = Depends(get_document_service),
 ) -> None:
     await service.delete_document(current_user, document_id)
+
+
+@router.get("/{document_id}/classification", response_model=DocumentClassificationResponse)
+async def get_document_classification(
+    document_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> DocumentClassificationResponse:
+    return await service.get_classification(current_user, document_id)
+
+
+@router.post("/{document_id}/classify", response_model=DocumentClassificationResponse)
+async def classify_document(
+    document_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> DocumentClassificationResponse:
+    return await service.classify_document(current_user, document_id)
 
 
 @router.get("/{document_id}/ocr", response_model=DocumentOcrResponse)
