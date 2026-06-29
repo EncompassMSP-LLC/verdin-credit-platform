@@ -67,6 +67,10 @@ pnpm dev
 
 Reuse shared utilities from `api/core/` (responses, pagination, permissions, security, audit, exceptions).
 
+### Task management module
+
+Operational tasks live in `api/modules/tasks/` with organization-scoped CRUD, soft delete, and timeline events (`TASK_CREATED`, `TASK_UPDATED`, `TASK_COMPLETED`, `TASK_REOPENED`, `TASK_DELETED`) published through `api/core/events.py`. Frontend pages are under `apps/web/src/pages/tasks/`. Shared API client functions are in `packages/api-client/src/tasks.ts`.
+
 ### Create a database migration
 
 ```bash

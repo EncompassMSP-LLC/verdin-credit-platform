@@ -116,12 +116,13 @@ async def seed() -> None:
 
         task = Task(
             id=uuid.uuid4(),
+            organization_id=org.id,
             title="Review financial statements",
             description="Collect and review last 3 years of financial statements.",
-            status=TaskStatus.PENDING,
+            status=TaskStatus.OPEN,
             priority=TaskPriority.HIGH,
             case_id=case.id,
-            assigned_to_id=admin.id,
+            assigned_user_id=admin.id,
         )
         apply_audit_on_create(task, owner.id)
         session.add(task)

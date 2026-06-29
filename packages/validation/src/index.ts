@@ -113,6 +113,26 @@ export const createAccountSchema = z.object({
 
 export const updateAccountSchema = createAccountSchema.omit({ case_id: true }).partial();
 
+export const taskStatusSchema = z.enum(['open', 'in_progress', 'blocked', 'completed', 'canceled']);
+
+export const taskPrioritySchema = z.enum(['low', 'medium', 'high', 'critical']);
+
+export const createTaskSchema = z.object({
+  title: z.string().min(1, 'Title is required').max(255),
+  description: z.string().optional().nullable(),
+  status: taskStatusSchema.default('open'),
+  priority: taskPrioritySchema.default('medium'),
+  due_date: z.string().optional().nullable(),
+  case_id: z.string().uuid().optional().nullable(),
+  account_id: z.string().uuid().optional().nullable(),
+  document_id: z.string().uuid().optional().nullable(),
+  assigned_user_id: z.string().uuid().optional().nullable(),
+  source_module: z.string().max(50).optional().nullable(),
+  source_event_id: z.string().uuid().optional().nullable(),
+});
+
+export const updateTaskSchema = createTaskSchema.partial();
+
 export const paginationSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   page_size: z.coerce.number().int().min(1).max(100).default(20),
@@ -125,4 +145,6 @@ export type CreateCaseInput = z.infer<typeof createCaseSchema>;
 export type UpdateCaseInput = z.infer<typeof updateCaseSchema>;
 export type CreateAccountInput = z.infer<typeof createAccountSchema>;
 export type UpdateAccountInput = z.infer<typeof updateAccountSchema>;
+export type CreateTaskInput = z.infer<typeof createTaskSchema>;
+export type UpdateTaskInput = z.infer<typeof updateTaskSchema>;
 export type PaginationInput = z.infer<typeof paginationSchema>;
