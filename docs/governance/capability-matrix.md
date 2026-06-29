@@ -87,13 +87,14 @@ Engineering milestone — not a semantic version.
 
 Plan: [`docs/sprint-4.3.1/operational-core-stabilization.md`](../sprint-4.3.1/operational-core-stabilization.md)
 
-| Focus Area              | Status        | Outcome                                                                    |
-| ----------------------- | ------------- | -------------------------------------------------------------------------- |
-| End-to-end validation   | ✅ Suite live | `tests/e2e` full case lifecycle gate + `e2e.yml`; consistent green         |
-| Performance baselines   | Planned       | Record dashboard, OCR, entity resolution, timeline, and task query metrics |
-| Security review         | Planned       | Review RBAC, JWTs, uploads, object storage, dependencies, secrets          |
-| Test coverage expansion | Planned       | 85–90% on core services and critical workflows                             |
-| Defect gate             | Planned       | No critical or high-severity defects before Version 4.5                    |
+| Focus Area              | Status      | Outcome                                                                                                        |
+| ----------------------- | ----------- | -------------------------------------------------------------------------------------------------------------- |
+| End-to-end validation   | ✅ Complete | `tests/e2e` full case lifecycle gate + `e2e.yml`; consistent green                                             |
+| Performance baselines   | ✅ Complete | Metrics captured in [`docs/quality/performance/v4.3.1-baseline.md`](../quality/performance/v4.3.1-baseline.md) |
+| Security review         | ✅ Complete | Pass/fail review complete in [`docs/quality/security/v4.3.1-review.md`](../quality/security/v4.3.1-review.md)  |
+| Test coverage expansion | ✅ Complete | Worker failure handling, event bus, dashboard aggregation, entity resolution, timeline, and RBAC paths covered |
+| Branch protection       | ✅ Complete | `main` requires PR review, strict CI status checks, and the E2E workflow                                       |
+| Defect gate             | ✅ Complete | No critical or high-severity defects found in the Sprint 4.3.1 security review                                 |
 
 ---
 

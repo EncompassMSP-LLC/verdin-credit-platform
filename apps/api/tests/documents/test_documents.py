@@ -2,8 +2,10 @@
 
 import uuid
 
+import pytest
 from fastapi.testclient import TestClient
 
+from api.core.config import get_settings
 from tests.documents.conftest import sample_pdf_upload
 
 
@@ -103,6 +105,89 @@ def test_download_document(
     )
     assert response.status_code == 200
     assert b"PDF" in response.content
+
+
+def test_download_document_requires_auth(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    filename, file_obj, content_type = sample_pdf_upload()
+    create = api_client.post(
+        "/api/v1/documents",
+        headers=manager_headers,
+        data={"title": "Protected Download", "case_id": sample_case_id},
+        files={"file": (filename, file_obj, content_type)},
+    )
+    document_id = create.json()["id"]
+    response = api_client.get(f"/api/v1/documents/{document_id}/download")
+    assert response.status_code == 401
+
+
+def test_upload_rejects_unsupported_mime_type(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    response = api_client.post(
+        "/api/v1/documents",
+        headers=manager_headers,
+        data={"title": "Executable", "case_id": sample_case_id},
+        files={"file": ("payload.exe", b"MZ", "application/x-msdownload")},
+    )
+    assert response.status_code == 422
+    assert "Unsupported file type" in response.json()["detail"]
+
+
+def test_upload_rejects_empty_file(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    response = api_client.post(
+        "/api/v1/documents",
+        headers=manager_headers,
+        data={"title": "Empty", "case_id": sample_case_id},
+        files={"file": ("empty.pdf", b"", "application/pdf")},
+    )
+    assert response.status_code == 422
+    assert response.json()["detail"] == "Uploaded file is empty"
+
+
+def test_upload_rejects_file_over_size_limit(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    settings = get_settings()
+    monkeypatch.setattr(settings, "document_max_upload_bytes", 4)
+    response = api_client.post(
+        "/api/v1/documents",
+        headers=manager_headers,
+        data={"title": "Too Large", "case_id": sample_case_id},
+        files={"file": ("large.pdf", b"%PDF-1.4 too large", "application/pdf")},
+    )
+    assert response.status_code == 413
+    assert response.json()["detail"] == "File exceeds maximum upload size"
+
+
+def test_upload_storage_key_strips_path_components(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+    memory_storage,
+) -> None:
+    response = api_client.post(
+        "/api/v1/documents",
+        headers=manager_headers,
+        data={"title": "Path Name", "case_id": sample_case_id},
+        files={"file": ("../../.hidden/report.pdf", b"%PDF-1.4", "application/pdf")},
+    )
+    assert response.status_code == 201, response.text
+    [storage_key] = list(memory_storage._objects)
+    assert storage_key.endswith("/report.pdf")
+    assert ".." not in storage_key
 
 
 def test_upload_new_version(

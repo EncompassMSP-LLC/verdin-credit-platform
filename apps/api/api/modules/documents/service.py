@@ -194,7 +194,11 @@ class DocumentService:
         version_number: int,
         file_name: str,
     ) -> str:
-        safe_name = file_name.replace("/", "_").replace("\\", "_")
+        base_name = file_name.replace("\\", "/").split("/")[-1].strip()
+        safe_name = "".join(
+            char if char.isalnum() or char in {".", "-", "_"} else "_" for char in base_name
+        ).lstrip(".")
+        safe_name = safe_name or "document"
         return f"{organization_id}/{case_id}/{document_id}/v{version_number}/{safe_name}"
 
     async def _get_document_for_user(
