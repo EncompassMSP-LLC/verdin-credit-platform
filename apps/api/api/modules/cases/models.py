@@ -75,15 +75,12 @@ class Case(Base, TimestampMixin, SoftDeleteMixin, AuditMixin):
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     opened_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     closed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    account_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("accounts.id"), nullable=True
-    )
 
     organization: Mapped["Organization"] = relationship(back_populates="cases")
-    account: Mapped["Account | None"] = relationship(back_populates="cases")
     assigned_to: Mapped["User | None"] = relationship(
         back_populates="assigned_cases", foreign_keys=[assigned_to_id]
     )
+    credit_accounts: Mapped[list["Account"]] = relationship(back_populates="case")
     documents: Mapped[list["Document"]] = relationship(back_populates="case")
     tasks: Mapped[list["Task"]] = relationship(back_populates="case")
     communications: Mapped[list["Communication"]] = relationship(back_populates="case")

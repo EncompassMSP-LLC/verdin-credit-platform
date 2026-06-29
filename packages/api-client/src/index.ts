@@ -36,7 +36,21 @@ export {
   type UpdateCaseInput,
 } from './cases';
 
-export { getAccount, listAccounts, type Account, type ListAccountsParams } from './accounts';
+export {
+  createAccount,
+  deleteAccount,
+  getAccount,
+  getAccountIntelligenceSummary,
+  listAccounts,
+  listCaseAccounts,
+  updateAccount,
+  type Account,
+  type AccountIntelligenceSummary,
+  type CreateAccountInput,
+  type ListAccountsParams,
+  type NextActionItem,
+  type UpdateAccountInput,
+} from './accounts';
 
 export { getDocument, listDocuments, type Document, type ListDocumentsParams } from './documents';
 
