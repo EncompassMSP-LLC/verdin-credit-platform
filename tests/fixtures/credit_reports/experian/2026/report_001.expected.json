@@ -1,0 +1,129 @@
+{
+  "accounts": [
+    {
+      "account_number_masked": "****7890",
+      "account_type": "Revolving",
+      "balance": 3200.0,
+      "bureau": "experian",
+      "confidence": 0.92,
+      "credit_limit": 10000.0,
+      "creditor_name": "First Horizon Bank",
+      "date_reported": "06/01/2026",
+      "open_date": "08/10/2018",
+      "payment_status": "Current"
+    },
+    {
+      "account_number_masked": "****3344",
+      "account_type": "Revolving",
+      "balance": 580.25,
+      "bureau": "experian",
+      "confidence": 0.92,
+      "credit_limit": null,
+      "creditor_name": "Metro Retail Card",
+      "date_reported": "06/01/2026",
+      "open_date": "02/14/2021",
+      "payment_status": "Late 30 Days"
+    }
+  ],
+  "bureau": "experian",
+  "collections": [
+    {
+      "agency_name": "ABC Recovery Services",
+      "balance": 425.0,
+      "confidence": 0.92,
+      "original_creditor": "Utility Co",
+      "status": "Open"
+    }
+  ],
+  "consumer": {
+    "confidence": 0.95,
+    "date_of_birth": "04/22/1990",
+    "name": "Alex M. Rivera",
+    "ssn_masked": "***-**-6789"
+  },
+  "inquiries": [
+    {
+      "confidence": 0.92,
+      "creditor_name": "Capital One",
+      "inquiry_date": "03/10/2026",
+      "inquiry_type": "Hard"
+    },
+    {
+      "confidence": 0.92,
+      "creditor_name": "Chase Bank",
+      "inquiry_date": "01/05/2026",
+      "inquiry_type": "Hard"
+    }
+  ],
+  "metadata": {
+    "classification_confidence": 0.95,
+    "classification_type": "credit_report",
+    "field_confidence": {
+      "accounts[0].account_number_masked": 0.92,
+      "accounts[0].account_type": 0.92,
+      "accounts[0].balance": 0.92,
+      "accounts[0].credit_limit": 0.92,
+      "accounts[0].creditor_name": 0.92,
+      "accounts[0].date_reported": 0.92,
+      "accounts[0].open_date": 0.92,
+      "accounts[0].payment_status": 0.92,
+      "accounts[1].account_number_masked": 0.92,
+      "accounts[1].account_type": 0.92,
+      "accounts[1].balance": 0.92,
+      "accounts[1].creditor_name": 0.92,
+      "accounts[1].date_reported": 0.92,
+      "accounts[1].open_date": 0.92,
+      "accounts[1].payment_status": 0.92,
+      "collections[0].agency_name": 0.92,
+      "collections[0].balance": 0.92,
+      "collections[0].original_creditor": 0.92,
+      "collections[0].status": 0.92,
+      "consumer.date_of_birth": 0.95,
+      "consumer.name": 0.95,
+      "consumer.ssn_masked": 0.95,
+      "inquiries[0].creditor_name": 0.92,
+      "inquiries[0].inquiry_date": 0.92,
+      "inquiries[0].inquiry_type": 0.92,
+      "inquiries[1].creditor_name": 0.92,
+      "inquiries[1].inquiry_date": 0.92,
+      "inquiries[1].inquiry_type": 0.92,
+      "layout.accounts": 0.15,
+      "layout.branding": 0.2,
+      "layout.collections": 0.1,
+      "layout.credit_summary": 0.05,
+      "layout.inquiries": 0.1,
+      "layout.personal_information": 0.15,
+      "layout.public_records": 0.1,
+      "layout.report_header": 0.15,
+      "parser.layout_confidence": 1.0,
+      "public_records[0].amount": 0.92,
+      "public_records[0].filing_date": 0.92,
+      "public_records[0].record_type": 0.92,
+      "public_records[0].status": 0.92,
+      "report.report_date": 0.92
+    },
+    "is_partial": false,
+    "parser_name": "experian",
+    "warnings": []
+  },
+  "personal_information": [],
+  "public_records": [
+    {
+      "amount": 1200.0,
+      "confidence": 0.92,
+      "filing_date": "11/20/2019",
+      "record_type": "Tax Lien",
+      "status": "Released"
+    }
+  ],
+  "report_id": "fixture-report_001",
+  "schema_version": "1.0",
+  "summary": {
+    "confidence": 0.95,
+    "total_accounts": 2,
+    "total_balance": 3780.25,
+    "total_collections": 1,
+    "total_inquiries": 2,
+    "total_public_records": 1
+  }
+}
