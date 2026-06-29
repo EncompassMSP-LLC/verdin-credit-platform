@@ -56,27 +56,30 @@ A capability may be marked **✅ Production** in the [capability matrix](capabil
 
 ## Recommended build order
 
-With governance in place, prioritize features in this order:
+### Phase 1 — Operational Core (Version 4.3)
 
-### Phase 1 — Operational Core (complete 4.3)
+| Priority | Capability                                                        | Status      | Branch                          |
+| -------- | ----------------------------------------------------------------- | ----------- | ------------------------------- |
+| —        | Platform Foundation                                               | ✅          | `feature/platform-foundation`   |
+| —        | Case Management                                                   | ✅          | `feature/case-management`       |
+| —        | Credit Account Intelligence                                       | ✅          | `feature/account-intelligence`  |
+| —        | Document Foundation (M1)                                          | ✅          | `feature/document-foundation`   |
+| —        | OCR Pipeline (M2)                                                 | ✅          | `feature/document-ocr`          |
+| **Next** | **M3 — AI Classification** (`feature/document-classification`) 🚧 | In progress | Rule-based classifier framework |
+| 2        | M4 — Metadata & entity extraction                                 | Planned     | `feature/document-metadata`     |
+| 3        | Timeline & Audit Engine                                           | Planned     | —                               |
+| 4        | Task Management (full module)                                     | Planned     | —                               |
+| 5        | Operational Dashboard                                             | Planned     | —                               |
 
-| Priority | Capability                                        | Rationale                                                   |
-| -------- | ------------------------------------------------- | ----------------------------------------------------------- |
-| **Next** | **M2 — OCR Pipeline** (`feature/document-ocr`) 🚧 | Async text extraction; unblocks classification and metadata |
-| 2        | M3–M4 — Classification & metadata extraction      | Structured fields linked to accounts                        |
-| 3        | Timeline & Audit Engine                           | Document events feed audit trail                            |
-| 4        | Task Management (full module)                     | Operational queues depend on tasks                          |
-| 5        | Operational Dashboard                             | Live metrics from cases, accounts, tasks, timeline          |
-
-> **Note:** Milestone 1 (Document Foundation) is complete. Continue the epic on `feature/document-ocr`.
+> **Version 4.3** is the **Operational Core** release. Freeze 4.3 as a stable production milestone once classification, metadata extraction, timeline, tasks, and dashboard are complete. **Version 4.5** then focuses on automation without revisiting platform architecture.
 
 ### Phase 2 — Automation (4.5)
 
-Credit Report Import Wizard → OCR pipeline → entity extraction → AI summaries → recommendation engine
+Credit Report Import Wizard → AI summaries → workflow orchestration → dispute generation
 
 ### Phase 3 — Intelligence (4.8)
 
-Dispute generation → analytics → client portal → notifications
+Dispute generation (full) → analytics → client portal → notifications
 
 ### Phase 4 — Enterprise (5.0)
 
@@ -86,5 +89,6 @@ Multi-tenancy → compliance center → AI case assistant → predictive analyti
 
 - [Capability matrix (executive view)](capability-matrix.md)
 - [Roadmap index](../roadmap/README.md)
+- [Release notes — M2 OCR](../release-notes/v4.3-m2-ocr-pipeline.md)
 - [Developer guide](../developer-guide.md)
 - [ADR 009 — Architecture governance](../adr/009-architecture-governance.md)

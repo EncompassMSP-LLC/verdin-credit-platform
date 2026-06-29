@@ -3,7 +3,16 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import (
+    Boolean,
+    DateTime,
+    ForeignKey,
+    Integer,
+    Numeric,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -50,6 +59,13 @@ class Document(Base, TimestampMixin, SoftDeleteMixin, AuditMixin):
     )
     ocr_job_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
     ocr_version_number: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    document_type: Mapped[str | None] = mapped_column(String(50), nullable=True, index=True)
+    confidence_score: Mapped[float | None] = mapped_column(Numeric(5, 4), nullable=True)
+    classification_method: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    classified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    classified_by_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id"), nullable=True
+    )
 
     case: Mapped["Case"] = relationship(back_populates="documents")
     account: Mapped["Account | None"] = relationship()

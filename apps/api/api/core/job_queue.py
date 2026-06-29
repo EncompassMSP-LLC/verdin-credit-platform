@@ -12,6 +12,7 @@ from api.core.config import get_settings
 
 class JobType(StrEnum):
     OCR = "ocr"
+    DOCUMENT_CLASSIFY = "document_classify"
     REPORT_IMPORT = "report_import"
     AI_SUMMARY = "ai_summary"
     MONTHLY_REVIEW = "monthly_review"
