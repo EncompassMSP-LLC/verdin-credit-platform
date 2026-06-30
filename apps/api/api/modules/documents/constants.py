@@ -39,6 +39,7 @@ class MetadataStatus(StrEnum):
 class ExtractionMethod(StrEnum):
     RULES = "rules"
     AI = "ai"
+    PARSER = "parser"
 
 
 class MatchedEntityType(StrEnum):

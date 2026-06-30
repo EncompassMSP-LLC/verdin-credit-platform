@@ -51,7 +51,6 @@ def bridge_parsed_report(report: ParsedCreditReport) -> BridgedMetadataFields:
         elif item.field_name.lower() == "phone":
             phone_numbers.append(item.value)
 
-    parser_name = report.metadata.parser_name if report.metadata else "parser"
     field_confidence = report.metadata.field_confidence if report.metadata else {}
     layout_confidence = field_confidence.get("parser.layout_confidence")
     summary_confidence = report.summary.confidence if report.summary else None
@@ -85,7 +84,7 @@ def bridge_parsed_report(report: ParsedCreditReport) -> BridgedMetadataFields:
         phone_numbers=tuple(phone_numbers),
         ssn_masked=consumer.ssn_masked if consumer else None,
         confidence_score=confidence_score,
-        extraction_method=f"parser:{parser_name}",
+        extraction_method="parser",
     )
 
 
@@ -113,7 +112,6 @@ def bridge_parsed_report_dict(report: dict[str, Any]) -> BridgedMetadataFields:
         if item.get("field_name", "").lower() == "phone" and item.get("value")
     ]
 
-    parser_name = metadata.get("parser_name", "parser")
     confidence_candidates = [
         field_confidence.get("parser.layout_confidence"),
         summary.get("confidence"),
@@ -142,5 +140,5 @@ def bridge_parsed_report_dict(report: dict[str, Any]) -> BridgedMetadataFields:
         phone_numbers=tuple(phone_numbers),
         ssn_masked=consumer.get("ssn_masked"),
         confidence_score=float(confidence_score),
-        extraction_method=f"parser:{parser_name}",
+        extraction_method="parser",
     )

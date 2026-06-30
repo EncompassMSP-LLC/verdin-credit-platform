@@ -28,5 +28,5 @@ def test_bridge_experian_expected_fixture() -> None:
     assert bridged.creditor == "First Horizon Bank"
     assert bridged.account_number_masked == "****7890"
     assert bridged.balance == 3200.0
-    assert bridged.extraction_method == "parser:experian"
+    assert bridged.extraction_method == "parser"
     assert bridged.confidence_score > 0
