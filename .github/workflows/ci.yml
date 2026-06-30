@@ -114,13 +114,15 @@ jobs:
       - name: Build API image
         uses: docker/build-push-action@v6
         with:
-          context: apps/api
+          context: .
+          file: apps/api/Dockerfile
           push: false
           tags: verdin-api:ci
       - name: Build Worker image
         uses: docker/build-push-action@v6
         with:
-          context: apps/worker
+          context: .
+          file: apps/worker/Dockerfile
           push: false
           tags: verdin-worker:ci
       - name: Build Web image

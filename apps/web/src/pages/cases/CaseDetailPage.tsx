@@ -132,6 +132,15 @@ export function CaseDetailPage() {
           ) : null}
         </Card>
 
+        <Card title="Credit accounts">
+          <p className="text-sm text-gray-600">View tradelines linked to this case.</p>
+          <Link to={`/cases/${caseId}/accounts`} className="mt-3 inline-block">
+            <Button variant="secondary" size="sm">
+              View accounts
+            </Button>
+          </Link>
+        </Card>
+
         <Card title="Metadata">
           <dl className="space-y-3 text-sm">
             <div>
