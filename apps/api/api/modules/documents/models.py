@@ -77,6 +77,10 @@ class Document(Base, TimestampMixin, SoftDeleteMixin, AuditMixin):
     entity_resolutions: Mapped[list["DocumentEntityResolution"]] = relationship(
         back_populates="document",
     )
+    parsed_credit_report: Mapped["DocumentParsedCreditReport | None"] = relationship(
+        back_populates="document",
+        uselist=False,
+    )
     versions: Mapped[list["DocumentVersion"]] = relationship(
         back_populates="document",
         order_by="DocumentVersion.version_number.desc()",
