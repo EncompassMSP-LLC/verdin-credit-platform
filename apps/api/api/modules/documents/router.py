@@ -23,6 +23,7 @@ from api.modules.documents.metadata_schemas import (
 )
 from api.modules.documents.schemas import (
     DocumentClassificationResponse,
+    DocumentDuplicateGroupResponse,
     DocumentListParams,
     DocumentOcrResponse,
     DocumentParsedCreditReportResponse,
@@ -113,6 +114,15 @@ async def get_document(
     service: DocumentService = Depends(get_document_service),
 ) -> DocumentResponse:
     return await service.get_document(current_user, document_id)
+
+
+@router.get("/{document_id}/duplicates", response_model=DocumentDuplicateGroupResponse)
+async def get_document_duplicate_group(
+    document_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> DocumentDuplicateGroupResponse:
+    return await service.get_duplicate_group(current_user, document_id)
 
 
 @router.patch("/{document_id}", response_model=DocumentResponse)

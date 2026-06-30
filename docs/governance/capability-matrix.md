@@ -44,7 +44,7 @@ Mission Control dashboard and governance refinements shipped in tag `v4.3.1`. Se
 | Platform Foundation             | 4.2     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | Shipped in 4.2 — monorepo, auth, RBAC, CI             |
 | **Case Management**             | 4.3     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | CRUD, filters, RBAC, full UI                          |
 | **Credit Account Intelligence** | 4.3     | ✅     | ✅      | ✅       | ✅  | Partial | ✅    | Heuristic risk/readiness scoring in `intelligence.py` |
-| **Document Foundation**         | 4.3     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | Upload, versioning, MinIO, duplicate detection        |
+| **Document Foundation**         | 4.3     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | Upload, versioning, MinIO, duplicate detection/review |
 | **OCR Pipeline**                | 4.3     | ✅     | ✅      | ✅       | ✅  | ✅      | ✅    | Async worker extraction; pypdf + tesseract            |
 | **AI Classification**           | 4.3     | ✅     | ✅      | Partial  | ✅  | Partial | ✅    | Rule-based classifier framework                       |
 | **Metadata Extraction**         | 4.3     | ✅     | ✅      | ✅       | ✅  | Partial | ✅    | Rule-based extraction; `packages/document-metadata`   |

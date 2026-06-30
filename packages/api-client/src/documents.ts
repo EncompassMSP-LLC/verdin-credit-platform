@@ -89,6 +89,13 @@ export interface DocumentOcrResult {
   ocr_version_number: number | null;
 }
 
+export interface DocumentDuplicateGroup {
+  document_id: string;
+  canonical_document: Document;
+  duplicate_documents: Document[];
+  duplicate_count: number;
+}
+
 export interface DocumentMetadata {
   document_id: string;
   consumer_name: string | null;
@@ -172,6 +179,12 @@ export async function listDocuments(
 
 export async function getDocument(documentId: string): Promise<Document> {
   return request<Document>(apiPath(`/documents/${documentId}`));
+}
+
+export async function getDocumentDuplicateGroup(
+  documentId: string,
+): Promise<DocumentDuplicateGroup> {
+  return request<DocumentDuplicateGroup>(apiPath(`/documents/${documentId}/duplicates`));
 }
 
 export async function updateDocument(

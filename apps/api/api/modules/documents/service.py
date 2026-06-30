@@ -49,6 +49,7 @@ from api.modules.documents.permissions import (
 from api.modules.documents.repository import DocumentListFilters, DocumentRepository
 from api.modules.documents.schemas import (
     DocumentClassificationResponse,
+    DocumentDuplicateGroupResponse,
     DocumentListParams,
     DocumentOcrResponse,
     DocumentParsedCreditReportResponse,
@@ -434,6 +435,27 @@ class DocumentService:
     async def get_document(self, user: User, document_id: uuid.UUID) -> DocumentResponse:
         document = await self._get_document_for_user(document_id, user, include_versions=True)
         return DocumentResponse.from_model(document, include_versions=True)
+
+    async def get_duplicate_group(
+        self,
+        user: User,
+        document_id: uuid.UUID,
+    ) -> DocumentDuplicateGroupResponse:
+        document = await self._get_document_for_user(document_id, user)
+        canonical_id = document.duplicate_of_id or document.id
+        group = await self._documents.list_duplicate_group(document.organization_id, canonical_id)
+        canonical = next((item for item in group if item.id == canonical_id), None)
+        if canonical is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Canonical duplicate document not found",
+            )
+        duplicates = [item for item in group if item.id != canonical.id]
+        return DocumentDuplicateGroupResponse.from_group(
+            document_id=document.id,
+            canonical_document=canonical,
+            duplicate_documents=duplicates,
+        )
 
     async def update_document(
         self,
