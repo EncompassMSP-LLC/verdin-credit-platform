@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import Literal
 
 from pydantic import Field
+from sqlalchemy import inspect as sa_inspect
 
 from api.core.pagination import PaginationParams
 from api.core.responses import BaseSchema
@@ -103,6 +104,10 @@ class DocumentResponse(BaseSchema):
         versions: list[DocumentVersionResponse] = []
         if include_versions and document.versions:
             versions = [DocumentVersionResponse.from_model(v) for v in document.versions]
+        unloaded = sa_inspect(document).unloaded
+        extracted_metadata = (
+            document.extracted_metadata if "extracted_metadata" not in unloaded else None
+        )
         return cls(
             id=document.id,
             organization_id=document.organization_id,
@@ -128,8 +133,8 @@ class DocumentResponse(BaseSchema):
             else None,
             classified_at=document.classified_at,
             metadata_status=(
-                MetadataStatus(document.extracted_metadata.metadata_status)
-                if document.extracted_metadata is not None
+                MetadataStatus(extracted_metadata.metadata_status)
+                if extracted_metadata is not None
                 else None
             ),
             created_at=document.created_at,

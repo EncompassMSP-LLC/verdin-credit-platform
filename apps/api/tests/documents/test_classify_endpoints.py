@@ -3,9 +3,12 @@
 from unittest.mock import patch
 
 from fastapi.testclient import TestClient
+from verdin_document_classification import (
+    ClassificationMethod,
+    ClassificationResult,
+    DocumentType,
+)
 
-from api.modules.documents.classification.base import ClassificationResult
-from api.modules.documents.constants import ClassificationMethod, DocumentType
 from tests.documents.conftest import sample_pdf_upload
 
 

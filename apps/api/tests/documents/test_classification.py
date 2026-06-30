@@ -1,8 +1,11 @@
 """Unit tests for document classification engine."""
 
-from api.modules.documents.classification import ClassificationContext, classify_document
-from api.modules.documents.classification.registry import list_classifiers
-from api.modules.documents.constants import DocumentType
+from verdin_document_classification import (
+    ClassificationContext,
+    DocumentType,
+    classify_document,
+)
+from verdin_document_classification.registry import list_classifiers
 
 
 def test_registry_lists_all_classifiers() -> None:

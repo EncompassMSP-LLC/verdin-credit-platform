@@ -7,22 +7,24 @@ from datetime import UTC, datetime
 
 from fastapi import HTTPException, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from verdin_document_classification import (
+    ClassificationContext,
+    ClassificationResult,
+)
+from verdin_document_classification import (
+    classify_document as run_document_classification,
+)
+from verdin_event_types import DocumentEventType
 
 from api.core.audit import apply_audit_on_create, apply_audit_on_update
 from api.core.config import get_settings
+from api.core.events import publish_platform_event
 from api.core.job_queue import JobType, enqueue_job
 from api.core.pagination import PaginatedResponse, paginate
 from api.core.permissions import has_permission
 from api.modules.accounts.repository import AccountRepository
 from api.modules.auth.models import User
 from api.modules.cases.repository import CaseRepository
-from api.modules.documents.classification import (
-    ClassificationContext,
-)
-from api.modules.documents.classification import (
-    classify_document as run_document_classification,
-)
-from api.modules.documents.classification.base import ClassificationResult
 from api.modules.documents.constants import (
     DocumentProcessingStatus,
     MatchedEntityType,
@@ -59,6 +61,11 @@ from api.modules.documents.storage import (
     async_put,
     get_document_storage,
 )
+from api.modules.timeline.builders import (
+    document_pipeline_event,
+    document_uploaded_event,
+    document_version_created_event,
+)
 from api.repositories.document import DocumentRepositoryProtocol
 
 logger = logging.getLogger(__name__)
@@ -84,12 +91,14 @@ class DocumentService:
         account_repo: AccountRepository,
         metadata_repo: DocumentMetadataRepository,
         storage: DocumentStorage,
+        session: AsyncSession | None = None,
     ) -> None:
         self._documents = document_repo
         self._cases = case_repo
         self._accounts = account_repo
         self._metadata = metadata_repo
         self._storage = storage
+        self._session = session
 
     @classmethod
     def from_session(
@@ -103,6 +112,7 @@ class DocumentService:
             AccountRepository(session),
             DocumentMetadataRepository(session),
             storage or get_document_storage(),
+            session=session,
         )
 
     def _require_organization(self, user: User) -> uuid.UUID:
@@ -184,7 +194,11 @@ class DocumentService:
         version_number: int,
         file_name: str,
     ) -> str:
-        safe_name = file_name.replace("/", "_").replace("\\", "_")
+        base_name = file_name.replace("\\", "/").split("/")[-1].strip()
+        safe_name = "".join(
+            char if char.isalnum() or char in {".", "-", "_"} else "_" for char in base_name
+        ).lstrip(".")
+        safe_name = safe_name or "document"
         return f"{organization_id}/{case_id}/{document_id}/v{version_number}/{safe_name}"
 
     async def _get_document_for_user(
@@ -317,8 +331,17 @@ class DocumentService:
         )
         await self._documents.create_version(version)
 
+        # Commit before enqueuing async work. The worker reads the document on a
+        # separate connection and may dequeue the OCR job before this request's
+        # transaction commits — a read-after-write race that otherwise drops the
+        # job and leaves the document stuck in "queued".
+        if self._session is not None:
+            await self._session.commit()
+
         self._queue_ocr_job(document)
         await self._documents.update(document)
+        if self._session is not None:
+            await publish_platform_event(self._session, document_uploaded_event(document, user.id))
 
         return DocumentResponse.from_model(document)
 
@@ -379,8 +402,17 @@ class DocumentService:
         apply_audit_on_update(document, user.id)
         updated = await self._documents.update(document)
 
+        # See upload_document: persist the new version before enqueuing OCR so
+        # the worker never races the request transaction.
+        if self._session is not None:
+            await self._session.commit()
+
         self._queue_ocr_job(updated)
         updated = await self._documents.update(updated)
+        if self._session is not None:
+            await publish_platform_event(
+                self._session, document_version_created_event(updated, user.id)
+            )
         return DocumentResponse.from_model(updated)
 
     async def list_documents(
@@ -544,6 +576,21 @@ class DocumentService:
         apply_audit_on_update(document, user.id)
         await self._documents.update(document)
         self._queue_metadata_extract_job(document)
+        if self._session is not None:
+            await publish_platform_event(
+                self._session,
+                document_pipeline_event(
+                    document,
+                    DocumentEventType.CLASSIFICATION_COMPLETED,
+                    title="Classification completed",
+                    description=f"Document classified as {result.document_type.value}.",
+                    performed_by=user.id,
+                    metadata={
+                        "document_type": result.document_type.value,
+                        "confidence_score": result.confidence_score,
+                    },
+                ),
+            )
         return DocumentClassificationResponse.from_model(document)
 
     async def get_classification(
@@ -605,6 +652,18 @@ class DocumentService:
         apply_audit_on_update(document, user.id)
         await self._documents.update(document)
         self._queue_entity_resolve_job(document)
+        if self._session is not None:
+            await publish_platform_event(
+                self._session,
+                document_pipeline_event(
+                    document,
+                    DocumentEventType.METADATA_EXTRACTED,
+                    title="Metadata extracted",
+                    description=f"Structured metadata extracted from '{document.title}'.",
+                    performed_by=user.id,
+                    metadata={"confidence_score": response.confidence_score},
+                ),
+            )
         return response
 
     async def get_resolutions(
@@ -643,6 +702,27 @@ class DocumentService:
             ) from exc
         apply_audit_on_update(document, user.id)
         await self._documents.update(document)
+        if self._session is not None:
+            account_match = next(
+                (row for row in response.resolutions if row.entity_type.value == "account"),
+                None,
+            )
+            await publish_platform_event(
+                self._session,
+                document_pipeline_event(
+                    document,
+                    DocumentEventType.ENTITY_RESOLVED,
+                    title="Entity resolution completed",
+                    description="Document entities were resolved to case and account records.",
+                    performed_by=user.id,
+                    metadata={
+                        "resolution_count": len(response.resolutions),
+                        "account_status": (
+                            account_match.resolution_status.value if account_match else None
+                        ),
+                    },
+                ),
+            )
         return response
 
     async def confirm_resolution(

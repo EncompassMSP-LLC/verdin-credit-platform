@@ -133,7 +133,7 @@ function ResolutionRow({
           <Button
             size="sm"
             variant="secondary"
-            onClick={() => confirmMutation.mutate()}
+            onClick={() => confirmMutation.mutate(undefined)}
             disabled={confirmMutation.isPending}
           >
             Confirm

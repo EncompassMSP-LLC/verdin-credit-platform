@@ -240,9 +240,34 @@ export const DISPUTE_STATUS_LABELS: Record<DisputeStatus, string> = {
   monitoring: 'Monitoring',
 };
 
-export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
+export type TaskStatus = 'open' | 'in_progress' | 'blocked' | 'completed' | 'canceled';
 
-export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
+export type TaskPriority = 'low' | 'medium' | 'high' | 'critical';
+
+export const TASK_STATUSES: TaskStatus[] = [
+  'open',
+  'in_progress',
+  'blocked',
+  'completed',
+  'canceled',
+];
+
+export const TASK_PRIORITIES: TaskPriority[] = ['low', 'medium', 'high', 'critical'];
+
+export const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
+  open: 'Open',
+  in_progress: 'In Progress',
+  blocked: 'Blocked',
+  completed: 'Completed',
+  canceled: 'Canceled',
+};
+
+export const TASK_PRIORITY_LABELS: Record<TaskPriority, string> = {
+  low: 'Low',
+  medium: 'Medium',
+  high: 'High',
+  critical: 'Critical',
+};
 
 export interface PaginatedResponse<T> {
   items: T[];

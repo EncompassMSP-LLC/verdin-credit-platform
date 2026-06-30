@@ -47,5 +47,5 @@ class User(Base, TimestampMixin, SoftDeleteMixin, AuditMixin):
         back_populates="assigned_to", foreign_keys="Case.assigned_to_id"
     )
     assigned_tasks: Mapped[list["Task"]] = relationship(
-        back_populates="assigned_to", foreign_keys="Task.assigned_to_id"
+        back_populates="assigned_user", foreign_keys="Task.assigned_user_id"
     )

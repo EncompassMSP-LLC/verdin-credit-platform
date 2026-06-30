@@ -1,5 +1,8 @@
+-e ../../packages/document-classification
 -e ../../packages/document-metadata
 -e ../../packages/entity-resolution
+-e ../../packages/event-bus
+-e ../../packages/event-types
 fastapi>=0.115.6
 uvicorn[standard]>=0.34.0
 pydantic[email]>=2.10.3

@@ -1,32 +1,23 @@
 """Document classification worker job."""
 
-import sys
-from pathlib import Path
 from uuid import UUID
 
 import structlog
+from verdin_document_classification import ClassificationContext, classify_document
 
 from worker.base import BaseJob, JobContext, JobResult
 from worker.constants import JobStatus, JobType
 from worker.db import session_scope
-from worker.documents import get_document_for_classification, save_classification
+from worker.documents import (
+    get_document_for_classification,
+    get_document_timeline_context,
+    save_classification,
+)
 from worker.queue import enqueue_job
 from worker.registry import register_job
+from worker.timeline import append_timeline_event
 
 logger = structlog.get_logger(__name__)
-
-
-def _load_classifier():
-    apps_dir = Path(__file__).resolve().parents[3]
-    api_root = apps_dir / "api"
-    if str(api_root) not in sys.path:
-        sys.path.insert(0, str(api_root))
-    from api.modules.documents.classification import (
-        ClassificationContext,
-        classify_document,
-    )
-
-    return ClassificationContext, classify_document
 
 
 def _parse_document_id(payload: dict) -> UUID:
@@ -46,15 +37,6 @@ class DocumentClassifyJob(BaseJob):
         except ValueError as exc:
             return JobResult(status=JobStatus.FAILED, message=str(exc))
 
-        try:
-            context_cls, classify_fn = _load_classifier()
-        except ImportError as exc:
-            logger.exception("classification_module_unavailable", error=str(exc))
-            return JobResult(
-                status=JobStatus.FAILED,
-                message="Classification module unavailable in worker runtime",
-            )
-
         with session_scope() as session:
             document = get_document_for_classification(session, document_id)
             if document is None:
@@ -64,13 +46,13 @@ class DocumentClassifyJob(BaseJob):
                     status=JobStatus.CANCELLED, message="Document was deleted"
                 )
 
-            classification_context = context_cls(
+            classification_context = ClassificationContext(
                 ocr_text=document.ocr_text,
                 file_name=document.file_name,
                 title=document.title,
                 mime_type=document.mime_type,
             )
-            result = classify_fn(classification_context)
+            result = classify_document(classification_context)
             save_classification(
                 session,
                 document_id,
@@ -78,7 +60,26 @@ class DocumentClassifyJob(BaseJob):
                 confidence_score=result.confidence_score,
                 classification_method=result.classification_method.value,
             )
+            timeline_context = get_document_timeline_context(session, document_id)
+            if timeline_context is not None:
+                append_timeline_event(
+                    session,
+                    organization_id=timeline_context.organization_id,
+                    event_type="CLASSIFICATION_COMPLETED",
+                    event_category="document",
+                    title="Classification completed",
+                    description=f"Document classified as {result.document_type.value}.",
+                    source_module="worker",
+                    case_id=timeline_context.case_id,
+                    account_id=timeline_context.account_id,
+                    document_id=timeline_context.id,
+                    metadata={
+                        "document_type": result.document_type.value,
+                        "confidence_score": result.confidence_score,
+                    },
+                )
 
+        # Enqueue metadata extraction only after the classification is committed.
         enqueue_job(
             JobType.DOCUMENT_METADATA_EXTRACT, {"document_id": str(document_id)}
         )

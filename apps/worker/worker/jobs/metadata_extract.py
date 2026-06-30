@@ -9,6 +9,7 @@ from worker.base import BaseJob, JobContext, JobResult
 from worker.constants import JobStatus, JobType
 from worker.db import session_scope
 from worker.metadata_documents import get_document_for_metadata, upsert_metadata
+from worker.timeline import append_timeline_event
 from worker.queue import enqueue_job
 from worker.registry import register_job
 
@@ -69,6 +70,19 @@ class DocumentMetadataExtractJob(BaseJob):
                 phone_numbers=extracted.phone_numbers,
                 ssn_masked=extracted.ssn_masked,
                 confidence_score=extracted.confidence_score,
+            )
+            append_timeline_event(
+                session,
+                organization_id=document.organization_id,
+                event_type="METADATA_EXTRACTED",
+                event_category="document",
+                title="Metadata extracted",
+                description=f"Metadata extracted from '{document.title}'.",
+                source_module="worker",
+                case_id=document.case_id,
+                account_id=document.account_id,
+                document_id=document.id,
+                metadata={"confidence_score": extracted.confidence_score},
             )
 
         enqueue_job(JobType.DOCUMENT_ENTITY_RESOLVE, {"document_id": str(document_id)})
