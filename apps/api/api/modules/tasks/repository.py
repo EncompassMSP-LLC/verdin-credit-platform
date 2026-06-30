@@ -61,6 +61,26 @@ class TaskRepository:
         result = await self._session.execute(query)
         return result.scalar_one_or_none()
 
+    async def find_active_by_source(
+        self,
+        *,
+        organization_id: uuid.UUID,
+        document_id: uuid.UUID,
+        source_module: str,
+        source_event_id: uuid.UUID,
+    ) -> Task | None:
+        result = await self._session.execute(
+            select(Task).where(
+                Task.organization_id == organization_id,
+                Task.document_id == document_id,
+                Task.source_module == source_module,
+                Task.source_event_id == source_event_id,
+                Task.status.notin_(_TERMINAL_STATUSES),
+                Task.deleted_at.is_(None),
+            )
+        )
+        return result.scalar_one_or_none()
+
     async def list_tasks(self, filters: TaskListFilters) -> tuple[list[Task], int]:
         base = select(Task).where(
             Task.organization_id == filters.organization_id,

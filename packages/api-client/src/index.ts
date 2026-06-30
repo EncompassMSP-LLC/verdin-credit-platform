@@ -73,6 +73,7 @@ export {
 export {
   compareDocumentParsedCreditReport,
   confirmDocumentResolution,
+  createDocumentParsedCreditReportReviewTask,
   deleteDocument,
   extractDocumentMetadata,
   getDocument,

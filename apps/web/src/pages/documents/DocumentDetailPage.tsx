@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   compareDocumentParsedCreditReport,
+  createDocumentParsedCreditReportReviewTask,
   deleteDocument,
   getAccessToken,
   getDocument,
@@ -17,6 +18,7 @@ import {
   type ParsedReportAccountCandidate,
   type DocumentParsedCreditReportComparison,
   type ParsedReportAccountChange,
+  type Task,
 } from '@verdin/api-client';
 import { Badge, Button, Card } from '@verdin/ui';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -160,8 +162,14 @@ function buildCreateAccountUrl(candidate: ParsedReportAccountCandidate): string 
 
 function ParsedReportAccountCandidatesPanel({
   accountCandidates,
+  reviewTask,
+  reviewTaskLoading,
+  onCreateReviewTask,
 }: {
   accountCandidates?: DocumentParsedCreditReportAccountCandidates;
+  reviewTask?: Task;
+  reviewTaskLoading: boolean;
+  onCreateReviewTask: () => void;
 }) {
   if (!accountCandidates || accountCandidates.candidates.length === 0) {
     return null;
@@ -176,7 +184,25 @@ function ParsedReportAccountCandidatesPanel({
             Review parsed tradelines before creating account records.
           </p>
         </div>
-        <Badge variant="info">{accountCandidates.candidates.length} candidates</Badge>
+        <div className="flex flex-wrap gap-2">
+          <Badge variant="info">{accountCandidates.candidates.length} candidates</Badge>
+          {reviewTask ? (
+            <Link to={`/tasks/${reviewTask.id}`}>
+              <Button size="sm" variant="secondary">
+                View review task
+              </Button>
+            </Link>
+          ) : (
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={onCreateReviewTask}
+              loading={reviewTaskLoading}
+            >
+              Create review task
+            </Button>
+          )}
+        </div>
       </div>
       <ul className="mt-3 divide-y divide-blue-100">
         {accountCandidates.candidates.map((candidate) => (
@@ -320,6 +346,13 @@ export function DocumentDetailPage() {
     queryFn: () => getDocumentParsedCreditReportAccountCandidates(documentId!),
     enabled: Boolean(documentId) && Boolean(parsedReport),
     retry: false,
+  });
+
+  const reviewTaskMutation = useMutation({
+    mutationFn: () => createDocumentParsedCreditReportReviewTask(documentId!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    },
   });
 
   const { data: duplicateGroup } = useQuery({
@@ -505,7 +538,12 @@ export function DocumentDetailPage() {
                   </p>
                 ) : null}
                 <ParsedReportComparisonPanel comparison={parsedReportComparison} />
-                <ParsedReportAccountCandidatesPanel accountCandidates={accountCandidates} />
+                <ParsedReportAccountCandidatesPanel
+                  accountCandidates={accountCandidates}
+                  reviewTask={reviewTaskMutation.data}
+                  reviewTaskLoading={reviewTaskMutation.isPending}
+                  onCreateReviewTask={() => reviewTaskMutation.mutate()}
+                />
                 <ParsedReportTradelines parsedReport={parsedReport} />
               </div>
             ) : (

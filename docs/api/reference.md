@@ -152,6 +152,7 @@ Secure document storage with MinIO, SHA-256 hashing, versioning, and duplicate d
 | POST   | `/documents/{document_id}/metadata/extract`                        | case_manager | Extract metadata from OCR text                  |
 | GET    | `/documents/{document_id}/parsed-credit-report/account-candidates` | read_only    | Build account candidates from parsed tradelines |
 | GET    | `/documents/{document_id}/parsed-credit-report/comparison`         | read_only    | Compare against previous report                 |
+| POST   | `/documents/{document_id}/parsed-credit-report/review-task`        | case_manager | Create or reuse account candidate review task   |
 | GET    | `/documents/{document_id}/resolutions`                             | read_only    | List entity resolution results                  |
 | POST   | `/documents/{document_id}/resolutions/resolve`                     | case_manager | Run entity resolution                           |
 | POST   | `/documents/{document_id}/resolutions/{resolution_id}/confirm`     | case_manager | Confirm or manually select match                |
@@ -172,6 +173,8 @@ Duplicate detection: uploading a file with the same SHA-256 hash as an existing 
 Parsed credit report comparison: `GET /documents/{document_id}/parsed-credit-report/comparison` compares the selected report to the previous parsed report for the same case and bureau, matching tradelines by creditor plus masked account number.
 
 Parsed tradeline account candidates: `GET /documents/{document_id}/parsed-credit-report/account-candidates` converts parser tradelines into normalized account-create candidates for staff review.
+
+Parsed report review task: `POST /documents/{document_id}/parsed-credit-report/review-task` creates or reuses an active task linked to the document and parsed report, giving staff a workflow item for account candidate review.
 
 ## Timeline
 

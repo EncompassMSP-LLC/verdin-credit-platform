@@ -117,7 +117,7 @@ Plan: [`docs/sprint-4.3.1/operational-core-stabilization.md`](../sprint-4.3.1/op
 
 | Capability                      | Version | Status  | Backend | Frontend | API | AI      | Tests | Dependencies        | Notes                                          |
 | ------------------------------- | ------- | ------- | ------- | -------- | --- | ------- | ----- | ------------------- | ---------------------------------------------- |
-| Workflow Automation             | 4.5     | Planned | —       | —        | —   | —       | —     | Timeline, Tasks     | —                                              |
+| Workflow Automation             | 4.5     | Partial | 🚧      | 🚧       | 🚧  | —       | ✅    | Timeline, Tasks     | Parsed report review task automation           |
 | Credit Report Import Wizard     | 4.5     | ✅      | ✅      | ✅       | ✅  | —       | ✅    | Documents, OCR      | Upload, parser review, comparison, resolution  |
 | OCR Pipeline                    | 4.3     | ✅      | ✅      | ✅       | ✅  | ✅      | ✅    | Documents, Worker   | Shipped in 4.3 Operational Core                |
 | Document Classification         | 4.3     | 🚧      | 🚧      | —        | 🚧  | 🚧      | 🚧    | OCR                 | Rules engine in 4.3; LLM augmentation in 4.5   |

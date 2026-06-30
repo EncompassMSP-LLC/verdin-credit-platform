@@ -3,7 +3,7 @@
 import hashlib
 import logging
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any, Literal
 
 from fastapi import HTTPException, UploadFile, status
@@ -69,10 +69,14 @@ from api.modules.documents.storage import (
     async_put,
     get_document_storage,
 )
+from api.modules.tasks.models import Task, TaskPriority
+from api.modules.tasks.repository import TaskRepository
+from api.modules.tasks.schemas import TaskResponse
 from api.modules.timeline.builders import (
     document_pipeline_event,
     document_uploaded_event,
     document_version_created_event,
+    task_created_event,
 )
 from api.repositories.document import DocumentRepositoryProtocol
 
@@ -89,6 +93,7 @@ ALLOWED_MIME_TYPES = frozenset(
         "text/plain",
     }
 )
+PARSED_REPORT_REVIEW_TASK_SOURCE = "documents.parsed_credit_report"
 
 
 class DocumentService:
@@ -99,6 +104,7 @@ class DocumentService:
         account_repo: AccountRepository,
         metadata_repo: DocumentMetadataRepository,
         storage: DocumentStorage,
+        task_repo: TaskRepository | None = None,
         session: AsyncSession | None = None,
     ) -> None:
         self._documents = document_repo
@@ -106,6 +112,7 @@ class DocumentService:
         self._accounts = account_repo
         self._metadata = metadata_repo
         self._storage = storage
+        self._tasks = task_repo
         self._session = session
 
     @classmethod
@@ -120,6 +127,7 @@ class DocumentService:
             AccountRepository(session),
             DocumentMetadataRepository(session),
             storage or get_document_storage(),
+            TaskRepository(session),
             session=session,
         )
 
@@ -937,6 +945,67 @@ class DocumentService:
             bureau=parsed_report.bureau,
             candidates=candidates,
         )
+
+    async def create_parsed_credit_report_review_task(
+        self,
+        user: User,
+        document_id: uuid.UUID,
+    ) -> TaskResponse:
+        self._require_write(user)
+        document = await self._get_document_for_user(document_id, user)
+        parsed_report = await self._documents.get_parsed_credit_report(
+            document.id,
+            organization_id=document.organization_id,
+        )
+        if parsed_report is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Parsed credit report not found",
+            )
+
+        candidates = (
+            await self.get_parsed_credit_report_account_candidates(user, document_id)
+        ).candidates
+        if not candidates:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Parsed credit report has no account candidates to review",
+            )
+
+        if self._tasks is not None:
+            existing = await self._tasks.find_active_by_source(
+                organization_id=document.organization_id,
+                document_id=document.id,
+                source_module=PARSED_REPORT_REVIEW_TASK_SOURCE,
+                source_event_id=parsed_report.id,
+            )
+            if existing is not None:
+                return TaskResponse.from_model(existing)
+
+        task = Task(
+            organization_id=document.organization_id,
+            case_id=document.case_id,
+            document_id=document.id,
+            title=f"Review {len(candidates)} account candidate(s) from {document.title}",
+            description=(
+                "Review parsed credit report tradelines and create account records "
+                "for candidate tradelines that should be tracked."
+            ),
+            priority=TaskPriority.HIGH,
+            due_date=datetime.now(UTC) + timedelta(days=1),
+            source_module=PARSED_REPORT_REVIEW_TASK_SOURCE,
+            source_event_id=parsed_report.id,
+        )
+        apply_audit_on_create(task, user.id)
+        if self._tasks is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Task repository is not configured",
+            )
+        await self._tasks.create(task)
+        if self._session is not None:
+            await publish_platform_event(self._session, task_created_event(task, user.id))
+        return TaskResponse.from_model(task)
 
     def _queue_metadata_extract_job(self, document: Document) -> None:
         settings = get_settings()
