@@ -9,6 +9,7 @@ from pydantic import Field
 
 from api.core.pagination import PaginationParams
 from api.core.responses import BaseSchema
+from api.modules.accounts.dispute_letter_models import DisputeLetter, DisputeLetterStatus
 from api.modules.accounts.models import (
     Account,
     AccountBureau,
@@ -241,3 +242,53 @@ class AccountDisputeDraftResponse(BaseSchema):
     generated_by: Literal["rules"]
     readiness_score: int | None
     risk_score: int | None
+
+
+class DisputeLetterResponse(BaseSchema):
+    id: uuid.UUID
+    organization_id: uuid.UUID
+    case_id: uuid.UUID
+    account_id: uuid.UUID
+    recipient_type: str
+    status: DisputeLetterStatus
+    template_id: str
+    subject: str
+    body: str
+    disputed_items: list[str]
+    requested_action: str
+    evidence_checklist: list[str]
+    compliance_notes: list[str]
+    generated_by: str
+    generated_at: datetime
+    sent_at: datetime | None
+    created_at: datetime
+    updated_at: datetime
+    deleted_at: datetime | None
+    created_by_id: uuid.UUID | None
+    updated_by_id: uuid.UUID | None
+
+    @classmethod
+    def from_model(cls, dispute_letter: DisputeLetter) -> "DisputeLetterResponse":
+        return cls(
+            id=dispute_letter.id,
+            organization_id=dispute_letter.organization_id,
+            case_id=dispute_letter.case_id,
+            account_id=dispute_letter.account_id,
+            recipient_type=dispute_letter.recipient_type,
+            status=dispute_letter.status,
+            template_id=dispute_letter.template_id,
+            subject=dispute_letter.subject,
+            body=dispute_letter.body,
+            disputed_items=dispute_letter.disputed_items,
+            requested_action=dispute_letter.requested_action,
+            evidence_checklist=dispute_letter.evidence_checklist,
+            compliance_notes=dispute_letter.compliance_notes,
+            generated_by=dispute_letter.generated_by,
+            generated_at=dispute_letter.generated_at,
+            sent_at=dispute_letter.sent_at,
+            created_at=dispute_letter.created_at,
+            updated_at=dispute_letter.updated_at,
+            deleted_at=dispute_letter.deleted_at,
+            created_by_id=dispute_letter.created_by_id,
+            updated_by_id=dispute_letter.updated_by_id,
+        )

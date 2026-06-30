@@ -13,6 +13,7 @@ from verdin_event_types import (
     TaskEventType,
 )
 
+from api.modules.accounts.dispute_letter_models import DisputeLetter
 from api.modules.accounts.models import Account
 from api.modules.auth.models import User
 from api.modules.cases.models import Case, CaseStatus
@@ -130,6 +131,32 @@ def account_status_changed_event(
                 account.payment_status.value
                 if hasattr(account.payment_status, "value")
                 else account.payment_status
+            ),
+        },
+    )
+
+
+def dispute_letter_draft_created_event(
+    dispute_letter: DisputeLetter,
+    performed_by: uuid.UUID,
+) -> PlatformEvent:
+    return PlatformEvent(
+        event_type="DISPUTE_LETTER_DRAFT_CREATED",
+        event_category=EventCategory.ACCOUNT.value,
+        title="Dispute letter draft saved",
+        description=f"Dispute letter draft '{dispute_letter.subject}' was saved.",
+        organization_id=dispute_letter.organization_id,
+        case_id=dispute_letter.case_id,
+        account_id=dispute_letter.account_id,
+        performed_by=performed_by,
+        source_module="accounts",
+        metadata={
+            "dispute_letter_id": str(dispute_letter.id),
+            "template_id": dispute_letter.template_id,
+            "status": (
+                dispute_letter.status.value
+                if hasattr(dispute_letter.status, "value")
+                else dispute_letter.status
             ),
         },
     )

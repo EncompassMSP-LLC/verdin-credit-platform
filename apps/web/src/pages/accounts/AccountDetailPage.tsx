@@ -3,9 +3,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   createAccountDisputeDraftReviewTask,
+  createAccountDisputeLetterDraft,
   deleteAccount,
   getAccount,
   getAccountDisputeDraft,
+  listAccountDisputeLetters,
 } from '@verdin/api-client';
 import { ACCOUNT_TYPE_LABELS, DISPUTE_STATUS_LABELS, PAYMENT_STATUS_LABELS } from '@verdin/shared';
 import { Button, Card } from '@verdin/ui';
@@ -51,6 +53,12 @@ export function AccountDetailPage() {
     enabled: Boolean(accountId),
   });
 
+  const disputeLettersQuery = useQuery({
+    queryKey: ['account-dispute-letters', accountId],
+    queryFn: () => listAccountDisputeLetters(accountId!),
+    enabled: Boolean(accountId),
+  });
+
   const deleteMutation = useMutation({
     mutationFn: () => deleteAccount(accountId!),
     onSuccess: () => {
@@ -64,6 +72,13 @@ export function AccountDetailPage() {
     mutationFn: () => createAccountDisputeDraftReviewTask(accountId!),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    },
+  });
+
+  const saveDraftMutation = useMutation({
+    mutationFn: () => createAccountDisputeLetterDraft(accountId!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['account-dispute-letters', accountId] });
     },
   });
 
@@ -236,21 +251,44 @@ export function AccountDetailPage() {
                   Create a task to review this draft, confirm evidence, and prepare the next dispute
                   action.
                 </p>
-                {reviewTaskMutation.data ? (
-                  <Link to={`/tasks/${reviewTaskMutation.data.id}`}>
-                    <Button size="sm">View review task</Button>
-                  </Link>
-                ) : (
+                <div className="flex flex-wrap gap-2">
                   <Button
                     size="sm"
-                    onClick={() => reviewTaskMutation.mutate()}
-                    loading={reviewTaskMutation.isPending}
-                    disabled={reviewTaskMutation.isPending}
+                    variant="secondary"
+                    onClick={() => saveDraftMutation.mutate()}
+                    loading={saveDraftMutation.isPending}
+                    disabled={saveDraftMutation.isPending}
                   >
-                    Create review task
+                    Save draft
                   </Button>
-                )}
+                  {reviewTaskMutation.data ? (
+                    <Link to={`/tasks/${reviewTaskMutation.data.id}`}>
+                      <Button size="sm">View review task</Button>
+                    </Link>
+                  ) : (
+                    <Button
+                      size="sm"
+                      onClick={() => reviewTaskMutation.mutate()}
+                      loading={reviewTaskMutation.isPending}
+                      disabled={reviewTaskMutation.isPending}
+                    >
+                      Create review task
+                    </Button>
+                  )}
+                </div>
               </div>
+
+              {saveDraftMutation.isSuccess ? (
+                <div className="rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-700">
+                  Draft saved for later review.
+                </div>
+              ) : null}
+
+              {saveDraftMutation.isError ? (
+                <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                  Failed to save the dispute draft.
+                </div>
+              ) : null}
 
               {reviewTaskMutation.isError ? (
                 <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
@@ -307,6 +345,31 @@ export function AccountDetailPage() {
 
               <div className="rounded-md border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800">
                 {disputeDraftQuery.data.requested_action}
+              </div>
+
+              <div>
+                <h4 className="text-sm font-semibold text-gray-900">Saved drafts</h4>
+                {disputeLettersQuery.isLoading ? (
+                  <p className="mt-2 text-sm text-gray-500">Loading saved drafts...</p>
+                ) : null}
+                {disputeLettersQuery.data && disputeLettersQuery.data.length > 0 ? (
+                  <ul className="mt-2 divide-y divide-gray-200 rounded-md border border-gray-200">
+                    {disputeLettersQuery.data.map((letter) => (
+                      <li key={letter.id} className="flex items-center justify-between gap-4 p-3">
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">{letter.subject}</p>
+                          <p className="text-xs text-gray-500">
+                            {letter.status} · {new Date(letter.generated_at).toLocaleString()}
+                          </p>
+                        </div>
+                        <span className="text-xs text-gray-500">{letter.template_id}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+                {disputeLettersQuery.data?.length === 0 ? (
+                  <EmptyListText>No saved drafts yet.</EmptyListText>
+                ) : null}
               </div>
             </div>
           ) : null}

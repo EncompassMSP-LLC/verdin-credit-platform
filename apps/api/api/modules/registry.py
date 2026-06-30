@@ -1,6 +1,7 @@
 """Register all ORM models with SQLAlchemy metadata."""
 
 from api.core.constants import UserRole
+from api.modules.accounts.dispute_letter_models import DisputeLetter, DisputeLetterStatus
 from api.modules.accounts.models import Account
 from api.modules.auth.models import Organization, User
 from api.modules.cases.models import Case, CaseStatus
@@ -14,6 +15,8 @@ __all__ = [
     "CaseStatus",
     "Communication",
     "Document",
+    "DisputeLetter",
+    "DisputeLetterStatus",
     "Organization",
     "Task",
     "TaskPriority",

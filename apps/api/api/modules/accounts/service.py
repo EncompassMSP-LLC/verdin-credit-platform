@@ -15,6 +15,8 @@ from api.modules.accounts.dispute_drafts import (
     build_dispute_reasons,
     build_evidence_checklist,
 )
+from api.modules.accounts.dispute_letter_models import DisputeLetter, DisputeLetterStatus
+from api.modules.accounts.dispute_letter_repository import DisputeLetterRepository
 from api.modules.accounts.intelligence import apply_account_intelligence, recommend_next_action
 from api.modules.accounts.models import Account
 from api.modules.accounts.permissions import ACCOUNT_DELETE_ROLE, ACCOUNT_WRITE_ROLE
@@ -26,6 +28,7 @@ from api.modules.accounts.schemas import (
     AccountListParams,
     AccountResponse,
     AccountUpdate,
+    DisputeLetterResponse,
     NextActionItem,
 )
 from api.modules.auth.models import User
@@ -37,6 +40,7 @@ from api.modules.timeline.builders import (
     account_created_event,
     account_status_changed_event,
     account_updated_event,
+    dispute_letter_draft_created_event,
     task_created_event,
 )
 from api.repositories.account import AccountRepositoryProtocol
@@ -50,11 +54,13 @@ class AccountService:
         account_repo: AccountRepositoryProtocol,
         case_repo: CaseRepository | None = None,
         task_repo: TaskRepository | None = None,
+        dispute_letter_repo: DisputeLetterRepository | None = None,
         session: AsyncSession | None = None,
     ) -> None:
         self._accounts = account_repo
         self._cases = case_repo
         self._tasks = task_repo
+        self._dispute_letters = dispute_letter_repo
         self._session = session
 
     @classmethod
@@ -63,6 +69,7 @@ class AccountService:
             AccountRepository(session),
             CaseRepository(session),
             TaskRepository(session),
+            DisputeLetterRepository(session),
             session=session,
         )
 
@@ -253,6 +260,62 @@ class AccountService:
             readiness_score=account.readiness_score,
             risk_score=account.risk_score,
         )
+
+    async def create_dispute_letter_draft(
+        self,
+        user: User,
+        account_id: uuid.UUID,
+    ) -> DisputeLetterResponse:
+        self._require_write(user)
+        account = await self._get_account_for_user(account_id, user)
+        if self._dispute_letters is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Dispute letter repository is not configured",
+            )
+        draft = await self.get_dispute_draft(user, account_id)
+        now = datetime.now(UTC)
+        dispute_letter = DisputeLetter(
+            organization_id=account.organization_id,
+            case_id=account.case_id,
+            account_id=account.id,
+            recipient_type=draft.recipient_type,
+            status=DisputeLetterStatus.DRAFT,
+            template_id=draft.template_id,
+            subject=draft.subject,
+            body=draft.body,
+            disputed_items=draft.disputed_items,
+            requested_action=draft.requested_action,
+            evidence_checklist=draft.evidence_checklist,
+            compliance_notes=draft.compliance_notes,
+            generated_by=draft.generated_by,
+            generated_at=now,
+        )
+        apply_audit_on_create(dispute_letter, user.id)
+        created = await self._dispute_letters.create(dispute_letter)
+        if self._session is not None:
+            await publish_platform_event(
+                self._session,
+                dispute_letter_draft_created_event(created, user.id),
+            )
+        return DisputeLetterResponse.from_model(created)
+
+    async def list_dispute_letters(
+        self,
+        user: User,
+        account_id: uuid.UUID,
+    ) -> list[DisputeLetterResponse]:
+        account = await self._get_account_for_user(account_id, user)
+        if self._dispute_letters is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Dispute letter repository is not configured",
+            )
+        letters = await self._dispute_letters.list_for_account(
+            organization_id=account.organization_id,
+            account_id=account.id,
+        )
+        return [DisputeLetterResponse.from_model(letter) for letter in letters]
 
     async def create_dispute_draft_review_task(
         self,
