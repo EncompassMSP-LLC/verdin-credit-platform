@@ -16,6 +16,7 @@ from api.modules.accounts.models import (
 )
 from api.modules.accounts.schemas import (
     AccountCreate,
+    AccountDisputeDraftResponse,
     AccountIntelligenceSummary,
     AccountListParams,
     AccountResponse,
@@ -104,6 +105,15 @@ async def get_account(
     service: AccountService = Depends(get_account_service),
 ) -> AccountResponse:
     return await service.get_account(current_user, account_id)
+
+
+@router.get("/{account_id}/dispute-draft", response_model=AccountDisputeDraftResponse)
+async def get_account_dispute_draft(
+    account_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: AccountService = Depends(get_account_service),
+) -> AccountDisputeDraftResponse:
+    return await service.get_dispute_draft(current_user, account_id)
 
 
 @router.patch("/{account_id}", response_model=AccountResponse)

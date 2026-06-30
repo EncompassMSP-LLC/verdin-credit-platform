@@ -9,12 +9,18 @@ from api.core.audit import apply_audit_on_create, apply_audit_on_update
 from api.core.events import publish_platform_event
 from api.core.pagination import PaginatedResponse, paginate
 from api.core.permissions import has_permission
+from api.modules.accounts.dispute_drafts import (
+    build_dispute_body,
+    build_dispute_reasons,
+    build_evidence_checklist,
+)
 from api.modules.accounts.intelligence import apply_account_intelligence, recommend_next_action
 from api.modules.accounts.models import Account
 from api.modules.accounts.permissions import ACCOUNT_DELETE_ROLE, ACCOUNT_WRITE_ROLE
 from api.modules.accounts.repository import AccountListFilters, AccountRepository
 from api.modules.accounts.schemas import (
     AccountCreate,
+    AccountDisputeDraftResponse,
     AccountIntelligenceSummary,
     AccountListParams,
     AccountResponse,
@@ -188,6 +194,51 @@ class AccountService:
     async def get_account(self, user: User, account_id: uuid.UUID) -> AccountResponse:
         account = await self._get_account_for_user(account_id, user)
         return AccountResponse.from_model(account)
+
+    async def get_dispute_draft(
+        self,
+        user: User,
+        account_id: uuid.UUID,
+    ) -> AccountDisputeDraftResponse:
+        account = await self._get_account_for_user(account_id, user)
+        if self._cases is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Case repository is not configured",
+            )
+        case = await self._cases.get_by_id(
+            account.case_id,
+            organization_id=account.organization_id,
+        )
+        if case is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Case not found",
+            )
+
+        disputed_items = build_dispute_reasons(account)
+        return AccountDisputeDraftResponse(
+            account_id=account.id,
+            case_id=account.case_id,
+            bureau=account.bureau,
+            recipient_type="credit_bureau",
+            template_id="cra-tradeline-investigation-v1",
+            subject=f"Dispute of {account.creditor_name} tradeline",
+            body=build_dispute_body(account, case, disputed_items),
+            disputed_items=disputed_items,
+            requested_action=(
+                "Investigate the disputed tradeline and delete or correct any information "
+                "that cannot be verified as complete and accurate."
+            ),
+            evidence_checklist=build_evidence_checklist(account),
+            compliance_notes=[
+                "Draft requires staff review before sending.",
+                "Confirm consumer authorization and supporting evidence before submission.",
+            ],
+            generated_by="rules",
+            readiness_score=account.readiness_score,
+            risk_score=account.risk_score,
+        )
 
     async def update_account(
         self,

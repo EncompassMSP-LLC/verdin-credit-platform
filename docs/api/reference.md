@@ -101,14 +101,15 @@ All case endpoints require authentication. Users are scoped to their organizatio
 
 Credit tradeline accounts with intelligence scoring. All endpoints require authentication and organization scoping.
 
-| Method | Path                             | Min role     | Description               |
-| ------ | -------------------------------- | ------------ | ------------------------- |
-| POST   | `/accounts`                      | case_manager | Create a credit account   |
-| GET    | `/accounts`                      | read_only    | List accounts             |
-| GET    | `/accounts/intelligence/summary` | read_only    | Organization intelligence |
-| GET    | `/accounts/{account_id}`         | read_only    | Get account by ID         |
-| PATCH  | `/accounts/{account_id}`         | case_manager | Update an account         |
-| DELETE | `/accounts/{account_id}`         | admin        | Soft-delete an account    |
+| Method | Path                                   | Min role     | Description                      |
+| ------ | -------------------------------------- | ------------ | -------------------------------- |
+| POST   | `/accounts`                            | case_manager | Create a credit account          |
+| GET    | `/accounts`                            | read_only    | List accounts                    |
+| GET    | `/accounts/intelligence/summary`       | read_only    | Organization intelligence        |
+| GET    | `/accounts/{account_id}`               | read_only    | Get account by ID                |
+| GET    | `/accounts/{account_id}/dispute-draft` | read_only    | Preview rule-based dispute draft |
+| PATCH  | `/accounts/{account_id}`               | case_manager | Update an account                |
+| DELETE | `/accounts/{account_id}`               | admin        | Soft-delete an account           |
 
 ### List query parameters
 
@@ -130,6 +131,10 @@ Credit tradeline accounts with intelligence scoring. All endpoints require authe
 ### Intelligence fields
 
 Accounts automatically compute `risk_score`, `readiness_score`, `next_eligible_dispute_date`, and `ai_recommended_next_action` on create/update via `api/modules/accounts/intelligence.py`.
+
+### Dispute draft preview
+
+`GET /accounts/{account_id}/dispute-draft` returns a rule-based CRA tradeline dispute draft, disputed item list, requested action, evidence checklist, and compliance notes for staff review. Drafts are generated on demand and are not persisted in this foundation slice.
 
 ## Documents
 

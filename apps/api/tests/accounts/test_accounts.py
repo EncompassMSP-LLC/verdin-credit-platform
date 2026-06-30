@@ -108,6 +108,41 @@ def test_get_account(
     assert response.json()["id"] == account_id
 
 
+def test_get_account_dispute_draft(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    readonly_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    create = api_client.post(
+        "/api/v1/accounts",
+        headers=manager_headers,
+        json=sample_account_payload(sample_case_id),
+    )
+    account_id = create.json()["id"]
+
+    response = api_client.get(
+        f"/api/v1/accounts/{account_id}/dispute-draft",
+        headers=readonly_headers,
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["account_id"] == account_id
+    assert data["case_id"] == sample_case_id
+    assert data["bureau"] == "equifax"
+    assert data["recipient_type"] == "credit_bureau"
+    assert data["template_id"] == "cra-tradeline-investigation-v1"
+    assert data["generated_by"] == "rules"
+    assert "Example Bank" in data["subject"]
+    assert "Example Bank" in data["body"]
+    assert "Account Client" in data["body"]
+    assert any("payment history" in item for item in data["disputed_items"])
+    assert any("balance" in item.lower() for item in data["evidence_checklist"])
+    assert data["readiness_score"] is not None
+    assert data["risk_score"] is not None
+
+
 def test_get_account_not_found(
     api_client: TestClient,
     manager_headers: dict[str, str],
