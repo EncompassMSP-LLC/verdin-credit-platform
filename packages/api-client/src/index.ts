@@ -60,6 +60,7 @@ export {
   createAccountDisputeLetterDraft,
   createAccountDisputeLetterReviewTask,
   approveAccountDisputeLetter,
+  sendAccountDisputeLetter,
   deleteAccount,
   getAccount,
   getAccountDisputeDraft,

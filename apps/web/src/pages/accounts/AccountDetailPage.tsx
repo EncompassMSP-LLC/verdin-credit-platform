@@ -10,6 +10,7 @@ import {
   getAccount,
   getAccountDisputeDraft,
   listAccountDisputeLetters,
+  sendAccountDisputeLetter,
   type DisputeLetter,
 } from '@verdin/api-client';
 import { ACCOUNT_TYPE_LABELS, DISPUTE_STATUS_LABELS, PAYMENT_STATUS_LABELS } from '@verdin/shared';
@@ -61,12 +62,22 @@ function SavedDisputeLetterRow({
     },
   });
 
+  const sendMutation = useMutation({
+    mutationFn: () => sendAccountDisputeLetter(accountId, letter.id),
+    onSuccess: () => {
+      onLetterUpdated();
+    },
+  });
+
   return (
     <li className="flex flex-wrap items-center justify-between gap-4 p-3">
       <div>
         <p className="text-sm font-medium text-gray-900">{letter.subject}</p>
         <p className="text-xs text-gray-500">
-          {letter.status} · {new Date(letter.generated_at).toLocaleString()}
+          {letter.status}
+          {letter.sent_at ? ` · sent ${new Date(letter.sent_at).toLocaleString()}` : null}
+          {' · '}
+          {new Date(letter.generated_at).toLocaleString()}
         </p>
       </div>
       <div className="flex flex-wrap items-center gap-2">
@@ -82,7 +93,17 @@ function SavedDisputeLetterRow({
           </Button>
         ) : null}
         {letter.status === 'approved' ? (
-          <span className="text-xs font-medium text-green-700">Approved</span>
+          <Button
+            size="sm"
+            onClick={() => sendMutation.mutate()}
+            loading={sendMutation.isPending}
+            disabled={sendMutation.isPending}
+          >
+            Mark as sent
+          </Button>
+        ) : null}
+        {letter.status === 'sent' ? (
+          <span className="text-xs font-medium text-blue-700">Sent</span>
         ) : null}
         {reviewTaskMutation.data ? (
           <Link to={`/tasks/${reviewTaskMutation.data.id}`}>
@@ -107,6 +128,9 @@ function SavedDisputeLetterRow({
       ) : null}
       {approveMutation.isError ? (
         <p className="w-full text-xs text-red-600">Failed to approve this dispute letter.</p>
+      ) : null}
+      {sendMutation.isError ? (
+        <p className="w-full text-xs text-red-600">Failed to mark this dispute letter as sent.</p>
       ) : null}
     </li>
   );

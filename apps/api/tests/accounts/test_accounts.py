@@ -339,6 +339,76 @@ def test_approve_account_dispute_letter_requires_review_status(
     assert response.status_code == 422
 
 
+def test_send_account_dispute_letter(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    create = api_client.post(
+        "/api/v1/accounts",
+        headers=manager_headers,
+        json=sample_account_payload(sample_case_id),
+    )
+    account_id = create.json()["id"]
+
+    letter = api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-draft/letters",
+        headers=manager_headers,
+    )
+    letter_id = letter.json()["id"]
+
+    api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-letters/{letter_id}/review-task",
+        headers=manager_headers,
+    )
+    api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-letters/{letter_id}/approve",
+        headers=manager_headers,
+    )
+    first_send = api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-letters/{letter_id}/send",
+        headers=manager_headers,
+    )
+    second_send = api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-letters/{letter_id}/send",
+        headers=manager_headers,
+    )
+
+    assert first_send.status_code == 200
+    assert second_send.status_code == 200
+    assert first_send.json()["status"] == "sent"
+    assert first_send.json()["sent_at"] is not None
+    assert second_send.json()["id"] == first_send.json()["id"]
+    assert second_send.json()["status"] == "sent"
+    assert second_send.json()["sent_at"] == first_send.json()["sent_at"]
+
+
+def test_send_account_dispute_letter_requires_approved_status(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    create = api_client.post(
+        "/api/v1/accounts",
+        headers=manager_headers,
+        json=sample_account_payload(sample_case_id),
+    )
+    account_id = create.json()["id"]
+
+    letter = api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-draft/letters",
+        headers=manager_headers,
+    )
+    letter_id = letter.json()["id"]
+
+    response = api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-letters/{letter_id}/send",
+        headers=manager_headers,
+    )
+
+    assert response.status_code == 422
+
+
 def test_get_account_not_found(
     api_client: TestClient,
     manager_headers: dict[str, str],
