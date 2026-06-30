@@ -1,14 +1,17 @@
 """Synthetic credit-report document used to drive the full pipeline.
 
 The PDF is generated with embedded text so the worker's ``pypdf`` extractor
-yields deterministic OCR text. The text is crafted so that:
+yields deterministic OCR text. The text follows the real Equifax 2026 layout so
+that:
 
 * the rule-based classifier identifies it as a ``credit_report``;
-* the metadata extractor finds creditor, bureau, account number, and dates;
+* the Equifax report parser extracts the tradeline, consumer, and report date;
+* the metadata bridge populates creditor, bureau, account number, and dates;
 * entity resolution matches it to the account created via ``ACCOUNT_PAYLOAD``.
 
-Keeping the document content and the expected account in one place makes the
-matching contract explicit and easy to maintain.
+The section headers and per-tradeline field labels intentionally mirror
+``tests/fixtures/credit_reports/equifax/2026`` so the document exercises the
+structured parser path rather than the regex fallback.
 """
 
 from __future__ import annotations
@@ -25,25 +28,42 @@ EXPECTED_REPORT_DATE = "2026-05-01"
 EXPECTED_BALANCE = 2450.00
 
 # --- Document body -----------------------------------------------------------
-# Each entry is one rendered PDF line. Labels match the extractor's regexes.
+# Each entry is one rendered PDF line. Section headers and field labels match
+# the Equifax parser's layout detection and tradeline block extraction.
 CREDIT_REPORT_LINES: tuple[str, ...] = (
-    "CONSUMER CREDIT REPORT",
-    "Bureau: Equifax",
-    "Consumer Name: Jordan A. Sample",
-    "Date of Birth: 01/02/1985",
-    "",
-    "Tradelines",
-    "Creditor: Example National Bank",
-    "Account Number: ****4521",
-    "Account Status: Open",
-    "Payment Status: Late 60 Days",
-    "Balance: $2,450.00",
-    "Past Due: $420.00",
-    "Date Opened: 03/15/2019",
+    "EQUIFAX",
+    "Equifax Consumer Credit File",
     "Report Date: 05/01/2026",
     "",
-    "This consumer credit report includes tradeline and account number data",
-    "reported by Equifax for dispute review.",
+    "CONSUMER INFORMATION",
+    "Consumer: Jordan A. Sample",
+    "DOB: 01/02/1985",
+    "Social Security Number: 123-45-6789",
+    "",
+    "TRADELINES",
+    "Tradeline 1",
+    "Furnisher: Example National Bank",
+    "Account Identifier: 4000123456784521",
+    "Portfolio Type: Credit Card",
+    "Current Balance: $2,450.00",
+    "High Credit: $5,000.00",
+    "Account Status: Late 60 Days",
+    "Opened: 03/15/2019",
+    "Last Reported: 05/01/2026",
+    "",
+    "CREDIT INQUIRIES",
+    "Inquiry 1",
+    "Requested By: Example National Bank",
+    "Date of Inquiry: 04/10/2026",
+    "Purpose: Hard",
+    "",
+    "PUBLIC RECORD INFORMATION",
+    "",
+    "COLLECTION ACCOUNTS",
+    "",
+    "ACCOUNT SUMMARY",
+    "Total Tradelines: 1",
+    "Total Inquiries: 1",
 )
 
 # --- Case / account payloads sent to the API ---------------------------------

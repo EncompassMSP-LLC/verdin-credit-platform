@@ -118,6 +118,7 @@ def upsert_metadata(
     phone_numbers: tuple[str, ...],
     ssn_masked: str | None,
     confidence_score: float,
+    extraction_method: str = "rules",
 ) -> None:
     now = datetime.now(UTC)
     existing = session.execute(
@@ -140,7 +141,7 @@ def upsert_metadata(
         "phone_numbers": list(phone_numbers),
         "ssn_masked": ssn_masked,
         "confidence_score": Decimal(str(confidence_score)),
-        "extraction_method": "rules",
+        "extraction_method": extraction_method,
         "metadata_status": "extracted",
         "extracted_at": now,
         "extraction_error": None,

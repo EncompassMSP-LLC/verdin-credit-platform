@@ -79,10 +79,12 @@ class DocumentClassifyJob(BaseJob):
                     },
                 )
 
-        # Enqueue metadata extraction only after the classification is committed.
-        enqueue_job(
-            JobType.DOCUMENT_METADATA_EXTRACT, {"document_id": str(document_id)}
+        next_job = (
+            JobType.DOCUMENT_CREDIT_REPORT_PARSE
+            if result.document_type.value == "credit_report"
+            else JobType.DOCUMENT_METADATA_EXTRACT
         )
+        enqueue_job(next_job, {"document_id": str(document_id)})
 
         logger.info(
             "document_classified",
