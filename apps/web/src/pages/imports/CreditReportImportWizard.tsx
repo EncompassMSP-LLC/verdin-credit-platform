@@ -5,6 +5,7 @@ import {
   getDocument,
   getDocumentMetadata,
   getDocumentOcr,
+  getDocumentParsedCreditReport,
   getDocumentResolutions,
   listCases,
   resolveDocumentEntities,
@@ -12,6 +13,7 @@ import {
   type DocumentEntityResolution,
   type DocumentMetadata,
   type DocumentOcrResult,
+  type DocumentParsedCreditReport,
   uploadDocument,
 } from '@verdin/api-client';
 import { Button, Card, Badge } from '@verdin/ui';
@@ -105,6 +107,25 @@ function MetadataSummary({ metadata }: { metadata: DocumentMetadata }) {
   );
 }
 
+function ParserSummary({ parsedReport }: { parsedReport: DocumentParsedCreditReport }) {
+  return (
+    <div className="rounded-md border border-blue-100 bg-blue-50 p-3 text-sm text-blue-900">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="font-medium">
+          Parsed by {parsedReport.parser_name} ({parsedReport.bureau})
+        </span>
+        <Badge variant={parsedReport.is_partial ? 'warning' : 'success'}>
+          {parsedReport.is_partial ? 'Partial' : 'Complete'}
+        </Badge>
+        <span>{formatPercent(parsedReport.parser_confidence)} confidence</span>
+      </div>
+      {parsedReport.warnings.length > 0 ? (
+        <p className="mt-2 text-blue-800">Warnings: {parsedReport.warnings.join(', ')}</p>
+      ) : null}
+    </div>
+  );
+}
+
 function ResolutionLinks({ resolutions }: { resolutions: DocumentEntityResolution[] }) {
   const linked = resolutions.filter((resolution) => resolution.matched_entity_id);
 
@@ -184,6 +205,14 @@ export function CreditReportImportWizard() {
       const metadata = query.state.data as DocumentMetadata | undefined;
       return metadata?.metadata_status === 'extracted' ? false : 3000;
     },
+  });
+
+  const parsedReportQuery = useQuery({
+    queryKey: ['document-parsed-credit-report', documentId],
+    queryFn: () => getDocumentParsedCreditReport(documentId!),
+    enabled: Boolean(documentId) && Boolean(ocrQuery.data?.ocr_text),
+    retry: false,
+    refetchInterval: (query) => (query.state.data ? false : 3000),
   });
 
   const resolutionsQuery = useQuery({
@@ -445,6 +474,9 @@ export function CreditReportImportWizard() {
           <StepCard title="3. Parse and extract metadata" status={metadataStatus}>
             {metadataQuery.data ? (
               <div className="space-y-4">
+                {parsedReportQuery.data ? (
+                  <ParserSummary parsedReport={parsedReportQuery.data} />
+                ) : null}
                 <MetadataSummary metadata={metadataQuery.data} />
                 <div className="flex items-center gap-2 text-xs text-gray-500">
                   <DocumentMetadataStatusBadge status={metadataQuery.data.metadata_status} />

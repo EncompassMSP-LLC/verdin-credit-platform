@@ -2,7 +2,7 @@
 
 import uuid
 from datetime import datetime
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import Field
 from sqlalchemy import inspect as sa_inspect
@@ -17,6 +17,7 @@ from api.modules.documents.constants import (
     ResolutionStatus,
 )
 from api.modules.documents.models import Document, DocumentVersion
+from api.modules.documents.parsed_report_models import DocumentParsedCreditReport
 
 DocumentSortField = Literal["created_at", "title", "file_name", "file_size"]
 DocumentSortOrder = Literal["asc", "desc"]
@@ -191,4 +192,33 @@ class DocumentClassificationResponse(BaseSchema):
             ),
             classified_at=document.classified_at,
             classified_by_id=document.classified_by_id,
+        )
+
+
+class DocumentParsedCreditReportResponse(BaseSchema):
+    document_id: uuid.UUID
+    schema_version: str
+    bureau: str
+    parser_name: str
+    parser_confidence: float
+    parsed_report: dict[str, Any]
+    is_partial: bool
+    warnings: list[str]
+    parsed_at: datetime
+
+    @classmethod
+    def from_model(
+        cls,
+        parsed_report: DocumentParsedCreditReport,
+    ) -> "DocumentParsedCreditReportResponse":
+        return cls(
+            document_id=parsed_report.document_id,
+            schema_version=parsed_report.schema_version,
+            bureau=parsed_report.bureau,
+            parser_name=parsed_report.parser_name,
+            parser_confidence=float(parsed_report.parser_confidence),
+            parsed_report=parsed_report.parsed_report,
+            is_partial=parsed_report.is_partial,
+            warnings=list(parsed_report.warnings or []),
+            parsed_at=parsed_report.parsed_at,
         )

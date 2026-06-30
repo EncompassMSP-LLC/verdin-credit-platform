@@ -4,6 +4,7 @@ import uuid
 from typing import Protocol, runtime_checkable
 
 from api.modules.documents.models import Document, DocumentVersion
+from api.modules.documents.parsed_report_models import DocumentParsedCreditReport
 from api.modules.documents.repository import DocumentListFilters
 
 
@@ -35,3 +36,10 @@ class DocumentRepositoryProtocol(Protocol):
     async def update(self, document: Document) -> Document: ...
 
     async def list_versions(self, document_id: uuid.UUID) -> list[DocumentVersion]: ...
+
+    async def get_parsed_credit_report(
+        self,
+        document_id: uuid.UUID,
+        *,
+        organization_id: uuid.UUID,
+    ) -> DocumentParsedCreditReport | None: ...
