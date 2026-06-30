@@ -274,6 +274,71 @@ def test_create_account_dispute_letter_review_task_not_found(
     assert response.status_code == 404
 
 
+def test_approve_account_dispute_letter(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    create = api_client.post(
+        "/api/v1/accounts",
+        headers=manager_headers,
+        json=sample_account_payload(sample_case_id),
+    )
+    account_id = create.json()["id"]
+
+    letter = api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-draft/letters",
+        headers=manager_headers,
+    )
+    letter_id = letter.json()["id"]
+
+    review_task = api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-letters/{letter_id}/review-task",
+        headers=manager_headers,
+    )
+    first_approve = api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-letters/{letter_id}/approve",
+        headers=manager_headers,
+    )
+    second_approve = api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-letters/{letter_id}/approve",
+        headers=manager_headers,
+    )
+
+    assert review_task.status_code == 200
+    assert first_approve.status_code == 200
+    assert second_approve.status_code == 200
+    assert first_approve.json()["status"] == "approved"
+    assert second_approve.json()["id"] == first_approve.json()["id"]
+    assert second_approve.json()["status"] == "approved"
+
+
+def test_approve_account_dispute_letter_requires_review_status(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    create = api_client.post(
+        "/api/v1/accounts",
+        headers=manager_headers,
+        json=sample_account_payload(sample_case_id),
+    )
+    account_id = create.json()["id"]
+
+    letter = api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-draft/letters",
+        headers=manager_headers,
+    )
+    letter_id = letter.json()["id"]
+
+    response = api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-letters/{letter_id}/approve",
+        headers=manager_headers,
+    )
+
+    assert response.status_code == 422
+
+
 def test_get_account_not_found(
     api_client: TestClient,
     manager_headers: dict[str, str],

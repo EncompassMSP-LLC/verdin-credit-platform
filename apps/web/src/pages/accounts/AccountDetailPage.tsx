@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
+  approveAccountDisputeLetter,
   createAccountDisputeDraftReviewTask,
   createAccountDisputeLetterDraft,
   createAccountDisputeLetterReviewTask,
@@ -40,16 +41,23 @@ function EmptyListText({ children }: { children: string }) {
 function SavedDisputeLetterRow({
   accountId,
   letter,
-  onReviewTaskCreated,
+  onLetterUpdated,
 }: {
   accountId: string;
   letter: DisputeLetter;
-  onReviewTaskCreated: () => void;
+  onLetterUpdated: () => void;
 }) {
   const reviewTaskMutation = useMutation({
     mutationFn: () => createAccountDisputeLetterReviewTask(accountId, letter.id),
     onSuccess: () => {
-      onReviewTaskCreated();
+      onLetterUpdated();
+    },
+  });
+
+  const approveMutation = useMutation({
+    mutationFn: () => approveAccountDisputeLetter(accountId, letter.id),
+    onSuccess: () => {
+      onLetterUpdated();
     },
   });
 
@@ -63,13 +71,26 @@ function SavedDisputeLetterRow({
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-xs text-gray-500">{letter.template_id}</span>
+        {letter.status === 'review' ? (
+          <Button
+            size="sm"
+            onClick={() => approveMutation.mutate()}
+            loading={approveMutation.isPending}
+            disabled={approveMutation.isPending}
+          >
+            Approve letter
+          </Button>
+        ) : null}
+        {letter.status === 'approved' ? (
+          <span className="text-xs font-medium text-green-700">Approved</span>
+        ) : null}
         {reviewTaskMutation.data ? (
           <Link to={`/tasks/${reviewTaskMutation.data.id}`}>
             <Button size="sm" variant="secondary">
               View review task
             </Button>
           </Link>
-        ) : (
+        ) : letter.status === 'draft' || letter.status === 'review' ? (
           <Button
             size="sm"
             variant="secondary"
@@ -79,10 +100,13 @@ function SavedDisputeLetterRow({
           >
             Create review task
           </Button>
-        )}
+        ) : null}
       </div>
       {reviewTaskMutation.isError ? (
         <p className="w-full text-xs text-red-600">Failed to create review task for this draft.</p>
+      ) : null}
+      {approveMutation.isError ? (
+        <p className="w-full text-xs text-red-600">Failed to approve this dispute letter.</p>
       ) : null}
     </li>
   );
@@ -412,7 +436,7 @@ export function AccountDetailPage() {
                         key={letter.id}
                         accountId={accountId!}
                         letter={letter}
-                        onReviewTaskCreated={() => {
+                        onLetterUpdated={() => {
                           queryClient.invalidateQueries({
                             queryKey: ['account-dispute-letters', accountId],
                           });

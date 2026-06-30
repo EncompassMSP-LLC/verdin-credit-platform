@@ -40,6 +40,7 @@ from api.modules.timeline.builders import (
     account_created_event,
     account_status_changed_event,
     account_updated_event,
+    dispute_letter_approved_event,
     dispute_letter_draft_created_event,
     task_created_event,
 )
@@ -380,6 +381,51 @@ class AccountService:
         if self._session is not None:
             await publish_platform_event(self._session, task_created_event(created, user.id))
         return TaskResponse.from_model(created)
+
+    async def approve_dispute_letter(
+        self,
+        user: User,
+        account_id: uuid.UUID,
+        letter_id: uuid.UUID,
+    ) -> DisputeLetterResponse:
+        self._require_write(user)
+        account = await self._get_account_for_user(account_id, user)
+        if self._dispute_letters is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Dispute letter repository is not configured",
+            )
+
+        dispute_letter = await self._dispute_letters.get_for_account(
+            organization_id=account.organization_id,
+            account_id=account.id,
+            letter_id=letter_id,
+        )
+        if dispute_letter is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Dispute letter not found",
+            )
+
+        if dispute_letter.status == DisputeLetterStatus.APPROVED:
+            return DisputeLetterResponse.from_model(dispute_letter)
+
+        if dispute_letter.status != DisputeLetterStatus.REVIEW:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Dispute letter must be in review before approval",
+            )
+
+        dispute_letter.status = DisputeLetterStatus.APPROVED
+        apply_audit_on_update(dispute_letter, user.id)
+        if self._session is not None:
+            await self._session.flush()
+            await self._session.refresh(dispute_letter)
+            await publish_platform_event(
+                self._session,
+                dispute_letter_approved_event(dispute_letter, user.id),
+            )
+        return DisputeLetterResponse.from_model(dispute_letter)
 
     async def create_dispute_draft_review_task(
         self,
