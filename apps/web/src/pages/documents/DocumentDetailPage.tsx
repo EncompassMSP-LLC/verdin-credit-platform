@@ -6,6 +6,7 @@ import {
   getDocument,
   getDocumentDownloadUrl,
   getDocumentOcr,
+  getDocumentParsedCreditReport,
   retryDocumentOcr,
 } from '@verdin/api-client';
 import { Badge, Button, Card } from '@verdin/ui';
@@ -15,6 +16,7 @@ import { DocumentEntityResolutionPanel } from '../../components/documents/Docume
 import { DocumentMetadataPanel } from '../../components/documents/DocumentMetadataPanel';
 import { DocumentMetadataStatusBadge } from '../../components/documents/DocumentMetadataStatusBadge';
 import { DocumentProcessingBadge } from '../../components/documents/DocumentProcessingBadge';
+import { ParsedReportTradelines } from '../../components/imports/ParsedReportTradelines';
 
 function formatFileSize(bytes: number | null) {
   if (!bytes) return '—';
@@ -25,6 +27,11 @@ function formatFileSize(bytes: number | null) {
 
 function formatDateTime(value: string) {
   return new Date(value).toLocaleString();
+}
+
+function formatPercent(value: number | null | undefined): string {
+  if (value === null || value === undefined) return '—';
+  return `${Math.round(value * 100)}%`;
 }
 
 const ACTIVE_OCR_STATUSES = new Set(['pending', 'queued', 'processing']);
@@ -49,6 +56,13 @@ export function DocumentDetailPage() {
       const status = query.state.data?.processing_status;
       return status && ACTIVE_OCR_STATUSES.has(status) ? 3000 : false;
     },
+  });
+
+  const { data: parsedReport } = useQuery({
+    queryKey: ['document-parsed-credit-report', documentId],
+    queryFn: () => getDocumentParsedCreditReport(documentId!),
+    enabled: Boolean(documentId) && data?.document_type === 'credit_report',
+    retry: false,
   });
 
   const retryMutation = useMutation({
@@ -201,6 +215,39 @@ export function DocumentDetailPage() {
           documentId={documentId}
           hasMetadata={data.metadata_status === 'extracted'}
         />
+
+        {data.document_type === 'credit_report' ? (
+          <Card title="Parsed credit report" className="lg:col-span-3">
+            {parsedReport ? (
+              <div className="space-y-4">
+                <div className="flex flex-wrap items-center gap-2 text-sm">
+                  <Badge variant={parsedReport.is_partial ? 'warning' : 'success'}>
+                    {parsedReport.is_partial ? 'Partial parse' : 'Complete parse'}
+                  </Badge>
+                  <span className="text-gray-700">
+                    {parsedReport.parser_name} ({parsedReport.bureau})
+                  </span>
+                  <span className="text-gray-500">
+                    {formatPercent(parsedReport.parser_confidence)} confidence
+                  </span>
+                  <span className="text-gray-500">
+                    Parsed {formatDateTime(parsedReport.parsed_at)}
+                  </span>
+                </div>
+                {parsedReport.warnings.length > 0 ? (
+                  <p className="rounded-md bg-yellow-50 p-3 text-sm text-yellow-800">
+                    Parser warnings: {parsedReport.warnings.join(', ')}
+                  </p>
+                ) : null}
+                <ParsedReportTradelines parsedReport={parsedReport} />
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500">
+                Structured parser output is not available for this credit report yet.
+              </p>
+            )}
+          </Card>
+        ) : null}
 
         <Card title="Extracted text" className="lg:col-span-2 lg:row-start-1 lg:col-start-2">
           {processingStatus === 'skipped' ? (
