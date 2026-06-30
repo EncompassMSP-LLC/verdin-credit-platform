@@ -15,6 +15,7 @@ import { CaseAccountsPage } from '../pages/accounts/CaseAccountsPage';
 import { DocumentsListPage } from '../pages/documents/DocumentsListPage';
 import { DocumentUploadPage } from '../pages/documents/DocumentUploadPage';
 import { DocumentDetailPage } from '../pages/documents/DocumentDetailPage';
+import { CreditReportImportWizard } from '../pages/imports/CreditReportImportWizard';
 import { TimelinePage } from '../pages/timeline/TimelinePage';
 import { TasksListPage } from '../pages/tasks/TasksListPage';
 import { TaskCreatePage } from '../pages/tasks/TaskCreatePage';
@@ -69,6 +70,7 @@ export function AppRoutes() {
         <Route path="documents" element={<DocumentsListPage />} />
         <Route path="documents/upload" element={<DocumentUploadPage />} />
         <Route path="documents/:documentId" element={<DocumentDetailPage />} />
+        <Route path="imports/credit-report" element={<CreditReportImportWizard />} />
         <Route path="timeline" element={<TimelinePage />} />
         <Route path="tasks" element={<TasksListPage />} />
         <Route path="tasks/new" element={<TaskCreatePage />} />

@@ -340,5 +340,5 @@ export const MATCHED_ENTITY_TYPE_LABELS: Record<MatchedEntityType, string> = {
   person: 'Person',
 };
 
-export type ExtractionMethod = 'rules' | 'ai';
+export type ExtractionMethod = 'rules' | 'ai' | 'parser';
 export type ResolutionMethod = 'rules' | 'manual' | 'ai';
