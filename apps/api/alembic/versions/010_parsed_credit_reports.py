@@ -1,6 +1,6 @@
 """Persist structured parsed credit reports.
 
-Revision ID: 010_document_parsed_credit_reports
+Revision ID: 010_parsed_credit_reports
 Revises: 009_task_management
 Create Date: 2026-06-30
 """
@@ -12,7 +12,7 @@ from sqlalchemy.dialects import postgresql
 
 from alembic import op
 
-revision: str = "010_document_parsed_credit_reports"
+revision: str = "010_parsed_credit_reports"
 down_revision: str | None = "009_task_management"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
