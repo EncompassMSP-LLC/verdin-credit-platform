@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { deleteAccount, getAccount } from '@verdin/api-client';
+import { deleteAccount, getAccount, getAccountDisputeDraft } from '@verdin/api-client';
 import { ACCOUNT_TYPE_LABELS, DISPUTE_STATUS_LABELS, PAYMENT_STATUS_LABELS } from '@verdin/shared';
 import { Button, Card } from '@verdin/ui';
 import { AccountDeleteDialog } from '../../components/accounts/AccountDeleteDialog';
@@ -24,6 +24,10 @@ function formatDate(value: string | null) {
   return new Date(value).toLocaleDateString();
 }
 
+function EmptyListText({ children }: { children: string }) {
+  return <p className="text-sm text-gray-500">{children}</p>;
+}
+
 export function AccountDetailPage() {
   const { accountId } = useParams<{ accountId: string }>();
   const navigate = useNavigate();
@@ -33,6 +37,12 @@ export function AccountDetailPage() {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['account', accountId],
     queryFn: () => getAccount(accountId!),
+    enabled: Boolean(accountId),
+  });
+
+  const disputeDraftQuery = useQuery({
+    queryKey: ['account-dispute-draft', accountId],
+    queryFn: () => getAccountDisputeDraft(accountId!),
     enabled: Boolean(accountId),
   });
 
@@ -178,6 +188,89 @@ export function AccountDetailPage() {
               View linked case →
             </Link>
           </div>
+        </Card>
+
+        <Card title="Dispute draft preview" className="lg:col-span-3">
+          {disputeDraftQuery.isLoading ? (
+            <p className="py-6 text-center text-sm text-gray-500">Loading dispute draft...</p>
+          ) : null}
+
+          {disputeDraftQuery.isError ? (
+            <div className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+              Failed to load the dispute draft preview.
+            </div>
+          ) : null}
+
+          {disputeDraftQuery.data ? (
+            <div className="space-y-6">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                    {disputeDraftQuery.data.template_id}
+                  </p>
+                  <h3 className="mt-1 text-base font-semibold text-gray-900">
+                    {disputeDraftQuery.data.subject}
+                  </h3>
+                </div>
+                <span className="inline-flex w-fit rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
+                  {disputeDraftQuery.data.generated_by === 'rules'
+                    ? 'Rule-based draft'
+                    : 'Generated draft'}
+                </span>
+              </div>
+
+              <div>
+                <h4 className="text-sm font-semibold text-gray-900">Disputed items</h4>
+                {disputeDraftQuery.data.disputed_items.length > 0 ? (
+                  <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-gray-700">
+                    {disputeDraftQuery.data.disputed_items.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <EmptyListText>No disputed items generated.</EmptyListText>
+                )}
+              </div>
+
+              <div>
+                <h4 className="text-sm font-semibold text-gray-900">Draft body</h4>
+                <pre className="mt-2 whitespace-pre-wrap rounded-md border border-gray-200 bg-gray-50 p-4 text-sm leading-6 text-gray-800">
+                  {disputeDraftQuery.data.body}
+                </pre>
+              </div>
+
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                <div>
+                  <h4 className="text-sm font-semibold text-gray-900">Evidence checklist</h4>
+                  {disputeDraftQuery.data.evidence_checklist.length > 0 ? (
+                    <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-gray-700">
+                      {disputeDraftQuery.data.evidence_checklist.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <EmptyListText>No evidence checklist generated.</EmptyListText>
+                  )}
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold text-gray-900">Compliance notes</h4>
+                  {disputeDraftQuery.data.compliance_notes.length > 0 ? (
+                    <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-gray-700">
+                      {disputeDraftQuery.data.compliance_notes.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <EmptyListText>No compliance notes generated.</EmptyListText>
+                  )}
+                </div>
+              </div>
+
+              <div className="rounded-md border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800">
+                {disputeDraftQuery.data.requested_action}
+              </div>
+            </div>
+          ) : null}
         </Card>
       </div>
 
