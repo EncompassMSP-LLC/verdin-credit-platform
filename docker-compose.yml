@@ -50,8 +50,8 @@ services:
 
   api:
     build:
-      context: ./apps/api
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apps/api/Dockerfile
     container_name: verdin-api
     environment:
       APP_ENV: development
@@ -60,6 +60,11 @@ services:
       DATABASE_URL_SYNC: postgresql://verdin:verdin@postgres:5432/verdin_credit
       REDIS_URL: redis://redis:6379/0
       CORS_ORIGINS: http://localhost:5173,http://localhost:3000,http://localhost
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+      MINIO_BUCKET: verdin-documents
+      MINIO_SECURE: 'false'
     ports:
       - '8000:8000'
     volumes:
@@ -68,6 +73,8 @@ services:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      minio:
         condition: service_healthy
     healthcheck:
       test:
@@ -83,14 +90,24 @@ services:
 
   worker:
     build:
-      context: ./apps/worker
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apps/worker/Dockerfile
     container_name: verdin-worker
     environment:
       REDIS_URL: redis://redis:6379/0
       WORKER_QUEUE_NAME: verdin:jobs
+      DATABASE_URL_SYNC: postgresql://verdin:verdin@postgres:5432/verdin_credit
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+      MINIO_BUCKET: verdin-documents
+      MINIO_SECURE: 'false'
     depends_on:
+      postgres:
+        condition: service_healthy
       redis:
+        condition: service_healthy
+      minio:
         condition: service_healthy
     restart: unless-stopped
 

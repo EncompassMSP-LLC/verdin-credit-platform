@@ -1,0 +1,4 @@
+# E2E suite dependencies (in addition to apps/api/requirements.txt, which
+# provides httpx, pytest, SQLAlchemy, and the `api` package used to bootstrap
+# the organization and user directly in the database).
+reportlab>=4.2.0

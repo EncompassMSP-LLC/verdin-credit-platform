@@ -13,7 +13,7 @@ dependencies = [
     "alembic>=1.14.0",
     "psycopg2-binary>=2.9.10",
     "python-jose[cryptography]>=3.3.0",
-    "passlib[bcrypt]>=1.7.4",
+    "bcrypt>=4.1.0",
     "python-multipart>=0.0.20",
     "structlog>=24.4.0",
     "redis>=5.2.1",
@@ -38,8 +38,9 @@ packages = ["api"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 testpaths = ["tests"]
-pythonpath = ["."]
+pythonpath = [".", "../../packages/document-classification", "../../packages/document-metadata", "../../packages/entity-resolution", "../../packages/event-bus", "../../packages/event-types"]
 
 [tool.ruff]
 line-length = 100

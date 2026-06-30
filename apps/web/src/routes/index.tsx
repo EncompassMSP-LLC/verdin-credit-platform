@@ -7,9 +7,19 @@ import { CasesListPage } from '../pages/cases/CasesListPage';
 import { CaseCreatePage } from '../pages/cases/CaseCreatePage';
 import { CaseDetailPage } from '../pages/cases/CaseDetailPage';
 import { CaseEditPage } from '../pages/cases/CaseEditPage';
-import { AccountsPage } from '../pages/AccountsPage';
-import { DocumentsPage } from '../pages/DocumentsPage';
-import { TasksPage } from '../pages/TasksPage';
+import { AccountsListPage } from '../pages/accounts/AccountsListPage';
+import { AccountCreatePage } from '../pages/accounts/AccountCreatePage';
+import { AccountDetailPage } from '../pages/accounts/AccountDetailPage';
+import { AccountEditPage } from '../pages/accounts/AccountEditPage';
+import { CaseAccountsPage } from '../pages/accounts/CaseAccountsPage';
+import { DocumentsListPage } from '../pages/documents/DocumentsListPage';
+import { DocumentUploadPage } from '../pages/documents/DocumentUploadPage';
+import { DocumentDetailPage } from '../pages/documents/DocumentDetailPage';
+import { TimelinePage } from '../pages/timeline/TimelinePage';
+import { TasksListPage } from '../pages/tasks/TasksListPage';
+import { TaskCreatePage } from '../pages/tasks/TaskCreatePage';
+import { TaskDetailPage } from '../pages/tasks/TaskDetailPage';
+import { TaskEditPage } from '../pages/tasks/TaskEditPage';
 import { SettingsPage } from '../pages/SettingsPage';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -51,9 +61,19 @@ export function AppRoutes() {
         <Route path="cases/new" element={<CaseCreatePage />} />
         <Route path="cases/:caseId" element={<CaseDetailPage />} />
         <Route path="cases/:caseId/edit" element={<CaseEditPage />} />
-        <Route path="accounts" element={<AccountsPage />} />
-        <Route path="documents" element={<DocumentsPage />} />
-        <Route path="tasks" element={<TasksPage />} />
+        <Route path="cases/:caseId/accounts" element={<CaseAccountsPage />} />
+        <Route path="accounts" element={<AccountsListPage />} />
+        <Route path="accounts/new" element={<AccountCreatePage />} />
+        <Route path="accounts/:accountId" element={<AccountDetailPage />} />
+        <Route path="accounts/:accountId/edit" element={<AccountEditPage />} />
+        <Route path="documents" element={<DocumentsListPage />} />
+        <Route path="documents/upload" element={<DocumentUploadPage />} />
+        <Route path="documents/:documentId" element={<DocumentDetailPage />} />
+        <Route path="timeline" element={<TimelinePage />} />
+        <Route path="tasks" element={<TasksListPage />} />
+        <Route path="tasks/new" element={<TaskCreatePage />} />
+        <Route path="tasks/:taskId" element={<TaskDetailPage />} />
+        <Route path="tasks/:taskId/edit" element={<TaskEditPage />} />
         <Route path="settings" element={<SettingsPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
