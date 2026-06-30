@@ -3,8 +3,12 @@
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+_DEVELOPMENT_SECRET_KEY = "dev-secret-key-change-in-production-32chars"
+_DEVELOPMENT_MINIO_ACCESS_KEY = "minioadmin"
+_DEVELOPMENT_MINIO_SECRET_KEY = "minioadmin"
 
 
 class Settings(BaseSettings):
@@ -21,7 +25,7 @@ class Settings(BaseSettings):
     debug: bool = False
 
     secret_key: str = Field(
-        default="dev-secret-key-change-in-production-32chars",
+        default=_DEVELOPMENT_SECRET_KEY,
         min_length=32,
     )
     access_token_expire_minutes: int = 30
@@ -62,6 +66,22 @@ class Settings(BaseSettings):
     @property
     def cors_origins_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
+
+    @model_validator(mode="after")
+    def validate_production_configuration(self) -> "Settings":
+        if self.app_env != "production":
+            return self
+
+        if self.secret_key == _DEVELOPMENT_SECRET_KEY or "change-me" in self.secret_key.lower():
+            raise ValueError("Production SECRET_KEY must be explicitly configured")
+
+        if (
+            self.minio_access_key == _DEVELOPMENT_MINIO_ACCESS_KEY
+            or self.minio_secret_key == _DEVELOPMENT_MINIO_SECRET_KEY
+        ):
+            raise ValueError("Production MinIO credentials must be explicitly configured")
+
+        return self
 
 
 @lru_cache

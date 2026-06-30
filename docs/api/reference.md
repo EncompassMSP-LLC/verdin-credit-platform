@@ -177,6 +177,41 @@ Duplicate detection: uploading a file with the same SHA-256 hash as an existing 
 
 Timeline events are **append-only** — no update or delete endpoints.
 
+## Tasks
+
+| Method | Path                   | Role         | Description                      |
+| ------ | ---------------------- | ------------ | -------------------------------- |
+| POST   | `/tasks`               | case_manager | Create a task                    |
+| GET    | `/tasks`               | read_only    | List tasks (filterable)          |
+| GET    | `/tasks/{id}`          | read_only    | Get task details                 |
+| PATCH  | `/tasks/{id}`          | case_manager | Update a task                    |
+| POST   | `/tasks/{id}/complete` | case_manager | Mark task completed              |
+| POST   | `/tasks/{id}/reopen`   | case_manager | Reopen a completed/canceled task |
+| DELETE | `/tasks/{id}`          | admin        | Soft-delete a task               |
+
+**List query parameters:** `status`, `priority`, `case_id`, `account_id`, `document_id`, `assigned_user_id`, `due_before`, `due_after`, `overdue`, `search`, `sort_by`, `sort_order`, `page`, `page_size`.
+
+Task lifecycle events (`TASK_CREATED`, `TASK_UPDATED`, `TASK_COMPLETED`, `TASK_REOPENED`, `TASK_DELETED`) are published to the timeline via the event bus.
+
+## Dashboard
+
+| Method | Path         | Role      | Description                         |
+| ------ | ------------ | --------- | ----------------------------------- |
+| GET    | `/dashboard` | read_only | Mission Control operations snapshot |
+
+Returns a single payload with `overview`, `cases`, `accounts`, `documents`, `timeline`, `tasks`, `processing`, `performance`, and `alerts`. The response includes `generated_at` and `refresh_seconds` (default 30) for polling clients; the contract is designed for future WebSocket push without breaking changes.
+
+**Card groups surfaced in the UI:**
+
+| Section      | Metrics                                                                                   |
+| ------------ | ----------------------------------------------------------------------------------------- |
+| Operations   | Open cases, active accounts, documents, tasks due today, overdue tasks                    |
+| Processing   | OCR queue, OCR failed, classification/metadata/entity resolution pending                  |
+| Performance  | Cases created/closed today, avg resolution time, docs/accounts per case                   |
+| Intelligence | Classification confidence, entity resolution confidence, AI-ready, unresolved             |
+| Timeline     | Recent activity with case and document context                                            |
+| Alerts       | OCR failures, unmatched entities, documents requiring review, high-priority overdue tasks |
+
 ## Error Responses
 
 All errors follow this format:

@@ -194,7 +194,11 @@ class DocumentService:
         version_number: int,
         file_name: str,
     ) -> str:
-        safe_name = file_name.replace("/", "_").replace("\\", "_")
+        base_name = file_name.replace("\\", "/").split("/")[-1].strip()
+        safe_name = "".join(
+            char if char.isalnum() or char in {".", "-", "_"} else "_" for char in base_name
+        ).lstrip(".")
+        safe_name = safe_name or "document"
         return f"{organization_id}/{case_id}/{document_id}/v{version_number}/{safe_name}"
 
     async def _get_document_for_user(
@@ -327,6 +331,13 @@ class DocumentService:
         )
         await self._documents.create_version(version)
 
+        # Commit before enqueuing async work. The worker reads the document on a
+        # separate connection and may dequeue the OCR job before this request's
+        # transaction commits — a read-after-write race that otherwise drops the
+        # job and leaves the document stuck in "queued".
+        if self._session is not None:
+            await self._session.commit()
+
         self._queue_ocr_job(document)
         await self._documents.update(document)
         if self._session is not None:
@@ -390,6 +401,11 @@ class DocumentService:
         self._apply_initial_processing_status(document)
         apply_audit_on_update(document, user.id)
         updated = await self._documents.update(document)
+
+        # See upload_document: persist the new version before enqueuing OCR so
+        # the worker never races the request transaction.
+        if self._session is not None:
+            await self._session.commit()
 
         self._queue_ocr_job(updated)
         updated = await self._documents.update(updated)

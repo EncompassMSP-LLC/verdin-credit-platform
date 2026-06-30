@@ -26,6 +26,23 @@ export {
 } from './auth';
 
 export {
+  getDashboard,
+  type DashboardAccounts,
+  type DashboardAlertItem,
+  type DashboardAlerts,
+  type DashboardAlertSeverity,
+  type DashboardAlertType,
+  type DashboardCases,
+  type DashboardDocuments,
+  type DashboardOverview,
+  type DashboardPerformance,
+  type DashboardProcessing,
+  type DashboardResponse,
+  type DashboardTasks,
+  type DashboardTimelineItem,
+} from './dashboard';
+
+export {
   createCase,
   deleteCase,
   getCase,
@@ -81,7 +98,19 @@ export {
   type UploadDocumentInput,
 } from './documents';
 
-export { getTask, listTasks, type ListTasksParams, type Task } from './tasks';
+export {
+  completeTask,
+  createTask,
+  deleteTask,
+  getTask,
+  listTasks,
+  reopenTask,
+  updateTask,
+  type CreateTaskInput,
+  type ListTasksParams,
+  type Task,
+  type UpdateTaskInput,
+} from './tasks';
 
 export {
   getTimelineEvent,

@@ -10,12 +10,14 @@ from verdin_event_types import (
     CaseEventType,
     DocumentEventType,
     EventCategory,
+    TaskEventType,
 )
 
 from api.modules.accounts.models import Account
 from api.modules.auth.models import User
 from api.modules.cases.models import Case, CaseStatus
 from api.modules.documents.models import Document
+from api.modules.tasks.models import Task
 
 
 def case_created_event(case: Case, performed_by: uuid.UUID) -> PlatformEvent:
@@ -207,3 +209,91 @@ def user_login_event(user: User) -> PlatformEvent:
 
 def is_case_closed_status(status: CaseStatus) -> bool:
     return status in (CaseStatus.CLOSED, CaseStatus.RESOLVED)
+
+
+def _task_event_metadata(task: Task) -> dict[str, str | None]:
+    return {
+        "status": task.status.value if hasattr(task.status, "value") else task.status,
+        "priority": task.priority.value if hasattr(task.priority, "value") else task.priority,
+        "title": task.title,
+    }
+
+
+def task_created_event(task: Task, performed_by: uuid.UUID) -> PlatformEvent:
+    return PlatformEvent(
+        event_type=TaskEventType.TASK_CREATED.value,
+        event_category=EventCategory.TASK.value,
+        title="Task created",
+        description=f"Task '{task.title}' was created.",
+        organization_id=task.organization_id,
+        case_id=task.case_id,
+        account_id=task.account_id,
+        document_id=task.document_id,
+        performed_by=performed_by,
+        source_module="tasks",
+        metadata=_task_event_metadata(task),
+    )
+
+
+def task_updated_event(task: Task, performed_by: uuid.UUID) -> PlatformEvent:
+    return PlatformEvent(
+        event_type=TaskEventType.TASK_UPDATED.value,
+        event_category=EventCategory.TASK.value,
+        title="Task updated",
+        description=f"Task '{task.title}' was updated.",
+        organization_id=task.organization_id,
+        case_id=task.case_id,
+        account_id=task.account_id,
+        document_id=task.document_id,
+        performed_by=performed_by,
+        source_module="tasks",
+        metadata=_task_event_metadata(task),
+    )
+
+
+def task_completed_event(task: Task, performed_by: uuid.UUID) -> PlatformEvent:
+    return PlatformEvent(
+        event_type=TaskEventType.TASK_COMPLETED.value,
+        event_category=EventCategory.TASK.value,
+        title="Task completed",
+        description=f"Task '{task.title}' was completed.",
+        organization_id=task.organization_id,
+        case_id=task.case_id,
+        account_id=task.account_id,
+        document_id=task.document_id,
+        performed_by=performed_by,
+        source_module="tasks",
+        metadata=_task_event_metadata(task),
+    )
+
+
+def task_reopened_event(task: Task, performed_by: uuid.UUID) -> PlatformEvent:
+    return PlatformEvent(
+        event_type=TaskEventType.TASK_REOPENED.value,
+        event_category=EventCategory.TASK.value,
+        title="Task reopened",
+        description=f"Task '{task.title}' was reopened.",
+        organization_id=task.organization_id,
+        case_id=task.case_id,
+        account_id=task.account_id,
+        document_id=task.document_id,
+        performed_by=performed_by,
+        source_module="tasks",
+        metadata=_task_event_metadata(task),
+    )
+
+
+def task_deleted_event(task: Task, performed_by: uuid.UUID) -> PlatformEvent:
+    return PlatformEvent(
+        event_type=TaskEventType.TASK_DELETED.value,
+        event_category=EventCategory.TASK.value,
+        title="Task deleted",
+        description=f"Task '{task.title}' was deleted.",
+        organization_id=task.organization_id,
+        case_id=task.case_id,
+        account_id=task.account_id,
+        document_id=task.document_id,
+        performed_by=performed_by,
+        source_module="tasks",
+        metadata=_task_event_metadata(task),
+    )
