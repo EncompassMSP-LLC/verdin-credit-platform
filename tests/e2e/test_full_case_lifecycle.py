@@ -186,6 +186,28 @@ def test_full_case_lifecycle(
     assert metadata["account_number_masked"] == doc.EXPECTED_ACCOUNT_MASKED
     assert metadata["report_date"] == doc.EXPECTED_REPORT_DATE
 
+    # ---------------------------------------------------------------- Stage 7b
+    # Parsed report — structured parser output must be persisted for UI review.
+    parsed_report = expect_ok(
+        http.get(
+            f"/api/v1/documents/{document_id}/parsed-credit-report",
+            headers=headers,
+        ),
+        label="stage7b_parsed_credit_report",
+        artifacts=artifacts,
+    )
+    assert parsed_report["bureau"] == doc.EXPECTED_BUREAU
+    assert parsed_report["parser_name"] == doc.EXPECTED_BUREAU
+    assert parsed_report["schema_version"] == "1.0"
+    assert parsed_report["is_partial"] is False
+    assert parsed_report["parser_confidence"] > 0
+    accounts = parsed_report["parsed_report"]["accounts"]
+    assert len(accounts) == 1
+    assert accounts[0]["creditor_name"] == doc.EXPECTED_CREDITOR
+    assert accounts[0]["account_number_masked"] == doc.EXPECTED_ACCOUNT_MASKED
+    assert accounts[0]["balance"] == doc.EXPECTED_BALANCE
+    assert accounts[0]["date_reported"] == "05/01/2026"
+
     # ---------------------------------------------------------------- Stage 8
     # Entity resolution — the account tradeline must match the seeded account.
     def fetch_resolutions() -> httpx.Response:
