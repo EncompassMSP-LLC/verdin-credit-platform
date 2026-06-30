@@ -2,9 +2,18 @@ FROM python:3.13-slim
 
 WORKDIR /app
 
-COPY requirements.txt .
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends tesseract-ocr \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY apps/worker/requirements.txt .
+COPY packages/document-classification /packages/document-classification
+COPY packages/document-metadata /packages/document-metadata
+COPY packages/entity-resolution /packages/entity-resolution
+COPY packages/event-bus /packages/event-bus
+COPY packages/event-types /packages/event-types
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+COPY apps/worker .
 
 CMD ["python", "main.py"]
