@@ -132,6 +132,23 @@ export interface AccountIntelligenceSummary {
   next_action_queue: NextActionItem[];
 }
 
+export interface AccountDisputeDraft {
+  account_id: string;
+  case_id: string;
+  bureau: AccountBureau;
+  recipient_type: 'credit_bureau';
+  template_id: string;
+  subject: string;
+  body: string;
+  disputed_items: string[];
+  requested_action: string;
+  evidence_checklist: string[];
+  compliance_notes: string[];
+  generated_by: 'rules';
+  readiness_score: number | null;
+  risk_score: number | null;
+}
+
 function buildQuery(params: Record<string, unknown>): string {
   const search = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {
@@ -157,6 +174,10 @@ export async function listAccounts(
 
 export async function getAccount(accountId: string): Promise<Account> {
   return request<Account>(apiPath(`/accounts/${accountId}`));
+}
+
+export async function getAccountDisputeDraft(accountId: string): Promise<AccountDisputeDraft> {
+  return request<AccountDisputeDraft>(apiPath(`/accounts/${accountId}/dispute-draft`));
 }
 
 export async function updateAccount(

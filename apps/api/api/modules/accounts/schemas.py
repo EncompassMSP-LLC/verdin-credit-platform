@@ -224,3 +224,20 @@ class AccountIntelligenceSummary(BaseSchema):
     highest_balance_accounts: list[AccountResponse]
     highest_risk_accounts: list[AccountResponse]
     next_action_queue: list[NextActionItem]
+
+
+class AccountDisputeDraftResponse(BaseSchema):
+    account_id: uuid.UUID
+    case_id: uuid.UUID
+    bureau: AccountBureau
+    recipient_type: Literal["credit_bureau"]
+    template_id: str
+    subject: str
+    body: str
+    disputed_items: list[str]
+    requested_action: str
+    evidence_checklist: list[str]
+    compliance_notes: list[str]
+    generated_by: Literal["rules"]
+    readiness_score: int | None
+    risk_score: int | None
