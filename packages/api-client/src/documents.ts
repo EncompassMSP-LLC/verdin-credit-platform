@@ -158,6 +158,27 @@ export interface DocumentParsedCreditReportComparison {
   account_changes: ParsedReportAccountChange[];
 }
 
+export interface ParsedReportAccountCandidate {
+  source_index: number;
+  case_id: string;
+  bureau: string;
+  creditor_name: string;
+  original_creditor: string | null;
+  account_number_masked: string | null;
+  account_type: string;
+  account_status: string;
+  payment_status: string;
+  balance: string | null;
+  past_due_amount: string | null;
+  remarks: string | null;
+}
+
+export interface DocumentParsedCreditReportAccountCandidates {
+  document_id: string;
+  bureau: string;
+  candidates: ParsedReportAccountCandidate[];
+}
+
 export interface DocumentEntityResolution {
   id: string;
   document_id: string;
@@ -269,6 +290,14 @@ export async function compareDocumentParsedCreditReport(
 ): Promise<DocumentParsedCreditReportComparison> {
   return request<DocumentParsedCreditReportComparison>(
     apiPath(`/documents/${documentId}/parsed-credit-report/comparison`),
+  );
+}
+
+export async function getDocumentParsedCreditReportAccountCandidates(
+  documentId: string,
+): Promise<DocumentParsedCreditReportAccountCandidates> {
+  return request<DocumentParsedCreditReportAccountCandidates>(
+    apiPath(`/documents/${documentId}/parsed-credit-report/account-candidates`),
   );
 }
 

@@ -135,26 +135,27 @@ Accounts automatically compute `risk_score`, `readiness_score`, `next_eligible_d
 
 Secure document storage with MinIO, SHA-256 hashing, versioning, and duplicate detection. See [`docs/epics/document-intelligence-platform.md`](../epics/document-intelligence-platform.md).
 
-| Method | Path                                                           | Min role     | Description                        |
-| ------ | -------------------------------------------------------------- | ------------ | ---------------------------------- |
-| POST   | `/documents`                                                   | case_manager | Upload document (multipart)        |
-| GET    | `/documents`                                                   | read_only    | List documents                     |
-| GET    | `/documents/{document_id}`                                     | read_only    | Get document with versions         |
-| GET    | `/documents/{document_id}/duplicates`                          | read_only    | Get exact-hash duplicate group     |
-| PATCH  | `/documents/{document_id}`                                     | case_manager | Update metadata                    |
-| DELETE | `/documents/{document_id}`                                     | admin        | Soft-delete document               |
-| GET    | `/documents/{document_id}/ocr`                                 | read_only    | OCR status and extracted text      |
-| POST   | `/documents/{document_id}/ocr/retry`                           | case_manager | Re-queue OCR for failed document   |
-| GET    | `/documents/{document_id}/download`                            | read_only    | Download file (optional `version`) |
-| POST   | `/documents/{document_id}/versions`                            | case_manager | Upload new version                 |
-| GET    | `/documents/{document_id}/versions`                            | read_only    | List version history               |
-| GET    | `/documents/{document_id}/metadata`                            | read_only    | Get extracted metadata             |
-| POST   | `/documents/{document_id}/metadata/extract`                    | case_manager | Extract metadata from OCR text     |
-| GET    | `/documents/{document_id}/parsed-credit-report/comparison`     | read_only    | Compare against previous report    |
-| GET    | `/documents/{document_id}/resolutions`                         | read_only    | List entity resolution results     |
-| POST   | `/documents/{document_id}/resolutions/resolve`                 | case_manager | Run entity resolution              |
-| POST   | `/documents/{document_id}/resolutions/{resolution_id}/confirm` | case_manager | Confirm or manually select match   |
-| POST   | `/documents/{document_id}/resolutions/{resolution_id}/reject`  | case_manager | Reject proposed match              |
+| Method | Path                                                               | Min role     | Description                                     |
+| ------ | ------------------------------------------------------------------ | ------------ | ----------------------------------------------- |
+| POST   | `/documents`                                                       | case_manager | Upload document (multipart)                     |
+| GET    | `/documents`                                                       | read_only    | List documents                                  |
+| GET    | `/documents/{document_id}`                                         | read_only    | Get document with versions                      |
+| GET    | `/documents/{document_id}/duplicates`                              | read_only    | Get exact-hash duplicate group                  |
+| PATCH  | `/documents/{document_id}`                                         | case_manager | Update metadata                                 |
+| DELETE | `/documents/{document_id}`                                         | admin        | Soft-delete document                            |
+| GET    | `/documents/{document_id}/ocr`                                     | read_only    | OCR status and extracted text                   |
+| POST   | `/documents/{document_id}/ocr/retry`                               | case_manager | Re-queue OCR for failed document                |
+| GET    | `/documents/{document_id}/download`                                | read_only    | Download file (optional `version`)              |
+| POST   | `/documents/{document_id}/versions`                                | case_manager | Upload new version                              |
+| GET    | `/documents/{document_id}/versions`                                | read_only    | List version history                            |
+| GET    | `/documents/{document_id}/metadata`                                | read_only    | Get extracted metadata                          |
+| POST   | `/documents/{document_id}/metadata/extract`                        | case_manager | Extract metadata from OCR text                  |
+| GET    | `/documents/{document_id}/parsed-credit-report/account-candidates` | read_only    | Build account candidates from parsed tradelines |
+| GET    | `/documents/{document_id}/parsed-credit-report/comparison`         | read_only    | Compare against previous report                 |
+| GET    | `/documents/{document_id}/resolutions`                             | read_only    | List entity resolution results                  |
+| POST   | `/documents/{document_id}/resolutions/resolve`                     | case_manager | Run entity resolution                           |
+| POST   | `/documents/{document_id}/resolutions/{resolution_id}/confirm`     | case_manager | Confirm or manually select match                |
+| POST   | `/documents/{document_id}/resolutions/{resolution_id}/reject`      | case_manager | Reject proposed match                           |
 
 **List query parameters:** `metadata_status` (`pending`, `extracted`, `failed`), `resolution_status` (`matched`, `ambiguous`, `unmatched`, `confirmed`, `rejected`).
 
@@ -169,6 +170,8 @@ Fields: `file` (required), `title` (required), `case_id` (required), `descriptio
 Duplicate detection: uploading a file with the same SHA-256 hash as an existing org document sets `is_duplicate: true` and `duplicate_of_id`. Use `GET /documents/{document_id}/duplicates` to review the canonical document and exact duplicate copies in the same organization.
 
 Parsed credit report comparison: `GET /documents/{document_id}/parsed-credit-report/comparison` compares the selected report to the previous parsed report for the same case and bureau, matching tradelines by creditor plus masked account number.
+
+Parsed tradeline account candidates: `GET /documents/{document_id}/parsed-credit-report/account-candidates` converts parser tradelines into normalized account-create candidates for staff review.
 
 ## Timeline
 

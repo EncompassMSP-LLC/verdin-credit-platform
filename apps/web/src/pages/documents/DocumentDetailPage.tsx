@@ -9,9 +9,12 @@ import {
   getDocumentDownloadUrl,
   getDocumentOcr,
   getDocumentParsedCreditReport,
+  getDocumentParsedCreditReportAccountCandidates,
   retryDocumentOcr,
   type Document,
   type DocumentDuplicateGroup,
+  type DocumentParsedCreditReportAccountCandidates,
+  type ParsedReportAccountCandidate,
   type DocumentParsedCreditReportComparison,
   type ParsedReportAccountChange,
 } from '@verdin/api-client';
@@ -132,6 +135,75 @@ function ParsedReportComparisonPanel({
   );
 }
 
+function buildCreateAccountUrl(candidate: ParsedReportAccountCandidate): string {
+  const params = new URLSearchParams();
+  params.set('case_id', candidate.case_id);
+  params.set('bureau', candidate.bureau);
+  params.set('creditor_name', candidate.creditor_name);
+  params.set('account_type', candidate.account_type);
+  params.set('account_status', candidate.account_status);
+  params.set('payment_status', candidate.payment_status);
+  if (candidate.account_number_masked) {
+    params.set('account_number_masked', candidate.account_number_masked);
+  }
+  if (candidate.balance) {
+    params.set('balance', candidate.balance);
+  }
+  if (candidate.past_due_amount) {
+    params.set('past_due_amount', candidate.past_due_amount);
+  }
+  if (candidate.remarks) {
+    params.set('remarks', candidate.remarks);
+  }
+  return `/accounts/new?${params.toString()}`;
+}
+
+function ParsedReportAccountCandidatesPanel({
+  accountCandidates,
+}: {
+  accountCandidates?: DocumentParsedCreditReportAccountCandidates;
+}) {
+  if (!accountCandidates || accountCandidates.candidates.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="rounded-md border border-blue-100 bg-blue-50 p-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h4 className="text-sm font-medium text-blue-950">Account candidates</h4>
+          <p className="mt-1 text-sm text-blue-800">
+            Review parsed tradelines before creating account records.
+          </p>
+        </div>
+        <Badge variant="info">{accountCandidates.candidates.length} candidates</Badge>
+      </div>
+      <ul className="mt-3 divide-y divide-blue-100">
+        {accountCandidates.candidates.map((candidate) => (
+          <li
+            key={`${candidate.source_index}-${candidate.creditor_name}`}
+            className="flex flex-col gap-3 py-3 text-sm sm:flex-row sm:items-center sm:justify-between"
+          >
+            <div>
+              <p className="font-medium text-blue-950">{candidate.creditor_name}</p>
+              <p className="mt-1 text-blue-800">
+                {candidate.account_number_masked ?? 'No account number'} ·{' '}
+                {candidate.account_type.replace('_', ' ')} ·{' '}
+                {formatCurrency(candidate.balance ? Number(candidate.balance) : null)}
+              </p>
+            </div>
+            <Link to={buildCreateAccountUrl(candidate)}>
+              <Button size="sm" variant="secondary">
+                Create account
+              </Button>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 function DuplicateDocumentRow({
   document,
   label,
@@ -239,6 +311,13 @@ export function DocumentDetailPage() {
   const { data: parsedReportComparison } = useQuery({
     queryKey: ['document-parsed-credit-report-comparison', documentId],
     queryFn: () => compareDocumentParsedCreditReport(documentId!),
+    enabled: Boolean(documentId) && Boolean(parsedReport),
+    retry: false,
+  });
+
+  const { data: accountCandidates } = useQuery({
+    queryKey: ['document-parsed-credit-report-account-candidates', documentId],
+    queryFn: () => getDocumentParsedCreditReportAccountCandidates(documentId!),
     enabled: Boolean(documentId) && Boolean(parsedReport),
     retry: false,
   });
@@ -426,6 +505,7 @@ export function DocumentDetailPage() {
                   </p>
                 ) : null}
                 <ParsedReportComparisonPanel comparison={parsedReportComparison} />
+                <ParsedReportAccountCandidatesPanel accountCandidates={accountCandidates} />
                 <ParsedReportTradelines parsedReport={parsedReport} />
               </div>
             ) : (
