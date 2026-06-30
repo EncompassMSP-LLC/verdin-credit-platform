@@ -9,6 +9,7 @@ import {
 } from '../../components/documents/DocumentFilters';
 import { DocumentMetadataStatusBadge } from '../../components/documents/DocumentMetadataStatusBadge';
 import { DocumentProcessingBadge } from '../../components/documents/DocumentProcessingBadge';
+import { featureFlags } from '../../lib/feature-flags';
 
 const defaultFilters: DocumentFiltersValue = {
   search: '',
@@ -64,9 +65,16 @@ export function DocumentsListPage() {
           <h1 className="text-2xl font-bold text-gray-900">Documents</h1>
           <p className="mt-1 text-gray-500">Secure document library for case evidence.</p>
         </div>
-        <Link to="/documents/upload">
-          <Button>Upload document</Button>
-        </Link>
+        <div className="flex gap-2">
+          {featureFlags.enableImports ? (
+            <Link to="/imports/credit-report">
+              <Button variant="secondary">Import credit report</Button>
+            </Link>
+          ) : null}
+          <Link to="/documents/upload">
+            <Button>Upload document</Button>
+          </Link>
+        </div>
       </div>
 
       <Card className="mb-6">

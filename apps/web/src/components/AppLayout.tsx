@@ -1,12 +1,14 @@
 import { NavLink, Outlet } from 'react-router-dom';
 import { APP_NAME } from '@verdin/shared';
 import { useAuth } from '../lib/auth';
+import { featureFlags } from '../lib/feature-flags';
 
 const navItems = [
   { to: '/', label: 'Dashboard', end: true },
   { to: '/cases', label: 'Cases' },
   { to: '/accounts', label: 'Accounts' },
   { to: '/documents', label: 'Documents' },
+  ...(featureFlags.enableImports ? [{ to: '/imports/credit-report', label: 'Import Wizard' }] : []),
   { to: '/timeline', label: 'Timeline' },
   { to: '/tasks', label: 'Tasks' },
   { to: '/settings', label: 'Settings' },
