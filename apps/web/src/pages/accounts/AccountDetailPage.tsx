@@ -4,10 +4,12 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   createAccountDisputeDraftReviewTask,
   createAccountDisputeLetterDraft,
+  createAccountDisputeLetterReviewTask,
   deleteAccount,
   getAccount,
   getAccountDisputeDraft,
   listAccountDisputeLetters,
+  type DisputeLetter,
 } from '@verdin/api-client';
 import { ACCOUNT_TYPE_LABELS, DISPUTE_STATUS_LABELS, PAYMENT_STATUS_LABELS } from '@verdin/shared';
 import { Button, Card } from '@verdin/ui';
@@ -33,6 +35,57 @@ function formatDate(value: string | null) {
 
 function EmptyListText({ children }: { children: string }) {
   return <p className="text-sm text-gray-500">{children}</p>;
+}
+
+function SavedDisputeLetterRow({
+  accountId,
+  letter,
+  onReviewTaskCreated,
+}: {
+  accountId: string;
+  letter: DisputeLetter;
+  onReviewTaskCreated: () => void;
+}) {
+  const reviewTaskMutation = useMutation({
+    mutationFn: () => createAccountDisputeLetterReviewTask(accountId, letter.id),
+    onSuccess: () => {
+      onReviewTaskCreated();
+    },
+  });
+
+  return (
+    <li className="flex flex-wrap items-center justify-between gap-4 p-3">
+      <div>
+        <p className="text-sm font-medium text-gray-900">{letter.subject}</p>
+        <p className="text-xs text-gray-500">
+          {letter.status} · {new Date(letter.generated_at).toLocaleString()}
+        </p>
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs text-gray-500">{letter.template_id}</span>
+        {reviewTaskMutation.data ? (
+          <Link to={`/tasks/${reviewTaskMutation.data.id}`}>
+            <Button size="sm" variant="secondary">
+              View review task
+            </Button>
+          </Link>
+        ) : (
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => reviewTaskMutation.mutate()}
+            loading={reviewTaskMutation.isPending}
+            disabled={reviewTaskMutation.isPending}
+          >
+            Create review task
+          </Button>
+        )}
+      </div>
+      {reviewTaskMutation.isError ? (
+        <p className="w-full text-xs text-red-600">Failed to create review task for this draft.</p>
+      ) : null}
+    </li>
+  );
 }
 
 export function AccountDetailPage() {
@@ -355,15 +408,17 @@ export function AccountDetailPage() {
                 {disputeLettersQuery.data && disputeLettersQuery.data.length > 0 ? (
                   <ul className="mt-2 divide-y divide-gray-200 rounded-md border border-gray-200">
                     {disputeLettersQuery.data.map((letter) => (
-                      <li key={letter.id} className="flex items-center justify-between gap-4 p-3">
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">{letter.subject}</p>
-                          <p className="text-xs text-gray-500">
-                            {letter.status} · {new Date(letter.generated_at).toLocaleString()}
-                          </p>
-                        </div>
-                        <span className="text-xs text-gray-500">{letter.template_id}</span>
-                      </li>
+                      <SavedDisputeLetterRow
+                        key={letter.id}
+                        accountId={accountId!}
+                        letter={letter}
+                        onReviewTaskCreated={() => {
+                          queryClient.invalidateQueries({
+                            queryKey: ['account-dispute-letters', accountId],
+                          });
+                          queryClient.invalidateQueries({ queryKey: ['tasks'] });
+                        }}
+                      />
                     ))}
                   </ul>
                 ) : null}

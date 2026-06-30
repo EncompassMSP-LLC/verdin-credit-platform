@@ -212,6 +212,68 @@ def test_create_and_list_account_dispute_letter_drafts(
     assert [item["id"] for item in listed_data] == [created_data["id"]]
 
 
+def test_create_account_dispute_letter_review_task_is_idempotent(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    create = api_client.post(
+        "/api/v1/accounts",
+        headers=manager_headers,
+        json=sample_account_payload(sample_case_id),
+    )
+    account_id = create.json()["id"]
+
+    letter = api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-draft/letters",
+        headers=manager_headers,
+    )
+    letter_id = letter.json()["id"]
+
+    first = api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-letters/{letter_id}/review-task",
+        headers=manager_headers,
+    )
+    second = api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-letters/{letter_id}/review-task",
+        headers=manager_headers,
+    )
+    listed = api_client.get(
+        f"/api/v1/accounts/{account_id}/dispute-letters",
+        headers=manager_headers,
+    )
+
+    assert first.status_code == 200
+    assert second.status_code == 200
+    assert second.json()["id"] == first.json()["id"]
+    assert first.json()["account_id"] == account_id
+    assert first.json()["case_id"] == sample_case_id
+    assert first.json()["priority"] == "high"
+    assert first.json()["source_module"] == "accounts.dispute_letter"
+    assert first.json()["source_event_id"] == letter_id
+    assert listed.json()[0]["status"] == "review"
+
+
+def test_create_account_dispute_letter_review_task_not_found(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    create = api_client.post(
+        "/api/v1/accounts",
+        headers=manager_headers,
+        json=sample_account_payload(sample_case_id),
+    )
+    account_id = create.json()["id"]
+
+    response = api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-letters/{uuid.uuid4()}/review-task",
+        headers=manager_headers,
+    )
+
+    assert response.status_code == 404
+
+
 def test_get_account_not_found(
     api_client: TestClient,
     manager_headers: dict[str, str],

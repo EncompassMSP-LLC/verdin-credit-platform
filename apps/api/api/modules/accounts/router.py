@@ -145,6 +145,19 @@ async def list_account_dispute_letters(
     return await service.list_dispute_letters(current_user, account_id)
 
 
+@router.post(
+    "/{account_id}/dispute-letters/{letter_id}/review-task",
+    response_model=TaskResponse,
+)
+async def create_account_dispute_letter_review_task(
+    account_id: uuid.UUID,
+    letter_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: AccountService = Depends(get_account_service),
+) -> TaskResponse:
+    return await service.create_dispute_letter_review_task(current_user, account_id, letter_id)
+
+
 @router.patch("/{account_id}", response_model=AccountResponse)
 async def update_account(
     account_id: uuid.UUID,
