@@ -58,6 +58,7 @@ export {
   createAccount,
   createAccountDisputeDraftReviewTask,
   createAccountDisputeLetterDraft,
+  createAccountDisputeLetterReviewTask,
   deleteAccount,
   getAccount,
   getAccountDisputeDraft,

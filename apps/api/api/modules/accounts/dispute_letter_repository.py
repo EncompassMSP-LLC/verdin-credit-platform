@@ -18,6 +18,23 @@ class DisputeLetterRepository:
         await self._session.refresh(dispute_letter)
         return dispute_letter
 
+    async def get_for_account(
+        self,
+        *,
+        organization_id: uuid.UUID,
+        account_id: uuid.UUID,
+        letter_id: uuid.UUID,
+    ) -> DisputeLetter | None:
+        result = await self._session.execute(
+            select(DisputeLetter).where(
+                DisputeLetter.id == letter_id,
+                DisputeLetter.organization_id == organization_id,
+                DisputeLetter.account_id == account_id,
+                DisputeLetter.deleted_at.is_(None),
+            )
+        )
+        return result.scalar_one_or_none()
+
     async def list_for_account(
         self,
         *,

@@ -46,6 +46,7 @@ from api.modules.timeline.builders import (
 from api.repositories.account import AccountRepositoryProtocol
 
 DISPUTE_DRAFT_REVIEW_TASK_SOURCE = "accounts.dispute_draft"
+DISPUTE_LETTER_REVIEW_TASK_SOURCE = "accounts.dispute_letter"
 
 
 class AccountService:
@@ -316,6 +317,69 @@ class AccountService:
             account_id=account.id,
         )
         return [DisputeLetterResponse.from_model(letter) for letter in letters]
+
+    async def create_dispute_letter_review_task(
+        self,
+        user: User,
+        account_id: uuid.UUID,
+        letter_id: uuid.UUID,
+    ) -> TaskResponse:
+        self._require_write(user)
+        account = await self._get_account_for_user(account_id, user)
+        if self._dispute_letters is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Dispute letter repository is not configured",
+            )
+        if self._tasks is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Task repository is not configured",
+            )
+
+        dispute_letter = await self._dispute_letters.get_for_account(
+            organization_id=account.organization_id,
+            account_id=account.id,
+            letter_id=letter_id,
+        )
+        if dispute_letter is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Dispute letter not found",
+            )
+
+        existing = await self._tasks.find_active_by_account_source(
+            organization_id=account.organization_id,
+            account_id=account.id,
+            source_module=DISPUTE_LETTER_REVIEW_TASK_SOURCE,
+            source_event_id=dispute_letter.id,
+        )
+        if existing is not None:
+            return TaskResponse.from_model(existing)
+
+        if dispute_letter.status == DisputeLetterStatus.DRAFT:
+            dispute_letter.status = DisputeLetterStatus.REVIEW
+            apply_audit_on_update(dispute_letter, user.id)
+
+        task = Task(
+            organization_id=account.organization_id,
+            case_id=account.case_id,
+            account_id=account.id,
+            title=f"Review saved dispute letter for {account.creditor_name}",
+            description=(
+                "Review the saved CRA dispute letter draft, confirm supporting evidence, "
+                "and prepare the next dispute action."
+            ),
+            priority=TaskPriority.HIGH,
+            due_date=datetime.now(UTC) + timedelta(days=1),
+            source_module=DISPUTE_LETTER_REVIEW_TASK_SOURCE,
+            source_event_id=dispute_letter.id,
+        )
+        apply_audit_on_create(task, user.id)
+        created = await self._tasks.create(task)
+        if self._session is not None:
+            await publish_platform_event(self._session, task_created_event(created, user.id))
+        return TaskResponse.from_model(created)
 
     async def create_dispute_draft_review_task(
         self,
