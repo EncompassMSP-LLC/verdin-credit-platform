@@ -1,0 +1,47 @@
+# Cursor Automation prefill — Version 4.5 Sprint Loop
+# Import via Cursor Automations editor, or copy fields manually.
+# See docs/development/agent-sprint-loop.md for setup.
+
+name: Version 4.5 Sprint Loop
+description: After a PR merges to main, sync and ship the next dispute-generation slice with auto-merge.
+
+workflow:
+  triggers:
+    - git:
+        pullRequest:
+          action: MERGED
+          repos:
+            - EncompassMSP-LLC/verdin-credit-platform
+  actions: []
+  prompts:
+    - |
+      You are continuing the Verdin Credit Platform Version 4.5 sprint loop without user input.
+
+      Repository: EncompassMSP-LLC/verdin-credit-platform
+      Follow `.cursor/rules/version-45-sprint-loop.mdc` and AGENTS.md.
+
+      Execute the full loop now:
+      1. Sync main (`git checkout main && git pull origin main`)
+      2. Read recent merges on main to infer the last shipped slice
+      3. Choose the next small reviewable slice (dispute letters, account intelligence, worker automation, docs)
+      4. Create `feature/<name>` branch from main
+      5. Implement with tests, api-client, web UI if needed, and docs
+      6. Verify: pytest for touched endpoints, api-client build, web typecheck/lint, pre-commit
+      7. Commit (conventional), push, `gh pr create` to main
+      8. Run `gh pr merge --auto --squash` on the new PR
+      9. If blocked (CI, permissions, ambiguous product decision), stop and report clearly
+
+      Do not ask the user to merge or continue unless blocked.
+      On Windows use `C:\Program Files\GitHub CLI\gh.exe` if `gh` is not on PATH.
+
+      Dispute letter lifecycle reference: draft → review → approved → sent.
+      Likely next slices: void/cancel letters, awaiting_response transition, furnisher templates.
+
+  model: ''
+  agentOptions:
+    skipInstall: false
+  memoryEnabled: true
+
+  gitConfig:
+    repo: EncompassMSP-LLC/verdin-credit-platform
+    branch: main

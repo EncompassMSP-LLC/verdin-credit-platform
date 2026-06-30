@@ -222,6 +222,10 @@ cd apps/api && uvicorn main:app --reload
 cd apps/web && pnpm dev
 ```
 
+## Agent Sprint Loop (Version 4.5)
+
+For hands-off dispute-generation slices (auto-merge + continue after merge), see [`docs/development/agent-sprint-loop.md`](docs/development/agent-sprint-loop.md) and `.cursor/rules/version-45-sprint-loop.mdc`.
+
 ## Demo Credentials (after seed)
 
 | Email             | Password    | Role  |
