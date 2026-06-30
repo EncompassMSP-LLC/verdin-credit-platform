@@ -1,4 +1,5 @@
 import type {
+  DocumentType,
   DocumentProcessingStatus,
   ExtractionMethod,
   MatchedEntityType,
@@ -39,6 +40,9 @@ export interface Document {
   processing_status: DocumentProcessingStatus;
   ocr_processed_at: string | null;
   ocr_version_number: number | null;
+  document_type: DocumentType | null;
+  confidence_score: number | null;
+  classified_at: string | null;
   metadata_status?: MetadataStatus | null;
   created_at: string;
   updated_at: string;

@@ -303,6 +303,18 @@ export const DOCUMENT_PROCESSING_STATUS_LABELS: Record<DocumentProcessingStatus,
   skipped: 'Not applicable',
 };
 
+export type DocumentType =
+  | 'credit_report'
+  | 'collection_letter'
+  | 'bureau_response'
+  | 'identity_document'
+  | 'proof_of_address'
+  | 'bankruptcy'
+  | 'court_record'
+  | 'medical_collection'
+  | 'utility_bill'
+  | 'unknown';
+
 export type MetadataStatus = 'pending' | 'extracted' | 'failed';
 
 export const METADATA_STATUSES: MetadataStatus[] = ['pending', 'extracted', 'failed'];
