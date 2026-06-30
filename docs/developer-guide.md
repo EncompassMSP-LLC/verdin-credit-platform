@@ -1,5 +1,15 @@
 # Developer Guide
 
+## Platform direction
+
+Verdin is evolving from v4.2 Platform Foundation toward **[Version 5.0 Enterprise](roadmap/v5.0-enterprise.md)**. Before starting work:
+
+1. Check which **[roadmap milestone](roadmap/README.md#version-milestones)** your sprint targets (usually 4.3 Operational Core).
+2. Review **[capability status](governance/capability-matrix.md)** — what is done vs in progress.
+3. Read the relevant **[architecture document](architecture/README.md)** for the domain you are changing.
+4. Follow the **[feature lifecycle](governance/README.md#feature-lifecycle)** and record significant decisions as an **[ADR](adr/README.md)**.
+5. **Update the capability matrix** when the epic reaches definition of done.
+
 ## Quick Start
 
 ```bash
@@ -57,6 +67,10 @@ pnpm dev
 
 Reuse shared utilities from `api/core/` (responses, pagination, permissions, security, audit, exceptions).
 
+### Task management module
+
+Operational tasks live in `api/modules/tasks/` with organization-scoped CRUD, soft delete, and timeline events (`TASK_CREATED`, `TASK_UPDATED`, `TASK_COMPLETED`, `TASK_REOPENED`, `TASK_DELETED`) published through `api/core/events.py`. Frontend pages are under `apps/web/src/pages/tasks/`. Shared API client functions are in `packages/api-client/src/tasks.ts`.
+
 ### Create a database migration
 
 ```bash
@@ -83,6 +97,23 @@ uvicorn main:app --reload
 Use `manager@verdin.demo / changeme123` to create cases and `admin@verdin.demo` to delete.
 
 See `docs/release-notes/sprint-2-epic-1-cases.md` for Sprint 2 Epic 1 details.
+
+### Run account intelligence locally
+
+```bash
+cd apps/api
+alembic upgrade head   # includes 003_credit_accounts migration
+python scripts/seed.py
+uvicorn main:app --reload
+```
+
+Use `manager@verdin.demo / changeme123` to create accounts and `admin@verdin.demo` to delete.
+
+Frontend routes: `/accounts`, `/accounts/new`, `/accounts/:id`, `/cases/:caseId/accounts`
+
+Intelligence scoring lives in `api/modules/accounts/intelligence.py`. The service recalculates scores on every create/update.
+
+See `docs/sprint-2/account-intelligence.md` for Sprint 2 Epic 2 details.
 
 ## Code Quality
 

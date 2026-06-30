@@ -20,6 +20,14 @@ class WorkerSettings(BaseSettings):
     worker_job_timeout_seconds: int = 3600
     worker_heartbeat_interval_seconds: int = 30
 
+    database_url_sync: str = "postgresql://verdin:verdin@localhost:5432/verdin_credit"
+
+    minio_endpoint: str = "localhost:9000"
+    minio_access_key: str = "minioadmin"
+    minio_secret_key: str = "minioadmin"
+    minio_bucket: str = "verdin-documents"
+    minio_secure: bool = False
+
 
 @lru_cache
 def get_worker_settings() -> WorkerSettings:

@@ -7,6 +7,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.core.audit import apply_audit_on_create, apply_audit_on_update
+from api.core.events import publish_platform_event
 from api.core.pagination import PaginatedResponse, paginate
 from api.core.permissions import has_permission
 from api.modules.auth.models import User
@@ -15,6 +16,12 @@ from api.modules.cases.models import Case, CaseStatus
 from api.modules.cases.permissions import CASE_DELETE_ROLE, CASE_WRITE_ROLE
 from api.modules.cases.repository import CaseListFilters, CaseRepository
 from api.modules.cases.schemas import CaseCreate, CaseListParams, CaseResponse, CaseUpdate
+from api.modules.timeline.builders import (
+    case_closed_event,
+    case_created_event,
+    case_updated_event,
+    is_case_closed_status,
+)
 from api.repositories.case import CaseRepositoryProtocol
 from api.repositories.user import UserRepositoryProtocol
 
@@ -24,13 +31,15 @@ class CaseService:
         self,
         case_repo: CaseRepositoryProtocol,
         user_repo: UserRepositoryProtocol | None = None,
+        session: AsyncSession | None = None,
     ) -> None:
         self._cases = case_repo
         self._users = user_repo
+        self._session = session
 
     @classmethod
     def from_session(cls, session: AsyncSession) -> "CaseService":
-        return cls(CaseRepository(session), UserRepository(session))
+        return cls(CaseRepository(session), UserRepository(session), session=session)
 
     def _require_organization(self, user: User) -> uuid.UUID:
         if user.organization_id is None:
@@ -122,6 +131,8 @@ class CaseService:
         )
         apply_audit_on_create(case, user.id)
         created = await self._cases.create(case)
+        if self._session is not None:
+            await publish_platform_event(self._session, case_created_event(created, user.id))
         return CaseResponse.from_model(created)
 
     async def list_cases(
@@ -163,6 +174,7 @@ class CaseService:
         self._require_write(user)
         case = await self._get_case_for_user(case_id, user)
         organization_id = self._require_organization(user)
+        previous_status = case.status
 
         updates = data.model_dump(exclude_unset=True)
         if "case_number" in updates and updates["case_number"]:
@@ -193,6 +205,12 @@ class CaseService:
 
         apply_audit_on_update(case, user.id)
         updated = await self._cases.update(case)
+        if self._session is not None:
+            await publish_platform_event(self._session, case_updated_event(updated, user.id))
+            new_status = updates.get("status", previous_status)
+            if new_status is not None and is_case_closed_status(new_status):
+                if previous_status != new_status:
+                    await publish_platform_event(self._session, case_closed_event(updated, user.id))
         return CaseResponse.from_model(updated)
 
     async def delete_case(self, user: User, case_id: uuid.UUID) -> None:

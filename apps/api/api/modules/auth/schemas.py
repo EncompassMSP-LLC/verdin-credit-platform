@@ -2,11 +2,22 @@
 
 import uuid
 from datetime import datetime
+from typing import Annotated
 
-from pydantic import EmailStr, Field
+from pydantic import AfterValidator, EmailStr, Field
 
 from api.core.constants import TOKEN_TYPE_BEARER, UserRole
 from api.core.responses import BaseSchema
+from api.core.security import MAX_PASSWORD_BYTES, password_within_bcrypt_limit
+
+
+def _validate_password_length(value: str) -> str:
+    if not password_within_bcrypt_limit(value):
+        raise ValueError(f"Password must not exceed {MAX_PASSWORD_BYTES} bytes when UTF-8 encoded")
+    return value
+
+
+Password = Annotated[str, Field(min_length=8), AfterValidator(_validate_password_length)]
 
 
 class TokenResponse(BaseSchema):
@@ -38,7 +49,7 @@ class UserBase(BaseSchema):
 
 
 class UserCreate(UserBase):
-    password: str = Field(min_length=8)
+    password: Password
     organization_id: uuid.UUID | None = None
 
 

@@ -39,15 +39,99 @@ export const createCaseSchema = z.object({
   client_name: z.string().min(1, 'Client name is required').max(255),
   client_email: z.string().email('Invalid email').optional().or(z.literal('')),
   case_number: z.string().max(50).optional(),
-  status: caseStatusSchema.default('open'),
-  stage: caseStageSchema.default('intake'),
-  priority: casePrioritySchema.default('medium'),
+  status: caseStatusSchema,
+  stage: caseStageSchema,
+  priority: casePrioritySchema,
   assigned_user_id: z.string().uuid().optional().nullable(),
   summary: z.string().optional(),
   notes: z.string().optional(),
 });
 
 export const updateCaseSchema = createCaseSchema.partial();
+
+export const accountBureauSchema = z.enum([
+  'equifax',
+  'experian',
+  'transunion',
+  'innovis',
+  'unknown',
+]);
+
+export const accountTypeSchema = z.enum([
+  'mortgage',
+  'auto',
+  'credit_card',
+  'collection',
+  'personal_loan',
+  'student_loan',
+  'medical',
+  'utility',
+  'telecom',
+  'other',
+]);
+
+export const accountStatusSchema = z.enum([
+  'open',
+  'closed',
+  'collection',
+  'charge_off',
+  'repossession',
+  'foreclosure',
+  'transferred',
+  'paid',
+  'settled',
+  'deleted',
+  'unknown',
+]);
+
+export const paymentStatusSchema = z.enum([
+  'current',
+  'late_30',
+  'late_60',
+  'late_90',
+  'late_120',
+  'charge_off',
+  'collection',
+  'repossession',
+  'foreclosure',
+  'unknown',
+]);
+
+export const createAccountSchema = z.object({
+  case_id: z.string().uuid('Case is required'),
+  bureau: accountBureauSchema,
+  creditor_name: z.string().min(1, 'Creditor name is required').max(255),
+  original_creditor: z.string().max(255).optional(),
+  account_number_masked: z.string().max(50).optional(),
+  account_type: accountTypeSchema,
+  account_status: accountStatusSchema,
+  payment_status: paymentStatusSchema,
+  balance: z.string().optional(),
+  past_due_amount: z.string().optional(),
+  remarks: z.string().optional(),
+});
+
+export const updateAccountSchema = createAccountSchema.omit({ case_id: true }).partial();
+
+export const taskStatusSchema = z.enum(['open', 'in_progress', 'blocked', 'completed', 'canceled']);
+
+export const taskPrioritySchema = z.enum(['low', 'medium', 'high', 'critical']);
+
+export const createTaskSchema = z.object({
+  title: z.string().min(1, 'Title is required').max(255),
+  description: z.string().optional().nullable(),
+  status: taskStatusSchema,
+  priority: taskPrioritySchema,
+  due_date: z.string().optional().nullable(),
+  case_id: z.string().uuid().optional().nullable(),
+  account_id: z.string().uuid().optional().nullable(),
+  document_id: z.string().uuid().optional().nullable(),
+  assigned_user_id: z.string().uuid().optional().nullable(),
+  source_module: z.string().max(50).optional().nullable(),
+  source_event_id: z.string().uuid().optional().nullable(),
+});
+
+export const updateTaskSchema = createTaskSchema.partial();
 
 export const paginationSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
@@ -59,4 +143,8 @@ export type RefreshTokenInput = z.infer<typeof refreshTokenSchema>;
 export type CreateUserInput = z.infer<typeof createUserSchema>;
 export type CreateCaseInput = z.infer<typeof createCaseSchema>;
 export type UpdateCaseInput = z.infer<typeof updateCaseSchema>;
+export type CreateAccountInput = z.infer<typeof createAccountSchema>;
+export type UpdateAccountInput = z.infer<typeof updateAccountSchema>;
+export type CreateTaskInput = z.infer<typeof createTaskSchema>;
+export type UpdateTaskInput = z.infer<typeof updateTaskSchema>;
 export type PaginationInput = z.infer<typeof paginationSchema>;
