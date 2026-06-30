@@ -107,3 +107,10 @@ class DocumentVersion(Base):
     created_by_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
 
     document: Mapped["Document"] = relationship(back_populates="versions")
+
+
+# Register the parsed credit report mapper whenever Document is loaded so the
+# Document.parsed_credit_report relationship resolves during mapper configuration.
+from api.modules.documents.parsed_report_models import (  # noqa: E402,F401
+    DocumentParsedCreditReport,
+)
