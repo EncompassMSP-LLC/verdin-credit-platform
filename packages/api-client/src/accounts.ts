@@ -242,6 +242,16 @@ export async function approveAccountDisputeLetter(
   );
 }
 
+export async function sendAccountDisputeLetter(
+  accountId: string,
+  letterId: string,
+): Promise<DisputeLetter> {
+  return request<DisputeLetter>(
+    apiPath(`/accounts/${accountId}/dispute-letters/${letterId}/send`),
+    { method: 'POST' },
+  );
+}
+
 export async function updateAccount(
   accountId: string,
   input: UpdateAccountInput,

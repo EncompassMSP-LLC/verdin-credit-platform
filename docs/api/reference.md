@@ -113,6 +113,7 @@ Credit tradeline accounts with intelligence scoring. All endpoints require authe
 | POST   | `/accounts/{account_id}/dispute-draft/review-task`               | case_manager | Create or reuse dispute draft review task |
 | POST   | `/accounts/{account_id}/dispute-letters/{letter_id}/review-task` | case_manager | Create or reuse saved letter review task  |
 | POST   | `/accounts/{account_id}/dispute-letters/{letter_id}/approve`     | case_manager | Approve a saved letter in review          |
+| POST   | `/accounts/{account_id}/dispute-letters/{letter_id}/send`        | case_manager | Mark an approved letter as sent           |
 | PATCH  | `/accounts/{account_id}`                                         | case_manager | Update an account                         |
 | DELETE | `/accounts/{account_id}`                                         | admin        | Soft-delete an account                    |
 
@@ -148,6 +149,8 @@ Accounts automatically compute `risk_score`, `readiness_score`, `next_eligible_d
 `POST /accounts/{account_id}/dispute-letters/{letter_id}/review-task` creates or reuses an active high-priority task for a saved letter, transitions `draft` letters to `review`, and links the task to the letter artifact.
 
 `POST /accounts/{account_id}/dispute-letters/{letter_id}/approve` transitions a saved letter from `review` to `approved` and emits a timeline event. Letters already approved are returned idempotently; letters not in `review` return `422`.
+
+`POST /accounts/{account_id}/dispute-letters/{letter_id}/send` transitions an approved letter to `sent`, records `sent_at`, and emits a timeline event. Letters already sent are returned idempotently; letters not in `approved` return `422`.
 
 ## Documents
 
