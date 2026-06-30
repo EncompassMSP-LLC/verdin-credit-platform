@@ -464,6 +464,8 @@ export function AccountDetailPage() {
                           queryClient.invalidateQueries({
                             queryKey: ['account-dispute-letters', accountId],
                           });
+                          queryClient.invalidateQueries({ queryKey: ['account', accountId] });
+                          queryClient.invalidateQueries({ queryKey: ['accounts-intelligence'] });
                           queryClient.invalidateQueries({ queryKey: ['tasks'] });
                         }}
                       />

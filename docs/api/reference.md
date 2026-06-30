@@ -150,7 +150,7 @@ Accounts automatically compute `risk_score`, `readiness_score`, `next_eligible_d
 
 `POST /accounts/{account_id}/dispute-letters/{letter_id}/approve` transitions a saved letter from `review` to `approved` and emits a timeline event. Letters already approved are returned idempotently; letters not in `review` return `422`.
 
-`POST /accounts/{account_id}/dispute-letters/{letter_id}/send` transitions an approved letter to `sent`, records `sent_at`, and emits a timeline event. Letters already sent are returned idempotently; letters not in `approved` return `422`.
+`POST /accounts/{account_id}/dispute-letters/{letter_id}/send` transitions an approved letter to `sent`, records `sent_at`, updates the linked account to `dispute_sent` (including `last_dispute_date`, `dispute_round`, and `cra_dispute`), and emits timeline events. Letters already sent are returned idempotently; letters not in `approved` return `422`.
 
 ## Documents
 

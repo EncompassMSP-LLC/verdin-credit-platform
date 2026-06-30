@@ -18,7 +18,7 @@ from api.modules.accounts.dispute_drafts import (
 from api.modules.accounts.dispute_letter_models import DisputeLetter, DisputeLetterStatus
 from api.modules.accounts.dispute_letter_repository import DisputeLetterRepository
 from api.modules.accounts.intelligence import apply_account_intelligence, recommend_next_action
-from api.modules.accounts.models import Account
+from api.modules.accounts.models import Account, DisputeStatus
 from api.modules.accounts.permissions import ACCOUNT_DELETE_ROLE, ACCOUNT_WRITE_ROLE
 from api.modules.accounts.repository import AccountListFilters, AccountRepository
 from api.modules.accounts.schemas import (
@@ -383,6 +383,14 @@ class AccountService:
             await publish_platform_event(self._session, task_created_event(created, user.id))
         return TaskResponse.from_model(created)
 
+    def _apply_dispute_sent_account_state(self, account: Account, *, sent_at: datetime) -> None:
+        account.dispute_status = DisputeStatus.DISPUTE_SENT
+        account.last_dispute_date = sent_at.date()
+        account.dispute_round += 1
+        account.cra_dispute = True
+        apply_account_intelligence(account)
+        account.ai_recommended_next_action = recommend_next_action(account)
+
     async def approve_dispute_letter(
         self,
         user: User,
@@ -466,6 +474,9 @@ class AccountService:
         dispute_letter.status = DisputeLetterStatus.SENT
         dispute_letter.sent_at = now
         apply_audit_on_update(dispute_letter, user.id)
+        self._apply_dispute_sent_account_state(account, sent_at=now)
+        apply_audit_on_update(account, user.id)
+        await self._accounts.update(account)
         if self._session is not None:
             await self._session.flush()
             await self._session.refresh(dispute_letter)
@@ -473,6 +484,7 @@ class AccountService:
                 self._session,
                 dispute_letter_sent_event(dispute_letter, user.id),
             )
+            await publish_platform_event(self._session, account_updated_event(account, user.id))
         return DisputeLetterResponse.from_model(dispute_letter)
 
     async def create_dispute_draft_review_task(

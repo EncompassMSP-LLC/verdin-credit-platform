@@ -382,6 +382,14 @@ def test_send_account_dispute_letter(
     assert second_send.json()["status"] == "sent"
     assert second_send.json()["sent_at"] == first_send.json()["sent_at"]
 
+    account = api_client.get(f"/api/v1/accounts/{account_id}", headers=manager_headers)
+    assert account.status_code == 200
+    account_data = account.json()
+    assert account_data["dispute_status"] == "dispute_sent"
+    assert account_data["last_dispute_date"] is not None
+    assert account_data["dispute_round"] == 1
+    assert account_data["cra_dispute"] is True
+
 
 def test_send_account_dispute_letter_requires_approved_status(
     api_client: TestClient,
