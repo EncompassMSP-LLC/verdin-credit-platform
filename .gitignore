@@ -55,6 +55,7 @@ minio_data/
 coverage/
 .pytest_cache/
 test-results/
+tests/e2e/_artifacts/
 
 # Alembic
 # Keep migrations, ignore local state

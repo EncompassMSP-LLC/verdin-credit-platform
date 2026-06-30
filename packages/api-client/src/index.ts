@@ -10,6 +10,7 @@ export {
   notImplemented,
   request,
   setAccessToken,
+  uploadRequest,
   type ApiClientConfig,
   type RequestOptions,
 } from './http';
@@ -25,6 +26,23 @@ export {
 } from './auth';
 
 export {
+  getDashboard,
+  type DashboardAccounts,
+  type DashboardAlertItem,
+  type DashboardAlerts,
+  type DashboardAlertSeverity,
+  type DashboardAlertType,
+  type DashboardCases,
+  type DashboardDocuments,
+  type DashboardOverview,
+  type DashboardPerformance,
+  type DashboardProcessing,
+  type DashboardResponse,
+  type DashboardTasks,
+  type DashboardTimelineItem,
+} from './dashboard';
+
+export {
   createCase,
   deleteCase,
   getCase,
@@ -36,11 +54,70 @@ export {
   type UpdateCaseInput,
 } from './cases';
 
-export { getAccount, listAccounts, type Account, type ListAccountsParams } from './accounts';
+export {
+  createAccount,
+  deleteAccount,
+  getAccount,
+  getAccountIntelligenceSummary,
+  listAccounts,
+  listCaseAccounts,
+  updateAccount,
+  type Account,
+  type AccountIntelligenceSummary,
+  type CreateAccountInput,
+  type ListAccountsParams,
+  type NextActionItem,
+  type UpdateAccountInput,
+} from './accounts';
 
-export { getDocument, listDocuments, type Document, type ListDocumentsParams } from './documents';
+export {
+  confirmDocumentResolution,
+  deleteDocument,
+  extractDocumentMetadata,
+  getDocument,
+  getDocumentDownloadUrl,
+  getDocumentMetadata,
+  getDocumentOcr,
+  getDocumentResolutions,
+  listDocumentVersions,
+  listDocuments,
+  rejectDocumentResolution,
+  resolveDocumentEntities,
+  retryDocumentOcr,
+  updateDocument,
+  uploadDocument,
+  uploadDocumentVersion,
+  type Document,
+  type DocumentEntityResolution,
+  type DocumentMetadata,
+  type DocumentOcrResult,
+  type DocumentResolutions,
+  type DocumentVersion,
+  type ListDocumentsParams,
+  type UpdateDocumentInput,
+  type UploadDocumentInput,
+} from './documents';
 
-export { getTask, listTasks, type ListTasksParams, type Task } from './tasks';
+export {
+  completeTask,
+  createTask,
+  deleteTask,
+  getTask,
+  listTasks,
+  reopenTask,
+  updateTask,
+  type CreateTaskInput,
+  type ListTasksParams,
+  type Task,
+  type UpdateTaskInput,
+} from './tasks';
+
+export {
+  getTimelineEvent,
+  listTimelineEvents,
+  type ListTimelineParams,
+  type TimelineEvent,
+} from './timeline';
 
 export interface HealthResponse {
   status: string;

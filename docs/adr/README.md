@@ -20,6 +20,7 @@ Skip ADRs for routine bug fixes, single-file refactors, or decisions that are ob
 3. **Fill in** Status, Context, Decision, and Consequences.
 4. **Open a PR** targeting `develop`. Architectural ADRs require review from at least two team members (see [`CONTRIBUTING.md`](../../CONTRIBUTING.md)).
 5. **Merge** once accepted. Update the ADR index in this README.
+6. **Update** the [capability matrix](../governance/capability-matrix.md) when the decision ships a new or changed capability.
 
 ## Status values
 
@@ -43,21 +44,26 @@ One decision per file. Do not append new decisions to existing ADR files.
 
 ## ADR index
 
-| ADR                           | Title                             | Status   |
-| ----------------------------- | --------------------------------- | -------- |
-| [001](001-monorepo.md)        | Monorepo with pnpm and Turborepo  | Accepted |
-| [002](001-monorepo.md)        | Layered backend architecture      | Accepted |
-| [003](001-monorepo.md)        | UUID primary keys                 | Accepted |
-| [004](001-monorepo.md)        | JWT with refresh tokens           | Accepted |
-| [005](005-domain-modules.md)  | Domain-driven API modules         | Accepted |
-| [006](006-api-versioning.md)  | URL-based API versioning          | Accepted |
-| [007](007-quality-gates.md)   | Quality gates (pre-commit and CI) | Accepted |
-| [008](008-background-jobs.md) | Redis-backed background jobs      | Accepted |
+| ADR                                   | Title                                  | Status   |
+| ------------------------------------- | -------------------------------------- | -------- |
+| [001](001-monorepo.md)                | Monorepo with pnpm and Turborepo       | Accepted |
+| [002](001-monorepo.md)                | Layered backend architecture           | Accepted |
+| [003](001-monorepo.md)                | UUID primary keys                      | Accepted |
+| [004](001-monorepo.md)                | JWT with refresh tokens                | Accepted |
+| [005](005-domain-modules.md)          | Domain-driven API modules              | Accepted |
+| [006](006-api-versioning.md)          | URL-based API versioning               | Accepted |
+| [007](007-quality-gates.md)           | Quality gates (pre-commit and CI)      | Accepted |
+| [008](008-background-jobs.md)         | Redis-backed background jobs           | Accepted |
+| [009](009-architecture-governance.md) | Architecture governance and V5 roadmap | Accepted |
+| [010](010-capability-matrix.md)       | Platform capability matrix             | Accepted |
 
 > **Note:** ADRs 001–004 were recorded in a single legacy file before the formal template was introduced. New ADRs from 005 onward follow [`template.md`](template.md).
 
 ## Related documentation
 
+- [`docs/governance/capability-matrix.md`](../governance/capability-matrix.md) — platform capability status
+- [`docs/governance/README.md`](../governance/README.md) — feature lifecycle
+- [`docs/roadmap/v5.0-enterprise.md`](../roadmap/v5.0-enterprise.md) — master product roadmap
 - [`docs/architecture/overview.md`](../architecture/overview.md) — system overview
 - [`docs/developer-guide.md`](../developer-guide.md) — day-to-day development
 - [`AGENTS.md`](../../AGENTS.md) — AI-assisted development rules

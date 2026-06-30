@@ -35,7 +35,7 @@ Higher roles inherit permissions of lower roles.
 
 ## Implementation
 
-- Passwords hashed with bcrypt via passlib
+- Passwords hashed with bcrypt
 - Tokens signed with HS256
 - Secret key from `SECRET_KEY` environment variable
 - Protected endpoints use `get_current_user` dependency

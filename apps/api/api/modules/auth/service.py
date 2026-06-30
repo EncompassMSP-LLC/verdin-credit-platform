@@ -4,6 +4,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.core.constants import TOKEN_TYPE_REFRESH
+from api.core.events import publish_platform_event
 from api.core.security import (
     create_access_token,
     create_refresh_token,
@@ -14,6 +15,7 @@ from api.core.security import (
 from api.modules.auth.models import User
 from api.modules.auth.repository import UserRepository
 from api.modules.auth.schemas import LoginRequest, TokenResponse, UserCreate, UserResponse
+from api.modules.timeline.builders import user_login_event
 from api.repositories.user import UserRepositoryProtocol
 
 
@@ -24,6 +26,7 @@ class AuthService:
         *,
         user_repo: UserRepositoryProtocol | None = None,
     ) -> None:
+        self._session = session
         self._repo: UserRepositoryProtocol = (
             user_repo if user_repo is not None else UserRepository(session)
         )
@@ -40,6 +43,8 @@ class AuthService:
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Account is inactive",
             )
+        if user.organization_id is not None:
+            await publish_platform_event(self._session, user_login_event(user))
         return TokenResponse(
             access_token=create_access_token(str(user.id), user.role),
             refresh_token=create_refresh_token(str(user.id)),

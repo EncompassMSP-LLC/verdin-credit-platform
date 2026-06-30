@@ -7,6 +7,7 @@ const navItems = [
   { to: '/cases', label: 'Cases' },
   { to: '/accounts', label: 'Accounts' },
   { to: '/documents', label: 'Documents' },
+  { to: '/timeline', label: 'Timeline' },
   { to: '/tasks', label: 'Tasks' },
   { to: '/settings', label: 'Settings' },
 ];

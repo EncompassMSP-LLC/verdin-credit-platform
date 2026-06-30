@@ -1,4 +1,15 @@
+-e ../../packages/document-classification
+-e ../../packages/document-metadata
+-e ../../packages/entity-resolution
+-e ../../packages/event-bus
+-e ../../packages/event-types
 pydantic>=2.10.3
 pydantic-settings>=2.7.0
 redis>=5.2.1
 structlog>=24.4.0
+sqlalchemy>=2.0.36
+psycopg2-binary>=2.9.10
+minio>=7.2.12
+pypdf>=5.1.0
+Pillow>=11.0.0
+pytesseract>=0.3.13

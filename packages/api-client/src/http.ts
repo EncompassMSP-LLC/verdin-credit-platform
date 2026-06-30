@@ -99,6 +99,33 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
   return response.json() as Promise<T>;
 }
 
+export async function uploadRequest<T>(path: string, formData: FormData): Promise<T> {
+  const requestHeaders: Record<string, string> = {};
+  if (accessToken) {
+    requestHeaders.Authorization = `Bearer ${accessToken}`;
+  }
+
+  const url = `${getApiBaseUrl()}${path.startsWith('/') ? path : `/${path}`}`;
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: requestHeaders,
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const error = (await response.json().catch(() => ({
+      detail: 'Request failed',
+    }))) as ApiError;
+    throw new ApiClientError(
+      error.detail || `HTTP ${response.status}`,
+      response.status,
+      error.code,
+    );
+  }
+
+  return response.json() as Promise<T>;
+}
+
 export function apiPath(segment: string): string {
   const normalized = segment.startsWith('/') ? segment : `/${segment}`;
   return `${API_PREFIX}${normalized}`;
