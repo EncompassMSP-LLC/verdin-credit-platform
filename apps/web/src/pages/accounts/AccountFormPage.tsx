@@ -26,6 +26,10 @@ interface AccountFormPageProps {
   defaultValues?: CreateAccountInput;
 }
 
+function queryEnum<T extends string>(values: readonly T[], value: string | null, fallback: T): T {
+  return values.includes(value as T) ? (value as T) : fallback;
+}
+
 export function AccountFormPage({ mode, accountId, defaultValues }: AccountFormPageProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -45,15 +49,15 @@ export function AccountFormPage({ mode, accountId, defaultValues }: AccountFormP
     resolver: zodResolver(createAccountSchema),
     defaultValues: defaultValues ?? {
       case_id: searchParams.get('case_id') ?? '',
-      bureau: 'unknown',
-      creditor_name: '',
-      account_type: 'other',
-      account_status: 'unknown',
-      payment_status: 'unknown',
-      account_number_masked: '',
-      balance: '',
-      past_due_amount: '',
-      remarks: '',
+      bureau: queryEnum(ACCOUNT_BUREAUS, searchParams.get('bureau'), 'unknown'),
+      creditor_name: searchParams.get('creditor_name') ?? '',
+      account_type: queryEnum(ACCOUNT_TYPES, searchParams.get('account_type'), 'other'),
+      account_status: queryEnum(ACCOUNT_STATUSES, searchParams.get('account_status'), 'unknown'),
+      payment_status: queryEnum(PAYMENT_STATUSES, searchParams.get('payment_status'), 'unknown'),
+      account_number_masked: searchParams.get('account_number_masked') ?? '',
+      balance: searchParams.get('balance') ?? '',
+      past_due_amount: searchParams.get('past_due_amount') ?? '',
+      remarks: searchParams.get('remarks') ?? '',
     },
   });
 

@@ -275,3 +275,24 @@ class DocumentParsedCreditReportComparisonResponse(BaseSchema):
     previous_parsed_at: datetime | None
     summary: ParsedReportComparisonSummary
     account_changes: list[ParsedReportAccountChange]
+
+
+class ParsedReportAccountCandidate(BaseSchema):
+    source_index: int
+    case_id: uuid.UUID
+    bureau: str
+    creditor_name: str
+    original_creditor: str | None = None
+    account_number_masked: str | None = None
+    account_type: str
+    account_status: str
+    payment_status: str
+    balance: str | None = None
+    past_due_amount: str | None = None
+    remarks: str | None = None
+
+
+class DocumentParsedCreditReportAccountCandidatesResponse(BaseSchema):
+    document_id: uuid.UUID
+    bureau: str
+    candidates: list[ParsedReportAccountCandidate]

@@ -53,11 +53,13 @@ from api.modules.documents.schemas import (
     DocumentDuplicateGroupResponse,
     DocumentListParams,
     DocumentOcrResponse,
+    DocumentParsedCreditReportAccountCandidatesResponse,
     DocumentParsedCreditReportComparisonResponse,
     DocumentParsedCreditReportResponse,
     DocumentResponse,
     DocumentUpdate,
     DocumentVersionResponse,
+    ParsedReportAccountCandidate,
     ParsedReportAccountChange,
     ParsedReportComparisonSummary,
 )
@@ -769,6 +771,171 @@ class DocumentService:
             previous_parsed_at=previous.parsed_at if previous else None,
             summary=summary,
             account_changes=changes,
+        )
+
+    @staticmethod
+    def _normalize_choice(value: str | None) -> str:
+        if not value:
+            return ""
+        return value.strip().lower().replace("-", " ").replace("_", " ")
+
+    @classmethod
+    def _normalize_bureau(cls, value: object) -> str:
+        bureau = cls._normalize_choice(cls._string_or_none(value))
+        if bureau in {"equifax", "experian", "transunion", "innovis"}:
+            return bureau
+        if bureau == "trans union":
+            return "transunion"
+        return "unknown"
+
+    @classmethod
+    def _normalize_account_type(cls, value: object) -> str:
+        account_type = cls._normalize_choice(cls._string_or_none(value))
+        if "mortgage" in account_type:
+            return "mortgage"
+        if "auto" in account_type:
+            return "auto"
+        if "credit card" in account_type or "revolving" in account_type:
+            return "credit_card"
+        if "collection" in account_type:
+            return "collection"
+        if "student" in account_type:
+            return "student_loan"
+        if "medical" in account_type:
+            return "medical"
+        if "utility" in account_type:
+            return "utility"
+        if "telecom" in account_type or "wireless" in account_type:
+            return "telecom"
+        if "installment" in account_type or "personal" in account_type:
+            return "personal_loan"
+        return "other"
+
+    @classmethod
+    def _normalize_account_status(cls, value: object) -> str:
+        account_status = cls._normalize_choice(cls._string_or_none(value))
+        if not account_status:
+            return "unknown"
+        if "charge" in account_status and "off" in account_status:
+            return "charge_off"
+        if "repossession" in account_status:
+            return "repossession"
+        if "foreclosure" in account_status:
+            return "foreclosure"
+        if "transfer" in account_status:
+            return "transferred"
+        if "settled" in account_status:
+            return "settled"
+        if "deleted" in account_status:
+            return "deleted"
+        if "collection" in account_status:
+            return "collection"
+        if "paid" in account_status:
+            return "paid"
+        if "closed" in account_status:
+            return "closed"
+        if "current" in account_status or "open" in account_status or "late" in account_status:
+            return "open"
+        if "pays as agreed" in account_status:
+            return "open"
+        return "unknown"
+
+    @classmethod
+    def _normalize_payment_status(cls, value: object) -> str:
+        payment_status = cls._normalize_choice(cls._string_or_none(value))
+        if not payment_status:
+            return "unknown"
+        if "120" in payment_status:
+            return "late_120"
+        if "90" in payment_status:
+            return "late_90"
+        if "60" in payment_status:
+            return "late_60"
+        if "30" in payment_status:
+            return "late_30"
+        if "charge" in payment_status and "off" in payment_status:
+            return "charge_off"
+        if "collection" in payment_status:
+            return "collection"
+        if "repossession" in payment_status:
+            return "repossession"
+        if "foreclosure" in payment_status:
+            return "foreclosure"
+        if "current" in payment_status or "pays as agreed" in payment_status:
+            return "current"
+        return "unknown"
+
+    @staticmethod
+    def _money_string(value: object) -> str | None:
+        normalized = DocumentService._float_or_none(value)
+        if normalized is None:
+            return None
+        return f"{normalized:.2f}"
+
+    @classmethod
+    def _candidate_from_account(
+        cls,
+        *,
+        case_id: uuid.UUID,
+        default_bureau: str,
+        index: int,
+        account: dict[str, Any],
+    ) -> ParsedReportAccountCandidate | None:
+        creditor_name = cls._string_or_none(account.get("creditor_name"))
+        if not creditor_name:
+            return None
+
+        payment_status = cls._string_or_none(account.get("payment_status"))
+        account_status = cls._string_or_none(account.get("account_status")) or payment_status
+        return ParsedReportAccountCandidate(
+            source_index=index,
+            case_id=case_id,
+            bureau=cls._normalize_bureau(account.get("bureau") or default_bureau),
+            creditor_name=creditor_name,
+            original_creditor=cls._string_or_none(account.get("original_creditor")),
+            account_number_masked=cls._string_or_none(account.get("account_number_masked")),
+            account_type=cls._normalize_account_type(account.get("account_type")),
+            account_status=cls._normalize_account_status(account_status),
+            payment_status=cls._normalize_payment_status(payment_status),
+            balance=cls._money_string(account.get("balance")),
+            past_due_amount=cls._money_string(account.get("past_due_amount")),
+            remarks="Imported from parsed credit report",
+        )
+
+    async def get_parsed_credit_report_account_candidates(
+        self,
+        user: User,
+        document_id: uuid.UUID,
+    ) -> DocumentParsedCreditReportAccountCandidatesResponse:
+        document = await self._get_document_for_user(document_id, user)
+        parsed_report = await self._documents.get_parsed_credit_report(
+            document.id,
+            organization_id=document.organization_id,
+        )
+        if parsed_report is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Parsed credit report not found",
+            )
+
+        accounts = parsed_report.parsed_report.get("accounts")
+        candidates: list[ParsedReportAccountCandidate] = []
+        if isinstance(accounts, list):
+            for index, account in enumerate(accounts):
+                if isinstance(account, dict):
+                    candidate = self._candidate_from_account(
+                        case_id=document.case_id,
+                        default_bureau=parsed_report.bureau,
+                        index=index,
+                        account=account,
+                    )
+                    if candidate is not None:
+                        candidates.append(candidate)
+
+        return DocumentParsedCreditReportAccountCandidatesResponse(
+            document_id=document.id,
+            bureau=parsed_report.bureau,
+            candidates=candidates,
         )
 
     def _queue_metadata_extract_job(self, document: Document) -> None:
