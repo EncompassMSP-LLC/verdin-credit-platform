@@ -1,0 +1,120 @@
+{
+  "accounts": [
+    {
+      "account_number_masked": "****2233",
+      "account_type": "Installment",
+      "balance": 14250.0,
+      "bureau": "equifax",
+      "confidence": 0.91,
+      "credit_limit": 18000.0,
+      "creditor_name": "Lakeside Credit Union",
+      "date_reported": "07/01/2026",
+      "open_date": "04/12/2020",
+      "payment_status": "Pays As Agreed"
+    },
+    {
+      "account_number_masked": "****5566",
+      "account_type": "Revolving",
+      "balance": 210.75,
+      "bureau": "equifax",
+      "confidence": 0.91,
+      "credit_limit": null,
+      "creditor_name": "Summit Wireless",
+      "date_reported": "07/01/2026",
+      "open_date": "11/03/2022",
+      "payment_status": "30 Days Past Due"
+    }
+  ],
+  "bureau": "equifax",
+  "collections": [
+    {
+      "agency_name": "Northstar Collections",
+      "balance": 780.0,
+      "confidence": 0.91,
+      "original_creditor": "Metro Medical Group",
+      "status": "Disputed"
+    }
+  ],
+  "consumer": {
+    "confidence": 0.94,
+    "date_of_birth": "09/18/1988",
+    "name": "Morgan T. Lee",
+    "ssn_masked": "***-**-4321"
+  },
+  "inquiries": [
+    {
+      "confidence": 0.91,
+      "creditor_name": "Auto Finance LLC",
+      "inquiry_date": "05/22/2026",
+      "inquiry_type": "Hard"
+    }
+  ],
+  "metadata": {
+    "classification_confidence": 0.95,
+    "classification_type": "credit_report",
+    "field_confidence": {
+      "accounts[0].account_number_masked": 0.91,
+      "accounts[0].account_type": 0.91,
+      "accounts[0].balance": 0.91,
+      "accounts[0].credit_limit": 0.91,
+      "accounts[0].creditor_name": 0.91,
+      "accounts[0].date_reported": 0.91,
+      "accounts[0].open_date": 0.91,
+      "accounts[0].payment_status": 0.91,
+      "accounts[1].account_number_masked": 0.91,
+      "accounts[1].account_type": 0.91,
+      "accounts[1].balance": 0.91,
+      "accounts[1].creditor_name": 0.91,
+      "accounts[1].date_reported": 0.91,
+      "accounts[1].open_date": 0.91,
+      "accounts[1].payment_status": 0.91,
+      "collections[0].agency_name": 0.91,
+      "collections[0].balance": 0.91,
+      "collections[0].original_creditor": 0.91,
+      "collections[0].status": 0.91,
+      "consumer.date_of_birth": 0.94,
+      "consumer.name": 0.94,
+      "consumer.ssn_masked": 0.94,
+      "inquiries[0].creditor_name": 0.91,
+      "inquiries[0].inquiry_date": 0.91,
+      "inquiries[0].inquiry_type": 0.91,
+      "layout.account_summary": 0.05,
+      "layout.branding": 0.2,
+      "layout.collection_accounts": 0.1,
+      "layout.consumer_information": 0.15,
+      "layout.credit_inquiries": 0.1,
+      "layout.public_record_information": 0.1,
+      "layout.report_header": 0.15,
+      "layout.tradelines": 0.15,
+      "parser.layout_confidence": 1.0,
+      "public_records[0].amount": 0.91,
+      "public_records[0].filing_date": 0.91,
+      "public_records[0].record_type": 0.91,
+      "public_records[0].status": 0.91,
+      "report.report_date": 0.91
+    },
+    "is_partial": false,
+    "parser_name": "equifax",
+    "warnings": []
+  },
+  "personal_information": [],
+  "public_records": [
+    {
+      "amount": 2400.0,
+      "confidence": 0.91,
+      "filing_date": "12/15/2020",
+      "record_type": "Civil Judgment",
+      "status": "Satisfied"
+    }
+  ],
+  "report_id": "fixture-report_001",
+  "schema_version": "1.0",
+  "summary": {
+    "confidence": 0.94,
+    "total_accounts": 2,
+    "total_balance": 14460.75,
+    "total_collections": 1,
+    "total_inquiries": 1,
+    "total_public_records": 1
+  }
+}
