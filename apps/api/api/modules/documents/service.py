@@ -4,6 +4,7 @@ import hashlib
 import logging
 import uuid
 from datetime import UTC, datetime
+from typing import Any, Literal
 
 from fastapi import HTTPException, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -52,10 +53,13 @@ from api.modules.documents.schemas import (
     DocumentDuplicateGroupResponse,
     DocumentListParams,
     DocumentOcrResponse,
+    DocumentParsedCreditReportComparisonResponse,
     DocumentParsedCreditReportResponse,
     DocumentResponse,
     DocumentUpdate,
     DocumentVersionResponse,
+    ParsedReportAccountChange,
+    ParsedReportComparisonSummary,
 )
 from api.modules.documents.storage import (
     DocumentStorage,
@@ -640,6 +644,132 @@ class DocumentService:
                 detail="Parsed credit report not found",
             )
         return DocumentParsedCreditReportResponse.from_model(parsed_report)
+
+    @staticmethod
+    def _string_or_none(value: object) -> str | None:
+        return value.strip() if isinstance(value, str) and value.strip() else None
+
+    @staticmethod
+    def _float_or_none(value: object) -> float | None:
+        if isinstance(value, int | float):
+            return float(value)
+        if isinstance(value, str):
+            try:
+                return float(value.replace(",", "").replace("$", ""))
+            except ValueError:
+                return None
+        return None
+
+    @classmethod
+    def _account_key(cls, account: dict[str, Any], fallback_index: int) -> str:
+        account_number = cls._string_or_none(account.get("account_number_masked"))
+        creditor = (cls._string_or_none(account.get("creditor_name")) or "unknown").lower()
+        if account_number:
+            return f"{creditor}:{account_number.lower()}"
+        return f"{creditor}:row-{fallback_index}"
+
+    @classmethod
+    def _account_change(
+        cls,
+        *,
+        match_key: str,
+        previous: dict[str, Any] | None,
+        current: dict[str, Any] | None,
+    ) -> ParsedReportAccountChange:
+        baseline = current or previous or {}
+        previous_balance = cls._float_or_none(previous.get("balance")) if previous else None
+        current_balance = cls._float_or_none(current.get("balance")) if current else None
+        balance_delta = (
+            round(current_balance - previous_balance, 2)
+            if current_balance is not None and previous_balance is not None
+            else None
+        )
+        previous_status = cls._string_or_none(previous.get("payment_status")) if previous else None
+        current_status = cls._string_or_none(current.get("payment_status")) if current else None
+
+        change_type: Literal["added", "removed", "changed", "unchanged"]
+        if previous is None:
+            change_type = "added"
+        elif current is None:
+            change_type = "removed"
+        elif balance_delta != 0 or previous_status != current_status:
+            change_type = "changed"
+        else:
+            change_type = "unchanged"
+
+        return ParsedReportAccountChange(
+            match_key=match_key,
+            creditor_name=cls._string_or_none(baseline.get("creditor_name")),
+            account_number_masked=cls._string_or_none(baseline.get("account_number_masked")),
+            change_type=change_type,
+            previous_balance=previous_balance,
+            current_balance=current_balance,
+            balance_delta=balance_delta,
+            previous_payment_status=previous_status,
+            current_payment_status=current_status,
+        )
+
+    @classmethod
+    def _accounts_by_key(cls, parsed_report: dict[str, object]) -> dict[str, dict[str, Any]]:
+        accounts = parsed_report.get("accounts")
+        if not isinstance(accounts, list):
+            return {}
+        keyed: dict[str, dict[str, Any]] = {}
+        for index, account in enumerate(accounts):
+            if isinstance(account, dict):
+                keyed[cls._account_key(account, index)] = account
+        return keyed
+
+    async def compare_parsed_credit_report(
+        self,
+        user: User,
+        document_id: uuid.UUID,
+    ) -> DocumentParsedCreditReportComparisonResponse:
+        document = await self._get_document_for_user(document_id, user)
+        current = await self._documents.get_parsed_credit_report(
+            document.id,
+            organization_id=document.organization_id,
+        )
+        if current is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Parsed credit report not found",
+            )
+
+        previous = await self._documents.get_previous_parsed_credit_report(
+            organization_id=document.organization_id,
+            case_id=document.case_id,
+            bureau=current.bureau,
+            before_document_id=document.id,
+            before_parsed_at=current.parsed_at,
+        )
+
+        current_accounts = self._accounts_by_key(current.parsed_report)
+        previous_accounts = self._accounts_by_key(previous.parsed_report) if previous else {}
+        changes = [
+            self._account_change(
+                match_key=key,
+                previous=previous_accounts.get(key),
+                current=current_accounts.get(key),
+            )
+            for key in sorted(set(current_accounts) | set(previous_accounts))
+        ]
+        summary = ParsedReportComparisonSummary(
+            added=sum(1 for change in changes if change.change_type == "added"),
+            removed=sum(1 for change in changes if change.change_type == "removed"),
+            changed=sum(1 for change in changes if change.change_type == "changed"),
+            unchanged=sum(1 for change in changes if change.change_type == "unchanged"),
+        )
+
+        return DocumentParsedCreditReportComparisonResponse(
+            document_id=document.id,
+            bureau=current.bureau,
+            previous_document_id=previous.document_id if previous else None,
+            current_parsed_at=current.parsed_at,
+            previous_parsed_at=previous.parsed_at if previous else None,
+            summary=summary,
+            account_changes=changes,
+        )
 
     def _queue_metadata_extract_job(self, document: Document) -> None:
         settings = get_settings()

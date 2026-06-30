@@ -2,6 +2,7 @@
 
 import uuid
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Any
 
 from sqlalchemy import exists, func, or_, select
@@ -183,5 +184,30 @@ class DocumentRepository:
                 DocumentParsedCreditReport.document_id == document_id,
                 DocumentParsedCreditReport.organization_id == organization_id,
             )
+        )
+        return result.scalar_one_or_none()
+
+    async def get_previous_parsed_credit_report(
+        self,
+        *,
+        organization_id: uuid.UUID,
+        case_id: uuid.UUID,
+        bureau: str,
+        before_document_id: uuid.UUID,
+        before_parsed_at: datetime,
+    ) -> DocumentParsedCreditReport | None:
+        result = await self._session.execute(
+            select(DocumentParsedCreditReport)
+            .join(Document, Document.id == DocumentParsedCreditReport.document_id)
+            .where(
+                DocumentParsedCreditReport.organization_id == organization_id,
+                DocumentParsedCreditReport.bureau == bureau,
+                DocumentParsedCreditReport.document_id != before_document_id,
+                DocumentParsedCreditReport.parsed_at < before_parsed_at,
+                Document.case_id == case_id,
+                Document.deleted_at.is_(None),
+            )
+            .order_by(DocumentParsedCreditReport.parsed_at.desc())
+            .limit(1)
         )
         return result.scalar_one_or_none()

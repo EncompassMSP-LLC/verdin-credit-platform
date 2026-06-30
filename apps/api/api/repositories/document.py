@@ -1,6 +1,7 @@
 """Document repository protocol."""
 
 import uuid
+from datetime import datetime
 from typing import Protocol, runtime_checkable
 
 from api.modules.documents.models import Document, DocumentVersion
@@ -48,4 +49,14 @@ class DocumentRepositoryProtocol(Protocol):
         document_id: uuid.UUID,
         *,
         organization_id: uuid.UUID,
+    ) -> DocumentParsedCreditReport | None: ...
+
+    async def get_previous_parsed_credit_report(
+        self,
+        *,
+        organization_id: uuid.UUID,
+        case_id: uuid.UUID,
+        bureau: str,
+        before_document_id: uuid.UUID,
+        before_parsed_at: datetime,
     ) -> DocumentParsedCreditReport | None: ...

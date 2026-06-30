@@ -71,6 +71,7 @@ export {
 } from './accounts';
 
 export {
+  compareDocumentParsedCreditReport,
   confirmDocumentResolution,
   deleteDocument,
   extractDocumentMetadata,
@@ -95,9 +96,12 @@ export {
   type DocumentMetadata,
   type DocumentOcrResult,
   type DocumentParsedCreditReport,
+  type DocumentParsedCreditReportComparison,
   type DocumentResolutions,
   type DocumentVersion,
   type ListDocumentsParams,
+  type ParsedReportAccountChange,
+  type ParsedReportComparisonSummary,
   type UpdateDocumentInput,
   type UploadDocumentInput,
 } from './documents';

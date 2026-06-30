@@ -246,3 +246,32 @@ class DocumentParsedCreditReportResponse(BaseSchema):
             warnings=list(parsed_report.warnings or []),
             parsed_at=parsed_report.parsed_at,
         )
+
+
+class ParsedReportAccountChange(BaseSchema):
+    match_key: str
+    creditor_name: str | None
+    account_number_masked: str | None
+    change_type: Literal["added", "removed", "changed", "unchanged"]
+    previous_balance: float | None = None
+    current_balance: float | None = None
+    balance_delta: float | None = None
+    previous_payment_status: str | None = None
+    current_payment_status: str | None = None
+
+
+class ParsedReportComparisonSummary(BaseSchema):
+    added: int
+    removed: int
+    changed: int
+    unchanged: int
+
+
+class DocumentParsedCreditReportComparisonResponse(BaseSchema):
+    document_id: uuid.UUID
+    bureau: str
+    previous_document_id: uuid.UUID | None
+    current_parsed_at: datetime
+    previous_parsed_at: datetime | None
+    summary: ParsedReportComparisonSummary
+    account_changes: list[ParsedReportAccountChange]
