@@ -1,6 +1,7 @@
 """Account management service — business logic and intelligence."""
 
 import uuid
+from datetime import UTC, datetime, timedelta
 
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -29,12 +30,18 @@ from api.modules.accounts.schemas import (
 )
 from api.modules.auth.models import User
 from api.modules.cases.repository import CaseRepository
+from api.modules.tasks.models import Task, TaskPriority
+from api.modules.tasks.repository import TaskRepository
+from api.modules.tasks.schemas import TaskResponse
 from api.modules.timeline.builders import (
     account_created_event,
     account_status_changed_event,
     account_updated_event,
+    task_created_event,
 )
 from api.repositories.account import AccountRepositoryProtocol
+
+DISPUTE_DRAFT_REVIEW_TASK_SOURCE = "accounts.dispute_draft"
 
 
 class AccountService:
@@ -42,15 +49,22 @@ class AccountService:
         self,
         account_repo: AccountRepositoryProtocol,
         case_repo: CaseRepository | None = None,
+        task_repo: TaskRepository | None = None,
         session: AsyncSession | None = None,
     ) -> None:
         self._accounts = account_repo
         self._cases = case_repo
+        self._tasks = task_repo
         self._session = session
 
     @classmethod
     def from_session(cls, session: AsyncSession) -> "AccountService":
-        return cls(AccountRepository(session), CaseRepository(session), session=session)
+        return cls(
+            AccountRepository(session),
+            CaseRepository(session),
+            TaskRepository(session),
+            session=session,
+        )
 
     def _require_organization(self, user: User) -> uuid.UUID:
         if user.organization_id is None:
@@ -239,6 +253,48 @@ class AccountService:
             readiness_score=account.readiness_score,
             risk_score=account.risk_score,
         )
+
+    async def create_dispute_draft_review_task(
+        self,
+        user: User,
+        account_id: uuid.UUID,
+    ) -> TaskResponse:
+        self._require_write(user)
+        account = await self._get_account_for_user(account_id, user)
+        if self._tasks is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Task repository is not configured",
+            )
+
+        existing = await self._tasks.find_active_by_account_source(
+            organization_id=account.organization_id,
+            account_id=account.id,
+            source_module=DISPUTE_DRAFT_REVIEW_TASK_SOURCE,
+            source_event_id=account.id,
+        )
+        if existing is not None:
+            return TaskResponse.from_model(existing)
+
+        task = Task(
+            organization_id=account.organization_id,
+            case_id=account.case_id,
+            account_id=account.id,
+            title=f"Review dispute draft for {account.creditor_name}",
+            description=(
+                "Review the rule-based CRA dispute draft, confirm supporting evidence, "
+                "and prepare the next dispute action."
+            ),
+            priority=TaskPriority.HIGH,
+            due_date=datetime.now(UTC) + timedelta(days=1),
+            source_module=DISPUTE_DRAFT_REVIEW_TASK_SOURCE,
+            source_event_id=account.id,
+        )
+        apply_audit_on_create(task, user.id)
+        created = await self._tasks.create(task)
+        if self._session is not None:
+            await publish_platform_event(self._session, task_created_event(created, user.id))
+        return TaskResponse.from_model(created)
 
     async def update_account(
         self,

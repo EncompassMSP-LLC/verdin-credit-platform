@@ -1,7 +1,12 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { deleteAccount, getAccount, getAccountDisputeDraft } from '@verdin/api-client';
+import {
+  createAccountDisputeDraftReviewTask,
+  deleteAccount,
+  getAccount,
+  getAccountDisputeDraft,
+} from '@verdin/api-client';
 import { ACCOUNT_TYPE_LABELS, DISPUTE_STATUS_LABELS, PAYMENT_STATUS_LABELS } from '@verdin/shared';
 import { Button, Card } from '@verdin/ui';
 import { AccountDeleteDialog } from '../../components/accounts/AccountDeleteDialog';
@@ -52,6 +57,13 @@ export function AccountDetailPage() {
       queryClient.invalidateQueries({ queryKey: ['accounts'] });
       queryClient.invalidateQueries({ queryKey: ['accounts-intelligence'] });
       navigate('/accounts');
+    },
+  });
+
+  const reviewTaskMutation = useMutation({
+    mutationFn: () => createAccountDisputeDraftReviewTask(accountId!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
     },
   });
 
@@ -218,6 +230,33 @@ export function AccountDetailPage() {
                     : 'Generated draft'}
                 </span>
               </div>
+
+              <div className="flex flex-col gap-3 rounded-md border border-blue-100 bg-blue-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm text-blue-900">
+                  Create a task to review this draft, confirm evidence, and prepare the next dispute
+                  action.
+                </p>
+                {reviewTaskMutation.data ? (
+                  <Link to={`/tasks/${reviewTaskMutation.data.id}`}>
+                    <Button size="sm">View review task</Button>
+                  </Link>
+                ) : (
+                  <Button
+                    size="sm"
+                    onClick={() => reviewTaskMutation.mutate()}
+                    loading={reviewTaskMutation.isPending}
+                    disabled={reviewTaskMutation.isPending}
+                  >
+                    Create review task
+                  </Button>
+                )}
+              </div>
+
+              {reviewTaskMutation.isError ? (
+                <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                  Failed to create the dispute draft review task.
+                </div>
+              ) : null}
 
               <div>
                 <h4 className="text-sm font-semibold text-gray-900">Disputed items</h4>

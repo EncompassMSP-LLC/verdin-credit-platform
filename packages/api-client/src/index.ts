@@ -56,6 +56,7 @@ export {
 
 export {
   createAccount,
+  createAccountDisputeDraftReviewTask,
   deleteAccount,
   getAccount,
   getAccountDisputeDraft,
