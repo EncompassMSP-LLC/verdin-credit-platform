@@ -12,6 +12,16 @@ COPY packages/validation/package.json ./packages/validation/
 RUN pnpm install --frozen-lockfile || pnpm install
 
 FROM deps AS build
+ARG VITE_API_BASE_URL=""
+ARG VITE_ENABLE_AI=false
+ARG VITE_ENABLE_IMPORTS=true
+ARG VITE_ENABLE_ENTERPRISE=false
+ARG VITE_ENABLE_CLIENT_PORTAL=false
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+ENV VITE_ENABLE_AI=$VITE_ENABLE_AI
+ENV VITE_ENABLE_IMPORTS=$VITE_ENABLE_IMPORTS
+ENV VITE_ENABLE_ENTERPRISE=$VITE_ENABLE_ENTERPRISE
+ENV VITE_ENABLE_CLIENT_PORTAL=$VITE_ENABLE_CLIENT_PORTAL
 COPY . .
 RUN pnpm --filter @verdin/shared build
 RUN pnpm --filter @verdin/api-client build

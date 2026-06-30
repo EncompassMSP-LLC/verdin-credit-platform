@@ -118,7 +118,7 @@ Plan: [`docs/sprint-4.3.1/operational-core-stabilization.md`](../sprint-4.3.1/op
 | Capability                      | Version | Status  | Backend | Frontend | API | AI      | Tests | Dependencies        | Notes                                          |
 | ------------------------------- | ------- | ------- | ------- | -------- | --- | ------- | ----- | ------------------- | ---------------------------------------------- |
 | Workflow Automation             | 4.5     | Planned | —       | —        | —   | —       | —     | Timeline, Tasks     | —                                              |
-| Credit Report Import Wizard     | 4.5     | Planned | —       | —        | —   | Planned | —     | Documents, OCR      | —                                              |
+| Credit Report Import Wizard     | 4.5     | ✅      | ✅      | ✅       | ✅  | —       | ✅    | Documents, OCR      | Upload, parser review, metadata, resolution    |
 | OCR Pipeline                    | 4.3     | ✅      | ✅      | ✅       | ✅  | ✅      | ✅    | Documents, Worker   | Shipped in 4.3 Operational Core                |
 | Document Classification         | 4.3     | 🚧      | 🚧      | —        | 🚧  | 🚧      | 🚧    | OCR                 | Rules engine in 4.3; LLM augmentation in 4.5   |
 | Entity Extraction               | 4.5     | Planned | —       | —        | —   | ✅      | —     | OCR, Accounts       | Links tradelines to accounts                   |
