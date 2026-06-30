@@ -51,6 +51,7 @@ from api.modules.documents.schemas import (
     DocumentClassificationResponse,
     DocumentListParams,
     DocumentOcrResponse,
+    DocumentParsedCreditReportResponse,
     DocumentResponse,
     DocumentUpdate,
     DocumentVersionResponse,
@@ -600,6 +601,23 @@ class DocumentService:
     ) -> DocumentClassificationResponse:
         document = await self._get_document_for_user(document_id, user)
         return DocumentClassificationResponse.from_model(document)
+
+    async def get_parsed_credit_report(
+        self,
+        user: User,
+        document_id: uuid.UUID,
+    ) -> DocumentParsedCreditReportResponse:
+        document = await self._get_document_for_user(document_id, user)
+        parsed_report = await self._documents.get_parsed_credit_report(
+            document.id,
+            organization_id=document.organization_id,
+        )
+        if parsed_report is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Parsed credit report not found",
+            )
+        return DocumentParsedCreditReportResponse.from_model(parsed_report)
 
     def _queue_metadata_extract_job(self, document: Document) -> None:
         settings = get_settings()

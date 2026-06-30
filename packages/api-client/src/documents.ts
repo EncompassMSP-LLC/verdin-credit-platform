@@ -106,6 +106,18 @@ export interface DocumentMetadata {
   extraction_error: string | null;
 }
 
+export interface DocumentParsedCreditReport {
+  document_id: string;
+  schema_version: string;
+  bureau: string;
+  parser_name: string;
+  parser_confidence: number;
+  parsed_report: Record<string, unknown>;
+  is_partial: boolean;
+  warnings: string[];
+  parsed_at: string;
+}
+
 export interface DocumentEntityResolution {
   id: string;
   document_id: string;
@@ -196,6 +208,14 @@ export async function retryDocumentOcr(documentId: string): Promise<DocumentOcrR
 
 export async function getDocumentMetadata(documentId: string): Promise<DocumentMetadata> {
   return request<DocumentMetadata>(apiPath(`/documents/${documentId}/metadata`));
+}
+
+export async function getDocumentParsedCreditReport(
+  documentId: string,
+): Promise<DocumentParsedCreditReport> {
+  return request<DocumentParsedCreditReport>(
+    apiPath(`/documents/${documentId}/parsed-credit-report`),
+  );
 }
 
 export async function extractDocumentMetadata(documentId: string): Promise<DocumentMetadata> {

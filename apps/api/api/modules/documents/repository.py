@@ -15,6 +15,7 @@ from api.modules.documents.constants import (
 )
 from api.modules.documents.metadata_models import DocumentEntityResolution, DocumentMetadata
 from api.modules.documents.models import Document, DocumentVersion
+from api.modules.documents.parsed_report_models import DocumentParsedCreditReport
 from api.modules.documents.schemas import DocumentSortField, DocumentSortOrder
 
 
@@ -151,3 +152,17 @@ class DocumentRepository:
             .order_by(DocumentVersion.version_number.desc())
         )
         return list(result.scalars().all())
+
+    async def get_parsed_credit_report(
+        self,
+        document_id: uuid.UUID,
+        *,
+        organization_id: uuid.UUID,
+    ) -> DocumentParsedCreditReport | None:
+        result = await self._session.execute(
+            select(DocumentParsedCreditReport).where(
+                DocumentParsedCreditReport.document_id == document_id,
+                DocumentParsedCreditReport.organization_id == organization_id,
+            )
+        )
+        return result.scalar_one_or_none()

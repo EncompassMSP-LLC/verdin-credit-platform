@@ -1,12 +1,14 @@
 """Document metadata and entity resolution endpoint tests."""
 
 import uuid
+from datetime import UTC, datetime
 
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.modules.documents.models import Document
+from api.modules.documents.parsed_report_models import DocumentParsedCreditReport
 from tests.accounts.conftest import sample_account_payload
 from tests.documents.conftest import sample_pdf_upload
 from tests.documents.test_metadata_extraction import SAMPLE_CREDIT_REPORT_TEXT
@@ -70,6 +72,69 @@ def test_get_metadata_after_extract(
     )
     assert response.status_code == 200
     assert response.json()["account_number_masked"] == "****1234"
+
+
+def test_get_parsed_credit_report_not_found(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    document_with_ocr: str,
+) -> None:
+    response = api_client.get(
+        f"/api/v1/documents/{document_with_ocr}/parsed-credit-report",
+        headers=manager_headers,
+    )
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Parsed credit report not found"
+
+
+async def test_get_parsed_credit_report(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    document_with_ocr: str,
+    db_session: AsyncSession,
+) -> None:
+    document_id = uuid.UUID(document_with_ocr)
+    document = await db_session.get(Document, document_id)
+    assert document is not None
+
+    now = datetime.now(UTC)
+    parsed = DocumentParsedCreditReport(
+        id=uuid.uuid4(),
+        document_id=document.id,
+        organization_id=document.organization_id,
+        schema_version="1.0",
+        bureau="equifax",
+        parser_name="equifax",
+        parser_confidence=0.98,
+        parsed_report={
+            "schema_version": "1.0",
+            "bureau": "equifax",
+            "accounts": [{"creditor_name": "Example Bank"}],
+        },
+        is_partial=False,
+        warnings=[],
+        parsed_at=now,
+        created_at=now,
+        updated_at=now,
+    )
+    db_session.add(parsed)
+    await db_session.commit()
+
+    response = api_client.get(
+        f"/api/v1/documents/{document_with_ocr}/parsed-credit-report",
+        headers=manager_headers,
+    )
+
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["document_id"] == document_with_ocr
+    assert data["bureau"] == "equifax"
+    assert data["parser_name"] == "equifax"
+    assert data["parser_confidence"] == 0.98
+    assert data["parsed_report"]["accounts"][0]["creditor_name"] == "Example Bank"
+    assert data["is_partial"] is False
+    assert data["warnings"] == []
 
 
 def test_resolve_entities_matched_account(
