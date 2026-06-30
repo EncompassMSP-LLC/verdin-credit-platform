@@ -1,0 +1,121 @@
+{
+  "accounts": [
+    {
+      "account_number_masked": "****3344",
+      "account_type": "Revolving",
+      "balance": 1875.5,
+      "bureau": "transunion",
+      "confidence": 0.91,
+      "credit_limit": 4500.0,
+      "creditor_name": "Summit Retail Bank",
+      "date_reported": "08/01/2026",
+      "open_date": "04/18/2018",
+      "payment_status": "Late 30 Days"
+    },
+    {
+      "account_number_masked": "****1122",
+      "account_type": "Installment",
+      "balance": 9420.0,
+      "bureau": "transunion",
+      "confidence": 0.91,
+      "credit_limit": 18000.0,
+      "creditor_name": "Metro Auto Finance",
+      "date_reported": "08/01/2026",
+      "open_date": "09/22/2020",
+      "payment_status": "Current"
+    }
+  ],
+  "bureau": "transunion",
+  "collections": [
+    {
+      "agency_name": "Northstar Recovery",
+      "balance": 640.0,
+      "confidence": 0.91,
+      "original_creditor": "Utility Services",
+      "status": "Open"
+    }
+  ],
+  "consumer": {
+    "confidence": 0.94,
+    "date_of_birth": "05/12/1987",
+    "name": "Avery J. Morgan",
+    "ssn_masked": "***-**-9012"
+  },
+  "inquiries": [
+    {
+      "confidence": 0.91,
+      "creditor_name": "Capital One",
+      "inquiry_date": "06/12/2026",
+      "inquiry_type": "Hard"
+    }
+  ],
+  "metadata": {
+    "classification_confidence": 0.95,
+    "classification_type": "credit_report",
+    "field_confidence": {
+      "accounts[0].account_number_masked": 0.91,
+      "accounts[0].account_type": 0.91,
+      "accounts[0].balance": 0.91,
+      "accounts[0].credit_limit": 0.91,
+      "accounts[0].creditor_name": 0.91,
+      "accounts[0].date_reported": 0.91,
+      "accounts[0].open_date": 0.91,
+      "accounts[0].payment_status": 0.91,
+      "accounts[1].account_number_masked": 0.91,
+      "accounts[1].account_type": 0.91,
+      "accounts[1].balance": 0.91,
+      "accounts[1].credit_limit": 0.91,
+      "accounts[1].creditor_name": 0.91,
+      "accounts[1].date_reported": 0.91,
+      "accounts[1].open_date": 0.91,
+      "accounts[1].payment_status": 0.91,
+      "collections[0].agency_name": 0.91,
+      "collections[0].balance": 0.91,
+      "collections[0].original_creditor": 0.91,
+      "collections[0].status": 0.91,
+      "consumer.date_of_birth": 0.94,
+      "consumer.name": 0.94,
+      "consumer.ssn_masked": 0.94,
+      "inquiries[0].creditor_name": 0.91,
+      "inquiries[0].inquiry_date": 0.91,
+      "inquiries[0].inquiry_type": 0.91,
+      "layout.accounts": 0.15,
+      "layout.branding": 0.2,
+      "layout.collections": 0.1,
+      "layout.credit_summary": 0.05,
+      "layout.inquiries": 0.1,
+      "layout.personal_information": 0.15,
+      "layout.public_records": 0.1,
+      "layout.report_header": 0.15,
+      "parser.layout_confidence": 1.0,
+      "public_records[0].amount": 0.91,
+      "public_records[0].filing_date": 0.91,
+      "public_records[0].record_type": 0.91,
+      "public_records[0].status": 0.91,
+      "report.report_date": 0.91
+    },
+    "is_partial": false,
+    "parser_name": "transunion",
+    "warnings": []
+  },
+  "personal_information": [],
+  "public_records": [
+    {
+      "amount": 1800.0,
+      "confidence": 0.91,
+      "filing_date": "10/05/2019",
+      "record_type": "Civil Judgment",
+      "status": "Satisfied"
+    }
+  ],
+  "report_id": "fixture-report_001",
+  "schema_version": "1.0",
+  "summary": {
+    "confidence": 0.94,
+    "total_accounts": 2,
+    "total_balance": 11295.5,
+    "total_collections": 1,
+    "total_inquiries": 1,
+    "total_public_records": 1
+  }
+}
