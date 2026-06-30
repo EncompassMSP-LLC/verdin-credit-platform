@@ -7,6 +7,7 @@ import type {
   PaymentStatus,
 } from '@verdin/shared';
 
+import type { Task } from './tasks';
 import { apiPath, request } from './http';
 
 export interface Account {
@@ -178,6 +179,12 @@ export async function getAccount(accountId: string): Promise<Account> {
 
 export async function getAccountDisputeDraft(accountId: string): Promise<AccountDisputeDraft> {
   return request<AccountDisputeDraft>(apiPath(`/accounts/${accountId}/dispute-draft`));
+}
+
+export async function createAccountDisputeDraftReviewTask(accountId: string): Promise<Task> {
+  return request<Task>(apiPath(`/accounts/${accountId}/dispute-draft/review-task`), {
+    method: 'POST',
+  });
 }
 
 export async function updateAccount(

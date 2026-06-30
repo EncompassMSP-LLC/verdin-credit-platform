@@ -27,6 +27,7 @@ from api.modules.accounts.schemas import (
 from api.modules.accounts.service import AccountService
 from api.modules.auth.dependencies import get_current_user
 from api.modules.auth.models import User
+from api.modules.tasks.schemas import TaskResponse
 
 router = APIRouter(prefix="/accounts", tags=["Accounts"])
 
@@ -114,6 +115,15 @@ async def get_account_dispute_draft(
     service: AccountService = Depends(get_account_service),
 ) -> AccountDisputeDraftResponse:
     return await service.get_dispute_draft(current_user, account_id)
+
+
+@router.post("/{account_id}/dispute-draft/review-task", response_model=TaskResponse)
+async def create_account_dispute_draft_review_task(
+    account_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: AccountService = Depends(get_account_service),
+) -> TaskResponse:
+    return await service.create_dispute_draft_review_task(current_user, account_id)
 
 
 @router.patch("/{account_id}", response_model=AccountResponse)

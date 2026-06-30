@@ -124,7 +124,7 @@ Plan: [`docs/sprint-4.3.1/operational-core-stabilization.md`](../sprint-4.3.1/op
 | Entity Extraction               | 4.5     | Partial | 🚧      | 🚧       | 🚧  | ✅      | ✅    | OCR, Accounts       | Parser tradelines produce account candidates      |
 | AI Case Summaries               | 4.5     | Planned | —       | —        | —   | ✅      | —     | Cases, Documents    | Phase 2 AI                                        |
 | AI Recommendation Engine        | 4.5     | Partial | 🚧      | —        | —   | Partial | ✅    | Accounts            | Heuristic recommendations shipped; LLM planned    |
-| Dispute Generation (foundation) | 4.5     | Partial | 🚧      | 🚧       | 🚧  | ✅      | ✅    | Accounts, Documents | Rule-based account dispute draft preview + UI     |
+| Dispute Generation (foundation) | 4.5     | Partial | 🚧      | 🚧       | 🚧  | ✅      | ✅    | Accounts, Documents | Draft preview UI + review task handoff            |
 
 ---
 
