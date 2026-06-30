@@ -17,9 +17,10 @@ import {
   uploadDocument,
 } from '@verdin/api-client';
 import { Button, Card, Badge } from '@verdin/ui';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { DocumentMetadataStatusBadge } from '../../components/documents/DocumentMetadataStatusBadge';
 import { DocumentProcessingBadge } from '../../components/documents/DocumentProcessingBadge';
+import { ParsedReportTradelines } from '../../components/imports/ParsedReportTradelines';
 import { featureFlags } from '../../lib/feature-flags';
 
 const inputClass =
@@ -162,9 +163,10 @@ function ResolutionLinks({ resolutions }: { resolutions: DocumentEntityResolutio
 
 export function CreditReportImportWizard() {
   const queryClient = useQueryClient();
+  const [searchParams] = useSearchParams();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [caseId, setCaseId] = useState('');
+  const [caseId, setCaseId] = useState(searchParams.get('case_id') ?? '');
   const [file, setFile] = useState<File | null>(null);
   const [documentId, setDocumentId] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
@@ -294,6 +296,9 @@ export function CreditReportImportWizard() {
           ? 'active'
           : 'pending';
 
+  const importComplete =
+    uploadStatus === 'complete' && metadataStatus === 'complete' && resolutionStatus === 'complete';
+
   if (!featureFlags.enableImports) {
     return (
       <div className="p-8">
@@ -331,6 +336,32 @@ export function CreditReportImportWizard() {
           </Link>
         ) : null}
       </div>
+
+      {importComplete && documentId ? (
+        <Card className="mb-6 border-green-200 bg-green-50">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="font-semibold text-green-900">Import complete</h2>
+              <p className="mt-1 text-sm text-green-800">
+                The credit report was parsed, metadata was extracted, and entity matches are
+                available.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Link to={`/documents/${documentId}`}>
+                <Button size="sm">View document</Button>
+              </Link>
+              {caseId ? (
+                <Link to={`/cases/${caseId}`}>
+                  <Button size="sm" variant="secondary">
+                    View case
+                  </Button>
+                </Link>
+              ) : null}
+            </div>
+          </div>
+        </Card>
+      ) : null}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <Card title="Import details" className="lg:col-span-1">
@@ -476,6 +507,12 @@ export function CreditReportImportWizard() {
               <div className="space-y-4">
                 {parsedReportQuery.data ? (
                   <ParserSummary parsedReport={parsedReportQuery.data} />
+                ) : null}
+                {parsedReportQuery.data ? (
+                  <div>
+                    <h4 className="mb-2 text-sm font-medium text-gray-700">Extracted tradelines</h4>
+                    <ParsedReportTradelines parsedReport={parsedReportQuery.data} />
+                  </div>
                 ) : null}
                 <MetadataSummary metadata={metadataQuery.data} />
                 <div className="flex items-center gap-2 text-xs text-gray-500">

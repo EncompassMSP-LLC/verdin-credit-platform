@@ -6,6 +6,7 @@ import { CASE_STAGE_LABELS } from '@verdin/shared';
 import { Button, Card } from '@verdin/ui';
 import { CaseDeleteDialog } from '../../components/cases/CaseDeleteDialog';
 import { CasePriorityBadge, CaseStatusChip } from '../../components/cases/CaseBadges';
+import { featureFlags } from '../../lib/feature-flags';
 
 function formatDateTime(value: string | null) {
   if (!value) return '—';
@@ -134,11 +135,18 @@ export function CaseDetailPage() {
 
         <Card title="Credit accounts">
           <p className="text-sm text-gray-600">View tradelines linked to this case.</p>
-          <Link to={`/cases/${caseId}/accounts`} className="mt-3 inline-block">
-            <Button variant="secondary" size="sm">
-              View accounts
-            </Button>
-          </Link>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Link to={`/cases/${caseId}/accounts`}>
+              <Button variant="secondary" size="sm">
+                View accounts
+              </Button>
+            </Link>
+            {featureFlags.enableImports ? (
+              <Link to={`/imports/credit-report?case_id=${caseId}`}>
+                <Button size="sm">Import credit report</Button>
+              </Link>
+            ) : null}
+          </div>
         </Card>
 
         <Card title="Metadata">
