@@ -174,6 +174,44 @@ def test_create_account_dispute_draft_review_task_is_idempotent(
     assert first.json()["source_event_id"] == account_id
 
 
+def test_create_and_list_account_dispute_letter_drafts(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    readonly_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    create = api_client.post(
+        "/api/v1/accounts",
+        headers=manager_headers,
+        json=sample_account_payload(sample_case_id),
+    )
+    account_id = create.json()["id"]
+
+    created = api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-draft/letters",
+        headers=manager_headers,
+    )
+    listed = api_client.get(
+        f"/api/v1/accounts/{account_id}/dispute-letters",
+        headers=readonly_headers,
+    )
+
+    assert created.status_code == 200
+    created_data = created.json()
+    assert created_data["account_id"] == account_id
+    assert created_data["case_id"] == sample_case_id
+    assert created_data["status"] == "draft"
+    assert created_data["template_id"] == "cra-tradeline-investigation-v1"
+    assert created_data["generated_by"] == "rules"
+    assert "Example Bank" in created_data["body"]
+    assert created_data["disputed_items"]
+    assert created_data["evidence_checklist"]
+
+    assert listed.status_code == 200
+    listed_data = listed.json()
+    assert [item["id"] for item in listed_data] == [created_data["id"]]
+
+
 def test_get_account_not_found(
     api_client: TestClient,
     manager_headers: dict[str, str],

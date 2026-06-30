@@ -23,6 +23,7 @@ from api.modules.accounts.schemas import (
     AccountSortField,
     AccountSortOrder,
     AccountUpdate,
+    DisputeLetterResponse,
 )
 from api.modules.accounts.service import AccountService
 from api.modules.auth.dependencies import get_current_user
@@ -124,6 +125,24 @@ async def create_account_dispute_draft_review_task(
     service: AccountService = Depends(get_account_service),
 ) -> TaskResponse:
     return await service.create_dispute_draft_review_task(current_user, account_id)
+
+
+@router.post("/{account_id}/dispute-draft/letters", response_model=DisputeLetterResponse)
+async def create_account_dispute_letter_draft(
+    account_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: AccountService = Depends(get_account_service),
+) -> DisputeLetterResponse:
+    return await service.create_dispute_letter_draft(current_user, account_id)
+
+
+@router.get("/{account_id}/dispute-letters", response_model=list[DisputeLetterResponse])
+async def list_account_dispute_letters(
+    account_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: AccountService = Depends(get_account_service),
+) -> list[DisputeLetterResponse]:
+    return await service.list_dispute_letters(current_user, account_id)
 
 
 @router.patch("/{account_id}", response_model=AccountResponse)

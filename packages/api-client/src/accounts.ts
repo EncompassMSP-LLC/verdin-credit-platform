@@ -150,6 +150,32 @@ export interface AccountDisputeDraft {
   risk_score: number | null;
 }
 
+export type DisputeLetterStatus = 'draft' | 'review' | 'approved' | 'sent' | 'void';
+
+export interface DisputeLetter {
+  id: string;
+  organization_id: string;
+  case_id: string;
+  account_id: string;
+  recipient_type: string;
+  status: DisputeLetterStatus;
+  template_id: string;
+  subject: string;
+  body: string;
+  disputed_items: string[];
+  requested_action: string;
+  evidence_checklist: string[];
+  compliance_notes: string[];
+  generated_by: string;
+  generated_at: string;
+  sent_at: string | null;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+  created_by_id: string | null;
+  updated_by_id: string | null;
+}
+
 function buildQuery(params: Record<string, unknown>): string {
   const search = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {
@@ -185,6 +211,16 @@ export async function createAccountDisputeDraftReviewTask(accountId: string): Pr
   return request<Task>(apiPath(`/accounts/${accountId}/dispute-draft/review-task`), {
     method: 'POST',
   });
+}
+
+export async function createAccountDisputeLetterDraft(accountId: string): Promise<DisputeLetter> {
+  return request<DisputeLetter>(apiPath(`/accounts/${accountId}/dispute-draft/letters`), {
+    method: 'POST',
+  });
+}
+
+export async function listAccountDisputeLetters(accountId: string): Promise<DisputeLetter[]> {
+  return request<DisputeLetter[]>(apiPath(`/accounts/${accountId}/dispute-letters`));
 }
 
 export async function updateAccount(

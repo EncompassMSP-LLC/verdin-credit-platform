@@ -8,6 +8,7 @@ erDiagram
     Organization ||--o{ Case : has
     Organization ||--o{ Account : has
     Case ||--o{ Account : "credit tradelines"
+    Account ||--o{ DisputeLetter : has
     User ||--o{ Case : "assigned to"
     Case ||--o{ Document : contains
     Case ||--o{ Task : contains
@@ -52,6 +53,19 @@ erDiagram
         enum dispute_status
         int risk_score
         int readiness_score
+    }
+
+    DisputeLetter {
+        uuid id PK
+        uuid organization_id FK
+        uuid case_id FK
+        uuid account_id FK
+        string recipient_type
+        enum status
+        string template_id
+        string subject
+        timestamp generated_at
+        timestamp sent_at
     }
 
     Case {
