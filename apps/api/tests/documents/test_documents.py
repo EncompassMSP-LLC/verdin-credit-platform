@@ -51,6 +51,68 @@ def test_duplicate_detection(
     assert second["duplicate_of_id"] is not None
 
 
+def test_get_document_duplicate_group_from_original(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    uploaded: list[dict] = []
+    for title in ("Original Report", "Duplicate Report"):
+        filename, file_obj, content_type = sample_pdf_upload()
+        response = api_client.post(
+            "/api/v1/documents",
+            headers=manager_headers,
+            data={"title": title, "case_id": sample_case_id},
+            files={"file": (filename, file_obj, content_type)},
+        )
+        assert response.status_code == 201, response.text
+        uploaded.append(response.json())
+
+    original, duplicate = uploaded
+    response = api_client.get(
+        f"/api/v1/documents/{original['id']}/duplicates",
+        headers=manager_headers,
+    )
+
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["document_id"] == original["id"]
+    assert data["canonical_document"]["id"] == original["id"]
+    assert data["duplicate_count"] == 1
+    assert data["duplicate_documents"][0]["id"] == duplicate["id"]
+
+
+def test_get_document_duplicate_group_from_duplicate(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    uploaded: list[dict] = []
+    for title in ("Original Report", "Duplicate Report"):
+        filename, file_obj, content_type = sample_pdf_upload()
+        response = api_client.post(
+            "/api/v1/documents",
+            headers=manager_headers,
+            data={"title": title, "case_id": sample_case_id},
+            files={"file": (filename, file_obj, content_type)},
+        )
+        assert response.status_code == 201, response.text
+        uploaded.append(response.json())
+
+    original, duplicate = uploaded
+    response = api_client.get(
+        f"/api/v1/documents/{duplicate['id']}/duplicates",
+        headers=manager_headers,
+    )
+
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["document_id"] == duplicate["id"]
+    assert data["canonical_document"]["id"] == original["id"]
+    assert data["duplicate_count"] == 1
+    assert data["duplicate_documents"][0]["id"] == duplicate["id"]
+
+
 def test_list_documents(
     api_client: TestClient,
     manager_headers: dict[str, str],

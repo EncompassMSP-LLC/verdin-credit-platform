@@ -24,6 +24,12 @@ class DocumentRepositoryProtocol(Protocol):
         file_hash: str,
     ) -> Document | None: ...
 
+    async def list_duplicate_group(
+        self,
+        organization_id: uuid.UUID,
+        canonical_document_id: uuid.UUID,
+    ) -> list[Document]: ...
+
     async def list_documents(
         self,
         filters: DocumentListFilters,

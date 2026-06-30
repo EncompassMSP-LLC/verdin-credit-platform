@@ -78,6 +78,25 @@ class DocumentRepository:
         )
         return result.scalar_one_or_none()
 
+    async def list_duplicate_group(
+        self,
+        organization_id: uuid.UUID,
+        canonical_document_id: uuid.UUID,
+    ) -> list[Document]:
+        result = await self._session.execute(
+            select(Document)
+            .where(
+                Document.organization_id == organization_id,
+                Document.deleted_at.is_(None),
+                or_(
+                    Document.id == canonical_document_id,
+                    Document.duplicate_of_id == canonical_document_id,
+                ),
+            )
+            .order_by(Document.is_duplicate.asc(), Document.created_at.asc())
+        )
+        return list(result.scalars().all())
+
     async def list_documents(self, filters: DocumentListFilters) -> tuple[list[Document], int]:
         base = select(Document).where(
             Document.organization_id == filters.organization_id,

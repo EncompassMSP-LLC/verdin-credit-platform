@@ -147,6 +147,30 @@ class DocumentResponse(BaseSchema):
         )
 
 
+class DocumentDuplicateGroupResponse(BaseSchema):
+    document_id: uuid.UUID
+    canonical_document: DocumentResponse
+    duplicate_documents: list[DocumentResponse]
+    duplicate_count: int
+
+    @classmethod
+    def from_group(
+        cls,
+        *,
+        document_id: uuid.UUID,
+        canonical_document: Document,
+        duplicate_documents: list[Document],
+    ) -> "DocumentDuplicateGroupResponse":
+        return cls(
+            document_id=document_id,
+            canonical_document=DocumentResponse.from_model(canonical_document),
+            duplicate_documents=[
+                DocumentResponse.from_model(document) for document in duplicate_documents
+            ],
+            duplicate_count=len(duplicate_documents),
+        )
+
+
 class DocumentOcrResponse(BaseSchema):
     document_id: uuid.UUID
     processing_status: DocumentProcessingStatus
