@@ -26,6 +26,7 @@ from api.modules.documents.schemas import (
     DocumentDuplicateGroupResponse,
     DocumentListParams,
     DocumentOcrResponse,
+    DocumentParsedCreditReportComparisonResponse,
     DocumentParsedCreditReportResponse,
     DocumentResponse,
     DocumentSortField,
@@ -163,6 +164,18 @@ async def get_document_parsed_credit_report(
     service: DocumentService = Depends(get_document_service),
 ) -> DocumentParsedCreditReportResponse:
     return await service.get_parsed_credit_report(current_user, document_id)
+
+
+@router.get(
+    "/{document_id}/parsed-credit-report/comparison",
+    response_model=DocumentParsedCreditReportComparisonResponse,
+)
+async def compare_document_parsed_credit_report(
+    document_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> DocumentParsedCreditReportComparisonResponse:
+    return await service.compare_parsed_credit_report(current_user, document_id)
 
 
 @router.post("/{document_id}/classify", response_model=DocumentClassificationResponse)

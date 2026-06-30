@@ -150,6 +150,7 @@ Secure document storage with MinIO, SHA-256 hashing, versioning, and duplicate d
 | GET    | `/documents/{document_id}/versions`                            | read_only    | List version history               |
 | GET    | `/documents/{document_id}/metadata`                            | read_only    | Get extracted metadata             |
 | POST   | `/documents/{document_id}/metadata/extract`                    | case_manager | Extract metadata from OCR text     |
+| GET    | `/documents/{document_id}/parsed-credit-report/comparison`     | read_only    | Compare against previous report    |
 | GET    | `/documents/{document_id}/resolutions`                         | read_only    | List entity resolution results     |
 | POST   | `/documents/{document_id}/resolutions/resolve`                 | case_manager | Run entity resolution              |
 | POST   | `/documents/{document_id}/resolutions/{resolution_id}/confirm` | case_manager | Confirm or manually select match   |
@@ -166,6 +167,8 @@ Fields: `file` (required), `title` (required), `case_id` (required), `descriptio
 `page`, `page_size`, `search`, `case_id`, `account_id`, `is_duplicate`, `sort_by`, `sort_order`
 
 Duplicate detection: uploading a file with the same SHA-256 hash as an existing org document sets `is_duplicate: true` and `duplicate_of_id`. Use `GET /documents/{document_id}/duplicates` to review the canonical document and exact duplicate copies in the same organization.
+
+Parsed credit report comparison: `GET /documents/{document_id}/parsed-credit-report/comparison` compares the selected report to the previous parsed report for the same case and bureau, matching tradelines by creditor plus masked account number.
 
 ## Timeline
 
