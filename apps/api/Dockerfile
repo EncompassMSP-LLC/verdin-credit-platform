@@ -12,6 +12,7 @@ COPY packages/document-metadata /packages/document-metadata
 COPY packages/entity-resolution /packages/entity-resolution
 COPY packages/event-bus /packages/event-bus
 COPY packages/event-types /packages/event-types
+COPY packages/report-parsers /packages/report-parsers
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY apps/api .

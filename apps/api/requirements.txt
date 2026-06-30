@@ -3,6 +3,7 @@
 -e ../../packages/entity-resolution
 -e ../../packages/event-bus
 -e ../../packages/event-types
+-e ../../packages/report-parsers
 fastapi>=0.115.6
 uvicorn[standard]>=0.34.0
 pydantic[email]>=2.10.3
@@ -21,5 +22,6 @@ httpx>=0.28.1
 pytest>=8.3.4
 pytest-asyncio>=0.25.0
 pytest-cov>=6.0.0
+pypdf>=5.1.0
 ruff>=0.8.4
 mypy>=1.14.0
