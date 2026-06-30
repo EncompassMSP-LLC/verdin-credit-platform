@@ -10,6 +10,7 @@ import type {
 } from '@verdin/shared';
 
 import { apiPath, getApiBaseUrl, request, uploadRequest } from './http';
+import type { Task } from './tasks';
 
 export interface DocumentVersion {
   id: string;
@@ -299,6 +300,14 @@ export async function getDocumentParsedCreditReportAccountCandidates(
   return request<DocumentParsedCreditReportAccountCandidates>(
     apiPath(`/documents/${documentId}/parsed-credit-report/account-candidates`),
   );
+}
+
+export async function createDocumentParsedCreditReportReviewTask(
+  documentId: string,
+): Promise<Task> {
+  return request<Task>(apiPath(`/documents/${documentId}/parsed-credit-report/review-task`), {
+    method: 'POST',
+  });
 }
 
 export async function extractDocumentMetadata(documentId: string): Promise<DocumentMetadata> {

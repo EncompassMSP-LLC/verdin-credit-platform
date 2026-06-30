@@ -37,6 +37,7 @@ from api.modules.documents.schemas import (
 )
 from api.modules.documents.service import DocumentService
 from api.modules.documents.storage import DocumentStorage, get_document_storage
+from api.modules.tasks.schemas import TaskResponse
 
 router = APIRouter(prefix="/documents", tags=["Documents"])
 
@@ -189,6 +190,18 @@ async def get_document_parsed_credit_report_account_candidates(
     service: DocumentService = Depends(get_document_service),
 ) -> DocumentParsedCreditReportAccountCandidatesResponse:
     return await service.get_parsed_credit_report_account_candidates(current_user, document_id)
+
+
+@router.post(
+    "/{document_id}/parsed-credit-report/review-task",
+    response_model=TaskResponse,
+)
+async def create_document_parsed_credit_report_review_task(
+    document_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> TaskResponse:
+    return await service.create_parsed_credit_report_review_task(current_user, document_id)
 
 
 @router.post("/{document_id}/classify", response_model=DocumentClassificationResponse)
