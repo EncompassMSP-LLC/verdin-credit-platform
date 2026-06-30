@@ -13,6 +13,7 @@ from api.core.config import get_settings
 class JobType(StrEnum):
     OCR = "ocr"
     DOCUMENT_CLASSIFY = "document_classify"
+    DOCUMENT_CREDIT_REPORT_PARSE = "document_credit_report_parse"
     DOCUMENT_METADATA_EXTRACT = "document_metadata_extract"
     DOCUMENT_ENTITY_RESOLVE = "document_entity_resolve"
     REPORT_IMPORT = "report_import"

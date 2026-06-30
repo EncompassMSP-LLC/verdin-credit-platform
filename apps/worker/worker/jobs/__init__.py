@@ -3,6 +3,7 @@
 from worker.jobs import (
     ai_summary,
     classify,
+    credit_report_parse,
     entity_resolve,
     metadata_extract,
     monthly_review,
@@ -13,6 +14,7 @@ from worker.jobs import (
 __all__ = [
     "ai_summary",
     "classify",
+    "credit_report_parse",
     "entity_resolve",
     "metadata_extract",
     "monthly_review",
