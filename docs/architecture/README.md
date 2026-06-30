@@ -8,15 +8,16 @@ Every new feature, sprint, or ADR should align with these documents.
 
 ## Document index
 
-| Document                                          | Scope                                                         |
-| ------------------------------------------------- | ------------------------------------------------------------- |
-| [System Architecture](system-architecture.md)     | High-level platform design, runtime topology, monorepo layout |
-| [Domain Model](domain-model.md)                   | Business domains, bounded contexts, entity relationships      |
-| [Data Model](data-model.md)                       | Persistence model, lifecycles, multi-tenancy rules            |
-| [API Standards](api-standards.md)                 | REST conventions, errors, versioning, pagination              |
-| [Security Architecture](security-architecture.md) | Authentication, authorization, audit, compliance hooks        |
-| [AI Architecture](ai-architecture.md)             | OCR, summaries, recommendations, future agent orchestration   |
-| [Overview (legacy summary)](overview.md)          | Quick-reference diagram — see system-architecture for detail  |
+| Document                                           | Scope                                                         |
+| -------------------------------------------------- | ------------------------------------------------------------- |
+| [v4.3.0 Architecture Snapshot](v4.3.0-snapshot.md) | As-built Operational Core reference before Version 4.5        |
+| [System Architecture](system-architecture.md)      | High-level platform design, runtime topology, monorepo layout |
+| [Domain Model](domain-model.md)                    | Business domains, bounded contexts, entity relationships      |
+| [Data Model](data-model.md)                        | Persistence model, lifecycles, multi-tenancy rules            |
+| [API Standards](api-standards.md)                  | REST conventions, errors, versioning, pagination              |
+| [Security Architecture](security-architecture.md)  | Authentication, authorization, audit, compliance hooks        |
+| [AI Architecture](ai-architecture.md)              | OCR, summaries, recommendations, future agent orchestration   |
+| [Overview (legacy summary)](overview.md)           | Quick-reference diagram — see system-architecture for detail  |
 
 ## Architecture Decision Records
 
@@ -43,6 +44,8 @@ Before merging substantial work, confirm:
 - [Governance hub](../governance/README.md) — feature lifecycle
 - [Capability matrix](../governance/capability-matrix.md) — production readiness
 - [Product roadmap](../roadmap/README.md)
+- [Engineering Decision Log](../engineering/changelog.md) — sprint-level technical rationale
+- [v4.3.0 Architecture Snapshot](v4.3.0-snapshot.md) — as-built Operational Core reference
 - [Developer guide](../developer-guide.md)
 - [Database ERD](../database/erd.md) — diagram reference (see data-model for authoritative lifecycle detail)
 - [Coding standards](../coding-standards.md)

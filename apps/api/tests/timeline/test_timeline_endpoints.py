@@ -64,3 +64,32 @@ def test_login_emits_timeline_event(
     )
     assert response.status_code == 200
     assert response.json()["total"] >= 1
+
+
+def test_case_timeline_preserves_event_sequence(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+) -> None:
+    create = api_client.post(
+        "/api/v1/cases",
+        headers=manager_headers,
+        json={"title": "Sequenced Case", "client_name": "Sequence Client"},
+    )
+    assert create.status_code == 201, create.text
+    case_id = create.json()["id"]
+
+    update = api_client.patch(
+        f"/api/v1/cases/{case_id}",
+        headers=manager_headers,
+        json={"title": "Sequenced Case Updated"},
+    )
+    assert update.status_code == 200, update.text
+
+    response = api_client.get(
+        "/api/v1/timeline",
+        headers=manager_headers,
+        params={"case_id": case_id, "sort_order": "asc"},
+    )
+    assert response.status_code == 200, response.text
+    event_types = [item["event_type"] for item in response.json()["items"]]
+    assert event_types[:2] == ["CASE_CREATED", "CASE_UPDATED"]

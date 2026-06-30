@@ -1,5 +1,6 @@
 """Security helpers — password hashing and JWT token management."""
 
+import uuid
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
@@ -64,6 +65,7 @@ def create_refresh_token(subject: str) -> str:
         "sub": subject,
         "type": TOKEN_TYPE_REFRESH,
         "exp": expire,
+        "jti": str(uuid.uuid4()),
     }
     return jwt.encode(payload, settings.secret_key, algorithm=settings.algorithm)
 

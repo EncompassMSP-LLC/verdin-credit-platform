@@ -87,9 +87,6 @@ class OcrJob(BaseJob):
                     text=result.data["text"],
                     version_number=result.data["version_number"],
                 )
-                enqueue_job(
-                    JobType.DOCUMENT_CLASSIFY, {"document_id": str(document_id)}
-                )
                 timeline_context = get_document_timeline_context(session, document_id)
                 if timeline_context is not None:
                     append_timeline_event(
@@ -112,6 +109,11 @@ class OcrJob(BaseJob):
                 save_ocr_failure(session, document_id, result.message)
             elif result.status == JobStatus.CANCELLED:
                 save_ocr_failure(session, document_id, result.message)
+
+        # Enqueue the next stage only after the OCR results are committed, so the
+        # classification worker cannot read the document before its text exists.
+        if result.status == JobStatus.COMPLETED and result.data is not None:
+            enqueue_job(JobType.DOCUMENT_CLASSIFY, {"document_id": str(document_id)})
 
         logger.info(
             "ocr_job_finished",

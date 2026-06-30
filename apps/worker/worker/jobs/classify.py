@@ -78,9 +78,11 @@ class DocumentClassifyJob(BaseJob):
                         "confidence_score": result.confidence_score,
                     },
                 )
-            enqueue_job(
-                JobType.DOCUMENT_METADATA_EXTRACT, {"document_id": str(document_id)}
-            )
+
+        # Enqueue metadata extraction only after the classification is committed.
+        enqueue_job(
+            JobType.DOCUMENT_METADATA_EXTRACT, {"document_id": str(document_id)}
+        )
 
         logger.info(
             "document_classified",

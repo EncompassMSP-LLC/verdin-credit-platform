@@ -34,6 +34,31 @@ async def test_event_bus_dispatches_to_subscriber() -> None:
     assert received[0].event_type == "CASE_CREATED"
 
 
+@pytest.mark.asyncio
+async def test_event_bus_supports_sync_handlers_and_unsubscribe() -> None:
+    bus = EventBus()
+    received: list[str] = []
+
+    def handler(event: PlatformEvent, _context: dict) -> None:
+        received.append(event.event_type)
+
+    unsubscribe = bus.subscribe(handler)
+    event = PlatformEvent(
+        event_type="TASK_CREATED",
+        event_category="task",
+        title="Task created",
+        organization_id=uuid.uuid4(),
+        source_module="tasks",
+    )
+
+    await bus.publish(event, context={})
+    unsubscribe()
+    await bus.publish(event, context={})
+
+    assert received == ["TASK_CREATED"]
+    assert bus.is_subscribed(handler) is False
+
+
 def test_global_event_bus_singleton() -> None:
     first = get_event_bus()
     second = get_event_bus()
