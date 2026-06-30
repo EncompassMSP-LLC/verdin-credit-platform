@@ -10,7 +10,7 @@ def test_registry_lists_bureau_and_fallback_parsers() -> None:
     assert names == {"experian", "equifax", "transunion", "fallback"}
 
 
-def test_bureau_parsers_not_selected_until_implemented() -> None:
+def test_low_confidence_bureau_layout_uses_fallback() -> None:
     document = ParsedDocument(
         ocr_text="EQUIFAX consumer credit report tradeline",
         file_name="report.pdf",
@@ -36,6 +36,6 @@ def test_parse_credit_report_uses_fallback_for_unknown_layout() -> None:
     assert report.metadata.is_partial is True
 
 
-def test_bureau_parser_stubs_are_registered() -> None:
+def test_bureau_parsers_are_registered() -> None:
     bureau_names = {parser.name for parser in list_bureau_parsers()}
     assert bureau_names == {"experian", "equifax", "transunion"}

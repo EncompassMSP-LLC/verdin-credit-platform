@@ -8,7 +8,9 @@ from pathlib import Path
 from typing import Any
 
 from verdin_report_parsers import ParsedDocument
+from verdin_report_parsers.base import CreditReportParser
 from verdin_report_parsers.models import ParsedCreditReport
+from verdin_report_parsers.parsers.equifax.parser import EquifaxParser
 from verdin_report_parsers.parsers.experian.parser import ExperianParser
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -43,7 +45,15 @@ def report_to_comparable_dict(report: ParsedCreditReport) -> dict[str, Any]:
 
 
 def discover_experian_fixtures() -> list[Path]:
-    fixture_dir = CORPUS_ROOT / "experian" / "2026"
+    return discover_bureau_fixtures("experian")
+
+
+def discover_equifax_fixtures() -> list[Path]:
+    return discover_bureau_fixtures("equifax")
+
+
+def discover_bureau_fixtures(bureau: str) -> list[Path]:
+    fixture_dir = CORPUS_ROOT / bureau / "2026"
     if not fixture_dir.is_dir():
         return []
     return sorted(fixture_dir.glob("report_*.pdf"))
@@ -59,7 +69,8 @@ def load_expected_fixture(pdf_path: Path) -> dict[str, Any]:
 def parse_fixture_pdf(
     pdf_path: Path,
     *,
-    parser: ExperianParser | None = None,
+    parser: CreditReportParser | None = None,
+    title_prefix: str = "Experian Credit Report",
 ) -> ParsedCreditReport:
     parser = parser or ExperianParser()
     pdf_bytes = pdf_path.read_bytes()
@@ -68,13 +79,25 @@ def parse_fixture_pdf(
     document = ParsedDocument(
         ocr_text=ocr_text,
         file_name=pdf_path.name,
-        title=f"Experian Credit Report - {stem}",
+        title=f"{title_prefix} - {stem}",
         mime_type="application/pdf",
         document_type="credit_report",
         classification_confidence=0.95,
         document_id=f"fixture-{stem}",
     )
     return parser.parse(document)
+
+
+def parse_equifax_fixture_pdf(
+    pdf_path: Path,
+    *,
+    parser: EquifaxParser | None = None,
+) -> ParsedCreditReport:
+    return parse_fixture_pdf(
+        pdf_path,
+        parser=parser or EquifaxParser(),
+        title_prefix="Equifax Credit Report",
+    )
 
 
 def assert_report_matches_expected(actual: ParsedCreditReport, expected: dict[str, Any]) -> None:
