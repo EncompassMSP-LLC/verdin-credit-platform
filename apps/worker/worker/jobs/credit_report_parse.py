@@ -5,6 +5,7 @@ from __future__ import annotations
 from uuid import UUID
 
 import structlog
+from sqlalchemy import select
 from verdin_report_parsers import parse_credit_report
 from verdin_report_parsers.base import ParsedDocument
 
@@ -19,8 +20,8 @@ from worker.documents_table import documents_table
 from worker.parsed_reports import upsert_parsed_credit_report
 from worker.queue import enqueue_job
 from worker.registry import register_job
+from worker.tasks import create_parsed_report_review_task
 from worker.timeline import append_timeline_event
-from sqlalchemy import select
 
 logger = structlog.get_logger(__name__)
 
@@ -91,7 +92,8 @@ class DocumentCreditReportParseJob(BaseJob):
                     parser_confidence = float(layout_confidence)
 
             metadata = parsed.metadata
-            upsert_parsed_credit_report(
+            parsed_report_payload = parsed.as_dict()
+            parsed_report_id = upsert_parsed_credit_report(
                 session,
                 document_id=document_id,
                 organization_id=classification_row.organization_id,
@@ -99,13 +101,23 @@ class DocumentCreditReportParseJob(BaseJob):
                 bureau=parsed.bureau.value,
                 parser_name=metadata.parser_name if metadata else "unknown",
                 parser_confidence=parser_confidence,
-                parsed_report=parsed.as_dict(),
+                parsed_report=parsed_report_payload,
                 is_partial=metadata.is_partial if metadata else True,
                 warnings=metadata.warnings if metadata else (),
             )
 
             timeline_context = get_document_timeline_context(session, document_id)
             if timeline_context is not None:
+                review_task_id = create_parsed_report_review_task(
+                    session,
+                    organization_id=timeline_context.organization_id,
+                    case_id=timeline_context.case_id,
+                    account_id=timeline_context.account_id,
+                    document_id=timeline_context.id,
+                    document_title=timeline_context.title,
+                    parsed_report_id=parsed_report_id,
+                    parsed_report=parsed_report_payload,
+                )
                 append_timeline_event(
                     session,
                     organization_id=timeline_context.organization_id,
@@ -124,6 +136,9 @@ class DocumentCreditReportParseJob(BaseJob):
                         "bureau": parsed.bureau.value,
                         "parser_name": metadata.parser_name if metadata else None,
                         "is_partial": metadata.is_partial if metadata else True,
+                        "review_task_id": str(review_task_id)
+                        if review_task_id
+                        else None,
                     },
                 )
 
