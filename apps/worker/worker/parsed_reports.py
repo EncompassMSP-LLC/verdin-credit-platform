@@ -39,11 +39,12 @@ def upsert_parsed_credit_report(
     parsed_report: dict,
     is_partial: bool,
     warnings: tuple[str, ...],
-) -> None:
+) -> UUID:
     now = datetime.now(UTC)
     parsed_at = now
+    parsed_report_id = uuid4()
     stmt = insert(document_parsed_credit_reports_table).values(
-        id=uuid4(),
+        id=parsed_report_id,
         document_id=document_id,
         organization_id=organization_id,
         schema_version=schema_version,
@@ -72,7 +73,8 @@ def upsert_parsed_credit_report(
             "updated_at": now,
         },
     )
-    session.execute(stmt)
+    result = session.execute(stmt.returning(document_parsed_credit_reports_table.c.id))
+    return result.scalar_one()
 
 
 def get_parsed_credit_report(
