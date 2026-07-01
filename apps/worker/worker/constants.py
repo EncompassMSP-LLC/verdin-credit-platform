@@ -12,6 +12,7 @@ class JobType(StrEnum):
     REPORT_IMPORT = "report_import"
     AI_SUMMARY = "ai_summary"
     MONTHLY_REVIEW = "monthly_review"
+    OVERDUE_INVESTIGATION_SCAN = "overdue_investigation_scan"
 
 
 class JobStatus(StrEnum):

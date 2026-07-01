@@ -21,7 +21,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | 1     | 4.8 scope + completion checklist             | Kickoff       | ✅     |
 | 2     | In-app notifications model + API             | Notifications | ✅     |
 | 3     | Notification center UI (staff web)           | Notifications | ✅     |
-| 4     | Scheduled overdue investigation worker       | Workflow      | —      |
+| 4     | Scheduled overdue investigation worker       | Workflow      | ✅     |
 | 5     | `job-orchestrator` package scaffold + ADR    | Platform      | —      |
 | 6     | Client + contact model                       | Client Mgmt   | —      |
 | 7     | Client portal auth partition                 | Client Portal | —      |
