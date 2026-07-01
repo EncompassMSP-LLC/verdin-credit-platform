@@ -1050,7 +1050,7 @@ def test_escalate_overdue_investigation_requires_deadline_passed(
     assert response.status_code == 422
 
 
-def test_get_account_auto_escalates_overdue_investigation(
+def test_get_account_does_not_auto_escalate_overdue_investigation(
     api_client: TestClient,
     manager_headers: dict[str, str],
     sample_case_id: str,
@@ -1067,18 +1067,14 @@ def test_get_account_auto_escalates_overdue_investigation(
     response = api_client.get(f"/api/v1/accounts/{account_id}", headers=manager_headers)
 
     assert response.status_code == 200
-    assert response.json()["investigation_status"] == "overdue"
+    assert response.json()["investigation_status"] == "pending"
 
-    tasks = api_client.get(
-        "/api/v1/tasks",
+    escalated = api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-investigation-overdue",
         headers=manager_headers,
-        params={
-            "account_id": account_id,
-            "source_module": "accounts.dispute_investigation_overdue",
-        },
     )
-    assert tasks.status_code == 200
-    assert len(tasks.json()["items"]) == 1
+    assert escalated.status_code == 200
+    assert escalated.json()["investigation_status"] == "overdue"
 
 
 def test_get_account_not_found(

@@ -14,6 +14,7 @@ from worker.metadata_tables import metadata as worker_metadata
 from worker.timeline import append_timeline_event
 
 PARSED_REPORT_REVIEW_TASK_SOURCE = "documents.parsed_credit_report"
+OVERDUE_INVESTIGATION_TASK_SOURCE = "accounts.dispute_investigation_overdue"
 _TERMINAL_STATUSES = ("completed", "canceled")
 
 tasks_table = Table(
@@ -137,3 +138,74 @@ def create_parsed_report_review_task(
         },
     )
     return task_id
+
+
+def create_overdue_investigation_task(
+    session: Session,
+    *,
+    organization_id: uuid.UUID,
+    case_id: uuid.UUID,
+    account_id: uuid.UUID,
+    creditor_name: str,
+) -> bool:
+    """Create or reuse the active overdue investigation escalation task."""
+
+    existing = session.execute(
+        select(tasks_table.c.id).where(
+            tasks_table.c.organization_id == organization_id,
+            tasks_table.c.account_id == account_id,
+            tasks_table.c.source_module == OVERDUE_INVESTIGATION_TASK_SOURCE,
+            tasks_table.c.source_event_id == account_id,
+            tasks_table.c.status.notin_(_TERMINAL_STATUSES),
+            tasks_table.c.deleted_at.is_(None),
+        )
+    ).one_or_none()
+    if existing is not None:
+        return False
+
+    now = datetime.now(UTC)
+    task_id = uuid.uuid4()
+    session.execute(
+        insert(tasks_table).values(
+            id=task_id,
+            organization_id=organization_id,
+            case_id=case_id,
+            account_id=account_id,
+            document_id=None,
+            assigned_user_id=None,
+            title=f"Escalate overdue CRA investigation for {creditor_name}",
+            description=(
+                "The statutory CRA investigation window has passed without a recorded response. "
+                "Escalate with the bureau or furnisher and document next steps."
+            ),
+            status="open",
+            priority="high",
+            due_date=now + timedelta(days=2),
+            completed_at=None,
+            completed_by_id=None,
+            source_module=OVERDUE_INVESTIGATION_TASK_SOURCE,
+            source_event_id=account_id,
+            created_at=now,
+            updated_at=now,
+            deleted_at=None,
+            created_by_id=None,
+            updated_by_id=None,
+        )
+    )
+    append_timeline_event(
+        session,
+        organization_id=organization_id,
+        event_type="TASK_CREATED",
+        event_category="task",
+        title="Overdue investigation task created",
+        description="Automated escalation task created for overdue CRA investigation.",
+        source_module="worker",
+        case_id=case_id,
+        account_id=account_id,
+        metadata={
+            "task_id": str(task_id),
+            "source_module": OVERDUE_INVESTIGATION_TASK_SOURCE,
+            "source_event_id": str(account_id),
+        },
+    )
+    return True

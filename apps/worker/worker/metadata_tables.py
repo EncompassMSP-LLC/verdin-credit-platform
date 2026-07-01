@@ -80,5 +80,10 @@ accounts_table = Table(
     Column("account_number_masked", String(50)),
     Column("bureau", String(50)),
     Column("balance", Numeric(12, 2)),
+    Column("dispute_status", String(50)),
+    Column("investigation_status", String(50)),
+    Column("last_dispute_date", Date),
+    Column("ai_recommended_next_action", Text),
+    Column("updated_at", DateTime(timezone=True)),
     Column("deleted_at", DateTime(timezone=True)),
 )

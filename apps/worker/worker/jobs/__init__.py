@@ -8,6 +8,7 @@ from worker.jobs import (
     metadata_extract,
     monthly_review,
     ocr,
+    overdue_investigation_scan,
     report_import,
 )
 
@@ -19,5 +20,6 @@ __all__ = [
     "metadata_extract",
     "monthly_review",
     "ocr",
+    "overdue_investigation_scan",
     "report_import",
 ]

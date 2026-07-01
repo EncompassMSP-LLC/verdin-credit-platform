@@ -253,3 +253,13 @@ packages/job-orchestrator/
 **Documentation:** [`docs/governance/version-4.8-scope.md`](../governance/version-4.8-scope.md), [`docs/development/version-4.8-completion-checklist.md`](../development/version-4.8-completion-checklist.md)
 
 **Risks:** Users may expect email/SMS in the same slice — scope doc limits 4.8 notifications to in-app for RC.
+
+## Version 4.8 — Overdue investigation worker
+
+### Decision: Worker scan replaces GET auto-escalation
+
+**Decision:** Add `overdue_investigation_scan` worker job to scan eligible accounts and create escalation tasks. Remove read-time escalation from `GET /accounts/{id}`; retain explicit `POST /accounts/{id}/dispute-investigation-overdue` for staff.
+
+**Reason:** 4.5 technical debt used account GET as a pseudo-cron. A dedicated worker job is schedulable and auditable without side effects on read paths.
+
+**Follow-up work:** Wire daily enqueue via external cron or job-orchestrator package (slice 5).

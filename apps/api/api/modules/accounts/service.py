@@ -256,7 +256,6 @@ class AccountService:
 
     async def get_account(self, user: User, account_id: uuid.UUID) -> AccountResponse:
         account = await self._get_account_for_user(account_id, user)
-        account = await self._maybe_escalate_overdue_investigation(user, account)
         return AccountResponse.from_model(account)
 
     async def get_dispute_draft(

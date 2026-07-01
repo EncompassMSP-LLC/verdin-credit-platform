@@ -227,12 +227,22 @@ apps/worker/
 
 ### Registered job types (placeholders)
 
-| JobType          | Module                   | Purpose                      |
-| ---------------- | ------------------------ | ---------------------------- |
-| `ocr`            | `jobs/ocr.py`            | Document text extraction     |
-| `report_import`  | `jobs/report_import.py`  | Bulk credit report ingestion |
-| `ai_summary`     | `jobs/ai_summary.py`     | Case/document summarization  |
-| `monthly_review` | `jobs/monthly_review.py` | Scheduled portfolio review   |
+| JobType                      | Module                               | Purpose                             |
+| ---------------------------- | ------------------------------------ | ----------------------------------- |
+| `ocr`                        | `jobs/ocr.py`                        | Document text extraction            |
+| `report_import`              | `jobs/report_import.py`              | Bulk credit report ingestion        |
+| `ai_summary`                 | `jobs/ai_summary.py`                 | Case/document summarization         |
+| `monthly_review`             | `jobs/monthly_review.py`             | Scheduled portfolio review          |
+| `overdue_investigation_scan` | `jobs/overdue_investigation_scan.py` | Escalate overdue CRA investigations |
+
+Schedule the overdue scan daily by enqueueing from cron:
+
+```python
+from worker.constants import JobType
+from worker.queue import enqueue_job
+
+enqueue_job(JobType.OVERDUE_INVESTIGATION_SCAN, {})
+```
 
 ### Job status values
 
