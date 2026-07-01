@@ -390,6 +390,24 @@ def test_send_account_dispute_letter(
     assert account_data["dispute_round"] == 1
     assert account_data["cra_dispute"] is True
 
+    tasks = api_client.get(
+        "/api/v1/tasks",
+        headers=manager_headers,
+        params={"account_id": account_id},
+    )
+    assert tasks.status_code == 200
+    followup_tasks = [
+        item
+        for item in tasks.json()["items"]
+        if item["source_module"] == "accounts.dispute_letter_followup"
+    ]
+    assert len(followup_tasks) == 1
+    followup = followup_tasks[0]
+    assert followup["source_event_id"] == letter_id
+    assert followup["case_id"] == sample_case_id
+    assert followup["priority"] == "medium"
+    assert "Track CRA response" in followup["title"]
+
 
 def test_send_account_dispute_letter_requires_approved_status(
     api_client: TestClient,
@@ -415,6 +433,56 @@ def test_send_account_dispute_letter_requires_approved_status(
     )
 
     assert response.status_code == 422
+
+
+def test_send_account_dispute_letter_followup_task_is_idempotent(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    create = api_client.post(
+        "/api/v1/accounts",
+        headers=manager_headers,
+        json=sample_account_payload(sample_case_id),
+    )
+    account_id = create.json()["id"]
+
+    letter = api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-draft/letters",
+        headers=manager_headers,
+    )
+    letter_id = letter.json()["id"]
+
+    api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-letters/{letter_id}/review-task",
+        headers=manager_headers,
+    )
+    api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-letters/{letter_id}/approve",
+        headers=manager_headers,
+    )
+    api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-letters/{letter_id}/send",
+        headers=manager_headers,
+    )
+    api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-letters/{letter_id}/send",
+        headers=manager_headers,
+    )
+
+    tasks = api_client.get(
+        "/api/v1/tasks",
+        headers=manager_headers,
+        params={"account_id": account_id},
+    )
+    assert tasks.status_code == 200
+    followup_tasks = [
+        item
+        for item in tasks.json()["items"]
+        if item["source_module"] == "accounts.dispute_letter_followup"
+    ]
+    assert len(followup_tasks) == 1
+    assert followup_tasks[0]["source_event_id"] == letter_id
 
 
 def test_void_account_dispute_letter(
