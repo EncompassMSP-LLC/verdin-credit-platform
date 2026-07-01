@@ -223,6 +223,13 @@ export async function listAccountDisputeLetters(accountId: string): Promise<Disp
   return request<DisputeLetter[]>(apiPath(`/accounts/${accountId}/dispute-letters`));
 }
 
+export async function getAccountDisputeLetter(
+  accountId: string,
+  letterId: string,
+): Promise<DisputeLetter> {
+  return request<DisputeLetter>(apiPath(`/accounts/${accountId}/dispute-letters/${letterId}`));
+}
+
 export async function createAccountDisputeLetterReviewTask(
   accountId: string,
   letterId: string,

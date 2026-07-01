@@ -331,6 +331,31 @@ class AccountService:
         )
         return [DisputeLetterResponse.from_model(letter) for letter in letters]
 
+    async def get_dispute_letter(
+        self,
+        user: User,
+        account_id: uuid.UUID,
+        letter_id: uuid.UUID,
+    ) -> DisputeLetterResponse:
+        account = await self._get_account_for_user(account_id, user)
+        if self._dispute_letters is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Dispute letter repository is not configured",
+            )
+
+        dispute_letter = await self._dispute_letters.get_for_account(
+            organization_id=account.organization_id,
+            account_id=account.id,
+            letter_id=letter_id,
+        )
+        if dispute_letter is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Dispute letter not found",
+            )
+        return DisputeLetterResponse.from_model(dispute_letter)
+
     async def create_dispute_letter_review_task(
         self,
         user: User,

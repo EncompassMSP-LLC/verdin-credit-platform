@@ -145,6 +145,19 @@ async def list_account_dispute_letters(
     return await service.list_dispute_letters(current_user, account_id)
 
 
+@router.get(
+    "/{account_id}/dispute-letters/{letter_id}",
+    response_model=DisputeLetterResponse,
+)
+async def get_account_dispute_letter(
+    account_id: uuid.UUID,
+    letter_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: AccountService = Depends(get_account_service),
+) -> DisputeLetterResponse:
+    return await service.get_dispute_letter(current_user, account_id, letter_id)
+
+
 @router.post(
     "/{account_id}/dispute-letters/{letter_id}/review-task",
     response_model=TaskResponse,

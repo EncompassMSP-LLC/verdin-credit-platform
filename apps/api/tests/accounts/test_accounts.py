@@ -212,6 +212,61 @@ def test_create_and_list_account_dispute_letter_drafts(
     assert [item["id"] for item in listed_data] == [created_data["id"]]
 
 
+def test_get_account_dispute_letter(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    readonly_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    create = api_client.post(
+        "/api/v1/accounts",
+        headers=manager_headers,
+        json=sample_account_payload(sample_case_id),
+    )
+    account_id = create.json()["id"]
+
+    created = api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-draft/letters",
+        headers=manager_headers,
+    )
+    letter_id = created.json()["id"]
+
+    response = api_client.get(
+        f"/api/v1/accounts/{account_id}/dispute-letters/{letter_id}",
+        headers=readonly_headers,
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["id"] == letter_id
+    assert data["account_id"] == account_id
+    assert data["status"] == "draft"
+    assert "Example Bank" in data["body"]
+    assert data["disputed_items"]
+    assert data["evidence_checklist"]
+    assert data["compliance_notes"]
+
+
+def test_get_account_dispute_letter_not_found(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    create = api_client.post(
+        "/api/v1/accounts",
+        headers=manager_headers,
+        json=sample_account_payload(sample_case_id),
+    )
+    account_id = create.json()["id"]
+
+    response = api_client.get(
+        f"/api/v1/accounts/{account_id}/dispute-letters/{uuid.uuid4()}",
+        headers=manager_headers,
+    )
+
+    assert response.status_code == 404
+
+
 def test_create_account_dispute_letter_review_task_is_idempotent(
     api_client: TestClient,
     manager_headers: dict[str, str],

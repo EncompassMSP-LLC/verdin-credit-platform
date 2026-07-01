@@ -9,6 +9,7 @@ import {
   deleteAccount,
   getAccount,
   getAccountDisputeDraft,
+  getAccountDisputeLetter,
   listAccountDisputeLetters,
   markAccountAwaitingDisputeResponse,
   sendAccountDisputeLetter,
@@ -50,6 +51,14 @@ function SavedDisputeLetterRow({
   letter: DisputeLetter;
   onLetterUpdated: () => void;
 }) {
+  const [detailsOpen, setDetailsOpen] = useState(false);
+
+  const detailQuery = useQuery({
+    queryKey: ['account-dispute-letter', accountId, letter.id],
+    queryFn: () => getAccountDisputeLetter(accountId, letter.id),
+    enabled: detailsOpen,
+  });
+
   const reviewTaskMutation = useMutation({
     mutationFn: () => createAccountDisputeLetterReviewTask(accountId, letter.id),
     onSuccess: () => {
@@ -82,84 +91,165 @@ function SavedDisputeLetterRow({
     letter.status === 'draft' || letter.status === 'review' || letter.status === 'approved';
 
   return (
-    <li className="flex flex-wrap items-center justify-between gap-4 p-3">
-      <div>
-        <p className="text-sm font-medium text-gray-900">{letter.subject}</p>
-        <p className="text-xs text-gray-500">
-          {letter.status}
-          {letter.sent_at ? ` · sent ${new Date(letter.sent_at).toLocaleString()}` : null}
-          {' · '}
-          {new Date(letter.generated_at).toLocaleString()}
-        </p>
-      </div>
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="text-xs text-gray-500">{letter.template_id}</span>
-        {letter.status === 'review' ? (
-          <Button
-            size="sm"
-            onClick={() => approveMutation.mutate()}
-            loading={approveMutation.isPending}
-            disabled={approveMutation.isPending}
-          >
-            Approve letter
+    <li className="rounded-lg border border-gray-200 p-3">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <p className="text-sm font-medium text-gray-900">{letter.subject}</p>
+          <p className="text-xs text-gray-500">
+            {letter.status}
+            {letter.sent_at ? ` · sent ${new Date(letter.sent_at).toLocaleString()}` : null}
+            {' · '}
+            {new Date(letter.generated_at).toLocaleString()}
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs text-gray-500">{letter.template_id}</span>
+          <Button size="sm" variant="secondary" onClick={() => setDetailsOpen((open) => !open)}>
+            {detailsOpen ? 'Hide details' : 'View details'}
           </Button>
-        ) : null}
-        {letter.status === 'approved' ? (
-          <Button
-            size="sm"
-            onClick={() => sendMutation.mutate()}
-            loading={sendMutation.isPending}
-            disabled={sendMutation.isPending}
-          >
-            Mark as sent
-          </Button>
-        ) : null}
-        {letter.status === 'sent' ? (
-          <span className="text-xs font-medium text-blue-700">Sent</span>
-        ) : null}
-        {letter.status === 'void' ? (
-          <span className="text-xs font-medium text-gray-600">Voided</span>
-        ) : null}
-        {canVoid ? (
-          <Button
-            size="sm"
-            variant="secondary"
-            onClick={() => voidMutation.mutate()}
-            loading={voidMutation.isPending}
-            disabled={voidMutation.isPending}
-          >
-            Void letter
-          </Button>
-        ) : null}
-        {reviewTaskMutation.data ? (
-          <Link to={`/tasks/${reviewTaskMutation.data.id}`}>
-            <Button size="sm" variant="secondary">
-              View review task
+          {letter.status === 'review' ? (
+            <Button
+              size="sm"
+              onClick={() => approveMutation.mutate()}
+              loading={approveMutation.isPending}
+              disabled={approveMutation.isPending}
+            >
+              Approve letter
             </Button>
-          </Link>
-        ) : letter.status === 'draft' || letter.status === 'review' ? (
-          <Button
-            size="sm"
-            variant="secondary"
-            onClick={() => reviewTaskMutation.mutate()}
-            loading={reviewTaskMutation.isPending}
-            disabled={reviewTaskMutation.isPending}
-          >
-            Create review task
-          </Button>
-        ) : null}
+          ) : null}
+          {letter.status === 'approved' ? (
+            <Button
+              size="sm"
+              onClick={() => sendMutation.mutate()}
+              loading={sendMutation.isPending}
+              disabled={sendMutation.isPending}
+            >
+              Mark as sent
+            </Button>
+          ) : null}
+          {letter.status === 'sent' ? (
+            <span className="text-xs font-medium text-blue-700">Sent</span>
+          ) : null}
+          {letter.status === 'void' ? (
+            <span className="text-xs font-medium text-gray-600">Voided</span>
+          ) : null}
+          {canVoid ? (
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => voidMutation.mutate()}
+              loading={voidMutation.isPending}
+              disabled={voidMutation.isPending}
+            >
+              Void letter
+            </Button>
+          ) : null}
+          {reviewTaskMutation.data ? (
+            <Link to={`/tasks/${reviewTaskMutation.data.id}`}>
+              <Button size="sm" variant="secondary">
+                View review task
+              </Button>
+            </Link>
+          ) : letter.status === 'draft' || letter.status === 'review' ? (
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => reviewTaskMutation.mutate()}
+              loading={reviewTaskMutation.isPending}
+              disabled={reviewTaskMutation.isPending}
+            >
+              Create review task
+            </Button>
+          ) : null}
+        </div>
       </div>
       {reviewTaskMutation.isError ? (
-        <p className="w-full text-xs text-red-600">Failed to create review task for this draft.</p>
+        <p className="mt-2 w-full text-xs text-red-600">
+          Failed to create review task for this draft.
+        </p>
       ) : null}
       {approveMutation.isError ? (
-        <p className="w-full text-xs text-red-600">Failed to approve this dispute letter.</p>
+        <p className="mt-2 w-full text-xs text-red-600">Failed to approve this dispute letter.</p>
       ) : null}
       {sendMutation.isError ? (
-        <p className="w-full text-xs text-red-600">Failed to mark this dispute letter as sent.</p>
+        <p className="mt-2 w-full text-xs text-red-600">
+          Failed to mark this dispute letter as sent.
+        </p>
       ) : null}
       {voidMutation.isError ? (
-        <p className="w-full text-xs text-red-600">Failed to void this dispute letter.</p>
+        <p className="mt-2 w-full text-xs text-red-600">Failed to void this dispute letter.</p>
+      ) : null}
+      {detailsOpen ? (
+        <div className="mt-4 space-y-4 border-t border-gray-100 pt-4">
+          {detailQuery.isLoading ? (
+            <p className="text-sm text-gray-500">Loading letter details...</p>
+          ) : null}
+          {detailQuery.isError ? (
+            <p className="text-sm text-red-600">Failed to load dispute letter details.</p>
+          ) : null}
+          {detailQuery.data ? (
+            <>
+              <div>
+                <h4 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  Disputed items
+                </h4>
+                {detailQuery.data.disputed_items.length > 0 ? (
+                  <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-gray-700">
+                    {detailQuery.data.disputed_items.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <EmptyListText>No disputed items.</EmptyListText>
+                )}
+              </div>
+              <div>
+                <h4 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  Letter body
+                </h4>
+                <pre className="mt-2 whitespace-pre-wrap rounded-md bg-gray-50 p-3 text-sm text-gray-800">
+                  {detailQuery.data.body}
+                </pre>
+              </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <h4 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    Evidence checklist
+                  </h4>
+                  {detailQuery.data.evidence_checklist.length > 0 ? (
+                    <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-gray-700">
+                      {detailQuery.data.evidence_checklist.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <EmptyListText>No evidence checklist items.</EmptyListText>
+                  )}
+                </div>
+                <div>
+                  <h4 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    Compliance notes
+                  </h4>
+                  {detailQuery.data.compliance_notes.length > 0 ? (
+                    <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-gray-700">
+                      {detailQuery.data.compliance_notes.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <EmptyListText>No compliance notes.</EmptyListText>
+                  )}
+                </div>
+              </div>
+              <div>
+                <h4 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  Requested action
+                </h4>
+                <p className="mt-2 text-sm text-gray-700">{detailQuery.data.requested_action}</p>
+              </div>
+            </>
+          ) : null}
+        </div>
       ) : null}
     </li>
   );
