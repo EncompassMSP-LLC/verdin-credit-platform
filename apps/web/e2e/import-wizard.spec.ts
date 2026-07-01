@@ -209,6 +209,7 @@ test('completes the credit report import wizard with parsed tradelines', async (
   await expect(page.getByText('via parser')).toBeVisible();
   await expect(page.getByText('case match (94%)')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Import complete' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Start new import' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'View document' }).first()).toHaveAttribute(
     'href',
     '/documents/doc-import-001',
