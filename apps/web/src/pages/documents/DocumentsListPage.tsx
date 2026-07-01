@@ -142,6 +142,17 @@ export function DocumentsListPage() {
                       >
                         {doc.title}
                       </Link>
+                      {doc.is_duplicate && doc.duplicate_of_id ? (
+                        <p className="mt-1 text-xs text-gray-500">
+                          Duplicate of{' '}
+                          <Link
+                            to={`/documents/${doc.duplicate_of_id}`}
+                            className="text-brand-600 hover:underline"
+                          >
+                            original import
+                          </Link>
+                        </p>
+                      ) : null}
                     </td>
                     <td className="px-4 py-3 text-gray-700">{doc.file_name}</td>
                     <td className="px-4 py-3 text-gray-700">{formatFileSize(doc.file_size)}</td>

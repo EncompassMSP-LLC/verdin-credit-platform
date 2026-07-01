@@ -3,10 +3,12 @@ import { useQuery } from '@tanstack/react-query';
 import {
   ApiClientError,
   compareDocumentParsedCreditReport,
+  getDocumentDuplicateGroup,
   listDocuments,
 } from '@verdin/api-client';
 import { Card } from '@verdin/ui';
 import { Link } from 'react-router-dom';
+import { DocumentDuplicateAlert } from '../documents/DocumentDuplicatePanel';
 import {
   ParsedReportComparisonPanel,
   type ParsedReportTradelineHighlight,
@@ -60,6 +62,8 @@ export function CreditReportHistoryPanel({
     return creditReports[0].id;
   }, [creditReports, selectedDocumentId]);
 
+  const selectedDocument = creditReports.find((document) => document.id === activeDocumentId);
+
   const comparisonQuery = useQuery({
     queryKey: ['document-parsed-credit-report-comparison', activeDocumentId],
     queryFn: () => compareDocumentParsedCreditReport(activeDocumentId!),
@@ -67,7 +71,12 @@ export function CreditReportHistoryPanel({
     retry: false,
   });
 
-  const selectedDocument = creditReports.find((document) => document.id === activeDocumentId);
+  const duplicateGroupQuery = useQuery({
+    queryKey: ['document-duplicates', activeDocumentId],
+    queryFn: () => getDocumentDuplicateGroup(activeDocumentId!),
+    enabled: Boolean(activeDocumentId) && Boolean(selectedDocument),
+    retry: false,
+  });
 
   return (
     <Card title={title} className={className}>
@@ -101,6 +110,7 @@ export function CreditReportHistoryPanel({
               {creditReports.map((document) => (
                 <option key={document.id} value={document.id}>
                   {document.title} ({formatDateTime(document.created_at)})
+                  {document.is_duplicate ? ' · duplicate' : ''}
                 </option>
               ))}
             </select>
@@ -115,6 +125,13 @@ export function CreditReportHistoryPanel({
               </p>
             ) : null}
           </div>
+
+          {selectedDocument && duplicateGroupQuery.data ? (
+            <DocumentDuplicateAlert
+              currentDocument={selectedDocument}
+              duplicateGroup={duplicateGroupQuery.data}
+            />
+          ) : null}
 
           {comparisonQuery.isLoading ? (
             <p className="text-sm text-gray-500">Loading historical comparison...</p>
