@@ -236,12 +236,22 @@ class AccountDisputeDraftResponse(BaseSchema):
     subject: str
     body: str
     disputed_items: list[str]
+    dispute_reason_suggestions: list["DisputeReasonSuggestionResponse"]
     requested_action: str
     evidence_checklist: list[str]
     compliance_notes: list[str]
     generated_by: Literal["rules"]
     readiness_score: int | None
     risk_score: int | None
+
+
+class DisputeReasonSuggestionResponse(BaseSchema):
+    code: str
+    category: Literal["accuracy", "completeness", "verification"]
+    title: str
+    description: str
+    severity: Literal["low", "medium", "high"]
+    requires_evidence: list[str]
 
 
 class DisputeLetterResponse(BaseSchema):

@@ -133,6 +133,15 @@ export interface AccountIntelligenceSummary {
   next_action_queue: NextActionItem[];
 }
 
+export interface DisputeReasonSuggestion {
+  code: string;
+  category: 'accuracy' | 'completeness' | 'verification';
+  title: string;
+  description: string;
+  severity: 'low' | 'medium' | 'high';
+  requires_evidence: string[];
+}
+
 export interface AccountDisputeDraft {
   account_id: string;
   case_id: string;
@@ -142,6 +151,7 @@ export interface AccountDisputeDraft {
   subject: string;
   body: string;
   disputed_items: string[];
+  dispute_reason_suggestions: DisputeReasonSuggestion[];
   requested_action: string;
   evidence_checklist: string[];
   compliance_notes: string[];

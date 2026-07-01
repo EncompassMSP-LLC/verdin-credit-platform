@@ -2,10 +2,25 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from decimal import Decimal
+from typing import Literal
 
 from api.modules.accounts.models import Account, AccountStatus, PaymentStatus
 from api.modules.cases.models import Case
+
+DisputeReasonCategory = Literal["accuracy", "completeness", "verification"]
+DisputeReasonSeverity = Literal["low", "medium", "high"]
+
+
+@dataclass(frozen=True, slots=True)
+class DisputeReasonSuggestion:
+    code: str
+    category: DisputeReasonCategory
+    title: str
+    description: str
+    severity: DisputeReasonSeverity
+    requires_evidence: tuple[str, ...]
 
 
 def _money(value: Decimal | None) -> str | None:
@@ -19,35 +34,111 @@ def _label(value: object) -> str:
     return raw.replace("_", " ").title()
 
 
-def build_dispute_reasons(account: Account) -> list[str]:
-    reasons: list[str] = []
+def build_dispute_reason_suggestions(account: Account) -> list[DisputeReasonSuggestion]:
+    suggestions: list[DisputeReasonSuggestion] = []
+
     if account.account_status in {
         AccountStatus.COLLECTION,
         AccountStatus.CHARGE_OFF,
         AccountStatus.REPOSSESSION,
         AccountStatus.FORECLOSURE,
     }:
-        reasons.append(f"Verify the reported account status of {_label(account.account_status)}.")
-    if account.payment_status not in {PaymentStatus.CURRENT, PaymentStatus.UNKNOWN}:
-        reasons.append(
-            f"Verify the reported payment history showing {_label(account.payment_status)}."
+        suggestions.append(
+            DisputeReasonSuggestion(
+                code="account_status",
+                category="accuracy",
+                title="Account status reporting",
+                description=(
+                    f"Verify the reported account status of {_label(account.account_status)}."
+                ),
+                severity="high",
+                requires_evidence=(
+                    "Current credit report page showing the disputed tradeline",
+                    "Creditor correspondence or statements supporting the correct status",
+                ),
+            )
         )
+
+    if account.payment_status not in {PaymentStatus.CURRENT, PaymentStatus.UNKNOWN}:
+        suggestions.append(
+            DisputeReasonSuggestion(
+                code="payment_history",
+                category="accuracy",
+                title="Payment history reporting",
+                description=(
+                    f"Verify the reported payment history showing {_label(account.payment_status)}."
+                ),
+                severity="high",
+                requires_evidence=(
+                    "Payment records or statements supporting payment history dispute",
+                    "Current credit report page showing the disputed tradeline",
+                ),
+            )
+        )
+
     if account.balance is not None or account.past_due_amount is not None:
         balance = _money(account.balance) or "the reported balance"
         past_due = _money(account.past_due_amount)
         if past_due is not None:
-            reasons.append(
+            description = (
                 f"Verify the reported balance of {balance} and past due amount of {past_due}."
             )
         else:
-            reasons.append(f"Verify the reported balance of {balance}.")
-    if account.date_first_delinquency is not None:
-        reasons.append(
-            "Verify the date of first delinquency and confirm the reporting period is accurate."
+            description = f"Verify the reported balance of {balance}."
+        suggestions.append(
+            DisputeReasonSuggestion(
+                code="balance",
+                category="accuracy",
+                title="Balance and past-due amounts",
+                description=description,
+                severity="medium",
+                requires_evidence=(
+                    "Statements or creditor records supporting balance dispute",
+                    "Current credit report page showing the disputed tradeline",
+                ),
+            )
         )
-    if not reasons:
-        reasons.append("Verify that this tradeline is complete, accurate, and fully documented.")
-    return reasons
+
+    if account.date_first_delinquency is not None:
+        suggestions.append(
+            DisputeReasonSuggestion(
+                code="delinquency_date",
+                category="completeness",
+                title="Date of first delinquency",
+                description=(
+                    "Verify the date of first delinquency and confirm the reporting period "
+                    "is accurate."
+                ),
+                severity="medium",
+                requires_evidence=(
+                    "Payment records supporting the correct delinquency timeline",
+                    "Current credit report page showing the disputed tradeline",
+                ),
+            )
+        )
+
+    if not suggestions:
+        suggestions.append(
+            DisputeReasonSuggestion(
+                code="general_accuracy",
+                category="verification",
+                title="General accuracy review",
+                description=(
+                    "Verify that this tradeline is complete, accurate, and fully documented."
+                ),
+                severity="low",
+                requires_evidence=(
+                    "Current credit report page showing the disputed tradeline",
+                    "Government-issued ID and proof of current mailing address",
+                ),
+            )
+        )
+
+    return suggestions
+
+
+def build_dispute_reasons(account: Account) -> list[str]:
+    return [suggestion.description for suggestion in build_dispute_reason_suggestions(account)]
 
 
 def build_evidence_checklist(account: Account) -> list[str]:
