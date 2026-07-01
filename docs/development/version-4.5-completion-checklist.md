@@ -26,9 +26,9 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 
 | Order | Slice                                           | Epic | Status        |
 | ----- | ----------------------------------------------- | ---- | ------------- |
-| 1     | E2E import → account → dispute letter lifecycle | 5.3  | ✅ Phase 2 #1 |
-| 2     | Historical report comparison UI on account/case | 1.9  | **Next**      |
-| 3     | Duplicate report detection UX                   | 1.10 | Pending       |
+| 1     | E2E import → account → dispute letter lifecycle | 5.3  | ✅ #73        |
+| 2     | Historical report comparison UI on account/case | 1.9  | ✅ Phase 2 #2 |
+| 3     | Duplicate report detection UX                   | 1.10 | **Next**      |
 | 4     | Capability matrix 4.5 sign-off + deferrals      | 5.4  | Pending       |
 | 5     | `docs/release-notes/v4.5.0.md`                  | 5.5  | Pending       |
 | 6     | Tag `v4.5.0`                                    | 5.6  | Pending       |

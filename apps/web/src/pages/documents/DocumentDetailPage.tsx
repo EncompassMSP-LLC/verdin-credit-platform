@@ -16,8 +16,6 @@ import {
   type DocumentDuplicateGroup,
   type DocumentParsedCreditReportAccountCandidates,
   type ParsedReportAccountCandidate,
-  type DocumentParsedCreditReportComparison,
-  type ParsedReportAccountChange,
   type Task,
 } from '@verdin/api-client';
 import { Badge, Button, Card } from '@verdin/ui';
@@ -28,6 +26,7 @@ import { DocumentMetadataPanel } from '../../components/documents/DocumentMetada
 import { DocumentMetadataStatusBadge } from '../../components/documents/DocumentMetadataStatusBadge';
 import { DocumentProcessingBadge } from '../../components/documents/DocumentProcessingBadge';
 import { ParsedReportTradelines } from '../../components/imports/ParsedReportTradelines';
+import { ParsedReportComparisonPanel } from '../../components/imports/ParsedReportComparisonPanel';
 
 function formatFileSize(bytes: number | null) {
   if (!bytes) return '—';
@@ -48,93 +47,6 @@ function formatPercent(value: number | null | undefined): string {
 function formatCurrency(value: number | null): string {
   if (value === null) return '—';
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
-}
-
-function changeVariant(
-  changeType: ParsedReportAccountChange['change_type'],
-): 'default' | 'success' | 'warning' | 'danger' | 'info' {
-  if (changeType === 'added') return 'success';
-  if (changeType === 'removed') return 'danger';
-  if (changeType === 'changed') return 'warning';
-  return 'default';
-}
-
-function ParsedReportComparisonPanel({
-  comparison,
-}: {
-  comparison?: DocumentParsedCreditReportComparison;
-}) {
-  if (!comparison) {
-    return null;
-  }
-
-  const notableChanges = comparison.account_changes.filter(
-    (change) => change.change_type !== 'unchanged',
-  );
-
-  return (
-    <div className="rounded-md border border-gray-200 p-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <h4 className="text-sm font-medium text-gray-900">Historical comparison</h4>
-          <p className="mt-1 text-sm text-gray-500">
-            {comparison.previous_document_id
-              ? `Compared with the previous ${comparison.bureau} report for this case.`
-              : `No previous ${comparison.bureau} report was found for this case.`}
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2 text-xs">
-          <Badge variant="success">{comparison.summary.added} added</Badge>
-          <Badge variant="danger">{comparison.summary.removed} removed</Badge>
-          <Badge variant="warning">{comparison.summary.changed} changed</Badge>
-          <Badge variant="default">{comparison.summary.unchanged} unchanged</Badge>
-        </div>
-      </div>
-
-      {notableChanges.length > 0 ? (
-        <div className="mt-4 overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 text-sm">
-            <thead>
-              <tr className="text-left text-gray-500">
-                <th className="px-3 py-2 font-medium">Change</th>
-                <th className="px-3 py-2 font-medium">Creditor</th>
-                <th className="px-3 py-2 font-medium">Account</th>
-                <th className="px-3 py-2 font-medium">Previous</th>
-                <th className="px-3 py-2 font-medium">Current</th>
-                <th className="px-3 py-2 font-medium">Delta</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {notableChanges.map((change) => (
-                <tr key={change.match_key}>
-                  <td className="px-3 py-2">
-                    <Badge variant={changeVariant(change.change_type)}>{change.change_type}</Badge>
-                  </td>
-                  <td className="px-3 py-2 font-medium text-gray-900">
-                    {change.creditor_name ?? '—'}
-                  </td>
-                  <td className="px-3 py-2 text-gray-700">{change.account_number_masked ?? '—'}</td>
-                  <td className="px-3 py-2 text-gray-700">
-                    {formatCurrency(change.previous_balance)}
-                  </td>
-                  <td className="px-3 py-2 text-gray-700">
-                    {formatCurrency(change.current_balance)}
-                  </td>
-                  <td className="px-3 py-2 text-gray-700">
-                    {formatCurrency(change.balance_delta)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        <p className="mt-3 text-sm text-gray-500">
-          No balance or payment status changes were detected.
-        </p>
-      )}
-    </div>
-  );
 }
 
 function buildCreateAccountUrl(candidate: ParsedReportAccountCandidate): string {
@@ -537,7 +449,14 @@ export function DocumentDetailPage() {
                     Parser warnings: {parsedReport.warnings.join(', ')}
                   </p>
                 ) : null}
-                <ParsedReportComparisonPanel comparison={parsedReportComparison} />
+                <ParsedReportComparisonPanel
+                  comparison={parsedReportComparison}
+                  previousDocumentLink={
+                    parsedReportComparison?.previous_document_id
+                      ? `/documents/${parsedReportComparison.previous_document_id}`
+                      : null
+                  }
+                />
                 <ParsedReportAccountCandidatesPanel
                   accountCandidates={accountCandidates}
                   reviewTask={reviewTaskMutation.data}

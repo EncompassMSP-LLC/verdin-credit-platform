@@ -6,6 +6,7 @@ import { CASE_STAGE_LABELS } from '@verdin/shared';
 import { Button, Card } from '@verdin/ui';
 import { CaseDeleteDialog } from '../../components/cases/CaseDeleteDialog';
 import { CasePriorityBadge, CaseStatusChip } from '../../components/cases/CaseBadges';
+import { CreditReportHistoryPanel } from '../../components/imports/CreditReportHistoryPanel';
 import { featureFlags } from '../../lib/feature-flags';
 
 function formatDateTime(value: string | null) {
@@ -161,6 +162,8 @@ export function CaseDetailPage() {
             </div>
           </dl>
         </Card>
+
+        <CreditReportHistoryPanel caseId={caseId} className="lg:col-span-3" />
       </div>
 
       <CaseDeleteDialog

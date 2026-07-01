@@ -30,6 +30,7 @@ import {
   DisputeStatusChip,
   ScoreDisplay,
 } from '../../components/accounts/AccountBadges';
+import { CreditReportHistoryPanel } from '../../components/imports/CreditReportHistoryPanel';
 
 function formatCurrency(value: string | null) {
   if (!value) return '—';
@@ -822,6 +823,16 @@ export function AccountDetailPage() {
             </div>
           ) : null}
         </Card>
+
+        <CreditReportHistoryPanel
+          caseId={data.case_id}
+          title="Tradeline report history"
+          className="lg:col-span-3"
+          highlightTradeline={{
+            creditorName: data.creditor_name,
+            accountNumberMasked: data.account_number_masked,
+          }}
+        />
       </div>
 
       <AccountDeleteDialog
