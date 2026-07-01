@@ -89,7 +89,7 @@ Plan: [`docs/sprint-4.3.1/operational-core-stabilization.md`](../sprint-4.3.1/op
 
 | Focus Area              | Status      | Outcome                                                                                                        |
 | ----------------------- | ----------- | -------------------------------------------------------------------------------------------------------------- |
-| End-to-end validation   | ✅ Complete | `tests/e2e` full case lifecycle gate + `e2e.yml`; consistent green                                             |
+| End-to-end validation   | ✅ Complete | `tests/e2e` lifecycle + dispute letter gate; Playwright dispute UI smoke                                       |
 | Performance baselines   | ✅ Complete | Metrics captured in [`docs/quality/performance/v4.3.1-baseline.md`](../quality/performance/v4.3.1-baseline.md) |
 | Security review         | ✅ Complete | Pass/fail review complete in [`docs/quality/security/v4.3.1-review.md`](../quality/security/v4.3.1-review.md)  |
 | Test coverage expansion | ✅ Complete | Worker failure handling, event bus, dashboard aggregation, entity resolution, timeline, and RBAC paths covered |

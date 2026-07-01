@@ -16,6 +16,7 @@ and the asynchronous document pipeline is processed by the **real worker**.
 Keep `test_full_case_lifecycle.py` as the fast, deterministic golden path.
 Additional edge cases should be separate tests so CI failures stay isolated:
 
+- `test_dispute_letter_lifecycle.py` — dispute draft through CRA outcome
 - `test_entity_resolution_ambiguous.py` — ambiguous match
 - `test_entity_resolution_unmatched.py` — no match
 - `test_ocr_failure_recovery.py` — OCR retry
@@ -26,12 +27,14 @@ Additional edge cases should be separate tests so CI failures stay isolated:
 ```
 tests/e2e/
   conftest.py                 # API reachability, DB bootstrap, HTTP client, artifacts
+  test_dispute_letter_lifecycle.py # dispute letter API happy path
   test_full_case_lifecycle.py # the 11-stage workflow test
   requirements.txt            # reportlab (PDF fixture); rest comes from apps/api
   fixtures/
     organization.py           # seed an isolated org
     users.py                  # seed an owner user
     documents.py              # synthetic credit-report PDF + expected values
+    dispute.py                # dispute letter account payloads
   helpers/
     auth.py                   # login / refresh
     wait_for_worker.py        # poll-until helpers for async pipeline stages
