@@ -154,6 +154,7 @@ Multi-tenancy → compliance center → AI case assistant → predictive analyti
 - [Repository health dashboard](repository-health.md)
 - [Quality hub](../quality/README.md)
 - [Capability matrix (executive view)](capability-matrix.md)
+- [Version 4.5 scope & deferrals](version-4.5-scope.md)
 - [Roadmap index](../roadmap/README.md)
 - [Engineering Decision Log](../engineering/changelog.md)
 - [Sprint 4.3.1 stabilization](../sprint-4.3.1/operational-core-stabilization.md)

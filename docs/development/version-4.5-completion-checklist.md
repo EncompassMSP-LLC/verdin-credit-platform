@@ -6,11 +6,11 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 
 ## Exit criteria for “4.5 done”
 
-- [ ] All four epics below are **✅ or explicitly deferred to 4.8/5.0** with docs updated
-- [ ] Capability matrix rows for 4.5 show **✅** (or **Partial** with written scope limits)
+- [x] All four epics below are **✅ or explicitly deferred to 4.8/5.0** with docs updated — see [`version-4.5-scope.md`](../governance/version-4.5-scope.md)
+- [x] Capability matrix rows for 4.5 show **✅** (or **Partial** with written scope limits)
 - [ ] `v4.5.0` release notes + tag
 - [x] E2E covers import → account → dispute draft → letter lifecycle
-- [ ] No **Planned** items remain that were promised for 4.5 in `docs/roadmap/README.md`
+- [x] No **Planned** items remain that were promised for 4.5 in `docs/roadmap/README.md` (deferred items documented)
 
 ---
 
@@ -28,9 +28,9 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | ----- | ----------------------------------------------- | ---- | ------------- |
 | 1     | E2E import → account → dispute letter lifecycle | 5.3  | ✅ #73        |
 | 2     | Historical report comparison UI on account/case | 1.9  | ✅ #74        |
-| 3     | Duplicate report detection UX                   | 1.10 | ✅ Phase 2 #3 |
-| 4     | Capability matrix 4.5 sign-off + deferrals      | 5.4  | **Next**      |
-| 5     | `docs/release-notes/v4.5.0.md`                  | 5.5  | Pending       |
+| 3     | Duplicate report detection UX                   | 1.10 | ✅ #75        |
+| 4     | Capability matrix 4.5 sign-off + deferrals      | 5.4  | ✅ Phase 2 #4 |
+| 5     | `docs/release-notes/v4.5.0.md`                  | 5.5  | **Next**      |
 | 6     | Tag `v4.5.0`                                    | 5.6  | Pending       |
 
 LLM slices (4.6–4.8) require explicit approval or deferral before shipping.

@@ -21,29 +21,29 @@ v4.3.0 — Initial Operational Core (released)
     ↓
 v4.3.1 — Mission Control, dashboard completion, governance updates (released)
     ↓
-Sprint 4.3.1 — E2E validation, performance baselines, security review, coverage (current)
+Sprint 4.3.1 — E2E validation, performance baselines, security review, coverage (shipped)
     ↓
-v4.5.0 — Automation Platform (planned)
+v4.5.0 — Automation Platform (release candidate)
 ```
 
 Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (`Sprint 4.3.1`) are engineering milestones that harden a release before the next version opens.
 
 ## Version milestones
 
-| Version   | Theme                       | Status      | Focus                                                                    |
-| --------- | --------------------------- | ----------- | ------------------------------------------------------------------------ |
-| **4.2**   | Platform Foundation         | **Shipped** | Monorepo, auth, RBAC, domain module pattern, worker scaffold, CI/CD      |
-| **4.3.0** | Operational Core            | **Shipped** | Cases, accounts, documents, OCR, intelligence, timeline, tasks           |
-| **4.3.1** | Operational Core Completion | **Shipped** | Mission Control dashboard, governance refinements, release stabilization |
-| **4.5**   | Automation                  | Planned     | Import wizard, bureau parsing, workflow, disputes, AI assistant          |
-| **4.8**   | Operations                  | Planned     | Client portal, notifications, reporting expansions                       |
-| **5.0**   | Enterprise Edition          | Planned     | Multi-tenancy, compliance center, enterprise admin, predictive analytics |
+| Version   | Theme                       | Status                | Focus                                                                           |
+| --------- | --------------------------- | --------------------- | ------------------------------------------------------------------------------- |
+| **4.2**   | Platform Foundation         | **Shipped**           | Monorepo, auth, RBAC, domain module pattern, worker scaffold, CI/CD             |
+| **4.3.0** | Operational Core            | **Shipped**           | Cases, accounts, documents, OCR, intelligence, timeline, tasks                  |
+| **4.3.1** | Operational Core Completion | **Shipped**           | Mission Control dashboard, governance refinements, release stabilization        |
+| **4.5**   | Automation                  | **Release candidate** | Import wizard, dispute lifecycle, workflow auto-tasks, rules AI (see scope doc) |
+| **4.8**   | Operations                  | Planned               | Client portal, notifications, LLM assistance, reporting expansions              |
+| **5.0**   | Enterprise Edition          | Planned               | Multi-tenancy, compliance center, enterprise admin, predictive analytics        |
 
 ### Sprint milestones
 
-| Sprint    | Theme                          | Status             | Focus                                                            |
-| --------- | ------------------------------ | ------------------ | ---------------------------------------------------------------- |
-| **4.3.1** | Operational Core Stabilization | **Current sprint** | E2E validation, performance baselines, security review, coverage |
+| Sprint    | Theme                          | Status      | Focus                                                      |
+| --------- | ------------------------------ | ----------- | ---------------------------------------------------------- |
+| **4.3.1** | Operational Core Stabilization | **Shipped** | E2E gate, performance baselines, security review, coverage |
 
 ### Version 4.3.0 — Initial Operational Core
 
@@ -73,32 +73,29 @@ Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (
 
 Release notes: [`docs/release-notes/v4.3.1.md`](../release-notes/v4.3.1.md)
 
-### Sprint 4.3.1 — Operational Core Stabilization
+### Sprint 4.3.1 — Operational Core Stabilization (shipped)
 
-Current sprint plan: [`docs/sprint-4.3.1/operational-core-stabilization.md`](../sprint-4.3.1/operational-core-stabilization.md)
+Plan: [`docs/sprint-4.3.1/operational-core-stabilization.md`](../sprint-4.3.1/operational-core-stabilization.md)
 
-Sprint 4.3.1 is an **engineering milestone**, not a semantic version. It validates that the Operational Core works as one product before 4.5 begins:
+Sprint 4.3.1 validated the Operational Core before Version 4.5 automation. **All exit criteria met** — including E2E lifecycle, dispute letter gate, performance baselines, security review, and branch protection.
 
-- 100% end-to-end workflow pass rate in CI for the complete case lifecycle
-- Performance baselines captured and documented
-- Security review completed with tracked findings
-- Coverage target established (85–90% on core services and critical workflows)
-- No critical or high-severity defects before opening Version 4.5
+### Version 4.5 — Automation (release candidate)
 
-### Version 4.5 — Automation focus
+Scope and deferrals: [`docs/governance/version-4.5-scope.md`](../governance/version-4.5-scope.md)
 
-Every 4.5 feature should leverage the Operational Core rather than modify its foundations.
+Every 4.5 feature builds on the Operational Core without modifying its foundations.
 
-Organize Version 4.5 into four focused epics:
+| Epic | Theme                      | v4.5.0 outcome | Notes                                                        |
+| ---- | -------------------------- | -------------- | ------------------------------------------------------------ |
+| 1    | Credit Report Intelligence | ✅ Shipped     | Import wizard, parsers, comparison, duplicate detection      |
+| 2    | Workflow Automation        | Partial        | Event-driven auto-tasks; BPM/cron/notifications → 4.8        |
+| 3    | Dispute Generation         | Partial        | Rule-based letter lifecycle + export; auto-filing → 5.0+     |
+| 4    | AI Assistance              | Partial        | Heuristic + rules intelligence; LLM surfaces → 4.8           |
+| —    | Client Experience          | Deferred 4.8   | Portal, messaging, notifications (moved out of 4.5 RC scope) |
 
-| Epic | Theme                      | Included capabilities                                                                                              |
-| ---- | -------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| 1    | Credit Report Intelligence | Import Wizard, bureau-specific parsers, historical report comparison, duplicate detection                          |
-| 2    | Workflow Automation        | Workflow engine, scheduled jobs, SLA monitoring, automatic task generation, reminder engine                        |
-| 3    | AI Assistance              | Case summaries, document summaries, dispute recommendations, missing evidence detection, next-best-action guidance |
-| 4    | Client Experience          | Client Portal, secure messaging, notifications, uploads, progress tracking                                         |
+**Deferred from 4.5 to 4.8:** client portal, notification delivery, LLM case/document summaries, LLM classification augmentation, full workflow engine, `packages/job-orchestrator/`.
 
-Architectural recommendation: introduce a unified `packages/job-orchestrator/` layer during Version 4.5 so OCR, classification, metadata extraction, entity resolution, workflows, notifications, AI summaries, and imports share retry policies, scheduling, metrics, and queue abstractions.
+**Tag:** `v4.5.0` — pending release notes (slice 5.5).
 
 ## Sprint → version mapping
 
@@ -117,8 +114,8 @@ Architectural recommendation: introduce a unified `packages/job-orchestrator/` l
 | Credit report import (planned)            | 4.5              | Credit Report Import                         |
 | Advanced OCR & bureau parsing (planned)   | 4.5              | Document Intelligence                        |
 | Dispute generation (planned)              | 4.5              | Dispute Generation                           |
-| AI case assistant (planned)               | 4.5              | AI Assistant                                 |
-| Notifications & messaging (planned)       | 4.5              | Communications                               |
+| AI case assistant (planned)               | 4.8              | AI Assistant (LLM deferred from 4.5)         |
+| Notifications & messaging (planned)       | 4.8              | Communications                               |
 | Client portal (planned)                   | 4.8              | Client Portal                                |
 | Enterprise admin & compliance (planned)   | 5.0              | Enterprise Administration, Compliance Center |
 
