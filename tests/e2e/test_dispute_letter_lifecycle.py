@@ -17,6 +17,7 @@ from tests.e2e.helpers import auth
 from tests.e2e.helpers.artifacts import ArtifactCollector
 from tests.e2e.helpers.assertions import expect_ok
 from tests.e2e.helpers.dispute_lifecycle import run_dispute_letter_lifecycle
+from tests.e2e.helpers.readiness import wait_for_case_visible
 
 
 def test_dispute_letter_lifecycle(
@@ -38,6 +39,7 @@ def test_dispute_letter_lifecycle(
         expected_status=201,
     )
     case_id = case["id"]
+    wait_for_case_visible(http, headers, case_id, artifacts=artifacts, label="dispute_case_ready")
 
     account = expect_ok(
         http.post(

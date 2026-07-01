@@ -227,3 +227,29 @@ packages/job-orchestrator/
 **Documentation:** [`docs/governance/version-4.5-scope.md`](../governance/version-4.5-scope.md), capability matrix epic sign-off table.
 
 **Risks:** Stakeholders may expect full workflow engine or LLM in 4.5 — scope doc is the source of truth for what shipped vs deferred.
+
+## Version 4.8.0 — Operations kickoff
+
+### Decision: In-app notifications as first 4.8 slice
+
+**Decision:** Ship persisted per-user in-app notifications (API + staff bell UI) before email/SMS delivery or client portal auth.
+
+**Reason:** Notifications are a dependency for workflow reminders, dispute updates, and future client messaging. In-app delivery requires no external provider.
+
+**Alternatives considered:**
+
+- Start with client portal (rejected — needs client model + auth partition first)
+- Start with LLM summaries (rejected — policy ADR gate not yet merged)
+- Defer notifications to email-first (rejected — no delivery infra in 4.5)
+
+**Technical debt introduced:** Notification creation is admin-only HTTP for now; workflow modules should call `NotificationService.notify_user()` in follow-up slices.
+
+**Follow-up work:**
+
+- Wire auto-task and dispute lifecycle events to `notify_user`
+- Scheduled overdue investigation worker (checklist slice 4)
+- Email delivery scaffold (checklist slice 9)
+
+**Documentation:** [`docs/governance/version-4.8-scope.md`](../governance/version-4.8-scope.md), [`docs/development/version-4.8-completion-checklist.md`](../development/version-4.8-completion-checklist.md)
+
+**Risks:** Users may expect email/SMS in the same slice — scope doc limits 4.8 notifications to in-app for RC.

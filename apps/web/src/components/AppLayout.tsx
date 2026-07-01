@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from 'react-router-dom';
 import { APP_NAME } from '@verdin/shared';
+import { NotificationBell } from './NotificationBell';
 import { useAuth } from '../lib/auth';
 import { featureFlags } from '../lib/feature-flags';
 
@@ -22,7 +23,7 @@ export function AppLayout() {
       <aside className="w-64 bg-brand-900 text-white">
         <div className="border-b border-brand-700 px-6 py-5">
           <h1 className="text-lg font-bold">{APP_NAME}</h1>
-          <p className="text-xs text-brand-100">v4.2.0</p>
+          <p className="text-xs text-brand-100">v4.8.0-dev</p>
         </div>
         <nav className="px-3 py-4">
           {navItems.map((item) => (
@@ -55,8 +56,13 @@ export function AppLayout() {
           </button>
         </div>
       </aside>
-      <main className="flex-1 overflow-auto">
-        <Outlet />
+      <main className="flex flex-1 flex-col overflow-auto">
+        <header className="flex items-center justify-end border-b border-gray-200 bg-white px-6 py-3">
+          <NotificationBell />
+        </header>
+        <div className="flex-1 overflow-auto">
+          <Outlet />
+        </div>
       </main>
     </div>
   );

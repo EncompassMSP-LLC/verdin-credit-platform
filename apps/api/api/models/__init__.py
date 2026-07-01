@@ -8,6 +8,7 @@ from api.modules.cases.models import Case, CasePriority, CaseStage, CaseStatus
 from api.modules.documents.metadata_models import DocumentEntityResolution, DocumentMetadata
 from api.modules.documents.models import Document, DocumentVersion
 from api.modules.documents.parsed_report_models import DocumentParsedCreditReport
+from api.modules.notifications.models import Notification, NotificationCategory
 from api.modules.tasks.models import Task, TaskPriority, TaskStatus
 from api.modules.timeline.models import Communication, TimelineEvent
 
@@ -25,6 +26,8 @@ __all__ = [
     "DocumentVersion",
     "DisputeLetter",
     "DisputeLetterStatus",
+    "Notification",
+    "NotificationCategory",
     "Organization",
     "Task",
     "TaskPriority",

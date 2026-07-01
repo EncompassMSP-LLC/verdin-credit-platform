@@ -40,6 +40,7 @@ tests/e2e/
   helpers/
     auth.py                   # login / refresh
     wait_for_worker.py        # poll-until helpers for async pipeline stages
+    readiness.py              # poll until API reads are consistent after writes
     dispute_lifecycle.py      # shared dispute letter happy-path steps
     assertions.py             # status assertions that record artifacts
     artifacts.py              # diagnostic capture, flushed on failure

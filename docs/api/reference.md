@@ -242,6 +242,20 @@ Timeline events are **append-only** — no update or delete endpoints.
 
 Task lifecycle events (`TASK_CREATED`, `TASK_UPDATED`, `TASK_COMPLETED`, `TASK_REOPENED`, `TASK_DELETED`) are published to the timeline via the event bus.
 
+## Notifications
+
+In-app notifications for staff users. Recipients only see their own notifications.
+
+| Method | Path                           | Role      | Description                       |
+| ------ | ------------------------------ | --------- | --------------------------------- |
+| POST   | `/notifications`               | admin     | Create notification for org user  |
+| GET    | `/notifications`               | read_only | List current user's notifications |
+| GET    | `/notifications/unread-count`  | read_only | Unread count for current user     |
+| POST   | `/notifications/mark-all-read` | read_only | Mark all notifications read       |
+| POST   | `/notifications/{id}/read`     | read_only | Mark one notification read        |
+
+**List query parameters:** `unread_only`, `category`, `sort_by`, `sort_order`, `page`, `page_size`.
+
 ## Dashboard
 
 | Method | Path         | Role      | Description                         |

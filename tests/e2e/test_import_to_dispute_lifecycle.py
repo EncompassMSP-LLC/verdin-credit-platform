@@ -16,6 +16,7 @@ from tests.e2e.helpers import auth
 from tests.e2e.helpers.artifacts import ArtifactCollector
 from tests.e2e.helpers.assertions import expect_ok
 from tests.e2e.helpers.dispute_lifecycle import run_dispute_letter_lifecycle
+from tests.e2e.helpers.readiness import wait_for_case_visible
 from tests.e2e.helpers.wait_for_worker import poll_until
 
 
@@ -53,6 +54,7 @@ def test_import_to_dispute_lifecycle(
         expected_status=201,
     )
     case_id = case["id"]
+    wait_for_case_visible(http, headers, case_id, artifacts=artifacts, label="import_case_ready")
 
     pdf_bytes = doc.build_credit_report_pdf()
     upload = expect_ok(
