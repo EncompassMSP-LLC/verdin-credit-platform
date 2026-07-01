@@ -202,3 +202,28 @@ packages/job-orchestrator/
 **Performance observations:** Job orchestration should emit queue depth, duration, retry count, failure count, and throughput metrics.
 
 **Risks:** Introducing orchestration too early could over-abstract current needs; introducing it too late could leave 4.5 with fragmented job semantics.
+
+## Version 4.5.0 — Automation release candidate sign-off
+
+### Decision: Formal scope limits and deferrals for v4.5.0
+
+**Decision:** Version 4.5.0 ships as a **release candidate** with three **Partial** epics (workflow auto-tasks, dispute foundation, rules AI) and explicit deferral of client experience, LLM assistance, BPM/cron, and job-orchestrator package to 4.8+.
+
+**Reason:** The sprint loop delivered import intelligence, dispute lifecycle, and event-driven tasks with E2E coverage. Remaining roadmap items (portal, notifications, LLM) require infrastructure or compliance gates not in scope for this RC.
+
+**Alternatives considered:**
+
+- Hold v4.5.0 until LLM features ship (blocked on provider/PII approval)
+- Mark Partial capabilities as ✅ without written limits (rejected — governance requires scope notes)
+- Defer dispute generation entirely to 4.8 (rejected — foundation lifecycle is production-usable)
+
+**Technical debt introduced:** Overdue investigation uses read-time escalation on account GET rather than a scheduled worker job.
+
+**Follow-up work:**
+
+- Release notes and `v4.5.0` tag (slice 5.5–5.6)
+- 4.8 kickoff: notifications, LLM policy, `job-orchestrator` evaluation
+
+**Documentation:** [`docs/governance/version-4.5-scope.md`](../governance/version-4.5-scope.md), capability matrix epic sign-off table.
+
+**Risks:** Stakeholders may expect full workflow engine or LLM in 4.5 — scope doc is the source of truth for what shipped vs deferred.
