@@ -7,6 +7,7 @@ import {
   createAccountDisputeLetterDraft,
   createAccountDisputeLetterReviewTask,
   deleteAccount,
+  downloadAccountDisputeLetterExport,
   getAccount,
   getAccountDisputeDraft,
   getAccountDisputeLetter,
@@ -16,6 +17,7 @@ import {
   sendAccountDisputeLetter,
   voidAccountDisputeLetter,
   type DisputeLetter,
+  type DisputeLetterExportFormat,
   type DisputeRecipientType,
   type DisputeResponseOutcome,
 } from '@verdin/api-client';
@@ -55,6 +57,7 @@ function SavedDisputeLetterRow({
   onLetterUpdated: () => void;
 }) {
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [exportingFormat, setExportingFormat] = useState<DisputeLetterExportFormat | null>(null);
 
   const detailQuery = useQuery({
     queryKey: ['account-dispute-letter', accountId, letter.id],
@@ -93,6 +96,25 @@ function SavedDisputeLetterRow({
   const canVoid =
     letter.status === 'draft' || letter.status === 'review' || letter.status === 'approved';
 
+  const handleExport = async (format: DisputeLetterExportFormat) => {
+    setExportingFormat(format);
+    try {
+      const { blob, filename } = await downloadAccountDisputeLetterExport(
+        accountId,
+        letter.id,
+        format,
+      );
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = filename;
+      anchor.click();
+      URL.revokeObjectURL(url);
+    } finally {
+      setExportingFormat(null);
+    }
+  };
+
   return (
     <li className="rounded-lg border border-gray-200 p-3">
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -109,6 +131,24 @@ function SavedDisputeLetterRow({
           <span className="text-xs text-gray-500">{letter.template_id}</span>
           <Button size="sm" variant="secondary" onClick={() => setDetailsOpen((open) => !open)}>
             {detailsOpen ? 'Hide details' : 'View details'}
+          </Button>
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => handleExport('text')}
+            loading={exportingFormat === 'text'}
+            disabled={exportingFormat !== null}
+          >
+            Download text
+          </Button>
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => handleExport('pdf')}
+            loading={exportingFormat === 'pdf'}
+            disabled={exportingFormat !== null}
+          >
+            Download PDF
           </Button>
           {letter.status === 'review' ? (
             <Button

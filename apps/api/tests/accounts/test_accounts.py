@@ -311,6 +311,89 @@ def test_get_account_dispute_letter(
     assert data["compliance_notes"]
 
 
+def test_export_account_dispute_letter_text(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    readonly_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    create = api_client.post(
+        "/api/v1/accounts",
+        headers=manager_headers,
+        json=sample_account_payload(sample_case_id),
+    )
+    account_id = create.json()["id"]
+
+    created = api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-draft/letters",
+        headers=manager_headers,
+    )
+    letter_id = created.json()["id"]
+
+    response = api_client.get(
+        f"/api/v1/accounts/{account_id}/dispute-letters/{letter_id}/export",
+        headers=readonly_headers,
+        params={"format": "text"},
+    )
+
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/plain")
+    assert "attachment" in response.headers["content-disposition"]
+    assert ".txt" in response.headers["content-disposition"]
+    assert "Example Bank" in response.text
+    assert "DISPUTED ITEMS" in response.text
+
+
+def test_export_account_dispute_letter_pdf(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    create = api_client.post(
+        "/api/v1/accounts",
+        headers=manager_headers,
+        json=sample_account_payload(sample_case_id),
+    )
+    account_id = create.json()["id"]
+
+    created = api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-draft/letters",
+        headers=manager_headers,
+    )
+    letter_id = created.json()["id"]
+
+    response = api_client.get(
+        f"/api/v1/accounts/{account_id}/dispute-letters/{letter_id}/export",
+        headers=manager_headers,
+        params={"format": "pdf"},
+    )
+
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/pdf"
+    assert response.content.startswith(b"%PDF")
+
+
+def test_export_account_dispute_letter_not_found(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    create = api_client.post(
+        "/api/v1/accounts",
+        headers=manager_headers,
+        json=sample_account_payload(sample_case_id),
+    )
+    account_id = create.json()["id"]
+
+    response = api_client.get(
+        f"/api/v1/accounts/{account_id}/dispute-letters/{uuid.uuid4()}/export",
+        headers=manager_headers,
+        params={"format": "text"},
+    )
+
+    assert response.status_code == 404
+
+
 def test_get_account_dispute_letter_not_found(
     api_client: TestClient,
     manager_headers: dict[str, str],

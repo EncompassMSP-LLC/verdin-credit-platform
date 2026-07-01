@@ -111,6 +111,7 @@ Credit tradeline accounts with intelligence scoring. All endpoints require authe
 |        | Query: `recipient_type` (`credit_bureau`, `furnisher`)           |              |                                                       |
 | GET    | `/accounts/{account_id}/dispute-letters`                         | read_only    | List saved dispute letter drafts                      |
 | GET    | `/accounts/{account_id}/dispute-letters/{letter_id}`             | read_only    | Get saved dispute letter details                      |
+| GET    | `/accounts/{account_id}/dispute-letters/{letter_id}/export`      | read_only    | Download letter artifact (`format=text` or `pdf`)     |
 | POST   | `/accounts/{account_id}/dispute-draft/letters`                   | case_manager | Save generated dispute draft                          |
 |        | Query: `recipient_type` (`credit_bureau`, `furnisher`)           |              |                                                       |
 | POST   | `/accounts/{account_id}/dispute-draft/review-task`               | case_manager | Create or reuse dispute draft review task             |
@@ -160,6 +161,8 @@ Accounts automatically compute `risk_score`, `readiness_score`, `next_eligible_d
 `POST /accounts/{account_id}/dispute-letters/{letter_id}/send` transitions an approved letter to `sent`, records `sent_at`, updates the linked account to `dispute_sent` (including `last_dispute_date`, `dispute_round`, and `cra_dispute`), auto-creates a follow-up task (`accounts.dispute_letter_followup`) to track the CRA response, and emits timeline events. Letters already sent are returned idempotently and ensure the follow-up task exists; letters not in `approved` return `422`.
 
 `POST /accounts/{account_id}/dispute-letters/{letter_id}/void` voids a letter in `draft`, `review`, or `approved`. Sent letters return `422`; already voided letters are idempotent.
+
+`GET /accounts/{account_id}/dispute-letters/{letter_id}/export?format=text|pdf` downloads a plain-text or PDF artifact for manual mailing. Includes subject, body, disputed items, requested action, evidence checklist, and compliance notes. Returns `Content-Disposition: attachment` with a generated filename.
 
 `POST /accounts/{account_id}/dispute-awaiting-response` transitions an account from `dispute_sent` to `awaiting_response`, sets `investigation_status` to `pending` when unset, and emits a timeline event. Already `awaiting_response` accounts are idempotent; other statuses return `422`.
 

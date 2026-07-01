@@ -4,10 +4,12 @@ import uuid
 from typing import Literal
 
 from fastapi import APIRouter, Depends, Query, status
+from fastapi.responses import Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.core.pagination import PaginatedResponse
 from api.database.session import get_db
+from api.modules.accounts.dispute_letter_export import sanitize_content_disposition_filename
 from api.modules.accounts.models import (
     AccountBureau,
     AccountStatus,
@@ -168,6 +170,28 @@ async def get_account_dispute_letter(
     service: AccountService = Depends(get_account_service),
 ) -> DisputeLetterResponse:
     return await service.get_dispute_letter(current_user, account_id, letter_id)
+
+
+@router.get("/{account_id}/dispute-letters/{letter_id}/export")
+async def export_account_dispute_letter(
+    account_id: uuid.UUID,
+    letter_id: uuid.UUID,
+    format: Literal["text", "pdf"] = Query(..., alias="format"),
+    current_user: User = Depends(get_current_user),
+    service: AccountService = Depends(get_account_service),
+) -> Response:
+    content, file_name, media_type = await service.export_dispute_letter(
+        current_user,
+        account_id,
+        letter_id,
+        export_format=format,
+    )
+    safe_name = sanitize_content_disposition_filename(file_name)
+    return Response(
+        content=content,
+        media_type=media_type,
+        headers={"Content-Disposition": f'attachment; filename="{safe_name}"'},
+    )
 
 
 @router.post(
