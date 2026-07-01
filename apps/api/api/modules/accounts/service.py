@@ -51,6 +51,8 @@ from api.repositories.account import AccountRepositoryProtocol
 
 DISPUTE_DRAFT_REVIEW_TASK_SOURCE = "accounts.dispute_draft"
 DISPUTE_LETTER_REVIEW_TASK_SOURCE = "accounts.dispute_letter"
+DISPUTE_LETTER_FOLLOWUP_TASK_SOURCE = "accounts.dispute_letter_followup"
+DISPUTE_LETTER_CRA_RESPONSE_DAYS = 30
 _VOIDABLE_DISPUTE_LETTER_STATUSES = frozenset(
     {
         DisputeLetterStatus.DRAFT,
@@ -392,6 +394,43 @@ class AccountService:
             await publish_platform_event(self._session, task_created_event(created, user.id))
         return TaskResponse.from_model(created)
 
+    async def _ensure_dispute_letter_followup_task(
+        self,
+        user: User,
+        account: Account,
+        dispute_letter: DisputeLetter,
+    ) -> None:
+        if self._tasks is None:
+            return
+
+        existing = await self._tasks.find_active_by_account_source(
+            organization_id=account.organization_id,
+            account_id=account.id,
+            source_module=DISPUTE_LETTER_FOLLOWUP_TASK_SOURCE,
+            source_event_id=dispute_letter.id,
+        )
+        if existing is not None:
+            return
+
+        task = Task(
+            organization_id=account.organization_id,
+            case_id=account.case_id,
+            account_id=account.id,
+            title=f"Track CRA response for {account.creditor_name}",
+            description=(
+                "Monitor the CRA investigation timeline after the dispute letter was sent. "
+                "Follow up if no response is received within the statutory window."
+            ),
+            priority=TaskPriority.MEDIUM,
+            due_date=datetime.now(UTC) + timedelta(days=DISPUTE_LETTER_CRA_RESPONSE_DAYS),
+            source_module=DISPUTE_LETTER_FOLLOWUP_TASK_SOURCE,
+            source_event_id=dispute_letter.id,
+        )
+        apply_audit_on_create(task, user.id)
+        created = await self._tasks.create(task)
+        if self._session is not None:
+            await publish_platform_event(self._session, task_created_event(created, user.id))
+
     def _apply_dispute_sent_account_state(self, account: Account, *, sent_at: datetime) -> None:
         account.dispute_status = DisputeStatus.DISPUTE_SENT
         account.last_dispute_date = sent_at.date()
@@ -471,6 +510,7 @@ class AccountService:
             )
 
         if dispute_letter.status == DisputeLetterStatus.SENT:
+            await self._ensure_dispute_letter_followup_task(user, account, dispute_letter)
             return DisputeLetterResponse.from_model(dispute_letter)
 
         if dispute_letter.status != DisputeLetterStatus.APPROVED:
@@ -494,6 +534,7 @@ class AccountService:
                 dispute_letter_sent_event(dispute_letter, user.id),
             )
             await publish_platform_event(self._session, account_updated_event(account, user.id))
+        await self._ensure_dispute_letter_followup_task(user, account, dispute_letter)
         return DisputeLetterResponse.from_model(dispute_letter)
 
     async def void_dispute_letter(
