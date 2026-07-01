@@ -25,6 +25,7 @@ class TaskListFilters:
     account_id: uuid.UUID | None = None
     document_id: uuid.UUID | None = None
     assigned_user_id: uuid.UUID | None = None
+    source_module: str | None = None
     due_before: datetime | None = None
     due_after: datetime | None = None
     overdue: bool | None = None
@@ -119,6 +120,8 @@ class TaskRepository:
             base = base.where(Task.document_id == filters.document_id)
         if filters.assigned_user_id is not None:
             base = base.where(Task.assigned_user_id == filters.assigned_user_id)
+        if filters.source_module is not None:
+            base = base.where(Task.source_module == filters.source_module)
         if filters.due_before is not None:
             base = base.where(Task.due_date.isnot(None), Task.due_date <= filters.due_before)
         if filters.due_after is not None:

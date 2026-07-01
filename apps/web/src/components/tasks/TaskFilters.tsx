@@ -11,10 +11,18 @@ export interface TaskFiltersValue {
   search: string;
   status: TaskStatus | '';
   priority: TaskPriority | '';
+  source_module: string;
   overdue: boolean;
   sort_by: 'created_at' | 'due_date' | 'priority' | 'title';
   sort_order: 'asc' | 'desc';
 }
+
+const TASK_SOURCE_MODULE_OPTIONS = [
+  { value: 'accounts.dispute_draft', label: 'Dispute draft review' },
+  { value: 'accounts.dispute_letter', label: 'Dispute letter review' },
+  { value: 'accounts.dispute_letter_followup', label: 'CRA response follow-up' },
+  { value: 'documents.parsed_credit_report', label: 'Parsed report review' },
+] as const;
 
 interface TaskFiltersProps {
   value: TaskFiltersValue;
@@ -26,7 +34,7 @@ const inputClass =
 
 export function TaskFilters({ value, onChange }: TaskFiltersProps) {
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
       <div className="lg:col-span-2">
         <label className="block text-sm font-medium text-gray-700" htmlFor="task-search">
           Search
@@ -75,6 +83,24 @@ export function TaskFilters({ value, onChange }: TaskFiltersProps) {
           {TASK_PRIORITIES.map((priority) => (
             <option key={priority} value={priority}>
               {TASK_PRIORITY_LABELS[priority]}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700" htmlFor="task-source-module">
+          Source
+        </label>
+        <select
+          id="task-source-module"
+          className={inputClass}
+          value={value.source_module}
+          onChange={(e) => onChange({ ...value, source_module: e.target.value })}
+        >
+          <option value="">All sources</option>
+          {TASK_SOURCE_MODULE_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
             </option>
           ))}
         </select>

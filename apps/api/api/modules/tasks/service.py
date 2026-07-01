@@ -210,6 +210,7 @@ class TaskService:
             account_id=params.account_id,
             document_id=params.document_id,
             assigned_user_id=params.assigned_user_id,
+            source_module=params.source_module,
             due_before=params.due_before,
             due_after=params.due_after,
             overdue=params.overdue,

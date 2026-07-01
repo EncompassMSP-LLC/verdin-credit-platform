@@ -63,6 +63,7 @@ export interface ListTasksParams {
   account_id?: string;
   document_id?: string;
   assigned_user_id?: string;
+  source_module?: string;
   due_before?: string;
   due_after?: string;
   overdue?: boolean;
