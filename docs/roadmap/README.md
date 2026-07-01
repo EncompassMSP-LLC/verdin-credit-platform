@@ -25,7 +25,7 @@ Sprint 4.3.1 — E2E validation, performance baselines, security review, coverag
     ↓
 v4.5.0 — Automation Platform (released)
     ↓
-v4.8 — Operations (planned)
+v4.8 — Operations (in progress)
 ```
 
 Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (`Sprint 4.3.1`) are engineering milestones that harden a release before the next version opens.
@@ -38,7 +38,7 @@ Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (
 | **4.3.0** | Operational Core            | **Shipped** | Cases, accounts, documents, OCR, intelligence, timeline, tasks             |
 | **4.3.1** | Operational Core Completion | **Shipped** | Mission Control dashboard, governance refinements, release stabilization   |
 | **4.5**   | Automation                  | **Shipped** | Import wizard, dispute lifecycle, workflow auto-tasks, rules AI (`v4.5.0`) |
-| **4.8**   | Operations                  | Planned     | Client portal, notifications, LLM assistance, reporting expansions         |
+| **4.8**   | Operations                  | In progress | Client portal, notifications, LLM assistance, reporting expansions         |
 | **5.0**   | Enterprise Edition          | Planned     | Multi-tenancy, compliance center, enterprise admin, predictive analytics   |
 
 ### Sprint milestones
@@ -135,6 +135,7 @@ Release notes: [`docs/release-notes/v4.5.0.md`](../release-notes/v4.5.0.md)
 - [Sprint 4.3.1 stabilization](../sprint-4.3.1/operational-core-stabilization.md)
 - [Release notes — v4.3.1](../release-notes/v4.3.1.md)
 - [Release notes — v4.5.0](../release-notes/v4.5.0.md)
+- [Version 4.8 completion checklist](../development/version-4.8-completion-checklist.md)
 - [Release notes — v4.3.0 GA](../release-notes/v4.3.0-ga.md)
 - [Architecture](../architecture/README.md) — technical constitution
 - [ADR index](../adr/README.md) — architecture decision records

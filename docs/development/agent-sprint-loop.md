@@ -1,6 +1,8 @@
-# Agent Sprint Loop (Version 4.5)
+# Agent Sprint Loop (Version 4.8)
 
 Hands-off workflow: **implement slice → open PR → CI → auto-merge → next slice**.
+
+See [`version-4.8-completion-checklist.md`](./version-4.8-completion-checklist.md) for the Phase 1 queue.
 
 ## One-time GitHub setup (repo admin)
 
@@ -13,7 +15,7 @@ Hands-off workflow: **implement slice → open PR → CI → auto-merge → next
 
 After merge of `.github/workflows/enable-auto-merge.yml`, every non-draft PR from `feature/*` → `main` is queued for squash auto-merge when CI passes.
 
-Agents should also run `gh pr merge --auto --squash` immediately after `gh pr create` (see `.cursor/rules/version-45-sprint-loop.mdc`).
+Agents should also run `gh pr merge --auto --squash` immediately after `gh pr create` (see `.cursor/rules/version-48-sprint-loop.mdc`).
 
 ## Cursor Automation setup
 
@@ -31,7 +33,7 @@ Import the draft in [`cursor-automation-sprint-loop.yaml`](./cursor-automation-s
 When any PR merges to `main`, the agent:
 
 1. Syncs `main`
-2. Picks the next Version 4.5 slice
+2. Picks the next Version 4.8 slice
 3. Implements with tests + api-client + docs
 4. Verifies, commits, pushes, opens PR
 5. Enables auto-merge
@@ -43,19 +45,19 @@ If Automation is disabled, send:
 
 > Execute next steps
 
-The project rule `.cursor/rules/version-45-sprint-loop.mdc` applies the same loop.
+The project rule `.cursor/rules/version-48-sprint-loop.mdc` applies the same loop.
 
 ## Local `/loop` alternative
 
 For local-only polling while Cursor is open:
 
 ```text
-/loop 10m Check if main advanced on EncompassMSP-LLC/verdin-credit-platform; if a new merge landed, execute the Version 4.5 sprint loop (sync main, next slice, PR, auto-merge).
+/loop 10m Check if main advanced on EncompassMSP-LLC/verdin-credit-platform; if a new merge landed, execute the Version 4.8 sprint loop (sync main, next slice, PR, auto-merge).
 ```
 
 Cloud Automation on **PR merged** is preferred over polling.
 
-See also [`version-4.5-completion-checklist.md`](./version-4.5-completion-checklist.md) for the full 4.5 exit path and Phase 2 queue.
+See also [`version-4.8-completion-checklist.md`](./version-4.8-completion-checklist.md) for the full 4.8 exit path and Phase 1 queue.
 
 ## Troubleshooting
 

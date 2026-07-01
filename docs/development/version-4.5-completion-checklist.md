@@ -1,6 +1,6 @@
 # Version 4.5 Completion Checklist
 
-Ordered path to **v4.5.0** — **complete**. Next milestone: **4.8 Operations**.
+Ordered path to **v4.5.0** — **complete**. Next: [`version-4.8-completion-checklist.md`](version-4.8-completion-checklist.md).
 
 Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 

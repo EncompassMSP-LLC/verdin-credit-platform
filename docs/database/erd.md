@@ -15,6 +15,8 @@ erDiagram
     Case ||--o{ Communication : contains
     Case ||--o{ TimelineEvent : contains
     User ||--o{ Task : "assigned to"
+    User ||--o{ Notification : receives
+    Organization ||--o{ Notification : has
 
     Organization {
         uuid id PK
@@ -118,6 +120,22 @@ erDiagram
         text metadata_json
         timestamp occurred_at
         uuid case_id FK
+    }
+
+    Notification {
+        uuid id PK
+        uuid organization_id FK
+        uuid recipient_user_id FK
+        string title
+        text body
+        enum category
+        timestamp read_at
+        string entity_type
+        uuid entity_id
+        string source_module
+        string action_url
+        timestamp created_at
+        timestamp updated_at
     }
 ```
 

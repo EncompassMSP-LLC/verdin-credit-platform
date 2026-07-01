@@ -152,6 +152,19 @@ export {
   type TimelineEvent,
 } from './timeline';
 
+export {
+  createNotification,
+  getUnreadNotificationCount,
+  listNotifications,
+  markAllNotificationsRead,
+  markNotificationRead,
+  type CreateNotificationInput,
+  type ListNotificationsParams,
+  type Notification,
+  type NotificationCategory,
+  type UnreadCountResponse,
+} from './notifications';
+
 export interface HealthResponse {
   status: string;
   version: string;
