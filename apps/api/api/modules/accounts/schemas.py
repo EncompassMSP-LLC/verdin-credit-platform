@@ -256,6 +256,13 @@ class DisputeReasonSuggestionResponse(BaseSchema):
     requires_evidence: list[str]
 
 
+DisputeResponseOutcome = Literal["verified", "corrected", "deleted"]
+
+
+class AccountDisputeResponseReceivedRequest(BaseSchema):
+    outcome: DisputeResponseOutcome
+
+
 class MissingEvidenceResponse(BaseSchema):
     code: str
     title: str

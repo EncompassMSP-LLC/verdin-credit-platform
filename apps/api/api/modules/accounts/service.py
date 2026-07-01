@@ -31,6 +31,7 @@ from api.modules.accounts.repository import AccountListFilters, AccountRepositor
 from api.modules.accounts.schemas import (
     AccountCreate,
     AccountDisputeDraftResponse,
+    AccountDisputeResponseReceivedRequest,
     AccountIntelligenceSummary,
     AccountListParams,
     AccountResponse,
@@ -62,6 +63,11 @@ DISPUTE_DRAFT_REVIEW_TASK_SOURCE = "accounts.dispute_draft"
 DISPUTE_LETTER_REVIEW_TASK_SOURCE = "accounts.dispute_letter"
 DISPUTE_LETTER_FOLLOWUP_TASK_SOURCE = "accounts.dispute_letter_followup"
 DISPUTE_LETTER_CRA_RESPONSE_DAYS = 30
+_DISPUTE_RESPONSE_OUTCOMES: dict[str, DisputeStatus] = {
+    "verified": DisputeStatus.VERIFIED,
+    "corrected": DisputeStatus.CORRECTED,
+    "deleted": DisputeStatus.DELETED,
+}
 _VOIDABLE_DISPUTE_LETTER_STATUSES = frozenset(
     {
         DisputeLetterStatus.DRAFT,
@@ -700,6 +706,48 @@ class AccountService:
         account.dispute_status = DisputeStatus.AWAITING_RESPONSE
         if account.investigation_status == InvestigationStatus.NONE:
             account.investigation_status = InvestigationStatus.PENDING
+        apply_account_intelligence(account)
+        account.ai_recommended_next_action = recommend_next_action(account)
+        apply_audit_on_update(account, user.id)
+        updated = await self._accounts.update(account)
+        if self._session is not None:
+            await publish_platform_event(
+                self._session,
+                account_dispute_status_changed_event(
+                    updated,
+                    user.id,
+                    previous_dispute_status=previous_dispute_status,
+                ),
+            )
+        return AccountResponse.from_model(updated)
+
+    async def record_dispute_response_received(
+        self,
+        user: User,
+        account_id: uuid.UUID,
+        data: AccountDisputeResponseReceivedRequest,
+    ) -> AccountResponse:
+        self._require_write(user)
+        account = await self._get_account_for_user(account_id, user)
+        target_status = _DISPUTE_RESPONSE_OUTCOMES[data.outcome]
+
+        if account.dispute_status == target_status and account.response_received:
+            return AccountResponse.from_model(account)
+
+        if account.dispute_status != DisputeStatus.AWAITING_RESPONSE:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Account must be awaiting response before recording CRA outcome",
+            )
+
+        previous_dispute_status = (
+            account.dispute_status.value
+            if hasattr(account.dispute_status, "value")
+            else account.dispute_status
+        )
+        account.response_received = True
+        account.dispute_status = target_status
+        account.investigation_status = InvestigationStatus.COMPLETED
         apply_account_intelligence(account)
         account.ai_recommended_next_action = recommend_next_action(account)
         apply_audit_on_update(account, user.id)

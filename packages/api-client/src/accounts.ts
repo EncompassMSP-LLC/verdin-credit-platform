@@ -300,9 +300,21 @@ export async function voidAccountDisputeLetter(
   );
 }
 
+export type DisputeResponseOutcome = 'verified' | 'corrected' | 'deleted';
+
 export async function markAccountAwaitingDisputeResponse(accountId: string): Promise<Account> {
   return request<Account>(apiPath(`/accounts/${accountId}/dispute-awaiting-response`), {
     method: 'POST',
+  });
+}
+
+export async function markAccountDisputeResponseReceived(
+  accountId: string,
+  outcome: DisputeResponseOutcome,
+): Promise<Account> {
+  return request<Account>(apiPath(`/accounts/${accountId}/dispute-response-received`), {
+    method: 'POST',
+    body: { outcome },
   });
 }
 

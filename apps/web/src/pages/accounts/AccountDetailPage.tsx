@@ -12,10 +12,12 @@ import {
   getAccountDisputeLetter,
   listAccountDisputeLetters,
   markAccountAwaitingDisputeResponse,
+  markAccountDisputeResponseReceived,
   sendAccountDisputeLetter,
   voidAccountDisputeLetter,
   type DisputeLetter,
   type DisputeRecipientType,
+  type DisputeResponseOutcome,
 } from '@verdin/api-client';
 import { ACCOUNT_TYPE_LABELS, DISPUTE_STATUS_LABELS, PAYMENT_STATUS_LABELS } from '@verdin/shared';
 import { Button, Card } from '@verdin/ui';
@@ -313,6 +315,15 @@ export function AccountDetailPage() {
     },
   });
 
+  const responseReceivedMutation = useMutation({
+    mutationFn: (outcome: DisputeResponseOutcome) =>
+      markAccountDisputeResponseReceived(accountId!, outcome),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['account', accountId] });
+      queryClient.invalidateQueries({ queryKey: ['accounts-intelligence'] });
+    },
+  });
+
   if (!accountId) return null;
 
   if (isLoading) {
@@ -453,6 +464,50 @@ export function AccountDetailPage() {
               </Button>
               {awaitingResponseMutation.isError ? (
                 <p className="text-xs text-red-600">Failed to update dispute status.</p>
+              ) : null}
+            </div>
+          ) : null}
+          {data.dispute_status === 'awaiting_response' ? (
+            <div className="mt-4 flex flex-col gap-3">
+              <p className="text-sm text-gray-700">Record the CRA investigation outcome:</p>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => responseReceivedMutation.mutate('verified')}
+                  loading={
+                    responseReceivedMutation.isPending &&
+                    responseReceivedMutation.variables === 'verified'
+                  }
+                  disabled={responseReceivedMutation.isPending}
+                >
+                  Verified
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => responseReceivedMutation.mutate('corrected')}
+                  loading={
+                    responseReceivedMutation.isPending &&
+                    responseReceivedMutation.variables === 'corrected'
+                  }
+                  disabled={responseReceivedMutation.isPending}
+                >
+                  Corrected
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => responseReceivedMutation.mutate('deleted')}
+                  loading={
+                    responseReceivedMutation.isPending &&
+                    responseReceivedMutation.variables === 'deleted'
+                  }
+                  disabled={responseReceivedMutation.isPending}
+                >
+                  Deleted
+                </Button>
+              </div>
+              {responseReceivedMutation.isError ? (
+                <p className="text-xs text-red-600">Failed to record dispute response.</p>
               ) : null}
             </div>
           ) : null}
