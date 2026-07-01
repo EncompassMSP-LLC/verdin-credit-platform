@@ -22,6 +22,10 @@ from api.modules.accounts.dispute_drafts import (
     build_furnisher_evidence_checklist,
     detect_missing_evidence,
 )
+from api.modules.accounts.dispute_letter_export import (
+    DisputeLetterExportFormat,
+    build_dispute_letter_export,
+)
 from api.modules.accounts.dispute_letter_models import DisputeLetter, DisputeLetterStatus
 from api.modules.accounts.dispute_letter_repository import DisputeLetterRepository
 from api.modules.accounts.intelligence import apply_account_intelligence, recommend_next_action
@@ -439,6 +443,34 @@ class AccountService:
                 detail="Dispute letter not found",
             )
         return DisputeLetterResponse.from_model(dispute_letter)
+
+    async def export_dispute_letter(
+        self,
+        user: User,
+        account_id: uuid.UUID,
+        letter_id: uuid.UUID,
+        *,
+        export_format: DisputeLetterExportFormat,
+    ) -> tuple[bytes, str, str]:
+        account = await self._get_account_for_user(account_id, user)
+        if self._dispute_letters is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Dispute letter repository is not configured",
+            )
+
+        dispute_letter = await self._dispute_letters.get_for_account(
+            organization_id=account.organization_id,
+            account_id=account.id,
+            letter_id=letter_id,
+        )
+        if dispute_letter is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Dispute letter not found",
+            )
+
+        return build_dispute_letter_export(dispute_letter, export_format)
 
     async def create_dispute_letter_review_task(
         self,

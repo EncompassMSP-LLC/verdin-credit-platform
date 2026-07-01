@@ -8,7 +8,7 @@ import type {
 } from '@verdin/shared';
 
 import type { Task } from './tasks';
-import { apiPath, request } from './http';
+import { ApiClientError, apiPath, getAccessToken, getApiBaseUrl, request } from './http';
 
 export interface Account {
   id: string;
@@ -259,6 +259,48 @@ export async function getAccountDisputeLetter(
   letterId: string,
 ): Promise<DisputeLetter> {
   return request<DisputeLetter>(apiPath(`/accounts/${accountId}/dispute-letters/${letterId}`));
+}
+
+export type DisputeLetterExportFormat = 'text' | 'pdf';
+
+function parseContentDispositionFilename(header: string | null, fallback: string): string {
+  if (!header) return fallback;
+  const match = /filename="([^"]+)"/.exec(header);
+  return match?.[1] ?? fallback;
+}
+
+export async function downloadAccountDisputeLetterExport(
+  accountId: string,
+  letterId: string,
+  format: DisputeLetterExportFormat,
+): Promise<{ blob: Blob; filename: string }> {
+  const url = `${getApiBaseUrl()}${apiPath(
+    `/accounts/${accountId}/dispute-letters/${letterId}/export`,
+  )}?format=${format}`;
+  const headers: Record<string, string> = {};
+  const token = getAccessToken();
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const response = await fetch(url, { headers });
+  if (!response.ok) {
+    const error = (await response.json().catch(() => ({
+      detail: 'Request failed',
+    }))) as { detail?: string; code?: string };
+    throw new ApiClientError(
+      error.detail || `HTTP ${response.status}`,
+      response.status,
+      error.code,
+    );
+  }
+
+  const fallback = `dispute-letter.${format === 'text' ? 'txt' : 'pdf'}`;
+  const filename = parseContentDispositionFilename(
+    response.headers.get('Content-Disposition'),
+    fallback,
+  );
+  return { blob: await response.blob(), filename };
 }
 
 export async function createAccountDisputeLetterReviewTask(
