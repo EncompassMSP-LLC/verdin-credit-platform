@@ -11,6 +11,10 @@ from api.modules.cases.models import Case
 
 DisputeReasonCategory = Literal["accuracy", "completeness", "verification"]
 DisputeReasonSeverity = Literal["low", "medium", "high"]
+DisputeRecipientType = Literal["credit_bureau", "furnisher"]
+
+CRA_TEMPLATE_ID = "cra-tradeline-investigation-v1"
+FURNISHER_TEMPLATE_ID = "furnisher-direct-dispute-v1"
 
 
 @dataclass(frozen=True, slots=True)
@@ -257,6 +261,12 @@ def detect_missing_evidence(
     return missing
 
 
+def build_furnisher_evidence_checklist(account: Account) -> list[str]:
+    checklist = build_evidence_checklist(account)
+    checklist.append("Copy of credit report showing furnisher-reported tradeline")
+    return checklist
+
+
 def build_dispute_body(account: Account, case: Case, dispute_reasons: list[str]) -> str:
     account_identifier = account.account_number_masked or "account number not provided"
     reason_lines = "\n".join(f"- {reason}" for reason in dispute_reasons)
@@ -268,5 +278,22 @@ def build_dispute_body(account: Account, case: Case, dispute_reasons: list[str])
         f"Please investigate the following items:\n{reason_lines}\n\n"
         "Please verify this information with the furnisher, provide the method of verification, "
         "and delete or correct any information that cannot be verified as complete and accurate.\n\n"
+        "Sincerely,\nVerdin Credit Platform"
+    )
+
+
+def build_furnisher_dispute_body(account: Account, case: Case, dispute_reasons: list[str]) -> str:
+    account_identifier = account.account_number_masked or "account number not provided"
+    reason_lines = "\n".join(f"- {reason}" for reason in dispute_reasons)
+    furnisher_name = account.original_creditor or account.creditor_name
+    return (
+        f"To whom it may concern at {furnisher_name},\n\n"
+        f"I am writing on behalf of {case.client_name} regarding inaccurate information your "
+        f"company is furnishing to {_label(account.bureau)} for account {account_identifier}. "
+        "The consumer disputes the accuracy and completeness of the information you are reporting.\n\n"
+        f"Under the Fair Credit Reporting Act, please investigate the following items:\n"
+        f"{reason_lines}\n\n"
+        "Correct or delete any information that cannot be verified as complete and accurate, "
+        "and notify all consumer reporting agencies to whom you furnish data.\n\n"
         "Sincerely,\nVerdin Credit Platform"
     )

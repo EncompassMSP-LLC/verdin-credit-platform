@@ -231,7 +231,7 @@ class AccountDisputeDraftResponse(BaseSchema):
     account_id: uuid.UUID
     case_id: uuid.UUID
     bureau: AccountBureau
-    recipient_type: Literal["credit_bureau"]
+    recipient_type: Literal["credit_bureau", "furnisher"]
     template_id: str
     subject: str
     body: str

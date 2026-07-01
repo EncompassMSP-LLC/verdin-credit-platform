@@ -6,6 +6,7 @@ from decimal import Decimal
 from api.modules.accounts.dispute_drafts import (
     build_dispute_reason_suggestions,
     build_evidence_checklist,
+    build_furnisher_dispute_body,
     detect_missing_evidence,
 )
 from api.modules.accounts.models import Account, AccountBureau, AccountStatus, PaymentStatus
@@ -75,3 +76,19 @@ def test_detect_missing_evidence_flags_account_and_case_gaps() -> None:
     assert "account_identifier" in codes
     assert "reporting_dates" in codes
     assert "client_contact" in codes
+
+
+def test_build_furnisher_dispute_body_uses_furnisher_language() -> None:
+    account = _account(
+        payment_status=PaymentStatus.LATE_60,
+        balance=Decimal("1500.00"),
+        account_number_masked="****1234",
+    )
+    case = Case(client_name="Account Client", client_email="client@example.com")
+    reasons = ["Verify the reported payment history showing Late 60."]
+
+    body = build_furnisher_dispute_body(account, case, reasons)
+
+    assert "Example Bank" in body
+    assert "Fair Credit Reporting Act" in body
+    assert "consumer reporting agencies" in body
