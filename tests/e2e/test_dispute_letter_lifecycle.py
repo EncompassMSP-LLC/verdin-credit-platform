@@ -84,6 +84,7 @@ def test_dispute_letter_lifecycle(
         label="dispute_list_letters",
         artifacts=artifacts,
     )
+    assert isinstance(letters, list)
     assert any(item["id"] == letter_id for item in letters)
 
     review_task = expect_ok(
