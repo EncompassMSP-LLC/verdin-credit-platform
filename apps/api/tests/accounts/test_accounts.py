@@ -144,6 +144,9 @@ def test_get_account_dispute_draft(
     assert all(
         item["description"] in data["disputed_items"] for item in data["dispute_reason_suggestions"]
     )
+    assert data["evidence_ready"] is False
+    assert any(item["code"] == "client_contact" for item in data["missing_evidence"])
+    assert any(item["code"] == "reporting_dates" for item in data["missing_evidence"])
     assert any("balance" in item.lower() for item in data["evidence_checklist"])
     assert data["readiness_score"] is not None
     assert data["risk_score"] is not None

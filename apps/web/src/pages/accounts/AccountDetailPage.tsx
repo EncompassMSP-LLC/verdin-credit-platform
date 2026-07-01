@@ -489,6 +489,31 @@ export function AccountDetailPage() {
                 </span>
               </div>
 
+              {disputeDraftQuery.data.evidence_ready ? (
+                <div className="rounded-md border border-green-200 bg-green-50 p-4 text-sm text-green-800">
+                  Account and case fields satisfy the current evidence checklist.
+                </div>
+              ) : (
+                <div className="rounded-md border border-amber-200 bg-amber-50 p-4">
+                  <h4 className="text-sm font-semibold text-amber-900">
+                    Missing evidence before filing
+                  </h4>
+                  <ul className="mt-3 space-y-3">
+                    {disputeDraftQuery.data.missing_evidence.map((item) => (
+                      <li key={item.code} className="text-sm text-amber-900">
+                        <p className="font-medium">{item.title}</p>
+                        <p className="mt-1 text-amber-800">{item.description}</p>
+                        {item.checklist_item ? (
+                          <p className="mt-1 text-xs text-amber-700">
+                            Checklist: {item.checklist_item}
+                          </p>
+                        ) : null}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
               <div className="flex flex-col gap-3 rounded-md border border-blue-100 bg-blue-50 p-4 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm text-blue-900">
                   Create a task to review this draft, confirm evidence, and prepare the next dispute

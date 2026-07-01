@@ -143,7 +143,7 @@ Accounts automatically compute `risk_score`, `readiness_score`, `next_eligible_d
 
 ### Dispute draft preview
 
-`GET /accounts/{account_id}/dispute-draft` returns a rule-based CRA tradeline dispute draft, structured `dispute_reason_suggestions` (code, category, severity, evidence hints), disputed item list, requested action, evidence checklist, and compliance notes for staff review. Drafts are generated on demand and are not persisted in this foundation slice.
+`GET /accounts/{account_id}/dispute-draft` returns a rule-based CRA tradeline dispute draft, structured `dispute_reason_suggestions` (code, category, severity, evidence hints), `evidence_ready` / `missing_evidence` flags comparing the checklist to account and case fields, disputed item list, requested action, evidence checklist, and compliance notes for staff review. Drafts are generated on demand and are not persisted in this foundation slice.
 
 `POST /accounts/{account_id}/dispute-draft/review-task` creates or reuses an active high-priority task linked to the account and draft source, giving staff an explicit workflow item before any dispute is sent.
 

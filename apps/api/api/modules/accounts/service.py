@@ -15,6 +15,7 @@ from api.modules.accounts.dispute_drafts import (
     build_dispute_reason_suggestions,
     build_dispute_reasons,
     build_evidence_checklist,
+    detect_missing_evidence,
 )
 from api.modules.accounts.dispute_letter_models import DisputeLetter, DisputeLetterStatus
 from api.modules.accounts.dispute_letter_repository import DisputeLetterRepository
@@ -31,6 +32,7 @@ from api.modules.accounts.schemas import (
     AccountUpdate,
     DisputeLetterResponse,
     DisputeReasonSuggestionResponse,
+    MissingEvidenceResponse,
     NextActionItem,
 )
 from api.modules.auth.models import User
@@ -255,6 +257,13 @@ class AccountService:
 
         disputed_items = build_dispute_reasons(account)
         reason_suggestions = build_dispute_reason_suggestions(account)
+        evidence_checklist = build_evidence_checklist(account)
+        missing_evidence = detect_missing_evidence(
+            account,
+            case,
+            evidence_checklist=evidence_checklist,
+            reason_suggestions=reason_suggestions,
+        )
         return AccountDisputeDraftResponse(
             account_id=account.id,
             case_id=account.case_id,
@@ -279,10 +288,21 @@ class AccountService:
                 "Investigate the disputed tradeline and delete or correct any information "
                 "that cannot be verified as complete and accurate."
             ),
-            evidence_checklist=build_evidence_checklist(account),
+            evidence_checklist=evidence_checklist,
             compliance_notes=[
                 "Draft requires staff review before sending.",
                 "Confirm consumer authorization and supporting evidence before submission.",
+            ],
+            evidence_ready=not missing_evidence,
+            missing_evidence=[
+                MissingEvidenceResponse(
+                    code=item.code,
+                    title=item.title,
+                    description=item.description,
+                    severity=item.severity,
+                    checklist_item=item.checklist_item,
+                )
+                for item in missing_evidence
             ],
             generated_by="rules",
             readiness_score=account.readiness_score,

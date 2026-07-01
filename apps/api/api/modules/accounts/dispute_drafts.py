@@ -23,6 +23,15 @@ class DisputeReasonSuggestion:
     requires_evidence: tuple[str, ...]
 
 
+@dataclass(frozen=True, slots=True)
+class MissingEvidenceItem:
+    code: str
+    title: str
+    description: str
+    severity: DisputeReasonSeverity
+    checklist_item: str | None = None
+
+
 def _money(value: Decimal | None) -> str | None:
     if value is None:
         return None
@@ -155,6 +164,97 @@ def build_evidence_checklist(account: Account) -> list[str]:
     if account.balance is not None or account.past_due_amount is not None:
         checklist.append("Statements or creditor records supporting balance dispute")
     return checklist
+
+
+def detect_missing_evidence(
+    account: Account,
+    case: Case,
+    *,
+    evidence_checklist: list[str],
+    reason_suggestions: list[DisputeReasonSuggestion],
+) -> list[MissingEvidenceItem]:
+    missing: list[MissingEvidenceItem] = []
+    suggestion_codes = {suggestion.code for suggestion in reason_suggestions}
+
+    if not account.account_number_masked:
+        missing.append(
+            MissingEvidenceItem(
+                code="account_identifier",
+                title="Masked account identifier",
+                description=(
+                    "Add a masked account number on the tradeline before filing so staff can "
+                    "match bureau records to the correct account."
+                ),
+                severity="high",
+                checklist_item="Masked account identifier evidence for bureau matching",
+            )
+        )
+
+    if suggestion_codes & {"payment_history", "delinquency_date"}:
+        if account.date_reported is None and account.date_last_activity is None:
+            missing.append(
+                MissingEvidenceItem(
+                    code="reporting_dates",
+                    title="Reporting timeline dates",
+                    description=(
+                        "Add date reported or date of last activity to support payment history "
+                        "and delinquency disputes."
+                    ),
+                    severity="medium",
+                    checklist_item=next(
+                        (
+                            item
+                            for item in evidence_checklist
+                            if "payment history" in item.lower() or "delinquency" in item.lower()
+                        ),
+                        None,
+                    ),
+                )
+            )
+
+    if (
+        account.account_status
+        in {
+            AccountStatus.COLLECTION,
+            AccountStatus.CHARGE_OFF,
+            AccountStatus.REPOSSESSION,
+            AccountStatus.FORECLOSURE,
+        }
+        and not account.remarks
+    ):
+        missing.append(
+            MissingEvidenceItem(
+                code="account_notes",
+                title="Dispute support notes",
+                description=(
+                    "Add account remarks summarizing why the adverse status reporting is disputed."
+                ),
+                severity="medium",
+                checklist_item=next(
+                    (item for item in evidence_checklist if "Notes supporting" in item),
+                    None,
+                ),
+            )
+        )
+
+    if not case.client_email:
+        missing.append(
+            MissingEvidenceItem(
+                code="client_contact",
+                title="Client contact email",
+                description=(
+                    "Add the client email on the linked case for identity verification and "
+                    "bureau correspondence."
+                ),
+                severity="medium",
+                checklist_item=next(
+                    (item for item in evidence_checklist if "Government-issued ID" in item),
+                    "Government-issued ID and proof of current mailing address",
+                ),
+            )
+        )
+
+    return missing
 
 
 def build_dispute_body(account: Account, case: Case, dispute_reasons: list[str]) -> str:

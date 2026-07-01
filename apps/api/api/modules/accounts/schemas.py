@@ -240,6 +240,8 @@ class AccountDisputeDraftResponse(BaseSchema):
     requested_action: str
     evidence_checklist: list[str]
     compliance_notes: list[str]
+    evidence_ready: bool
+    missing_evidence: list["MissingEvidenceResponse"]
     generated_by: Literal["rules"]
     readiness_score: int | None
     risk_score: int | None
@@ -252,6 +254,14 @@ class DisputeReasonSuggestionResponse(BaseSchema):
     description: str
     severity: Literal["low", "medium", "high"]
     requires_evidence: list[str]
+
+
+class MissingEvidenceResponse(BaseSchema):
+    code: str
+    title: str
+    description: str
+    severity: Literal["low", "medium", "high"]
+    checklist_item: str | None = None
 
 
 class DisputeLetterResponse(BaseSchema):
