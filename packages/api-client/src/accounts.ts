@@ -262,6 +262,12 @@ export async function voidAccountDisputeLetter(
   );
 }
 
+export async function markAccountAwaitingDisputeResponse(accountId: string): Promise<Account> {
+  return request<Account>(apiPath(`/accounts/${accountId}/dispute-awaiting-response`), {
+    method: 'POST',
+  });
+}
+
 export async function updateAccount(
   accountId: string,
   input: UpdateAccountInput,

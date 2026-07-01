@@ -115,16 +115,16 @@ Plan: [`docs/sprint-4.3.1/operational-core-stabilization.md`](../sprint-4.3.1/op
 
 ## Version 4.5 — Automation
 
-| Capability                      | Version | Status  | Backend | Frontend | API | AI      | Tests | Dependencies        | Notes                                             |
-| ------------------------------- | ------- | ------- | ------- | -------- | --- | ------- | ----- | ------------------- | ------------------------------------------------- |
-| Workflow Automation             | 4.5     | Partial | 🚧      | 🚧       | 🚧  | —       | ✅    | Timeline, Tasks     | Parsed report review tasks auto-created by worker |
-| Credit Report Import Wizard     | 4.5     | ✅      | ✅      | ✅       | ✅  | —       | ✅    | Documents, OCR      | Upload, parser review, comparison, resolution     |
-| OCR Pipeline                    | 4.3     | ✅      | ✅      | ✅       | ✅  | ✅      | ✅    | Documents, Worker   | Shipped in 4.3 Operational Core                   |
-| Document Classification         | 4.3     | 🚧      | 🚧      | —        | 🚧  | 🚧      | 🚧    | OCR                 | Rules engine in 4.3; LLM augmentation in 4.5      |
-| Entity Extraction               | 4.5     | Partial | 🚧      | 🚧       | 🚧  | ✅      | ✅    | OCR, Accounts       | Parser tradelines produce account candidates      |
-| AI Case Summaries               | 4.5     | Planned | —       | —        | —   | ✅      | —     | Cases, Documents    | Phase 2 AI                                        |
-| AI Recommendation Engine        | 4.5     | Partial | 🚧      | —        | —   | Partial | ✅    | Accounts            | Heuristic recommendations shipped; LLM planned    |
-| Dispute Generation (foundation) | 4.5     | Partial | 🚧      | 🚧       | 🚧  | ✅      | ✅    | Accounts, Documents | Full letter lifecycle including void/cancel       |
+| Capability                      | Version | Status  | Backend | Frontend | API | AI      | Tests | Dependencies        | Notes                                               |
+| ------------------------------- | ------- | ------- | ------- | -------- | --- | ------- | ----- | ------------------- | --------------------------------------------------- |
+| Workflow Automation             | 4.5     | Partial | 🚧      | 🚧       | 🚧  | —       | ✅    | Timeline, Tasks     | Parsed report review tasks auto-created by worker   |
+| Credit Report Import Wizard     | 4.5     | ✅      | ✅      | ✅       | ✅  | —       | ✅    | Documents, OCR      | Upload, parser review, comparison, resolution       |
+| OCR Pipeline                    | 4.3     | ✅      | ✅      | ✅       | ✅  | ✅      | ✅    | Documents, Worker   | Shipped in 4.3 Operational Core                     |
+| Document Classification         | 4.3     | 🚧      | 🚧      | —        | 🚧  | 🚧      | 🚧    | OCR                 | Rules engine in 4.3; LLM augmentation in 4.5        |
+| Entity Extraction               | 4.5     | Partial | 🚧      | 🚧       | 🚧  | ✅      | ✅    | OCR, Accounts       | Parser tradelines produce account candidates        |
+| AI Case Summaries               | 4.5     | Planned | —       | —        | —   | ✅      | —     | Cases, Documents    | Phase 2 AI                                          |
+| AI Recommendation Engine        | 4.5     | Partial | 🚧      | —        | —   | Partial | ✅    | Accounts            | Heuristic recommendations shipped; LLM planned      |
+| Dispute Generation (foundation) | 4.5     | Partial | 🚧      | 🚧       | 🚧  | ✅      | ✅    | Accounts, Documents | Letter lifecycle + dispute_sent → awaiting_response |
 
 ---
 

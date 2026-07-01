@@ -18,7 +18,7 @@ from api.modules.accounts.dispute_drafts import (
 from api.modules.accounts.dispute_letter_models import DisputeLetter, DisputeLetterStatus
 from api.modules.accounts.dispute_letter_repository import DisputeLetterRepository
 from api.modules.accounts.intelligence import apply_account_intelligence, recommend_next_action
-from api.modules.accounts.models import Account, DisputeStatus
+from api.modules.accounts.models import Account, DisputeStatus, InvestigationStatus
 from api.modules.accounts.permissions import ACCOUNT_DELETE_ROLE, ACCOUNT_WRITE_ROLE
 from api.modules.accounts.repository import AccountListFilters, AccountRepository
 from api.modules.accounts.schemas import (
@@ -38,6 +38,7 @@ from api.modules.tasks.repository import TaskRepository
 from api.modules.tasks.schemas import TaskResponse
 from api.modules.timeline.builders import (
     account_created_event,
+    account_dispute_status_changed_event,
     account_status_changed_event,
     account_updated_event,
     dispute_letter_approved_event,
@@ -539,6 +540,46 @@ class AccountService:
                 dispute_letter_voided_event(dispute_letter, user.id),
             )
         return DisputeLetterResponse.from_model(dispute_letter)
+
+    async def mark_account_awaiting_dispute_response(
+        self,
+        user: User,
+        account_id: uuid.UUID,
+    ) -> AccountResponse:
+        self._require_write(user)
+        account = await self._get_account_for_user(account_id, user)
+
+        if account.dispute_status == DisputeStatus.AWAITING_RESPONSE:
+            return AccountResponse.from_model(account)
+
+        if account.dispute_status != DisputeStatus.DISPUTE_SENT:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Account must be in dispute_sent before awaiting response",
+            )
+
+        previous_dispute_status = (
+            account.dispute_status.value
+            if hasattr(account.dispute_status, "value")
+            else account.dispute_status
+        )
+        account.dispute_status = DisputeStatus.AWAITING_RESPONSE
+        if account.investigation_status == InvestigationStatus.NONE:
+            account.investigation_status = InvestigationStatus.PENDING
+        apply_account_intelligence(account)
+        account.ai_recommended_next_action = recommend_next_action(account)
+        apply_audit_on_update(account, user.id)
+        updated = await self._accounts.update(account)
+        if self._session is not None:
+            await publish_platform_event(
+                self._session,
+                account_dispute_status_changed_event(
+                    updated,
+                    user.id,
+                    previous_dispute_status=previous_dispute_status,
+                ),
+            )
+        return AccountResponse.from_model(updated)
 
     async def create_dispute_draft_review_task(
         self,

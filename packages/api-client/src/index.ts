@@ -67,6 +67,7 @@ export {
   getAccountDisputeDraft,
   getAccountIntelligenceSummary,
   listAccountDisputeLetters,
+  markAccountAwaitingDisputeResponse,
   listAccounts,
   listCaseAccounts,
   updateAccount,
