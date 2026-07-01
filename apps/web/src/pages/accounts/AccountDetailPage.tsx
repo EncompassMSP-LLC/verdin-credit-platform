@@ -10,6 +10,7 @@ import {
   getAccount,
   getAccountDisputeDraft,
   listAccountDisputeLetters,
+  markAccountAwaitingDisputeResponse,
   sendAccountDisputeLetter,
   voidAccountDisputeLetter,
   type DisputeLetter,
@@ -211,6 +212,14 @@ export function AccountDetailPage() {
     },
   });
 
+  const awaitingResponseMutation = useMutation({
+    mutationFn: () => markAccountAwaitingDisputeResponse(accountId!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['account', accountId] });
+      queryClient.invalidateQueries({ queryKey: ['accounts-intelligence'] });
+    },
+  });
+
   if (!accountId) return null;
 
   if (isLoading) {
@@ -339,6 +348,21 @@ export function AccountDetailPage() {
               </dd>
             </div>
           </dl>
+          {data.dispute_status === 'dispute_sent' ? (
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <Button
+                size="sm"
+                onClick={() => awaitingResponseMutation.mutate()}
+                loading={awaitingResponseMutation.isPending}
+                disabled={awaitingResponseMutation.isPending}
+              >
+                Mark awaiting response
+              </Button>
+              {awaitingResponseMutation.isError ? (
+                <p className="text-xs text-red-600">Failed to update dispute status.</p>
+              ) : null}
+            </div>
+          ) : null}
           <div className="mt-4">
             <Link to={`/cases/${data.case_id}`} className="text-sm text-brand-600 hover:underline">
               View linked case →

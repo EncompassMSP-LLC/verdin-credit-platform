@@ -136,6 +136,37 @@ def account_status_changed_event(
     )
 
 
+def account_dispute_status_changed_event(
+    account: Account,
+    performed_by: uuid.UUID,
+    *,
+    previous_dispute_status: str | None = None,
+) -> PlatformEvent:
+    dispute_status = (
+        account.dispute_status.value
+        if hasattr(account.dispute_status, "value")
+        else account.dispute_status
+    )
+    return PlatformEvent(
+        event_type="ACCOUNT_DISPUTE_STATUS_CHANGED",
+        event_category=EventCategory.ACCOUNT.value,
+        title="Account dispute status changed",
+        description=(
+            f"Account '{account.creditor_name}' dispute status changed to {dispute_status}."
+        ),
+        organization_id=account.organization_id,
+        case_id=account.case_id,
+        account_id=account.id,
+        performed_by=performed_by,
+        source_module="accounts",
+        metadata={
+            "previous_dispute_status": previous_dispute_status,
+            "dispute_status": dispute_status,
+            "dispute_round": account.dispute_round,
+        },
+    )
+
+
 def dispute_letter_draft_created_event(
     dispute_letter: DisputeLetter,
     performed_by: uuid.UUID,
