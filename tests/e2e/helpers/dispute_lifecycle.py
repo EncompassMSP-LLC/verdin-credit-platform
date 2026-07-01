@@ -6,6 +6,7 @@ import httpx
 
 from tests.e2e.helpers.artifacts import ArtifactCollector
 from tests.e2e.helpers.assertions import expect_ok
+from tests.e2e.helpers.wait_for_worker import poll_until
 
 
 def run_dispute_letter_lifecycle(
@@ -68,15 +69,20 @@ def run_dispute_letter_lifecycle(
     assert review_task["account_id"] == account_id
     assert review_task["source_module"] == "accounts.dispute_letter"
 
-    in_review = expect_ok(
-        http.get(
+    review_response = poll_until(
+        lambda: http.get(
             f"/api/v1/accounts/{account_id}/dispute-letters/{letter_id}",
             headers=headers,
         ),
-        label=f"{label}_letter_in_review",
-        artifacts=artifacts,
+        lambda response: (
+            response.status_code == 200 and response.json().get("status") == "review"
+        ),
+        description="dispute letter status == review",
+        timeout=15.0,
+        interval=0.25,
     )
-    assert in_review["status"] == "review"
+    in_review = review_response.json()
+    artifacts.record(f"{label}_letter_in_review", in_review)
 
     approved = expect_ok(
         http.post(

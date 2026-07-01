@@ -509,6 +509,9 @@ class AccountService:
             source_event_id=dispute_letter.id,
         )
         if existing is not None:
+            if dispute_letter.status == DisputeLetterStatus.DRAFT:
+                dispute_letter.status = DisputeLetterStatus.REVIEW
+                apply_audit_on_update(dispute_letter, user.id)
             return TaskResponse.from_model(existing)
 
         if dispute_letter.status == DisputeLetterStatus.DRAFT:
