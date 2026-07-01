@@ -16,6 +16,7 @@ import {
   sendAccountDisputeLetter,
   voidAccountDisputeLetter,
   type DisputeLetter,
+  type DisputeRecipientType,
   type DisputeResponseOutcome,
 } from '@verdin/api-client';
 import { ACCOUNT_TYPE_LABELS, DISPUTE_STATUS_LABELS, PAYMENT_STATUS_LABELS } from '@verdin/shared';
@@ -262,6 +263,8 @@ export function AccountDetailPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [disputeRecipientType, setDisputeRecipientType] =
+    useState<DisputeRecipientType>('credit_bureau');
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['account', accountId],
@@ -270,8 +273,8 @@ export function AccountDetailPage() {
   });
 
   const disputeDraftQuery = useQuery({
-    queryKey: ['account-dispute-draft', accountId],
-    queryFn: () => getAccountDisputeDraft(accountId!),
+    queryKey: ['account-dispute-draft', accountId, disputeRecipientType],
+    queryFn: () => getAccountDisputeDraft(accountId!, disputeRecipientType),
     enabled: Boolean(accountId),
   });
 
@@ -298,7 +301,7 @@ export function AccountDetailPage() {
   });
 
   const saveDraftMutation = useMutation({
-    mutationFn: () => createAccountDisputeLetterDraft(accountId!),
+    mutationFn: () => createAccountDisputeLetterDraft(accountId!, disputeRecipientType),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['account-dispute-letters', accountId] });
     },
@@ -516,6 +519,32 @@ export function AccountDetailPage() {
         </Card>
 
         <Card title="Dispute draft preview" className="lg:col-span-3">
+          <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <label
+                className="block text-sm font-medium text-gray-700"
+                htmlFor="dispute-recipient-type"
+              >
+                Letter template
+              </label>
+              <select
+                id="dispute-recipient-type"
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 sm:w-72"
+                value={disputeRecipientType}
+                onChange={(event) =>
+                  setDisputeRecipientType(event.target.value as DisputeRecipientType)
+                }
+              >
+                <option value="credit_bureau">CRA tradeline investigation</option>
+                <option value="furnisher">Direct furnisher dispute</option>
+              </select>
+            </div>
+            {disputeDraftQuery.data ? (
+              <span className="inline-flex w-fit rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
+                {disputeDraftQuery.data.template_id}
+              </span>
+            ) : null}
+          </div>
           {disputeDraftQuery.isLoading ? (
             <p className="py-6 text-center text-sm text-gray-500">Loading dispute draft...</p>
           ) : null}

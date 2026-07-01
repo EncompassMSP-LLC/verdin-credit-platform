@@ -1,6 +1,7 @@
 """Account management endpoints."""
 
 import uuid
+from typing import Literal
 
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -113,10 +114,15 @@ async def get_account(
 @router.get("/{account_id}/dispute-draft", response_model=AccountDisputeDraftResponse)
 async def get_account_dispute_draft(
     account_id: uuid.UUID,
+    recipient_type: Literal["credit_bureau", "furnisher"] = Query(default="credit_bureau"),
     current_user: User = Depends(get_current_user),
     service: AccountService = Depends(get_account_service),
 ) -> AccountDisputeDraftResponse:
-    return await service.get_dispute_draft(current_user, account_id)
+    return await service.get_dispute_draft(
+        current_user,
+        account_id,
+        recipient_type=recipient_type,
+    )
 
 
 @router.post("/{account_id}/dispute-draft/review-task", response_model=TaskResponse)
@@ -131,10 +137,15 @@ async def create_account_dispute_draft_review_task(
 @router.post("/{account_id}/dispute-draft/letters", response_model=DisputeLetterResponse)
 async def create_account_dispute_letter_draft(
     account_id: uuid.UUID,
+    recipient_type: Literal["credit_bureau", "furnisher"] = Query(default="credit_bureau"),
     current_user: User = Depends(get_current_user),
     service: AccountService = Depends(get_account_service),
 ) -> DisputeLetterResponse:
-    return await service.create_dispute_letter_draft(current_user, account_id)
+    return await service.create_dispute_letter_draft(
+        current_user,
+        account_id,
+        recipient_type=recipient_type,
+    )
 
 
 @router.get("/{account_id}/dispute-letters", response_model=list[DisputeLetterResponse])
