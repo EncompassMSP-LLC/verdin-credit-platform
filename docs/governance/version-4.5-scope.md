@@ -3,7 +3,7 @@
 Formal sign-off for **v4.5.0 release candidate** scope. Capabilities marked **Partial** below are complete for the stated limits; remaining work is explicitly deferred.
 
 **Sign-off date:** 2026-06-30  
-**Release tag:** `v4.5.0` — see [`docs/release-notes/v4.5.0.md`](../release-notes/v4.5.0.md) (tag pending slice 5.6)
+**Release tag:** `v4.5.0` — [`docs/release-notes/v4.5.0.md`](../release-notes/v4.5.0.md)
 
 ## Epic outcomes
 

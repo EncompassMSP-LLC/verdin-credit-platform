@@ -23,21 +23,23 @@ v4.3.1 — Mission Control, dashboard completion, governance updates (released)
     ↓
 Sprint 4.3.1 — E2E validation, performance baselines, security review, coverage (shipped)
     ↓
-v4.5.0 — Automation Platform (release candidate)
+v4.5.0 — Automation Platform (released)
+    ↓
+v4.8 — Operations (planned)
 ```
 
 Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (`Sprint 4.3.1`) are engineering milestones that harden a release before the next version opens.
 
 ## Version milestones
 
-| Version   | Theme                       | Status                | Focus                                                                           |
-| --------- | --------------------------- | --------------------- | ------------------------------------------------------------------------------- |
-| **4.2**   | Platform Foundation         | **Shipped**           | Monorepo, auth, RBAC, domain module pattern, worker scaffold, CI/CD             |
-| **4.3.0** | Operational Core            | **Shipped**           | Cases, accounts, documents, OCR, intelligence, timeline, tasks                  |
-| **4.3.1** | Operational Core Completion | **Shipped**           | Mission Control dashboard, governance refinements, release stabilization        |
-| **4.5**   | Automation                  | **Release candidate** | Import wizard, dispute lifecycle, workflow auto-tasks, rules AI (see scope doc) |
-| **4.8**   | Operations                  | Planned               | Client portal, notifications, LLM assistance, reporting expansions              |
-| **5.0**   | Enterprise Edition          | Planned               | Multi-tenancy, compliance center, enterprise admin, predictive analytics        |
+| Version   | Theme                       | Status      | Focus                                                                      |
+| --------- | --------------------------- | ----------- | -------------------------------------------------------------------------- |
+| **4.2**   | Platform Foundation         | **Shipped** | Monorepo, auth, RBAC, domain module pattern, worker scaffold, CI/CD        |
+| **4.3.0** | Operational Core            | **Shipped** | Cases, accounts, documents, OCR, intelligence, timeline, tasks             |
+| **4.3.1** | Operational Core Completion | **Shipped** | Mission Control dashboard, governance refinements, release stabilization   |
+| **4.5**   | Automation                  | **Shipped** | Import wizard, dispute lifecycle, workflow auto-tasks, rules AI (`v4.5.0`) |
+| **4.8**   | Operations                  | Planned     | Client portal, notifications, LLM assistance, reporting expansions         |
+| **5.0**   | Enterprise Edition          | Planned     | Multi-tenancy, compliance center, enterprise admin, predictive analytics   |
 
 ### Sprint milestones
 
@@ -79,7 +81,7 @@ Plan: [`docs/sprint-4.3.1/operational-core-stabilization.md`](../sprint-4.3.1/op
 
 Sprint 4.3.1 validated the Operational Core before Version 4.5 automation. **All exit criteria met** — including E2E lifecycle, dispute letter gate, performance baselines, security review, and branch protection.
 
-### Version 4.5 — Automation (release candidate)
+### Version 4.5 — Automation (shipped)
 
 Scope and deferrals: [`docs/governance/version-4.5-scope.md`](../governance/version-4.5-scope.md)
 
@@ -95,7 +97,7 @@ Every 4.5 feature builds on the Operational Core without modifying its foundatio
 
 **Deferred from 4.5 to 4.8:** client portal, notification delivery, LLM case/document summaries, LLM classification augmentation, full workflow engine, `packages/job-orchestrator/`.
 
-**Tag:** `v4.5.0` — Automation Platform release candidate.
+**Tag:** `v4.5.0` — Automation Platform.
 
 Release notes: [`docs/release-notes/v4.5.0.md`](../release-notes/v4.5.0.md)
 
