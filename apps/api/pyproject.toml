@@ -41,7 +41,7 @@ packages = ["api"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 testpaths = ["tests"]
-pythonpath = [".", "../../packages/document-classification", "../../packages/document-metadata", "../../packages/entity-resolution", "../../packages/event-bus", "../../packages/event-types"]
+pythonpath = [".", "../../packages/document-classification", "../../packages/document-metadata", "../../packages/entity-resolution", "../../packages/event-bus", "../../packages/event-types", "../../packages/job-orchestrator"]
 
 [tool.ruff]
 line-length = 100

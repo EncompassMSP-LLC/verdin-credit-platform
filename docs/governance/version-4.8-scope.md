@@ -43,9 +43,9 @@ Credit report import, dispute letter lifecycle, workflow auto-tasks, rules-based
 
 ### Workflow Operations (Partial)
 
-**Included:** Worker job for overdue CRA investigation escalation (replaces 4.5 read-time check).
+**Included:** Worker job for overdue CRA investigation escalation (replaces 4.5 read-time check); `packages/job-orchestrator/` scaffold (shared queue/registry/retry/scheduler/metrics — not full parity).
 
-**Not included:** Generic cron scheduler UI, cross-org SLA dashboards, full `packages/job-orchestrator/` parity.
+**Not included:** Generic cron scheduler UI, cross-org SLA dashboards, runner retry wiring, PostgreSQL job persistence.
 
 ### Client Experience (Partial)
 

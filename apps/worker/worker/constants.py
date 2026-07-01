@@ -1,24 +1,5 @@
 """Shared job type and status constants."""
 
-from enum import StrEnum
+from verdin_job_orchestrator.constants import JobStatus, JobType
 
-
-class JobType(StrEnum):
-    OCR = "ocr"
-    DOCUMENT_CLASSIFY = "document_classify"
-    DOCUMENT_CREDIT_REPORT_PARSE = "document_credit_report_parse"
-    DOCUMENT_METADATA_EXTRACT = "document_metadata_extract"
-    DOCUMENT_ENTITY_RESOLVE = "document_entity_resolve"
-    REPORT_IMPORT = "report_import"
-    AI_SUMMARY = "ai_summary"
-    MONTHLY_REVIEW = "monthly_review"
-    OVERDUE_INVESTIGATION_SCAN = "overdue_investigation_scan"
-
-
-class JobStatus(StrEnum):
-    PENDING = "pending"
-    QUEUED = "queued"
-    RUNNING = "running"
-    COMPLETED = "completed"
-    FAILED = "failed"
-    CANCELLED = "cancelled"
+__all__ = ["JobStatus", "JobType"]

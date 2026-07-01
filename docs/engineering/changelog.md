@@ -262,4 +262,27 @@ packages/job-orchestrator/
 
 **Reason:** 4.5 technical debt used account GET as a pseudo-cron. A dedicated worker job is schedulable and auditable without side effects on read paths.
 
-**Follow-up work:** Wire daily enqueue via external cron or job-orchestrator package (slice 5).
+**Follow-up work:** Wire daily enqueue via external cron or `JobScheduler` registry (slice 5 scaffold).
+
+## Version 4.8 — Job orchestration package scaffold
+
+### Decision: Extract shared orchestration into `packages/job-orchestrator/`
+
+**Decision:** Introduce `verdin-job-orchestrator` with job contracts, registry, Redis queue, retry/scheduler/metrics scaffolds, and ADR-011. API and worker import shared `JobType` / queue primitives via thin re-export modules.
+
+**Reason:** Duplicated enqueue code and enums between API and worker blocked consistent retries, scheduling, and observability.
+
+**Alternatives considered:**
+
+- Full Celery migration in 4.8 (rejected — ops cost)
+- Defer package to 5.0 (rejected — overdue scan and future jobs need a convergence point now)
+
+**Technical debt introduced:** Retry policy and metrics recorders are not yet wired into `worker/runner.py`; cron evaluation in `JobScheduler` is a placeholder.
+
+**Follow-up work:**
+
+- Wire runner retries and metrics export
+- Register scheduled jobs (overdue scan daily cron) when scheduler executes expressions
+- PostgreSQL job persistence per ADR-008 Sprint 2 plan
+
+**Documentation:** [`docs/adr/011-job-orchestrator.md`](../adr/011-job-orchestrator.md)
