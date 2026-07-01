@@ -4,6 +4,7 @@ import {
   ApiClientError,
   extractDocumentMetadata,
   getDocument,
+  getDocumentDuplicateGroup,
   getDocumentMetadata,
   getDocumentOcr,
   getDocumentParsedCreditReport,
@@ -21,6 +22,7 @@ import {
 import { Button, Card, Badge } from '@verdin/ui';
 import { Link, useSearchParams } from 'react-router-dom';
 import { DocumentMetadataStatusBadge } from '../../components/documents/DocumentMetadataStatusBadge';
+import { DocumentDuplicateAlert } from '../../components/documents/DocumentDuplicatePanel';
 import { DocumentProcessingBadge } from '../../components/documents/DocumentProcessingBadge';
 import { ParsedReportTradelines } from '../../components/imports/ParsedReportTradelines';
 import { featureFlags } from '../../lib/feature-flags';
@@ -190,6 +192,13 @@ export function CreditReportImportWizard() {
       const document = query.state.data as Document | undefined;
       return document?.metadata_status !== 'extracted' ? 3000 : false;
     },
+  });
+
+  const duplicateGroupQuery = useQuery({
+    queryKey: ['document-duplicates', documentId],
+    queryFn: () => getDocumentDuplicateGroup(documentId!),
+    enabled: Boolean(documentId) && Boolean(documentQuery.data),
+    retry: false,
   });
 
   const ocrQuery = useQuery({
@@ -558,10 +567,19 @@ export function CreditReportImportWizard() {
                 </p>
                 <div className="flex flex-wrap gap-2">
                   <DocumentProcessingBadge status={processingStatus} />
+                  {documentQuery.data.is_duplicate ? (
+                    <Badge variant="warning">Duplicate file</Badge>
+                  ) : null}
                   {documentQuery.data.metadata_status ? (
                     <DocumentMetadataStatusBadge status={documentQuery.data.metadata_status} />
                   ) : null}
                 </div>
+                {duplicateGroupQuery.data ? (
+                  <DocumentDuplicateAlert
+                    currentDocument={documentQuery.data}
+                    duplicateGroup={duplicateGroupQuery.data}
+                  />
+                ) : null}
               </div>
             ) : (
               <p className="text-sm text-gray-500">Choose a case and PDF to begin.</p>

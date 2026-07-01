@@ -12,8 +12,6 @@ import {
   getDocumentParsedCreditReport,
   getDocumentParsedCreditReportAccountCandidates,
   retryDocumentOcr,
-  type Document,
-  type DocumentDuplicateGroup,
   type DocumentParsedCreditReportAccountCandidates,
   type ParsedReportAccountCandidate,
   type Task,
@@ -21,6 +19,7 @@ import {
 import { Badge, Button, Card } from '@verdin/ui';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { DocumentDeleteDialog } from '../../components/documents/DocumentDeleteDialog';
+import { DocumentDuplicatePanel } from '../../components/documents/DocumentDuplicatePanel';
 import { DocumentEntityResolutionPanel } from '../../components/documents/DocumentEntityResolutionPanel';
 import { DocumentMetadataPanel } from '../../components/documents/DocumentMetadataPanel';
 import { DocumentMetadataStatusBadge } from '../../components/documents/DocumentMetadataStatusBadge';
@@ -139,79 +138,6 @@ function ParsedReportAccountCandidatesPanel({
         ))}
       </ul>
     </div>
-  );
-}
-
-function DuplicateDocumentRow({
-  document,
-  label,
-}: {
-  document: Document;
-  label: 'Canonical' | 'Duplicate';
-}) {
-  return (
-    <li className="flex items-center justify-between gap-3 py-3 text-sm">
-      <div>
-        <div className="flex items-center gap-2">
-          <Badge variant={label === 'Canonical' ? 'success' : 'warning'}>{label}</Badge>
-          <Link
-            to={`/documents/${document.id}`}
-            className="font-medium text-brand-600 hover:underline"
-          >
-            {document.title}
-          </Link>
-        </div>
-        <p className="mt-1 text-gray-500">
-          {document.file_name} · {formatFileSize(document.file_size)} ·{' '}
-          {formatDateTime(document.created_at)}
-        </p>
-      </div>
-      <Badge variant="info">v{document.version_number}</Badge>
-    </li>
-  );
-}
-
-function DocumentDuplicatePanel({
-  currentDocument,
-  duplicateGroup,
-}: {
-  currentDocument: Document;
-  duplicateGroup?: DocumentDuplicateGroup;
-}) {
-  const hasDuplicates = currentDocument.is_duplicate || (duplicateGroup?.duplicate_count ?? 0) > 0;
-
-  if (!hasDuplicates || !duplicateGroup) {
-    return null;
-  }
-
-  return (
-    <Card title="Duplicate review" className="lg:col-span-3">
-      <div className="rounded-md border border-yellow-200 bg-yellow-50 p-3 text-sm text-yellow-900">
-        {currentDocument.is_duplicate ? (
-          <p>
-            This document is an exact duplicate of{' '}
-            <Link
-              to={`/documents/${duplicateGroup.canonical_document.id}`}
-              className="font-medium underline"
-            >
-              {duplicateGroup.canonical_document.title}
-            </Link>
-            .
-          </p>
-        ) : (
-          <p>
-            This document is the canonical copy for {duplicateGroup.duplicate_count} duplicate
-            {duplicateGroup.duplicate_count === 1 ? '' : 's'}.
-          </p>
-        )}
-      </div>
-      <ul className="mt-3 divide-y divide-gray-100">
-        <DuplicateDocumentRow document={duplicateGroup.canonical_document} label="Canonical" />
-        {duplicateGroup.duplicate_documents.map((document) => (
-          <DuplicateDocumentRow key={document.id} document={document} label="Duplicate" />
-        ))}
-      </ul>
-    </Card>
   );
 }
 
@@ -379,7 +305,11 @@ export function DocumentDetailPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <DocumentDuplicatePanel currentDocument={data} duplicateGroup={duplicateGroup} />
+        <DocumentDuplicatePanel
+          currentDocument={data}
+          duplicateGroup={duplicateGroup}
+          className="lg:col-span-3"
+        />
 
         <Card title="File details" className="lg:col-span-1">
           <dl className="space-y-3 text-sm">
