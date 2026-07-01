@@ -55,6 +55,29 @@ export {
 } from './cases';
 
 export {
+  createClient,
+  createClientContact,
+  deleteClient,
+  deleteClientContact,
+  getClient,
+  getClientContact,
+  listClientContacts,
+  listClients,
+  updateClient,
+  updateClientContact,
+  type Client,
+  type ClientContact,
+  type ClientStatus,
+  type ContactRelationship,
+  type CreateClientContactInput,
+  type CreateClientInput,
+  type ListClientContactsParams,
+  type ListClientsParams,
+  type UpdateClientContactInput,
+  type UpdateClientInput,
+} from './clients';
+
+export {
   createAccount,
   createAccountDisputeDraftReviewTask,
   createAccountDisputeLetterDraft,

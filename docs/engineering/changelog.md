@@ -286,3 +286,13 @@ packages/job-orchestrator/
 - PostgreSQL job persistence per ADR-008 Sprint 2 plan
 
 **Documentation:** [`docs/adr/011-job-orchestrator.md`](../adr/011-job-orchestrator.md)
+
+## Version 4.8 — Client and contact model
+
+### Decision: First-class Client aggregate with nested contacts
+
+**Decision:** Add `clients` and `client_contacts` tables with staff CRUD API (`/clients`, `/clients/{id}/contacts`). Cases retain inline `client_name` / `client_email` for backward compatibility; optional `client_id` FK deferred.
+
+**Reason:** Client portal auth (slice 7) requires a durable client identity separate from case denormalized fields.
+
+**Follow-up work:** Link cases to clients, portal auth partition, read-only progress view.

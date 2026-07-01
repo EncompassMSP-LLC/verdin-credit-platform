@@ -41,20 +41,20 @@ Mission Control dashboard and governance refinements shipped in tag `v4.3.1`. Se
 
 ## Version 4.3.0 — Operational Core (shipped)
 
-| Capability                      | Version | Status | Backend | Frontend | API | AI      | Tests | Notes                                                 |
-| ------------------------------- | ------- | ------ | ------- | -------- | --- | ------- | ----- | ----------------------------------------------------- |
-| Platform Foundation             | 4.2     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | Shipped in 4.2 — monorepo, auth, RBAC, CI             |
-| **Case Management**             | 4.3     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | CRUD, filters, RBAC, full UI                          |
-| **Credit Account Intelligence** | 4.3     | ✅     | ✅      | ✅       | ✅  | Partial | ✅    | Heuristic risk/readiness scoring in `intelligence.py` |
-| **Document Foundation**         | 4.3     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | Upload, versioning, MinIO, duplicate detection/review |
-| **OCR Pipeline**                | 4.3     | ✅     | ✅      | ✅       | ✅  | ✅      | ✅    | Async worker extraction; pypdf + tesseract            |
-| **AI Classification**           | 4.3     | ✅     | ✅      | Partial  | ✅  | Partial | ✅    | Rule-based classifier framework                       |
-| **Metadata Extraction**         | 4.3     | ✅     | ✅      | ✅       | ✅  | Partial | ✅    | Rule-based extraction; `packages/document-metadata`   |
-| **Entity Resolution**           | 4.3     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | Deterministic matching; `packages/entity-resolution`  |
-| Timeline & Audit Engine         | 4.3     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | Event bus + append-only timeline                      |
-| Task Management                 | 4.3     | ✅     | ✅      | ✅       | ✅  | —       | ✅    | CRUD, complete/reopen, filters, timeline events, UI   |
-| Operational Dashboard           | 4.3.1   | ✅     | ✅      | ✅       | ✅  | —       | ✅    | Mission Control — shipped in v4.3.1                   |
-| Client Management               | 4.3     | —      | —       | —        | —   | —       | —     | Deferred to 4.8                                       |
+| Capability                      | Version | Status  | Backend | Frontend | API | AI      | Tests | Notes                                                 |
+| ------------------------------- | ------- | ------- | ------- | -------- | --- | ------- | ----- | ----------------------------------------------------- |
+| Platform Foundation             | 4.2     | ✅      | ✅      | ✅       | ✅  | —       | ✅    | Shipped in 4.2 — monorepo, auth, RBAC, CI             |
+| **Case Management**             | 4.3     | ✅      | ✅      | ✅       | ✅  | —       | ✅    | CRUD, filters, RBAC, full UI                          |
+| **Credit Account Intelligence** | 4.3     | ✅      | ✅      | ✅       | ✅  | Partial | ✅    | Heuristic risk/readiness scoring in `intelligence.py` |
+| **Document Foundation**         | 4.3     | ✅      | ✅      | ✅       | ✅  | —       | ✅    | Upload, versioning, MinIO, duplicate detection/review |
+| **OCR Pipeline**                | 4.3     | ✅      | ✅      | ✅       | ✅  | ✅      | ✅    | Async worker extraction; pypdf + tesseract            |
+| **AI Classification**           | 4.3     | ✅      | ✅      | Partial  | ✅  | Partial | ✅    | Rule-based classifier framework                       |
+| **Metadata Extraction**         | 4.3     | ✅      | ✅      | ✅       | ✅  | Partial | ✅    | Rule-based extraction; `packages/document-metadata`   |
+| **Entity Resolution**           | 4.3     | ✅      | ✅      | ✅       | ✅  | —       | ✅    | Deterministic matching; `packages/entity-resolution`  |
+| Timeline & Audit Engine         | 4.3     | ✅      | ✅      | ✅       | ✅  | —       | ✅    | Event bus + append-only timeline                      |
+| Task Management                 | 4.3     | ✅      | ✅      | ✅       | ✅  | —       | ✅    | CRUD, complete/reopen, filters, timeline events, UI   |
+| Operational Dashboard           | 4.3.1   | ✅      | ✅      | ✅       | ✅  | —       | ✅    | Mission Control — shipped in v4.3.1                   |
+| Client Management               | 4.8     | Partial | ✅      | —        | ✅  | —       | ✅    | Portal auth in slice 7                                |
 
 ### Document Intelligence Platform (4.3 epic)
 
@@ -150,6 +150,7 @@ Scope: [version-4.8-scope.md](version-4.8-scope.md)
 | ----------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ------------------------------------------------------------------- |
 | In-App Notifications    | 4.8     | Partial | ✅      | ✅       | ✅  | —   | ✅    | Auth         | Staff bell + API; email/SMS deferred                                |
 | Client Portal           | 4.8     | Planned | —       | —        | —   | —   | —     | Client Mgmt  | Auth partition + progress view planned                              |
+| Client Management       | 4.8     | Partial | ✅      | —        | ✅  | —   | ✅    | Auth         | Client + contact CRUD; case linking deferred                        |
 | Workflow Scheduled Jobs | 4.8     | Partial | ✅      | —        | —   | —   | ✅    | Worker       | `overdue_investigation_scan` job; manual POST endpoint retained     |
 | Job Orchestration       | 4.8     | Partial | 🚧      | —        | —   | —   | ✅    | Worker, API  | `packages/job-orchestrator` scaffold; retry/metrics wiring deferred |
 
