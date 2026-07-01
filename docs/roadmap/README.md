@@ -95,7 +95,9 @@ Every 4.5 feature builds on the Operational Core without modifying its foundatio
 
 **Deferred from 4.5 to 4.8:** client portal, notification delivery, LLM case/document summaries, LLM classification augmentation, full workflow engine, `packages/job-orchestrator/`.
 
-**Tag:** `v4.5.0` — pending release notes (slice 5.5).
+**Tag:** `v4.5.0` — Automation Platform release candidate.
+
+Release notes: [`docs/release-notes/v4.5.0.md`](../release-notes/v4.5.0.md)
 
 ## Sprint → version mapping
 
@@ -130,6 +132,7 @@ Every 4.5 feature builds on the Operational Core without modifying its foundatio
 - [Engineering Decision Log](../engineering/changelog.md) — technical rationale across milestones
 - [Sprint 4.3.1 stabilization](../sprint-4.3.1/operational-core-stabilization.md)
 - [Release notes — v4.3.1](../release-notes/v4.3.1.md)
+- [Release notes — v4.5.0](../release-notes/v4.5.0.md)
 - [Release notes — v4.3.0 GA](../release-notes/v4.3.0-ga.md)
 - [Architecture](../architecture/README.md) — technical constitution
 - [ADR index](../adr/README.md) — architecture decision records

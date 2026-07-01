@@ -5,7 +5,7 @@
 **Last updated:** 2026-06-30  
 **Maintainers:** Update this document in every epic PR that ships or materially advances a capability.
 
-**Version 4.5 sign-off:** [version-4.5-scope.md](version-4.5-scope.md) (v4.5.0 release candidate)
+**Version 4.5 sign-off:** [version-4.5-scope.md](version-4.5-scope.md) · Release notes: [v4.5.0.md](../release-notes/v4.5.0.md)
 
 ## Status legend
 

@@ -74,7 +74,7 @@ Release flow:
 | v4.3.0  | Released | Initial Operational Core release                                                             |
 | v4.3.1  | Released | Operational Core completion (Mission Control, governance refinements, release stabilization) |
 
-Release notes: [`v4.3.0-ga.md`](../release-notes/v4.3.0-ga.md), [`v4.3.1.md`](../release-notes/v4.3.1.md)
+Release notes: [`v4.3.0-ga.md`](../release-notes/v4.3.0-ga.md), [`v4.3.1.md`](../release-notes/v4.3.1.md), [`v4.5.0.md`](../release-notes/v4.5.0.md)
 
 ## Sprint history
 
@@ -159,5 +159,6 @@ Multi-tenancy → compliance center → AI case assistant → predictive analyti
 - [Engineering Decision Log](../engineering/changelog.md)
 - [Sprint 4.3.1 stabilization](../sprint-4.3.1/operational-core-stabilization.md)
 - [Release notes — v4.3.1](../release-notes/v4.3.1.md)
+- [Release notes — v4.5.0](../release-notes/v4.5.0.md)
 - [Developer guide](../developer-guide.md)
 - [ADR 009 — Architecture governance](../adr/009-architecture-governance.md)
