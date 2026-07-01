@@ -152,6 +152,60 @@ def test_get_account_dispute_draft(
     assert data["risk_score"] is not None
 
 
+def test_get_account_furnisher_dispute_draft(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    readonly_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    create = api_client.post(
+        "/api/v1/accounts",
+        headers=manager_headers,
+        json=sample_account_payload(sample_case_id),
+    )
+    account_id = create.json()["id"]
+
+    response = api_client.get(
+        f"/api/v1/accounts/{account_id}/dispute-draft",
+        headers=readonly_headers,
+        params={"recipient_type": "furnisher"},
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["recipient_type"] == "furnisher"
+    assert data["template_id"] == "furnisher-direct-dispute-v1"
+    assert "Direct furnisher dispute" in data["subject"]
+    assert "Fair Credit Reporting Act" in data["body"]
+    assert "furnishing to equifax" in data["body"].lower()
+    assert any("furnisher-reported tradeline" in item for item in data["evidence_checklist"])
+
+
+def test_create_furnisher_dispute_letter_draft(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    create = api_client.post(
+        "/api/v1/accounts",
+        headers=manager_headers,
+        json=sample_account_payload(sample_case_id),
+    )
+    account_id = create.json()["id"]
+
+    response = api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-draft/letters",
+        headers=manager_headers,
+        params={"recipient_type": "furnisher"},
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["recipient_type"] == "furnisher"
+    assert data["template_id"] == "furnisher-direct-dispute-v1"
+    assert data["status"] == "draft"
+
+
 def test_create_account_dispute_draft_review_task_is_idempotent(
     api_client: TestClient,
     manager_headers: dict[str, str],

@@ -150,11 +150,13 @@ export interface MissingEvidenceItem {
   checklist_item: string | null;
 }
 
+export type DisputeRecipientType = 'credit_bureau' | 'furnisher';
+
 export interface AccountDisputeDraft {
   account_id: string;
   case_id: string;
   bureau: AccountBureau;
-  recipient_type: 'credit_bureau';
+  recipient_type: DisputeRecipientType;
   template_id: string;
   subject: string;
   body: string;
@@ -223,8 +225,13 @@ export async function getAccount(accountId: string): Promise<Account> {
   return request<Account>(apiPath(`/accounts/${accountId}`));
 }
 
-export async function getAccountDisputeDraft(accountId: string): Promise<AccountDisputeDraft> {
-  return request<AccountDisputeDraft>(apiPath(`/accounts/${accountId}/dispute-draft`));
+export async function getAccountDisputeDraft(
+  accountId: string,
+  recipientType: DisputeRecipientType = 'credit_bureau',
+): Promise<AccountDisputeDraft> {
+  return request<AccountDisputeDraft>(
+    `${apiPath(`/accounts/${accountId}/dispute-draft`)}${buildQuery({ recipient_type: recipientType })}`,
+  );
 }
 
 export async function createAccountDisputeDraftReviewTask(accountId: string): Promise<Task> {
@@ -233,10 +240,14 @@ export async function createAccountDisputeDraftReviewTask(accountId: string): Pr
   });
 }
 
-export async function createAccountDisputeLetterDraft(accountId: string): Promise<DisputeLetter> {
-  return request<DisputeLetter>(apiPath(`/accounts/${accountId}/dispute-draft/letters`), {
-    method: 'POST',
-  });
+export async function createAccountDisputeLetterDraft(
+  accountId: string,
+  recipientType: DisputeRecipientType = 'credit_bureau',
+): Promise<DisputeLetter> {
+  return request<DisputeLetter>(
+    `${apiPath(`/accounts/${accountId}/dispute-draft/letters`)}${buildQuery({ recipient_type: recipientType })}`,
+    { method: 'POST' },
+  );
 }
 
 export async function listAccountDisputeLetters(accountId: string): Promise<DisputeLetter[]> {

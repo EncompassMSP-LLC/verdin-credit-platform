@@ -108,9 +108,11 @@ Credit tradeline accounts with intelligence scoring. All endpoints require authe
 | GET    | `/accounts/intelligence/summary`                                 | read_only    | Organization intelligence                 |
 | GET    | `/accounts/{account_id}`                                         | read_only    | Get account by ID                         |
 | GET    | `/accounts/{account_id}/dispute-draft`                           | read_only    | Preview rule-based dispute draft          |
+|        | Query: `recipient_type` (`credit_bureau`, `furnisher`)           |              |                                           |
 | GET    | `/accounts/{account_id}/dispute-letters`                         | read_only    | List saved dispute letter drafts          |
 | GET    | `/accounts/{account_id}/dispute-letters/{letter_id}`             | read_only    | Get saved dispute letter details          |
 | POST   | `/accounts/{account_id}/dispute-draft/letters`                   | case_manager | Save generated dispute draft              |
+|        | Query: `recipient_type` (`credit_bureau`, `furnisher`)           |              |                                           |
 | POST   | `/accounts/{account_id}/dispute-draft/review-task`               | case_manager | Create or reuse dispute draft review task |
 | POST   | `/accounts/{account_id}/dispute-letters/{letter_id}/review-task` | case_manager | Create or reuse saved letter review task  |
 | POST   | `/accounts/{account_id}/dispute-letters/{letter_id}/approve`     | case_manager | Approve a saved letter in review          |
@@ -143,7 +145,7 @@ Accounts automatically compute `risk_score`, `readiness_score`, `next_eligible_d
 
 ### Dispute draft preview
 
-`GET /accounts/{account_id}/dispute-draft` returns a rule-based CRA tradeline dispute draft, structured `dispute_reason_suggestions` (code, category, severity, evidence hints), `evidence_ready` / `missing_evidence` flags comparing the checklist to account and case fields, disputed item list, requested action, evidence checklist, and compliance notes for staff review. Drafts are generated on demand and are not persisted in this foundation slice.
+`GET /accounts/{account_id}/dispute-draft` returns a rule-based dispute draft for either a CRA tradeline investigation (`recipient_type=credit_bureau`, default) or a direct furnisher dispute (`recipient_type=furnisher`). The response includes structured `dispute_reason_suggestions`, `evidence_ready` / `missing_evidence` flags comparing the checklist to account and case fields, disputed item list, requested action, evidence checklist, and compliance notes for staff review. Drafts are generated on demand and are not persisted in this foundation slice.
 
 `POST /accounts/{account_id}/dispute-draft/review-task` creates or reuses an active high-priority task linked to the account and draft source, giving staff an explicit workflow item before any dispute is sent.
 

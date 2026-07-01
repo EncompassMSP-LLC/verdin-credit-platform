@@ -11,10 +11,15 @@ from api.core.events import publish_platform_event
 from api.core.pagination import PaginatedResponse, paginate
 from api.core.permissions import has_permission
 from api.modules.accounts.dispute_drafts import (
+    CRA_TEMPLATE_ID,
+    FURNISHER_TEMPLATE_ID,
+    DisputeRecipientType,
     build_dispute_body,
     build_dispute_reason_suggestions,
     build_dispute_reasons,
     build_evidence_checklist,
+    build_furnisher_dispute_body,
+    build_furnisher_evidence_checklist,
     detect_missing_evidence,
 )
 from api.modules.accounts.dispute_letter_models import DisputeLetter, DisputeLetterStatus
@@ -238,6 +243,8 @@ class AccountService:
         self,
         user: User,
         account_id: uuid.UUID,
+        *,
+        recipient_type: DisputeRecipientType = "credit_bureau",
     ) -> AccountDisputeDraftResponse:
         account = await self._get_account_for_user(account_id, user)
         if self._cases is None:
@@ -257,7 +264,34 @@ class AccountService:
 
         disputed_items = build_dispute_reasons(account)
         reason_suggestions = build_dispute_reason_suggestions(account)
-        evidence_checklist = build_evidence_checklist(account)
+        if recipient_type == "furnisher":
+            evidence_checklist = build_furnisher_evidence_checklist(account)
+            template_id = FURNISHER_TEMPLATE_ID
+            subject = f"Direct furnisher dispute — {account.creditor_name} tradeline"
+            body = build_furnisher_dispute_body(account, case, disputed_items)
+            requested_action = (
+                "Investigate the consumer's direct furnisher dispute, correct or delete "
+                "unverifiable information, and notify all CRAs to whom you furnish data."
+            )
+            compliance_notes = [
+                "Draft requires staff review before sending.",
+                "Confirm consumer authorization and supporting evidence before submission.",
+                "Direct furnisher disputes must be sent to the data furnisher, not the CRA.",
+            ]
+        else:
+            evidence_checklist = build_evidence_checklist(account)
+            template_id = CRA_TEMPLATE_ID
+            subject = f"Dispute of {account.creditor_name} tradeline"
+            body = build_dispute_body(account, case, disputed_items)
+            requested_action = (
+                "Investigate the disputed tradeline and delete or correct any information "
+                "that cannot be verified as complete and accurate."
+            )
+            compliance_notes = [
+                "Draft requires staff review before sending.",
+                "Confirm consumer authorization and supporting evidence before submission.",
+            ]
+
         missing_evidence = detect_missing_evidence(
             account,
             case,
@@ -268,10 +302,10 @@ class AccountService:
             account_id=account.id,
             case_id=account.case_id,
             bureau=account.bureau,
-            recipient_type="credit_bureau",
-            template_id="cra-tradeline-investigation-v1",
-            subject=f"Dispute of {account.creditor_name} tradeline",
-            body=build_dispute_body(account, case, disputed_items),
+            recipient_type=recipient_type,
+            template_id=template_id,
+            subject=subject,
+            body=body,
             disputed_items=disputed_items,
             dispute_reason_suggestions=[
                 DisputeReasonSuggestionResponse(
@@ -284,15 +318,9 @@ class AccountService:
                 )
                 for suggestion in reason_suggestions
             ],
-            requested_action=(
-                "Investigate the disputed tradeline and delete or correct any information "
-                "that cannot be verified as complete and accurate."
-            ),
+            requested_action=requested_action,
             evidence_checklist=evidence_checklist,
-            compliance_notes=[
-                "Draft requires staff review before sending.",
-                "Confirm consumer authorization and supporting evidence before submission.",
-            ],
+            compliance_notes=compliance_notes,
             evidence_ready=not missing_evidence,
             missing_evidence=[
                 MissingEvidenceResponse(
@@ -313,6 +341,8 @@ class AccountService:
         self,
         user: User,
         account_id: uuid.UUID,
+        *,
+        recipient_type: DisputeRecipientType = "credit_bureau",
     ) -> DisputeLetterResponse:
         self._require_write(user)
         account = await self._get_account_for_user(account_id, user)
@@ -321,7 +351,11 @@ class AccountService:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Dispute letter repository is not configured",
             )
-        draft = await self.get_dispute_draft(user, account_id)
+        draft = await self.get_dispute_draft(
+            user,
+            account_id,
+            recipient_type=recipient_type,
+        )
         now = datetime.now(UTC)
         dispute_letter = DisputeLetter(
             organization_id=account.organization_id,
