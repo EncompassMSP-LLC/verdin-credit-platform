@@ -43,12 +43,20 @@ from api.modules.timeline.builders import (
     dispute_letter_approved_event,
     dispute_letter_draft_created_event,
     dispute_letter_sent_event,
+    dispute_letter_voided_event,
     task_created_event,
 )
 from api.repositories.account import AccountRepositoryProtocol
 
 DISPUTE_DRAFT_REVIEW_TASK_SOURCE = "accounts.dispute_draft"
 DISPUTE_LETTER_REVIEW_TASK_SOURCE = "accounts.dispute_letter"
+_VOIDABLE_DISPUTE_LETTER_STATUSES = frozenset(
+    {
+        DisputeLetterStatus.DRAFT,
+        DisputeLetterStatus.REVIEW,
+        DisputeLetterStatus.APPROVED,
+    }
+)
 
 
 class AccountService:
@@ -485,6 +493,51 @@ class AccountService:
                 dispute_letter_sent_event(dispute_letter, user.id),
             )
             await publish_platform_event(self._session, account_updated_event(account, user.id))
+        return DisputeLetterResponse.from_model(dispute_letter)
+
+    async def void_dispute_letter(
+        self,
+        user: User,
+        account_id: uuid.UUID,
+        letter_id: uuid.UUID,
+    ) -> DisputeLetterResponse:
+        self._require_write(user)
+        account = await self._get_account_for_user(account_id, user)
+        if self._dispute_letters is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Dispute letter repository is not configured",
+            )
+
+        dispute_letter = await self._dispute_letters.get_for_account(
+            organization_id=account.organization_id,
+            account_id=account.id,
+            letter_id=letter_id,
+        )
+        if dispute_letter is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Dispute letter not found",
+            )
+
+        if dispute_letter.status == DisputeLetterStatus.VOID:
+            return DisputeLetterResponse.from_model(dispute_letter)
+
+        if dispute_letter.status not in _VOIDABLE_DISPUTE_LETTER_STATUSES:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Sent dispute letters cannot be voided",
+            )
+
+        dispute_letter.status = DisputeLetterStatus.VOID
+        apply_audit_on_update(dispute_letter, user.id)
+        if self._session is not None:
+            await self._session.flush()
+            await self._session.refresh(dispute_letter)
+            await publish_platform_event(
+                self._session,
+                dispute_letter_voided_event(dispute_letter, user.id),
+            )
         return DisputeLetterResponse.from_model(dispute_letter)
 
     async def create_dispute_draft_review_task(

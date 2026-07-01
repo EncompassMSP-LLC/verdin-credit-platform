@@ -184,6 +184,19 @@ async def send_account_dispute_letter(
     return await service.send_dispute_letter(current_user, account_id, letter_id)
 
 
+@router.post(
+    "/{account_id}/dispute-letters/{letter_id}/void",
+    response_model=DisputeLetterResponse,
+)
+async def void_account_dispute_letter(
+    account_id: uuid.UUID,
+    letter_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: AccountService = Depends(get_account_service),
+) -> DisputeLetterResponse:
+    return await service.void_dispute_letter(current_user, account_id, letter_id)
+
+
 @router.patch("/{account_id}", response_model=AccountResponse)
 async def update_account(
     account_id: uuid.UUID,

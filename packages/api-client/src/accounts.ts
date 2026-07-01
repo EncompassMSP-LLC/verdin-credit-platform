@@ -252,6 +252,16 @@ export async function sendAccountDisputeLetter(
   );
 }
 
+export async function voidAccountDisputeLetter(
+  accountId: string,
+  letterId: string,
+): Promise<DisputeLetter> {
+  return request<DisputeLetter>(
+    apiPath(`/accounts/${accountId}/dispute-letters/${letterId}/void`),
+    { method: 'POST' },
+  );
+}
+
 export async function updateAccount(
   accountId: string,
   input: UpdateAccountInput,

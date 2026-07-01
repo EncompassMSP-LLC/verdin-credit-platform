@@ -417,6 +417,113 @@ def test_send_account_dispute_letter_requires_approved_status(
     assert response.status_code == 422
 
 
+def test_void_account_dispute_letter(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    create = api_client.post(
+        "/api/v1/accounts",
+        headers=manager_headers,
+        json=sample_account_payload(sample_case_id),
+    )
+    account_id = create.json()["id"]
+
+    letter = api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-draft/letters",
+        headers=manager_headers,
+    )
+    letter_id = letter.json()["id"]
+
+    first_void = api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-letters/{letter_id}/void",
+        headers=manager_headers,
+    )
+    second_void = api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-letters/{letter_id}/void",
+        headers=manager_headers,
+    )
+
+    assert first_void.status_code == 200
+    assert second_void.status_code == 200
+    assert first_void.json()["status"] == "void"
+    assert second_void.json()["id"] == first_void.json()["id"]
+    assert second_void.json()["status"] == "void"
+
+
+def test_void_account_dispute_letter_from_approved(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    create = api_client.post(
+        "/api/v1/accounts",
+        headers=manager_headers,
+        json=sample_account_payload(sample_case_id),
+    )
+    account_id = create.json()["id"]
+
+    letter = api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-draft/letters",
+        headers=manager_headers,
+    )
+    letter_id = letter.json()["id"]
+
+    api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-letters/{letter_id}/review-task",
+        headers=manager_headers,
+    )
+    api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-letters/{letter_id}/approve",
+        headers=manager_headers,
+    )
+    response = api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-letters/{letter_id}/void",
+        headers=manager_headers,
+    )
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "void"
+
+
+def test_void_account_dispute_letter_rejects_sent(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    create = api_client.post(
+        "/api/v1/accounts",
+        headers=manager_headers,
+        json=sample_account_payload(sample_case_id),
+    )
+    account_id = create.json()["id"]
+
+    letter = api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-draft/letters",
+        headers=manager_headers,
+    )
+    letter_id = letter.json()["id"]
+
+    api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-letters/{letter_id}/review-task",
+        headers=manager_headers,
+    )
+    api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-letters/{letter_id}/approve",
+        headers=manager_headers,
+    )
+    api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-letters/{letter_id}/send",
+        headers=manager_headers,
+    )
+    response = api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-letters/{letter_id}/void",
+        headers=manager_headers,
+    )
+
+    assert response.status_code == 422
+
+
 def test_get_account_not_found(
     api_client: TestClient,
     manager_headers: dict[str, str],

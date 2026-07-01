@@ -11,6 +11,7 @@ import {
   getAccountDisputeDraft,
   listAccountDisputeLetters,
   sendAccountDisputeLetter,
+  voidAccountDisputeLetter,
   type DisputeLetter,
 } from '@verdin/api-client';
 import { ACCOUNT_TYPE_LABELS, DISPUTE_STATUS_LABELS, PAYMENT_STATUS_LABELS } from '@verdin/shared';
@@ -69,6 +70,16 @@ function SavedDisputeLetterRow({
     },
   });
 
+  const voidMutation = useMutation({
+    mutationFn: () => voidAccountDisputeLetter(accountId, letter.id),
+    onSuccess: () => {
+      onLetterUpdated();
+    },
+  });
+
+  const canVoid =
+    letter.status === 'draft' || letter.status === 'review' || letter.status === 'approved';
+
   return (
     <li className="flex flex-wrap items-center justify-between gap-4 p-3">
       <div>
@@ -105,6 +116,20 @@ function SavedDisputeLetterRow({
         {letter.status === 'sent' ? (
           <span className="text-xs font-medium text-blue-700">Sent</span>
         ) : null}
+        {letter.status === 'void' ? (
+          <span className="text-xs font-medium text-gray-600">Voided</span>
+        ) : null}
+        {canVoid ? (
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => voidMutation.mutate()}
+            loading={voidMutation.isPending}
+            disabled={voidMutation.isPending}
+          >
+            Void letter
+          </Button>
+        ) : null}
         {reviewTaskMutation.data ? (
           <Link to={`/tasks/${reviewTaskMutation.data.id}`}>
             <Button size="sm" variant="secondary">
@@ -131,6 +156,9 @@ function SavedDisputeLetterRow({
       ) : null}
       {sendMutation.isError ? (
         <p className="w-full text-xs text-red-600">Failed to mark this dispute letter as sent.</p>
+      ) : null}
+      {voidMutation.isError ? (
+        <p className="w-full text-xs text-red-600">Failed to void this dispute letter.</p>
       ) : null}
     </li>
   );

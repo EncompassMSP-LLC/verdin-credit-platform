@@ -61,6 +61,7 @@ export {
   createAccountDisputeLetterReviewTask,
   approveAccountDisputeLetter,
   sendAccountDisputeLetter,
+  voidAccountDisputeLetter,
   deleteAccount,
   getAccount,
   getAccountDisputeDraft,
