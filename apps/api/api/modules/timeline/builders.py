@@ -167,6 +167,40 @@ def account_dispute_status_changed_event(
     )
 
 
+def account_investigation_overdue_event(
+    account: Account,
+    performed_by: uuid.UUID,
+    *,
+    previous_investigation_status: str | None = None,
+) -> PlatformEvent:
+    investigation_status = (
+        account.investigation_status.value
+        if hasattr(account.investigation_status, "value")
+        else account.investigation_status
+    )
+    return PlatformEvent(
+        event_type="ACCOUNT_INVESTIGATION_OVERDUE",
+        event_category=EventCategory.ACCOUNT.value,
+        title="CRA investigation overdue",
+        description=(
+            f"CRA investigation for '{account.creditor_name}' is overdue — "
+            "statutory response window passed without a recorded outcome."
+        ),
+        organization_id=account.organization_id,
+        case_id=account.case_id,
+        account_id=account.id,
+        performed_by=performed_by,
+        source_module="accounts",
+        metadata={
+            "previous_investigation_status": previous_investigation_status,
+            "investigation_status": investigation_status,
+            "last_dispute_date": (
+                account.last_dispute_date.isoformat() if account.last_dispute_date else None
+            ),
+        },
+    )
+
+
 def dispute_letter_draft_created_event(
     dispute_letter: DisputeLetter,
     performed_by: uuid.UUID,

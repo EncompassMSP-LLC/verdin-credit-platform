@@ -21,6 +21,7 @@ const TASK_SOURCE_MODULE_OPTIONS = [
   { value: 'accounts.dispute_draft', label: 'Dispute draft review' },
   { value: 'accounts.dispute_letter', label: 'Dispute letter review' },
   { value: 'accounts.dispute_letter_followup', label: 'CRA response follow-up' },
+  { value: 'accounts.dispute_investigation_overdue', label: 'Overdue investigation escalation' },
   { value: 'documents.parsed_credit_report', label: 'Parsed report review' },
 ] as const;
 

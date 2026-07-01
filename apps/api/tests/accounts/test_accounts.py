@@ -1,6 +1,7 @@
 """Account management endpoint tests."""
 
 import uuid
+from datetime import date, timedelta
 
 from fastapi.testclient import TestClient
 
@@ -880,6 +881,121 @@ def test_record_account_dispute_response_received_requires_awaiting_response(
     )
 
     assert response.status_code == 422
+
+
+def _backdate_last_dispute_date(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    account_id: str,
+    *,
+    days_ago: int,
+) -> None:
+    past_date = (date.today() - timedelta(days=days_ago)).isoformat()
+    response = api_client.patch(
+        f"/api/v1/accounts/{account_id}",
+        headers=manager_headers,
+        json={"last_dispute_date": past_date},
+    )
+    assert response.status_code == 200
+
+
+def test_escalate_overdue_investigation_creates_task(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    create = api_client.post(
+        "/api/v1/accounts",
+        headers=manager_headers,
+        json=sample_account_payload(sample_case_id),
+    )
+    account_id = create.json()["id"]
+    _mark_account_awaiting_response(api_client, manager_headers, account_id)
+    _backdate_last_dispute_date(api_client, manager_headers, account_id, days_ago=31)
+
+    first = api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-investigation-overdue",
+        headers=manager_headers,
+    )
+    second = api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-investigation-overdue",
+        headers=manager_headers,
+    )
+
+    assert first.status_code == 200
+    assert second.status_code == 200
+    assert first.json()["investigation_status"] == "overdue"
+    assert second.json()["id"] == first.json()["id"]
+    assert second.json()["investigation_status"] == "overdue"
+    assert "Escalate overdue" in first.json()["ai_recommended_next_action"]
+
+    tasks = api_client.get(
+        "/api/v1/tasks",
+        headers=manager_headers,
+        params={"account_id": account_id},
+    )
+    assert tasks.status_code == 200
+    overdue_tasks = [
+        item
+        for item in tasks.json()["items"]
+        if item["source_module"] == "accounts.dispute_investigation_overdue"
+    ]
+    assert len(overdue_tasks) == 1
+    assert overdue_tasks[0]["source_event_id"] == account_id
+    assert overdue_tasks[0]["priority"] == "high"
+    assert "Escalate overdue CRA investigation" in overdue_tasks[0]["title"]
+
+
+def test_escalate_overdue_investigation_requires_deadline_passed(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    create = api_client.post(
+        "/api/v1/accounts",
+        headers=manager_headers,
+        json=sample_account_payload(sample_case_id),
+    )
+    account_id = create.json()["id"]
+    _mark_account_awaiting_response(api_client, manager_headers, account_id)
+
+    response = api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-investigation-overdue",
+        headers=manager_headers,
+    )
+
+    assert response.status_code == 422
+
+
+def test_get_account_auto_escalates_overdue_investigation(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    create = api_client.post(
+        "/api/v1/accounts",
+        headers=manager_headers,
+        json=sample_account_payload(sample_case_id),
+    )
+    account_id = create.json()["id"]
+    _mark_account_awaiting_response(api_client, manager_headers, account_id)
+    _backdate_last_dispute_date(api_client, manager_headers, account_id, days_ago=31)
+
+    response = api_client.get(f"/api/v1/accounts/{account_id}", headers=manager_headers)
+
+    assert response.status_code == 200
+    assert response.json()["investigation_status"] == "overdue"
+
+    tasks = api_client.get(
+        "/api/v1/tasks",
+        headers=manager_headers,
+        params={
+            "account_id": account_id,
+            "source_module": "accounts.dispute_investigation_overdue",
+        },
+    )
+    assert tasks.status_code == 200
+    assert len(tasks.json()["items"]) == 1
 
 
 def test_get_account_not_found(

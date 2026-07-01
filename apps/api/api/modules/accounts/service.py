@@ -1,7 +1,7 @@
 """Account management service — business logic and intelligence."""
 
 import uuid
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -49,6 +49,7 @@ from api.modules.tasks.schemas import TaskResponse
 from api.modules.timeline.builders import (
     account_created_event,
     account_dispute_status_changed_event,
+    account_investigation_overdue_event,
     account_status_changed_event,
     account_updated_event,
     dispute_letter_approved_event,
@@ -62,6 +63,7 @@ from api.repositories.account import AccountRepositoryProtocol
 DISPUTE_DRAFT_REVIEW_TASK_SOURCE = "accounts.dispute_draft"
 DISPUTE_LETTER_REVIEW_TASK_SOURCE = "accounts.dispute_letter"
 DISPUTE_LETTER_FOLLOWUP_TASK_SOURCE = "accounts.dispute_letter_followup"
+DISPUTE_INVESTIGATION_OVERDUE_TASK_SOURCE = "accounts.dispute_investigation_overdue"
 DISPUTE_LETTER_CRA_RESPONSE_DAYS = 30
 _DISPUTE_RESPONSE_OUTCOMES: dict[str, DisputeStatus] = {
     "verified": DisputeStatus.VERIFIED,
@@ -241,8 +243,16 @@ class AccountService:
         scoped = params.model_copy(update={"case_id": case_id})
         return await self.list_accounts(user, scoped)
 
+    @staticmethod
+    def _cra_response_deadline_passed(account: Account) -> bool:
+        if account.last_dispute_date is None:
+            return False
+        deadline = account.last_dispute_date + timedelta(days=DISPUTE_LETTER_CRA_RESPONSE_DAYS)
+        return date.today() > deadline
+
     async def get_account(self, user: User, account_id: uuid.UUID) -> AccountResponse:
         account = await self._get_account_for_user(account_id, user)
+        account = await self._maybe_escalate_overdue_investigation(user, account)
         return AccountResponse.from_model(account)
 
     async def get_dispute_draft(
@@ -530,6 +540,93 @@ class AccountService:
         if self._session is not None:
             await publish_platform_event(self._session, task_created_event(created, user.id))
 
+    async def _ensure_overdue_investigation_task(
+        self,
+        user: User,
+        account: Account,
+    ) -> None:
+        if self._tasks is None:
+            return
+
+        existing = await self._tasks.find_active_by_account_source(
+            organization_id=account.organization_id,
+            account_id=account.id,
+            source_module=DISPUTE_INVESTIGATION_OVERDUE_TASK_SOURCE,
+            source_event_id=account.id,
+        )
+        if existing is not None:
+            return
+
+        task = Task(
+            organization_id=account.organization_id,
+            case_id=account.case_id,
+            account_id=account.id,
+            title=f"Escalate overdue CRA investigation for {account.creditor_name}",
+            description=(
+                "The statutory CRA investigation window has passed without a recorded response. "
+                "Escalate with the bureau or furnisher and document next steps."
+            ),
+            priority=TaskPriority.HIGH,
+            due_date=datetime.now(UTC) + timedelta(days=2),
+            source_module=DISPUTE_INVESTIGATION_OVERDUE_TASK_SOURCE,
+            source_event_id=account.id,
+        )
+        apply_audit_on_create(task, user.id)
+        created = await self._tasks.create(task)
+        if self._session is not None:
+            await publish_platform_event(self._session, task_created_event(created, user.id))
+
+    async def _maybe_escalate_overdue_investigation(
+        self,
+        user: User,
+        account: Account,
+    ) -> Account:
+        if not self._should_escalate_overdue_investigation(account):
+            return account
+        return await self._escalate_overdue_investigation(user, account)
+
+    @staticmethod
+    def _should_escalate_overdue_investigation(account: Account) -> bool:
+        if account.dispute_status != DisputeStatus.AWAITING_RESPONSE:
+            return False
+        if account.investigation_status not in (
+            InvestigationStatus.PENDING,
+            InvestigationStatus.OVERDUE,
+        ):
+            return False
+        return AccountService._cra_response_deadline_passed(account)
+
+    async def _escalate_overdue_investigation(
+        self,
+        user: User,
+        account: Account,
+    ) -> Account:
+        if account.investigation_status == InvestigationStatus.OVERDUE:
+            await self._ensure_overdue_investigation_task(user, account)
+            return account
+
+        previous_investigation_status = (
+            account.investigation_status.value
+            if hasattr(account.investigation_status, "value")
+            else account.investigation_status
+        )
+        account.investigation_status = InvestigationStatus.OVERDUE
+        apply_account_intelligence(account)
+        account.ai_recommended_next_action = recommend_next_action(account)
+        apply_audit_on_update(account, user.id)
+        updated = await self._accounts.update(account)
+        await self._ensure_overdue_investigation_task(user, updated)
+        if self._session is not None:
+            await publish_platform_event(
+                self._session,
+                account_investigation_overdue_event(
+                    updated,
+                    user.id,
+                    previous_investigation_status=previous_investigation_status,
+                ),
+            )
+        return updated
+
     def _apply_dispute_sent_account_state(self, account: Account, *, sent_at: datetime) -> None:
         account.dispute_status = DisputeStatus.DISPUTE_SENT
         account.last_dispute_date = sent_at.date()
@@ -761,6 +858,39 @@ class AccountService:
                     previous_dispute_status=previous_dispute_status,
                 ),
             )
+        return AccountResponse.from_model(updated)
+
+    async def escalate_overdue_investigation(
+        self,
+        user: User,
+        account_id: uuid.UUID,
+    ) -> AccountResponse:
+        self._require_write(user)
+        account = await self._get_account_for_user(account_id, user)
+
+        if account.investigation_status == InvestigationStatus.OVERDUE:
+            updated = await self._escalate_overdue_investigation(user, account)
+            return AccountResponse.from_model(updated)
+
+        if account.dispute_status != DisputeStatus.AWAITING_RESPONSE:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Account must be awaiting response before marking investigation overdue",
+            )
+
+        if account.investigation_status != InvestigationStatus.PENDING:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Investigation must be pending before marking overdue",
+            )
+
+        if not self._cra_response_deadline_passed(account):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="CRA investigation window has not passed yet",
+            )
+
+        updated = await self._escalate_overdue_investigation(user, account)
         return AccountResponse.from_model(updated)
 
     async def create_dispute_draft_review_task(

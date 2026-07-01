@@ -120,6 +120,7 @@ Credit tradeline accounts with intelligence scoring. All endpoints require authe
 | POST   | `/accounts/{account_id}/dispute-letters/{letter_id}/void`        | case_manager | Void an in-flight letter                              |
 | POST   | `/accounts/{account_id}/dispute-awaiting-response`               | case_manager | Mark account awaiting CRA response                    |
 | POST   | `/accounts/{account_id}/dispute-response-received`               | case_manager | Record CRA outcome (`verified`/`corrected`/`deleted`) |
+| POST   | `/accounts/{account_id}/dispute-investigation-overdue`           | case_manager | Mark investigation overdue + escalation task          |
 | PATCH  | `/accounts/{account_id}`                                         | case_manager | Update an account                                     |
 | DELETE | `/accounts/{account_id}`                                         | admin        | Soft-delete an account                                |
 
@@ -163,6 +164,8 @@ Accounts automatically compute `risk_score`, `readiness_score`, `next_eligible_d
 `POST /accounts/{account_id}/dispute-awaiting-response` transitions an account from `dispute_sent` to `awaiting_response`, sets `investigation_status` to `pending` when unset, and emits a timeline event. Already `awaiting_response` accounts are idempotent; other statuses return `422`.
 
 `POST /accounts/{account_id}/dispute-response-received` records a CRA investigation outcome for accounts in `awaiting_response`. Body: `{ "outcome": "verified" | "corrected" | "deleted" }`. Sets `response_received=true`, updates `dispute_status`, marks `investigation_status` as `completed`, refreshes intelligence, and emits a timeline event. Idempotent when the same outcome is already recorded; other statuses return `422`.
+
+`POST /accounts/{account_id}/dispute-investigation-overdue` marks a pending CRA investigation as `overdue` when the statutory response window (`last_dispute_date` + 30 days) has passed without a recorded outcome. Auto-creates a high-priority escalation task (`accounts.dispute_investigation_overdue`), refreshes intelligence, and emits a timeline event. Idempotent when already overdue (ensures the escalation task exists). `GET /accounts/{account_id}` performs the same escalation automatically when eligible. Accounts not in `awaiting_response`, investigations not `pending`, or deadlines not yet passed return `422`.
 
 ## Documents
 

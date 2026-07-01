@@ -318,6 +318,12 @@ export async function markAccountDisputeResponseReceived(
   });
 }
 
+export async function escalateAccountOverdueInvestigation(accountId: string): Promise<Account> {
+  return request<Account>(apiPath(`/accounts/${accountId}/dispute-investigation-overdue`), {
+    method: 'POST',
+  });
+}
+
 export async function updateAccount(
   accountId: string,
   input: UpdateAccountInput,
