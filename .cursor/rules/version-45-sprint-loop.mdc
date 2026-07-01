@@ -1,0 +1,57 @@
+---
+description: Version 4.5 sprint loop — sync, slice, verify, PR, auto-merge
+alwaysApply: true
+---
+
+# Version 4.5 Sprint Loop
+
+Use this loop when continuing dispute-generation / credit-intelligence work without waiting for manual "merge and continue" messages.
+
+## When triggered
+
+- User says merge and continue, execute next steps, or similar
+- Cursor Automation fires after a PR merges to `main`
+- You detect `main` advanced since the last slice (via `git fetch` + log)
+
+## Loop steps (always in order)
+
+1. **Sync** — `git checkout main && git pull origin main`
+2. **Scope** — pick the next small, reviewable Version 4.5 slice (one concern per PR)
+3. **Branch** — `git checkout -b feature/<short-name>` from synced `main`
+4. **Implement** — backend + tests + `@verdin/api-client` + UI (if applicable) + docs
+5. **Verify**
+   - `python -m pytest` for touched API tests (`DATABASE_URL` → `verdin_credit_test`)
+   - `pnpm --filter @verdin/api-client build` before web typecheck
+   - `pnpm --filter @verdin/web typecheck` and `lint` when web changes
+   - pre-commit hooks must pass before commit
+6. **Ship** — conventional commit, push, open PR to `main`
+7. **Auto-merge** — after `gh pr create`, run:
+   ```bash
+   gh pr merge --auto --squash
+   ```
+   CI + `.github/workflows/enable-auto-merge.yml` will queue merge when checks pass.
+8. **Continue** — do not stop for user input unless blocked; after merge (or Automation re-trigger), start step 1 again
+
+## Slice sizing
+
+- One endpoint, one UI surface, or one workflow handoff per PR
+- Follow existing patterns in `apps/api/api/modules/accounts/` for dispute letters
+- Update `docs/api/reference.md`, `docs/governance/capability-matrix.md`, and ERD when schema changes
+
+## GitHub CLI (Windows)
+
+Use full path when `gh` is not on PATH:
+
+`C:\Program Files\GitHub CLI\gh.exe`
+
+## Blockers — stop and report
+
+- CI failing after reasonable fix attempts
+- Migration conflicts or ambiguous product decisions
+- Branch protection prevents auto-merge (document required settings)
+
+## Version 4.5 dispute letter lifecycle (reference)
+
+`draft` → review task → `review` → approve → `approved` → send → `sent` (+ account `dispute_status` sync)
+
+Next slices after sent: void/cancel letters, `awaiting_response` transitions, furnisher letters, PDF export, etc.
