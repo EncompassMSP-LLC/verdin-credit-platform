@@ -434,7 +434,7 @@ export function AccountDetailPage() {
         </Card>
 
         <Card title="Dispute workflow" className="lg:col-span-3">
-          <dl className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div>
               <dt className="text-xs text-gray-500">Dispute status</dt>
               <dd className="mt-1">
@@ -451,7 +451,27 @@ export function AccountDetailPage() {
                 {DISPUTE_STATUS_LABELS[data.dispute_status]}
               </dd>
             </div>
+            <div>
+              <dt className="text-xs text-gray-500">Investigation status</dt>
+              <dd className="text-sm capitalize text-gray-900">{data.investigation_status}</dd>
+            </div>
           </dl>
+          {data.dispute_status === 'awaiting_response' &&
+          data.investigation_status === 'overdue' ? (
+            <div className="mt-4 rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+              <p className="font-medium">CRA investigation is overdue</p>
+              <p className="mt-1 text-amber-800">
+                The statutory response window passed without a recorded outcome. An escalation task
+                was created automatically.
+              </p>
+              <Link
+                to="/tasks"
+                className="mt-2 inline-block text-sm font-medium text-amber-900 underline"
+              >
+                View tasks →
+              </Link>
+            </div>
+          ) : null}
           {data.dispute_status === 'dispute_sent' ? (
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <Button

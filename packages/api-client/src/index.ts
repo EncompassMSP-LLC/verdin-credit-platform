@@ -70,6 +70,7 @@ export {
   getAccountDisputeLetter,
   markAccountAwaitingDisputeResponse,
   markAccountDisputeResponseReceived,
+  escalateAccountOverdueInvestigation,
   listAccounts,
   listCaseAccounts,
   updateAccount,

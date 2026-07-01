@@ -241,6 +241,15 @@ async def record_account_dispute_response_received(
     return await service.record_dispute_response_received(current_user, account_id, body)
 
 
+@router.post("/{account_id}/dispute-investigation-overdue", response_model=AccountResponse)
+async def escalate_account_overdue_investigation(
+    account_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: AccountService = Depends(get_account_service),
+) -> AccountResponse:
+    return await service.escalate_overdue_investigation(current_user, account_id)
+
+
 @router.patch("/{account_id}", response_model=AccountResponse)
 async def update_account(
     account_id: uuid.UUID,

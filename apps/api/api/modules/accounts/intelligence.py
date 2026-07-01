@@ -149,6 +149,8 @@ def recommend_next_action(account: Account) -> str:
     if account.dispute_status == DisputeStatus.READY_FOR_DISPUTE:
         return "Prepare and send dispute letter to CRA"
     if account.dispute_status == DisputeStatus.AWAITING_RESPONSE:
+        if account.investigation_status == InvestigationStatus.OVERDUE:
+            return "Escalate overdue investigation"
         return "Follow up on pending CRA or furnisher response"
     if account.dispute_status == DisputeStatus.VERIFIED:
         return "Review verified tradeline reporting and decide on escalation or monitoring"
