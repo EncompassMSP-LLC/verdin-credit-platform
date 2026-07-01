@@ -208,19 +208,29 @@ Set flags in `.env` (see `.env.example`). Restart the dev server after changing 
 
 ## Background Jobs
 
-The worker (`apps/worker`) processes asynchronous jobs from a Redis queue. Sprint 1 provides the architecture only; job implementations are placeholders until Sprint 2.
+The worker (`apps/worker`) processes asynchronous jobs from a Redis queue. Shared orchestration primitives live in **`packages/job-orchestrator/`** (`verdin-job-orchestrator`) — see [ADR-011](../adr/011-job-orchestrator.md). The worker and API import from that package via thin re-export modules.
 
 ### Layout
 
 ```
+packages/job-orchestrator/
+  verdin_job_orchestrator/
+    job.py                # BaseJob, JobContext, JobResult
+    constants.py          # JobType, JobStatus (single source of truth)
+    registry.py           # @register_job decorator and lookup
+    queue.py              # JobMessage, RedisJobQueue
+    retry.py              # RetryPolicy scaffold
+    scheduler.py          # ScheduledJob registry (cron wiring deferred)
+    metrics.py            # JobMetricsRecorder scaffold
+
 apps/worker/
   main.py                 # Entry point
   worker/
     config.py             # WorkerSettings (Redis URL, queue name, poll interval)
-    constants.py          # JobType, JobStatus
-    base.py               # BaseJob, JobContext, JobResult
-    registry.py           # @register_job decorator and lookup
-    queue.py              # enqueue_job / dequeue_job (Redis LPUSH / BRPOP)
+    constants.py          # Re-exports from verdin_job_orchestrator
+    base.py               # Re-exports from verdin_job_orchestrator
+    registry.py           # Re-exports from verdin_job_orchestrator
+    queue.py              # RedisJobQueue wired to WorkerSettings
     runner.py             # Poll loop and dispatch
     jobs/                 # One module per job type
 ```
@@ -248,7 +258,7 @@ enqueue_job(JobType.OVERDUE_INVESTIGATION_SCAN, {})
 
 `pending` → `queued` → `running` → `completed` | `failed` | `cancelled`
 
-Statuses are defined in `worker/constants.py` (`JobStatus`). Sprint 2 will persist status transitions in PostgreSQL; the queue message currently carries an initial `queued` status.
+Statuses are defined in `packages/job-orchestrator/verdin_job_orchestrator/constants.py` (`JobStatus`). Sprint 2 will persist status transitions in PostgreSQL; the queue message currently carries an initial `queued` status.
 
 ### Running the worker locally
 

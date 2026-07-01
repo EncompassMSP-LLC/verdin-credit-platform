@@ -56,6 +56,7 @@ One decision per file. Do not append new decisions to existing ADR files.
 | [008](008-background-jobs.md)         | Redis-backed background jobs           | Accepted |
 | [009](009-architecture-governance.md) | Architecture governance and V5 roadmap | Accepted |
 | [010](010-capability-matrix.md)       | Platform capability matrix             | Accepted |
+| [011](011-job-orchestrator.md)        | Unified job orchestration package      | Accepted |
 
 > **Note:** ADRs 001–004 were recorded in a single legacy file before the formal template was introduced. New ADRs from 005 onward follow [`template.md`](template.md).
 

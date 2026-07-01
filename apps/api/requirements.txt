@@ -1,3 +1,4 @@
+-e ../../packages/job-orchestrator
 -e ../../packages/document-classification
 -e ../../packages/document-metadata
 -e ../../packages/entity-resolution

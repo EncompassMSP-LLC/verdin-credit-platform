@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY apps/api/requirements.txt .
+COPY packages/job-orchestrator /packages/job-orchestrator
 COPY packages/document-classification /packages/document-classification
 COPY packages/document-metadata /packages/document-metadata
 COPY packages/entity-resolution /packages/entity-resolution

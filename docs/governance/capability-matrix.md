@@ -146,11 +146,12 @@ Scope and deferrals: [version-4.5-scope.md](version-4.5-scope.md)
 
 Scope: [version-4.8-scope.md](version-4.8-scope.md)
 
-| Capability              | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                           |
-| ----------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | --------------------------------------------------------------- |
-| In-App Notifications    | 4.8     | Partial | ✅      | ✅       | ✅  | —   | ✅    | Auth         | Staff bell + API; email/SMS deferred                            |
-| Client Portal           | 4.8     | Planned | —       | —        | —   | —   | —     | Client Mgmt  | Auth partition + progress view planned                          |
-| Workflow Scheduled Jobs | 4.8     | Partial | ✅      | —        | —   | —   | ✅    | Worker       | `overdue_investigation_scan` job; manual POST endpoint retained |
+| Capability              | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                               |
+| ----------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ------------------------------------------------------------------- |
+| In-App Notifications    | 4.8     | Partial | ✅      | ✅       | ✅  | —   | ✅    | Auth         | Staff bell + API; email/SMS deferred                                |
+| Client Portal           | 4.8     | Planned | —       | —        | —   | —   | —     | Client Mgmt  | Auth partition + progress view planned                              |
+| Workflow Scheduled Jobs | 4.8     | Partial | ✅      | —        | —   | —   | ✅    | Worker       | `overdue_investigation_scan` job; manual POST endpoint retained     |
+| Job Orchestration       | 4.8     | Partial | 🚧      | —        | —   | —   | ✅    | Worker, API  | `packages/job-orchestrator` scaffold; retry/metrics wiring deferred |
 
 ---
 

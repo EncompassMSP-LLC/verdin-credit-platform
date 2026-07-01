@@ -7,6 +7,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 COPY apps/worker/requirements.txt .
+COPY packages/job-orchestrator /packages/job-orchestrator
 COPY packages/report-parsers /packages/report-parsers
 COPY packages/document-classification /packages/document-classification
 COPY packages/document-metadata /packages/document-metadata

@@ -1,0 +1,25 @@
+[project]
+name = "verdin-job-orchestrator"
+version = "0.1.0"
+description = "Shared job orchestration primitives for Verdin platform workers"
+requires-python = ">=3.13"
+dependencies = [
+    "pydantic>=2.10.3",
+    "redis>=5.2.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.4",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["verdin_job_orchestrator"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
