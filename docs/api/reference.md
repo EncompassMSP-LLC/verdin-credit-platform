@@ -109,6 +109,7 @@ Credit tradeline accounts with intelligence scoring. All endpoints require authe
 | GET    | `/accounts/{account_id}`                                         | read_only    | Get account by ID                         |
 | GET    | `/accounts/{account_id}/dispute-draft`                           | read_only    | Preview rule-based dispute draft          |
 | GET    | `/accounts/{account_id}/dispute-letters`                         | read_only    | List saved dispute letter drafts          |
+| GET    | `/accounts/{account_id}/dispute-letters/{letter_id}`             | read_only    | Get saved dispute letter details          |
 | POST   | `/accounts/{account_id}/dispute-draft/letters`                   | case_manager | Save generated dispute draft              |
 | POST   | `/accounts/{account_id}/dispute-draft/review-task`               | case_manager | Create or reuse dispute draft review task |
 | POST   | `/accounts/{account_id}/dispute-letters/{letter_id}/review-task` | case_manager | Create or reuse saved letter review task  |
@@ -146,7 +147,7 @@ Accounts automatically compute `risk_score`, `readiness_score`, `next_eligible_d
 
 `POST /accounts/{account_id}/dispute-draft/review-task` creates or reuses an active high-priority task linked to the account and draft source, giving staff an explicit workflow item before any dispute is sent.
 
-`POST /accounts/{account_id}/dispute-draft/letters` saves the current rule-based preview as a `draft` dispute letter artifact. `GET /accounts/{account_id}/dispute-letters` lists saved drafts for the account.
+`POST /accounts/{account_id}/dispute-draft/letters` saves the current rule-based preview as a `draft` dispute letter artifact. `GET /accounts/{account_id}/dispute-letters` lists saved drafts for the account. `GET /accounts/{account_id}/dispute-letters/{letter_id}` returns the full letter body, checklists, and metadata for a single artifact.
 
 `POST /accounts/{account_id}/dispute-letters/{letter_id}/review-task` creates or reuses an active high-priority task for a saved letter, transitions `draft` letters to `review`, and links the task to the letter artifact.
 
