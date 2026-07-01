@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ApiClientError,
+  extractDocumentMetadata,
   getDocument,
   getDocumentMetadata,
   getDocumentOcr,
@@ -9,6 +10,7 @@ import {
   getDocumentResolutions,
   listCases,
   resolveDocumentEntities,
+  retryDocumentOcr,
   type Document,
   type DocumentEntityResolution,
   type DocumentMetadata,
@@ -32,6 +34,10 @@ type StepStatus = 'pending' | 'active' | 'complete' | 'failed';
 
 function isNotFound(error: unknown): boolean {
   return error instanceof ApiClientError && error.status === 404;
+}
+
+function errorMessage(error: unknown, fallback: string): string {
+  return error instanceof Error ? error.message : fallback;
 }
 
 function formatPercent(value: number | null | undefined): string {
@@ -259,6 +265,43 @@ export function CreditReportImportWizard() {
     },
   });
 
+  const retryOcrMutation = useMutation({
+    mutationFn: () => retryDocumentOcr(documentId!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['document', documentId] });
+      queryClient.invalidateQueries({ queryKey: ['document-ocr', documentId] });
+      queryClient.invalidateQueries({ queryKey: ['document-metadata', documentId] });
+      queryClient.invalidateQueries({ queryKey: ['document-parsed-credit-report', documentId] });
+      queryClient.invalidateQueries({ queryKey: ['document-resolutions', documentId] });
+    },
+  });
+
+  const extractMetadataMutation = useMutation({
+    mutationFn: () => extractDocumentMetadata(documentId!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['document-metadata', documentId] });
+      queryClient.invalidateQueries({ queryKey: ['document-parsed-credit-report', documentId] });
+      queryClient.invalidateQueries({ queryKey: ['document-resolutions', documentId] });
+      queryClient.invalidateQueries({ queryKey: ['document', documentId] });
+    },
+  });
+
+  const resetImport = () => {
+    if (documentId) {
+      queryClient.removeQueries({ queryKey: ['document', documentId] });
+      queryClient.removeQueries({ queryKey: ['document-ocr', documentId] });
+      queryClient.removeQueries({ queryKey: ['document-metadata', documentId] });
+      queryClient.removeQueries({ queryKey: ['document-parsed-credit-report', documentId] });
+      queryClient.removeQueries({ queryKey: ['document-resolutions', documentId] });
+    }
+    setTitle('');
+    setDescription('');
+    setCaseId(searchParams.get('case_id') ?? '');
+    setFile(null);
+    setDocumentId(null);
+    setFormError(null);
+  };
+
   const selectedCase = useMemo(
     () => casesQuery.data?.items.find((caseItem) => caseItem.id === caseId),
     [caseId, casesQuery.data?.items],
@@ -298,6 +341,15 @@ export function CreditReportImportWizard() {
 
   const importComplete =
     uploadStatus === 'complete' && metadataStatus === 'complete' && resolutionStatus === 'complete';
+
+  const casesAvailable = (casesQuery.data?.items.length ?? 0) > 0;
+  const casesReady = !casesQuery.isLoading && !casesQuery.isError && casesAvailable;
+  const parsedReportPending =
+    Boolean(ocrQuery.data?.ocr_text) &&
+    !parsedReportQuery.data &&
+    (!parsedReportQuery.isError || isNotFound(parsedReportQuery.error));
+  const parsedReportFailed =
+    Boolean(parsedReportQuery.isError) && !isNotFound(parsedReportQuery.error);
 
   if (!featureFlags.enableImports) {
     return (
@@ -358,6 +410,9 @@ export function CreditReportImportWizard() {
                   </Button>
                 </Link>
               ) : null}
+              <Button size="sm" variant="secondary" onClick={resetImport}>
+                Start new import
+              </Button>
             </div>
           </div>
         </Card>
@@ -397,16 +452,40 @@ export function CreditReportImportWizard() {
                 className={inputClass}
                 value={caseId}
                 onChange={(event) => setCaseId(event.target.value)}
-                disabled={Boolean(documentId)}
+                disabled={Boolean(documentId) || casesQuery.isLoading || casesQuery.isError}
                 required
               >
-                <option value="">Select a case</option>
+                <option value="">
+                  {casesQuery.isLoading ? 'Loading cases...' : 'Select a case'}
+                </option>
                 {casesQuery.data?.items.map((caseItem) => (
                   <option key={caseItem.id} value={caseItem.id}>
                     {caseItem.title} ({caseItem.client_name})
                   </option>
                 ))}
               </select>
+              {casesQuery.isError ? (
+                <div className="mt-2 space-y-2 rounded-md bg-red-50 p-3 text-sm text-red-700">
+                  <p>{errorMessage(casesQuery.error, 'Failed to load cases')}</p>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => casesQuery.refetch()}
+                  >
+                    Retry loading cases
+                  </Button>
+                </div>
+              ) : null}
+              {!casesQuery.isLoading && !casesQuery.isError && !casesAvailable ? (
+                <p className="mt-2 text-sm text-amber-700">
+                  No cases available.{' '}
+                  <Link to="/cases/new" className="font-medium text-brand-600 hover:underline">
+                    Create a case
+                  </Link>{' '}
+                  before importing a credit report.
+                </p>
+              ) : null}
             </div>
 
             <div>
@@ -460,7 +539,11 @@ export function CreditReportImportWizard() {
               <div className="rounded-md bg-red-50 p-3 text-sm text-red-700">{formError}</div>
             ) : null}
 
-            <Button type="submit" loading={uploadMutation.isPending} disabled={Boolean(documentId)}>
+            <Button
+              type="submit"
+              loading={uploadMutation.isPending}
+              disabled={Boolean(documentId) || !casesReady}
+            >
               Start import
             </Button>
           </form>
@@ -494,9 +577,26 @@ export function CreditReportImportWizard() {
             ) : ocrStatus === 'active' ? (
               <p className="text-sm text-gray-500">OCR and classification are running.</p>
             ) : ocrStatus === 'failed' ? (
-              <p className="text-sm text-red-600">
-                {ocrQuery.data?.ocr_error ?? 'OCR failed. Open the document to retry.'}
-              </p>
+              <div className="space-y-3">
+                <p className="text-sm text-red-600">
+                  {ocrQuery.data?.ocr_error ?? 'OCR failed for this document.'}
+                </p>
+                {documentId ? (
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => retryOcrMutation.mutate()}
+                    loading={retryOcrMutation.isPending}
+                  >
+                    Retry OCR
+                  </Button>
+                ) : null}
+                {retryOcrMutation.isError ? (
+                  <p className="text-sm text-red-600">
+                    {errorMessage(retryOcrMutation.error, 'OCR retry failed')}
+                  </p>
+                ) : null}
+              </div>
             ) : (
               <p className="text-sm text-gray-500">Waiting for upload.</p>
             )}
@@ -507,6 +607,20 @@ export function CreditReportImportWizard() {
               <div className="space-y-4">
                 {parsedReportQuery.data ? (
                   <ParserSummary parsedReport={parsedReportQuery.data} />
+                ) : parsedReportFailed ? (
+                  <p className="text-sm text-red-600">
+                    {errorMessage(parsedReportQuery.error, 'Failed to load parsed credit report')}
+                  </p>
+                ) : parsedReportPending ? (
+                  <p className="text-sm text-gray-500">
+                    Waiting for bureau parser output. Metadata may arrive before structured
+                    tradelines are ready.
+                  </p>
+                ) : metadataQuery.data.metadata_status === 'extracted' ? (
+                  <p className="text-sm text-amber-700">
+                    Structured parser output is not available for this report. Metadata was
+                    extracted using the rules fallback.
+                  </p>
                 ) : null}
                 {parsedReportQuery.data ? (
                   <div>
@@ -515,21 +629,68 @@ export function CreditReportImportWizard() {
                   </div>
                 ) : null}
                 <MetadataSummary metadata={metadataQuery.data} />
-                <div className="flex items-center gap-2 text-xs text-gray-500">
+                <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
                   <DocumentMetadataStatusBadge status={metadataQuery.data.metadata_status} />
                   <span>via {metadataQuery.data.extraction_method}</span>
                 </div>
+                {documentId && ocrQuery.data?.ocr_text ? (
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => extractMetadataMutation.mutate()}
+                    loading={extractMetadataMutation.isPending}
+                  >
+                    Re-run extraction
+                  </Button>
+                ) : null}
+                {extractMetadataMutation.isError ? (
+                  <p className="text-sm text-red-600">
+                    {errorMessage(extractMetadataMutation.error, 'Metadata extraction failed')}
+                  </p>
+                ) : null}
               </div>
             ) : metadataStatus === 'active' ? (
-              <p className="text-sm text-gray-500">
-                The worker is parsing the report and bridging structured fields into metadata.
-              </p>
+              <div className="space-y-3">
+                <p className="text-sm text-gray-500">
+                  The worker is parsing the report and bridging structured fields into metadata.
+                </p>
+                {parsedReportPending ? (
+                  <p className="text-sm text-gray-500">Bureau parser output is still processing.</p>
+                ) : null}
+                {documentId && ocrQuery.data?.ocr_text ? (
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => extractMetadataMutation.mutate()}
+                    loading={extractMetadataMutation.isPending}
+                  >
+                    Run extraction now
+                  </Button>
+                ) : null}
+              </div>
             ) : metadataStatus === 'failed' ? (
-              <p className="text-sm text-red-600">
-                {metadataQuery.error instanceof Error
-                  ? metadataQuery.error.message
-                  : 'Metadata extraction failed'}
-              </p>
+              <div className="space-y-3">
+                <p className="text-sm text-red-600">
+                  {isNotFound(metadataQuery.error)
+                    ? 'Metadata has not been extracted yet.'
+                    : errorMessage(metadataQuery.error, 'Metadata extraction failed')}
+                </p>
+                {documentId && ocrQuery.data?.ocr_text ? (
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => extractMetadataMutation.mutate()}
+                    loading={extractMetadataMutation.isPending}
+                  >
+                    Run extraction
+                  </Button>
+                ) : null}
+                {extractMetadataMutation.isError ? (
+                  <p className="text-sm text-red-600">
+                    {errorMessage(extractMetadataMutation.error, 'Metadata extraction failed')}
+                  </p>
+                ) : null}
+              </div>
             ) : (
               <p className="text-sm text-gray-500">Waiting for OCR text.</p>
             )}
@@ -563,11 +724,19 @@ export function CreditReportImportWizard() {
                 </Button>
               </div>
             ) : resolutionStatus === 'failed' ? (
-              <p className="text-sm text-red-600">
-                {resolutionsQuery.error instanceof Error
-                  ? resolutionsQuery.error.message
-                  : 'Entity resolution failed'}
-              </p>
+              <div className="space-y-3">
+                <p className="text-sm text-red-600">
+                  {errorMessage(resolutionsQuery.error, 'Entity resolution failed')}
+                </p>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => resolveMutation.mutate()}
+                  loading={resolveMutation.isPending}
+                >
+                  Retry matching
+                </Button>
+              </div>
             ) : (
               <p className="text-sm text-gray-500">Waiting for metadata.</p>
             )}
