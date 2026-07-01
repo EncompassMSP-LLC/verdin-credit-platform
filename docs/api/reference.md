@@ -97,6 +97,34 @@ All case endpoints require authentication. Users are scoped to their organizatio
 | ------ | --------------------------- | --------- | ------------------------ |
 | GET    | `/cases/{case_id}/accounts` | read_only | List accounts for a case |
 
+## Clients
+
+Client records and nested contacts for credit repair consumers. Organization-scoped; distinct from credit tradeline **accounts**.
+
+| Method | Path                                 | Min role     | Description              |
+| ------ | ------------------------------------ | ------------ | ------------------------ |
+| POST   | `/clients`                           | case_manager | Create a client          |
+| GET    | `/clients`                           | read_only    | List clients             |
+| GET    | `/clients/{client_id}`               | read_only    | Get client by ID         |
+| PATCH  | `/clients/{client_id}`               | case_manager | Update a client          |
+| DELETE | `/clients/{client_id}`               | admin        | Soft-delete a client     |
+| POST   | `/clients/{client_id}/contacts`      | case_manager | Add a contact            |
+| GET    | `/clients/{client_id}/contacts`      | read_only    | List contacts for client |
+| GET    | `/clients/{client_id}/contacts/{id}` | read_only    | Get contact by ID        |
+| PATCH  | `/clients/{client_id}/contacts/{id}` | case_manager | Update a contact         |
+| DELETE | `/clients/{client_id}/contacts/{id}` | admin        | Soft-delete a contact    |
+
+**List query parameters (clients):** `page`, `page_size`, `search`, `status`, `sort_by`, `sort_order`
+
+**List query parameters (contacts):** `page`, `page_size`, `search`, `relationship_type`, `is_primary`, `sort_by`, `sort_order`
+
+**Enums:**
+
+- **client status:** `active`, `inactive`
+- **contact relationship:** `primary`, `spouse`, `attorney`, `authorized`, `other`
+
+Only one contact per client may have `is_primary=true` at a time.
+
 ## Accounts
 
 Credit tradeline accounts with intelligence scoring. All endpoints require authentication and organization scoping.

@@ -23,7 +23,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | 3     | Notification center UI (staff web)           | Notifications | ✅     |
 | 4     | Scheduled overdue investigation worker       | Workflow      | ✅     |
 | 5     | `job-orchestrator` package scaffold + ADR    | Platform      | ✅     |
-| 6     | Client + contact model                       | Client Mgmt   | —      |
+| 6     | Client + contact model                       | Client Mgmt   | ✅     |
 | 7     | Client portal auth partition                 | Client Portal | —      |
 | 8     | LLM policy ADR + provider config gates       | AI            | —      |
 | 9     | Email delivery scaffold (feature-flagged)    | Comms         | —      |

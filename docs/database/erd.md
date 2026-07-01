@@ -5,7 +5,9 @@
 ```mermaid
 erDiagram
     Organization ||--o{ User : has
+    Organization ||--o{ Client : has
     Organization ||--o{ Case : has
+    Client ||--o{ ClientContact : has
     Organization ||--o{ Account : has
     Case ||--o{ Account : "credit tradelines"
     Account ||--o{ DisputeLetter : has
@@ -40,6 +42,28 @@ erDiagram
         timestamp created_at
         timestamp updated_at
         timestamp deleted_at
+    }
+
+    Client {
+        uuid id PK
+        uuid organization_id FK
+        string display_name
+        string email
+        string phone
+        enum status
+        text notes
+    }
+
+    ClientContact {
+        uuid id PK
+        uuid organization_id FK
+        uuid client_id FK
+        string full_name
+        string email
+        string phone
+        enum relationship
+        boolean is_primary
+        text notes
     }
 
     Account {

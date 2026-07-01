@@ -5,6 +5,7 @@ from api.modules.accounts.dispute_letter_models import DisputeLetter, DisputeLet
 from api.modules.accounts.models import Account
 from api.modules.auth.models import Organization, User
 from api.modules.cases.models import Case, CaseStatus
+from api.modules.clients.models import Client, ClientContact, ClientStatus, ContactRelationship
 from api.modules.documents.models import Document
 from api.modules.notifications.models import Notification, NotificationCategory
 from api.modules.tasks.models import Task, TaskPriority, TaskStatus
@@ -14,6 +15,10 @@ __all__ = [
     "Account",
     "Case",
     "CaseStatus",
+    "Client",
+    "ClientContact",
+    "ClientStatus",
+    "ContactRelationship",
     "Communication",
     "Document",
     "DisputeLetter",
