@@ -13,10 +13,10 @@ def expect_ok(
     label: str,
     artifacts: ArtifactCollector,
     expected_status: int = 200,
-) -> dict:
+) -> dict | list:
     """Assert an expected status code, recording the exchange as an artifact.
 
-    Returns the parsed JSON body on success.
+    Returns the parsed JSON body on success (object or array).
     """
     body: object
     try:
@@ -37,4 +37,6 @@ def expect_ok(
     assert response.status_code == expected_status, (
         f"{label}: expected {expected_status}, got {response.status_code}. Body: {body!r}"
     )
-    return body if isinstance(body, dict) else {}
+    if isinstance(body, (dict, list)):
+        return body
+    return {}
