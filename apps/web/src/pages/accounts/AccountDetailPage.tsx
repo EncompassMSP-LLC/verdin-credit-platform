@@ -540,6 +540,38 @@ export function AccountDetailPage() {
               ) : null}
 
               <div>
+                <h4 className="text-sm font-semibold text-gray-900">Suggested dispute reasons</h4>
+                {disputeDraftQuery.data.dispute_reason_suggestions.length > 0 ? (
+                  <ul className="mt-2 space-y-3">
+                    {disputeDraftQuery.data.dispute_reason_suggestions.map((suggestion) => (
+                      <li
+                        key={suggestion.code}
+                        className="rounded-md border border-gray-200 bg-white p-3"
+                      >
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <p className="text-sm font-medium text-gray-900">{suggestion.title}</p>
+                          <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-gray-500">
+                            <span>{suggestion.category}</span>
+                            <span>{suggestion.severity}</span>
+                          </div>
+                        </div>
+                        <p className="mt-2 text-sm text-gray-700">{suggestion.description}</p>
+                        {suggestion.requires_evidence.length > 0 ? (
+                          <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-gray-600">
+                            {suggestion.requires_evidence.map((item) => (
+                              <li key={item}>{item}</li>
+                            ))}
+                          </ul>
+                        ) : null}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <EmptyListText>No dispute reason suggestions generated.</EmptyListText>
+                )}
+              </div>
+
+              <div>
                 <h4 className="text-sm font-semibold text-gray-900">Disputed items</h4>
                 {disputeDraftQuery.data.disputed_items.length > 0 ? (
                   <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-gray-700">

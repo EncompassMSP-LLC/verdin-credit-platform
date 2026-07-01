@@ -138,6 +138,12 @@ def test_get_account_dispute_draft(
     assert "Example Bank" in data["body"]
     assert "Account Client" in data["body"]
     assert any("payment history" in item for item in data["disputed_items"])
+    assert data["dispute_reason_suggestions"]
+    assert any(item["code"] == "payment_history" for item in data["dispute_reason_suggestions"])
+    assert any(item["code"] == "balance" for item in data["dispute_reason_suggestions"])
+    assert all(
+        item["description"] in data["disputed_items"] for item in data["dispute_reason_suggestions"]
+    )
     assert any("balance" in item.lower() for item in data["evidence_checklist"])
     assert data["readiness_score"] is not None
     assert data["risk_score"] is not None

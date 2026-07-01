@@ -12,6 +12,7 @@ from api.core.pagination import PaginatedResponse, paginate
 from api.core.permissions import has_permission
 from api.modules.accounts.dispute_drafts import (
     build_dispute_body,
+    build_dispute_reason_suggestions,
     build_dispute_reasons,
     build_evidence_checklist,
 )
@@ -29,6 +30,7 @@ from api.modules.accounts.schemas import (
     AccountResponse,
     AccountUpdate,
     DisputeLetterResponse,
+    DisputeReasonSuggestionResponse,
     NextActionItem,
 )
 from api.modules.auth.models import User
@@ -252,6 +254,7 @@ class AccountService:
             )
 
         disputed_items = build_dispute_reasons(account)
+        reason_suggestions = build_dispute_reason_suggestions(account)
         return AccountDisputeDraftResponse(
             account_id=account.id,
             case_id=account.case_id,
@@ -261,6 +264,17 @@ class AccountService:
             subject=f"Dispute of {account.creditor_name} tradeline",
             body=build_dispute_body(account, case, disputed_items),
             disputed_items=disputed_items,
+            dispute_reason_suggestions=[
+                DisputeReasonSuggestionResponse(
+                    code=suggestion.code,
+                    category=suggestion.category,
+                    title=suggestion.title,
+                    description=suggestion.description,
+                    severity=suggestion.severity,
+                    requires_evidence=list(suggestion.requires_evidence),
+                )
+                for suggestion in reason_suggestions
+            ],
             requested_action=(
                 "Investigate the disputed tradeline and delete or correct any information "
                 "that cannot be verified as complete and accurate."
