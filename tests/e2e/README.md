@@ -16,6 +16,7 @@ and the asynchronous document pipeline is processed by the **real worker**.
 Keep `test_full_case_lifecycle.py` as the fast, deterministic golden path.
 Additional edge cases should be separate tests so CI failures stay isolated:
 
+- `test_import_to_dispute_lifecycle.py` — import through dispute letter outcome (4.5 exit gate)
 - `test_dispute_letter_lifecycle.py` — dispute draft through CRA outcome
 - `test_entity_resolution_ambiguous.py` — ambiguous match
 - `test_entity_resolution_unmatched.py` — no match
@@ -28,6 +29,7 @@ Additional edge cases should be separate tests so CI failures stay isolated:
 tests/e2e/
   conftest.py                 # API reachability, DB bootstrap, HTTP client, artifacts
   test_dispute_letter_lifecycle.py # dispute letter API happy path
+  test_import_to_dispute_lifecycle.py # import → account → dispute letter path
   test_full_case_lifecycle.py # the 11-stage workflow test
   requirements.txt            # reportlab (PDF fixture); rest comes from apps/api
   fixtures/
@@ -38,6 +40,7 @@ tests/e2e/
   helpers/
     auth.py                   # login / refresh
     wait_for_worker.py        # poll-until helpers for async pipeline stages
+    dispute_lifecycle.py      # shared dispute letter happy-path steps
     assertions.py             # status assertions that record artifacts
     artifacts.py              # diagnostic capture, flushed on failure
 ```

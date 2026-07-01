@@ -1,0 +1,49 @@
+# Version 4.5 Completion Checklist
+
+Ordered path to a **4.5.0 release candidate**, before **4.8 Operations**.
+
+Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
+
+## Exit criteria for “4.5 done”
+
+- [ ] All four epics below are **✅ or explicitly deferred to 4.8/5.0** with docs updated
+- [ ] Capability matrix rows for 4.5 show **✅** (or **Partial** with written scope limits)
+- [ ] `v4.5.0` release notes + tag
+- [x] E2E covers import → account → dispute draft → letter lifecycle
+- [ ] No **Planned** items remain that were promised for 4.5 in `docs/roadmap/README.md`
+
+---
+
+## Phase 1 — Recommended order (complete)
+
+| Order | Slice                                    | Epic     | PR      |
+| ----- | ---------------------------------------- | -------- | ------- |
+| 1–12  | Dispute lifecycle + import wizard polish | 2–5, 1.8 | #61–#72 |
+
+---
+
+## Phase 2 — Recommended order (release candidate)
+
+| Order | Slice                                           | Epic | Status        |
+| ----- | ----------------------------------------------- | ---- | ------------- |
+| 1     | E2E import → account → dispute letter lifecycle | 5.3  | ✅ Phase 2 #1 |
+| 2     | Historical report comparison UI on account/case | 1.9  | **Next**      |
+| 3     | Duplicate report detection UX                   | 1.10 | Pending       |
+| 4     | Capability matrix 4.5 sign-off + deferrals      | 5.4  | Pending       |
+| 5     | `docs/release-notes/v4.5.0.md`                  | 5.5  | Pending       |
+| 6     | Tag `v4.5.0`                                    | 5.6  | Pending       |
+
+LLM slices (4.6–4.8) require explicit approval or deferral before shipping.
+
+---
+
+## Explicitly not 4.5 (→ 4.8 / 5.0)
+
+| Capability                         | Version | Why defer        |
+| ---------------------------------- | ------- | ---------------- |
+| Client portal                      | 4.8     | Roadmap          |
+| Full reporting / ops dashboards    | 4.8     | Roadmap          |
+| Notifications center (email/SMS)   | 4.8     | Infra            |
+| SSO / MFA                          | 5.0     | Enterprise       |
+| Compliance center / consent engine | 5.0     | Legal            |
+| Autonomous dispute filing          | 5.0+    | Compliance gates |

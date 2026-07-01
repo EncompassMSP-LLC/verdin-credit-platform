@@ -55,6 +55,8 @@ For local-only polling while Cursor is open:
 
 Cloud Automation on **PR merged** is preferred over polling.
 
+See also [`version-4.5-completion-checklist.md`](./version-4.5-completion-checklist.md) for the full 4.5 exit path and Phase 2 queue.
+
 ## Troubleshooting
 
 | Issue                    | Fix                                          |
