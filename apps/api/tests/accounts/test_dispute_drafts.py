@@ -3,8 +3,13 @@
 import uuid
 from decimal import Decimal
 
-from api.modules.accounts.dispute_drafts import build_dispute_reason_suggestions
+from api.modules.accounts.dispute_drafts import (
+    build_dispute_reason_suggestions,
+    build_evidence_checklist,
+    detect_missing_evidence,
+)
 from api.modules.accounts.models import Account, AccountBureau, AccountStatus, PaymentStatus
+from api.modules.cases.models import Case
 
 
 def _account(**overrides: object) -> Account:
@@ -47,3 +52,26 @@ def test_build_dispute_reason_suggestions_fallback() -> None:
     assert len(suggestions) == 1
     assert suggestions[0].code == "general_accuracy"
     assert suggestions[0].severity == "low"
+
+
+def test_detect_missing_evidence_flags_account_and_case_gaps() -> None:
+    account = _account(
+        payment_status=PaymentStatus.LATE_60,
+        balance=Decimal("1500.00"),
+        account_number_masked=None,
+    )
+    case = Case(client_name="Account Client", client_email=None)
+    suggestions = build_dispute_reason_suggestions(account)
+    checklist = build_evidence_checklist(account)
+
+    missing = detect_missing_evidence(
+        account,
+        case,
+        evidence_checklist=checklist,
+        reason_suggestions=suggestions,
+    )
+    codes = {item.code for item in missing}
+
+    assert "account_identifier" in codes
+    assert "reporting_dates" in codes
+    assert "client_contact" in codes

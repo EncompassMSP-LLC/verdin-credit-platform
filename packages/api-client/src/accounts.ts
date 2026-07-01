@@ -142,6 +142,14 @@ export interface DisputeReasonSuggestion {
   requires_evidence: string[];
 }
 
+export interface MissingEvidenceItem {
+  code: string;
+  title: string;
+  description: string;
+  severity: 'low' | 'medium' | 'high';
+  checklist_item: string | null;
+}
+
 export interface AccountDisputeDraft {
   account_id: string;
   case_id: string;
@@ -155,6 +163,8 @@ export interface AccountDisputeDraft {
   requested_action: string;
   evidence_checklist: string[];
   compliance_notes: string[];
+  evidence_ready: boolean;
+  missing_evidence: MissingEvidenceItem[];
   generated_by: 'rules';
   readiness_score: number | null;
   risk_score: number | null;

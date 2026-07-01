@@ -123,7 +123,7 @@ Plan: [`docs/sprint-4.3.1/operational-core-stabilization.md`](../sprint-4.3.1/op
 | Document Classification         | 4.3     | 🚧      | 🚧      | —        | 🚧  | 🚧      | 🚧    | OCR                 | Rules engine in 4.3; LLM augmentation in 4.5       |
 | Entity Extraction               | 4.5     | Partial | 🚧      | 🚧       | 🚧  | ✅      | ✅    | OCR, Accounts       | Parser tradelines produce account candidates       |
 | AI Case Summaries               | 4.5     | Planned | —       | —        | —   | ✅      | —     | Cases, Documents    | Phase 2 AI                                         |
-| AI Recommendation Engine        | 4.5     | Partial | 🚧      | —        | —   | Partial | ✅    | Accounts            | Heuristic + structured dispute reason suggestions  |
+| AI Recommendation Engine        | 4.5     | Partial | 🚧      | —        | —   | Partial | ✅    | Accounts            | Dispute suggestions + missing evidence detector    |
 | Dispute Generation (foundation) | 4.5     | Partial | 🚧      | 🚧       | 🚧  | ✅      | ✅    | Accounts, Documents | Letter lifecycle, detail view, account transitions |
 
 ---

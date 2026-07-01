@@ -75,6 +75,7 @@ export {
   type Account,
   type AccountDisputeDraft,
   type DisputeReasonSuggestion,
+  type MissingEvidenceItem,
   type AccountIntelligenceSummary,
   type CreateAccountInput,
   type DisputeLetter,
