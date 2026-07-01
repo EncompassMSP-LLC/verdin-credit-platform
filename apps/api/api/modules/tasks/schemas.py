@@ -57,6 +57,7 @@ class TaskListParams(PaginationParams):
     account_id: uuid.UUID | None = None
     document_id: uuid.UUID | None = None
     assigned_user_id: uuid.UUID | None = None
+    source_module: str | None = Field(default=None, max_length=50)
     due_before: datetime | None = None
     due_after: datetime | None = None
     overdue: bool | None = None

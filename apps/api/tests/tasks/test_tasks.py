@@ -54,6 +54,42 @@ def test_list_tasks(
     assert "items" in data
 
 
+def test_list_tasks_source_module_filter(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    api_client.post(
+        "/api/v1/tasks",
+        headers=manager_headers,
+        json={
+            "title": "Manual Task",
+            "case_id": sample_case_id,
+            "source_module": "manual",
+        },
+    )
+    api_client.post(
+        "/api/v1/tasks",
+        headers=manager_headers,
+        json={
+            "title": "Dispute Letter Task",
+            "case_id": sample_case_id,
+            "source_module": "accounts.dispute_letter",
+        },
+    )
+
+    filtered = api_client.get(
+        "/api/v1/tasks",
+        headers=manager_headers,
+        params={"source_module": "accounts.dispute_letter"},
+    )
+    assert filtered.status_code == 200
+    data = filtered.json()
+    assert data["total"] >= 1
+    assert all(item["source_module"] == "accounts.dispute_letter" for item in data["items"])
+    assert any(item["title"] == "Dispute Letter Task" for item in data["items"])
+
+
 def test_list_tasks_overdue_filter(
     api_client: TestClient,
     manager_headers: dict[str, str],

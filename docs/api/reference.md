@@ -227,7 +227,7 @@ Timeline events are **append-only** — no update or delete endpoints.
 | POST   | `/tasks/{id}/reopen`   | case_manager | Reopen a completed/canceled task |
 | DELETE | `/tasks/{id}`          | admin        | Soft-delete a task               |
 
-**List query parameters:** `status`, `priority`, `case_id`, `account_id`, `document_id`, `assigned_user_id`, `due_before`, `due_after`, `overdue`, `search`, `sort_by`, `sort_order`, `page`, `page_size`.
+**List query parameters:** `status`, `priority`, `case_id`, `account_id`, `document_id`, `assigned_user_id`, `source_module`, `due_before`, `due_after`, `overdue`, `search`, `sort_by`, `sort_order`, `page`, `page_size`.
 
 Task lifecycle events (`TASK_CREATED`, `TASK_UPDATED`, `TASK_COMPLETED`, `TASK_REOPENED`, `TASK_DELETED`) are published to the timeline via the event bus.
 
