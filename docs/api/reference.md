@@ -114,6 +114,7 @@ Credit tradeline accounts with intelligence scoring. All endpoints require authe
 | POST   | `/accounts/{account_id}/dispute-letters/{letter_id}/review-task` | case_manager | Create or reuse saved letter review task  |
 | POST   | `/accounts/{account_id}/dispute-letters/{letter_id}/approve`     | case_manager | Approve a saved letter in review          |
 | POST   | `/accounts/{account_id}/dispute-letters/{letter_id}/send`        | case_manager | Mark an approved letter as sent           |
+| POST   | `/accounts/{account_id}/dispute-letters/{letter_id}/void`        | case_manager | Void an in-flight letter                  |
 | PATCH  | `/accounts/{account_id}`                                         | case_manager | Update an account                         |
 | DELETE | `/accounts/{account_id}`                                         | admin        | Soft-delete an account                    |
 
@@ -151,6 +152,8 @@ Accounts automatically compute `risk_score`, `readiness_score`, `next_eligible_d
 `POST /accounts/{account_id}/dispute-letters/{letter_id}/approve` transitions a saved letter from `review` to `approved` and emits a timeline event. Letters already approved are returned idempotently; letters not in `review` return `422`.
 
 `POST /accounts/{account_id}/dispute-letters/{letter_id}/send` transitions an approved letter to `sent`, records `sent_at`, updates the linked account to `dispute_sent` (including `last_dispute_date`, `dispute_round`, and `cra_dispute`), and emits timeline events. Letters already sent are returned idempotently; letters not in `approved` return `422`.
+
+`POST /accounts/{account_id}/dispute-letters/{letter_id}/void` voids a letter in `draft`, `review`, or `approved`. Sent letters return `422`; already voided letters are idempotent.
 
 ## Documents
 

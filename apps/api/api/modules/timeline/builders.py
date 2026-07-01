@@ -215,6 +215,32 @@ def dispute_letter_sent_event(
     )
 
 
+def dispute_letter_voided_event(
+    dispute_letter: DisputeLetter,
+    performed_by: uuid.UUID,
+) -> PlatformEvent:
+    return PlatformEvent(
+        event_type="DISPUTE_LETTER_VOIDED",
+        event_category=EventCategory.ACCOUNT.value,
+        title="Dispute letter voided",
+        description=f"Dispute letter '{dispute_letter.subject}' was voided.",
+        organization_id=dispute_letter.organization_id,
+        case_id=dispute_letter.case_id,
+        account_id=dispute_letter.account_id,
+        performed_by=performed_by,
+        source_module="accounts",
+        metadata={
+            "dispute_letter_id": str(dispute_letter.id),
+            "template_id": dispute_letter.template_id,
+            "status": (
+                dispute_letter.status.value
+                if hasattr(dispute_letter.status, "value")
+                else dispute_letter.status
+            ),
+        },
+    )
+
+
 def document_uploaded_event(document: Document, performed_by: uuid.UUID) -> PlatformEvent:
     return PlatformEvent(
         event_type=DocumentEventType.DOCUMENT_UPLOADED.value,

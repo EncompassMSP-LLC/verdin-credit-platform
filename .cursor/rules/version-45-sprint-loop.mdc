@@ -52,6 +52,4 @@ Use full path when `gh` is not on PATH:
 
 ## Version 4.5 dispute letter lifecycle (reference)
 
-`draft` → review task → `review` → approve → `approved` → send → `sent` (+ account `dispute_status` sync)
-
-Next slices after sent: void/cancel letters, `awaiting_response` transitions, furnisher letters, PDF export, etc.
+`draft` → review task → `review` → approve → `approved` → send → `sent` (+ account `dispute_status` sync). Void available for `draft`/`review`/`approved`.
