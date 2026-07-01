@@ -150,6 +150,12 @@ def recommend_next_action(account: Account) -> str:
         return "Prepare and send dispute letter to CRA"
     if account.dispute_status == DisputeStatus.AWAITING_RESPONSE:
         return "Follow up on pending CRA or furnisher response"
+    if account.dispute_status == DisputeStatus.VERIFIED:
+        return "Review verified tradeline reporting and decide on escalation or monitoring"
+    if account.dispute_status == DisputeStatus.CORRECTED:
+        return "Confirm corrected reporting on the next credit report import"
+    if account.dispute_status == DisputeStatus.DELETED:
+        return "Monitor credit report to confirm tradeline removal"
     if account.risk_score is not None and account.risk_score >= CRITICAL_RISK_THRESHOLD:
         return "Prioritize high-risk tradeline for immediate review"
     if account.investigation_status == InvestigationStatus.OVERDUE:

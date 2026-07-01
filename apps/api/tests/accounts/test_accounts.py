@@ -723,6 +723,111 @@ def test_mark_account_awaiting_dispute_response_requires_dispute_sent(
     assert response.status_code == 422
 
 
+def _mark_account_awaiting_response(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    account_id: str,
+) -> None:
+    letter = api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-draft/letters",
+        headers=manager_headers,
+    )
+    letter_id = letter.json()["id"]
+    api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-letters/{letter_id}/review-task",
+        headers=manager_headers,
+    )
+    api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-letters/{letter_id}/approve",
+        headers=manager_headers,
+    )
+    api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-letters/{letter_id}/send",
+        headers=manager_headers,
+    )
+    api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-awaiting-response",
+        headers=manager_headers,
+    )
+
+
+def test_record_account_dispute_response_received(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    create = api_client.post(
+        "/api/v1/accounts",
+        headers=manager_headers,
+        json=sample_account_payload(sample_case_id),
+    )
+    account_id = create.json()["id"]
+    _mark_account_awaiting_response(api_client, manager_headers, account_id)
+
+    first = api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-response-received",
+        headers=manager_headers,
+        json={"outcome": "corrected"},
+    )
+    second = api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-response-received",
+        headers=manager_headers,
+        json={"outcome": "corrected"},
+    )
+
+    assert first.status_code == 200
+    assert second.status_code == 200
+    assert first.json()["dispute_status"] == "corrected"
+    assert first.json()["response_received"] is True
+    assert first.json()["investigation_status"] == "completed"
+    assert second.json()["id"] == first.json()["id"]
+
+
+def test_record_account_dispute_response_received_supports_deleted(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    create = api_client.post(
+        "/api/v1/accounts",
+        headers=manager_headers,
+        json=sample_account_payload(sample_case_id),
+    )
+    account_id = create.json()["id"]
+    _mark_account_awaiting_response(api_client, manager_headers, account_id)
+
+    response = api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-response-received",
+        headers=manager_headers,
+        json={"outcome": "deleted"},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["dispute_status"] == "deleted"
+    assert response.json()["response_received"] is True
+
+
+def test_record_account_dispute_response_received_requires_awaiting_response(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    create = api_client.post(
+        "/api/v1/accounts",
+        headers=manager_headers,
+        json=sample_account_payload(sample_case_id),
+    )
+    account_id = create.json()["id"]
+
+    response = api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-response-received",
+        headers=manager_headers,
+        json={"outcome": "verified"},
+    )
+
+    assert response.status_code == 422
+
+
 def test_get_account_not_found(
     api_client: TestClient,
     manager_headers: dict[str, str],

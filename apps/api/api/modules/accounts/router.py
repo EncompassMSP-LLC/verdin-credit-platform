@@ -17,6 +17,7 @@ from api.modules.accounts.models import (
 from api.modules.accounts.schemas import (
     AccountCreate,
     AccountDisputeDraftResponse,
+    AccountDisputeResponseReceivedRequest,
     AccountIntelligenceSummary,
     AccountListParams,
     AccountResponse,
@@ -217,6 +218,16 @@ async def mark_account_awaiting_dispute_response(
     service: AccountService = Depends(get_account_service),
 ) -> AccountResponse:
     return await service.mark_account_awaiting_dispute_response(current_user, account_id)
+
+
+@router.post("/{account_id}/dispute-response-received", response_model=AccountResponse)
+async def record_account_dispute_response_received(
+    account_id: uuid.UUID,
+    body: AccountDisputeResponseReceivedRequest,
+    current_user: User = Depends(get_current_user),
+    service: AccountService = Depends(get_account_service),
+) -> AccountResponse:
+    return await service.record_dispute_response_received(current_user, account_id, body)
 
 
 @router.patch("/{account_id}", response_model=AccountResponse)

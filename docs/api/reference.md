@@ -101,24 +101,25 @@ All case endpoints require authentication. Users are scoped to their organizatio
 
 Credit tradeline accounts with intelligence scoring. All endpoints require authentication and organization scoping.
 
-| Method | Path                                                             | Min role     | Description                               |
-| ------ | ---------------------------------------------------------------- | ------------ | ----------------------------------------- |
-| POST   | `/accounts`                                                      | case_manager | Create a credit account                   |
-| GET    | `/accounts`                                                      | read_only    | List accounts                             |
-| GET    | `/accounts/intelligence/summary`                                 | read_only    | Organization intelligence                 |
-| GET    | `/accounts/{account_id}`                                         | read_only    | Get account by ID                         |
-| GET    | `/accounts/{account_id}/dispute-draft`                           | read_only    | Preview rule-based dispute draft          |
-| GET    | `/accounts/{account_id}/dispute-letters`                         | read_only    | List saved dispute letter drafts          |
-| GET    | `/accounts/{account_id}/dispute-letters/{letter_id}`             | read_only    | Get saved dispute letter details          |
-| POST   | `/accounts/{account_id}/dispute-draft/letters`                   | case_manager | Save generated dispute draft              |
-| POST   | `/accounts/{account_id}/dispute-draft/review-task`               | case_manager | Create or reuse dispute draft review task |
-| POST   | `/accounts/{account_id}/dispute-letters/{letter_id}/review-task` | case_manager | Create or reuse saved letter review task  |
-| POST   | `/accounts/{account_id}/dispute-letters/{letter_id}/approve`     | case_manager | Approve a saved letter in review          |
-| POST   | `/accounts/{account_id}/dispute-letters/{letter_id}/send`        | case_manager | Mark an approved letter as sent           |
-| POST   | `/accounts/{account_id}/dispute-letters/{letter_id}/void`        | case_manager | Void an in-flight letter                  |
-| POST   | `/accounts/{account_id}/dispute-awaiting-response`               | case_manager | Mark account awaiting CRA response        |
-| PATCH  | `/accounts/{account_id}`                                         | case_manager | Update an account                         |
-| DELETE | `/accounts/{account_id}`                                         | admin        | Soft-delete an account                    |
+| Method | Path                                                             | Min role     | Description                                           |
+| ------ | ---------------------------------------------------------------- | ------------ | ----------------------------------------------------- |
+| POST   | `/accounts`                                                      | case_manager | Create a credit account                               |
+| GET    | `/accounts`                                                      | read_only    | List accounts                                         |
+| GET    | `/accounts/intelligence/summary`                                 | read_only    | Organization intelligence                             |
+| GET    | `/accounts/{account_id}`                                         | read_only    | Get account by ID                                     |
+| GET    | `/accounts/{account_id}/dispute-draft`                           | read_only    | Preview rule-based dispute draft                      |
+| GET    | `/accounts/{account_id}/dispute-letters`                         | read_only    | List saved dispute letter drafts                      |
+| GET    | `/accounts/{account_id}/dispute-letters/{letter_id}`             | read_only    | Get saved dispute letter details                      |
+| POST   | `/accounts/{account_id}/dispute-draft/letters`                   | case_manager | Save generated dispute draft                          |
+| POST   | `/accounts/{account_id}/dispute-draft/review-task`               | case_manager | Create or reuse dispute draft review task             |
+| POST   | `/accounts/{account_id}/dispute-letters/{letter_id}/review-task` | case_manager | Create or reuse saved letter review task              |
+| POST   | `/accounts/{account_id}/dispute-letters/{letter_id}/approve`     | case_manager | Approve a saved letter in review                      |
+| POST   | `/accounts/{account_id}/dispute-letters/{letter_id}/send`        | case_manager | Mark an approved letter as sent                       |
+| POST   | `/accounts/{account_id}/dispute-letters/{letter_id}/void`        | case_manager | Void an in-flight letter                              |
+| POST   | `/accounts/{account_id}/dispute-awaiting-response`               | case_manager | Mark account awaiting CRA response                    |
+| POST   | `/accounts/{account_id}/dispute-response-received`               | case_manager | Record CRA outcome (`verified`/`corrected`/`deleted`) |
+| PATCH  | `/accounts/{account_id}`                                         | case_manager | Update an account                                     |
+| DELETE | `/accounts/{account_id}`                                         | admin        | Soft-delete an account                                |
 
 ### List query parameters
 
@@ -158,6 +159,8 @@ Accounts automatically compute `risk_score`, `readiness_score`, `next_eligible_d
 `POST /accounts/{account_id}/dispute-letters/{letter_id}/void` voids a letter in `draft`, `review`, or `approved`. Sent letters return `422`; already voided letters are idempotent.
 
 `POST /accounts/{account_id}/dispute-awaiting-response` transitions an account from `dispute_sent` to `awaiting_response`, sets `investigation_status` to `pending` when unset, and emits a timeline event. Already `awaiting_response` accounts are idempotent; other statuses return `422`.
+
+`POST /accounts/{account_id}/dispute-response-received` records a CRA investigation outcome for accounts in `awaiting_response`. Body: `{ "outcome": "verified" | "corrected" | "deleted" }`. Sets `response_received=true`, updates `dispute_status`, marks `investigation_status` as `completed`, refreshes intelligence, and emits a timeline event. Idempotent when the same outcome is already recorded; other statuses return `422`.
 
 ## Documents
 
