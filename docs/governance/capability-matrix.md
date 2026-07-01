@@ -115,7 +115,7 @@ Plan: [`docs/sprint-4.3.1/operational-core-stabilization.md`](../sprint-4.3.1/op
 
 ---
 
-## Version 4.5 — Automation (v4.5.0 release candidate)
+## Version 4.5 — Automation (shipped — `v4.5.0`)
 
 Scope and deferrals: [version-4.5-scope.md](version-4.5-scope.md)
 
