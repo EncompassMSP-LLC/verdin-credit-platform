@@ -94,6 +94,16 @@ export function CaseDetailPage() {
               {data.client_email ? (
                 <dd className="text-sm text-gray-500">{data.client_email}</dd>
               ) : null}
+              {data.client_id ? (
+                <dd className="mt-1">
+                  <Link
+                    to={`/clients/${data.client_id}`}
+                    className="text-sm text-brand-600 hover:underline"
+                  >
+                    View client profile
+                  </Link>
+                </dd>
+              ) : null}
             </div>
             <div>
               <dt className="text-sm text-gray-500">Stage</dt>

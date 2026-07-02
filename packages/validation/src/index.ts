@@ -34,9 +34,10 @@ export const caseStageSchema = z.enum([
 
 export const casePrioritySchema = z.enum(['low', 'medium', 'high', 'critical']);
 
-export const createCaseSchema = z.object({
+const caseFieldsSchema = z.object({
   title: z.string().min(1, 'Title is required').max(255),
-  client_name: z.string().min(1, 'Client name is required').max(255),
+  client_id: z.string().uuid('Invalid client').optional().or(z.literal('')),
+  client_name: z.string().max(255).optional().or(z.literal('')),
   client_email: z.string().email('Invalid email').optional().or(z.literal('')),
   case_number: z.string().max(50).optional(),
   status: caseStatusSchema,
@@ -47,7 +48,19 @@ export const createCaseSchema = z.object({
   notes: z.string().optional(),
 });
 
-export const updateCaseSchema = createCaseSchema.partial();
+export const createCaseSchema = caseFieldsSchema.superRefine((data, ctx) => {
+  const hasLinkedClient = Boolean(data.client_id);
+  const hasManualName = Boolean(data.client_name?.trim());
+  if (!hasLinkedClient && !hasManualName) {
+    ctx.addIssue({
+      code: 'custom',
+      message: 'Select a linked client or enter a client name',
+      path: ['client_name'],
+    });
+  }
+});
+
+export const updateCaseSchema = caseFieldsSchema.partial();
 
 export const accountBureauSchema = z.enum([
   'equifax',
