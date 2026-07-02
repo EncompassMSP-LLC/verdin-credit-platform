@@ -532,3 +532,11 @@ packages/job-orchestrator/
 **Reason:** 5.0+ pilot requires staff to access bureau and team read models without API calls; backend reporting shipped in v5.0.0.
 
 **Follow-up work:** Slice 10 — org admin staff UI.
+
+### Decision: LLM case summary UI on case detail
+
+**Decision:** Add `CaseLlmSummaryPanel` on staff case detail with LLM readiness check and generate action using `POST /cases/{id}/llm-summary`, gated by `VITE_ENABLE_LLM`.
+
+**Reason:** 5.0+ pilot requires staff to trigger gated case summaries from the case workspace without API calls.
+
+**Follow-up work:** Slice 12 — capability matrix 5.0+ sign-off.
