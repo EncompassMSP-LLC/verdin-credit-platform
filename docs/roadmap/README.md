@@ -42,6 +42,8 @@ Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (
 | **4.5**   | Automation                  | **Shipped** | Import wizard, dispute lifecycle, workflow auto-tasks, rules AI (`v4.5.0`)        |
 | **4.8**   | Operations                  | **Shipped** | Client portal, notifications, LLM policy gates, reporting (`v4.8.0`)              |
 | **5.0**   | Enterprise Edition          | **Shipped** | Compliance, SSO/MFA, LLM summaries, production email, portal expansion (`v5.0.0`) |
+| **5.0+**  | Product Hardening           | **Shipped** | Pilot-ready staff + portal UI for 5.0 APIs                                        |
+| **5.1**   | Production Hardening        | In progress | API key auth, billing, IdP enrollment, SMS, compliance enforcement                |
 
 ### Sprint milestones
 
@@ -155,6 +157,10 @@ Scope and checklist: [`docs/governance/version-5.0-plus-scope.md`](../governance
 | 8    | LLM assistance UI       | Partial      | Case summary trigger on case detail               |
 
 **Pilot ready** — all 5.0+ checklist slices complete; deferrals documented in scope doc.
+
+### Version 5.1 — Production Hardening (in progress)
+
+Scope and checklist: [`docs/governance/version-5.1-scope.md`](../governance/version-5.1-scope.md) · [`docs/development/version-5.1-completion-checklist.md`](../development/version-5.1-completion-checklist.md)
 
 ## Sprint → version mapping
 
