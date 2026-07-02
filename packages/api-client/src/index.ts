@@ -93,6 +93,17 @@ export { getLlmStatus, type LlmGateStatus } from './llm';
 export { getEnterpriseIdentityStatus, type EnterpriseIdentityStatus } from './enterprise';
 
 export {
+  getCaseMessageThread,
+  getMessagingCenterStatus,
+  postCaseMessageThreadReply,
+  type CaseMessageThread,
+  type MessagingCenterStatus,
+  type SendMessageInput,
+  type ThreadMessage,
+  type MessageSenderRole,
+} from './messaging';
+
+export {
   createConsentRecord,
   createRetentionPolicy,
   getComplianceCenterStatus,
@@ -237,10 +248,12 @@ export {
   getPortalCase,
   getPortalMe,
   listPortalCaseDocuments,
+  listPortalCaseMessages,
   listPortalCases,
   portalLogin,
   portalRefresh,
   provisionClientPortalUser,
+  sendPortalCaseMessage,
   uploadPortalCaseDocument,
   getClientPortalUser,
   updateClientPortalUser,
@@ -248,6 +261,7 @@ export {
   type ClientPortalUser,
   type PortalCaseDetail,
   type PortalCaseDocumentsResponse,
+  type PortalCaseMessageThread,
   type PortalCaseProgressResponse,
   type PortalCaseStage,
   type PortalCaseStatus,
@@ -255,8 +269,10 @@ export {
   type PortalDocument,
   type PortalLoginInput,
   type PortalMeResponse,
+  type PortalThreadMessage,
   type PortalTokenResponse,
   type ProvisionPortalUserInput,
+  type SendPortalMessageInput,
   type UpdatePortalUserInput,
   type UploadPortalCaseDocumentInput,
 } from './portal';

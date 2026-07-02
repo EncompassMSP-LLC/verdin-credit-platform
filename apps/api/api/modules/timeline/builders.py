@@ -11,6 +11,7 @@ from verdin_event_types import (
     CaseEventType,
     DocumentEventType,
     EventCategory,
+    MessagingEventType,
     TaskEventType,
 )
 
@@ -19,6 +20,7 @@ from api.modules.accounts.models import Account
 from api.modules.auth.models import User
 from api.modules.cases.models import Case, CaseStatus
 from api.modules.documents.models import Document
+from api.modules.messaging.models import MessageThread, ThreadMessage
 from api.modules.tasks.models import Task
 
 
@@ -520,4 +522,49 @@ def task_deleted_event(task: Task, performed_by: uuid.UUID) -> PlatformEvent:
         performed_by=performed_by,
         source_module="tasks",
         metadata=_task_event_metadata(task),
+    )
+
+
+def portal_message_sent_event(
+    thread: MessageThread,
+    message: ThreadMessage,
+    *,
+    portal_user_id: uuid.UUID,
+) -> PlatformEvent:
+    return PlatformEvent(
+        event_type=MessagingEventType.PORTAL_MESSAGE_SENT.value,
+        event_category=EventCategory.MESSAGING.value,
+        title="Portal message sent",
+        description="A secure message was sent from the client portal.",
+        organization_id=thread.organization_id,
+        case_id=thread.case_id,
+        performed_by=None,
+        source_module="client_portal",
+        metadata={
+            "thread_id": str(thread.id),
+            "message_id": str(message.id),
+            "portal_user_id": str(portal_user_id),
+        },
+    )
+
+
+def staff_message_sent_event(
+    thread: MessageThread,
+    message: ThreadMessage,
+    *,
+    staff_user_id: uuid.UUID,
+) -> PlatformEvent:
+    return PlatformEvent(
+        event_type=MessagingEventType.STAFF_MESSAGE_SENT.value,
+        event_category=EventCategory.MESSAGING.value,
+        title="Staff message sent",
+        description="A secure staff reply was posted to the case message thread.",
+        organization_id=thread.organization_id,
+        case_id=thread.case_id,
+        performed_by=staff_user_id,
+        source_module="messaging",
+        metadata={
+            "thread_id": str(thread.id),
+            "message_id": str(message.id),
+        },
     )

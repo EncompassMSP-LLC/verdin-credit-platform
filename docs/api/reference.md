@@ -159,6 +159,23 @@ Read-only case progress for portal users. Cases match when `client_id` is set to
 
 Portal uploads use the same MIME and size limits as staff `POST /documents`. Documents appear in staff document views and emit `PORTAL_DOCUMENT_UPLOADED` timeline events. Account-scoped uploads and portal document download are not included in this slice.
 
+Secure messaging uses one thread per case (`message_threads` + `thread_messages`). Portal users can read and post on linked cases; staff reply via the case message-thread endpoints.
+
+| Method | Path                          | Auth       | Description                           |
+| ------ | ----------------------------- | ---------- | ------------------------------------- |
+| GET    | `/portal/cases/{id}/messages` | portal JWT | List messages on a linked case thread |
+| POST   | `/portal/cases/{id}/messages` | portal JWT | Send a secure portal message          |
+
+## Secure messaging (staff)
+
+| Method | Path                                       | Min role     | Description                              |
+| ------ | ------------------------------------------ | ------------ | ---------------------------------------- |
+| GET    | `/messaging/status`                        | read_only    | Secure messaging capabilities overview   |
+| GET    | `/cases/{case_id}/message-thread`          | read_only    | List case message thread (empty if none) |
+| POST   | `/cases/{case_id}/message-thread/messages` | case_manager | Post a staff reply (creates thread)      |
+
+Staff replies require the case to be linked to a client (`client_id`). Real-time push, attachments, and email bridge are deferred to 5.0+.
+
 ## Accounts
 
 Credit tradeline accounts with intelligence scoring. All endpoints require authentication and organization scoping.

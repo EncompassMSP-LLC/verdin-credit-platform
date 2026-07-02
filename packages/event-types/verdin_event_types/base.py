@@ -10,3 +10,4 @@ class EventCategory(StrEnum):
     AUTH = "auth"
     TASK = "task"
     AI = "ai"
+    MESSAGING = "messaging"

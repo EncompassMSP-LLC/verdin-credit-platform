@@ -182,7 +182,7 @@ Scope: [version-5.0-scope.md](version-5.0-scope.md) · Checklist: [version-5.0-c
 | Job orchestrator     | 5.0     | Partial | ✅      | —        | —   | —   | ✅    | Worker        | Runner retry/metrics + overdue scan cron registration       |
 | SSO / MFA            | 5.0     | Partial | ✅      | —        | ✅  | —   | ✅    | Auth          | `GET /enterprise/status`; IdP/TOTP wiring deferred          |
 | Compliance center    | 5.0     | Partial | ✅      | —        | ✅  | —   | ✅    | Timeline      | Consent records + retention policy placeholders             |
-| Portal expansion     | 5.0     | Partial | ✅      | —        | ✅  | —   | ✅    | Portal        | Document upload on linked cases; messaging deferred         |
+| Portal expansion     | 5.0     | Partial | ✅      | —        | ✅  | —   | ✅    | Portal        | Document upload + secure messaging on linked cases          |
 | Enterprise reporting | 5.0     | Planned | —       | —        | —   | —   | —     | Reporting     | Bureau/team productivity read models                        |
 
 ---

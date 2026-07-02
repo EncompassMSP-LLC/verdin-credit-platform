@@ -73,6 +73,30 @@ export interface UploadPortalCaseDocumentInput {
   description?: string | null;
 }
 
+export type PortalMessageSenderRole = 'portal_client' | 'staff';
+
+export interface PortalThreadMessage {
+  id: string;
+  thread_id: string;
+  sender_role: PortalMessageSenderRole;
+  portal_user_id: string | null;
+  staff_user_id: string | null;
+  body: string;
+  created_at: string;
+}
+
+export interface PortalCaseMessageThread {
+  case_id: string;
+  thread_id: string | null;
+  client_id: string | null;
+  status: 'open' | 'closed' | null;
+  messages: PortalThreadMessage[];
+}
+
+export interface SendPortalMessageInput {
+  body: string;
+}
+
 export interface ClientPortalUser {
   id: string;
   organization_id: string;
@@ -138,6 +162,20 @@ export async function uploadPortalCaseDocument(
   form.append('title', input.title);
   if (input.description) form.append('description', input.description);
   return uploadRequest<PortalDocument>(apiPath(`/portal/cases/${caseId}/documents`), form);
+}
+
+export async function listPortalCaseMessages(caseId: string): Promise<PortalCaseMessageThread> {
+  return request<PortalCaseMessageThread>(apiPath(`/portal/cases/${caseId}/messages`));
+}
+
+export async function sendPortalCaseMessage(
+  caseId: string,
+  input: SendPortalMessageInput,
+): Promise<PortalThreadMessage> {
+  return request<PortalThreadMessage>(apiPath(`/portal/cases/${caseId}/messages`), {
+    method: 'POST',
+    body: input,
+  });
 }
 
 export async function provisionClientPortalUser(
