@@ -524,3 +524,11 @@ packages/job-orchestrator/
 **Reason:** 5.0+ pilot requires staff to manage compliance artifacts without API calls; backend compliance center shipped in v5.0.0.
 
 **Follow-up work:** Slice 9 — enterprise reporting staff UI.
+
+### Decision: Enterprise reporting staff UI
+
+**Decision:** Add `/reporting` page with operations, bureau performance, and team productivity tabs using enterprise reporting API helpers, gated by `VITE_ENABLE_ENTERPRISE`.
+
+**Reason:** 5.0+ pilot requires staff to access bureau and team read models without API calls; backend reporting shipped in v5.0.0.
+
+**Follow-up work:** Slice 10 — org admin staff UI.

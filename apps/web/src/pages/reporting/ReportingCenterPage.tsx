@@ -1,0 +1,397 @@
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import {
+  getBureauPerformanceReporting,
+  getEnterpriseReportingStatus,
+  getOperationsReporting,
+  getTeamProductivityReporting,
+} from '@verdin/api-client';
+import { Badge, Button, Card } from '@verdin/ui';
+import { DashboardMetricCard } from '../../components/dashboard/DashboardMetricCard';
+import { featureFlags } from '../../lib/feature-flags';
+
+type ReportingTab = 'operations' | 'bureau' | 'team';
+
+function formatGeneratedAt(value: string) {
+  return new Date(value).toLocaleString();
+}
+
+function formatLabel(value: string) {
+  return value.replaceAll('_', ' ');
+}
+
+function StatusBreakdown({ title, counts }: { title: string; counts: Record<string, number> }) {
+  const entries = Object.entries(counts).filter(([, count]) => count > 0);
+  if (entries.length === 0) {
+    return null;
+  }
+
+  return (
+    <div>
+      <h3 className="text-sm font-medium text-gray-700">{title}</h3>
+      <ul className="mt-2 space-y-2">
+        {entries.map(([status, count]) => (
+          <li
+            key={status}
+            className="flex items-center justify-between rounded-md border border-gray-200 px-4 py-2 text-sm"
+          >
+            <span className="capitalize text-gray-700">{formatLabel(status)}</span>
+            <span className="font-medium text-gray-900">{count}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+export function ReportingCenterPage() {
+  const [tab, setTab] = useState<ReportingTab>('operations');
+
+  if (!featureFlags.enableEnterprise) {
+    return (
+      <div className="p-8">
+        <Card>
+          <p className="py-12 text-center text-sm text-gray-500">
+            Enterprise reporting requires{' '}
+            <code className="text-xs">VITE_ENABLE_ENTERPRISE=true</code>.
+          </p>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-8">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-gray-900">Enterprise reporting</h1>
+        <p className="mt-1 text-gray-500">
+          Operations KPIs, bureau performance, and team productivity read models.
+        </p>
+      </div>
+
+      <ReportingStatusCard />
+
+      <div className="mb-6 flex flex-wrap gap-2">
+        <Button
+          type="button"
+          variant={tab === 'operations' ? 'primary' : 'secondary'}
+          onClick={() => setTab('operations')}
+        >
+          Operations
+        </Button>
+        <Button
+          type="button"
+          variant={tab === 'bureau' ? 'primary' : 'secondary'}
+          onClick={() => setTab('bureau')}
+        >
+          Bureau performance
+        </Button>
+        <Button
+          type="button"
+          variant={tab === 'team' ? 'primary' : 'secondary'}
+          onClick={() => setTab('team')}
+        >
+          Team productivity
+        </Button>
+      </div>
+
+      {tab === 'operations' ? <OperationsPanel /> : null}
+      {tab === 'bureau' ? <BureauPerformancePanel /> : null}
+      {tab === 'team' ? <TeamProductivityPanel /> : null}
+    </div>
+  );
+}
+
+function ReportingStatusCard() {
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['reporting-status'],
+    queryFn: getEnterpriseReportingStatus,
+  });
+
+  if (isLoading) {
+    return (
+      <Card className="mb-6">
+        <p className="text-sm text-gray-500">Loading reporting status…</p>
+      </Card>
+    );
+  }
+
+  if (isError || !data) {
+    return (
+      <Card className="mb-6">
+        <p className="text-sm text-red-600">Failed to load enterprise reporting status.</p>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="mb-6" title="Capabilities">
+      <div className="flex flex-wrap gap-2">
+        {data.capabilities.map((capability) => (
+          <Badge key={capability} variant="success">
+            {formatLabel(capability)}
+          </Badge>
+        ))}
+        {data.deferred_capabilities.map((capability) => (
+          <Badge key={capability} variant="default">
+            {formatLabel(capability)} (deferred)
+          </Badge>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
+function OperationsPanel() {
+  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
+    queryKey: ['reporting-operations'],
+    queryFn: getOperationsReporting,
+  });
+
+  if (isLoading) {
+    return (
+      <Card>
+        <p className="text-sm text-gray-500">Loading operations reporting…</p>
+      </Card>
+    );
+  }
+
+  if (isError || !data) {
+    return (
+      <Card>
+        <p className="text-sm text-red-600">
+          Failed to load operations reporting:{' '}
+          {error instanceof Error ? error.message : 'Unknown error'}
+        </p>
+        <Button className="mt-4" variant="secondary" onClick={() => refetch()}>
+          Retry
+        </Button>
+      </Card>
+    );
+  }
+
+  const ops = data.operations;
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between gap-4">
+        <p className="text-xs text-gray-400">Generated {formatGeneratedAt(data.generated_at)}</p>
+        <Button variant="secondary" onClick={() => refetch()} disabled={isFetching}>
+          {isFetching ? 'Refreshing…' : 'Refresh'}
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+        <DashboardMetricCard label="Total clients" value={ops.clients.total} />
+        <DashboardMetricCard label="Active clients" value={ops.clients.active} tone="success" />
+        <DashboardMetricCard
+          label="Portal enabled"
+          value={ops.clients.portal_enabled}
+          tone="info"
+        />
+        <DashboardMetricCard label="Portal users" value={ops.portal_users} />
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <Card title="Notifications">
+          <div className="grid grid-cols-2 gap-4">
+            <DashboardMetricCard
+              label="Unread"
+              value={ops.notifications.unread_total}
+              tone="warning"
+            />
+            <DashboardMetricCard label="Created today" value={ops.notifications.created_today} />
+          </div>
+        </Card>
+
+        <Card title="Dispute breakdown">
+          <div className="space-y-4">
+            <StatusBreakdown title="Accounts by dispute status" counts={ops.dispute_accounts} />
+            <StatusBreakdown title="Letters by status" counts={ops.dispute_letters} />
+          </div>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+function BureauPerformancePanel() {
+  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
+    queryKey: ['reporting-bureau-performance'],
+    queryFn: getBureauPerformanceReporting,
+  });
+
+  if (isLoading) {
+    return (
+      <Card>
+        <p className="text-sm text-gray-500">Loading bureau performance…</p>
+      </Card>
+    );
+  }
+
+  if (isError || !data) {
+    return (
+      <Card>
+        <p className="text-sm text-red-600">
+          Failed to load bureau performance:{' '}
+          {error instanceof Error ? error.message : 'Unknown error'}
+        </p>
+        <Button className="mt-4" variant="secondary" onClick={() => refetch()}>
+          Retry
+        </Button>
+      </Card>
+    );
+  }
+
+  const report = data.bureau_performance;
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between gap-4">
+        <p className="text-sm text-gray-600">
+          {report.total_accounts} accounts across {report.bureaus.length} bureaus · generated{' '}
+          {formatGeneratedAt(data.generated_at)}
+        </p>
+        <Button variant="secondary" onClick={() => refetch()} disabled={isFetching}>
+          {isFetching ? 'Refreshing…' : 'Refresh'}
+        </Button>
+      </div>
+
+      {report.bureaus.length === 0 ? (
+        <Card>
+          <p className="text-sm text-gray-500">No bureau performance data yet.</p>
+        </Card>
+      ) : (
+        <Card>
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr className="border-b text-left text-gray-500">
+                  <th className="px-3 py-2 font-medium">Bureau</th>
+                  <th className="px-3 py-2 font-medium">Accounts</th>
+                  <th className="px-3 py-2 font-medium">Sent letters</th>
+                  <th className="px-3 py-2 font-medium">Resolved</th>
+                  <th className="px-3 py-2 font-medium">Dispute status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {report.bureaus.map((item) => (
+                  <tr key={item.bureau} className="border-b border-gray-100 align-top">
+                    <td className="px-3 py-3 font-medium capitalize text-gray-900">
+                      {formatLabel(item.bureau)}
+                    </td>
+                    <td className="px-3 py-3">{item.total_accounts}</td>
+                    <td className="px-3 py-3">{item.sent_letters}</td>
+                    <td className="px-3 py-3">{item.resolved_accounts}</td>
+                    <td className="px-3 py-3">
+                      <ul className="space-y-1">
+                        {Object.entries(item.dispute_status).map(([status, count]) => (
+                          <li key={status} className="text-gray-600">
+                            <span className="capitalize">{formatLabel(status)}</span>: {count}
+                          </li>
+                        ))}
+                      </ul>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+function TeamProductivityPanel() {
+  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
+    queryKey: ['reporting-team-productivity'],
+    queryFn: getTeamProductivityReporting,
+  });
+
+  if (isLoading) {
+    return (
+      <Card>
+        <p className="text-sm text-gray-500">Loading team productivity…</p>
+      </Card>
+    );
+  }
+
+  if (isError || !data) {
+    return (
+      <Card>
+        <p className="text-sm text-red-600">
+          Failed to load team productivity:{' '}
+          {error instanceof Error ? error.message : 'Unknown error'}
+        </p>
+        <Button className="mt-4" variant="secondary" onClick={() => refetch()}>
+          Retry
+        </Button>
+      </Card>
+    );
+  }
+
+  const report = data.team_productivity;
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between gap-4">
+        <p className="text-xs text-gray-400">Generated {formatGeneratedAt(data.generated_at)}</p>
+        <Button variant="secondary" onClick={() => refetch()} disabled={isFetching}>
+          {isFetching ? 'Refreshing…' : 'Refresh'}
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+        <DashboardMetricCard label="Open tasks" value={report.open_tasks_total} tone="warning" />
+        <DashboardMetricCard
+          label="Completed tasks (30d)"
+          value={report.completed_tasks_30d_total}
+          tone="success"
+        />
+        <DashboardMetricCard label="Open cases assigned" value={report.assigned_open_cases_total} />
+        <DashboardMetricCard
+          label="Cases closed (30d)"
+          value={report.closed_cases_30d_total}
+          tone="info"
+        />
+      </div>
+
+      {report.members.length === 0 ? (
+        <Card>
+          <p className="text-sm text-gray-500">No team productivity data yet.</p>
+        </Card>
+      ) : (
+        <Card title="By team member">
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr className="border-b text-left text-gray-500">
+                  <th className="px-3 py-2 font-medium">Member</th>
+                  <th className="px-3 py-2 font-medium">Open tasks</th>
+                  <th className="px-3 py-2 font-medium">Completed (30d)</th>
+                  <th className="px-3 py-2 font-medium">Open cases</th>
+                  <th className="px-3 py-2 font-medium">Closed (30d)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {report.members.map((member) => (
+                  <tr key={member.user_id} className="border-b border-gray-100">
+                    <td className="px-3 py-3">
+                      <p className="font-medium text-gray-900">{member.full_name}</p>
+                      <p className="text-xs text-gray-500">{member.email}</p>
+                    </td>
+                    <td className="px-3 py-3">{member.open_tasks}</td>
+                    <td className="px-3 py-3">{member.completed_tasks_30d}</td>
+                    <td className="px-3 py-3">{member.assigned_open_cases}</td>
+                    <td className="px-3 py-3">{member.closed_cases_30d}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      )}
+    </div>
+  );
+}
