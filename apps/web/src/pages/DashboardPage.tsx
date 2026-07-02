@@ -141,6 +141,31 @@ export function DashboardPage() {
               />
             </DashboardSection>
 
+            <DashboardSection
+              title="4.8 Operations"
+              description="Clients, disputes, and notifications."
+            >
+              <DashboardMetricCard label="Clients" value={data.operations.clients.total} />
+              <DashboardMetricCard
+                label="Active Clients"
+                value={data.operations.clients.active}
+                tone="success"
+              />
+              <DashboardMetricCard
+                label="Portal Enabled"
+                value={data.operations.clients.portal_enabled}
+              />
+              <DashboardMetricCard
+                label="Unread Notifications"
+                value={data.operations.notifications.unread_total}
+                tone={data.operations.notifications.unread_total > 0 ? 'warning' : 'default'}
+              />
+              <DashboardMetricCard
+                label="Dispute Letters (Review)"
+                value={data.operations.dispute_letters.review ?? 0}
+              />
+            </DashboardSection>
+
             <DashboardSection title="Intelligence" description="Document AI readiness.">
               <DashboardMetricCard
                 label="Classification Confidence"
