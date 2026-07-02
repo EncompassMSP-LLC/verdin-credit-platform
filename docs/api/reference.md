@@ -141,6 +141,13 @@ Requires `ENABLE_CLIENT_PORTAL=true`. Portal JWTs use `realm=portal` and include
 | POST   | `/portal/auth/refresh` | public     | Refresh portal tokens    |
 | GET    | `/portal/auth/me`      | portal JWT | Current portal user info |
 
+Read-only case progress for portal users. Cases are matched to the portal client by email/name until optional `client_id` linking ships.
+
+| Method | Path                 | Auth       | Description                          |
+| ------ | -------------------- | ---------- | ------------------------------------ |
+| GET    | `/portal/cases`      | portal JWT | List cases linked to portal client   |
+| GET    | `/portal/cases/{id}` | portal JWT | Read-only case progress and disputes |
+
 ## Accounts
 
 Credit tradeline accounts with intelligence scoring. All endpoints require authentication and organization scoping.

@@ -21,6 +21,36 @@ export interface PortalMeResponse {
   last_login_at: string | null;
 }
 
+export type PortalCaseStatus = 'open' | 'active' | 'on_hold' | 'resolved' | 'closed';
+export type PortalCaseStage =
+  | 'intake'
+  | 'review'
+  | 'evidence_gathering'
+  | 'dispute_preparation'
+  | 'awaiting_response'
+  | 'monitoring'
+  | 'complete';
+
+export interface PortalCaseSummary {
+  id: string;
+  case_number: string | null;
+  title: string;
+  status: PortalCaseStatus;
+  stage: PortalCaseStage;
+  opened_at: string;
+  closed_at: string | null;
+  updated_at: string;
+}
+
+export interface PortalCaseDetail extends PortalCaseSummary {
+  dispute_accounts: Record<string, number>;
+  account_count: number;
+}
+
+export interface PortalCaseProgressResponse {
+  items: PortalCaseSummary[];
+}
+
 export interface ClientPortalUser {
   id: string;
   organization_id: string;
@@ -61,6 +91,14 @@ export async function portalRefresh(refreshToken: string): Promise<PortalTokenRe
 
 export async function getPortalMe(): Promise<PortalMeResponse> {
   return request<PortalMeResponse>(apiPath('/portal/auth/me'));
+}
+
+export async function listPortalCases(): Promise<PortalCaseProgressResponse> {
+  return request<PortalCaseProgressResponse>(apiPath('/portal/cases'));
+}
+
+export async function getPortalCase(caseId: string): Promise<PortalCaseDetail> {
+  return request<PortalCaseDetail>(apiPath(`/portal/cases/${caseId}`));
 }
 
 export async function provisionClientPortalUser(

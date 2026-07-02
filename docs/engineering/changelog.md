@@ -336,3 +336,13 @@ packages/job-orchestrator/
 **Reason:** 4.8 reporting epic needs read-optimized operational KPIs without bloating the core Mission Control aggregation queries.
 
 **Follow-up work:** Materialized views or read replicas if aggregate latency exceeds dashboard targets; bureau performance and revenue metrics deferred to 5.0.
+
+## Version 4.8 — Client portal case progress view
+
+### Decision: Read-only portal case endpoints with interim case matching
+
+**Decision:** Add `GET /portal/cases` and `GET /portal/cases/{id}` for portal JWT users, plus a minimal client portal UI (`/portal/login`, `/portal`, `/portal/cases/:id`). Cases match the portal client via email/name heuristics until optional `cases.client_id` linking ships.
+
+**Reason:** 4.8 client experience epic requires read-only progress without exposing staff APIs or internal notes.
+
+**Follow-up work:** Add `client_id` FK on cases, dedicated portal token storage isolation from staff session, secure messaging.

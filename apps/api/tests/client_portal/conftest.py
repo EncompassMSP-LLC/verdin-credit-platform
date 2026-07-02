@@ -8,8 +8,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 import api.models  # noqa: F401 — register all ORM mappers
 from api.core.constants import UserRole
+from api.core.feature_flags import get_feature_flags
 from api.core.security import hash_password
 from api.modules.auth.models import Organization, User
+
+
+@pytest.fixture
+def portal_enabled(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("ENABLE_CLIENT_PORTAL", "true")
+    get_feature_flags.cache_clear()
+    yield
+    get_feature_flags.cache_clear()
 
 
 @pytest.fixture

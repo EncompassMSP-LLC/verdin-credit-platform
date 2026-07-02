@@ -202,7 +202,9 @@ export {
 } from './notifications';
 
 export {
+  getPortalCase,
   getPortalMe,
+  listPortalCases,
   portalLogin,
   portalRefresh,
   provisionClientPortalUser,
@@ -210,6 +212,11 @@ export {
   updateClientPortalUser,
   revokeClientPortalUser,
   type ClientPortalUser,
+  type PortalCaseDetail,
+  type PortalCaseProgressResponse,
+  type PortalCaseStage,
+  type PortalCaseStatus,
+  type PortalCaseSummary,
   type PortalLoginInput,
   type PortalMeResponse,
   type PortalTokenResponse,
