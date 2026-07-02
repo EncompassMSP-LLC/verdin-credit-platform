@@ -28,6 +28,7 @@ import { ClientDetailPage } from '../pages/clients/ClientDetailPage';
 import { ClientEditPage } from '../pages/clients/ClientEditPage';
 import { ComplianceCenterPage } from '../pages/compliance/ComplianceCenterPage';
 import { ReportingCenterPage } from '../pages/reporting/ReportingCenterPage';
+import { OrgAdminPage } from '../pages/org-admin/OrgAdminPage';
 import { PortalRoutes } from './portal';
 import { featureFlags } from '../lib/feature-flags';
 
@@ -92,6 +93,7 @@ export function AppRoutes() {
           <>
             <Route path="compliance" element={<ComplianceCenterPage />} />
             <Route path="reporting" element={<ReportingCenterPage />} />
+            <Route path="org-admin" element={<OrgAdminPage />} />
           </>
         ) : null}
         <Route path="settings" element={<SettingsPage />} />

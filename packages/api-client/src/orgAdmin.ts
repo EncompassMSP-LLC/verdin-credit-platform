@@ -59,7 +59,7 @@ export function listOrganizationApiKeys() {
 export function createOrganizationApiKey(input: ApiKeyCreateInput) {
   return request<ApiKeyCreateResponse>(apiPath('/org-admin/api-keys'), {
     method: 'POST',
-    body: JSON.stringify(input),
+    body: input,
   });
 }
 

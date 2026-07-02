@@ -15,6 +15,7 @@ const navItems = [
     ? [
         { to: '/compliance', label: 'Compliance' },
         { to: '/reporting', label: 'Reporting' },
+        { to: '/org-admin', label: 'Org Admin' },
       ]
     : []),
   { to: '/timeline', label: 'Timeline' },
