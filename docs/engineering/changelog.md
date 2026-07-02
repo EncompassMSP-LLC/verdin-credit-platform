@@ -533,6 +533,14 @@ packages/job-orchestrator/
 
 **Follow-up work:** Slice 10 — org admin staff UI.
 
+### Decision: Org admin staff UI
+
+**Decision:** Add `/org-admin` page with organization summary, API key list/create/revoke, and one-time secret display; fix api-client create key body serialization.
+
+**Reason:** 5.0+ pilot requires admins to manage API keys without CLI; backend org admin shipped in v5.0.0.
+
+**Follow-up work:** Slice 11 — LLM case summary UI.
+
 ### Decision: LLM case summary UI on case detail
 
 **Decision:** Add `CaseLlmSummaryPanel` on staff case detail with LLM readiness check and generate action using `POST /cases/{id}/llm-summary`, gated by `VITE_ENABLE_LLM`.
