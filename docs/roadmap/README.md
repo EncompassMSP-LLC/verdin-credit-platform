@@ -27,7 +27,7 @@ v4.5.0 — Automation Platform (released)
     ↓
 v4.8.0 — Operations (released)
     ↓
-v5.0 — Enterprise Edition (planned)
+v5.0 — Enterprise Edition (in progress)
 ```
 
 Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (`Sprint 4.3.1`) are engineering milestones that harden a release before the next version opens.
@@ -41,7 +41,7 @@ Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (
 | **4.3.1** | Operational Core Completion | **Shipped** | Mission Control dashboard, governance refinements, release stabilization   |
 | **4.5**   | Automation                  | **Shipped** | Import wizard, dispute lifecycle, workflow auto-tasks, rules AI (`v4.5.0`) |
 | **4.8**   | Operations                  | **Shipped** | Client portal, notifications, LLM policy gates, reporting (`v4.8.0`)       |
-| **5.0**   | Enterprise Edition          | Planned     | Multi-tenancy, compliance center, enterprise admin, predictive analytics   |
+| **5.0**   | Enterprise Edition          | In progress | Compliance, SSO/MFA, LLM summaries, production email, portal expansion     |
 
 ### Sprint milestones
 
@@ -119,6 +119,12 @@ Scope and deferrals: [`docs/governance/version-4.8-scope.md`](../governance/vers
 
 Release notes: [`docs/release-notes/v4.8.0.md`](../release-notes/v4.8.0.md)
 
+### Version 5.0 — Enterprise Edition (in progress)
+
+Scope and deferrals: [`docs/governance/version-5.0-scope.md`](../governance/version-5.0-scope.md)
+
+Completion checklist: [`docs/development/version-5.0-completion-checklist.md`](../development/version-5.0-completion-checklist.md)
+
 ## Sprint → version mapping
 
 | Sprint work                               | Version / Sprint | Architecture domain                                      |
@@ -153,7 +159,7 @@ Release notes: [`docs/release-notes/v4.8.0.md`](../release-notes/v4.8.0.md)
 - [Sprint 4.3.1 stabilization](../sprint-4.3.1/operational-core-stabilization.md)
 - [Release notes — v4.3.1](../release-notes/v4.3.1.md)
 - [Release notes — v4.5.0](../release-notes/v4.5.0.md)
-- [Version 4.8 completion checklist](../development/version-4.8-completion-checklist.md)
+- [Version 5.0 completion checklist](../development/version-5.0-completion-checklist.md)
 - [Release notes — v4.8.0](../release-notes/v4.8.0.md)
 - [Release notes — v4.3.0 GA](../release-notes/v4.3.0-ga.md)
 - [Architecture](../architecture/README.md) — technical constitution
