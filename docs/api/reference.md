@@ -393,6 +393,18 @@ Read-optimized operations reporting for 4.8 dashboard expansions.
 
 The Mission Control `GET /dashboard` response also embeds an `operations` section sourced from the same read model.
 
+### Enterprise reporting (5.0)
+
+Bureau performance and team productivity read models for enterprise dashboards. All endpoints are org-scoped aggregates — no cross-org queries.
+
+| Method | Path                            | Min role  | Description                                             |
+| ------ | ------------------------------- | --------- | ------------------------------------------------------- |
+| GET    | `/reporting/status`             | read_only | Enterprise reporting capabilities overview              |
+| GET    | `/reporting/bureau-performance` | read_only | Tradeline counts and dispute outcomes grouped by bureau |
+| GET    | `/reporting/team-productivity`  | read_only | Per-staff task and case productivity (30-day window)    |
+
+Materialized views, revenue metrics, and score-improvement trends are deferred to 5.0+.
+
 ## Dashboard
 
 | Method | Path         | Role      | Description                         |

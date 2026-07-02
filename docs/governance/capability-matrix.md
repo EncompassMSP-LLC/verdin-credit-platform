@@ -183,7 +183,7 @@ Scope: [version-5.0-scope.md](version-5.0-scope.md) · Checklist: [version-5.0-c
 | SSO / MFA            | 5.0     | Partial | ✅      | —        | ✅  | —   | ✅    | Auth          | `GET /enterprise/status`; IdP/TOTP wiring deferred          |
 | Compliance center    | 5.0     | Partial | ✅      | —        | ✅  | —   | ✅    | Timeline      | Consent records + retention policy placeholders             |
 | Portal expansion     | 5.0     | Partial | ✅      | —        | ✅  | —   | ✅    | Portal        | Document upload + secure messaging on linked cases          |
-| Enterprise reporting | 5.0     | Planned | —       | —        | —   | —   | —     | Reporting     | Bureau/team productivity read models                        |
+| Enterprise reporting | 5.0     | Partial | ✅      | —        | ✅  | —   | ✅    | Reporting     | Bureau performance + team productivity read models          |
 
 ---
 

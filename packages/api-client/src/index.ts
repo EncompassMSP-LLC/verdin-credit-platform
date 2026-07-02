@@ -44,11 +44,21 @@ export {
 } from './dashboard';
 
 export {
+  getBureauPerformanceReporting,
+  getEnterpriseReportingStatus,
   getOperationsReporting,
+  getTeamProductivityReporting,
+  type BureauPerformanceItem,
+  type BureauPerformanceReporting,
+  type BureauPerformanceReportingResponse,
   type ClientReportingMetrics,
+  type EnterpriseReportingStatus,
   type NotificationReportingMetrics,
   type OperationsReporting,
   type OperationsReportingResponse,
+  type TeamMemberProductivity,
+  type TeamProductivityReporting,
+  type TeamProductivityReportingResponse,
 } from './reporting';
 
 export {

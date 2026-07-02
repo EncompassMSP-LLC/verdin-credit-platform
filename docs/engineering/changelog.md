@@ -430,3 +430,11 @@ packages/job-orchestrator/
 **Reason:** Client portal epic requires a durable messaging foundation on linked cases before real-time delivery or attachments ship in later versions.
 
 **Follow-up work:** Slice 10 — enterprise reporting read models.
+
+### Decision: Enterprise bureau performance and team productivity read models
+
+**Decision:** Add `GET /reporting/bureau-performance` and `GET /reporting/team-productivity` org-scoped aggregate endpoints, `GET /reporting/status` capabilities overview, and `@verdin/api-client` reporting helpers.
+
+**Reason:** Reporting epic requires enterprise dashboards beyond 4.8 operations KPIs without materialized views or revenue pipelines in this slice.
+
+**Follow-up work:** Slice 11 — API keys + org admin scaffold.

@@ -6,15 +6,23 @@ from datetime import UTC, datetime
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from api.core.enterprise_reporting import get_enterprise_reporting_status
 from api.core.permissions import has_permission
 from api.modules.auth.models import User
 from api.modules.reporting.permissions import REPORTING_READ_ROLE
 from api.modules.reporting.repository import OperationsReportingRepository
 from api.modules.reporting.schemas import (
+    BureauPerformanceItem,
+    BureauPerformanceReporting,
+    BureauPerformanceReportingResponse,
     ClientReportingMetrics,
+    EnterpriseReportingStatusResponse,
     NotificationReportingMetrics,
     OperationsReporting,
     OperationsReportingResponse,
+    TeamMemberProductivity,
+    TeamProductivityReporting,
+    TeamProductivityReportingResponse,
 )
 
 
@@ -60,3 +68,35 @@ class ReportingService:
         """Return operations metrics without envelope (for dashboard embedding)."""
         response = await self.get_operations_summary(user)
         return response.operations
+
+    async def get_enterprise_status(self, user: User) -> EnterpriseReportingStatusResponse:
+        self._require_read(user)
+        self._require_organization(user)
+        return get_enterprise_reporting_status()
+
+    async def get_bureau_performance(self, user: User) -> BureauPerformanceReportingResponse:
+        self._require_read(user)
+        organization_id = self._require_organization(user)
+        raw = await self._reporting.get_bureau_performance(organization_id)
+        return BureauPerformanceReportingResponse(
+            generated_at=datetime.now(UTC),
+            bureau_performance=BureauPerformanceReporting(
+                bureaus=[BureauPerformanceItem(**item) for item in raw["bureaus"]],
+                total_accounts=raw["total_accounts"],
+            ),
+        )
+
+    async def get_team_productivity(self, user: User) -> TeamProductivityReportingResponse:
+        self._require_read(user)
+        organization_id = self._require_organization(user)
+        raw = await self._reporting.get_team_productivity(organization_id)
+        return TeamProductivityReportingResponse(
+            generated_at=datetime.now(UTC),
+            team_productivity=TeamProductivityReporting(
+                members=[TeamMemberProductivity(**item) for item in raw["members"]],
+                open_tasks_total=raw["open_tasks_total"],
+                completed_tasks_30d_total=raw["completed_tasks_30d_total"],
+                assigned_open_cases_total=raw["assigned_open_cases_total"],
+                closed_cases_30d_total=raw["closed_cases_30d_total"],
+            ),
+        )
