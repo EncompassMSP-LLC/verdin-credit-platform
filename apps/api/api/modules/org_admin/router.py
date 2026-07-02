@@ -1,0 +1,82 @@
+"""Organization admin endpoints."""
+
+import uuid
+
+from fastapi import APIRouter, Depends, status
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from api.database.session import get_db
+from api.modules.auth.dependencies import get_current_user
+from api.modules.auth.models import User
+from api.modules.org_admin.dependencies import require_org_admin_enabled
+from api.modules.org_admin.schemas import (
+    ApiKeyCreate,
+    ApiKeyCreateResponse,
+    ApiKeyResponse,
+    OrgAdminStatusResponse,
+    OrganizationAdminSummary,
+)
+from api.modules.org_admin.service import OrgAdminService
+
+router = APIRouter(prefix="/org-admin", tags=["Organization Admin"])
+
+
+def get_org_admin_service(db: AsyncSession = Depends(get_db)) -> OrgAdminService:
+    return OrgAdminService.from_session(db)
+
+
+@router.get("/status", response_model=OrgAdminStatusResponse)
+async def get_org_admin_status(
+    _: None = Depends(require_org_admin_enabled),
+    current_user: User = Depends(get_current_user),
+    service: OrgAdminService = Depends(get_org_admin_service),
+) -> OrgAdminStatusResponse:
+    return await service.get_status(current_user)
+
+
+@router.get("/organization", response_model=OrganizationAdminSummary)
+async def get_organization_admin_summary(
+    _: None = Depends(require_org_admin_enabled),
+    current_user: User = Depends(get_current_user),
+    service: OrgAdminService = Depends(get_org_admin_service),
+) -> OrganizationAdminSummary:
+    return await service.get_organization_summary(current_user)
+
+
+@router.get("/api-keys", response_model=list[ApiKeyResponse])
+async def list_organization_api_keys(
+    _: None = Depends(require_org_admin_enabled),
+    current_user: User = Depends(get_current_user),
+    service: OrgAdminService = Depends(get_org_admin_service),
+) -> list[ApiKeyResponse]:
+    return await service.list_api_keys(current_user)
+
+
+@router.post("/api-keys", response_model=ApiKeyCreateResponse, status_code=status.HTTP_201_CREATED)
+async def create_organization_api_key(
+    body: ApiKeyCreate,
+    _: None = Depends(require_org_admin_enabled),
+    current_user: User = Depends(get_current_user),
+    service: OrgAdminService = Depends(get_org_admin_service),
+) -> ApiKeyCreateResponse:
+    return await service.create_api_key(current_user, body)
+
+
+@router.get("/api-keys/{api_key_id}", response_model=ApiKeyResponse)
+async def get_organization_api_key(
+    api_key_id: uuid.UUID,
+    _: None = Depends(require_org_admin_enabled),
+    current_user: User = Depends(get_current_user),
+    service: OrgAdminService = Depends(get_org_admin_service),
+) -> ApiKeyResponse:
+    return await service.get_api_key(current_user, api_key_id)
+
+
+@router.post("/api-keys/{api_key_id}/revoke", response_model=ApiKeyResponse)
+async def revoke_organization_api_key(
+    api_key_id: uuid.UUID,
+    _: None = Depends(require_org_admin_enabled),
+    current_user: User = Depends(get_current_user),
+    service: OrgAdminService = Depends(get_org_admin_service),
+) -> ApiKeyResponse:
+    return await service.revoke_api_key(current_user, api_key_id)

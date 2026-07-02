@@ -103,6 +103,21 @@ export { getLlmStatus, type LlmGateStatus } from './llm';
 export { getEnterpriseIdentityStatus, type EnterpriseIdentityStatus } from './enterprise';
 
 export {
+  createOrganizationApiKey,
+  getOrgAdminStatus,
+  getOrganizationAdminSummary,
+  getOrganizationApiKey,
+  listOrganizationApiKeys,
+  revokeOrganizationApiKey,
+  type ApiKey,
+  type ApiKeyCreateInput,
+  type ApiKeyCreateResponse,
+  type ApiKeyScope,
+  type OrgAdminStatus,
+  type OrganizationAdminSummary,
+} from './orgAdmin';
+
+export {
   getCaseMessageThread,
   getMessagingCenterStatus,
   postCaseMessageThreadReply,
