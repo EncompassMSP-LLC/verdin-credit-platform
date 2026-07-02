@@ -26,7 +26,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | 6     | Portal secure messaging UI        | Client Portal    | ✅     |
 | 7     | Staff case messaging UI           | Client Portal    | ✅     |
 | 8     | Compliance center staff UI        | Compliance       | ✅     |
-| 9     | Enterprise reporting staff UI     | Reporting        | —      |
+| 9     | Enterprise reporting staff UI     | Reporting        | ✅     |
 | 10    | Org admin staff UI                | Enterprise Admin | —      |
 | 11    | LLM case summary UI               | AI               | —      |
 | 12    | Capability matrix 5.0+ sign-off   | Governance       | —      |
