@@ -49,5 +49,21 @@ These endpoints do not require authentication:
 - `GET /api/v1/version`
 - `POST /api/v1/auth/login`
 - `POST /api/v1/auth/refresh`
+- `POST /api/v1/portal/auth/login` (when `ENABLE_CLIENT_PORTAL=true`)
+- `POST /api/v1/portal/auth/refresh` (when `ENABLE_CLIENT_PORTAL=true`)
 
 All other endpoints require a valid Bearer token.
+
+## Client portal auth (4.8)
+
+When `ENABLE_CLIENT_PORTAL=true`, clients provisioned by staff receive separate portal credentials.
+
+| Token claim | Staff     | Portal             |
+| ----------- | --------- | ------------------ |
+| `realm`     | `staff`   | `portal`           |
+| `role`      | RBAC role | —                  |
+| `client_id` | —         | Linked client UUID |
+
+Portal endpoints (`/portal/auth/*`) reject staff tokens; staff endpoints reject portal tokens.
+
+Staff provisions portal access via `POST /clients/{id}/portal-user` (case_manager+).

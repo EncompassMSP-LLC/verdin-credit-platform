@@ -5,6 +5,7 @@ from api.modules.accounts.dispute_letter_models import DisputeLetter, DisputeLet
 from api.modules.accounts.models import Account
 from api.modules.auth.models import Organization, User
 from api.modules.cases.models import Case, CasePriority, CaseStage, CaseStatus
+from api.modules.client_portal.models import ClientPortalUser
 from api.modules.clients.models import Client, ClientContact, ClientStatus, ContactRelationship
 from api.modules.documents.metadata_models import DocumentEntityResolution, DocumentMetadata
 from api.modules.documents.models import Document, DocumentVersion
@@ -21,6 +22,7 @@ __all__ = [
     "CaseStatus",
     "Client",
     "ClientContact",
+    "ClientPortalUser",
     "ClientStatus",
     "ContactRelationship",
     "Communication",

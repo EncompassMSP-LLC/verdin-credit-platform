@@ -8,7 +8,13 @@ import bcrypt
 from jose import JWTError, jwt
 
 from api.core.config import get_settings
-from api.core.constants import TOKEN_TYPE_ACCESS, TOKEN_TYPE_REFRESH, UserRole
+from api.core.constants import (
+    TOKEN_REALM_PORTAL,
+    TOKEN_REALM_STAFF,
+    TOKEN_TYPE_ACCESS,
+    TOKEN_TYPE_REFRESH,
+    UserRole,
+)
 
 settings = get_settings()
 
@@ -54,6 +60,7 @@ def create_access_token(
         "sub": subject,
         "role": role.value,
         "type": TOKEN_TYPE_ACCESS,
+        "realm": TOKEN_REALM_STAFF,
         "exp": expire,
     }
     return jwt.encode(payload, settings.secret_key, algorithm=settings.algorithm)
@@ -64,6 +71,40 @@ def create_refresh_token(subject: str) -> str:
     payload: dict[str, Any] = {
         "sub": subject,
         "type": TOKEN_TYPE_REFRESH,
+        "realm": TOKEN_REALM_STAFF,
+        "exp": expire,
+        "jti": str(uuid.uuid4()),
+    }
+    return jwt.encode(payload, settings.secret_key, algorithm=settings.algorithm)
+
+
+def create_portal_access_token(
+    subject: str,
+    *,
+    organization_id: str,
+    client_id: str,
+    expires_delta: timedelta | None = None,
+) -> str:
+    expire = datetime.now(UTC) + (
+        expires_delta or timedelta(minutes=settings.access_token_expire_minutes)
+    )
+    payload: dict[str, Any] = {
+        "sub": subject,
+        "type": TOKEN_TYPE_ACCESS,
+        "realm": TOKEN_REALM_PORTAL,
+        "organization_id": organization_id,
+        "client_id": client_id,
+        "exp": expire,
+    }
+    return jwt.encode(payload, settings.secret_key, algorithm=settings.algorithm)
+
+
+def create_portal_refresh_token(subject: str) -> str:
+    expire = datetime.now(UTC) + timedelta(days=settings.refresh_token_expire_days)
+    payload: dict[str, Any] = {
+        "sub": subject,
+        "type": TOKEN_TYPE_REFRESH,
+        "realm": TOKEN_REALM_PORTAL,
         "exp": expire,
         "jti": str(uuid.uuid4()),
     }

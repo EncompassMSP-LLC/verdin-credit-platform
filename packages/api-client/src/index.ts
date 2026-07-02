@@ -190,6 +190,22 @@ export {
   type UnreadCountResponse,
 } from './notifications';
 
+export {
+  getPortalMe,
+  portalLogin,
+  portalRefresh,
+  provisionClientPortalUser,
+  getClientPortalUser,
+  updateClientPortalUser,
+  revokeClientPortalUser,
+  type ClientPortalUser,
+  type PortalLoginInput,
+  type PortalMeResponse,
+  type PortalTokenResponse,
+  type ProvisionPortalUserInput,
+  type UpdatePortalUserInput,
+} from './portal';
+
 export interface HealthResponse {
   status: string;
   version: string;

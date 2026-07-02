@@ -67,7 +67,7 @@ DOMAIN_DELETE_ROLE = UserRole.ADMIN
 - Users belong to one `Organization`
 - All case/account/document queries filter by org
 - 404 (not 403) when resource exists in another org — prevents enumeration
-- Future client portal users (4.8) get a separate auth realm with case-scoped tokens
+- Future client portal users (4.8) get a separate auth realm with case-scoped tokens — **shipped:** JWT `realm=portal`, `/portal/auth/*`, gated by `ENABLE_CLIENT_PORTAL`
 
 ## Audit trail
 
