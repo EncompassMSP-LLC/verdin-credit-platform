@@ -3,7 +3,7 @@
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.core.constants import TOKEN_TYPE_REFRESH
+from api.core.constants import TOKEN_REALM_STAFF, TOKEN_TYPE_REFRESH
 from api.core.events import publish_platform_event
 from api.core.security import (
     create_access_token,
@@ -53,6 +53,11 @@ class AuthService:
     async def refresh(self, refresh_token: str) -> TokenResponse:
         payload = decode_token(refresh_token)
         if payload is None or payload.get("type") != TOKEN_TYPE_REFRESH:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid refresh token",
+            )
+        if payload.get("realm", TOKEN_REALM_STAFF) != TOKEN_REALM_STAFF:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid refresh token",

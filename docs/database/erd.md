@@ -8,6 +8,7 @@ erDiagram
     Organization ||--o{ Client : has
     Organization ||--o{ Case : has
     Client ||--o{ ClientContact : has
+    Client ||--o| ClientPortalUser : "portal login"
     Organization ||--o{ Account : has
     Case ||--o{ Account : "credit tradelines"
     Account ||--o{ DisputeLetter : has
@@ -64,6 +65,16 @@ erDiagram
         enum relationship
         boolean is_primary
         text notes
+    }
+
+    ClientPortalUser {
+        uuid id PK
+        uuid organization_id FK
+        uuid client_id FK UK
+        string email UK
+        string hashed_password
+        boolean is_active
+        timestamp last_login_at
     }
 
     Account {

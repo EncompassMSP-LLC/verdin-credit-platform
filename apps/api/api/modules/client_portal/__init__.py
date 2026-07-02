@@ -1,0 +1,1 @@
+"""Client portal authentication module."""

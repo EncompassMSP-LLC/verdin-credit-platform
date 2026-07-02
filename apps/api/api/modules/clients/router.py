@@ -9,6 +9,12 @@ from api.core.pagination import PaginatedResponse
 from api.database.session import get_db
 from api.modules.auth.dependencies import get_current_user
 from api.modules.auth.models import User
+from api.modules.client_portal.schemas import (
+    ClientPortalUserProvision,
+    ClientPortalUserResponse,
+    ClientPortalUserUpdate,
+)
+from api.modules.client_portal.service import ClientPortalProvisioningService
 from api.modules.clients.models import ClientStatus, ContactRelationship
 from api.modules.clients.schemas import (
     ClientContactCreate,
@@ -31,6 +37,12 @@ router = APIRouter(prefix="/clients", tags=["Clients"])
 
 def get_client_service(db: AsyncSession = Depends(get_db)) -> ClientService:
     return ClientService.from_session(db)
+
+
+def get_portal_provisioning_service(
+    db: AsyncSession = Depends(get_db),
+) -> ClientPortalProvisioningService:
+    return ClientPortalProvisioningService.from_session(db)
 
 
 def get_client_list_params(
@@ -170,3 +182,45 @@ async def delete_client_contact(
     service: ClientService = Depends(get_client_service),
 ) -> None:
     await service.delete_contact(current_user, client_id, contact_id)
+
+
+@router.post(
+    "/{client_id}/portal-user",
+    response_model=ClientPortalUserResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def provision_client_portal_user(
+    client_id: uuid.UUID,
+    body: ClientPortalUserProvision,
+    current_user: User = Depends(get_current_user),
+    service: ClientPortalProvisioningService = Depends(get_portal_provisioning_service),
+) -> ClientPortalUserResponse:
+    return await service.provision_portal_user(current_user, client_id, body)
+
+
+@router.get("/{client_id}/portal-user", response_model=ClientPortalUserResponse)
+async def get_client_portal_user(
+    client_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: ClientPortalProvisioningService = Depends(get_portal_provisioning_service),
+) -> ClientPortalUserResponse:
+    return await service.get_portal_user(current_user, client_id)
+
+
+@router.patch("/{client_id}/portal-user", response_model=ClientPortalUserResponse)
+async def update_client_portal_user(
+    client_id: uuid.UUID,
+    body: ClientPortalUserUpdate,
+    current_user: User = Depends(get_current_user),
+    service: ClientPortalProvisioningService = Depends(get_portal_provisioning_service),
+) -> ClientPortalUserResponse:
+    return await service.update_portal_user(current_user, client_id, body)
+
+
+@router.delete("/{client_id}/portal-user", status_code=status.HTTP_204_NO_CONTENT)
+async def revoke_client_portal_user(
+    client_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: ClientPortalProvisioningService = Depends(get_portal_provisioning_service),
+) -> None:
+    await service.revoke_portal_user(current_user, client_id)

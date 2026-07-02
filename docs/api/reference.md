@@ -113,6 +113,12 @@ Client records and nested contacts for credit repair consumers. Organization-sco
 | GET    | `/clients/{client_id}/contacts/{id}` | read_only    | Get contact by ID        |
 | PATCH  | `/clients/{client_id}/contacts/{id}` | case_manager | Update a contact         |
 | DELETE | `/clients/{client_id}/contacts/{id}` | admin        | Soft-delete a contact    |
+| POST   | `/clients/{client_id}/portal-user`   | case_manager | Provision portal login   |
+| GET    | `/clients/{client_id}/portal-user`   | read_only    | Get portal user metadata |
+| PATCH  | `/clients/{client_id}/portal-user`   | case_manager | Update portal access     |
+| DELETE | `/clients/{client_id}/portal-user`   | case_manager | Revoke portal access     |
+
+Portal provisioning requires `ENABLE_CLIENT_PORTAL=true`.
 
 **List query parameters (clients):** `page`, `page_size`, `search`, `status`, `sort_by`, `sort_order`
 
@@ -124,6 +130,16 @@ Client records and nested contacts for credit repair consumers. Organization-sco
 - **contact relationship:** `primary`, `spouse`, `attorney`, `authorized`, `other`
 
 Only one contact per client may have `is_primary=true` at a time.
+
+## Client portal auth
+
+Requires `ENABLE_CLIENT_PORTAL=true`. Portal JWTs use `realm=portal` and include `client_id`; staff tokens use `realm=staff`. Realms are not interchangeable.
+
+| Method | Path                   | Auth       | Description              |
+| ------ | ---------------------- | ---------- | ------------------------ |
+| POST   | `/portal/auth/login`   | public     | Portal user login        |
+| POST   | `/portal/auth/refresh` | public     | Refresh portal tokens    |
+| GET    | `/portal/auth/me`      | portal JWT | Current portal user info |
 
 ## Accounts
 

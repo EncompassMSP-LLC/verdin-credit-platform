@@ -4,7 +4,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.core.constants import TOKEN_TYPE_ACCESS, UserRole
+from api.core.constants import TOKEN_REALM_STAFF, TOKEN_TYPE_ACCESS, UserRole
 from api.core.permissions import has_permission
 from api.core.security import decode_token
 from api.database.session import get_db
@@ -27,6 +27,10 @@ async def get_current_user(
 
     payload = decode_token(credentials.credentials)
     if payload is None or payload.get("type") != TOKEN_TYPE_ACCESS:
+        raise credentials_exception
+
+    realm = payload.get("realm", TOKEN_REALM_STAFF)
+    if realm != TOKEN_REALM_STAFF:
         raise credentials_exception
 
     user_id = payload.get("sub")

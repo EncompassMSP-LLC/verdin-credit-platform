@@ -295,7 +295,17 @@ packages/job-orchestrator/
 
 **Reason:** Client portal auth (slice 7) requires a durable client identity separate from case denormalized fields.
 
-**Follow-up work:** Link cases to clients, portal auth partition, read-only progress view.
+**Follow-up work:** Link cases to clients, read-only progress view (slice 11).
+
+## Version 4.8 — Client portal auth partition
+
+### Decision: Separate JWT realm for portal users
+
+**Decision:** Add `client_portal_users` table, `/portal/auth/*` endpoints, and JWT `realm=portal` claims. Staff provisions portal credentials via `/clients/{id}/portal-user`. Feature-flagged with `ENABLE_CLIENT_PORTAL`.
+
+**Reason:** Portal users must not share staff RBAC tokens or access staff APIs.
+
+**Follow-up work:** Client portal case progress view (slice 11), dedicated portal token storage in web app.
 
 ## Version 4.8 — LLM provider policy and gates
 
