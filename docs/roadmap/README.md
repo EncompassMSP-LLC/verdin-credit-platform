@@ -139,9 +139,22 @@ Scope and deferrals: [`docs/governance/version-5.0-scope.md`](../governance/vers
 
 Release notes: [`docs/release-notes/v5.0.0.md`](../release-notes/v5.0.0.md)
 
-### Version 5.0+ — Product Hardening (in progress)
+### Version 5.0+ — Product Hardening (pilot ready)
 
 Scope and checklist: [`docs/governance/version-5.0-plus-scope.md`](../governance/version-5.0-plus-scope.md) · [`docs/development/version-5.0-plus-completion-checklist.md`](../development/version-5.0-plus-completion-checklist.md)
+
+| Epic | Theme                   | 5.0+ outcome | Notes                                             |
+| ---- | ----------------------- | ------------ | ------------------------------------------------- |
+| 1    | Developer experience    | Partial      | `predev` api-client build on `pnpm dev`           |
+| 2    | Client management UI    | Partial      | Staff clients CRUD, contacts, portal provision    |
+| 3    | Case–client linking UI  | Partial      | `client_id` picker on case forms                  |
+| 4    | Portal product UI       | Partial      | Document upload + messaging on linked cases       |
+| 5    | Compliance UI           | Partial      | Consent + retention policy staff UI               |
+| 6    | Enterprise reporting UI | Partial      | Bureau performance + team productivity dashboards |
+| 7    | Org admin UI            | Partial      | API key lifecycle management                      |
+| 8    | LLM assistance UI       | Partial      | Case summary trigger on case detail               |
+
+**Pilot ready** — all 5.0+ checklist slices complete; deferrals documented in scope doc.
 
 ## Sprint → version mapping
 
