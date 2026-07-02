@@ -406,6 +406,8 @@ Read-optimized operations reporting for 4.8 dashboard expansions.
 | ------ | ----------------------- | --------- | ------------------------------------------------ |
 | GET    | `/reporting/operations` | read_only | Org-scoped clients, disputes, notifications KPIs |
 
+`GET /reporting/operations` also accepts organization API keys when `ENABLE_ENTERPRISE=true`: pass `X-API-Key: vrd_live_…` or `Authorization: Bearer vrd_live_…` with a key that includes the `read` scope. Staff JWT auth with `read_only` role remains supported. Other reporting routes are JWT-only.
+
 The Mission Control `GET /dashboard` response also embeds an `operations` section sourced from the same read model.
 
 ### Enterprise reporting (5.0)

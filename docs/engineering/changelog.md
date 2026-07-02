@@ -564,3 +564,11 @@ packages/job-orchestrator/
 **Reason:** 5.0+ pilot sign-off complete; deferred production integrations need a sequenced delivery path before v5.1.0 release.
 
 **Follow-up work:** Slice 2 — API key auth middleware.
+
+### Decision: API key auth middleware on reporting operations
+
+**Decision:** Add `ApiKeyAuthService` with prefix/hash validation, scope checks, and `last_used_at` audit; wire `GET /reporting/operations` to accept `X-API-Key` or `Authorization: Bearer vrd_live_…` alongside staff JWT. Gated behind `ENABLE_ENTERPRISE`.
+
+**Reason:** 5.1 requires at least one production integration path authenticated by organization API keys before billing and external automation expand.
+
+**Follow-up work:** Slice 3 — production SMS delivery.

@@ -13,11 +13,12 @@ from api.modules.auth.repository import UserRepository
 from api.repositories.user import UserRepositoryProtocol
 
 security = HTTPBearer()
+optional_bearer = HTTPBearer(auto_error=False)
 
 
-async def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
-    db: AsyncSession = Depends(get_db),
+async def authenticate_staff_user(
+    credentials: HTTPAuthorizationCredentials,
+    db: AsyncSession,
 ) -> User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -43,6 +44,13 @@ async def get_current_user(
         raise credentials_exception
 
     return user
+
+
+async def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db: AsyncSession = Depends(get_db),
+) -> User:
+    return await authenticate_staff_user(credentials, db)
 
 
 def require_role(minimum_role: UserRole):
