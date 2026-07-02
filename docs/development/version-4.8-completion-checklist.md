@@ -1,16 +1,16 @@
 # Version 4.8 Completion Checklist
 
-Ordered path to **v4.8.0** — **in progress**. Preceded by shipped **v4.5.0**.
+Ordered path to **v4.8.0** — **complete**. Preceded by shipped **v4.5.0**.
 
 Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 
 ## Exit criteria for “4.8 done”
 
-- [ ] All five epics below are **✅ or explicitly deferred to 5.0** with docs updated — see [`version-4.8-scope.md`](../governance/version-4.8-scope.md)
-- [ ] Capability matrix rows for 4.8 show **✅** (or **Partial** with written scope limits)
-- [ ] `v4.8.0` release notes + tag
+- [x] All five epics below are **✅ or explicitly deferred to 5.0** with docs updated — see [`version-4.8-scope.md`](../governance/version-4.8-scope.md)
+- [x] Capability matrix rows for 4.8 show **✅** (or **Partial** with written scope limits)
+- [x] `v4.8.0` release notes + tag
 - [x] LLM features gated behind policy ADR + `ENABLE_LLM`
-- [ ] No **Planned** items remain that were promised for 4.8 in `docs/roadmap/README.md` (deferred items documented)
+- [x] No **Planned** items remain that were promised for 4.8 in `docs/roadmap/README.md` (deferred items documented)
 
 ---
 
@@ -29,9 +29,9 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | 9     | Email delivery scaffold (feature-flagged)    | Comms         | ✅     |
 | 10    | Reporting read models / dashboard expansions | Reporting     | ✅     |
 | 11    | Client portal case progress view             | Client Portal | ✅     |
-| 12    | Capability matrix 4.8 sign-off + deferrals   | Governance    | —      |
-| 13    | `docs/release-notes/v4.8.0.md`               | Release       | —      |
-| 14    | Tag `v4.8.0`                                 | Release       | —      |
+| 12    | Capability matrix 4.8 sign-off + deferrals   | Governance    | ✅     |
+| 13    | `docs/release-notes/v4.8.0.md`               | Release       | ✅     |
+| 14    | Tag `v4.8.0`                                 | Release       | ✅     |
 
 LLM implementation slices (8+) require the policy ADR merged before external provider calls ship.
 

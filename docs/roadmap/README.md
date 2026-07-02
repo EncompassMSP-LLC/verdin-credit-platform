@@ -25,7 +25,9 @@ Sprint 4.3.1 — E2E validation, performance baselines, security review, coverag
     ↓
 v4.5.0 — Automation Platform (released)
     ↓
-v4.8 — Operations (in progress)
+v4.8.0 — Operations (released)
+    ↓
+v5.0 — Enterprise Edition (planned)
 ```
 
 Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (`Sprint 4.3.1`) are engineering milestones that harden a release before the next version opens.
@@ -38,7 +40,7 @@ Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (
 | **4.3.0** | Operational Core            | **Shipped** | Cases, accounts, documents, OCR, intelligence, timeline, tasks             |
 | **4.3.1** | Operational Core Completion | **Shipped** | Mission Control dashboard, governance refinements, release stabilization   |
 | **4.5**   | Automation                  | **Shipped** | Import wizard, dispute lifecycle, workflow auto-tasks, rules AI (`v4.5.0`) |
-| **4.8**   | Operations                  | In progress | Client portal, notifications, LLM assistance, reporting expansions         |
+| **4.8**   | Operations                  | **Shipped** | Client portal, notifications, LLM policy gates, reporting (`v4.8.0`)       |
 | **5.0**   | Enterprise Edition          | Planned     | Multi-tenancy, compliance center, enterprise admin, predictive analytics   |
 
 ### Sprint milestones
@@ -101,27 +103,43 @@ Every 4.5 feature builds on the Operational Core without modifying its foundatio
 
 Release notes: [`docs/release-notes/v4.5.0.md`](../release-notes/v4.5.0.md)
 
+### Version 4.8 — Operations (shipped)
+
+Scope and deferrals: [`docs/governance/version-4.8-scope.md`](../governance/version-4.8-scope.md)
+
+| Epic | Theme               | v4.8.0 outcome | Notes                                                    |
+| ---- | ------------------- | -------------- | -------------------------------------------------------- |
+| 1    | Notifications       | Partial        | In-app + staff UI; email readiness scaffold; sends → 5.0 |
+| 2    | Workflow Operations | Partial        | Overdue scan worker + job-orchestrator scaffold          |
+| 3    | Client Experience   | Partial        | Clients, portal auth, read-only case progress            |
+| 4    | AI Assistance       | Partial        | ADR-012 + `ENABLE_LLM` gates; summary endpoints → 5.0    |
+| 5    | Reporting           | Partial        | Operations read model + Mission Control dashboard embed  |
+
+**Tag:** `v4.8.0` — Operations.
+
+Release notes: [`docs/release-notes/v4.8.0.md`](../release-notes/v4.8.0.md)
+
 ## Sprint → version mapping
 
-| Sprint work                               | Version / Sprint | Architecture domain                          |
-| ----------------------------------------- | ---------------- | -------------------------------------------- |
-| Sprint 2 Epic 1 — Case Management         | 4.3              | Case Management                              |
-| Sprint 2 Epic 2 — Account Intelligence    | 4.3              | Credit Account Intelligence                  |
-| Document Intelligence M1 — Foundation     | 4.3              | Document Foundation                          |
-| Document Intelligence M2 — OCR            | 4.3              | OCR Pipeline                                 |
-| Document Intelligence M3 — Classification | 4.3              | AI Classification (rules engine)             |
-| Timeline & audit events                   | 4.3              | Timeline & Audit Engine                      |
-| Task management completion                | 4.3              | Task Management                              |
-| Mission Control Dashboard                 | 4.3.1            | Operational Dashboard                        |
-| Operational Core stabilization            | Sprint 4.3.1     | Validation, performance, security, coverage  |
-| Workflow automation (planned)             | 4.5              | Workflow Automation                          |
-| Credit report import (planned)            | 4.5              | Credit Report Import                         |
-| Advanced OCR & bureau parsing (planned)   | 4.5              | Document Intelligence                        |
-| Dispute generation (planned)              | 4.5              | Dispute Generation                           |
-| AI case assistant (planned)               | 4.8              | AI Assistant (LLM deferred from 4.5)         |
-| Notifications & messaging (planned)       | 4.8              | Communications                               |
-| Client portal (planned)                   | 4.8              | Client Portal                                |
-| Enterprise admin & compliance (planned)   | 5.0              | Enterprise Administration, Compliance Center |
+| Sprint work                               | Version / Sprint | Architecture domain                                      |
+| ----------------------------------------- | ---------------- | -------------------------------------------------------- |
+| Sprint 2 Epic 1 — Case Management         | 4.3              | Case Management                                          |
+| Sprint 2 Epic 2 — Account Intelligence    | 4.3              | Credit Account Intelligence                              |
+| Document Intelligence M1 — Foundation     | 4.3              | Document Foundation                                      |
+| Document Intelligence M2 — OCR            | 4.3              | OCR Pipeline                                             |
+| Document Intelligence M3 — Classification | 4.3              | AI Classification (rules engine)                         |
+| Timeline & audit events                   | 4.3              | Timeline & Audit Engine                                  |
+| Task management completion                | 4.3              | Task Management                                          |
+| Mission Control Dashboard                 | 4.3.1            | Operational Dashboard                                    |
+| Operational Core stabilization            | Sprint 4.3.1     | Validation, performance, security, coverage              |
+| Workflow automation (planned)             | 4.5              | Workflow Automation                                      |
+| Credit report import (planned)            | 4.5              | Credit Report Import                                     |
+| Advanced OCR & bureau parsing (planned)   | 4.5              | Document Intelligence                                    |
+| Dispute generation (planned)              | 4.5              | Dispute Generation                                       |
+| AI case assistant (planned)               | 4.8              | AI Assistant (LLM policy gates shipped; summaries → 5.0) |
+| Notifications & messaging (planned)       | 4.8              | Communications (in-app shipped; provider sends → 5.0)    |
+| Client portal (planned)                   | 4.8              | Client Portal (auth + read-only progress shipped)        |
+| Enterprise admin & compliance (planned)   | 5.0              | Enterprise Administration, Compliance Center             |
 
 ## Primary document
 
@@ -136,6 +154,7 @@ Release notes: [`docs/release-notes/v4.5.0.md`](../release-notes/v4.5.0.md)
 - [Release notes — v4.3.1](../release-notes/v4.3.1.md)
 - [Release notes — v4.5.0](../release-notes/v4.5.0.md)
 - [Version 4.8 completion checklist](../development/version-4.8-completion-checklist.md)
+- [Release notes — v4.8.0](../release-notes/v4.8.0.md)
 - [Release notes — v4.3.0 GA](../release-notes/v4.3.0-ga.md)
 - [Architecture](../architecture/README.md) — technical constitution
 - [ADR index](../adr/README.md) — architecture decision records
