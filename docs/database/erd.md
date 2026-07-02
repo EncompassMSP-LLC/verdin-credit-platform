@@ -21,6 +21,8 @@ erDiagram
     User ||--o{ Task : "assigned to"
     User ||--o{ Notification : receives
     Organization ||--o{ Notification : has
+    Organization ||--o{ EmailDeliveryLog : has
+    Notification ||--o{ EmailDeliveryLog : "email sends"
 
     Organization {
         uuid id PK
@@ -171,6 +173,22 @@ erDiagram
         uuid entity_id
         string source_module
         string action_url
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    EmailDeliveryLog {
+        uuid id PK
+        uuid organization_id FK
+        uuid notification_id FK
+        uuid recipient_user_id FK
+        string recipient_email
+        string subject
+        string provider
+        enum status
+        string provider_message_id
+        text error_message
+        uuid sent_by_user_id FK
         timestamp created_at
         timestamp updated_at
     }

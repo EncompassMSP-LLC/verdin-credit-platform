@@ -21,6 +21,44 @@ class NotificationCreate(BaseModel):
     entity_id: uuid.UUID | None = None
     source_module: str | None = Field(default=None, max_length=50)
     action_url: str | None = Field(default=None, max_length=500)
+    deliver_email: bool = False
+
+
+class EmailSendRequest(BaseModel):
+    recipient_user_id: uuid.UUID
+    subject: str = Field(min_length=1, max_length=255)
+    body: str = Field(min_length=1)
+    notification_id: uuid.UUID | None = None
+
+
+class EmailDeliveryAttemptResponse(BaseModel):
+    attempted: bool
+    status: str | None = None
+    delivery_log_id: uuid.UUID | None = None
+    error: str | None = None
+
+
+class EmailDeliveryLogResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    organization_id: uuid.UUID
+    notification_id: uuid.UUID | None
+    recipient_user_id: uuid.UUID | None
+    recipient_email: str
+    subject: str
+    provider: str
+    status: str
+    provider_message_id: str | None
+    error_message: str | None
+    sent_by_user_id: uuid.UUID | None
+    created_at: datetime
+    updated_at: datetime
+
+
+class EmailDeliveryLogListParams(BaseModel):
+    page: int = Field(default=1, ge=1)
+    page_size: int = Field(default=20, ge=1, le=100)
 
 
 class NotificationResponse(BaseModel):
@@ -39,6 +77,7 @@ class NotificationResponse(BaseModel):
     action_url: str | None
     created_at: datetime
     updated_at: datetime
+    email_delivery: EmailDeliveryAttemptResponse | None = None
 
 
 class NotificationListParams(BaseModel):

@@ -301,18 +301,24 @@ Task lifecycle events (`TASK_CREATED`, `TASK_UPDATED`, `TASK_COMPLETED`, `TASK_R
 
 In-app notifications for staff users. Recipients only see their own notifications.
 
-| Method | Path                           | Role      | Description                       |
-| ------ | ------------------------------ | --------- | --------------------------------- |
-| POST   | `/notifications`               | admin     | Create notification for org user  |
-| GET    | `/notifications`               | read_only | List current user's notifications |
-| GET    | `/notifications/unread-count`  | read_only | Unread count for current user     |
-| POST   | `/notifications/mark-all-read` | read_only | Mark all notifications read       |
-| POST   | `/notifications/{id}/read`     | read_only | Mark one notification read        |
-| GET    | `/notifications/email/status`  | read_only | Email delivery readiness scaffold |
+| Method | Path                              | Role      | Description                         |
+| ------ | --------------------------------- | --------- | ----------------------------------- |
+| POST   | `/notifications`                  | admin     | Create notification for org user    |
+| GET    | `/notifications`                  | read_only | List current user's notifications   |
+| GET    | `/notifications/unread-count`     | read_only | Unread count for current user       |
+| POST   | `/notifications/mark-all-read`    | read_only | Mark all notifications read         |
+| POST   | `/notifications/{id}/read`        | read_only | Mark one notification read          |
+| GET    | `/notifications/email/status`     | read_only | Email delivery readiness            |
+| POST   | `/notifications/email/send`       | admin     | Send email to org user via provider |
+| GET    | `/notifications/email/deliveries` | admin     | List email delivery audit logs      |
 
 **List query parameters:** `unread_only`, `category`, `sort_by`, `sort_order`, `page`, `page_size`.
 
-`/notifications/email/status` is a non-sending readiness check for future delivery wiring. It reports `enabled`, `ready`, configured provider metadata, and blockers based on `ENABLE_EMAIL_DELIVERY` plus email provider env vars.
+`/notifications/email/status` reports `enabled`, `ready`, configured provider metadata, and blockers based on `ENABLE_EMAIL_DELIVERY` plus email provider env vars.
+
+`POST /notifications/email/send` delivers via the configured provider (`smtp` or `sendgrid`) when ready. Each attempt is persisted to `email_delivery_logs`. Set `deliver_email: true` on `POST /notifications` to send email alongside the in-app notification.
+
+Provider env vars: `EMAIL_PROVIDER`, `EMAIL_FROM_ADDRESS`, `EMAIL_SMTP_HOST`, `EMAIL_SMTP_PORT`, `EMAIL_SMTP_USERNAME`, `EMAIL_SMTP_PASSWORD`, `EMAIL_SENDGRID_API_KEY`.
 
 ## LLM gateway
 

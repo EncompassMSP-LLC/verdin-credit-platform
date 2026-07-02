@@ -374,3 +374,11 @@ packages/job-orchestrator/
 **Reason:** Durable case–client relationships replace fragile heuristic-only portal matching while preserving backward compatibility for legacy inline client fields.
 
 **Follow-up work:** Slice 3 — production email delivery adapters.
+
+### Decision: Production email delivery with SMTP/SendGrid adapters and audit trail
+
+**Decision:** Wire `smtp` and `sendgrid` provider adapters behind `ENABLE_EMAIL_DELIVERY`, persist `email_delivery_logs`, expose `POST /notifications/email/send` and `GET /notifications/email/deliveries`, and add optional `deliver_email` on notification create.
+
+**Reason:** Communications epic requires production email beyond the 4.8 readiness scaffold, with auditable sends for compliance and workflow integration.
+
+**Follow-up work:** Slice 4 — LLM case summary endpoint (post-gate).
