@@ -346,3 +346,13 @@ packages/job-orchestrator/
 **Reason:** 4.8 client experience epic requires read-only progress without exposing staff APIs or internal notes.
 
 **Follow-up work:** Add `client_id` FK on cases, dedicated portal token storage isolation from staff session, secure messaging.
+
+## Version 4.8.0 — Operations release sign-off
+
+### Decision: Partial epic delivery with explicit deferrals to 5.0
+
+**Decision:** Ship `v4.8.0` with all five Operations epics marked **Partial** and documented limits in scope doc, capability matrix epic sign-off table, and release notes. LLM summary endpoints and production email/SMS delivery remain deferred post-gate.
+
+**Reason:** 4.8 delivers operational foundations (notifications, portal, reporting, workflow jobs, LLM policy) without over-promising enterprise or compliance features.
+
+**Documentation:** [`docs/governance/version-4.8-scope.md`](../governance/version-4.8-scope.md), [`docs/release-notes/v4.8.0.md`](../release-notes/v4.8.0.md)

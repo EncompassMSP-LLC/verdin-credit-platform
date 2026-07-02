@@ -2,10 +2,11 @@
 
 **Executive view** of Verdin platform capabilities — what exists, what version introduced it, readiness by layer, and dependencies.
 
-**Last updated:** 2026-06-30  
+**Last updated:** 2026-07-02  
 **Maintainers:** Update this document in every epic PR that ships or materially advances a capability.
 
-**Version 4.5 sign-off:** [version-4.5-scope.md](version-4.5-scope.md) · Release notes: [v4.5.0.md](../release-notes/v4.5.0.md)
+**Version 4.5 sign-off:** [version-4.5-scope.md](version-4.5-scope.md) · Release notes: [v4.5.0.md](../release-notes/v4.5.0.md)  
+**Version 4.8 sign-off:** [version-4.8-scope.md](version-4.8-scope.md) · Release notes: [v4.8.0.md](../release-notes/v4.8.0.md)
 
 ## Status legend
 
@@ -142,39 +143,50 @@ Scope and deferrals: [version-4.5-scope.md](version-4.5-scope.md)
 
 ---
 
-## Version 4.8 — Operations (in progress)
+## Version 4.8 — Operations (shipped — `v4.8.0`)
 
-Scope: [version-4.8-scope.md](version-4.8-scope.md)
+Scope: [version-4.8-scope.md](version-4.8-scope.md) · Release notes: [v4.8.0.md](../release-notes/v4.8.0.md)
 
 | Capability              | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                               |
 | ----------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ------------------------------------------------------------------- |
 | In-App Notifications    | 4.8     | Partial | ✅      | ✅       | ✅  | —   | ✅    | Auth         | Staff bell + API; email readiness scaffold added, no provider sends |
 | Client Portal           | 4.8     | Partial | ✅      | ✅       | ✅  | —   | ✅    | Client Mgmt  | Auth + read-only case progress at `/portal/cases`                   |
-| Client Management       | 4.8     | Partial | ✅      | —        | ✅  | —   | ✅    | Auth         | Client + contact CRUD; case linking deferred                        |
+| Client Management       | 4.8     | Partial | ✅      | —        | ✅  | —   | ✅    | Auth         | Client + contact CRUD; `cases.client_id` linking deferred           |
 | Workflow Scheduled Jobs | 4.8     | Partial | ✅      | —        | —   | —   | ✅    | Worker       | `overdue_investigation_scan` job; manual POST endpoint retained     |
 | Job Orchestration       | 4.8     | Partial | 🚧      | —        | —   | —   | ✅    | Worker, API  | `packages/job-orchestrator` scaffold; retry/metrics wiring deferred |
 | LLM Policy Gates        | 4.8     | Partial | ✅      | —        | ✅  | —   | ✅    | —            | `packages/llm-gateway` + `ENABLE_LLM`; no provider calls yet        |
 | Operations Reporting    | 4.8     | Partial | ✅      | ✅       | ✅  | —   | ✅    | Dashboard    | `GET /reporting/operations`; embedded in Mission Control dashboard  |
 
+### Version 4.8 epic sign-off
+
+| Epic                | v4.8.0 outcome | Exit note                                                                  |
+| ------------------- | -------------- | -------------------------------------------------------------------------- |
+| Notifications       | Partial        | In-app + staff UI shipped; email/SMS provider sends deferred               |
+| Workflow Operations | Partial        | Overdue scan worker + orchestrator scaffold; cron UI / runner wiring → 5.0 |
+| Client Experience   | Partial        | Clients, portal auth, read-only progress; messaging/upload → 5.0           |
+| AI Assistance (LLM) | Partial        | Policy ADR + gates only; summary endpoints post-gate → 5.0                 |
+| Reporting           | Partial        | Operations read model + dashboard embed; materialized views → 5.0          |
+
 ---
 
 ## AI capability tracker
 
-| AI feature                   | Phase | Version | Status  | Location                                                |
-| ---------------------------- | ----- | ------- | ------- | ------------------------------------------------------- |
-| Risk score (heuristic)       | —     | 4.3     | ✅      | `accounts/intelligence.py`                              |
-| Readiness score (heuristic)  | —     | 4.3     | ✅      | `accounts/intelligence.py`                              |
-| Dispute readiness rules      | —     | 4.3     | ✅      | `accounts/intelligence.py`                              |
-| Next action recommendations  | —     | 4.3     | ✅      | Heuristic text; LLM in 4.5                              |
-| OCR                          | 1     | 4.3     | ✅      | `worker/jobs/ocr.py`                                    |
-| Document classification      | 1     | 4.3     | Partial | Rules in `modules/documents/classification/`; LLM → 4.8 |
-| Metadata / entity extraction | 1     | 4.5     | Partial | Parser bridge + candidates; LLM NER → 4.8               |
-| Case summaries (LLM)         | 2     | 4.8     | —       | Deferred from 4.5                                       |
-| Document summaries (LLM)     | 2     | 4.8     | —       | Deferred from 4.5                                       |
-| LLM dispute draft augment    | 2     | 4.8     | —       | Rules default in 4.5                                    |
-| AI workflow orchestration    | 3     | 5.0     | Planned | —                                                       |
-| Predictive outcomes          | 3     | 5.0     | Planned | —                                                       |
-| Autonomous dispute prep      | 4     | 5.0+    | Planned | Compliance gates required                               |
+| AI feature                   | Phase | Version | Status  | Location                                                        |
+| ---------------------------- | ----- | ------- | ------- | --------------------------------------------------------------- |
+| Risk score (heuristic)       | —     | 4.3     | ✅      | `accounts/intelligence.py`                                      |
+| Readiness score (heuristic)  | —     | 4.3     | ✅      | `accounts/intelligence.py`                                      |
+| Dispute readiness rules      | —     | 4.3     | ✅      | `accounts/intelligence.py`                                      |
+| Next action recommendations  | —     | 4.3     | ✅      | Heuristic text; LLM in 4.5                                      |
+| OCR                          | 1     | 4.3     | ✅      | `worker/jobs/ocr.py`                                            |
+| Document classification      | 1     | 4.3     | Partial | Rules in `modules/documents/classification/`; LLM augment → 5.0 |
+| Metadata / entity extraction | 1     | 4.5     | Partial | Parser bridge + candidates; LLM NER → 5.0                       |
+| LLM policy gates             | 2     | 4.8     | Partial | `packages/llm-gateway` + `GET /llm/status`; no provider calls   |
+| Case summaries (LLM)         | 2     | 5.0     | —       | Deferred post-gate; requires approved provider integration      |
+| Document summaries (LLM)     | 2     | 5.0     | —       | Deferred post-gate; requires approved provider integration      |
+| LLM dispute draft augment    | 2     | 5.0     | —       | Rules default in 4.5; LLM augment post-gate                     |
+| AI workflow orchestration    | 3     | 5.0     | Planned | —                                                               |
+| Predictive outcomes          | 3     | 5.0     | Planned | —                                                               |
+| Autonomous dispute prep      | 4     | 5.0+    | Planned | Compliance gates required                                       |
 
 See [AI Architecture](../architecture/ai-architecture.md).
 

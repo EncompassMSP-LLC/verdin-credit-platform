@@ -3,7 +3,8 @@
 Formal scope for **Version 4.8 — Operations**. Builds on the shipped **v4.5.0** Automation Platform.
 
 **Kickoff date:** 2026-07-01  
-**Target tag:** `v4.8.0`
+**Sign-off date:** 2026-07-02  
+**Tag:** `v4.8.0`
 
 ## Theme
 
@@ -57,7 +58,19 @@ Credit report import, dispute letter lifecycle, workflow auto-tasks, rules-based
 
 **Included:** Provider configuration, PII policy ADR, opt-in LLM summaries behind `ENABLE_LLM`.
 
-**Not included:** Autonomous agents, external PII export without explicit org config.
+**Not included:** Autonomous agents, external PII export without explicit org config, case/document summary endpoints (post-gate implementation → 5.0).
+
+## v4.8.0 sign-off
+
+All five epics ship as **Partial** with written limits above. No **Planned** 4.8 roadmap items remain undocumented — remaining LLM summary work and enterprise capabilities are deferred to **5.0**.
+
+| Epic                | v4.8.0 status | Notes                                         |
+| ------------------- | ------------- | --------------------------------------------- |
+| Notifications       | Partial ✅    | In-app + email readiness scaffold             |
+| Workflow Operations | Partial ✅    | Overdue worker + job-orchestrator scaffold    |
+| Client Experience   | Partial ✅    | Clients, portal auth, read-only case progress |
+| AI Assistance       | Partial ✅    | ADR-012 + `ENABLE_LLM` gates only             |
+| Reporting           | Partial ✅    | Operations read model + Mission Control embed |
 
 ## Related documents
 
