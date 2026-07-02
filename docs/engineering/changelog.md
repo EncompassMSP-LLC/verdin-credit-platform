@@ -356,3 +356,13 @@ packages/job-orchestrator/
 **Reason:** 4.8 delivers operational foundations (notifications, portal, reporting, workflow jobs, LLM policy) without over-promising enterprise or compliance features.
 
 **Documentation:** [`docs/governance/version-4.8-scope.md`](../governance/version-4.8-scope.md), [`docs/release-notes/v4.8.0.md`](../release-notes/v4.8.0.md)
+
+## Version 5.0.0 — Enterprise kickoff
+
+### Decision: Formal scope and ordered checklist before implementation slices
+
+**Decision:** Publish `version-5.0-scope.md`, `version-5.0-completion-checklist.md`, capability matrix 5.0 planned rows, and Version 5.0 sprint loop rule. First implementation slice is `cases.client_id` linking.
+
+**Reason:** 4.8 deferred enterprise identity, compliance, production comms, and post-gate LLM work to 5.0; kickoff docs are the source of truth for slice order.
+
+**Follow-up work:** Slice 2 — Alembic migration + API for case–client FK.

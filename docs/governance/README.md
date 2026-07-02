@@ -69,12 +69,15 @@ Release flow:
 
 ## Release history
 
-| Version | Status   | Description                                                                                  |
-| ------- | -------- | -------------------------------------------------------------------------------------------- |
-| v4.3.0  | Released | Initial Operational Core release                                                             |
-| v4.3.1  | Released | Operational Core completion (Mission Control, governance refinements, release stabilization) |
+| Version | Status      | Description                                                             |
+| ------- | ----------- | ----------------------------------------------------------------------- |
+| v4.3.0  | Released    | Initial Operational Core release                                        |
+| v4.3.1  | Released    | Operational Core completion (Mission Control, governance refinements)   |
+| v4.5.0  | Released    | Automation Platform release                                             |
+| v4.8.0  | Released    | Operations release (notifications, portal, LLM gates, reporting)        |
+| v5.0.0  | In progress | Enterprise Edition — see [`version-5.0-scope.md`](version-5.0-scope.md) |
 
-Release notes: [`v4.3.0-ga.md`](../release-notes/v4.3.0-ga.md), [`v4.3.1.md`](../release-notes/v4.3.1.md), [`v4.5.0.md`](../release-notes/v4.5.0.md)
+Release notes: [`v4.3.0-ga.md`](../release-notes/v4.3.0-ga.md), [`v4.3.1.md`](../release-notes/v4.3.1.md), [`v4.5.0.md`](../release-notes/v4.5.0.md), [`v4.8.0.md`](../release-notes/v4.8.0.md)
 
 ## Sprint history
 

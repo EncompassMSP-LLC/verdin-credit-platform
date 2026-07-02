@@ -6,7 +6,8 @@
 **Maintainers:** Update this document in every epic PR that ships or materially advances a capability.
 
 **Version 4.5 sign-off:** [version-4.5-scope.md](version-4.5-scope.md) · Release notes: [v4.5.0.md](../release-notes/v4.5.0.md)  
-**Version 4.8 sign-off:** [version-4.8-scope.md](version-4.8-scope.md) · Release notes: [v4.8.0.md](../release-notes/v4.8.0.md)
+**Version 4.8 sign-off:** [version-4.8-scope.md](version-4.8-scope.md) · Release notes: [v4.8.0.md](../release-notes/v4.8.0.md)  
+**Version 5.0 kickoff:** [version-5.0-scope.md](version-5.0-scope.md) · Checklist: [version-5.0-completion-checklist.md](../development/version-5.0-completion-checklist.md)
 
 ## Status legend
 
@@ -166,6 +167,23 @@ Scope: [version-4.8-scope.md](version-4.8-scope.md) · Release notes: [v4.8.0.md
 | Client Experience   | Partial        | Clients, portal auth, read-only progress; messaging/upload → 5.0           |
 | AI Assistance (LLM) | Partial        | Policy ADR + gates only; summary endpoints post-gate → 5.0                 |
 | Reporting           | Partial        | Operations read model + dashboard embed; materialized views → 5.0          |
+
+---
+
+## Version 5.0 — Enterprise Edition (in progress)
+
+Scope: [version-5.0-scope.md](version-5.0-scope.md) · Checklist: [version-5.0-completion-checklist.md](../development/version-5.0-completion-checklist.md)
+
+| Capability           | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies  | Notes                                      |
+| -------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------- | ------------------------------------------ |
+| Case–client linking  | 5.0     | Planned | —       | —        | —   | —   | —     | Clients       | `cases.client_id` FK; portal match upgrade |
+| Production email     | 5.0     | Planned | —       | —        | —   | —   | —     | Notifications | Provider adapters beyond 4.8 scaffold      |
+| LLM case summaries   | 5.0     | Planned | —       | —        | —   | —   | —     | LLM gates     | Post-gate; ADR-012 required                |
+| Job orchestrator     | 5.0     | Planned | —       | —        | —   | —   | —     | Worker        | Runner retry/metrics + scheduled jobs      |
+| SSO / MFA            | 5.0     | Planned | —       | —        | —   | —   | —     | Auth          | `ENABLE_ENTERPRISE` foundation             |
+| Compliance center    | 5.0     | Planned | —       | —        | —   | —   | —     | Timeline      | Consent + retention scaffold               |
+| Portal expansion     | 5.0     | Planned | —       | —        | —   | —   | —     | Portal        | Upload + messaging beyond 4.8 read-only    |
+| Enterprise reporting | 5.0     | Planned | —       | —        | —   | —   | —     | Reporting     | Bureau/team productivity read models       |
 
 ---
 
