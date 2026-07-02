@@ -150,10 +150,14 @@ Requires `ENABLE_CLIENT_PORTAL=true`. Portal JWTs use `realm=portal` and include
 
 Read-only case progress for portal users. Cases match when `client_id` is set to the portal client, with email/name heuristics as fallback for unlinked cases.
 
-| Method | Path                 | Auth       | Description                          |
-| ------ | -------------------- | ---------- | ------------------------------------ |
-| GET    | `/portal/cases`      | portal JWT | List cases linked to portal client   |
-| GET    | `/portal/cases/{id}` | portal JWT | Read-only case progress and disputes |
+| Method | Path                           | Auth       | Description                                                                           |
+| ------ | ------------------------------ | ---------- | ------------------------------------------------------------------------------------- |
+| GET    | `/portal/cases`                | portal JWT | List cases linked to portal client                                                    |
+| GET    | `/portal/cases/{id}`           | portal JWT | Read-only case progress and disputes                                                  |
+| GET    | `/portal/cases/{id}/documents` | portal JWT | List documents on a linked case                                                       |
+| POST   | `/portal/cases/{id}/documents` | portal JWT | Upload document to a linked case (multipart: `file`, `title`, optional `description`) |
+
+Portal uploads use the same MIME and size limits as staff `POST /documents`. Documents appear in staff document views and emit `PORTAL_DOCUMENT_UPLOADED` timeline events. Account-scoped uploads and portal document download are not included in this slice.
 
 ## Accounts
 

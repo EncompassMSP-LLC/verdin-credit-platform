@@ -78,3 +78,19 @@ class PortalCaseDetailResponse(PortalCaseSummaryResponse):
 
 class PortalCaseProgressResponse(BaseSchema):
     items: list[PortalCaseSummaryResponse]
+
+
+class PortalDocumentResponse(BaseSchema):
+    id: uuid.UUID
+    case_id: uuid.UUID
+    title: str
+    description: str | None
+    file_name: str
+    mime_type: str | None
+    file_size: int | None
+    processing_status: str
+    created_at: datetime
+
+
+class PortalCaseDocumentsResponse(BaseSchema):
+    items: list[PortalDocumentResponse]

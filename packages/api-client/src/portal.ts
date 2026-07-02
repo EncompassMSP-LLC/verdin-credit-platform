@@ -1,4 +1,4 @@
-import { apiPath, request } from './http';
+import { apiPath, request, uploadRequest } from './http';
 
 export interface PortalLoginInput {
   email: string;
@@ -51,6 +51,28 @@ export interface PortalCaseProgressResponse {
   items: PortalCaseSummary[];
 }
 
+export interface PortalDocument {
+  id: string;
+  case_id: string;
+  title: string;
+  description: string | null;
+  file_name: string;
+  mime_type: string | null;
+  file_size: number | null;
+  processing_status: string;
+  created_at: string;
+}
+
+export interface PortalCaseDocumentsResponse {
+  items: PortalDocument[];
+}
+
+export interface UploadPortalCaseDocumentInput {
+  file: File | Blob;
+  title: string;
+  description?: string | null;
+}
+
 export interface ClientPortalUser {
   id: string;
   organization_id: string;
@@ -99,6 +121,23 @@ export async function listPortalCases(): Promise<PortalCaseProgressResponse> {
 
 export async function getPortalCase(caseId: string): Promise<PortalCaseDetail> {
   return request<PortalCaseDetail>(apiPath(`/portal/cases/${caseId}`));
+}
+
+export async function listPortalCaseDocuments(
+  caseId: string,
+): Promise<PortalCaseDocumentsResponse> {
+  return request<PortalCaseDocumentsResponse>(apiPath(`/portal/cases/${caseId}/documents`));
+}
+
+export async function uploadPortalCaseDocument(
+  caseId: string,
+  input: UploadPortalCaseDocumentInput,
+): Promise<PortalDocument> {
+  const form = new FormData();
+  form.append('file', input.file);
+  form.append('title', input.title);
+  if (input.description) form.append('description', input.description);
+  return uploadRequest<PortalDocument>(apiPath(`/portal/cases/${caseId}/documents`), form);
 }
 
 export async function provisionClientPortalUser(

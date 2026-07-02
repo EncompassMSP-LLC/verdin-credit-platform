@@ -76,6 +76,7 @@ from api.modules.timeline.builders import (
     document_pipeline_event,
     document_uploaded_event,
     document_version_created_event,
+    portal_document_uploaded_event,
     task_created_event,
 )
 from api.repositories.document import DocumentRepositoryProtocol
@@ -360,6 +361,95 @@ class DocumentService:
             await publish_platform_event(self._session, document_uploaded_event(document, user.id))
 
         return DocumentResponse.from_model(document)
+
+    async def upload_document_for_portal(
+        self,
+        *,
+        organization_id: uuid.UUID,
+        portal_user_id: uuid.UUID,
+        case_id: uuid.UUID,
+        file: UploadFile,
+        title: str,
+        description: str | None = None,
+    ) -> Document:
+        await self._validate_case(case_id, organization_id)
+
+        data, content_type = await self._read_upload(file)
+        file_hash = self._compute_hash(data)
+        file_name = file.filename or "upload.bin"
+
+        existing = await self._documents.find_by_hash(organization_id, file_hash)
+        is_duplicate = existing is not None
+        duplicate_of_id = existing.id if existing else None
+
+        document_id = uuid.uuid4()
+        storage_key = self._storage_key(organization_id, case_id, document_id, 1, file_name)
+        await async_put(self._storage, storage_key, data, content_type)
+
+        now = datetime.now(UTC)
+        document = Document(
+            id=document_id,
+            organization_id=organization_id,
+            case_id=case_id,
+            account_id=None,
+            title=title,
+            description=description,
+            file_name=file_name,
+            storage_key=storage_key,
+            mime_type=content_type,
+            file_size=len(data),
+            file_hash=file_hash,
+            version_number=1,
+            is_duplicate=is_duplicate,
+            duplicate_of_id=duplicate_of_id,
+        )
+        self._apply_initial_processing_status(document)
+        await self._documents.create(document)
+
+        version = DocumentVersion(
+            id=uuid.uuid4(),
+            document_id=document.id,
+            version_number=1,
+            storage_key=storage_key,
+            file_hash=file_hash,
+            file_name=file_name,
+            mime_type=content_type,
+            file_size=len(data),
+            created_at=now,
+            created_by_id=portal_user_id,
+        )
+        await self._documents.create_version(version)
+
+        if self._session is not None:
+            await self._session.commit()
+
+        self._queue_ocr_job(document)
+        await self._documents.update(document)
+        if self._session is not None:
+            await publish_platform_event(
+                self._session,
+                portal_document_uploaded_event(document, portal_user_id=portal_user_id),
+            )
+
+        return document
+
+    async def list_documents_for_case(
+        self,
+        *,
+        organization_id: uuid.UUID,
+        case_id: uuid.UUID,
+    ) -> list[Document]:
+        documents, _total = await self._documents.list_documents(
+            DocumentListFilters(
+                organization_id=organization_id,
+                case_id=case_id,
+                skip=0,
+                limit=100,
+                sort_by="created_at",
+                sort_order="desc",
+            )
+        )
+        return documents
 
     async def upload_version(
         self,

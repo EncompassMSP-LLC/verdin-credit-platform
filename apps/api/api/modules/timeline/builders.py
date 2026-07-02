@@ -350,6 +350,31 @@ def document_uploaded_event(document: Document, performed_by: uuid.UUID) -> Plat
     )
 
 
+def portal_document_uploaded_event(
+    document: Document,
+    *,
+    portal_user_id: uuid.UUID,
+) -> PlatformEvent:
+    return PlatformEvent(
+        event_type=DocumentEventType.PORTAL_DOCUMENT_UPLOADED.value,
+        event_category=EventCategory.DOCUMENT.value,
+        title="Client portal document uploaded",
+        description=f"Document '{document.title}' was uploaded via the client portal.",
+        organization_id=document.organization_id,
+        case_id=document.case_id,
+        account_id=document.account_id,
+        document_id=document.id,
+        performed_by=None,
+        source_module="client_portal",
+        metadata={
+            "file_name": document.file_name,
+            "mime_type": document.mime_type,
+            "portal_user_id": str(portal_user_id),
+            "upload_source": "portal",
+        },
+    )
+
+
 def document_version_created_event(document: Document, performed_by: uuid.UUID) -> PlatformEvent:
     return PlatformEvent(
         event_type=DocumentEventType.DOCUMENT_VERSION_CREATED.value,
