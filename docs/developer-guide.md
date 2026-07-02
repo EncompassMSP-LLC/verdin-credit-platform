@@ -238,7 +238,7 @@ packages/job-orchestrator/
     registry.py           # @register_job decorator and lookup
     queue.py              # JobMessage, RedisJobQueue
     retry.py              # RetryPolicy scaffold
-    scheduler.py          # ScheduledJob registry (cron wiring deferred)
+    scheduler.py          # ScheduledJob registry + cron evaluation (croniter)
     metrics.py            # JobMetricsRecorder scaffold
 
 apps/worker/
@@ -271,6 +271,8 @@ from worker.queue import enqueue_job
 
 enqueue_job(JobType.OVERDUE_INVESTIGATION_SCAN, {})
 ```
+
+As of Version 5.0 slice 5, the worker process also registers `overdue_investigation_scan` on the shared `JobScheduler` (`0 6 * * *` UTC) and enqueues due jobs in-process on `WORKER_SCHEDULER_INTERVAL_SECONDS` (default 60s). External cron enqueue remains supported for redundancy.
 
 ### Job status values
 

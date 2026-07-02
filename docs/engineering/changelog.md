@@ -391,6 +391,14 @@ packages/job-orchestrator/
 
 **Follow-up work:** Slice 5 — job orchestrator runner wiring + overdue cron.
 
+### Decision: Wire job orchestrator retry/metrics and in-process overdue scan cron
+
+**Decision:** Implement cron evaluation in `JobScheduler` (croniter), wire `RetryPolicy` and `JobMetricsRecorder` into `worker/orchestrator.py`, and register `overdue_investigation_scan` at `0 6 * * *` UTC with in-process scheduler ticks.
+
+**Reason:** 4.8 deferred runner integration; 5.0 platform slice requires schedulable overdue scan without external cron-only wiring.
+
+**Follow-up work:** Slice 6 — MFA / SSO foundation (feature-flagged).
+
 ### Decision: Enterprise identity readiness scaffold behind `ENABLE_ENTERPRISE`
 
 **Decision:** Add `enterprise_identity` settings/gates, `GET /enterprise/status` for SSO (`oidc`/`saml`) and MFA (`totp`) readiness, and `@verdin/api-client` types. Staff and portal auth partitions remain separate.

@@ -3,15 +3,16 @@
 import signal
 import sys
 import time
+from datetime import UTC, datetime
 from typing import Any
 
 import structlog
+from verdin_job_orchestrator import NullJobMetricsRecorder, RetryPolicy
 
 from worker import jobs  # noqa: F401 — register placeholder jobs
-from worker.base import JobContext
 from worker.config import get_worker_settings
-from worker.queue import dequeue_job
-from worker.registry import get_job, list_job_types
+from worker.orchestrator import build_default_scheduler, dispatch_job, tick_scheduler
+from worker.queue import dequeue_job, enqueue_job
 
 logger = structlog.get_logger(__name__)
 
@@ -24,33 +25,11 @@ def handle_shutdown(signum: int, _frame: object) -> None:
     _running = False
 
 
-def dispatch_job(job_id: str, job_type_value: str, payload: dict[str, Any]) -> None:
-    from worker.constants import JobType
-
-    job_type = JobType(job_type_value)
-    job = get_job(job_type)
-    context = JobContext(job_id=job_id, payload=payload)
-
-    logger.info("job_started", job_id=job_id, job_type=job_type.value)
-    try:
-        result = job.run(context)
-    except Exception as exc:
-        logger.exception(
-            "job_failed", job_id=job_id, job_type=job_type.value, error=str(exc)
-        )
-        return
-
-    logger.info(
-        "job_finished",
-        job_id=job_id,
-        job_type=job_type.value,
-        status=result.status.value,
-        message=result.message,
-    )
-
-
 def run_worker() -> None:
     settings = get_worker_settings()
+    scheduler = build_default_scheduler()
+    retry_policy = RetryPolicy()
+    metrics = NullJobMetricsRecorder()
 
     structlog.configure(
         processors=[
@@ -62,23 +41,48 @@ def run_worker() -> None:
     signal.signal(signal.SIGINT, handle_shutdown)
     signal.signal(signal.SIGTERM, handle_shutdown)
 
+    from worker.registry import list_job_types
+
     registered = [job_type.value for job_type in list_job_types()]
+    scheduled = [
+        {"job_type": job.job_type.value, "cron": job.cron_expression}
+        for job in scheduler.list_scheduled()
+    ]
     logger.info(
         "worker_started",
         version=settings.app_version,
         queue=settings.worker_queue_name,
         registered_jobs=registered,
+        scheduled_jobs=scheduled,
+        scheduler_interval_seconds=settings.worker_scheduler_interval_seconds,
     )
 
     last_heartbeat = 0.0
+    last_scheduler_tick = 0.0
+
+    def _dispatch(job_id: str, job_type_value: str, payload: dict[str, Any]) -> None:
+        dispatch_job(
+            job_id,
+            job_type_value,
+            payload,
+            retry_policy=retry_policy,
+            metrics=metrics,
+            enqueue_fn=enqueue_job,
+        )
 
     while _running:
         message = dequeue_job()
         if message is not None:
-            dispatch_job(message.job_id, message.job_type.value, message.payload)
+            _dispatch(message.job_id, message.job_type.value, message.payload)
             continue
 
         now = time.monotonic()
+        if now - last_scheduler_tick >= settings.worker_scheduler_interval_seconds:
+            tick_scheduler(
+                scheduler, enqueue_job, at=datetime.now(tz=UTC), metrics=metrics
+            )
+            last_scheduler_tick = now
+
         if now - last_heartbeat >= settings.worker_heartbeat_interval_seconds:
             logger.debug("worker_heartbeat", registered_jobs=registered)
             last_heartbeat = now

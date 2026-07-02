@@ -148,25 +148,25 @@ Scope and deferrals: [version-4.5-scope.md](version-4.5-scope.md)
 
 Scope: [version-4.8-scope.md](version-4.8-scope.md) · Release notes: [v4.8.0.md](../release-notes/v4.8.0.md)
 
-| Capability              | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                               |
-| ----------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ------------------------------------------------------------------- |
-| In-App Notifications    | 4.8     | Partial | ✅      | ✅       | ✅  | —   | ✅    | Auth         | Staff bell + API; production email in 5.0 slice 3                   |
-| Client Portal           | 4.8     | Partial | ✅      | —        | ✅  | —   | ✅    | Client Mgmt  | Auth, case progress, portal document upload on linked cases         |
-| Client Management       | 4.8     | Partial | ✅      | —        | ✅  | —   | ✅    | Auth         | Client + contact CRUD; case FK linking in 5.0 slice 2               |
-| Workflow Scheduled Jobs | 4.8     | Partial | ✅      | —        | —   | —   | ✅    | Worker       | `overdue_investigation_scan` job; manual POST endpoint retained     |
-| Job Orchestration       | 4.8     | Partial | 🚧      | —        | —   | —   | ✅    | Worker, API  | `packages/job-orchestrator` scaffold; retry/metrics wiring deferred |
-| LLM Policy Gates        | 4.8     | Partial | ✅      | —        | ✅  | —   | ✅    | —            | `packages/llm-gateway` + `ENABLE_LLM`; no provider calls yet        |
-| Operations Reporting    | 4.8     | Partial | ✅      | ✅       | ✅  | —   | ✅    | Dashboard    | `GET /reporting/operations`; embedded in Mission Control dashboard  |
+| Capability              | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                              |
+| ----------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ------------------------------------------------------------------ |
+| In-App Notifications    | 4.8     | Partial | ✅      | ✅       | ✅  | —   | ✅    | Auth         | Staff bell + API; production email in 5.0 slice 3                  |
+| Client Portal           | 4.8     | Partial | ✅      | —        | ✅  | —   | ✅    | Client Mgmt  | Auth, case progress, portal document upload on linked cases        |
+| Client Management       | 4.8     | Partial | ✅      | —        | ✅  | —   | ✅    | Auth         | Client + contact CRUD; case FK linking in 5.0 slice 2              |
+| Workflow Scheduled Jobs | 4.8     | Partial | ✅      | —        | —   | —   | ✅    | Worker       | `overdue_investigation_scan` job; manual POST endpoint retained    |
+| Job Orchestration       | 4.8     | Partial | 🚧      | —        | —   | —   | ✅    | Worker, API  | Retry/metrics + cron wired in 5.0 slice 5; PG persistence deferred |
+| LLM Policy Gates        | 4.8     | Partial | ✅      | —        | ✅  | —   | ✅    | —            | `packages/llm-gateway` + `ENABLE_LLM`; no provider calls yet       |
+| Operations Reporting    | 4.8     | Partial | ✅      | ✅       | ✅  | —   | ✅    | Dashboard    | `GET /reporting/operations`; embedded in Mission Control dashboard |
 
 ### Version 4.8 epic sign-off
 
-| Epic                | v4.8.0 outcome | Exit note                                                                  |
-| ------------------- | -------------- | -------------------------------------------------------------------------- |
-| Notifications       | Partial        | In-app + staff UI shipped; email/SMS provider sends deferred               |
-| Workflow Operations | Partial        | Overdue scan worker + orchestrator scaffold; cron UI / runner wiring → 5.0 |
-| Client Experience   | Partial        | Clients, portal auth, read-only progress; messaging/upload → 5.0           |
-| AI Assistance (LLM) | Partial        | Policy ADR + gates only; summary endpoints post-gate → 5.0                 |
-| Reporting           | Partial        | Operations read model + dashboard embed; materialized views → 5.0          |
+| Epic                | v4.8.0 outcome | Exit note                                                                    |
+| ------------------- | -------------- | ---------------------------------------------------------------------------- |
+| Notifications       | Partial        | In-app + staff UI shipped; email/SMS provider sends deferred                 |
+| Workflow Operations | Partial        | Overdue scan worker + in-process cron via job-orchestrator; cron UI deferred |
+| Client Experience   | Partial        | Clients, portal auth, read-only progress; messaging/upload → 5.0             |
+| AI Assistance (LLM) | Partial        | Policy ADR + gates only; summary endpoints post-gate → 5.0                   |
+| Reporting           | Partial        | Operations read model + dashboard embed; materialized views → 5.0            |
 
 ---
 
@@ -179,10 +179,10 @@ Scope: [version-5.0-scope.md](version-5.0-scope.md) · Checklist: [version-5.0-c
 | Case–client linking  | 5.0     | Partial | ✅      | —        | ✅  | —   | ✅    | Clients       | `cases.client_id` FK; portal FK + heuristic match           |
 | Production email     | 5.0     | Partial | ✅      | —        | ✅  | —   | ✅    | Notifications | SMTP/SendGrid send + audit log; SMS deferred                |
 | LLM case summaries   | 5.0     | Partial | ✅      | —        | ✅  | —   | ✅    | LLM gates     | `POST /cases/{id}/llm-summary`; document summaries deferred |
-| Job orchestrator     | 5.0     | Planned | —       | —        | —   | —   | —     | Worker        | Runner retry/metrics + scheduled jobs                       |
-| SSO / MFA            | 5.0     | Partial | ✅      | —        | —   | —   | —     | Auth          | `GET /enterprise/status`; IdP/TOTP wiring deferred          |
+| Job orchestrator     | 5.0     | Partial | ✅      | —        | —   | —   | ✅    | Worker        | Runner retry/metrics + overdue scan cron registration       |
+| SSO / MFA            | 5.0     | Partial | ✅      | —        | ✅  | —   | ✅    | Auth          | `GET /enterprise/status`; IdP/TOTP wiring deferred          |
 | Compliance center    | 5.0     | Partial | ✅      | —        | ✅  | —   | ✅    | Timeline      | Consent records + retention policy placeholders             |
-| Portal expansion     | 5.0     | Planned | —       | —        | —   | —   | —     | Portal        | Upload + messaging beyond 4.8 read-only                     |
+| Portal expansion     | 5.0     | Partial | ✅      | —        | ✅  | —   | ✅    | Portal        | Document upload on linked cases; messaging deferred         |
 | Enterprise reporting | 5.0     | Planned | —       | —        | —   | —   | —     | Reporting     | Bureau/team productivity read models                        |
 
 ---
