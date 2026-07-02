@@ -44,6 +44,14 @@ export interface UnreadCountResponse {
   unread_count: number;
 }
 
+export interface EmailDeliveryStatus {
+  enabled: boolean;
+  ready: boolean;
+  provider: string;
+  from_address: string | null;
+  blockers: string[];
+}
+
 function buildQuery(params: ListNotificationsParams): string {
   const search = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {
@@ -80,4 +88,8 @@ export function createNotification(input: CreateNotificationInput) {
     method: 'POST',
     body: JSON.stringify(input),
   });
+}
+
+export function getNotificationEmailDeliveryStatus() {
+  return request<EmailDeliveryStatus>(apiPath('/notifications/email/status'));
 }

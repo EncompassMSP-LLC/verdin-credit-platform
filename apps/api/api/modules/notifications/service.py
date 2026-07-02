@@ -5,6 +5,7 @@ import uuid
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from api.core.email_delivery import get_email_delivery_status
 from api.core.pagination import PaginatedResponse, paginate
 from api.core.permissions import has_permission
 from api.modules.auth.models import User
@@ -13,6 +14,7 @@ from api.modules.notifications.models import Notification, NotificationCategory
 from api.modules.notifications.permissions import NOTIFICATION_CREATE_ROLE
 from api.modules.notifications.repository import NotificationListFilters, NotificationRepository
 from api.modules.notifications.schemas import (
+    EmailDeliveryStatusResponse,
     NotificationCreate,
     NotificationListParams,
     NotificationResponse,
@@ -170,3 +172,14 @@ class NotificationService:
             recipient_user_id=user.id,
         )
         return UnreadCountResponse(unread_count=0)
+
+    async def get_email_delivery_status(self, user: User) -> EmailDeliveryStatusResponse:
+        self._require_organization(user)
+        status = get_email_delivery_status()
+        return EmailDeliveryStatusResponse(
+            enabled=status.enabled,
+            ready=status.ready,
+            provider=status.provider,
+            from_address=status.from_address,
+            blockers=status.blockers,
+        )
