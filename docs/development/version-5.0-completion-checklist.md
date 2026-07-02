@@ -26,7 +26,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | 6     | MFA / SSO foundation (feature-flagged)        | Enterprise Id    | ✅     |
 | 7     | Compliance center scaffold + consent model    | Compliance       | ✅     |
 | 8     | Portal document upload                        | Client Portal    | ✅     |
-| 9     | Portal secure messaging scaffold              | Client Portal    | —      |
+| 9     | Portal secure messaging scaffold              | Client Portal    | ✅     |
 | 10    | Enterprise reporting read models              | Reporting        | —      |
 | 11    | API keys + org admin scaffold                 | Enterprise Admin | —      |
 | 12    | Capability matrix 5.0 sign-off + deferrals    | Governance       | —      |

@@ -422,3 +422,11 @@ packages/job-orchestrator/
 **Reason:** Client portal epic requires clients to submit evidence on linked cases without staff mediation; uploads remain org-scoped with the same case visibility rules as read-only progress.
 
 **Follow-up work:** Slice 9 — portal secure messaging scaffold.
+
+### Decision: Secure messaging thread scaffold for portal and staff
+
+**Decision:** Add `message_threads` and `thread_messages` tables (migration `018`), one thread per case, portal `GET/POST /portal/cases/{case_id}/messages`, staff `GET/POST /cases/{case_id}/message-thread`, timeline events for portal and staff messages, and `@verdin/api-client` messaging helpers.
+
+**Reason:** Client portal epic requires a durable messaging foundation on linked cases before real-time delivery or attachments ship in later versions.
+
+**Follow-up work:** Slice 10 — enterprise reporting read models.

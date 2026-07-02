@@ -15,6 +15,12 @@ from api.modules.compliance.models import (
     RetentionScope,
 )
 from api.modules.documents.models import Document
+from api.modules.messaging.models import (
+    MessageSenderRole,
+    MessageThread,
+    MessageThreadStatus,
+    ThreadMessage,
+)
 from api.modules.notifications.models import EmailDeliveryLog, Notification, NotificationCategory
 from api.modules.tasks.models import Task, TaskPriority, TaskStatus
 from api.modules.timeline.models import Communication, TimelineEvent
@@ -36,6 +42,9 @@ __all__ = [
     "DisputeLetter",
     "DisputeLetterStatus",
     "EmailDeliveryLog",
+    "MessageSenderRole",
+    "MessageThread",
+    "MessageThreadStatus",
     "Notification",
     "NotificationCategory",
     "Organization",
@@ -44,6 +53,7 @@ __all__ = [
     "Task",
     "TaskPriority",
     "TaskStatus",
+    "ThreadMessage",
     "TimelineEvent",
     "User",
     "UserRole",
