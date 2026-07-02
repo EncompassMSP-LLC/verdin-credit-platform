@@ -119,11 +119,29 @@ Scope and deferrals: [`docs/governance/version-4.8-scope.md`](../governance/vers
 
 Release notes: [`docs/release-notes/v4.8.0.md`](../release-notes/v4.8.0.md)
 
-### Version 5.0 — Enterprise Edition (in progress)
+### Version 5.0 — Enterprise Edition (RC complete)
 
 Scope and deferrals: [`docs/governance/version-5.0-scope.md`](../governance/version-5.0-scope.md)
 
 Completion checklist: [`docs/development/version-5.0-completion-checklist.md`](../development/version-5.0-completion-checklist.md)
+
+| Epic | Theme                 | v5.0.0 outcome | Notes                                                    |
+| ---- | --------------------- | -------------- | -------------------------------------------------------- |
+| 1    | Data & client linking | Partial        | `cases.client_id` FK; bulk import → 5.0+                 |
+| 2    | Communications        | Partial        | Production email + audit; SMS production → 5.0+          |
+| 3    | AI Assistance (LLM)   | Partial        | Case summary post-gate; document summaries → 5.0+        |
+| 4    | Platform operations   | Partial        | Orchestrator retry/metrics + cron; PG persistence → 5.0+ |
+| 5    | Enterprise identity   | Partial        | SSO/MFA readiness scaffold; IdP enrollment → 5.0+        |
+| 6    | Compliance            | Partial        | Consent + retention placeholders; enforcement → 5.0+     |
+| 7    | Client portal         | Partial        | Upload + messaging scaffold; real-time delivery → 5.0+   |
+| 8    | Enterprise admin      | Partial        | API key lifecycle; SCIM/billing admin → 5.0+             |
+| 9    | Reporting & analytics | Partial        | Bureau + team productivity; materialized views → 5.0+    |
+
+**Deferred from 5.0 to 5.0+ / 5.1+:** autonomous dispute filing, full BPM designer, Stripe billing, predictive analytics, AI autonomous agents, native mobile apps, document LLM summaries, SMS production delivery.
+
+**Tag:** `v5.0.0` — pending release notes (slice 13) and git tag (slice 14).
+
+Release notes: _pending slice 13_
 
 ## Sprint → version mapping
 
