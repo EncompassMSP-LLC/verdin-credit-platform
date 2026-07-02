@@ -54,10 +54,12 @@ export {
 export {
   createCase,
   deleteCase,
+  generateCaseLlmSummary,
   getCase,
   listCases,
   updateCase,
   type Case,
+  type CaseLlmSummary,
   type CreateCaseInput,
   type ListCasesParams,
   type UpdateCaseInput,
@@ -87,6 +89,31 @@ export {
 } from './clients';
 
 export { getLlmStatus, type LlmGateStatus } from './llm';
+
+export { getEnterpriseIdentityStatus, type EnterpriseIdentityStatus } from './enterprise';
+
+export {
+  createConsentRecord,
+  createRetentionPolicy,
+  getComplianceCenterStatus,
+  getConsentRecord,
+  getRetentionPolicy,
+  listConsentRecords,
+  listRetentionPolicies,
+  updateRetentionPolicy,
+  withdrawConsentRecord,
+  type ComplianceCenterStatus,
+  type ConsentRecord,
+  type ConsentStatus,
+  type ConsentType,
+  type CreateConsentRecordInput,
+  type CreateRetentionPolicyInput,
+  type ListConsentRecordsParams,
+  type ListRetentionPoliciesParams,
+  type RetentionPolicy,
+  type RetentionScope,
+  type UpdateRetentionPolicyInput,
+} from './compliance';
 
 export {
   createAccount,
@@ -209,24 +236,29 @@ export {
 export {
   getPortalCase,
   getPortalMe,
+  listPortalCaseDocuments,
   listPortalCases,
   portalLogin,
   portalRefresh,
   provisionClientPortalUser,
+  uploadPortalCaseDocument,
   getClientPortalUser,
   updateClientPortalUser,
   revokeClientPortalUser,
   type ClientPortalUser,
   type PortalCaseDetail,
+  type PortalCaseDocumentsResponse,
   type PortalCaseProgressResponse,
   type PortalCaseStage,
   type PortalCaseStatus,
   type PortalCaseSummary,
+  type PortalDocument,
   type PortalLoginInput,
   type PortalMeResponse,
   type PortalTokenResponse,
   type ProvisionPortalUserInput,
   type UpdatePortalUserInput,
+  type UploadPortalCaseDocumentInput,
 } from './portal';
 
 export interface HealthResponse {

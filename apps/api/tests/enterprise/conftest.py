@@ -1,4 +1,4 @@
-"""Fixtures for LLM gateway tests."""
+"""Fixtures for enterprise identity tests."""
 
 import uuid
 
@@ -42,23 +42,6 @@ async def case_manager_user(db_session: AsyncSession, test_org: Organization) ->
     return user
 
 
-@pytest.fixture
-async def read_only_user(db_session: AsyncSession, test_org: Organization) -> User:
-    user = User(
-        id=uuid.uuid4(),
-        email=f"readonly-{uuid.uuid4().hex[:8]}@test.example",
-        hashed_password=hash_password("password123"),
-        first_name="Test",
-        last_name="Reader",
-        role=UserRole.READ_ONLY,
-        organization_id=test_org.id,
-        is_active=True,
-    )
-    db_session.add(user)
-    await db_session.commit()
-    return user
-
-
 def _login(client: TestClient, email: str) -> dict[str, str]:
     response = client.post(
         "/api/v1/auth/login",
@@ -71,8 +54,3 @@ def _login(client: TestClient, email: str) -> dict[str, str]:
 @pytest.fixture
 def manager_headers(api_client: TestClient, case_manager_user: User) -> dict[str, str]:
     return _login(api_client, case_manager_user.email)
-
-
-@pytest.fixture
-def readonly_headers(api_client: TestClient, read_only_user: User) -> dict[str, str]:
-    return _login(api_client, read_only_user.email)

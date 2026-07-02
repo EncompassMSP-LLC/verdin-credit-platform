@@ -166,13 +166,13 @@ Feature flags gate optional platform capabilities. Backend and frontend each rea
 
 ### Available flags
 
-| Flag                   | Description                                           |
-| ---------------------- | ----------------------------------------------------- |
-| `ENABLE_AI`            | Heuristic/rules AI features (scoring, suggestions)    |
-| `ENABLE_LLM`           | External LLM provider calls (requires `LLM_*` config) |
-| `ENABLE_IMPORTS`       | Data import pipeline                                  |
-| `ENABLE_ENTERPRISE`    | Enterprise-tier capabilities                          |
-| `ENABLE_CLIENT_PORTAL` | Client-facing portal                                  |
+| Flag                   | Description                                               |
+| ---------------------- | --------------------------------------------------------- |
+| `ENABLE_AI`            | Heuristic/rules AI features (scoring, suggestions)        |
+| `ENABLE_LLM`           | External LLM provider calls (requires `LLM_*` config)     |
+| `ENABLE_IMPORTS`       | Data import pipeline                                      |
+| `ENABLE_ENTERPRISE`    | Enterprise-tier capabilities (SSO/MFA readiness scaffold) |
+| `ENABLE_CLIENT_PORTAL` | Client-facing portal                                      |
 
 ### Backend
 

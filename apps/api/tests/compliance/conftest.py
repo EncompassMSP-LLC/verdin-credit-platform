@@ -1,4 +1,4 @@
-"""Fixtures for LLM gateway tests."""
+"""Fixtures for compliance center integration tests."""
 
 import uuid
 
@@ -10,19 +10,34 @@ import api.models  # noqa: F401 — register all ORM mappers
 from api.core.constants import UserRole
 from api.core.security import hash_password
 from api.modules.auth.models import Organization, User
+from api.modules.clients.models import Client, ClientStatus
 
 
 @pytest.fixture
 async def test_org(db_session: AsyncSession) -> Organization:
     org = Organization(
         id=uuid.uuid4(),
-        name="Test Organization",
-        slug=f"test-org-{uuid.uuid4().hex[:8]}",
+        name="Compliance Test Organization",
+        slug=f"compliance-org-{uuid.uuid4().hex[:8]}",
         is_active=True,
     )
     db_session.add(org)
     await db_session.commit()
     return org
+
+
+@pytest.fixture
+async def test_client(db_session: AsyncSession, test_org: Organization) -> Client:
+    client = Client(
+        id=uuid.uuid4(),
+        organization_id=test_org.id,
+        display_name="Compliance Test Client",
+        email="client@compliance.test",
+        status=ClientStatus.ACTIVE,
+    )
+    db_session.add(client)
+    await db_session.commit()
+    return client
 
 
 @pytest.fixture
@@ -59,6 +74,23 @@ async def read_only_user(db_session: AsyncSession, test_org: Organization) -> Us
     return user
 
 
+@pytest.fixture
+async def admin_user(db_session: AsyncSession, test_org: Organization) -> User:
+    user = User(
+        id=uuid.uuid4(),
+        email=f"admin-{uuid.uuid4().hex[:8]}@test.example",
+        hashed_password=hash_password("password123"),
+        first_name="Test",
+        last_name="Admin",
+        role=UserRole.ADMIN,
+        organization_id=test_org.id,
+        is_active=True,
+    )
+    db_session.add(user)
+    await db_session.commit()
+    return user
+
+
 def _login(client: TestClient, email: str) -> dict[str, str]:
     response = client.post(
         "/api/v1/auth/login",
@@ -76,3 +108,8 @@ def manager_headers(api_client: TestClient, case_manager_user: User) -> dict[str
 @pytest.fixture
 def readonly_headers(api_client: TestClient, read_only_user: User) -> dict[str, str]:
     return _login(api_client, read_only_user.email)
+
+
+@pytest.fixture
+def admin_headers(api_client: TestClient, admin_user: User) -> dict[str, str]:
+    return _login(api_client, admin_user.email)

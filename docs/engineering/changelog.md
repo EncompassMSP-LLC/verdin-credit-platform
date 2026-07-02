@@ -383,6 +383,14 @@ packages/job-orchestrator/
 
 **Follow-up work:** Slice 4 — LLM case summary endpoint (post-gate).
 
+### Decision: Post-gate LLM case summary endpoint with PII scrubbing and audit trail
+
+**Decision:** Add `verdin_llm_gateway` completion clients (OpenAI-compatible, Anthropic), `POST /cases/{case_id}/llm-summary` for case managers, scrubbed context via `scrub_payload()`, and timeline event `CASE_LLM_SUMMARY_GENERATED` with model and prompt hash metadata.
+
+**Reason:** 5.0 AI epic requires at least one staff-authenticated LLM endpoint after ADR-012 gates; case summaries are the highest-value first surface.
+
+**Follow-up work:** Slice 5 — job orchestrator runner wiring + overdue cron.
+
 ### Decision: Wire job orchestrator retry/metrics and in-process overdue scan cron
 
 **Decision:** Implement cron evaluation in `JobScheduler` (croniter), wire `RetryPolicy` and `JobMetricsRecorder` into `worker/orchestrator.py`, and register `overdue_investigation_scan` at `0 6 * * *` UTC with in-process scheduler ticks.
@@ -390,3 +398,27 @@ packages/job-orchestrator/
 **Reason:** 4.8 deferred runner integration; 5.0 platform slice requires schedulable overdue scan without external cron-only wiring.
 
 **Follow-up work:** Slice 6 — MFA / SSO foundation (feature-flagged).
+
+### Decision: Enterprise identity readiness scaffold behind `ENABLE_ENTERPRISE`
+
+**Decision:** Add `enterprise_identity` settings/gates, `GET /enterprise/status` for SSO (`oidc`/`saml`) and MFA (`totp`) readiness, and `@verdin/api-client` types. Staff and portal auth partitions remain separate.
+
+**Reason:** Enterprise identity epic requires a compliance gate before IdP or TOTP enrollment endpoints ship in later slices.
+
+**Follow-up work:** Slice 7 — compliance center scaffold + consent model.
+
+### Decision: Compliance center scaffold with consent records and retention placeholders
+
+**Decision:** Add `consent_records` and `retention_policies` tables (migration `017`), compliance module with org-scoped consent CRUD + withdrawal, retention policy placeholders (admin), `GET /compliance/status`, and `@verdin/api-client` compliance functions.
+
+**Reason:** Compliance epic requires durable consent history and retention policy foundations before legal sign-off or enforcement workflows ship in later versions.
+
+**Follow-up work:** Slice 8 — portal document upload.
+
+### Decision: Portal document upload scoped to linked cases
+
+**Decision:** Add `POST /portal/cases/{case_id}/documents` and `GET /portal/cases/{case_id}/documents` for portal JWT users, reuse document storage/OCR pipeline, emit `PORTAL_DOCUMENT_UPLOADED` timeline events, and expose `@verdin/api-client` upload helpers.
+
+**Reason:** Client portal epic requires clients to submit evidence on linked cases without staff mediation; uploads remain org-scoped with the same case visibility rules as read-only progress.
+
+**Follow-up work:** Slice 9 — portal secure messaging scaffold.

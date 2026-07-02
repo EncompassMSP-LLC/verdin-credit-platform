@@ -1,6 +1,7 @@
 """Platform event builders for domain services."""
 
 import uuid
+from datetime import datetime
 from typing import Any
 
 from verdin_event_bus import PlatformEvent
@@ -67,6 +68,33 @@ def case_closed_event(case: Case, performed_by: uuid.UUID) -> PlatformEvent:
         performed_by=performed_by,
         source_module="cases",
         metadata={"status": case.status.value if hasattr(case.status, "value") else case.status},
+    )
+
+
+def case_llm_summary_event(
+    *,
+    case: Case,
+    performed_by: uuid.UUID,
+    model: str,
+    provider: str,
+    prompt_hash: str,
+    generated_at: datetime,
+) -> PlatformEvent:
+    return PlatformEvent(
+        event_type=CaseEventType.CASE_LLM_SUMMARY_GENERATED.value,
+        event_category=EventCategory.CASE.value,
+        title="LLM case summary generated",
+        description=f"An LLM summary was generated for case '{case.title}'.",
+        organization_id=case.organization_id,
+        case_id=case.id,
+        performed_by=performed_by,
+        source_module="cases",
+        metadata={
+            "model": model,
+            "provider": provider,
+            "prompt_hash": prompt_hash,
+            "generated_at": generated_at.isoformat(),
+        },
     )
 
 
@@ -319,6 +347,31 @@ def document_uploaded_event(document: Document, performed_by: uuid.UUID) -> Plat
         performed_by=performed_by,
         source_module="documents",
         metadata={"file_name": document.file_name, "mime_type": document.mime_type},
+    )
+
+
+def portal_document_uploaded_event(
+    document: Document,
+    *,
+    portal_user_id: uuid.UUID,
+) -> PlatformEvent:
+    return PlatformEvent(
+        event_type=DocumentEventType.PORTAL_DOCUMENT_UPLOADED.value,
+        event_category=EventCategory.DOCUMENT.value,
+        title="Client portal document uploaded",
+        description=f"Document '{document.title}' was uploaded via the client portal.",
+        organization_id=document.organization_id,
+        case_id=document.case_id,
+        account_id=document.account_id,
+        document_id=document.id,
+        performed_by=None,
+        source_module="client_portal",
+        metadata={
+            "file_name": document.file_name,
+            "mime_type": document.mime_type,
+            "portal_user_id": str(portal_user_id),
+            "upload_source": "portal",
+        },
     )
 
 

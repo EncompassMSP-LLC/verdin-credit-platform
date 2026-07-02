@@ -7,6 +7,13 @@ from api.modules.auth.models import Organization, User
 from api.modules.cases.models import Case, CaseStatus
 from api.modules.client_portal.models import ClientPortalUser
 from api.modules.clients.models import Client, ClientContact, ClientStatus, ContactRelationship
+from api.modules.compliance.models import (
+    ConsentRecord,
+    ConsentStatus,
+    ConsentType,
+    RetentionPolicy,
+    RetentionScope,
+)
 from api.modules.documents.models import Document
 from api.modules.notifications.models import EmailDeliveryLog, Notification, NotificationCategory
 from api.modules.tasks.models import Task, TaskPriority, TaskStatus
@@ -20,6 +27,9 @@ __all__ = [
     "ClientContact",
     "ClientPortalUser",
     "ClientStatus",
+    "ConsentRecord",
+    "ConsentStatus",
+    "ConsentType",
     "ContactRelationship",
     "Communication",
     "Document",
@@ -29,6 +39,8 @@ __all__ = [
     "Notification",
     "NotificationCategory",
     "Organization",
+    "RetentionPolicy",
+    "RetentionScope",
     "Task",
     "TaskPriority",
     "TaskStatus",

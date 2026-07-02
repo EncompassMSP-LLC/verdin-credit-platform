@@ -1,5 +1,11 @@
 """Verdin LLM gateway — provider config and policy gates."""
 
+from verdin_llm_gateway.client import (
+    LlmChatMessage,
+    LlmCompletionClient,
+    LlmCompletionResult,
+    get_llm_completion_client,
+)
 from verdin_llm_gateway.config import LlmGatewaySettings, LlmProvider, get_llm_settings
 from verdin_llm_gateway.exceptions import (
     LlmFeatureDisabledError,
@@ -11,6 +17,9 @@ from verdin_llm_gateway.gate import LlmGateStatus, evaluate_llm_gate, require_ll
 from verdin_llm_gateway.policy import PII_FIELD_NAMES, redact_pii, scrub_payload
 
 __all__ = [
+    "LlmChatMessage",
+    "LlmCompletionClient",
+    "LlmCompletionResult",
     "LlmFeatureDisabledError",
     "LlmGateStatus",
     "LlmGatewayError",
@@ -20,6 +29,7 @@ __all__ = [
     "LlmProviderNotConfiguredError",
     "PII_FIELD_NAMES",
     "evaluate_llm_gate",
+    "get_llm_completion_client",
     "get_llm_settings",
     "redact_pii",
     "require_llm_ready",

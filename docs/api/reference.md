@@ -73,13 +73,14 @@ Authorization: Bearer <access_token>
 
 All case endpoints require authentication. Users are scoped to their organization.
 
-| Method | Path               | Min role     | Description        |
-| ------ | ------------------ | ------------ | ------------------ |
-| POST   | `/cases`           | case_manager | Create a case      |
-| GET    | `/cases`           | read_only    | List cases         |
-| GET    | `/cases/{case_id}` | read_only    | Get case by ID     |
-| PATCH  | `/cases/{case_id}` | case_manager | Update a case      |
-| DELETE | `/cases/{case_id}` | admin        | Soft-delete a case |
+| Method | Path                           | Min role     | Description               |
+| ------ | ------------------------------ | ------------ | ------------------------- |
+| POST   | `/cases`                       | case_manager | Create a case             |
+| GET    | `/cases`                       | read_only    | List cases                |
+| GET    | `/cases/{case_id}`             | read_only    | Get case by ID            |
+| PATCH  | `/cases/{case_id}`             | case_manager | Update a case             |
+| DELETE | `/cases/{case_id}`             | admin        | Soft-delete a case        |
+| POST   | `/cases/{case_id}/llm-summary` | case_manager | Generate LLM case summary |
 
 ### List query parameters
 
@@ -88,6 +89,8 @@ All case endpoints require authentication. Users are scoped to their organizatio
 ### Create / update body
 
 Optional `client_id` links a case to a `clients` record in the same organization. When `client_id` is set, `client_name` and `client_email` default from the client unless explicitly provided.
+
+`POST /cases/{case_id}/llm-summary` invokes the configured LLM provider when `ENABLE_LLM` and ADR-012 gates pass. Case context is PII-scrubbed before the provider call; a timeline audit event records model, provider, and prompt hash.
 
 ### Enums
 
@@ -147,10 +150,14 @@ Requires `ENABLE_CLIENT_PORTAL=true`. Portal JWTs use `realm=portal` and include
 
 Read-only case progress for portal users. Cases match when `client_id` is set to the portal client, with email/name heuristics as fallback for unlinked cases.
 
-| Method | Path                 | Auth       | Description                          |
-| ------ | -------------------- | ---------- | ------------------------------------ |
-| GET    | `/portal/cases`      | portal JWT | List cases linked to portal client   |
-| GET    | `/portal/cases/{id}` | portal JWT | Read-only case progress and disputes |
+| Method | Path                           | Auth       | Description                                                                           |
+| ------ | ------------------------------ | ---------- | ------------------------------------------------------------------------------------- |
+| GET    | `/portal/cases`                | portal JWT | List cases linked to portal client                                                    |
+| GET    | `/portal/cases/{id}`           | portal JWT | Read-only case progress and disputes                                                  |
+| GET    | `/portal/cases/{id}/documents` | portal JWT | List documents on a linked case                                                       |
+| POST   | `/portal/cases/{id}/documents` | portal JWT | Upload document to a linked case (multipart: `file`, `title`, optional `description`) |
+
+Portal uploads use the same MIME and size limits as staff `POST /documents`. Documents appear in staff document views and emit `PORTAL_DOCUMENT_UPLOADED` timeline events. Account-scoped uploads and portal document download are not included in this slice.
 
 ## Accounts
 
@@ -322,13 +329,42 @@ Provider env vars: `EMAIL_PROVIDER`, `EMAIL_FROM_ADDRESS`, `EMAIL_SMTP_HOST`, `E
 
 ## LLM gateway
 
-Readiness check for external LLM provider configuration. Does **not** invoke a provider.
+LLM readiness and case summary generation behind ADR-012 gates.
 
-| Method | Path          | Min role  | Description                      |
-| ------ | ------------- | --------- | -------------------------------- |
-| GET    | `/llm/status` | read_only | LLM feature + provider readiness |
+| Method | Path                           | Min role     | Description                      |
+| ------ | ------------------------------ | ------------ | -------------------------------- |
+| GET    | `/llm/status`                  | read_only    | LLM feature + provider readiness |
+| POST   | `/cases/{case_id}/llm-summary` | case_manager | Generate scrubbed case summary   |
 
-Requires `ENABLE_LLM=true` and `LLM_PROVIDER` / `LLM_API_KEY` / `LLM_MODEL` for `ready=true`. See [ADR-012](../adr/012-llm-provider-policy.md).
+Requires `ENABLE_LLM=true` and `LLM_PROVIDER` / `LLM_API_KEY` / `LLM_MODEL` for provider calls. See [ADR-012](../adr/012-llm-provider-policy.md).
+
+## Enterprise identity
+
+MFA and SSO readiness scaffold for staff users. Portal authentication (`/portal/auth/*`) remains a separate partition and is unchanged.
+
+| Method | Path                 | Min role  | Description                               |
+| ------ | -------------------- | --------- | ----------------------------------------- |
+| GET    | `/enterprise/status` | read_only | Enterprise MFA/SSO readiness and blockers |
+
+Requires `ENABLE_ENTERPRISE=true`. Configure `ENTERPRISE_SSO_PROVIDER` (`oidc` / `saml`) with issuer and client credentials, and/or `ENTERPRISE_MFA_MODE=totp` with `ENTERPRISE_MFA_ISSUER`. No external IdP or TOTP enrollment calls are executed in this slice.
+
+## Compliance center
+
+Consent history and retention policy placeholders for CROA/FCRA-oriented operations. Records are org-scoped and append-only (withdrawal updates status; records are not deleted).
+
+| Method | Path                                         | Min role     | Description                             |
+| ------ | -------------------------------------------- | ------------ | --------------------------------------- |
+| GET    | `/compliance/status`                         | read_only    | Compliance center capabilities overview |
+| GET    | `/compliance/consents`                       | read_only    | List consent records (filter by client) |
+| POST   | `/compliance/consents`                       | case_manager | Record client consent                   |
+| GET    | `/compliance/consents/{consent_id}`          | read_only    | Get consent record                      |
+| POST   | `/compliance/consents/{consent_id}/withdraw` | case_manager | Withdraw previously granted consent     |
+| GET    | `/compliance/retention-policies`             | read_only    | List retention policy placeholders      |
+| POST   | `/compliance/retention-policies`             | admin        | Create retention policy placeholder     |
+| GET    | `/compliance/retention-policies/{policy_id}` | read_only    | Get retention policy                    |
+| PATCH  | `/compliance/retention-policies/{policy_id}` | admin        | Update retention policy placeholder     |
+
+Consent types: `croa_services`, `fcra_dispute`, `fdcpa_contact`, `marketing`, `data_processing`. Retention scopes: `documents`, `communications`, `audit_logs`, `client_profiles`. Enforcement jobs and legal sign-off workflows are deferred to 5.0+.
 
 ## Reporting
 
