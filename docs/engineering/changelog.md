@@ -556,3 +556,11 @@ packages/job-orchestrator/
 **Reason:** All twelve 5.0+ UI slices shipped; pilot can run staff and portal workflows behind feature flags without API-only gaps.
 
 **Follow-up work:** 5.1+ planning — billing, IdP enrollment, API key middleware, autonomous agents per deferrals table.
+
+### Decision: Kick off Version 5.1 production hardening
+
+**Decision:** Add `version-5.1-scope.md`, `version-5.1-completion-checklist.md`, and `.cursor/rules/version-51-sprint-loop.mdc`; link 5.1 from product roadmap.
+
+**Reason:** 5.0+ pilot sign-off complete; deferred production integrations need a sequenced delivery path before v5.1.0 release.
+
+**Follow-up work:** Slice 2 — API key auth middleware.
