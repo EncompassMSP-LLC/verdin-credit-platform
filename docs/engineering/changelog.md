@@ -628,3 +628,11 @@ packages/job-orchestrator/
 **Reason:** Final exit criterion for the 5.1 production-hardening milestone.
 
 **Follow-up work:** 5.2 planning — deferred SMS, LLM document summaries, revenue analytics.
+
+### Decision: Production SMS delivery
+
+**Decision:** Add Twilio SMS provider adapter, `sms_delivery_logs` audit table, optional `users.phone_number`, and notification endpoints `GET /notifications/sms/status`, `POST /notifications/sms/send`, `GET /notifications/sms/deliveries` gated by `ENABLE_SMS_DELIVERY`.
+
+**Reason:** 5.2 communications epic ships production SMS deferred from v5.1.0 alongside existing email delivery for staff notification workflows.
+
+**Follow-up work:** Slice 3 — LLM document summary UI.

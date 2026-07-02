@@ -343,6 +343,9 @@ In-app notifications for staff users. Recipients only see their own notification
 | GET    | `/notifications/email/status`     | read_only | Email delivery readiness            |
 | POST   | `/notifications/email/send`       | admin     | Send email to org user via provider |
 | GET    | `/notifications/email/deliveries` | admin     | List email delivery audit logs      |
+| GET    | `/notifications/sms/status`       | read_only | SMS delivery readiness              |
+| POST   | `/notifications/sms/send`         | admin     | Send SMS to org user via provider   |
+| GET    | `/notifications/sms/deliveries`   | admin     | List SMS delivery audit logs        |
 
 **List query parameters:** `unread_only`, `category`, `sort_by`, `sort_order`, `page`, `page_size`.
 
@@ -351,6 +354,12 @@ In-app notifications for staff users. Recipients only see their own notification
 `POST /notifications/email/send` delivers via the configured provider (`smtp` or `sendgrid`) when ready. Each attempt is persisted to `email_delivery_logs`. Set `deliver_email: true` on `POST /notifications` to send email alongside the in-app notification.
 
 Provider env vars: `EMAIL_PROVIDER`, `EMAIL_FROM_ADDRESS`, `EMAIL_SMTP_HOST`, `EMAIL_SMTP_PORT`, `EMAIL_SMTP_USERNAME`, `EMAIL_SMTP_PASSWORD`, `EMAIL_SENDGRID_API_KEY`.
+
+`/notifications/sms/status` reports `enabled`, `ready`, configured provider metadata, and blockers based on `ENABLE_SMS_DELIVERY` plus SMS provider env vars.
+
+`POST /notifications/sms/send` delivers via the configured provider (`twilio`) when ready. Recipients must have `phone_number` set on their user record. Each attempt is persisted to `sms_delivery_logs`. Set `deliver_sms: true` on `POST /notifications` to send SMS alongside the in-app notification.
+
+SMS provider env vars: `SMS_PROVIDER`, `SMS_FROM_NUMBER`, `SMS_TWILIO_ACCOUNT_SID`, `SMS_TWILIO_AUTH_TOKEN`.
 
 ## LLM gateway
 

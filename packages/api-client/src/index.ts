@@ -295,12 +295,15 @@ export {
 export {
   createNotification,
   getNotificationEmailDeliveryStatus,
+  getNotificationSmsDeliveryStatus,
   getUnreadNotificationCount,
   listNotificationEmailDeliveries,
+  listNotificationSmsDeliveries,
   listNotifications,
   markAllNotificationsRead,
   markNotificationRead,
   sendNotificationEmail,
+  sendNotificationSms,
   type CreateNotificationInput,
   type EmailDeliveryAttempt,
   type EmailDeliveryLog,
@@ -309,6 +312,10 @@ export {
   type Notification,
   type NotificationCategory,
   type SendNotificationEmailInput,
+  type SendNotificationSmsInput,
+  type SmsDeliveryAttempt,
+  type SmsDeliveryLog,
+  type SmsDeliveryStatus,
   type UnreadCountResponse,
 } from './notifications';
 

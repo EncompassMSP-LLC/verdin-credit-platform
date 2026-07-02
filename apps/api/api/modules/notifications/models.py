@@ -25,6 +25,11 @@ class EmailDeliveryLogStatus(StrEnum):
     FAILED = "failed"
 
 
+class SmsDeliveryLogStatus(StrEnum):
+    SENT = "sent"
+    FAILED = "failed"
+
+
 class Notification(Base, TimestampMixin):
     __tablename__ = "notifications"
 
@@ -73,6 +78,37 @@ class EmailDeliveryLog(Base, TimestampMixin):
         Enum(
             EmailDeliveryLogStatus,
             name="email_delivery_status",
+            values_callable=lambda x: [e.value for e in x],
+        ),
+        nullable=False,
+    )
+    provider_message_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    sent_by_user_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id"), nullable=True
+    )
+
+
+class SmsDeliveryLog(Base, TimestampMixin):
+    __tablename__ = "sms_delivery_logs"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    organization_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("organizations.id"), nullable=False, index=True
+    )
+    notification_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("notifications.id"), nullable=True, index=True
+    )
+    recipient_user_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id"), nullable=True, index=True
+    )
+    recipient_phone: Mapped[str] = mapped_column(String(50), nullable=False)
+    body: Mapped[str] = mapped_column(Text, nullable=False)
+    provider: Mapped[str] = mapped_column(String(50), nullable=False)
+    status: Mapped[SmsDeliveryLogStatus] = mapped_column(
+        Enum(
+            SmsDeliveryLogStatus,
+            name="sms_delivery_status",
             values_callable=lambda x: [e.value for e in x],
         ),
         nullable=False,

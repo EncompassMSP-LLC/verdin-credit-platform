@@ -22,6 +22,7 @@ class NotificationCreate(BaseModel):
     source_module: str | None = Field(default=None, max_length=50)
     action_url: str | None = Field(default=None, max_length=500)
     deliver_email: bool = False
+    deliver_sms: bool = False
 
 
 class EmailSendRequest(BaseModel):
@@ -32,6 +33,13 @@ class EmailSendRequest(BaseModel):
 
 
 class EmailDeliveryAttemptResponse(BaseModel):
+    attempted: bool
+    status: str | None = None
+    delivery_log_id: uuid.UUID | None = None
+    error: str | None = None
+
+
+class SmsDeliveryAttemptResponse(BaseModel):
     attempted: bool
     status: str | None = None
     delivery_log_id: uuid.UUID | None = None
@@ -78,6 +86,7 @@ class NotificationResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     email_delivery: EmailDeliveryAttemptResponse | None = None
+    sms_delivery: SmsDeliveryAttemptResponse | None = None
 
 
 class NotificationListParams(BaseModel):
@@ -98,4 +107,36 @@ class EmailDeliveryStatusResponse(BaseModel):
     ready: bool
     provider: str
     from_address: str | None
+    blockers: list[str]
+
+
+class SmsSendRequest(BaseModel):
+    recipient_user_id: uuid.UUID
+    body: str = Field(min_length=1, max_length=1600)
+    notification_id: uuid.UUID | None = None
+
+
+class SmsDeliveryLogResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    organization_id: uuid.UUID
+    notification_id: uuid.UUID | None
+    recipient_user_id: uuid.UUID | None
+    recipient_phone: str
+    body: str
+    provider: str
+    status: str
+    provider_message_id: str | None
+    error_message: str | None
+    sent_by_user_id: uuid.UUID | None
+    created_at: datetime
+    updated_at: datetime
+
+
+class SmsDeliveryStatusResponse(BaseModel):
+    enabled: bool
+    ready: bool
+    provider: str
+    from_number: str | None
     blockers: list[str]

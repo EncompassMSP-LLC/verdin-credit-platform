@@ -11,6 +11,7 @@ class FeatureFlag(StrEnum):
     ENABLE_AI = "ENABLE_AI"
     ENABLE_LLM = "ENABLE_LLM"
     ENABLE_EMAIL_DELIVERY = "ENABLE_EMAIL_DELIVERY"
+    ENABLE_SMS_DELIVERY = "ENABLE_SMS_DELIVERY"
     ENABLE_IMPORTS = "ENABLE_IMPORTS"
     ENABLE_ENTERPRISE = "ENABLE_ENTERPRISE"
     ENABLE_BILLING = "ENABLE_BILLING"
@@ -38,6 +39,10 @@ class FeatureFlags(BaseSettings):
     enable_email_delivery: bool = Field(
         default=False,
         description="Enable email notification delivery scaffold",
+    )
+    enable_sms_delivery: bool = Field(
+        default=False,
+        description="Enable SMS notification delivery",
     )
     enable_imports: bool = Field(default=False, description="Enable data import pipeline")
     enable_enterprise: bool = Field(default=False, description="Enable enterprise-tier features")
@@ -67,6 +72,7 @@ _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
     FeatureFlag.ENABLE_AI: "enable_ai",
     FeatureFlag.ENABLE_LLM: "enable_llm",
     FeatureFlag.ENABLE_EMAIL_DELIVERY: "enable_email_delivery",
+    FeatureFlag.ENABLE_SMS_DELIVERY: "enable_sms_delivery",
     FeatureFlag.ENABLE_IMPORTS: "enable_imports",
     FeatureFlag.ENABLE_ENTERPRISE: "enable_enterprise",
     FeatureFlag.ENABLE_BILLING: "enable_billing",

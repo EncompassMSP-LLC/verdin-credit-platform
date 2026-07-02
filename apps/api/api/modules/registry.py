@@ -31,7 +31,12 @@ from api.modules.messaging.models import (
     MessageThreadStatus,
     ThreadMessage,
 )
-from api.modules.notifications.models import EmailDeliveryLog, Notification, NotificationCategory
+from api.modules.notifications.models import (
+    EmailDeliveryLog,
+    Notification,
+    NotificationCategory,
+    SmsDeliveryLog,
+)
 from api.modules.org_admin.models import ApiKeyScope, OrganizationApiKey
 from api.modules.reporting.materialized_models import (
     ReportingMvRefreshRun,
@@ -79,6 +84,7 @@ __all__ = [
     "RetentionPolicy",
     "RetentionEnforcementRun",
     "RetentionScope",
+    "SmsDeliveryLog",
     "Task",
     "TaskPriority",
     "TaskStatus",

@@ -19,6 +19,7 @@ export interface Notification {
   created_at: string;
   updated_at: string;
   email_delivery?: EmailDeliveryAttempt | null;
+  sms_delivery?: SmsDeliveryAttempt | null;
 }
 
 export interface CreateNotificationInput {
@@ -31,6 +32,7 @@ export interface CreateNotificationInput {
   source_module?: string | null;
   action_url?: string | null;
   deliver_email?: boolean;
+  deliver_sms?: boolean;
 }
 
 export interface EmailDeliveryAttempt {
@@ -81,6 +83,43 @@ export interface EmailDeliveryStatus {
   ready: boolean;
   provider: string;
   from_address: string | null;
+  blockers: string[];
+}
+
+export interface SmsDeliveryAttempt {
+  attempted: boolean;
+  status?: string | null;
+  delivery_log_id?: string | null;
+  error?: string | null;
+}
+
+export interface SmsDeliveryLog {
+  id: string;
+  organization_id: string;
+  notification_id: string | null;
+  recipient_user_id: string | null;
+  recipient_phone: string;
+  body: string;
+  provider: string;
+  status: string;
+  provider_message_id: string | null;
+  error_message: string | null;
+  sent_by_user_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SendNotificationSmsInput {
+  recipient_user_id: string;
+  body: string;
+  notification_id?: string | null;
+}
+
+export interface SmsDeliveryStatus {
+  enabled: boolean;
+  ready: boolean;
+  provider: string;
+  from_number: string | null;
   blockers: string[];
 }
 
@@ -142,5 +181,26 @@ export function listNotificationEmailDeliveries(
   const query = search.toString();
   return request<PaginatedResponse<EmailDeliveryLog>>(
     apiPath(`/notifications/email/deliveries${query ? `?${query}` : ''}`),
+  );
+}
+
+export function getNotificationSmsDeliveryStatus() {
+  return request<SmsDeliveryStatus>(apiPath('/notifications/sms/status'));
+}
+
+export function sendNotificationSms(input: SendNotificationSmsInput) {
+  return request<SmsDeliveryLog>(apiPath('/notifications/sms/send'), {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export function listNotificationSmsDeliveries(params: { page?: number; page_size?: number } = {}) {
+  const search = new URLSearchParams();
+  if (params.page) search.set('page', String(params.page));
+  if (params.page_size) search.set('page_size', String(params.page_size));
+  const query = search.toString();
+  return request<PaginatedResponse<SmsDeliveryLog>>(
+    apiPath(`/notifications/sms/deliveries${query ? `?${query}` : ''}`),
   );
 }
