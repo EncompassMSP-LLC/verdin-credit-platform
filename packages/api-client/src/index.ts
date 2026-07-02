@@ -90,6 +90,8 @@ export {
 
 export { getLlmStatus, type LlmGateStatus } from './llm';
 
+export { getEnterpriseIdentityStatus, type EnterpriseIdentityStatus } from './enterprise';
+
 export {
   createAccount,
   createAccountDisputeDraftReviewTask,

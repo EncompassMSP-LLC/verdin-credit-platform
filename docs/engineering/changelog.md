@@ -390,3 +390,11 @@ packages/job-orchestrator/
 **Reason:** 5.0 AI epic requires at least one staff-authenticated LLM endpoint after ADR-012 gates; case summaries are the highest-value first surface.
 
 **Follow-up work:** Slice 5 — job orchestrator runner wiring + overdue cron.
+
+### Decision: Enterprise identity readiness scaffold behind `ENABLE_ENTERPRISE`
+
+**Decision:** Add `enterprise_identity` settings/gates, `GET /enterprise/status` for SSO (`oidc`/`saml`) and MFA (`totp`) readiness, and `@verdin/api-client` types. Staff and portal auth partitions remain separate.
+
+**Reason:** Enterprise identity epic requires a compliance gate before IdP or TOTP enrollment endpoints ship in later slices.
+
+**Follow-up work:** Slice 7 — compliance center scaffold + consent model.

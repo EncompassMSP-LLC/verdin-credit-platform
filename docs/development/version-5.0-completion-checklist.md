@@ -23,7 +23,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | 3     | Production email delivery (provider adapters) | Communications   | ✅     |
 | 4     | LLM case summary endpoint (post-gate)         | AI               | ✅     |
 | 5     | Job orchestrator runner wiring + overdue cron | Platform         | —      |
-| 6     | MFA / SSO foundation (feature-flagged)        | Enterprise Id    | —      |
+| 6     | MFA / SSO foundation (feature-flagged)        | Enterprise Id    | ✅     |
 | 7     | Compliance center scaffold + consent model    | Compliance       | —      |
 | 8     | Portal document upload                        | Client Portal    | —      |
 | 9     | Portal secure messaging scaffold              | Client Portal    | —      |
