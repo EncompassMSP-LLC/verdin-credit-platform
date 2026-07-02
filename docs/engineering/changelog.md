@@ -296,3 +296,13 @@ packages/job-orchestrator/
 **Reason:** Client portal auth (slice 7) requires a durable client identity separate from case denormalized fields.
 
 **Follow-up work:** Link cases to clients, portal auth partition, read-only progress view.
+
+## Version 4.8 — LLM provider policy and gates
+
+### Decision: `ENABLE_LLM` + `packages/llm-gateway/` before external calls
+
+**Decision:** Add ADR-012, `verdin-llm-gateway` package with provider config, PII scrubbing, and `require_llm_ready()` gate. Separate `ENABLE_LLM` from heuristic `ENABLE_AI`. Expose `GET /llm/status` for staff readiness checks.
+
+**Reason:** 4.5 deferred all LLM work pending compliance gates; implementation slices must not call providers without policy merged.
+
+**Follow-up work:** Actual LLM summary endpoints and worker integration behind gate.

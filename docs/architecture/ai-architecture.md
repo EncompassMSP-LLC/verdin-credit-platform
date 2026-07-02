@@ -8,7 +8,7 @@ How artificial intelligence and machine learning capabilities integrate into the
 2. **Structured inputs** — models consume typed domain objects (Case, Account, Document), not raw DB rows
 3. **Async by default** — OCR, summarization, and batch scoring run in the worker queue
 4. **Explainable outputs** — store rationale text (`ai_summary`, `ai_recommended_next_action`) alongside scores
-5. **Feature-flagged** — `ENABLE_AI` gates AI endpoints and job enqueue ([developer guide](../developer-guide.md))
+5. **Feature-flagged** — `ENABLE_AI` gates heuristic AI; `ENABLE_LLM` gates external provider calls ([ADR-012](../adr/012-llm-provider-policy.md))
 
 ## AI capability layers
 
@@ -90,6 +90,8 @@ async def generate_case_summary(self, case_id: UUID) -> str:
 **Rules:**
 
 - Never call external LLM APIs from routers
+- Call `require_llm_gateway()` from services/workers before any provider request ([`packages/llm-gateway/`](../../packages/llm-gateway/))
+- Scrub context with `scrub_payload()` unless org opts into `LLM_ALLOW_EXTERNAL_PII_EXPORT`
 - Log prompt hash and model version for audit (5.0)
 - Redact PII per org policy before sending to third-party models
 - Timeout and circuit-breaker on AI provider calls

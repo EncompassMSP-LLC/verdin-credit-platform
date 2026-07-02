@@ -284,6 +284,16 @@ In-app notifications for staff users. Recipients only see their own notification
 
 **List query parameters:** `unread_only`, `category`, `sort_by`, `sort_order`, `page`, `page_size`.
 
+## LLM gateway
+
+Readiness check for external LLM provider configuration. Does **not** invoke a provider.
+
+| Method | Path          | Min role  | Description                      |
+| ------ | ------------- | --------- | -------------------------------- |
+| GET    | `/llm/status` | read_only | LLM feature + provider readiness |
+
+Requires `ENABLE_LLM=true` and `LLM_PROVIDER` / `LLM_API_KEY` / `LLM_MODEL` for `ready=true`. See [ADR-012](../adr/012-llm-provider-policy.md).
+
 ## Dashboard
 
 | Method | Path         | Role      | Description                         |

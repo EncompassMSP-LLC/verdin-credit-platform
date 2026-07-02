@@ -9,6 +9,7 @@ from api.modules.cases.router import router as cases_router
 from api.modules.clients.router import router as clients_router
 from api.modules.dashboard.router import router as dashboard_router
 from api.modules.documents.router import router as documents_router
+from api.modules.llm.router import router as llm_router
 from api.modules.notifications.router import router as notifications_router
 from api.modules.tasks.router import router as tasks_router
 from api.modules.timeline.router import router as timeline_router
@@ -24,5 +25,6 @@ router.include_router(documents_router)
 router.include_router(tasks_router)
 router.include_router(notifications_router)
 router.include_router(timeline_router)
+router.include_router(llm_router)
 
 __all__ = ["router"]

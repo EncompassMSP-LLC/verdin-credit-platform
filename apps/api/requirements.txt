@@ -1,3 +1,4 @@
+-e ../../packages/llm-gateway
 -e ../../packages/job-orchestrator
 -e ../../packages/document-classification
 -e ../../packages/document-metadata
