@@ -466,3 +466,11 @@ packages/job-orchestrator/
 **Documentation:** [`docs/release-notes/v5.0.0.md`](../release-notes/v5.0.0.md)
 
 **Follow-up work:** Slice 14 — tag `v5.0.0`.
+
+### Decision: Tag `v5.0.0` — Enterprise Edition release
+
+**Decision:** Mark Version 5.0 completion checklist complete and tag `v5.0.0` on `main` with GitHub Release notes sourced from `docs/release-notes/v5.0.0.md`.
+
+**Reason:** Closes the Version 5.0 sprint loop; all nine epics ship as Partial with documented deferrals.
+
+**Documentation:** [`docs/release-notes/v5.0.0.md`](../release-notes/v5.0.0.md), [`docs/development/version-5.0-completion-checklist.md`](../development/version-5.0-completion-checklist.md)
