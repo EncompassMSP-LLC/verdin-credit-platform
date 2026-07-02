@@ -406,3 +406,11 @@ packages/job-orchestrator/
 **Reason:** Compliance epic requires durable consent history and retention policy foundations before legal sign-off or enforcement workflows ship in later versions.
 
 **Follow-up work:** Slice 8 — portal document upload.
+
+### Decision: Portal document upload scoped to linked cases
+
+**Decision:** Add `POST /portal/cases/{case_id}/documents` and `GET /portal/cases/{case_id}/documents` for portal JWT users, reuse document storage/OCR pipeline, emit `PORTAL_DOCUMENT_UPLOADED` timeline events, and expose `@verdin/api-client` upload helpers.
+
+**Reason:** Client portal epic requires clients to submit evidence on linked cases without staff mediation; uploads remain org-scoped with the same case visibility rules as read-only progress.
+
+**Follow-up work:** Slice 9 — portal secure messaging scaffold.
