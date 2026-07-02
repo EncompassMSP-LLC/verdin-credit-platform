@@ -18,6 +18,7 @@ export interface Notification {
   action_url: string | null;
   created_at: string;
   updated_at: string;
+  email_delivery?: EmailDeliveryAttempt | null;
 }
 
 export interface CreateNotificationInput {
@@ -29,6 +30,37 @@ export interface CreateNotificationInput {
   entity_id?: string | null;
   source_module?: string | null;
   action_url?: string | null;
+  deliver_email?: boolean;
+}
+
+export interface EmailDeliveryAttempt {
+  attempted: boolean;
+  status?: string | null;
+  delivery_log_id?: string | null;
+  error?: string | null;
+}
+
+export interface EmailDeliveryLog {
+  id: string;
+  organization_id: string;
+  notification_id: string | null;
+  recipient_user_id: string | null;
+  recipient_email: string;
+  subject: string;
+  provider: string;
+  status: string;
+  provider_message_id: string | null;
+  error_message: string | null;
+  sent_by_user_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SendNotificationEmailInput {
+  recipient_user_id: string;
+  subject: string;
+  body: string;
+  notification_id?: string | null;
 }
 
 export interface ListNotificationsParams {
@@ -92,4 +124,23 @@ export function createNotification(input: CreateNotificationInput) {
 
 export function getNotificationEmailDeliveryStatus() {
   return request<EmailDeliveryStatus>(apiPath('/notifications/email/status'));
+}
+
+export function sendNotificationEmail(input: SendNotificationEmailInput) {
+  return request<EmailDeliveryLog>(apiPath('/notifications/email/send'), {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export function listNotificationEmailDeliveries(
+  params: { page?: number; page_size?: number } = {},
+) {
+  const search = new URLSearchParams();
+  if (params.page) search.set('page', String(params.page));
+  if (params.page_size) search.set('page_size', String(params.page_size));
+  const query = search.toString();
+  return request<PaginatedResponse<EmailDeliveryLog>>(
+    apiPath(`/notifications/email/deliveries${query ? `?${query}` : ''}`),
+  );
 }

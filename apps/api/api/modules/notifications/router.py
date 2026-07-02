@@ -11,7 +11,9 @@ from api.modules.auth.dependencies import get_current_user
 from api.modules.auth.models import User
 from api.modules.notifications.models import NotificationCategory
 from api.modules.notifications.schemas import (
+    EmailDeliveryLogResponse,
     EmailDeliveryStatusResponse,
+    EmailSendRequest,
     NotificationCreate,
     NotificationListParams,
     NotificationResponse,
@@ -95,3 +97,24 @@ async def get_email_status(
     service: NotificationService = Depends(get_notification_service),
 ) -> EmailDeliveryStatusResponse:
     return await service.get_email_delivery_status(current_user)
+
+
+@router.post(
+    "/email/send", response_model=EmailDeliveryLogResponse, status_code=status.HTTP_201_CREATED
+)
+async def send_notification_email(
+    body: EmailSendRequest,
+    current_user: User = Depends(get_current_user),
+    service: NotificationService = Depends(get_notification_service),
+) -> EmailDeliveryLogResponse:
+    return await service.send_email(current_user, body)
+
+
+@router.get("/email/deliveries", response_model=PaginatedResponse[EmailDeliveryLogResponse])
+async def list_email_deliveries(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    current_user: User = Depends(get_current_user),
+    service: NotificationService = Depends(get_notification_service),
+) -> PaginatedResponse[EmailDeliveryLogResponse]:
+    return await service.list_email_deliveries(current_user, page=page, page_size=page_size)

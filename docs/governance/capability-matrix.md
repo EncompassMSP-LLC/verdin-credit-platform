@@ -150,7 +150,7 @@ Scope: [version-4.8-scope.md](version-4.8-scope.md) · Release notes: [v4.8.0.md
 
 | Capability              | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                               |
 | ----------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ------------------------------------------------------------------- |
-| In-App Notifications    | 4.8     | Partial | ✅      | ✅       | ✅  | —   | ✅    | Auth         | Staff bell + API; email readiness scaffold added, no provider sends |
+| In-App Notifications    | 4.8     | Partial | ✅      | ✅       | ✅  | —   | ✅    | Auth         | Staff bell + API; production email in 5.0 slice 3                   |
 | Client Portal           | 4.8     | Partial | ✅      | ✅       | ✅  | —   | ✅    | Client Mgmt  | Auth + read-only case progress at `/portal/cases`                   |
 | Client Management       | 4.8     | Partial | ✅      | —        | ✅  | —   | ✅    | Auth         | Client + contact CRUD; case FK linking in 5.0 slice 2               |
 | Workflow Scheduled Jobs | 4.8     | Partial | ✅      | —        | —   | —   | ✅    | Worker       | `overdue_investigation_scan` job; manual POST endpoint retained     |
@@ -177,7 +177,7 @@ Scope: [version-5.0-scope.md](version-5.0-scope.md) · Checklist: [version-5.0-c
 | Capability           | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies  | Notes                                             |
 | -------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------- | ------------------------------------------------- |
 | Case–client linking  | 5.0     | Partial | ✅      | —        | ✅  | —   | ✅    | Clients       | `cases.client_id` FK; portal FK + heuristic match |
-| Production email     | 5.0     | Planned | —       | —        | —   | —   | —     | Notifications | Provider adapters beyond 4.8 scaffold             |
+| Production email     | 5.0     | Partial | ✅      | —        | ✅  | —   | ✅    | Notifications | SMTP/SendGrid send + audit log; SMS deferred      |
 | LLM case summaries   | 5.0     | Planned | —       | —        | —   | —   | —     | LLM gates     | Post-gate; ADR-012 required                       |
 | Job orchestrator     | 5.0     | Planned | —       | —        | —   | —   | —     | Worker        | Runner retry/metrics + scheduled jobs             |
 | SSO / MFA            | 5.0     | Planned | —       | —        | —   | —   | —     | Auth          | `ENABLE_ENTERPRISE` foundation                    |
