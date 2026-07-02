@@ -26,7 +26,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | 6     | Client + contact model                       | Client Mgmt   | ✅     |
 | 7     | Client portal auth partition                 | Client Portal | ✅     |
 | 8     | LLM policy ADR + provider config gates       | AI            | ✅     |
-| 9     | Email delivery scaffold (feature-flagged)    | Comms         | —      |
+| 9     | Email delivery scaffold (feature-flagged)    | Comms         | ✅     |
 | 10    | Reporting read models / dashboard expansions | Reporting     | —      |
 | 11    | Client portal case progress view             | Client Portal | —      |
 | 12    | Capability matrix 4.8 sign-off + deferrals   | Governance    | —      |

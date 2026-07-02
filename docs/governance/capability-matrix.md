@@ -148,7 +148,7 @@ Scope: [version-4.8-scope.md](version-4.8-scope.md)
 
 | Capability              | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                               |
 | ----------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ------------------------------------------------------------------- |
-| In-App Notifications    | 4.8     | Partial | ✅      | ✅       | ✅  | —   | ✅    | Auth         | Staff bell + API; email/SMS deferred                                |
+| In-App Notifications    | 4.8     | Partial | ✅      | ✅       | ✅  | —   | ✅    | Auth         | Staff bell + API; email readiness scaffold added, no provider sends |
 | Client Portal           | 4.8     | Partial | ✅      | —        | ✅  | —   | ✅    | Client Mgmt  | Auth partition + `/portal/auth`; progress view in slice 11          |
 | Client Management       | 4.8     | Partial | ✅      | —        | ✅  | —   | ✅    | Auth         | Client + contact CRUD; case linking deferred                        |
 | Workflow Scheduled Jobs | 4.8     | Partial | ✅      | —        | —   | —   | ✅    | Worker       | `overdue_investigation_scan` job; manual POST endpoint retained     |

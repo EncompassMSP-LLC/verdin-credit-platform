@@ -297,8 +297,11 @@ In-app notifications for staff users. Recipients only see their own notification
 | GET    | `/notifications/unread-count`  | read_only | Unread count for current user     |
 | POST   | `/notifications/mark-all-read` | read_only | Mark all notifications read       |
 | POST   | `/notifications/{id}/read`     | read_only | Mark one notification read        |
+| GET    | `/notifications/email/status`  | read_only | Email delivery readiness scaffold |
 
 **List query parameters:** `unread_only`, `category`, `sort_by`, `sort_order`, `page`, `page_size`.
+
+`/notifications/email/status` is a non-sending readiness check for future delivery wiring. It reports `enabled`, `ready`, configured provider metadata, and blockers based on `ENABLE_EMAIL_DELIVERY` plus email provider env vars.
 
 ## LLM gateway
 

@@ -316,3 +316,13 @@ packages/job-orchestrator/
 **Reason:** 4.5 deferred all LLM work pending compliance gates; implementation slices must not call providers without policy merged.
 
 **Follow-up work:** Actual LLM summary endpoints and worker integration behind gate.
+
+## Version 4.8 — Email delivery scaffold (feature-flagged)
+
+### Decision: Add non-sending readiness gate before provider integration
+
+**Decision:** Add `ENABLE_EMAIL_DELIVERY`, email provider config env vars, and `GET /notifications/email/status` to report readiness (`enabled`, `ready`, provider metadata, blockers). No external provider calls are executed in this slice.
+
+**Reason:** Notifications epic requires an email/SMS scaffold in 4.8, but production delivery wiring needs a later slice and provider selection.
+
+**Follow-up work:** Implement provider adapters (`smtp` / `sendgrid`), enqueue delivery attempts from notification workflows, and add retry/metrics via `job-orchestrator`.

@@ -179,11 +179,13 @@ export {
 
 export {
   createNotification,
+  getNotificationEmailDeliveryStatus,
   getUnreadNotificationCount,
   listNotifications,
   markAllNotificationsRead,
   markNotificationRead,
   type CreateNotificationInput,
+  type EmailDeliveryStatus,
   type ListNotificationsParams,
   type Notification,
   type NotificationCategory,

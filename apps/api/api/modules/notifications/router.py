@@ -11,6 +11,7 @@ from api.modules.auth.dependencies import get_current_user
 from api.modules.auth.models import User
 from api.modules.notifications.models import NotificationCategory
 from api.modules.notifications.schemas import (
+    EmailDeliveryStatusResponse,
     NotificationCreate,
     NotificationListParams,
     NotificationResponse,
@@ -86,3 +87,11 @@ async def mark_notification_read(
     service: NotificationService = Depends(get_notification_service),
 ) -> NotificationResponse:
     return await service.mark_read(current_user, notification_id)
+
+
+@router.get("/email/status", response_model=EmailDeliveryStatusResponse)
+async def get_email_status(
+    current_user: User = Depends(get_current_user),
+    service: NotificationService = Depends(get_notification_service),
+) -> EmailDeliveryStatusResponse:
+    return await service.get_email_delivery_status(current_user)

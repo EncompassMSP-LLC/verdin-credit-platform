@@ -52,3 +52,11 @@ class NotificationListParams(BaseModel):
 
 class UnreadCountResponse(BaseModel):
     unread_count: int
+
+
+class EmailDeliveryStatusResponse(BaseModel):
+    enabled: bool
+    ready: bool
+    provider: str
+    from_address: str | None
+    blockers: list[str]
