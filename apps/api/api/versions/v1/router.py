@@ -9,6 +9,7 @@ from api.modules.cases.router import router as cases_router
 from api.modules.client_portal.cases_router import router as client_portal_cases_router
 from api.modules.client_portal.router import router as client_portal_router
 from api.modules.clients.router import router as clients_router
+from api.modules.compliance.router import router as compliance_router
 from api.modules.dashboard.router import router as dashboard_router
 from api.modules.documents.router import router as documents_router
 from api.modules.enterprise.router import router as enterprise_router
@@ -23,6 +24,7 @@ router.include_router(system_router)
 router.include_router(auth_router)
 router.include_router(cases_router)
 router.include_router(clients_router)
+router.include_router(compliance_router)
 router.include_router(client_portal_router)
 router.include_router(client_portal_cases_router)
 router.include_router(dashboard_router)

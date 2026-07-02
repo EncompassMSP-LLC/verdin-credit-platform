@@ -1,0 +1,140 @@
+"""Compliance center domain schemas."""
+
+import uuid
+from datetime import datetime
+from typing import Literal
+
+from pydantic import Field
+
+from api.core.pagination import PaginationParams
+from api.core.responses import BaseSchema
+from api.modules.compliance.models import (
+    ConsentRecord,
+    ConsentStatus,
+    ConsentType,
+    RetentionPolicy,
+    RetentionScope,
+)
+
+ConsentSortField = Literal["granted_at", "created_at", "consent_type", "status"]
+ConsentSortOrder = Literal["asc", "desc"]
+
+RetentionSortField = Literal["created_at", "name", "scope", "retention_days"]
+RetentionSortOrder = Literal["asc", "desc"]
+
+
+class ConsentRecordCreate(BaseSchema):
+    client_id: uuid.UUID
+    case_id: uuid.UUID | None = None
+    consent_type: ConsentType
+    source: str = Field(default="staff", min_length=1, max_length=50)
+    notes: str | None = None
+    granted_at: datetime | None = None
+
+
+class ConsentRecordListParams(PaginationParams):
+    client_id: uuid.UUID | None = None
+    case_id: uuid.UUID | None = None
+    consent_type: ConsentType | None = None
+    status: ConsentStatus | None = None
+    sort_by: ConsentSortField = "granted_at"
+    sort_order: ConsentSortOrder = "desc"
+
+
+class ConsentRecordResponse(BaseSchema):
+    id: uuid.UUID
+    organization_id: uuid.UUID
+    client_id: uuid.UUID
+    case_id: uuid.UUID | None
+    consent_type: ConsentType
+    status: ConsentStatus
+    granted_at: datetime
+    withdrawn_at: datetime | None
+    source: str
+    notes: str | None
+    created_at: datetime
+    updated_at: datetime
+    created_by_id: uuid.UUID | None
+    updated_by_id: uuid.UUID | None
+
+    @classmethod
+    def from_model(cls, record: ConsentRecord) -> "ConsentRecordResponse":
+        return cls(
+            id=record.id,
+            organization_id=record.organization_id,
+            client_id=record.client_id,
+            case_id=record.case_id,
+            consent_type=record.consent_type,
+            status=record.status,
+            granted_at=record.granted_at,
+            withdrawn_at=record.withdrawn_at,
+            source=record.source,
+            notes=record.notes,
+            created_at=record.created_at,
+            updated_at=record.updated_at,
+            created_by_id=record.created_by_id,
+            updated_by_id=record.updated_by_id,
+        )
+
+
+class RetentionPolicyCreate(BaseSchema):
+    name: str = Field(min_length=1, max_length=255)
+    scope: RetentionScope
+    retention_days: int = Field(ge=1, le=36500)
+    is_active: bool = True
+    description: str | None = None
+
+
+class RetentionPolicyUpdate(BaseSchema):
+    name: str | None = Field(default=None, min_length=1, max_length=255)
+    retention_days: int | None = Field(default=None, ge=1, le=36500)
+    is_active: bool | None = None
+    description: str | None = None
+
+
+class RetentionPolicyListParams(PaginationParams):
+    scope: RetentionScope | None = None
+    is_active: bool | None = None
+    sort_by: RetentionSortField = "created_at"
+    sort_order: RetentionSortOrder = "desc"
+
+
+class RetentionPolicyResponse(BaseSchema):
+    id: uuid.UUID
+    organization_id: uuid.UUID
+    name: str
+    scope: RetentionScope
+    retention_days: int
+    is_active: bool
+    description: str | None
+    created_at: datetime
+    updated_at: datetime
+    deleted_at: datetime | None
+    created_by_id: uuid.UUID | None
+    updated_by_id: uuid.UUID | None
+
+    @classmethod
+    def from_model(cls, policy: RetentionPolicy) -> "RetentionPolicyResponse":
+        return cls(
+            id=policy.id,
+            organization_id=policy.organization_id,
+            name=policy.name,
+            scope=policy.scope,
+            retention_days=policy.retention_days,
+            is_active=policy.is_active,
+            description=policy.description,
+            created_at=policy.created_at,
+            updated_at=policy.updated_at,
+            deleted_at=policy.deleted_at,
+            created_by_id=policy.created_by_id,
+            updated_by_id=policy.updated_by_id,
+        )
+
+
+class ComplianceCenterStatusResponse(BaseSchema):
+    consent_records_enabled: bool
+    retention_policies_enabled: bool
+    consent_type_count: int
+    retention_scope_count: int
+    capabilities: list[str]
+    deferred_capabilities: list[str]

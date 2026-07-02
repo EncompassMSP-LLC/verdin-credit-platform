@@ -398,3 +398,11 @@ packages/job-orchestrator/
 **Reason:** Enterprise identity epic requires a compliance gate before IdP or TOTP enrollment endpoints ship in later slices.
 
 **Follow-up work:** Slice 7 — compliance center scaffold + consent model.
+
+### Decision: Compliance center scaffold with consent records and retention placeholders
+
+**Decision:** Add `consent_records` and `retention_policies` tables (migration `017`), compliance module with org-scoped consent CRUD + withdrawal, retention policy placeholders (admin), `GET /compliance/status`, and `@verdin/api-client` compliance functions.
+
+**Reason:** Compliance epic requires durable consent history and retention policy foundations before legal sign-off or enforcement workflows ship in later versions.
+
+**Follow-up work:** Slice 8 — portal document upload.

@@ -93,6 +93,29 @@ export { getLlmStatus, type LlmGateStatus } from './llm';
 export { getEnterpriseIdentityStatus, type EnterpriseIdentityStatus } from './enterprise';
 
 export {
+  createConsentRecord,
+  createRetentionPolicy,
+  getComplianceCenterStatus,
+  getConsentRecord,
+  getRetentionPolicy,
+  listConsentRecords,
+  listRetentionPolicies,
+  updateRetentionPolicy,
+  withdrawConsentRecord,
+  type ComplianceCenterStatus,
+  type ConsentRecord,
+  type ConsentStatus,
+  type ConsentType,
+  type CreateConsentRecordInput,
+  type CreateRetentionPolicyInput,
+  type ListConsentRecordsParams,
+  type ListRetentionPoliciesParams,
+  type RetentionPolicy,
+  type RetentionScope,
+  type UpdateRetentionPolicyInput,
+} from './compliance';
+
+export {
   createAccount,
   createAccountDisputeDraftReviewTask,
   createAccountDisputeLetterDraft,

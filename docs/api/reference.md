@@ -344,6 +344,24 @@ MFA and SSO readiness scaffold for staff users. Portal authentication (`/portal/
 
 Requires `ENABLE_ENTERPRISE=true`. Configure `ENTERPRISE_SSO_PROVIDER` (`oidc` / `saml`) with issuer and client credentials, and/or `ENTERPRISE_MFA_MODE=totp` with `ENTERPRISE_MFA_ISSUER`. No external IdP or TOTP enrollment calls are executed in this slice.
 
+## Compliance center
+
+Consent history and retention policy placeholders for CROA/FCRA-oriented operations. Records are org-scoped and append-only (withdrawal updates status; records are not deleted).
+
+| Method | Path                                         | Min role     | Description                             |
+| ------ | -------------------------------------------- | ------------ | --------------------------------------- |
+| GET    | `/compliance/status`                         | read_only    | Compliance center capabilities overview |
+| GET    | `/compliance/consents`                       | read_only    | List consent records (filter by client) |
+| POST   | `/compliance/consents`                       | case_manager | Record client consent                   |
+| GET    | `/compliance/consents/{consent_id}`          | read_only    | Get consent record                      |
+| POST   | `/compliance/consents/{consent_id}/withdraw` | case_manager | Withdraw previously granted consent     |
+| GET    | `/compliance/retention-policies`             | read_only    | List retention policy placeholders      |
+| POST   | `/compliance/retention-policies`             | admin        | Create retention policy placeholder     |
+| GET    | `/compliance/retention-policies/{policy_id}` | read_only    | Get retention policy                    |
+| PATCH  | `/compliance/retention-policies/{policy_id}` | admin        | Update retention policy placeholder     |
+
+Consent types: `croa_services`, `fcra_dispute`, `fdcpa_contact`, `marketing`, `data_processing`. Retention scopes: `documents`, `communications`, `audit_logs`, `client_profiles`. Enforcement jobs and legal sign-off workflows are deferred to 5.0+.
+
 ## Reporting
 
 Read-optimized operations reporting for 4.8 dashboard expansions.
