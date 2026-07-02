@@ -7,6 +7,7 @@ from typing import Any, Literal
 from pydantic import Field
 
 from api.core.responses import BaseSchema
+from api.modules.reporting.schemas import OperationsReporting
 
 AlertType = Literal[
     "ocr_failure",
@@ -123,3 +124,4 @@ class DashboardResponse(BaseSchema):
     processing: DashboardProcessing
     performance: DashboardPerformance
     alerts: DashboardAlerts
+    operations: OperationsReporting

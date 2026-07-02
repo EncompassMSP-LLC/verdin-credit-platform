@@ -90,6 +90,25 @@ export interface DashboardAlerts {
   items: DashboardAlertItem[];
 }
 
+export interface DashboardClientReportingMetrics {
+  total: number;
+  active: number;
+  portal_enabled: number;
+}
+
+export interface DashboardNotificationReportingMetrics {
+  unread_total: number;
+  created_today: number;
+}
+
+export interface DashboardOperations {
+  clients: DashboardClientReportingMetrics;
+  dispute_accounts: Record<string, number>;
+  dispute_letters: Record<string, number>;
+  notifications: DashboardNotificationReportingMetrics;
+  portal_users: number;
+}
+
 export interface DashboardResponse {
   generated_at: string;
   refresh_seconds: number;
@@ -102,6 +121,7 @@ export interface DashboardResponse {
   processing: DashboardProcessing;
   performance: DashboardPerformance;
   alerts: DashboardAlerts;
+  operations: DashboardOperations;
 }
 
 export async function getDashboard(): Promise<DashboardResponse> {

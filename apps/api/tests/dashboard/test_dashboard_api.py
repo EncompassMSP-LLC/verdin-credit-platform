@@ -36,6 +36,7 @@ def test_dashboard_returns_mission_control_snapshot(
         "processing",
         "performance",
         "alerts",
+        "operations",
     ):
         assert section in body
 

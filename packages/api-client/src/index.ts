@@ -34,6 +34,7 @@ export {
   type DashboardAlertType,
   type DashboardCases,
   type DashboardDocuments,
+  type DashboardOperations,
   type DashboardOverview,
   type DashboardPerformance,
   type DashboardProcessing,
@@ -41,6 +42,14 @@ export {
   type DashboardTasks,
   type DashboardTimelineItem,
 } from './dashboard';
+
+export {
+  getOperationsReporting,
+  type ClientReportingMetrics,
+  type NotificationReportingMetrics,
+  type OperationsReporting,
+  type OperationsReportingResponse,
+} from './reporting';
 
 export {
   createCase,

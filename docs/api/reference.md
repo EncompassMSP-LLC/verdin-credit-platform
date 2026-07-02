@@ -313,6 +313,16 @@ Readiness check for external LLM provider configuration. Does **not** invoke a p
 
 Requires `ENABLE_LLM=true` and `LLM_PROVIDER` / `LLM_API_KEY` / `LLM_MODEL` for `ready=true`. See [ADR-012](../adr/012-llm-provider-policy.md).
 
+## Reporting
+
+Read-optimized operations reporting for 4.8 dashboard expansions.
+
+| Method | Path                    | Min role  | Description                                      |
+| ------ | ----------------------- | --------- | ------------------------------------------------ |
+| GET    | `/reporting/operations` | read_only | Org-scoped clients, disputes, notifications KPIs |
+
+The Mission Control `GET /dashboard` response also embeds an `operations` section sourced from the same read model.
+
 ## Dashboard
 
 | Method | Path         | Role      | Description                         |

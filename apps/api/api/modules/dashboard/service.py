@@ -23,17 +23,19 @@ from api.modules.dashboard.schemas import (
     DashboardTasks,
     DashboardTimelineItem,
 )
+from api.modules.reporting.service import ReportingService
 
 DASHBOARD_REFRESH_SECONDS = 30
 
 
 class DashboardService:
-    def __init__(self, repo: DashboardRepository) -> None:
+    def __init__(self, repo: DashboardRepository, reporting: ReportingService) -> None:
         self._dashboard = repo
+        self._reporting = reporting
 
     @classmethod
     def from_session(cls, session: AsyncSession) -> "DashboardService":
-        return cls(DashboardRepository(session))
+        return cls(DashboardRepository(session), ReportingService.from_session(session))
 
     def _require_organization(self, user: User) -> uuid.UUID:
         if user.organization_id is None:
@@ -54,6 +56,7 @@ class DashboardService:
         self._require_read(user)
         organization_id = self._require_organization(user)
         raw = await self._dashboard.get_snapshot(organization_id)
+        operations = await self._reporting.get_operations_metrics(user)
 
         return DashboardResponse(
             generated_at=datetime.now(UTC),
@@ -70,4 +73,5 @@ class DashboardService:
                 total=raw["alerts"]["total"],
                 items=[DashboardAlertItem(**item) for item in raw["alerts"]["items"]],
             ),
+            operations=operations,
         )

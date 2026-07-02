@@ -326,3 +326,13 @@ packages/job-orchestrator/
 **Reason:** Notifications epic requires an email/SMS scaffold in 4.8, but production delivery wiring needs a later slice and provider selection.
 
 **Follow-up work:** Implement provider adapters (`smtp` / `sendgrid`), enqueue delivery attempts from notification workflows, and add retry/metrics via `job-orchestrator`.
+
+## Version 4.8 — Operations reporting read model
+
+### Decision: Dedicated reporting endpoint + dashboard embedding
+
+**Decision:** Add `GET /reporting/operations` with org-scoped aggregates for clients, dispute account/letter status counts, and notification backlog. Embed the same read model in `GET /dashboard` as an `operations` section.
+
+**Reason:** 4.8 reporting epic needs read-optimized operational KPIs without bloating the core Mission Control aggregation queries.
+
+**Follow-up work:** Materialized views or read replicas if aggregate latency exceeds dashboard targets; bureau performance and revenue metrics deferred to 5.0.
