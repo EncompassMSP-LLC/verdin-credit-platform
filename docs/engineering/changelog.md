@@ -509,6 +509,14 @@ packages/job-orchestrator/
 
 **Follow-up work:** Slice 7 — staff case messaging UI.
 
+### Decision: Staff case messaging UI on case detail
+
+**Decision:** Add `CaseMessageThreadPanel` on staff case detail with thread history and reply form using staff messaging API helpers, gated by `VITE_ENABLE_CLIENT_PORTAL`.
+
+**Reason:** 5.0+ pilot requires staff to respond to portal clients without leaving the case workspace.
+
+**Follow-up work:** Slice 8 — compliance center staff UI.
+
 ### Decision: Compliance center staff UI
 
 **Decision:** Add `/compliance` page with consent record list/create/withdraw and retention policy list/create, gated by `VITE_ENABLE_ENTERPRISE`.

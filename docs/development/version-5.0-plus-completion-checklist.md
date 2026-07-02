@@ -24,7 +24,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | 4     | Case form `client_id` picker      | Client Mgmt      | ✅     |
 | 5     | Portal document upload UI         | Client Portal    | ✅     |
 | 6     | Portal secure messaging UI        | Client Portal    | ✅     |
-| 7     | Staff case messaging UI           | Client Portal    | —      |
+| 7     | Staff case messaging UI           | Client Portal    | ✅     |
 | 8     | Compliance center staff UI        | Compliance       | ✅     |
 | 9     | Enterprise reporting staff UI     | Reporting        | —      |
 | 10    | Org admin staff UI                | Enterprise Admin | —      |
