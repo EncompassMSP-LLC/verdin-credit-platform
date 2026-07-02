@@ -82,6 +82,34 @@ In-app notifications, email delivery readiness gate, client/contact CRUD, portal
 
 **Not included:** Billing, credit score history charts, mobile push.
 
+### Enterprise admin (Partial)
+
+**Included:** Organization summary metrics, API key create/list/revoke with hashed storage, org-admin status endpoint behind `ENABLE_ENTERPRISE`.
+
+**Not included:** SCIM provisioning, billing administration, cross-org admin roles, API key usage analytics, key-authenticated API middleware.
+
+### Reporting & analytics (Partial)
+
+**Included:** Bureau performance and team productivity org-scoped read models; enterprise reporting status endpoint.
+
+**Not included:** Materialized views, revenue metrics, score-improvement trends, scheduled report delivery.
+
+## v5.0.0 sign-off
+
+All nine epics ship as **Partial** with written limits above. No **Planned** 5.0 roadmap items remain undocumented — autonomous agents, full BPM, billing, predictive analytics, and native mobile apps are deferred to **5.0+** or **5.1+** per the deferrals table.
+
+| Epic                  | v5.0.0 status | Notes                                                               |
+| --------------------- | ------------- | ------------------------------------------------------------------- |
+| Data & client linking | Partial ✅    | `cases.client_id` FK; portal FK + heuristic match                   |
+| Communications        | Partial ✅    | Production email + audit log; SMS production deferred               |
+| AI Assistance (LLM)   | Partial ✅    | Case summary endpoint post-gate; document summaries deferred        |
+| Platform operations   | Partial ✅    | Job orchestrator retry/metrics + overdue cron registration          |
+| Enterprise identity   | Partial ✅    | SSO/MFA readiness scaffold; IdP/TOTP enrollment deferred            |
+| Compliance            | Partial ✅    | Consent records + retention placeholders; enforcement deferred      |
+| Client portal         | Partial ✅    | Document upload + messaging scaffold; real-time delivery deferred   |
+| Enterprise admin      | Partial ✅    | Org summary + API key lifecycle; SCIM/billing deferred              |
+| Reporting & analytics | Partial ✅    | Bureau performance + team productivity; materialized views deferred |
+
 ## Related documents
 
 - [Version 5.0 completion checklist](../development/version-5.0-completion-checklist.md)

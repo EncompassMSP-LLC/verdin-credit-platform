@@ -446,3 +446,13 @@ packages/job-orchestrator/
 **Reason:** Enterprise admin epic requires durable API key foundations before SCIM, billing admin, or key-authenticated integrations ship in later versions.
 
 **Follow-up work:** Slice 12 — capability matrix 5.0 sign-off + deferrals.
+
+### Decision: Version 5.0 epic sign-off with explicit deferrals to 5.0+ / 5.1+
+
+**Decision:** Mark all nine Version 5.0 epics **Partial ✅** in `version-5.0-scope.md`, add capability matrix epic sign-off table, document deferred AI workflow orchestration and predictive outcomes in the AI tracker, and update roadmap with v5.0.0 RC outcomes.
+
+**Reason:** Governance slice closes the 5.0 implementation track before release notes and tag; all promised capabilities are either shipped (partial) or explicitly deferred with written limits.
+
+**Documentation:** [`docs/governance/version-5.0-scope.md`](../governance/version-5.0-scope.md), [`docs/governance/capability-matrix.md`](../governance/capability-matrix.md)
+
+**Follow-up work:** Slice 13 — `docs/release-notes/v5.0.0.md`.
