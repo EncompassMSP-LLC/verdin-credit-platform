@@ -63,6 +63,21 @@ def test_scheduler_registers_unique_job_types() -> None:
     assert scheduled[0].job_type is JobType.OVERDUE_INVESTIGATION_SCAN
 
 
+def test_scheduler_jobs_due_at_for_matching_cron() -> None:
+    from datetime import UTC, datetime
+
+    scheduler = JobScheduler()
+    scheduler.register(
+        ScheduledJob(
+            job_type=JobType.OVERDUE_INVESTIGATION_SCAN,
+            cron_expression="0 6 * * *",
+        ),
+    )
+
+    due = scheduler.jobs_due_at(datetime(2026, 7, 2, 6, 0, tzinfo=UTC))
+    assert len(due) == 1
+
+
 def test_in_memory_metrics_recorder() -> None:
     recorder = InMemoryJobMetricsRecorder()
     recorder.record_enqueued(JobType.OCR)

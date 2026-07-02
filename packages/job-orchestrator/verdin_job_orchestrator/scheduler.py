@@ -1,9 +1,11 @@
-"""In-memory scheduled job registry (scaffold for external cron wiring)."""
+"""In-memory scheduled job registry with cron evaluation."""
 
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
+
+from croniter import croniter
 
 from verdin_job_orchestrator.constants import JobType
 
@@ -20,10 +22,11 @@ class ScheduledJob:
 
 
 class JobScheduler:
-    """Registers scheduled jobs; execution is delegated to an external cron runner."""
+    """Registers scheduled jobs and evaluates cron expressions."""
 
     def __init__(self) -> None:
         self._jobs: dict[JobType, ScheduledJob] = {}
+        self._last_triggered: dict[JobType, datetime] = {}
 
     def register(self, scheduled_job: ScheduledJob) -> None:
         if scheduled_job.job_type in self._jobs:
@@ -38,6 +41,17 @@ class JobScheduler:
         return list(self._jobs.values())
 
     def jobs_due_at(self, at: datetime | None = None) -> list[ScheduledJob]:
-        """Placeholder hook — cron evaluation lands in a follow-up slice."""
-        _ = at or datetime.now(tz=UTC)
-        return []
+        current = (at or datetime.now(tz=UTC)).replace(second=0, microsecond=0)
+        due: list[ScheduledJob] = []
+        for scheduled in self._jobs.values():
+            if not croniter.match(scheduled.cron_expression, current):
+                continue
+            last_triggered = self._last_triggered.get(scheduled.job_type)
+            if last_triggered is not None and last_triggered >= current:
+                continue
+            due.append(scheduled)
+        return due
+
+    def mark_triggered(self, job_type: JobType, at: datetime | None = None) -> None:
+        current = (at or datetime.now(tz=UTC)).replace(second=0, microsecond=0)
+        self._last_triggered[job_type] = current

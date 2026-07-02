@@ -382,3 +382,11 @@ packages/job-orchestrator/
 **Reason:** Communications epic requires production email beyond the 4.8 readiness scaffold, with auditable sends for compliance and workflow integration.
 
 **Follow-up work:** Slice 4 — LLM case summary endpoint (post-gate).
+
+### Decision: Wire job orchestrator retry/metrics and in-process overdue scan cron
+
+**Decision:** Implement cron evaluation in `JobScheduler` (croniter), wire `RetryPolicy` and `JobMetricsRecorder` into `worker/orchestrator.py`, and register `overdue_investigation_scan` at `0 6 * * *` UTC with in-process scheduler ticks.
+
+**Reason:** 4.8 deferred runner integration; 5.0 platform slice requires schedulable overdue scan without external cron-only wiring.
+
+**Follow-up work:** Slice 6 — MFA / SSO foundation (feature-flagged).

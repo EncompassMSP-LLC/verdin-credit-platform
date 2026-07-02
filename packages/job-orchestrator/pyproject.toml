@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Shared job orchestration primitives for Verdin platform workers"
 requires-python = ">=3.13"
 dependencies = [
+    "croniter>=2.0.0",
     "pydantic>=2.10.3",
     "redis>=5.2.1",
 ]

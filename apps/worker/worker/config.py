@@ -17,6 +17,7 @@ class WorkerSettings(BaseSettings):
     redis_url: str = "redis://localhost:6379/0"
     worker_queue_name: str = "verdin:jobs"
     worker_poll_interval_seconds: float = 1.0
+    worker_scheduler_interval_seconds: float = 60.0
     worker_job_timeout_seconds: int = 3600
     worker_heartbeat_interval_seconds: int = 30
 
