@@ -492,3 +492,11 @@ packages/job-orchestrator/
 **Reason:** 5.0+ pilot requires staff to link cases to client records without API calls; portal matching prefers FK when set.
 
 **Follow-up work:** Slice 5 — portal document upload UI.
+
+### Decision: Portal document upload UI on case detail
+
+**Decision:** Add `PortalCaseDocuments` on portal case detail with document list and multipart upload form using existing portal document API helpers.
+
+**Reason:** 5.0+ pilot requires clients to submit evidence without staff mediation; backend upload endpoints shipped in v5.0.0.
+
+**Follow-up work:** Slice 6 — portal secure messaging UI.

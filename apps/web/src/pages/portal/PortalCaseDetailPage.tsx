@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getPortalCase } from '@verdin/api-client';
 import { Button, Card } from '@verdin/ui';
 import { Link, useParams } from 'react-router-dom';
+import { PortalCaseDocuments } from '../../components/portal/PortalCaseDocuments';
 import { usePortalAuth } from '../../lib/portal-auth';
 
 function formatDate(value: string | null) {
@@ -109,6 +110,8 @@ export function PortalCaseDetailPage() {
                 </ul>
               </div>
             ) : null}
+
+            {caseId ? <PortalCaseDocuments caseId={caseId} /> : null}
           </Card>
         ) : null}
       </div>
