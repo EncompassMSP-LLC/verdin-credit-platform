@@ -16,10 +16,12 @@ from api.modules.accounts.schemas import (
 from api.modules.accounts.service import AccountService
 from api.modules.auth.dependencies import get_current_user
 from api.modules.auth.models import User
+from api.modules.cases.llm_summary import CaseLlmSummaryService
 from api.modules.cases.models import CasePriority, CaseStage, CaseStatus
 from api.modules.cases.schemas import (
     CaseCreate,
     CaseListParams,
+    CaseLlmSummaryResponse,
     CaseResponse,
     CaseSortField,
     CaseSortOrder,
@@ -32,6 +34,10 @@ router = APIRouter(prefix="/cases", tags=["Cases"])
 
 def get_case_service(db: AsyncSession = Depends(get_db)) -> CaseService:
     return CaseService.from_session(db)
+
+
+def get_case_llm_summary_service(db: AsyncSession = Depends(get_db)) -> CaseLlmSummaryService:
+    return CaseLlmSummaryService.from_session(db)
 
 
 def get_account_service(db: AsyncSession = Depends(get_db)) -> AccountService:
@@ -94,6 +100,15 @@ async def list_cases(
     service: CaseService = Depends(get_case_service),
 ) -> PaginatedResponse[CaseResponse]:
     return await service.list_cases(current_user, params)
+
+
+@router.post("/{case_id}/llm-summary", response_model=CaseLlmSummaryResponse)
+async def generate_case_llm_summary(
+    case_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: CaseLlmSummaryService = Depends(get_case_llm_summary_service),
+) -> CaseLlmSummaryResponse:
+    return await service.generate_summary(current_user, case_id)
 
 
 @router.get("/{case_id}/accounts", response_model=PaginatedResponse[AccountResponse])

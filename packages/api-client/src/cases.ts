@@ -99,3 +99,17 @@ export async function updateCase(caseId: string, input: UpdateCaseInput): Promis
 export async function deleteCase(caseId: string): Promise<void> {
   await request<void>(apiPath(`/cases/${caseId}`), { method: 'DELETE' });
 }
+
+export interface CaseLlmSummary {
+  case_id: string;
+  summary: string;
+  model: string;
+  provider: string;
+  prompt_hash: string;
+  generated_at: string;
+  pii_scrubbed: boolean;
+}
+
+export async function generateCaseLlmSummary(caseId: string): Promise<CaseLlmSummary> {
+  return request<CaseLlmSummary>(apiPath(`/cases/${caseId}/llm-summary`), { method: 'POST' });
+}

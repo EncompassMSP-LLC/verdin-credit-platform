@@ -174,16 +174,16 @@ Scope: [version-4.8-scope.md](version-4.8-scope.md) · Release notes: [v4.8.0.md
 
 Scope: [version-5.0-scope.md](version-5.0-scope.md) · Checklist: [version-5.0-completion-checklist.md](../development/version-5.0-completion-checklist.md)
 
-| Capability           | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies  | Notes                                             |
-| -------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------- | ------------------------------------------------- |
-| Case–client linking  | 5.0     | Partial | ✅      | —        | ✅  | —   | ✅    | Clients       | `cases.client_id` FK; portal FK + heuristic match |
-| Production email     | 5.0     | Partial | ✅      | —        | ✅  | —   | ✅    | Notifications | SMTP/SendGrid send + audit log; SMS deferred      |
-| LLM case summaries   | 5.0     | Planned | —       | —        | —   | —   | —     | LLM gates     | Post-gate; ADR-012 required                       |
-| Job orchestrator     | 5.0     | Planned | —       | —        | —   | —   | —     | Worker        | Runner retry/metrics + scheduled jobs             |
-| SSO / MFA            | 5.0     | Planned | —       | —        | —   | —   | —     | Auth          | `ENABLE_ENTERPRISE` foundation                    |
-| Compliance center    | 5.0     | Planned | —       | —        | —   | —   | —     | Timeline      | Consent + retention scaffold                      |
-| Portal expansion     | 5.0     | Planned | —       | —        | —   | —   | —     | Portal        | Upload + messaging beyond 4.8 read-only           |
-| Enterprise reporting | 5.0     | Planned | —       | —        | —   | —   | —     | Reporting     | Bureau/team productivity read models              |
+| Capability           | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies  | Notes                                                       |
+| -------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------- | ----------------------------------------------------------- |
+| Case–client linking  | 5.0     | Partial | ✅      | —        | ✅  | —   | ✅    | Clients       | `cases.client_id` FK; portal FK + heuristic match           |
+| Production email     | 5.0     | Partial | ✅      | —        | ✅  | —   | ✅    | Notifications | SMTP/SendGrid send + audit log; SMS deferred                |
+| LLM case summaries   | 5.0     | Partial | ✅      | —        | ✅  | —   | ✅    | LLM gates     | `POST /cases/{id}/llm-summary`; document summaries deferred |
+| Job orchestrator     | 5.0     | Planned | —       | —        | —   | —   | —     | Worker        | Runner retry/metrics + scheduled jobs                       |
+| SSO / MFA            | 5.0     | Planned | —       | —        | —   | —   | —     | Auth          | `ENABLE_ENTERPRISE` foundation                              |
+| Compliance center    | 5.0     | Planned | —       | —        | —   | —   | —     | Timeline      | Consent + retention scaffold                                |
+| Portal expansion     | 5.0     | Planned | —       | —        | —   | —   | —     | Portal        | Upload + messaging beyond 4.8 read-only                     |
+| Enterprise reporting | 5.0     | Planned | —       | —        | —   | —   | —     | Reporting     | Bureau/team productivity read models                        |
 
 ---
 
@@ -199,7 +199,7 @@ Scope: [version-5.0-scope.md](version-5.0-scope.md) · Checklist: [version-5.0-c
 | Document classification      | 1     | 4.3     | Partial | Rules in `modules/documents/classification/`; LLM augment → 5.0 |
 | Metadata / entity extraction | 1     | 4.5     | Partial | Parser bridge + candidates; LLM NER → 5.0                       |
 | LLM policy gates             | 2     | 4.8     | Partial | `packages/llm-gateway` + `GET /llm/status`; no provider calls   |
-| Case summaries (LLM)         | 2     | 5.0     | —       | Deferred post-gate; requires approved provider integration      |
+| Case summaries (LLM)         | 2     | 5.0     | Partial | Case-level summary endpoint behind `ENABLE_LLM` + PII scrub     |
 | Document summaries (LLM)     | 2     | 5.0     | —       | Deferred post-gate; requires approved provider integration      |
 | LLM dispute draft augment    | 2     | 5.0     | —       | Rules default in 4.5; LLM augment post-gate                     |
 | AI workflow orchestration    | 3     | 5.0     | Planned | —                                                               |

@@ -73,13 +73,14 @@ Authorization: Bearer <access_token>
 
 All case endpoints require authentication. Users are scoped to their organization.
 
-| Method | Path               | Min role     | Description        |
-| ------ | ------------------ | ------------ | ------------------ |
-| POST   | `/cases`           | case_manager | Create a case      |
-| GET    | `/cases`           | read_only    | List cases         |
-| GET    | `/cases/{case_id}` | read_only    | Get case by ID     |
-| PATCH  | `/cases/{case_id}` | case_manager | Update a case      |
-| DELETE | `/cases/{case_id}` | admin        | Soft-delete a case |
+| Method | Path                           | Min role     | Description               |
+| ------ | ------------------------------ | ------------ | ------------------------- |
+| POST   | `/cases`                       | case_manager | Create a case             |
+| GET    | `/cases`                       | read_only    | List cases                |
+| GET    | `/cases/{case_id}`             | read_only    | Get case by ID            |
+| PATCH  | `/cases/{case_id}`             | case_manager | Update a case             |
+| DELETE | `/cases/{case_id}`             | admin        | Soft-delete a case        |
+| POST   | `/cases/{case_id}/llm-summary` | case_manager | Generate LLM case summary |
 
 ### List query parameters
 
@@ -88,6 +89,8 @@ All case endpoints require authentication. Users are scoped to their organizatio
 ### Create / update body
 
 Optional `client_id` links a case to a `clients` record in the same organization. When `client_id` is set, `client_name` and `client_email` default from the client unless explicitly provided.
+
+`POST /cases/{case_id}/llm-summary` invokes the configured LLM provider when `ENABLE_LLM` and ADR-012 gates pass. Case context is PII-scrubbed before the provider call; a timeline audit event records model, provider, and prompt hash.
 
 ### Enums
 
@@ -322,13 +325,14 @@ Provider env vars: `EMAIL_PROVIDER`, `EMAIL_FROM_ADDRESS`, `EMAIL_SMTP_HOST`, `E
 
 ## LLM gateway
 
-Readiness check for external LLM provider configuration. Does **not** invoke a provider.
+LLM readiness and case summary generation behind ADR-012 gates.
 
-| Method | Path          | Min role  | Description                      |
-| ------ | ------------- | --------- | -------------------------------- |
-| GET    | `/llm/status` | read_only | LLM feature + provider readiness |
+| Method | Path                           | Min role     | Description                      |
+| ------ | ------------------------------ | ------------ | -------------------------------- |
+| GET    | `/llm/status`                  | read_only    | LLM feature + provider readiness |
+| POST   | `/cases/{case_id}/llm-summary` | case_manager | Generate scrubbed case summary   |
 
-Requires `ENABLE_LLM=true` and `LLM_PROVIDER` / `LLM_API_KEY` / `LLM_MODEL` for `ready=true`. See [ADR-012](../adr/012-llm-provider-policy.md).
+Requires `ENABLE_LLM=true` and `LLM_PROVIDER` / `LLM_API_KEY` / `LLM_MODEL` for provider calls. See [ADR-012](../adr/012-llm-provider-policy.md).
 
 ## Reporting
 

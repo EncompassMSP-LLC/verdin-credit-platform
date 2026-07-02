@@ -54,10 +54,12 @@ export {
 export {
   createCase,
   deleteCase,
+  generateCaseLlmSummary,
   getCase,
   listCases,
   updateCase,
   type Case,
+  type CaseLlmSummary,
   type CreateCaseInput,
   type ListCasesParams,
   type UpdateCaseInput,
