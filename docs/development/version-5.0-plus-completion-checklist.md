@@ -28,7 +28,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | 8     | Compliance center staff UI        | Compliance       | ✅     |
 | 9     | Enterprise reporting staff UI     | Reporting        | ✅     |
 | 10    | Org admin staff UI                | Enterprise Admin | —      |
-| 11    | LLM case summary UI               | AI               | —      |
+| 11    | LLM case summary UI               | AI               | ✅     |
 | 12    | Capability matrix 5.0+ sign-off   | Governance       | —      |
 
 Portal slices require `VITE_ENABLE_CLIENT_PORTAL=true`. LLM UI slice requires `VITE_ENABLE_LLM=true` and ADR-012 gates.

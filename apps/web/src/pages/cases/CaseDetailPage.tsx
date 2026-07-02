@@ -5,6 +5,7 @@ import { deleteCase, getCase } from '@verdin/api-client';
 import { CASE_STAGE_LABELS } from '@verdin/shared';
 import { Button, Card } from '@verdin/ui';
 import { CaseDeleteDialog } from '../../components/cases/CaseDeleteDialog';
+import { CaseLlmSummaryPanel } from '../../components/cases/CaseLlmSummaryPanel';
 import { CaseMessageThreadPanel } from '../../components/cases/CaseMessageThreadPanel';
 import { CasePriorityBadge, CaseStatusChip } from '../../components/cases/CaseBadges';
 import { CreditReportHistoryPanel } from '../../components/imports/CreditReportHistoryPanel';
@@ -177,6 +178,8 @@ export function CaseDetailPage() {
         <CreditReportHistoryPanel caseId={caseId} className="lg:col-span-3" />
 
         {featureFlags.enableClientPortal ? <CaseMessageThreadPanel caseId={caseId} /> : null}
+
+        <CaseLlmSummaryPanel caseId={caseId} />
       </div>
 
       <CaseDeleteDialog
