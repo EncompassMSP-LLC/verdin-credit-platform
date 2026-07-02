@@ -7,6 +7,7 @@ import { featureFlags } from '../lib/feature-flags';
 const navItems = [
   { to: '/', label: 'Dashboard', end: true },
   { to: '/cases', label: 'Cases' },
+  { to: '/clients', label: 'Clients' },
   { to: '/accounts', label: 'Accounts' },
   { to: '/documents', label: 'Documents' },
   ...(featureFlags.enableImports ? [{ to: '/imports/credit-report', label: 'Import Wizard' }] : []),
@@ -23,7 +24,7 @@ export function AppLayout() {
       <aside className="w-64 bg-brand-900 text-white">
         <div className="border-b border-brand-700 px-6 py-5">
           <h1 className="text-lg font-bold">{APP_NAME}</h1>
-          <p className="text-xs text-brand-100">v4.8.0-dev</p>
+          <p className="text-xs text-brand-100">v5.0.0-dev</p>
         </div>
         <nav className="px-3 py-4">
           {navItems.map((item) => (
