@@ -1,11 +1,14 @@
 """Reporting endpoints — read-optimized operational summaries."""
 
+import uuid
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.database.session import get_db
 from api.modules.auth.dependencies import get_current_user
 from api.modules.auth.models import User
+from api.modules.reporting.dependencies import get_reporting_organization_id
 from api.modules.reporting.schemas import (
     BureauPerformanceReportingResponse,
     EnterpriseReportingStatusResponse,
@@ -23,11 +26,11 @@ def get_reporting_service(db: AsyncSession = Depends(get_db)) -> ReportingServic
 
 @router.get("/operations", response_model=OperationsReportingResponse)
 async def get_operations_reporting(
-    current_user: User = Depends(get_current_user),
+    organization_id: uuid.UUID = Depends(get_reporting_organization_id),
     service: ReportingService = Depends(get_reporting_service),
 ) -> OperationsReportingResponse:
     """Return org-scoped operations reporting read model."""
-    return await service.get_operations_summary(current_user)
+    return await service.get_operations_summary_for_organization(organization_id)
 
 
 @router.get("/status", response_model=EnterpriseReportingStatusResponse)

@@ -229,8 +229,18 @@ Scope: [version-5.0-plus-scope.md](version-5.0-plus-scope.md) · Checklist: [ver
 | Portal product UI       | Partial ✅   | Document upload + messaging; real-time push + billing → 5.1+     |
 | Compliance UI           | Partial ✅   | Consent + retention staff UI; enforcement jobs → 5.1+            |
 | Enterprise reporting UI | Partial ✅   | Bureau + team dashboards; materialized views + revenue → 5.1+    |
-| Org admin UI            | Partial ✅   | API key lifecycle UI; API key auth middleware → 5.1+             |
+| Org admin UI            | Partial ✅   | API key lifecycle UI; API key auth middleware → 5.1              |
 | LLM assistance UI       | Partial ✅   | Case summary trigger UI; document summaries + LLM augment → 5.1+ |
+
+---
+
+## Version 5.1 — Production Hardening (in progress)
+
+Scope: [version-5.1-scope.md](version-5.1-scope.md) · Checklist: [version-5.1-completion-checklist.md](../development/version-5.1-completion-checklist.md)
+
+| Capability              | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                     |
+| ----------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | --------------------------------------------------------- |
+| API key auth middleware | 5.1     | Partial | ✅      | —        | ✅  | —   | ✅    | Org admin    | `GET /reporting/operations` via `X-API-Key` or Bearer key |
 
 ---
 

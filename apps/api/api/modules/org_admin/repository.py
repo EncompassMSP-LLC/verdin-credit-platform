@@ -1,6 +1,7 @@
 """Organization admin repository."""
 
 import uuid
+from datetime import UTC, datetime
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -78,3 +79,20 @@ class OrgAdminRepository:
         await self._session.flush()
         await self._session.refresh(api_key)
         return api_key
+
+    async def list_active_api_keys_by_prefix(self, key_prefix: str) -> list[OrganizationApiKey]:
+        result = await self._session.execute(
+            select(OrganizationApiKey).where(
+                OrganizationApiKey.key_prefix == key_prefix,
+                OrganizationApiKey.is_active.is_(True),
+                OrganizationApiKey.revoked_at.is_(None),
+            )
+        )
+        return list(result.scalars().all())
+
+    async def touch_api_key_last_used(self, api_key_id: uuid.UUID) -> None:
+        api_key = await self._session.get(OrganizationApiKey, api_key_id)
+        if api_key is None:
+            return
+        api_key.last_used_at = datetime.now(UTC)
+        await self._session.flush()

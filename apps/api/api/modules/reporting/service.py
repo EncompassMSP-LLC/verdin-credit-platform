@@ -52,6 +52,12 @@ class ReportingService:
     async def get_operations_summary(self, user: User) -> OperationsReportingResponse:
         self._require_read(user)
         organization_id = self._require_organization(user)
+        return await self.get_operations_summary_for_organization(organization_id)
+
+    async def get_operations_summary_for_organization(
+        self,
+        organization_id: uuid.UUID,
+    ) -> OperationsReportingResponse:
         raw = await self._reporting.get_operations_summary(organization_id)
         return OperationsReportingResponse(
             generated_at=datetime.now(UTC),

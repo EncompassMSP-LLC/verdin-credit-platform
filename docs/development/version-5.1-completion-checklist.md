@@ -18,7 +18,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | Order | Slice                             | Epic             | Status |
 | ----- | --------------------------------- | ---------------- | ------ |
 | 1     | 5.1 scope + completion checklist  | Kickoff          | ✅     |
-| 2     | API key auth middleware           | API integrations | —      |
+| 2     | API key auth middleware           | API integrations | ✅     |
 | 3     | Production SMS delivery           | Communications   | —      |
 | 4     | IdP / TOTP enrollment             | Identity         | —      |
 | 5     | Stripe billing scaffold           | Billing          | —      |
