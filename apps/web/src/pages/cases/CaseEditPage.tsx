@@ -48,6 +48,7 @@ export function CaseEditPage() {
       caseId={caseId}
       defaultValues={{
         title: data.title,
+        client_id: data.client_id ?? '',
         client_name: data.client_name,
         client_email: data.client_email ?? '',
         case_number: data.case_number ?? '',

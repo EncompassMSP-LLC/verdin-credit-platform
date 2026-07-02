@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
@@ -14,6 +14,7 @@ import {
   CASE_STATUS_LABELS,
 } from '@verdin/shared';
 import { Button, Card } from '@verdin/ui';
+import { ClientPicker } from '../../components/cases/ClientPicker';
 
 const inputClass =
   'mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500';
@@ -32,11 +33,15 @@ export function CaseFormPage({ mode, caseId, defaultValues }: CaseFormPageProps)
   const {
     register,
     handleSubmit,
+    control,
+    watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<CreateCaseInput>({
     resolver: zodResolver(createCaseSchema),
     defaultValues: defaultValues ?? {
       title: '',
+      client_id: '',
       client_name: '',
       client_email: '',
       status: 'open',
@@ -47,10 +52,15 @@ export function CaseFormPage({ mode, caseId, defaultValues }: CaseFormPageProps)
     },
   });
 
+  const linkedClientId = watch('client_id');
+  const hasLinkedClient = Boolean(linkedClientId);
+
   const mutation = useMutation({
     mutationFn: async (values: CreateCaseInput) => {
       const payload = {
         ...values,
+        client_id: values.client_id || null,
+        client_name: values.client_name?.trim() || undefined,
         client_email: values.client_email || null,
       };
       if (mode === 'create') {
@@ -98,24 +108,47 @@ export function CaseFormPage({ mode, caseId, defaultValues }: CaseFormPageProps)
             ) : null}
           </div>
 
+          <Controller
+            name="client_id"
+            control={control}
+            render={({ field }) => (
+              <ClientPicker
+                value={field.value ?? ''}
+                onChange={(clientId, client) => {
+                  field.onChange(clientId);
+                  if (client) {
+                    setValue('client_name', client.display_name, { shouldValidate: true });
+                    setValue('client_email', client.email ?? '', { shouldValidate: true });
+                  }
+                }}
+              />
+            )}
+          />
+
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
               <label htmlFor="client_name" className="block text-sm font-medium text-gray-700">
-                Client name
+                Client name {hasLinkedClient ? '(from linked client)' : ''}
               </label>
-              <input id="client_name" className={inputClass} {...register('client_name')} />
+              <input
+                id="client_name"
+                className={inputClass}
+                disabled={hasLinkedClient}
+                {...register('client_name')}
+              />
               {errors.client_name ? (
                 <p className="mt-1 text-sm text-red-600">{errors.client_name.message}</p>
               ) : null}
             </div>
             <div>
               <label htmlFor="client_email" className="block text-sm font-medium text-gray-700">
-                Client email
+                Client email {hasLinkedClient ? '(from linked client)' : ''}
               </label>
               <input
                 id="client_email"
                 type="email"
                 className={inputClass}
+                disabled={hasLinkedClient}
                 {...register('client_email')}
               />
               {errors.client_email ? (

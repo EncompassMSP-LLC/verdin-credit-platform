@@ -484,3 +484,11 @@ packages/job-orchestrator/
 **Reason:** v5.0 shipped enterprise APIs without staff UI for clients, compliance, reporting, and org admin; pilot readiness requires product surfaces before 5.1 enterprise hardening.
 
 **Follow-up work:** Slice 4 — case form `client_id` picker.
+
+### Decision: Case form client picker for durable case–client linking
+
+**Decision:** Extend `createCaseSchema` with optional `client_id`, add `ClientPicker` on case create/edit forms, auto-fill client name/email from linked records, and show client profile link on case detail.
+
+**Reason:** 5.0+ pilot requires staff to link cases to client records without API calls; portal matching prefers FK when set.
+
+**Follow-up work:** Slice 5 — portal document upload UI.
