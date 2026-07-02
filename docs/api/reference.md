@@ -334,6 +334,16 @@ LLM readiness and case summary generation behind ADR-012 gates.
 
 Requires `ENABLE_LLM=true` and `LLM_PROVIDER` / `LLM_API_KEY` / `LLM_MODEL` for provider calls. See [ADR-012](../adr/012-llm-provider-policy.md).
 
+## Enterprise identity
+
+MFA and SSO readiness scaffold for staff users. Portal authentication (`/portal/auth/*`) remains a separate partition and is unchanged.
+
+| Method | Path                 | Min role  | Description                               |
+| ------ | -------------------- | --------- | ----------------------------------------- |
+| GET    | `/enterprise/status` | read_only | Enterprise MFA/SSO readiness and blockers |
+
+Requires `ENABLE_ENTERPRISE=true`. Configure `ENTERPRISE_SSO_PROVIDER` (`oidc` / `saml`) with issuer and client credentials, and/or `ENTERPRISE_MFA_MODE=totp` with `ENTERPRISE_MFA_ISSUER`. No external IdP or TOTP enrollment calls are executed in this slice.
+
 ## Reporting
 
 Read-optimized operations reporting for 4.8 dashboard expansions.

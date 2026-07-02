@@ -11,6 +11,7 @@ from api.modules.client_portal.router import router as client_portal_router
 from api.modules.clients.router import router as clients_router
 from api.modules.dashboard.router import router as dashboard_router
 from api.modules.documents.router import router as documents_router
+from api.modules.enterprise.router import router as enterprise_router
 from api.modules.llm.router import router as llm_router
 from api.modules.notifications.router import router as notifications_router
 from api.modules.reporting.router import router as reporting_router
@@ -30,6 +31,7 @@ router.include_router(documents_router)
 router.include_router(tasks_router)
 router.include_router(notifications_router)
 router.include_router(timeline_router)
+router.include_router(enterprise_router)
 router.include_router(llm_router)
 router.include_router(reporting_router)
 
