@@ -71,6 +71,16 @@ class CaseListParams(PaginationParams):
     sort_order: CaseSortOrder = "desc"
 
 
+class CaseLlmSummaryResponse(BaseSchema):
+    case_id: uuid.UUID
+    summary: str
+    model: str
+    provider: str
+    prompt_hash: str
+    generated_at: datetime
+    pii_scrubbed: bool = True
+
+
 class CaseResponse(BaseSchema):
     id: uuid.UUID
     organization_id: uuid.UUID

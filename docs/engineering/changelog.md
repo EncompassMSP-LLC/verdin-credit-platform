@@ -382,3 +382,11 @@ packages/job-orchestrator/
 **Reason:** Communications epic requires production email beyond the 4.8 readiness scaffold, with auditable sends for compliance and workflow integration.
 
 **Follow-up work:** Slice 4 — LLM case summary endpoint (post-gate).
+
+### Decision: Post-gate LLM case summary endpoint with PII scrubbing and audit trail
+
+**Decision:** Add `verdin_llm_gateway` completion clients (OpenAI-compatible, Anthropic), `POST /cases/{case_id}/llm-summary` for case managers, scrubbed context via `scrub_payload()`, and timeline event `CASE_LLM_SUMMARY_GENERATED` with model and prompt hash metadata.
+
+**Reason:** 5.0 AI epic requires at least one staff-authenticated LLM endpoint after ADR-012 gates; case summaries are the highest-value first surface.
+
+**Follow-up work:** Slice 5 — job orchestrator runner wiring + overdue cron.
