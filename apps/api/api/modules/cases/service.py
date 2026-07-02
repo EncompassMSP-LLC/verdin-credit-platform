@@ -16,6 +16,8 @@ from api.modules.cases.models import Case, CaseStatus
 from api.modules.cases.permissions import CASE_DELETE_ROLE, CASE_WRITE_ROLE
 from api.modules.cases.repository import CaseListFilters, CaseRepository
 from api.modules.cases.schemas import CaseCreate, CaseListParams, CaseResponse, CaseUpdate
+from api.modules.clients.models import Client
+from api.modules.clients.repository import ClientRepository
 from api.modules.timeline.builders import (
     case_closed_event,
     case_created_event,
@@ -31,15 +33,22 @@ class CaseService:
         self,
         case_repo: CaseRepositoryProtocol,
         user_repo: UserRepositoryProtocol | None = None,
+        client_repo: ClientRepository | None = None,
         session: AsyncSession | None = None,
     ) -> None:
         self._cases = case_repo
         self._users = user_repo
+        self._clients = client_repo
         self._session = session
 
     @classmethod
     def from_session(cls, session: AsyncSession) -> "CaseService":
-        return cls(CaseRepository(session), UserRepository(session), session=session)
+        return cls(
+            CaseRepository(session),
+            UserRepository(session),
+            ClientRepository(session),
+            session=session,
+        )
 
     def _require_organization(self, user: User) -> uuid.UUID:
         if user.organization_id is None:
@@ -77,6 +86,43 @@ class CaseService:
                 detail="Assigned user must belong to the same organization",
             )
 
+    async def _validate_client(
+        self,
+        client_id: uuid.UUID,
+        organization_id: uuid.UUID,
+    ) -> Client:
+        if self._clients is None:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Client validation is unavailable",
+            )
+        client = await self._clients.get_by_id(client_id, organization_id=organization_id)
+        if client is None:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Client must belong to the same organization",
+            )
+        return client
+
+    @staticmethod
+    def _resolve_client_fields(
+        *,
+        client: Client | None,
+        client_name: str | None,
+        client_email: str | None,
+    ) -> tuple[str, str | None]:
+        if client is None:
+            if client_name is None:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail="client_name is required when client_id is not set",
+                )
+            return client_name, client_email
+
+        resolved_name = client_name or client.display_name
+        resolved_email = client_email if client_email is not None else client.email
+        return resolved_name, resolved_email
+
     async def _get_case_for_user(self, case_id: uuid.UUID, user: User) -> Case:
         organization_id = self._require_organization(user)
         case = await self._cases.get_by_id(case_id, organization_id=organization_id)
@@ -101,6 +147,16 @@ class CaseService:
         organization_id = self._require_organization(user)
         await self._validate_assignee(data.assigned_user_id, organization_id)
 
+        linked_client: Client | None = None
+        if data.client_id is not None:
+            linked_client = await self._validate_client(data.client_id, organization_id)
+
+        client_name, client_email = self._resolve_client_fields(
+            client=linked_client,
+            client_name=data.client_name,
+            client_email=str(data.client_email) if data.client_email else None,
+        )
+
         if data.case_number:
             existing = await self._cases.get_by_case_number(data.case_number)
             if existing is not None:
@@ -116,9 +172,10 @@ class CaseService:
 
         case = Case(
             organization_id=organization_id,
+            client_id=data.client_id,
             title=data.title,
-            client_name=data.client_name,
-            client_email=str(data.client_email) if data.client_email else None,
+            client_name=client_name,
+            client_email=client_email,
             case_number=data.case_number,
             status=data.status,
             stage=data.stage,
@@ -148,6 +205,7 @@ class CaseService:
             stage=params.stage,
             priority=params.priority,
             assigned_user_id=params.assigned_user_id,
+            client_id=params.client_id,
             skip=params.offset,
             limit=params.limit,
             sort_by=params.sort_by,
@@ -187,6 +245,24 @@ class CaseService:
 
         if "assigned_user_id" in updates:
             await self._validate_assignee(updates["assigned_user_id"], organization_id)
+
+        linked_client: Client | None = None
+        if "client_id" in updates and updates["client_id"] is not None:
+            linked_client = await self._validate_client(updates["client_id"], organization_id)
+
+        if linked_client is not None:
+            client_name, client_email = self._resolve_client_fields(
+                client=linked_client,
+                client_name=updates.get("client_name"),
+                client_email=(
+                    str(updates["client_email"])
+                    if updates.get("client_email") is not None
+                    else None
+                ),
+            )
+            updates.setdefault("client_name", client_name)
+            if "client_email" not in updates:
+                updates["client_email"] = client_email
 
         field_map = {
             "assigned_user_id": "assigned_to_id",

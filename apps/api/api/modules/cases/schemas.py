@@ -2,9 +2,9 @@
 
 import uuid
 from datetime import datetime
-from typing import Literal
+from typing import Literal, Self
 
-from pydantic import EmailStr, Field
+from pydantic import EmailStr, Field, model_validator
 
 from api.core.pagination import PaginationParams
 from api.core.responses import BaseSchema
@@ -25,7 +25,8 @@ CaseSortOrder = Literal["asc", "desc"]
 
 class CaseCreate(BaseSchema):
     title: str = Field(min_length=1, max_length=255)
-    client_name: str = Field(min_length=1, max_length=255)
+    client_id: uuid.UUID | None = None
+    client_name: str | None = Field(default=None, min_length=1, max_length=255)
     client_email: EmailStr | None = None
     case_number: str | None = Field(default=None, max_length=50)
     status: CaseStatus = CaseStatus.OPEN
@@ -36,9 +37,16 @@ class CaseCreate(BaseSchema):
     notes: str | None = None
     opened_at: datetime | None = None
 
+    @model_validator(mode="after")
+    def require_client_identity(self) -> Self:
+        if self.client_id is None and not self.client_name:
+            raise ValueError("Either client_id or client_name is required")
+        return self
+
 
 class CaseUpdate(BaseSchema):
     title: str | None = Field(default=None, min_length=1, max_length=255)
+    client_id: uuid.UUID | None = None
     client_name: str | None = Field(default=None, min_length=1, max_length=255)
     client_email: EmailStr | None = None
     case_number: str | None = Field(default=None, max_length=50)
@@ -58,6 +66,7 @@ class CaseListParams(PaginationParams):
     stage: CaseStage | None = None
     priority: CasePriority | None = None
     assigned_user_id: uuid.UUID | None = None
+    client_id: uuid.UUID | None = None
     sort_by: CaseSortField = "created_at"
     sort_order: CaseSortOrder = "desc"
 
@@ -65,6 +74,7 @@ class CaseListParams(PaginationParams):
 class CaseResponse(BaseSchema):
     id: uuid.UUID
     organization_id: uuid.UUID
+    client_id: uuid.UUID | None
     case_number: str | None
     title: str
     client_name: str
@@ -88,6 +98,7 @@ class CaseResponse(BaseSchema):
         return cls(
             id=case.id,
             organization_id=case.organization_id,
+            client_id=case.client_id,
             case_number=case.case_number,
             title=case.title,
             client_name=case.client_name,

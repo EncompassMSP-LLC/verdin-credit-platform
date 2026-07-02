@@ -60,6 +60,7 @@ def get_case_list_params(
     stage: CaseStage | None = None,
     priority: CasePriority | None = None,
     assigned_user_id: uuid.UUID | None = None,
+    client_id: uuid.UUID | None = None,
     sort_by: CaseSortField = "created_at",
     sort_order: CaseSortOrder = "desc",
 ) -> CaseListParams:
@@ -71,6 +72,7 @@ def get_case_list_params(
         stage=stage,
         priority=priority,
         assigned_user_id=assigned_user_id,
+        client_id=client_id,
         sort_by=sort_by,
         sort_order=sort_order,
     )

@@ -366,3 +366,11 @@ packages/job-orchestrator/
 **Reason:** 4.8 deferred enterprise identity, compliance, production comms, and post-gate LLM work to 5.0; kickoff docs are the source of truth for slice order.
 
 **Follow-up work:** Slice 2 — Alembic migration + API for case–client FK.
+
+### Decision: Optional `cases.client_id` FK with portal FK-first matching
+
+**Decision:** Add nullable `cases.client_id` FK to `clients`, staff create/update/list support with org-scoped validation, and portal case queries that match on FK first with email/name heuristics as fallback for unlinked cases.
+
+**Reason:** Durable case–client relationships replace fragile heuristic-only portal matching while preserving backward compatibility for legacy inline client fields.
+
+**Follow-up work:** Slice 3 — production email delivery adapters.

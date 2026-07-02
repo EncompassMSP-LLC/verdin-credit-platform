@@ -53,12 +53,17 @@ def _create_case(
     headers: dict[str, str],
     *,
     title: str,
-    client_name: str,
+    client_name: str | None = None,
     client_email: str | None = None,
+    client_id: str | None = None,
 ) -> dict:
-    payload: dict[str, str] = {"title": title, "client_name": client_name}
+    payload: dict[str, str] = {"title": title}
+    if client_name:
+        payload["client_name"] = client_name
     if client_email:
         payload["client_email"] = client_email
+    if client_id:
+        payload["client_id"] = client_id
     response = api_client.post("/api/v1/cases", headers=headers, json=payload)
     assert response.status_code == 201, response.text
     return response.json()
@@ -143,3 +148,40 @@ def test_portal_user_cannot_view_unmatched_case(
         headers=portal_headers,
     )
     assert response.status_code == 404
+
+
+def test_portal_user_sees_fk_linked_case_without_heuristic_match(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    portal_enabled: None,
+) -> None:
+    email = f"portal-fk-{uuid.uuid4().hex[:8]}@example.com"
+    display_name = f"FK Portal Client {uuid.uuid4().hex[:6]}"
+    client_id = _create_client(
+        api_client,
+        manager_headers,
+        display_name=display_name,
+        email=email,
+    )
+    _provision_portal_user(api_client, manager_headers, client_id, email=email)
+
+    linked_case = _create_case(
+        api_client,
+        manager_headers,
+        title="FK Linked Case",
+        client_id=client_id,
+    )
+    assert linked_case["client_id"] == client_id
+
+    portal_headers = _portal_login(api_client, email)
+    list_response = api_client.get("/api/v1/portal/cases", headers=portal_headers)
+    assert list_response.status_code == 200, list_response.text
+    items = list_response.json()["items"]
+    assert len(items) == 1
+    assert items[0]["id"] == linked_case["id"]
+
+    detail_response = api_client.get(
+        f"/api/v1/portal/cases/{linked_case['id']}",
+        headers=portal_headers,
+    )
+    assert detail_response.status_code == 200, detail_response.text

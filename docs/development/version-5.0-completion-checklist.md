@@ -19,7 +19,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | Order | Slice                                         | Epic             | Status |
 | ----- | --------------------------------------------- | ---------------- | ------ |
 | 1     | 5.0 scope + completion checklist              | Kickoff          | ✅     |
-| 2     | `cases.client_id` FK + staff/portal linking   | Client Mgmt      | —      |
+| 2     | `cases.client_id` FK + staff/portal linking   | Client Mgmt      | ✅     |
 | 3     | Production email delivery (provider adapters) | Communications   | —      |
 | 4     | LLM case summary endpoint (post-gate)         | AI               | —      |
 | 5     | Job orchestrator runner wiring + overdue cron | Platform         | —      |

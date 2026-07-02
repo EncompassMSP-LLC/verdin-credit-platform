@@ -43,6 +43,7 @@ class Client(Base, TimestampMixin, SoftDeleteMixin, AuditMixin):
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     contacts: Mapped[list["ClientContact"]] = relationship(back_populates="client")
+    cases: Mapped[list["Case"]] = relationship(back_populates="client")
 
 
 class ClientContact(Base, TimestampMixin, SoftDeleteMixin, AuditMixin):

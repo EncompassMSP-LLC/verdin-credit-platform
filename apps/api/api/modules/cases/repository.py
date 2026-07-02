@@ -20,6 +20,7 @@ class CaseListFilters:
     stage: CaseStage | None = None
     priority: CasePriority | None = None
     assigned_user_id: uuid.UUID | None = None
+    client_id: uuid.UUID | None = None
     skip: int = 0
     limit: int = 20
     sort_by: CaseSortField = "created_at"
@@ -78,6 +79,8 @@ class CaseRepository:
             base = base.where(Case.priority == filters.priority)
         if filters.assigned_user_id is not None:
             base = base.where(Case.assigned_to_id == filters.assigned_user_id)
+        if filters.client_id is not None:
+            base = base.where(Case.client_id == filters.client_id)
         if filters.search:
             term = f"%{filters.search.strip()}%"
             base = base.where(
