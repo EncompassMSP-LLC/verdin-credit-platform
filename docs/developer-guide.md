@@ -166,12 +166,13 @@ Feature flags gate optional platform capabilities. Backend and frontend each rea
 
 ### Available flags
 
-| Flag                   | Description                                  |
-| ---------------------- | -------------------------------------------- |
-| `ENABLE_AI`            | AI-powered features (summaries, suggestions) |
-| `ENABLE_IMPORTS`       | Data import pipeline                         |
-| `ENABLE_ENTERPRISE`    | Enterprise-tier capabilities                 |
-| `ENABLE_CLIENT_PORTAL` | Client-facing portal                         |
+| Flag                   | Description                                           |
+| ---------------------- | ----------------------------------------------------- |
+| `ENABLE_AI`            | Heuristic/rules AI features (scoring, suggestions)    |
+| `ENABLE_LLM`           | External LLM provider calls (requires `LLM_*` config) |
+| `ENABLE_IMPORTS`       | Data import pipeline                                  |
+| `ENABLE_ENTERPRISE`    | Enterprise-tier capabilities                          |
+| `ENABLE_CLIENT_PORTAL` | Client-facing portal                                  |
 
 ### Backend
 
@@ -205,6 +206,23 @@ if (featureFlags.enableAi) {
 ```
 
 Set flags in `.env` (see `.env.example`). Restart the dev server after changing Vite variables.
+
+### LLM provider configuration
+
+External LLM calls require **both** `ENABLE_LLM=true` and provider env vars. Heuristic AI under `ENABLE_AI` does not use these settings.
+
+| Variable                        | Description                                      |
+| ------------------------------- | ------------------------------------------------ |
+| `LLM_PROVIDER`                  | `none`, `openai`, `azure_openai`, `anthropic`    |
+| `LLM_API_KEY`                   | Provider API key                                 |
+| `LLM_MODEL`                     | Default model identifier                         |
+| `LLM_BASE_URL`                  | Required for Azure OpenAI                        |
+| `LLM_ALLOW_EXTERNAL_PII_EXPORT` | Opt-in to send PII to external providers (false) |
+| `LLM_TIMEOUT_SECONDS`           | Provider request timeout (default 30)            |
+
+Gate helpers live in `packages/llm-gateway/`. API services call `api.core.llm.require_llm_gateway()` before any future provider invocation. Staff can check readiness via `GET /api/v1/llm/status`.
+
+See [ADR-012](../adr/012-llm-provider-policy.md).
 
 ## Background Jobs
 

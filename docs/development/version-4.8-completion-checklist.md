@@ -9,7 +9,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 - [ ] All five epics below are **✅ or explicitly deferred to 5.0** with docs updated — see [`version-4.8-scope.md`](../governance/version-4.8-scope.md)
 - [ ] Capability matrix rows for 4.8 show **✅** (or **Partial** with written scope limits)
 - [ ] `v4.8.0` release notes + tag
-- [ ] LLM features gated behind policy ADR + `ENABLE_LLM`
+- [x] LLM features gated behind policy ADR + `ENABLE_LLM`
 - [ ] No **Planned** items remain that were promised for 4.8 in `docs/roadmap/README.md` (deferred items documented)
 
 ---
@@ -25,7 +25,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | 5     | `job-orchestrator` package scaffold + ADR    | Platform      | ✅     |
 | 6     | Client + contact model                       | Client Mgmt   | ✅     |
 | 7     | Client portal auth partition                 | Client Portal | —      |
-| 8     | LLM policy ADR + provider config gates       | AI            | —      |
+| 8     | LLM policy ADR + provider config gates       | AI            | ✅     |
 | 9     | Email delivery scaffold (feature-flagged)    | Comms         | —      |
 | 10    | Reporting read models / dashboard expansions | Reporting     | —      |
 | 11    | Client portal case progress view             | Client Portal | —      |

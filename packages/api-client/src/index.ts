@@ -77,6 +77,8 @@ export {
   type UpdateClientInput,
 } from './clients';
 
+export { getLlmStatus, type LlmGateStatus } from './llm';
+
 export {
   createAccount,
   createAccountDisputeDraftReviewTask,
