@@ -22,6 +22,8 @@ import { TaskCreatePage } from '../pages/tasks/TaskCreatePage';
 import { TaskDetailPage } from '../pages/tasks/TaskDetailPage';
 import { TaskEditPage } from '../pages/tasks/TaskEditPage';
 import { SettingsPage } from '../pages/SettingsPage';
+import { PortalRoutes } from './portal';
+import { featureFlags } from '../lib/feature-flags';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -78,6 +80,9 @@ export function AppRoutes() {
         <Route path="tasks/:taskId/edit" element={<TaskEditPage />} />
         <Route path="settings" element={<SettingsPage />} />
       </Route>
+      {featureFlags.enableClientPortal ? (
+        <Route path="portal/*" element={<PortalRoutes />} />
+      ) : null}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

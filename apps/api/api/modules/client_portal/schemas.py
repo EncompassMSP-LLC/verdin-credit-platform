@@ -7,6 +7,7 @@ from pydantic import EmailStr
 
 from api.core.responses import BaseSchema
 from api.modules.auth.schemas import LoginRequest, Password, RefreshTokenRequest, TokenResponse
+from api.modules.cases.models import CaseStage, CaseStatus
 from api.modules.client_portal.models import ClientPortalUser
 
 PortalLoginRequest = LoginRequest
@@ -57,3 +58,23 @@ class PortalMeResponse(BaseSchema):
     client_display_name: str
     is_active: bool
     last_login_at: datetime | None
+
+
+class PortalCaseSummaryResponse(BaseSchema):
+    id: uuid.UUID
+    case_number: str | None
+    title: str
+    status: CaseStatus
+    stage: CaseStage
+    opened_at: datetime
+    closed_at: datetime | None
+    updated_at: datetime
+
+
+class PortalCaseDetailResponse(PortalCaseSummaryResponse):
+    dispute_accounts: dict[str, int]
+    account_count: int
+
+
+class PortalCaseProgressResponse(BaseSchema):
+    items: list[PortalCaseSummaryResponse]

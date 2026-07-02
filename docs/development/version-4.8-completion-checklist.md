@@ -28,7 +28,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | 8     | LLM policy ADR + provider config gates       | AI            | ✅     |
 | 9     | Email delivery scaffold (feature-flagged)    | Comms         | ✅     |
 | 10    | Reporting read models / dashboard expansions | Reporting     | ✅     |
-| 11    | Client portal case progress view             | Client Portal | —      |
+| 11    | Client portal case progress view             | Client Portal | ✅     |
 | 12    | Capability matrix 4.8 sign-off + deferrals   | Governance    | —      |
 | 13    | `docs/release-notes/v4.8.0.md`               | Release       | —      |
 | 14    | Tag `v4.8.0`                                 | Release       | —      |
