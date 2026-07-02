@@ -500,3 +500,11 @@ packages/job-orchestrator/
 **Reason:** 5.0+ pilot requires clients to submit evidence without staff mediation; backend upload endpoints shipped in v5.0.0.
 
 **Follow-up work:** Slice 6 — portal secure messaging UI.
+
+### Decision: Portal secure messaging UI on case detail
+
+**Decision:** Add `PortalCaseMessages` on portal case detail with thread history and send form using portal messaging API helpers.
+
+**Reason:** 5.0+ pilot requires clients to communicate with staff on linked cases without email; backend messaging scaffold shipped in v5.0.0.
+
+**Follow-up work:** Slice 7 — staff case messaging UI.
