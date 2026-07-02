@@ -26,6 +26,7 @@ import { ClientsListPage } from '../pages/clients/ClientsListPage';
 import { ClientCreatePage } from '../pages/clients/ClientCreatePage';
 import { ClientDetailPage } from '../pages/clients/ClientDetailPage';
 import { ClientEditPage } from '../pages/clients/ClientEditPage';
+import { ComplianceCenterPage } from '../pages/compliance/ComplianceCenterPage';
 import { PortalRoutes } from './portal';
 import { featureFlags } from '../lib/feature-flags';
 
@@ -86,6 +87,9 @@ export function AppRoutes() {
         <Route path="tasks/new" element={<TaskCreatePage />} />
         <Route path="tasks/:taskId" element={<TaskDetailPage />} />
         <Route path="tasks/:taskId/edit" element={<TaskEditPage />} />
+        {featureFlags.enableEnterprise ? (
+          <Route path="compliance" element={<ComplianceCenterPage />} />
+        ) : null}
         <Route path="settings" element={<SettingsPage />} />
       </Route>
       {featureFlags.enableClientPortal ? (

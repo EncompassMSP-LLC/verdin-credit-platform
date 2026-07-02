@@ -508,3 +508,11 @@ packages/job-orchestrator/
 **Reason:** 5.0+ pilot requires clients to communicate with staff on linked cases without email; backend messaging scaffold shipped in v5.0.0.
 
 **Follow-up work:** Slice 7 — staff case messaging UI.
+
+### Decision: Compliance center staff UI
+
+**Decision:** Add `/compliance` page with consent record list/create/withdraw and retention policy list/create, gated by `VITE_ENABLE_ENTERPRISE`.
+
+**Reason:** 5.0+ pilot requires staff to manage compliance artifacts without API calls; backend compliance center shipped in v5.0.0.
+
+**Follow-up work:** Slice 9 — enterprise reporting staff UI.

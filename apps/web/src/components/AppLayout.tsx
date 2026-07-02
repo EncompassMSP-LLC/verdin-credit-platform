@@ -11,6 +11,7 @@ const navItems = [
   { to: '/accounts', label: 'Accounts' },
   { to: '/documents', label: 'Documents' },
   ...(featureFlags.enableImports ? [{ to: '/imports/credit-report', label: 'Import Wizard' }] : []),
+  ...(featureFlags.enableEnterprise ? [{ to: '/compliance', label: 'Compliance' }] : []),
   { to: '/timeline', label: 'Timeline' },
   { to: '/tasks', label: 'Tasks' },
   { to: '/settings', label: 'Settings' },
