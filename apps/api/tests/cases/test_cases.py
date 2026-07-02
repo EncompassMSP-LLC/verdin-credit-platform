@@ -142,3 +142,81 @@ def test_delete_case_forbidden_for_manager(
 def test_cases_require_auth(api_client: TestClient) -> None:
     response = api_client.get("/api/v1/cases")
     assert response.status_code == 401
+
+
+def test_create_case_with_client_id(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+) -> None:
+    client_response = api_client.post(
+        "/api/v1/clients",
+        headers=manager_headers,
+        json={"display_name": "Linked Client", "email": "linked@example.com"},
+    )
+    assert client_response.status_code == 201
+    client_id = client_response.json()["id"]
+
+    response = api_client.post(
+        "/api/v1/cases",
+        headers=manager_headers,
+        json={
+            "title": "Linked Case",
+            "client_id": client_id,
+        },
+    )
+    assert response.status_code == 201
+    data = response.json()
+    assert data["client_id"] == client_id
+    assert data["client_name"] == "Linked Client"
+    assert data["client_email"] == "linked@example.com"
+
+
+def test_create_case_rejects_foreign_client_id(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+) -> None:
+    response = api_client.post(
+        "/api/v1/cases",
+        headers=manager_headers,
+        json={
+            "title": "Invalid Link",
+            "client_id": str(uuid.uuid4()),
+        },
+    )
+    assert response.status_code == 422
+
+
+def test_list_cases_filter_by_client_id(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+) -> None:
+    client_response = api_client.post(
+        "/api/v1/clients",
+        headers=manager_headers,
+        json={"display_name": "Filter Client"},
+    )
+    assert client_response.status_code == 201
+    client_id = client_response.json()["id"]
+
+    linked = api_client.post(
+        "/api/v1/cases",
+        headers=manager_headers,
+        json={"title": "Filter Match", "client_id": client_id},
+    )
+    assert linked.status_code == 201
+
+    api_client.post(
+        "/api/v1/cases",
+        headers=manager_headers,
+        json={"title": "Filter Miss", "client_name": "Other Client"},
+    )
+
+    response = api_client.get(
+        "/api/v1/cases",
+        headers=manager_headers,
+        params={"client_id": client_id},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["total"] == 1
+    assert data["items"][0]["id"] == linked.json()["id"]

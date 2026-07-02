@@ -152,7 +152,7 @@ Scope: [version-4.8-scope.md](version-4.8-scope.md) · Release notes: [v4.8.0.md
 | ----------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ------------------------------------------------------------------- |
 | In-App Notifications    | 4.8     | Partial | ✅      | ✅       | ✅  | —   | ✅    | Auth         | Staff bell + API; email readiness scaffold added, no provider sends |
 | Client Portal           | 4.8     | Partial | ✅      | ✅       | ✅  | —   | ✅    | Client Mgmt  | Auth + read-only case progress at `/portal/cases`                   |
-| Client Management       | 4.8     | Partial | ✅      | —        | ✅  | —   | ✅    | Auth         | Client + contact CRUD; `cases.client_id` linking deferred           |
+| Client Management       | 4.8     | Partial | ✅      | —        | ✅  | —   | ✅    | Auth         | Client + contact CRUD; case FK linking in 5.0 slice 2               |
 | Workflow Scheduled Jobs | 4.8     | Partial | ✅      | —        | —   | —   | ✅    | Worker       | `overdue_investigation_scan` job; manual POST endpoint retained     |
 | Job Orchestration       | 4.8     | Partial | 🚧      | —        | —   | —   | ✅    | Worker, API  | `packages/job-orchestrator` scaffold; retry/metrics wiring deferred |
 | LLM Policy Gates        | 4.8     | Partial | ✅      | —        | ✅  | —   | ✅    | —            | `packages/llm-gateway` + `ENABLE_LLM`; no provider calls yet        |
@@ -174,16 +174,16 @@ Scope: [version-4.8-scope.md](version-4.8-scope.md) · Release notes: [v4.8.0.md
 
 Scope: [version-5.0-scope.md](version-5.0-scope.md) · Checklist: [version-5.0-completion-checklist.md](../development/version-5.0-completion-checklist.md)
 
-| Capability           | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies  | Notes                                      |
-| -------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------- | ------------------------------------------ |
-| Case–client linking  | 5.0     | Planned | —       | —        | —   | —   | —     | Clients       | `cases.client_id` FK; portal match upgrade |
-| Production email     | 5.0     | Planned | —       | —        | —   | —   | —     | Notifications | Provider adapters beyond 4.8 scaffold      |
-| LLM case summaries   | 5.0     | Planned | —       | —        | —   | —   | —     | LLM gates     | Post-gate; ADR-012 required                |
-| Job orchestrator     | 5.0     | Planned | —       | —        | —   | —   | —     | Worker        | Runner retry/metrics + scheduled jobs      |
-| SSO / MFA            | 5.0     | Planned | —       | —        | —   | —   | —     | Auth          | `ENABLE_ENTERPRISE` foundation             |
-| Compliance center    | 5.0     | Planned | —       | —        | —   | —   | —     | Timeline      | Consent + retention scaffold               |
-| Portal expansion     | 5.0     | Planned | —       | —        | —   | —   | —     | Portal        | Upload + messaging beyond 4.8 read-only    |
-| Enterprise reporting | 5.0     | Planned | —       | —        | —   | —   | —     | Reporting     | Bureau/team productivity read models       |
+| Capability           | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies  | Notes                                             |
+| -------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------- | ------------------------------------------------- |
+| Case–client linking  | 5.0     | Partial | ✅      | —        | ✅  | —   | ✅    | Clients       | `cases.client_id` FK; portal FK + heuristic match |
+| Production email     | 5.0     | Planned | —       | —        | —   | —   | —     | Notifications | Provider adapters beyond 4.8 scaffold             |
+| LLM case summaries   | 5.0     | Planned | —       | —        | —   | —   | —     | LLM gates     | Post-gate; ADR-012 required                       |
+| Job orchestrator     | 5.0     | Planned | —       | —        | —   | —   | —     | Worker        | Runner retry/metrics + scheduled jobs             |
+| SSO / MFA            | 5.0     | Planned | —       | —        | —   | —   | —     | Auth          | `ENABLE_ENTERPRISE` foundation                    |
+| Compliance center    | 5.0     | Planned | —       | —        | —   | —   | —     | Timeline      | Consent + retention scaffold                      |
+| Portal expansion     | 5.0     | Planned | —       | —        | —   | —   | —     | Portal        | Upload + messaging beyond 4.8 read-only           |
+| Enterprise reporting | 5.0     | Planned | —       | —        | —   | —   | —     | Reporting     | Bureau/team productivity read models              |
 
 ---
 

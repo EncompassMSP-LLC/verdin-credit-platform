@@ -83,7 +83,11 @@ All case endpoints require authentication. Users are scoped to their organizatio
 
 ### List query parameters
 
-`page`, `page_size`, `search`, `status`, `stage`, `priority`, `assigned_user_id`, `sort_by`, `sort_order`
+`page`, `page_size`, `search`, `status`, `stage`, `priority`, `assigned_user_id`, `client_id`, `sort_by`, `sort_order`
+
+### Create / update body
+
+Optional `client_id` links a case to a `clients` record in the same organization. When `client_id` is set, `client_name` and `client_email` default from the client unless explicitly provided.
 
 ### Enums
 
@@ -141,7 +145,7 @@ Requires `ENABLE_CLIENT_PORTAL=true`. Portal JWTs use `realm=portal` and include
 | POST   | `/portal/auth/refresh` | public     | Refresh portal tokens    |
 | GET    | `/portal/auth/me`      | portal JWT | Current portal user info |
 
-Read-only case progress for portal users. Cases are matched to the portal client by email/name until optional `client_id` linking ships.
+Read-only case progress for portal users. Cases match when `client_id` is set to the portal client, with email/name heuristics as fallback for unlinked cases.
 
 | Method | Path                 | Auth       | Description                          |
 | ------ | -------------------- | ---------- | ------------------------------------ |

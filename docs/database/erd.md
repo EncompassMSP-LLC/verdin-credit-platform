@@ -8,6 +8,7 @@ erDiagram
     Organization ||--o{ Client : has
     Organization ||--o{ Case : has
     Client ||--o{ ClientContact : has
+    Client ||--o{ Case : "linked cases"
     Client ||--o| ClientPortalUser : "portal login"
     Organization ||--o{ Account : has
     Case ||--o{ Account : "credit tradelines"
@@ -109,6 +110,7 @@ erDiagram
         uuid id PK
         string title
         string client_name
+        uuid client_id FK
         enum status
         enum stage
         enum priority

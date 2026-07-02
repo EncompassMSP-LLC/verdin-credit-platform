@@ -48,6 +48,9 @@ class Case(Base, TimestampMixin, SoftDeleteMixin, AuditMixin):
         String(50), unique=True, nullable=True, index=True
     )
     title: Mapped[str] = mapped_column(String(255), nullable=False)
+    client_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("clients.id"), nullable=True, index=True
+    )
     client_name: Mapped[str] = mapped_column(String(255), nullable=False)
     client_email: Mapped[str | None] = mapped_column(String(255), nullable=True)
     status: Mapped[CaseStatus] = mapped_column(
@@ -76,6 +79,7 @@ class Case(Base, TimestampMixin, SoftDeleteMixin, AuditMixin):
     opened_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     closed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
+    client: Mapped["Client | None"] = relationship(back_populates="cases")
     organization: Mapped["Organization"] = relationship(back_populates="cases")
     assigned_to: Mapped["User | None"] = relationship(
         back_populates="assigned_cases", foreign_keys=[assigned_to_id]

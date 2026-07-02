@@ -5,6 +5,7 @@ import { apiPath, request } from './http';
 export interface Case {
   id: string;
   organization_id: string;
+  client_id: string | null;
   case_number: string | null;
   title: string;
   client_name: string;
@@ -26,7 +27,8 @@ export interface Case {
 
 export interface CreateCaseInput {
   title: string;
-  client_name: string;
+  client_id?: string | null;
+  client_name?: string;
   client_email?: string | null;
   case_number?: string | null;
   status?: CaseStatus;
@@ -40,6 +42,7 @@ export interface CreateCaseInput {
 
 export interface UpdateCaseInput {
   title?: string;
+  client_id?: string | null;
   client_name?: string;
   client_email?: string | null;
   case_number?: string | null;
@@ -61,6 +64,7 @@ export interface ListCasesParams {
   stage?: CaseStage;
   priority?: CasePriority;
   assigned_user_id?: string;
+  client_id?: string;
   sort_by?: string;
   sort_order?: 'asc' | 'desc';
 }

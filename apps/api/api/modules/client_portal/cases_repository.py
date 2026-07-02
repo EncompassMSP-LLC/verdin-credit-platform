@@ -28,15 +28,17 @@ class ClientPortalCasesRepository:
             portal_email=portal_email,
             contact_emails=contact_emails,
         )
-        if not match_conditions:
-            return []
+
+        visibility = Case.client_id == client.id
+        if match_conditions:
+            visibility = or_(visibility, or_(*match_conditions))
 
         result = await self._session.execute(
             select(Case)
             .where(
                 Case.organization_id == organization_id,
                 Case.deleted_at.is_(None),
-                or_(*match_conditions),
+                visibility,
             )
             .order_by(Case.opened_at.desc())
         )
@@ -56,15 +58,17 @@ class ClientPortalCasesRepository:
             portal_email=portal_email,
             contact_emails=contact_emails,
         )
-        if not match_conditions:
-            return None
+
+        visibility = Case.client_id == client.id
+        if match_conditions:
+            visibility = or_(visibility, or_(*match_conditions))
 
         result = await self._session.execute(
             select(Case).where(
                 Case.id == case_id,
                 Case.organization_id == organization_id,
                 Case.deleted_at.is_(None),
-                or_(*match_conditions),
+                visibility,
             )
         )
         return result.scalar_one_or_none()
