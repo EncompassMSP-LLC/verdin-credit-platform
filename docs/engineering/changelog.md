@@ -474,3 +474,13 @@ packages/job-orchestrator/
 **Reason:** Closes the Version 5.0 sprint loop; all nine epics ship as Partial with documented deferrals.
 
 **Documentation:** [`docs/release-notes/v5.0.0.md`](../release-notes/v5.0.0.md), [`docs/development/version-5.0-completion-checklist.md`](../development/version-5.0-completion-checklist.md)
+
+## Version 5.0+ — Product Hardening kickoff
+
+### Decision: Pilot UI checklist after v5.0.0 tag
+
+**Decision:** Publish `version-5.0-plus-scope.md`, `version-5.0-plus-completion-checklist.md`, and Version 5.0+ sprint loop. First implementation slices: web `predev` api-client build and staff client management UI.
+
+**Reason:** v5.0 shipped enterprise APIs without staff UI for clients, compliance, reporting, and org admin; pilot readiness requires product surfaces before 5.1 enterprise hardening.
+
+**Follow-up work:** Slice 4 — case form `client_id` picker.

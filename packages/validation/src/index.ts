@@ -148,3 +148,39 @@ export type UpdateAccountInput = z.infer<typeof updateAccountSchema>;
 export type CreateTaskInput = z.infer<typeof createTaskSchema>;
 export type UpdateTaskInput = z.infer<typeof updateTaskSchema>;
 export type PaginationInput = z.infer<typeof paginationSchema>;
+
+export const clientStatusSchema = z.enum(['active', 'inactive']);
+
+export const contactRelationshipSchema = z.enum([
+  'primary',
+  'spouse',
+  'attorney',
+  'authorized',
+  'other',
+]);
+
+export const createClientSchema = z.object({
+  display_name: z.string().min(1, 'Display name is required').max(255),
+  email: z.string().email('Invalid email').optional().or(z.literal('')),
+  phone: z.string().max(50).optional().or(z.literal('')),
+  status: clientStatusSchema,
+  notes: z.string().optional().or(z.literal('')),
+});
+
+export const updateClientSchema = createClientSchema.partial();
+
+export const createClientContactSchema = z.object({
+  full_name: z.string().min(1, 'Full name is required').max(255),
+  email: z.string().email('Invalid email').optional().or(z.literal('')),
+  phone: z.string().max(50).optional().or(z.literal('')),
+  relationship_type: contactRelationshipSchema,
+  is_primary: z.boolean(),
+  notes: z.string().optional().or(z.literal('')),
+});
+
+export const updateClientContactSchema = createClientContactSchema.partial();
+
+export type CreateClientInput = z.infer<typeof createClientSchema>;
+export type UpdateClientInput = z.infer<typeof updateClientSchema>;
+export type CreateClientContactInput = z.infer<typeof createClientContactSchema>;
+export type UpdateClientContactInput = z.infer<typeof updateClientContactSchema>;

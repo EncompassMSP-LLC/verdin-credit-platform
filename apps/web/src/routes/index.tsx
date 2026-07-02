@@ -22,6 +22,10 @@ import { TaskCreatePage } from '../pages/tasks/TaskCreatePage';
 import { TaskDetailPage } from '../pages/tasks/TaskDetailPage';
 import { TaskEditPage } from '../pages/tasks/TaskEditPage';
 import { SettingsPage } from '../pages/SettingsPage';
+import { ClientsListPage } from '../pages/clients/ClientsListPage';
+import { ClientCreatePage } from '../pages/clients/ClientCreatePage';
+import { ClientDetailPage } from '../pages/clients/ClientDetailPage';
+import { ClientEditPage } from '../pages/clients/ClientEditPage';
 import { PortalRoutes } from './portal';
 import { featureFlags } from '../lib/feature-flags';
 
@@ -65,6 +69,10 @@ export function AppRoutes() {
         <Route path="cases/:caseId" element={<CaseDetailPage />} />
         <Route path="cases/:caseId/edit" element={<CaseEditPage />} />
         <Route path="cases/:caseId/accounts" element={<CaseAccountsPage />} />
+        <Route path="clients" element={<ClientsListPage />} />
+        <Route path="clients/new" element={<ClientCreatePage />} />
+        <Route path="clients/:clientId" element={<ClientDetailPage />} />
+        <Route path="clients/:clientId/edit" element={<ClientEditPage />} />
         <Route path="accounts" element={<AccountsListPage />} />
         <Route path="accounts/new" element={<AccountCreatePage />} />
         <Route path="accounts/:accountId" element={<AccountDetailPage />} />

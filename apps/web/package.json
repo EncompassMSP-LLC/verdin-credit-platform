@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "predev": "pnpm --filter @verdin/api-client build && pnpm --filter @verdin/validation build",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",

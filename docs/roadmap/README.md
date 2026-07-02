@@ -139,6 +139,10 @@ Scope and deferrals: [`docs/governance/version-5.0-scope.md`](../governance/vers
 
 Release notes: [`docs/release-notes/v5.0.0.md`](../release-notes/v5.0.0.md)
 
+### Version 5.0+ — Product Hardening (in progress)
+
+Scope and checklist: [`docs/governance/version-5.0-plus-scope.md`](../governance/version-5.0-plus-scope.md) · [`docs/development/version-5.0-plus-completion-checklist.md`](../development/version-5.0-plus-completion-checklist.md)
+
 ## Sprint → version mapping
 
 | Sprint work                               | Version / Sprint | Architecture domain                                      |
