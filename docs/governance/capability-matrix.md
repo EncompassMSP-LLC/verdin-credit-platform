@@ -181,7 +181,7 @@ Scope: [version-5.0-scope.md](version-5.0-scope.md) · Checklist: [version-5.0-c
 | LLM case summaries   | 5.0     | Partial | ✅      | —        | ✅  | —   | ✅    | LLM gates     | `POST /cases/{id}/llm-summary`; document summaries deferred |
 | Job orchestrator     | 5.0     | Planned | —       | —        | —   | —   | —     | Worker        | Runner retry/metrics + scheduled jobs                       |
 | SSO / MFA            | 5.0     | Partial | ✅      | —        | —   | —   | —     | Auth          | `GET /enterprise/status`; IdP/TOTP wiring deferred          |
-| Compliance center    | 5.0     | Planned | —       | —        | —   | —   | —     | Timeline      | Consent + retention scaffold                                |
+| Compliance center    | 5.0     | Partial | ✅      | —        | ✅  | —   | ✅    | Timeline      | Consent records + retention policy placeholders             |
 | Portal expansion     | 5.0     | Planned | —       | —        | —   | —   | —     | Portal        | Upload + messaging beyond 4.8 read-only                     |
 | Enterprise reporting | 5.0     | Planned | —       | —        | —   | —   | —     | Reporting     | Bureau/team productivity read models                        |
 
