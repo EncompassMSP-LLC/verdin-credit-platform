@@ -59,6 +59,21 @@ All v5.0.0 backend modules, feature flags, migrations, and `@verdin/api-client` 
 
 **Not included:** Enforcement jobs, legal sign-off workflows.
 
+## v5.0+ sign-off
+
+All eight epics ship as **Partial** with written limits above. Staff and portal pilot surfaces are integrated in the web app behind feature flags (`VITE_ENABLE_CLIENT_PORTAL`, `VITE_ENABLE_ENTERPRISE`, `VITE_ENABLE_LLM`). No **Planned** 5.0+ checklist items remain undocumented — billing, IdP enrollment, API key middleware, and autonomous agents are deferred to **5.1+** per the deferrals table.
+
+| Epic                    | 5.0+ status | Notes                                                          |
+| ----------------------- | ----------- | -------------------------------------------------------------- |
+| Developer experience    | Partial ✅  | `predev` api-client build; package watch deferred              |
+| Client management UI    | Partial ✅  | Staff clients list/CRUD, contacts, portal provision            |
+| Case–client linking UI  | Partial ✅  | `client_id` picker on case create/edit                         |
+| Portal product UI       | Partial ✅  | Upload + messaging on linked cases; real-time push → 5.1+      |
+| Compliance UI           | Partial ✅  | Consent + retention staff UI; enforcement → 5.1+               |
+| Enterprise reporting UI | Partial ✅  | Operations, bureau, team tabs; materialized views → 5.1+       |
+| Org admin UI            | Partial ✅  | API key lifecycle UI; middleware auth → 5.1+                   |
+| LLM assistance UI       | Partial ✅  | Case summary trigger on case detail; document summaries → 5.1+ |
+
 ## Related documents
 
 - [Version 5.0+ completion checklist](../development/version-5.0-plus-completion-checklist.md)

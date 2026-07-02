@@ -548,3 +548,11 @@ packages/job-orchestrator/
 **Reason:** 5.0+ pilot requires staff to trigger gated case summaries from the case workspace without API calls.
 
 **Follow-up work:** Slice 12 — capability matrix 5.0+ sign-off.
+
+### Decision: Version 5.0+ pilot sign-off
+
+**Decision:** Mark all eight 5.0+ epics **Partial ✅** in scope doc, add capability matrix 5.0+ epic sign-off table, complete checklist exit criteria, and update roadmap to pilot-ready status.
+
+**Reason:** All twelve 5.0+ UI slices shipped; pilot can run staff and portal workflows behind feature flags without API-only gaps.
+
+**Follow-up work:** 5.1+ planning — billing, IdP enrollment, API key middleware, autonomous agents per deferrals table.

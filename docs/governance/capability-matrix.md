@@ -7,7 +7,8 @@
 
 **Version 4.5 sign-off:** [version-4.5-scope.md](version-4.5-scope.md) · Release notes: [v4.5.0.md](../release-notes/v4.5.0.md)  
 **Version 4.8 sign-off:** [version-4.8-scope.md](version-4.8-scope.md) · Release notes: [v4.8.0.md](../release-notes/v4.8.0.md)  
-**Version 5.0 sign-off:** [version-5.0-scope.md](version-5.0-scope.md) · Release notes: [v5.0.0.md](../release-notes/v5.0.0.md)
+**Version 5.0 sign-off:** [version-5.0-scope.md](version-5.0-scope.md) · Release notes: [v5.0.0.md](../release-notes/v5.0.0.md)  
+**Version 5.0+ sign-off:** [version-5.0-plus-scope.md](version-5.0-plus-scope.md) · Checklist: [version-5.0-plus-completion-checklist.md](../development/version-5.0-plus-completion-checklist.md)
 
 ## Status legend
 
@@ -56,7 +57,7 @@ Mission Control dashboard and governance refinements shipped in tag `v4.3.1`. Se
 | Timeline & Audit Engine         | 4.3     | ✅      | ✅      | ✅       | ✅  | —       | ✅    | Event bus + append-only timeline                      |
 | Task Management                 | 4.3     | ✅      | ✅      | ✅       | ✅  | —       | ✅    | CRUD, complete/reopen, filters, timeline events, UI   |
 | Operational Dashboard           | 4.3.1   | ✅      | ✅      | ✅       | ✅  | —       | ✅    | Mission Control — shipped in v4.3.1                   |
-| Client Management               | 4.8     | Partial | ✅      | —        | ✅  | —       | ✅    | Portal auth in slice 7                                |
+| Client Management               | 4.8     | Partial | ✅      | ✅       | ✅  | —       | ✅    | Staff clients UI shipped in 5.0+ slice 3              |
 
 ### Document Intelligence Platform (4.3 epic)
 
@@ -182,7 +183,7 @@ Scope: [version-5.0-scope.md](version-5.0-scope.md) · Release notes: [v5.0.0.md
 | Job orchestrator     | 5.0     | Partial | ✅      | —        | —   | —   | ✅    | Worker        | Runner retry/metrics + overdue scan cron registration       |
 | SSO / MFA            | 5.0     | Partial | ✅      | —        | ✅  | —   | ✅    | Auth          | `GET /enterprise/status`; IdP/TOTP wiring deferred          |
 | Compliance center    | 5.0     | Partial | ✅      | ✅       | ✅  | —   | ✅    | Timeline      | Consent records + retention policy placeholders             |
-| Portal expansion     | 5.0     | Partial | ✅      | Partial  | ✅  | —   | ✅    | Portal        | Document upload + secure messaging on linked cases          |
+| Portal expansion     | 5.0     | Partial | ✅      | ✅       | ✅  | —   | ✅    | Portal        | Document upload + secure messaging on linked cases          |
 | Enterprise reporting | 5.0     | Partial | ✅      | ✅       | ✅  | —   | ✅    | Reporting     | Bureau performance + team productivity read models          |
 | Org admin / API keys | 5.0     | Partial | ✅      | ✅       | ✅  | —   | ✅    | Enterprise    | Org summary + API key lifecycle behind `ENABLE_ENTERPRISE`  |
 
@@ -202,6 +203,37 @@ Scope: [version-5.0-scope.md](version-5.0-scope.md) · Release notes: [v5.0.0.md
 
 ---
 
+## Version 5.0+ — Product Hardening (pilot ready)
+
+Scope: [version-5.0-plus-scope.md](version-5.0-plus-scope.md) · Checklist: [version-5.0-plus-completion-checklist.md](../development/version-5.0-plus-completion-checklist.md)
+
+| Capability              | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                     |
+| ----------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | --------------------------------------------------------- |
+| Web dev DX (`predev`)   | 5.0+    | Partial | —       | ✅       | —   | —   | —     | Monorepo     | `@verdin/api-client` + validation build before `pnpm dev` |
+| Staff client management | 5.0+    | Partial | ✅      | ✅       | ✅  | —   | ✅    | Auth         | Clients list/CRUD, contacts, portal provision             |
+| Case–client linking UI  | 5.0+    | Partial | ✅      | ✅       | ✅  | —   | ✅    | Clients      | `client_id` picker on case create/edit                    |
+| Portal product surfaces | 5.0+    | Partial | ✅      | ✅       | ✅  | —   | ✅    | Portal       | Upload + messaging UI on linked cases                     |
+| Staff portal messaging  | 5.0+    | Partial | ✅      | ✅       | ✅  | —   | ✅    | Messaging    | Case message thread panel on staff case detail            |
+| Compliance center UI    | 5.0+    | Partial | ✅      | ✅       | ✅  | —   | ✅    | Compliance   | Consent + retention policy management at `/compliance`    |
+| Enterprise reporting UI | 5.0+    | Partial | ✅      | ✅       | ✅  | —   | ✅    | Reporting    | Operations, bureau, team tabs at `/reporting`             |
+| Org admin UI            | 5.0+    | Partial | ✅      | ✅       | ✅  | —   | ✅    | Enterprise   | Org summary + API key lifecycle at `/org-admin`           |
+| LLM case summary UI     | 5.0+    | Partial | ✅      | ✅       | ✅  | —   | ✅    | LLM gates    | `CaseLlmSummaryPanel` on case detail behind `ENABLE_LLM`  |
+
+### Version 5.0+ epic sign-off
+
+| Epic                    | 5.0+ outcome | Exit note                                                        |
+| ----------------------- | ------------ | ---------------------------------------------------------------- |
+| Developer experience    | Partial ✅   | `predev` builds api-client; no hot-reload package watch in 5.0+  |
+| Client management UI    | Partial ✅   | Staff clients CRUD + contacts + portal provision                 |
+| Case–client linking UI  | Partial ✅   | `client_id` picker on case forms                                 |
+| Portal product UI       | Partial ✅   | Document upload + messaging; real-time push + billing → 5.1+     |
+| Compliance UI           | Partial ✅   | Consent + retention staff UI; enforcement jobs → 5.1+            |
+| Enterprise reporting UI | Partial ✅   | Bureau + team dashboards; materialized views + revenue → 5.1+    |
+| Org admin UI            | Partial ✅   | API key lifecycle UI; API key auth middleware → 5.1+             |
+| LLM assistance UI       | Partial ✅   | Case summary trigger UI; document summaries + LLM augment → 5.1+ |
+
+---
+
 ## AI capability tracker
 
 | AI feature                   | Phase | Version | Status  | Location                                                                 |
@@ -214,7 +246,7 @@ Scope: [version-5.0-scope.md](version-5.0-scope.md) · Release notes: [v5.0.0.md
 | Document classification      | 1     | 4.3     | Partial | Rules in `modules/documents/classification/`; LLM augment → 5.0          |
 | Metadata / entity extraction | 1     | 4.5     | Partial | Parser bridge + candidates; LLM NER → 5.0                                |
 | LLM policy gates             | 2     | 4.8     | Partial | `packages/llm-gateway` + `GET /llm/status`; no provider calls            |
-| Case summaries (LLM)         | 2     | 5.0     | Partial | Case-level summary endpoint behind `ENABLE_LLM` + PII scrub              |
+| Case summaries (LLM)         | 2     | 5.0     | Partial | Endpoint + staff UI behind `ENABLE_LLM` + PII scrub                      |
 | Document summaries (LLM)     | 2     | 5.0     | —       | Deferred post-gate; requires approved provider integration               |
 | LLM dispute draft augment    | 2     | 5.0     | —       | Rules default in 4.5; LLM augment post-gate                              |
 | AI workflow orchestration    | 3     | 5.0+    | Planned | Deferred from 5.0 RC — requires compliance + observability prerequisites |
