@@ -181,7 +181,7 @@ Scope: [version-5.0-scope.md](version-5.0-scope.md) · Release notes: [v5.0.0.md
 | LLM case summaries   | 5.0     | Partial | ✅      | —        | ✅  | —   | ✅    | LLM gates     | `POST /cases/{id}/llm-summary`; document summaries deferred |
 | Job orchestrator     | 5.0     | Partial | ✅      | —        | —   | —   | ✅    | Worker        | Runner retry/metrics + overdue scan cron registration       |
 | SSO / MFA            | 5.0     | Partial | ✅      | —        | ✅  | —   | ✅    | Auth          | `GET /enterprise/status`; IdP/TOTP wiring deferred          |
-| Compliance center    | 5.0     | Partial | ✅      | —        | ✅  | —   | ✅    | Timeline      | Consent records + retention policy placeholders             |
+| Compliance center    | 5.0     | Partial | ✅      | ✅       | ✅  | —   | ✅    | Timeline      | Consent records + retention policy placeholders             |
 | Portal expansion     | 5.0     | Partial | ✅      | Partial  | ✅  | —   | ✅    | Portal        | Document upload + secure messaging on linked cases          |
 | Enterprise reporting | 5.0     | Partial | ✅      | —        | ✅  | —   | ✅    | Reporting     | Bureau performance + team productivity read models          |
 | Org admin / API keys | 5.0     | Partial | ✅      | —        | ✅  | —   | ✅    | Enterprise    | Org summary + API key lifecycle behind `ENABLE_ENTERPRISE`  |
