@@ -184,6 +184,7 @@ Scope: [version-5.0-scope.md](version-5.0-scope.md) · Checklist: [version-5.0-c
 | Compliance center    | 5.0     | Partial | ✅      | —        | ✅  | —   | ✅    | Timeline      | Consent records + retention policy placeholders             |
 | Portal expansion     | 5.0     | Partial | ✅      | —        | ✅  | —   | ✅    | Portal        | Document upload + secure messaging on linked cases          |
 | Enterprise reporting | 5.0     | Partial | ✅      | —        | ✅  | —   | ✅    | Reporting     | Bureau performance + team productivity read models          |
+| Org admin / API keys | 5.0     | Partial | ✅      | —        | ✅  | —   | ✅    | Enterprise    | Org summary + API key lifecycle behind `ENABLE_ENTERPRISE`  |
 
 ---
 

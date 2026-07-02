@@ -438,3 +438,11 @@ packages/job-orchestrator/
 **Reason:** Reporting epic requires enterprise dashboards beyond 4.8 operations KPIs without materialized views or revenue pipelines in this slice.
 
 **Follow-up work:** Slice 11 — API keys + org admin scaffold.
+
+### Decision: Organization admin scaffold with API key lifecycle
+
+**Decision:** Add `organization_api_keys` table (migration `019`), org-admin module with `GET /org-admin/status`, organization summary, API key create/list/get/revoke endpoints, SHA-256 hashed key storage with `vrd_live_` prefix, and `@verdin/api-client` org-admin helpers. Gated behind `ENABLE_ENTERPRISE`; admin role required.
+
+**Reason:** Enterprise admin epic requires durable API key foundations before SCIM, billing admin, or key-authenticated integrations ship in later versions.
+
+**Follow-up work:** Slice 12 — capability matrix 5.0 sign-off + deferrals.

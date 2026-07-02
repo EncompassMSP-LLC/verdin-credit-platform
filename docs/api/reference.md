@@ -365,6 +365,21 @@ MFA and SSO readiness scaffold for staff users. Portal authentication (`/portal/
 
 Requires `ENABLE_ENTERPRISE=true`. Configure `ENTERPRISE_SSO_PROVIDER` (`oidc` / `saml`) with issuer and client credentials, and/or `ENTERPRISE_MFA_MODE=totp` with `ENTERPRISE_MFA_ISSUER`. No external IdP or TOTP enrollment calls are executed in this slice.
 
+## Organization admin
+
+Enterprise org administration scaffold for API key lifecycle and organization summary metrics. All endpoints require `ENABLE_ENTERPRISE=true` and **admin** role.
+
+| Method | Path                              | Min role | Description                                   |
+| ------ | --------------------------------- | -------- | --------------------------------------------- |
+| GET    | `/org-admin/status`               | admin    | Org admin capabilities overview               |
+| GET    | `/org-admin/organization`         | admin    | Organization summary (users, active API keys) |
+| GET    | `/org-admin/api-keys`             | admin    | List organization API keys (prefix only)      |
+| POST   | `/org-admin/api-keys`             | admin    | Create API key (full secret returned once)    |
+| GET    | `/org-admin/api-keys/{id}`        | admin    | Get API key metadata                          |
+| POST   | `/org-admin/api-keys/{id}/revoke` | admin    | Revoke an active API key                      |
+
+API keys use prefix `vrd_live_` with SHA-256 hashed storage. Scopes: `read`, `write`. SCIM, billing admin, cross-org roles, and usage analytics are deferred to 5.0+.
+
 ## Compliance center
 
 Consent history and retention policy placeholders for CROA/FCRA-oriented operations. Records are org-scoped and append-only (withdrawal updates status; records are not deleted).
