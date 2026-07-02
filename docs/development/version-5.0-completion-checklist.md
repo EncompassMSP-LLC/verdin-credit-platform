@@ -1,16 +1,16 @@
 # Version 5.0 Completion Checklist
 
-Ordered path to **v5.0.0** — **in progress**. Preceded by shipped **v4.8.0**.
+Ordered path to **v5.0.0** — **RC complete** (tag pending). Preceded by shipped **v4.8.0**.
 
 Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 
 ## Exit criteria for “5.0 done”
 
-- [ ] All nine epics below are **✅ or explicitly deferred** with docs updated — see [`version-5.0-scope.md`](../governance/version-5.0-scope.md)
-- [ ] Capability matrix rows for 5.0 show **✅** (or **Partial** with written scope limits)
+- [x] All nine epics below are **✅ or explicitly deferred** with docs updated — see [`version-5.0-scope.md`](../governance/version-5.0-scope.md)
+- [x] Capability matrix rows for 5.0 show **✅** (or **Partial** with written scope limits)
 - [ ] `v5.0.0` release notes + tag
-- [ ] LLM summary endpoints respect ADR-012 gates (`ENABLE_LLM`, PII policy)
-- [ ] No **Planned** items remain that were promised for 5.0 in `docs/roadmap/README.md` without deferral docs
+- [x] LLM summary endpoints respect ADR-012 gates (`ENABLE_LLM`, PII policy)
+- [x] No **Planned** items remain that were promised for 5.0 in `docs/roadmap/README.md` without deferral docs
 
 ---
 
@@ -30,7 +30,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | 10    | Enterprise reporting read models              | Reporting        | ✅     |
 | 11    | API keys + org admin scaffold                 | Enterprise Admin | ✅     |
 | 12    | Capability matrix 5.0 sign-off + deferrals    | Governance       | ✅     |
-| 13    | `docs/release-notes/v5.0.0.md`                | Release          | —      |
+| 13    | `docs/release-notes/v5.0.0.md`                | Release          | ✅     |
 | 14    | Tag `v5.0.0`                                  | Release          | —      |
 
 Slices 4+ require ADR-012 (`ENABLE_LLM`) — already merged in 4.8. External LLM calls must pass `require_llm_ready()`.

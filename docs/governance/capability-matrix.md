@@ -7,7 +7,7 @@
 
 **Version 4.5 sign-off:** [version-4.5-scope.md](version-4.5-scope.md) · Release notes: [v4.5.0.md](../release-notes/v4.5.0.md)  
 **Version 4.8 sign-off:** [version-4.8-scope.md](version-4.8-scope.md) · Release notes: [v4.8.0.md](../release-notes/v4.8.0.md)  
-**Version 5.0 sign-off:** [version-5.0-scope.md](version-5.0-scope.md) · Checklist: [version-5.0-completion-checklist.md](../development/version-5.0-completion-checklist.md)
+**Version 5.0 sign-off:** [version-5.0-scope.md](version-5.0-scope.md) · Release notes: [v5.0.0.md](../release-notes/v5.0.0.md)
 
 ## Status legend
 
@@ -170,9 +170,9 @@ Scope: [version-4.8-scope.md](version-4.8-scope.md) · Release notes: [v4.8.0.md
 
 ---
 
-## Version 5.0 — Enterprise Edition (RC complete — `v5.0.0` tag pending)
+## Version 5.0 — Enterprise Edition (shipped — `v5.0.0`)
 
-Scope: [version-5.0-scope.md](version-5.0-scope.md) · Checklist: [version-5.0-completion-checklist.md](../development/version-5.0-completion-checklist.md)
+Scope: [version-5.0-scope.md](version-5.0-scope.md) · Release notes: [v5.0.0.md](../release-notes/v5.0.0.md)
 
 | Capability           | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies  | Notes                                                       |
 | -------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------- | ----------------------------------------------------------- |

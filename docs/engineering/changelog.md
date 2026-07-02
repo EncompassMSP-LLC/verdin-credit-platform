@@ -456,3 +456,13 @@ packages/job-orchestrator/
 **Documentation:** [`docs/governance/version-5.0-scope.md`](../governance/version-5.0-scope.md), [`docs/governance/capability-matrix.md`](../governance/capability-matrix.md)
 
 **Follow-up work:** Slice 13 — `docs/release-notes/v5.0.0.md`.
+
+### Decision: Publish Version 5.0.0 release notes
+
+**Decision:** Add `docs/release-notes/v5.0.0.md` covering all nine partial epics, feature flags, migrations 015–019, deferrals, and update capability matrix, roadmap, and governance release history.
+
+**Reason:** Release notes are the user-facing summary of the Enterprise Edition RC before the `v5.0.0` git tag.
+
+**Documentation:** [`docs/release-notes/v5.0.0.md`](../release-notes/v5.0.0.md)
+
+**Follow-up work:** Slice 14 — tag `v5.0.0`.

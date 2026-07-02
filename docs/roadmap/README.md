@@ -27,21 +27,21 @@ v4.5.0 — Automation Platform (released)
     ↓
 v4.8.0 — Operations (released)
     ↓
-v5.0 — Enterprise Edition (in progress)
+v5.0 — Enterprise Edition (released)
 ```
 
 Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (`Sprint 4.3.1`) are engineering milestones that harden a release before the next version opens.
 
 ## Version milestones
 
-| Version   | Theme                       | Status      | Focus                                                                      |
-| --------- | --------------------------- | ----------- | -------------------------------------------------------------------------- |
-| **4.2**   | Platform Foundation         | **Shipped** | Monorepo, auth, RBAC, domain module pattern, worker scaffold, CI/CD        |
-| **4.3.0** | Operational Core            | **Shipped** | Cases, accounts, documents, OCR, intelligence, timeline, tasks             |
-| **4.3.1** | Operational Core Completion | **Shipped** | Mission Control dashboard, governance refinements, release stabilization   |
-| **4.5**   | Automation                  | **Shipped** | Import wizard, dispute lifecycle, workflow auto-tasks, rules AI (`v4.5.0`) |
-| **4.8**   | Operations                  | **Shipped** | Client portal, notifications, LLM policy gates, reporting (`v4.8.0`)       |
-| **5.0**   | Enterprise Edition          | In progress | Compliance, SSO/MFA, LLM summaries, production email, portal expansion     |
+| Version   | Theme                       | Status      | Focus                                                                             |
+| --------- | --------------------------- | ----------- | --------------------------------------------------------------------------------- |
+| **4.2**   | Platform Foundation         | **Shipped** | Monorepo, auth, RBAC, domain module pattern, worker scaffold, CI/CD               |
+| **4.3.0** | Operational Core            | **Shipped** | Cases, accounts, documents, OCR, intelligence, timeline, tasks                    |
+| **4.3.1** | Operational Core Completion | **Shipped** | Mission Control dashboard, governance refinements, release stabilization          |
+| **4.5**   | Automation                  | **Shipped** | Import wizard, dispute lifecycle, workflow auto-tasks, rules AI (`v4.5.0`)        |
+| **4.8**   | Operations                  | **Shipped** | Client portal, notifications, LLM policy gates, reporting (`v4.8.0`)              |
+| **5.0**   | Enterprise Edition          | **Shipped** | Compliance, SSO/MFA, LLM summaries, production email, portal expansion (`v5.0.0`) |
 
 ### Sprint milestones
 
@@ -119,11 +119,9 @@ Scope and deferrals: [`docs/governance/version-4.8-scope.md`](../governance/vers
 
 Release notes: [`docs/release-notes/v4.8.0.md`](../release-notes/v4.8.0.md)
 
-### Version 5.0 — Enterprise Edition (RC complete)
+### Version 5.0 — Enterprise Edition (shipped)
 
 Scope and deferrals: [`docs/governance/version-5.0-scope.md`](../governance/version-5.0-scope.md)
-
-Completion checklist: [`docs/development/version-5.0-completion-checklist.md`](../development/version-5.0-completion-checklist.md)
 
 | Epic | Theme                 | v5.0.0 outcome | Notes                                                    |
 | ---- | --------------------- | -------------- | -------------------------------------------------------- |
@@ -137,11 +135,9 @@ Completion checklist: [`docs/development/version-5.0-completion-checklist.md`](.
 | 8    | Enterprise admin      | Partial        | API key lifecycle; SCIM/billing admin → 5.0+             |
 | 9    | Reporting & analytics | Partial        | Bureau + team productivity; materialized views → 5.0+    |
 
-**Deferred from 5.0 to 5.0+ / 5.1+:** autonomous dispute filing, full BPM designer, Stripe billing, predictive analytics, AI autonomous agents, native mobile apps, document LLM summaries, SMS production delivery.
+**Tag:** `v5.0.0` — Enterprise Edition.
 
-**Tag:** `v5.0.0` — pending release notes (slice 13) and git tag (slice 14).
-
-Release notes: _pending slice 13_
+Release notes: [`docs/release-notes/v5.0.0.md`](../release-notes/v5.0.0.md)
 
 ## Sprint → version mapping
 
@@ -179,6 +175,7 @@ Release notes: _pending slice 13_
 - [Release notes — v4.5.0](../release-notes/v4.5.0.md)
 - [Version 5.0 completion checklist](../development/version-5.0-completion-checklist.md)
 - [Release notes — v4.8.0](../release-notes/v4.8.0.md)
+- [Release notes — v5.0.0](../release-notes/v5.0.0.md)
 - [Release notes — v4.3.0 GA](../release-notes/v4.3.0-ga.md)
 - [Architecture](../architecture/README.md) — technical constitution
 - [ADR index](../adr/README.md) — architecture decision records
