@@ -2,13 +2,14 @@
 
 **Executive view** of Verdin platform capabilities — what exists, what version introduced it, readiness by layer, and dependencies.
 
-**Last updated:** 2026-07-02  
+**Last updated:** 2026-07-03  
 **Maintainers:** Update this document in every epic PR that ships or materially advances a capability.
 
 **Version 4.5 sign-off:** [version-4.5-scope.md](version-4.5-scope.md) · Release notes: [v4.5.0.md](../release-notes/v4.5.0.md)  
 **Version 4.8 sign-off:** [version-4.8-scope.md](version-4.8-scope.md) · Release notes: [v4.8.0.md](../release-notes/v4.8.0.md)  
 **Version 5.0 sign-off:** [version-5.0-scope.md](version-5.0-scope.md) · Release notes: [v5.0.0.md](../release-notes/v5.0.0.md)  
 **Version 5.0+ sign-off:** [version-5.0-plus-scope.md](version-5.0-plus-scope.md) · Checklist: [version-5.0-plus-completion-checklist.md](../development/version-5.0-plus-completion-checklist.md)
+**Version 5.1 sign-off:** [version-5.1-scope.md](version-5.1-scope.md) · Release notes: [v5.1.0.md](../release-notes/v5.1.0.md)
 
 ## Status legend
 
@@ -234,9 +235,9 @@ Scope: [version-5.0-plus-scope.md](version-5.0-plus-scope.md) · Checklist: [ver
 
 ---
 
-## Version 5.1 — Production Hardening (in progress)
+## Version 5.1 — Production Hardening (sign-off)
 
-Scope: [version-5.1-scope.md](version-5.1-scope.md) · Checklist: [version-5.1-completion-checklist.md](../development/version-5.1-completion-checklist.md)
+Scope: [version-5.1-scope.md](version-5.1-scope.md) · Checklist: [version-5.1-completion-checklist.md](../development/version-5.1-completion-checklist.md) · Release notes: [v5.1.0.md](../release-notes/v5.1.0.md)
 
 | Capability              | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies  | Notes                                                                 |
 | ----------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------- | --------------------------------------------------------------------- |
@@ -246,6 +247,19 @@ Scope: [version-5.1-scope.md](version-5.1-scope.md) · Checklist: [version-5.1-c
 | Retention enforcement   | 5.1     | Partial | ✅      | —        | ✅  | —   | ✅    | Compliance    | Manual + scheduled jobs; audit log; `audit_logs` skipped              |
 | Portal push scaffold    | 5.1     | Partial | ✅      | ✅       | ✅  | —   | ✅    | Client portal | Web Push scaffold; staff message dispatch; `ENABLE_PORTAL_PUSH`       |
 | Materialized reporting  | 5.1     | Partial | ✅      | —        | ✅  | —   | ✅    | Reporting     | Bureau + team MVs; scheduled refresh; `ENABLE_MATERIALIZED_REPORTING` |
+
+### Version 5.1 epic sign-off
+
+| Epic                      | 5.1 outcome | Exit note                                                               |
+| ------------------------- | ----------- | ----------------------------------------------------------------------- |
+| API integrations          | Partial ✅  | API key middleware on reporting operations; rate-limit UI → 5.2+        |
+| Identity enrollment       | Partial ✅  | TOTP + OIDC staff enrollment; SCIM / multi-IdP → 5.2+                   |
+| Billing                   | Partial ✅  | Stripe customer + subscription scaffold; usage metering → 5.2+          |
+| Communications production | Deferred    | Production SMS not merged for v5.1.0; Twilio scaffold → 5.2+            |
+| Compliance enforcement    | Partial ✅  | Retention enforcement jobs + audit; `audit_logs` purge deferred         |
+| LLM expansion             | Deferred    | Document summary UI + endpoint not in v5.1.0; case summary UI from 5.0+ |
+| Portal real-time          | Partial ✅  | Push subscription scaffold + staff dispatch; real Web Push HTTP → 5.2+  |
+| Reporting depth           | Partial ✅  | Materialized bureau/team views + refresh jobs; revenue metrics → 5.2+   |
 
 ---
 

@@ -34,16 +34,16 @@ Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (
 
 ## Version milestones
 
-| Version   | Theme                       | Status      | Focus                                                                             |
-| --------- | --------------------------- | ----------- | --------------------------------------------------------------------------------- |
-| **4.2**   | Platform Foundation         | **Shipped** | Monorepo, auth, RBAC, domain module pattern, worker scaffold, CI/CD               |
-| **4.3.0** | Operational Core            | **Shipped** | Cases, accounts, documents, OCR, intelligence, timeline, tasks                    |
-| **4.3.1** | Operational Core Completion | **Shipped** | Mission Control dashboard, governance refinements, release stabilization          |
-| **4.5**   | Automation                  | **Shipped** | Import wizard, dispute lifecycle, workflow auto-tasks, rules AI (`v4.5.0`)        |
-| **4.8**   | Operations                  | **Shipped** | Client portal, notifications, LLM policy gates, reporting (`v4.8.0`)              |
-| **5.0**   | Enterprise Edition          | **Shipped** | Compliance, SSO/MFA, LLM summaries, production email, portal expansion (`v5.0.0`) |
-| **5.0+**  | Product Hardening           | **Shipped** | Pilot-ready staff + portal UI for 5.0 APIs                                        |
-| **5.1**   | Production Hardening        | In progress | API key auth, billing, IdP enrollment, SMS, compliance enforcement                |
+| Version   | Theme                       | Status      | Focus                                                                                   |
+| --------- | --------------------------- | ----------- | --------------------------------------------------------------------------------------- |
+| **4.2**   | Platform Foundation         | **Shipped** | Monorepo, auth, RBAC, domain module pattern, worker scaffold, CI/CD                     |
+| **4.3.0** | Operational Core            | **Shipped** | Cases, accounts, documents, OCR, intelligence, timeline, tasks                          |
+| **4.3.1** | Operational Core Completion | **Shipped** | Mission Control dashboard, governance refinements, release stabilization                |
+| **4.5**   | Automation                  | **Shipped** | Import wizard, dispute lifecycle, workflow auto-tasks, rules AI (`v4.5.0`)              |
+| **4.8**   | Operations                  | **Shipped** | Client portal, notifications, LLM policy gates, reporting (`v4.8.0`)                    |
+| **5.0**   | Enterprise Edition          | **Shipped** | Compliance, SSO/MFA, LLM summaries, production email, portal expansion (`v5.0.0`)       |
+| **5.0+**  | Product Hardening           | **Shipped** | Pilot-ready staff + portal UI for 5.0 APIs                                              |
+| **5.1**   | Production Hardening        | **Shipped** | API keys, billing, IdP enrollment, enforcement, push, materialized reporting (`v5.1.0`) |
 
 ### Sprint milestones
 
@@ -158,9 +158,24 @@ Scope and checklist: [`docs/governance/version-5.0-plus-scope.md`](../governance
 
 **Pilot ready** — all 5.0+ checklist slices complete; deferrals documented in scope doc.
 
-### Version 5.1 — Production Hardening (in progress)
+### Version 5.1 — Production Hardening (released)
 
 Scope and checklist: [`docs/governance/version-5.1-scope.md`](../governance/version-5.1-scope.md) · [`docs/development/version-5.1-completion-checklist.md`](../development/version-5.1-completion-checklist.md)
+
+| Epic | Theme                     | 5.1 outcome | Notes                                             |
+| ---- | ------------------------- | ----------- | ------------------------------------------------- |
+| 1    | API integrations          | Partial ✅  | API key middleware on `GET /reporting/operations` |
+| 2    | Identity enrollment       | Partial ✅  | TOTP + OIDC staff enrollment                      |
+| 3    | Billing                   | Partial ✅  | Stripe customer + subscription scaffold           |
+| 4    | Communications production | Deferred    | Production SMS → 5.2+                             |
+| 5    | Compliance enforcement    | Partial ✅  | Retention enforcement jobs + audit                |
+| 6    | LLM expansion             | Deferred    | Document summary UI → 5.2+                        |
+| 7    | Portal real-time          | Partial ✅  | Push notification scaffold for portal messaging   |
+| 8    | Reporting depth           | Partial ✅  | Materialized bureau/team reporting views          |
+
+**Tag:** `v5.1.0` — Production Hardening.
+
+Release notes: [`docs/release-notes/v5.1.0.md`](../release-notes/v5.1.0.md)
 
 ## Sprint → version mapping
 
@@ -199,6 +214,7 @@ Scope and checklist: [`docs/governance/version-5.1-scope.md`](../governance/vers
 - [Version 5.0 completion checklist](../development/version-5.0-completion-checklist.md)
 - [Release notes — v4.8.0](../release-notes/v4.8.0.md)
 - [Release notes — v5.0.0](../release-notes/v5.0.0.md)
+- [Release notes — v5.1.0](../release-notes/v5.1.0.md)
 - [Release notes — v4.3.0 GA](../release-notes/v4.3.0-ga.md)
 - [Architecture](../architecture/README.md) — technical constitution
 - [ADR index](../adr/README.md) — architecture decision records
