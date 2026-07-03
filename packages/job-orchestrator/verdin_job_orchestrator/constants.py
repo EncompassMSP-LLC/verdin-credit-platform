@@ -14,6 +14,7 @@ class JobType(StrEnum):
     MONTHLY_REVIEW = "monthly_review"
     OVERDUE_INVESTIGATION_SCAN = "overdue_investigation_scan"
     RETENTION_ENFORCEMENT_SCAN = "retention_enforcement_scan"
+    REPORTING_MV_REFRESH = "reporting_mv_refresh"
 
 
 class JobStatus(StrEnum):

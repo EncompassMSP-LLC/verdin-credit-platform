@@ -597,8 +597,18 @@ packages/job-orchestrator/
 
 **Follow-up work:** Slice 8 — portal push notification scaffold.
 
+### Decision: Portal push notification scaffold
+
 **Decision:** Add `portal_push_subscriptions` and `portal_push_delivery_logs` tables, portal endpoints (`GET /portal/push/status`, `POST /portal/push/subscribe`, `DELETE /portal/push/subscriptions/{id}`), Web Push provider scaffold in `api/core/portal_push.py`, staff-message dispatch hook, `PortalPushPanel` UI, and `@verdin/api-client` helpers. Gated by `ENABLE_PORTAL_PUSH`.
 
 **Reason:** 5.1 portal real-time epic requires auditable push delivery for secure messaging beyond polling-only portal UX.
 
 **Follow-up work:** Slice 9 — reporting materialized views.
+
+### Decision: Reporting materialized views
+
+**Decision:** Add PostgreSQL materialized views (`mv_bureau_account_counts`, `mv_bureau_sent_letter_counts`, `mv_team_member_productivity`), `reporting_mv_refresh_runs` audit table, admin refresh endpoints (`GET/POST /reporting/materialized-views/*`), worker job `reporting_mv_refresh` (`0 4 * * *` UTC), and bureau/team read paths that use MVs when `ENABLE_MATERIALIZED_REPORTING=true`.
+
+**Reason:** 5.1 reporting epic requires read-optimized bureau and team aggregates without live-query latency on every dashboard load.
+
+**Follow-up work:** Slice 10 — capability matrix 5.1 sign-off.

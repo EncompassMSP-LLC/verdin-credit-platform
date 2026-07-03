@@ -25,7 +25,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | 6     | Compliance enforcement jobs       | Compliance       | ✅     |
 | 7     | LLM document summary UI           | AI               | —      |
 | 8     | Portal push notification scaffold | Client Portal    | ✅     |
-| 9     | Reporting materialized views      | Reporting        | —      |
+| 9     | Reporting materialized views      | Reporting        | ✅     |
 | 10    | Capability matrix 5.1 sign-off    | Governance       | —      |
 
 Slices 4+ require `ENABLE_ENTERPRISE=true`. Slice 7 requires `ENABLE_LLM=true` and ADR-012 gates. Slice 5 requires Stripe test keys in environment.

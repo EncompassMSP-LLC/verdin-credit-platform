@@ -33,6 +33,11 @@ from api.modules.messaging.models import (
 )
 from api.modules.notifications.models import EmailDeliveryLog, Notification, NotificationCategory
 from api.modules.org_admin.models import ApiKeyScope, OrganizationApiKey
+from api.modules.reporting.materialized_models import (
+    ReportingMvRefreshRun,
+    ReportingMvRefreshStatus,
+    ReportingMvTriggerSource,
+)
 from api.modules.tasks.models import Task, TaskPriority, TaskStatus
 from api.modules.timeline.models import Communication, TimelineEvent
 
@@ -68,6 +73,9 @@ __all__ = [
     "PortalPushDeliveryLog",
     "PortalPushDeliveryStatus",
     "PortalPushSubscription",
+    "ReportingMvRefreshRun",
+    "ReportingMvRefreshStatus",
+    "ReportingMvTriggerSource",
     "RetentionPolicy",
     "RetentionEnforcementRun",
     "RetentionScope",

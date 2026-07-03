@@ -71,6 +71,28 @@ export interface EnterpriseReportingStatus {
   deferred_capabilities: string[];
 }
 
+export interface MaterializedReportingStatus {
+  enabled: boolean;
+  views: string[];
+  last_refreshed_at: string | null;
+}
+
+export interface ReportingMvRefreshRun {
+  id: string;
+  organization_id: string | null;
+  trigger_source: string;
+  status: string;
+  views_refreshed: number;
+  started_at: string;
+  completed_at: string;
+  error_message: string | null;
+}
+
+export interface ReportingMvRefreshResult {
+  views_refreshed: number;
+  run: ReportingMvRefreshRun;
+}
+
 export function getOperationsReporting() {
   return request<OperationsReportingResponse>(apiPath('/reporting/operations'));
 }
@@ -85,4 +107,27 @@ export function getBureauPerformanceReporting() {
 
 export function getTeamProductivityReporting() {
   return request<TeamProductivityReportingResponse>(apiPath('/reporting/team-productivity'));
+}
+
+export function getMaterializedReportingStatus() {
+  return request<MaterializedReportingStatus>(apiPath('/reporting/materialized-views/status'));
+}
+
+export function listMaterializedReportingRefreshRuns(page = 1, pageSize = 20) {
+  const params = new URLSearchParams({
+    page: String(page),
+    page_size: String(pageSize),
+  });
+  return request<{
+    items: ReportingMvRefreshRun[];
+    total: number;
+    page: number;
+    page_size: number;
+  }>(`${apiPath('/reporting/materialized-views/runs')}?${params.toString()}`);
+}
+
+export function refreshMaterializedReportingViews() {
+  return request<ReportingMvRefreshResult>(apiPath('/reporting/materialized-views/refresh'), {
+    method: 'POST',
+  });
 }

@@ -28,6 +28,7 @@ logger = structlog.get_logger(__name__)
 ATTEMPT_PAYLOAD_KEY = "_attempt"
 DEFAULT_OVERDUE_SCAN_CRON = "0 6 * * *"
 DEFAULT_RETENTION_ENFORCEMENT_CRON = "0 3 * * *"
+DEFAULT_REPORTING_MV_REFRESH_CRON = "0 4 * * *"
 
 EnqueueFn = Callable[[WorkerJobType, dict[str, Any]], object]
 
@@ -44,6 +45,12 @@ def build_default_scheduler() -> JobScheduler:
         ScheduledJob(
             job_type=JobType.RETENTION_ENFORCEMENT_SCAN,
             cron_expression=DEFAULT_RETENTION_ENFORCEMENT_CRON,
+        ),
+    )
+    scheduler.register(
+        ScheduledJob(
+            job_type=JobType.REPORTING_MV_REFRESH,
+            cron_expression=DEFAULT_REPORTING_MV_REFRESH_CRON,
         ),
     )
     return scheduler
