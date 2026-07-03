@@ -15,38 +15,13 @@ from api.core.enterprise_identity import (
 from api.core.feature_flags import get_feature_flags
 
 
-@pytest.fixture
-def enterprise_oidc_env(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("ENABLE_ENTERPRISE", "true")
-    monkeypatch.setenv("ENTERPRISE_SSO_PROVIDER", "oidc")
-    monkeypatch.setenv("ENTERPRISE_SSO_ISSUER_URL", "https://idp.example.com")
-    monkeypatch.setenv("ENTERPRISE_SSO_CLIENT_ID", "verdin-client")
-    monkeypatch.setenv("ENTERPRISE_SSO_CLIENT_SECRET", "secret")
-    get_feature_flags.cache_clear()
-    get_enterprise_identity_settings.cache_clear()
-    yield
-    get_feature_flags.cache_clear()
-    get_enterprise_identity_settings.cache_clear()
-
-
-@pytest.fixture
-def enterprise_totp_env(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("ENABLE_ENTERPRISE", "true")
-    monkeypatch.setenv("ENTERPRISE_MFA_MODE", "totp")
-    monkeypatch.setenv("ENTERPRISE_MFA_ISSUER", "Verdin Credit Platform")
-    get_feature_flags.cache_clear()
-    get_enterprise_identity_settings.cache_clear()
-    yield
-    get_feature_flags.cache_clear()
-    get_enterprise_identity_settings.cache_clear()
-
-
 def test_evaluate_enterprise_identity_blocked_when_disabled() -> None:
     settings = EnterpriseIdentitySettings(
         enterprise_sso_provider=SsoProvider.OIDC,
         enterprise_sso_issuer_url="https://idp.example.com",
         enterprise_sso_client_id="client",
         enterprise_sso_client_secret="secret",
+        enterprise_sso_redirect_uri="https://app.verdin.example/auth/sso/callback",
     )
     status = evaluate_enterprise_identity_status(settings, feature_enabled=False)
     assert status.ready is False
@@ -59,6 +34,7 @@ def test_evaluate_enterprise_identity_oidc_ready() -> None:
         enterprise_sso_issuer_url="https://idp.example.com",
         enterprise_sso_client_id="client",
         enterprise_sso_client_secret="secret",
+        enterprise_sso_redirect_uri="https://app.verdin.example/auth/sso/callback",
     )
     status = evaluate_enterprise_identity_status(settings, feature_enabled=True)
     assert status.ready is True

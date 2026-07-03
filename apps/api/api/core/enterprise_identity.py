@@ -51,6 +51,10 @@ class EnterpriseIdentitySettings(BaseSettings):
         default=None,
         description="Display name shown in authenticator apps for TOTP enrollment",
     )
+    enterprise_sso_redirect_uri: str | None = Field(
+        default=None,
+        description="OAuth redirect URI for OIDC enrollment callback",
+    )
 
 
 @dataclass(frozen=True, slots=True)
@@ -94,6 +98,8 @@ def evaluate_enterprise_identity_status(
         if current.enterprise_sso_provider is SsoProvider.OIDC:
             if not current.enterprise_sso_client_secret:
                 blockers.append("ENTERPRISE_SSO_CLIENT_SECRET is not configured for oidc")
+            if not current.enterprise_sso_redirect_uri:
+                blockers.append("ENTERPRISE_SSO_REDIRECT_URI is not configured for oidc")
         sso_ready = not any(blocker.startswith("ENTERPRISE_SSO_") for blocker in blockers)
 
     mfa_ready = False
