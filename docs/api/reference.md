@@ -263,6 +263,7 @@ Secure document storage with MinIO, SHA-256 hashing, versioning, and duplicate d
 | DELETE | `/documents/{document_id}`                                         | admin        | Soft-delete document                            |
 | GET    | `/documents/{document_id}/ocr`                                     | read_only    | OCR status and extracted text                   |
 | POST   | `/documents/{document_id}/ocr/retry`                               | case_manager | Re-queue OCR for failed document                |
+| POST   | `/documents/{document_id}/llm-summary`                             | case_manager | Generate LLM document summary                   |
 | GET    | `/documents/{document_id}/download`                                | read_only    | Download file (optional `version`)              |
 | POST   | `/documents/{document_id}/versions`                                | case_manager | Upload new version                              |
 | GET    | `/documents/{document_id}/versions`                                | read_only    | List version history                            |
@@ -293,6 +294,8 @@ Parsed credit report comparison: `GET /documents/{document_id}/parsed-credit-rep
 Parsed tradeline account candidates: `GET /documents/{document_id}/parsed-credit-report/account-candidates` converts parser tradelines into normalized account-create candidates for staff review.
 
 Parsed report review task: `POST /documents/{document_id}/parsed-credit-report/review-task` creates or reuses an active task linked to the document and parsed report, giving staff a workflow item for account candidate review.
+
+`POST /documents/{document_id}/llm-summary` invokes the configured LLM provider when `ENABLE_LLM` and ADR-012 gates pass. Document context includes scrubbed metadata and a truncated OCR excerpt; a timeline audit event records model, provider, and prompt hash.
 
 ## Timeline
 

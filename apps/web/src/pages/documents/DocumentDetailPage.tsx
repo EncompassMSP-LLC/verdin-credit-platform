@@ -21,6 +21,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { DocumentDeleteDialog } from '../../components/documents/DocumentDeleteDialog';
 import { DocumentDuplicatePanel } from '../../components/documents/DocumentDuplicatePanel';
 import { DocumentEntityResolutionPanel } from '../../components/documents/DocumentEntityResolutionPanel';
+import { DocumentLlmSummaryPanel } from '../../components/documents/DocumentLlmSummaryPanel';
 import { DocumentMetadataPanel } from '../../components/documents/DocumentMetadataPanel';
 import { DocumentMetadataStatusBadge } from '../../components/documents/DocumentMetadataStatusBadge';
 import { DocumentProcessingBadge } from '../../components/documents/DocumentProcessingBadge';
@@ -350,6 +351,8 @@ export function DocumentDetailPage() {
         </Card>
 
         <DocumentMetadataPanel documentId={documentId} hasOcrText={Boolean(ocrData?.ocr_text)} />
+
+        <DocumentLlmSummaryPanel documentId={documentId} />
 
         <DocumentEntityResolutionPanel
           documentId={documentId}

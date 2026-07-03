@@ -587,4 +587,12 @@ packages/job-orchestrator/
 
 **Reason:** 5.1 billing epic requires a durable Stripe integration foundation before usage metering or invoicing ships in later versions.
 
-**Follow-up work:** Slice 6 — compliance enforcement jobs.
+**Follow-up work:** Slice 8 — portal push notification scaffold.
+
+### Decision: LLM document summary endpoint and staff UI
+
+**Decision:** Add `POST /documents/{document_id}/llm-summary` with PII-scrubbed OCR/metadata context, timeline event `DOCUMENT_LLM_SUMMARY_GENERATED`, `DocumentLlmSummaryPanel` on document detail, and `@verdin/api-client` helpers. Gated by `ENABLE_LLM` and ADR-012.
+
+**Reason:** 5.1 LLM expansion epic requires document summaries beyond the v5.0 case summary foundation.
+
+**Follow-up work:** Slice 8 — portal push notification scaffold.

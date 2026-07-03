@@ -268,6 +268,22 @@ export async function getDocumentOcr(documentId: string): Promise<DocumentOcrRes
   return request<DocumentOcrResult>(apiPath(`/documents/${documentId}/ocr`));
 }
 
+export interface DocumentLlmSummary {
+  document_id: string;
+  summary: string;
+  model: string;
+  provider: string;
+  prompt_hash: string;
+  generated_at: string;
+  pii_scrubbed: boolean;
+}
+
+export async function generateDocumentLlmSummary(documentId: string): Promise<DocumentLlmSummary> {
+  return request<DocumentLlmSummary>(apiPath(`/documents/${documentId}/llm-summary`), {
+    method: 'POST',
+  });
+}
+
 export async function retryDocumentOcr(documentId: string): Promise<DocumentOcrResult> {
   return request<DocumentOcrResult>(apiPath(`/documents/${documentId}/ocr/retry`), {
     method: 'POST',

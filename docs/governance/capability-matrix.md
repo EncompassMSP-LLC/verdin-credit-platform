@@ -243,6 +243,7 @@ Scope: [version-5.1-scope.md](version-5.1-scope.md) · Checklist: [version-5.1-c
 | API key auth middleware | 5.1     | Partial | ✅      | —        | ✅  | —   | ✅    | Org admin    | `GET /reporting/operations` via `X-API-Key` or Bearer key |
 | Identity enrollment     | 5.1     | Partial | ✅      | —        | ✅  | —   | ✅    | Enterprise   | TOTP + OIDC staff enrollment behind `ENABLE_ENTERPRISE`   |
 | Stripe billing scaffold | 5.1     | Partial | ✅      | —        | ✅  | —   | ✅    | Org admin    | Customer + subscription + webhook; billing on org summary |
+| LLM document summary    | 5.1     | Partial | ✅      | ✅       | ✅  | —   | ✅    | LLM gates    | `POST /documents/{id}/llm-summary` + staff UI             |
 
 ---
 
@@ -259,7 +260,7 @@ Scope: [version-5.1-scope.md](version-5.1-scope.md) · Checklist: [version-5.1-c
 | Metadata / entity extraction | 1     | 4.5     | Partial | Parser bridge + candidates; LLM NER → 5.0                                |
 | LLM policy gates             | 2     | 4.8     | Partial | `packages/llm-gateway` + `GET /llm/status`; no provider calls            |
 | Case summaries (LLM)         | 2     | 5.0     | Partial | Endpoint + staff UI behind `ENABLE_LLM` + PII scrub                      |
-| Document summaries (LLM)     | 2     | 5.0     | —       | Deferred post-gate; requires approved provider integration               |
+| Document summaries (LLM)     | 2     | 5.1     | Partial | `POST /documents/{id}/llm-summary` + staff UI behind `ENABLE_LLM`        |
 | LLM dispute draft augment    | 2     | 5.0     | —       | Rules default in 4.5; LLM augment post-gate                              |
 | AI workflow orchestration    | 3     | 5.0+    | Planned | Deferred from 5.0 RC — requires compliance + observability prerequisites |
 | Predictive outcomes          | 3     | 5.1+    | Planned | Deferred — needs historical data pipeline                                |

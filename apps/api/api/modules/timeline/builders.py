@@ -352,6 +352,35 @@ def document_uploaded_event(document: Document, performed_by: uuid.UUID) -> Plat
     )
 
 
+def document_llm_summary_event(
+    *,
+    document: Document,
+    performed_by: uuid.UUID,
+    model: str,
+    provider: str,
+    prompt_hash: str,
+    generated_at: datetime,
+) -> PlatformEvent:
+    return PlatformEvent(
+        event_type=DocumentEventType.DOCUMENT_LLM_SUMMARY_GENERATED.value,
+        event_category=EventCategory.DOCUMENT.value,
+        title="LLM document summary generated",
+        description=f"An LLM summary was generated for document '{document.title}'.",
+        organization_id=document.organization_id,
+        case_id=document.case_id,
+        account_id=document.account_id,
+        document_id=document.id,
+        performed_by=performed_by,
+        source_module="documents",
+        metadata={
+            "model": model,
+            "provider": provider,
+            "prompt_hash": prompt_hash,
+            "generated_at": generated_at.isoformat(),
+        },
+    )
+
+
 def portal_document_uploaded_event(
     document: Document,
     *,

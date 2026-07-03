@@ -23,7 +23,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | 4     | IdP / TOTP enrollment             | Identity         | ✅     |
 | 5     | Stripe billing scaffold           | Billing          | ✅     |
 | 6     | Compliance enforcement jobs       | Compliance       | —      |
-| 7     | LLM document summary UI           | AI               | —      |
+| 7     | LLM document summary UI           | AI               | ✅     |
 | 8     | Portal push notification scaffold | Client Portal    | —      |
 | 9     | Reporting materialized views      | Reporting        | —      |
 | 10    | Capability matrix 5.1 sign-off    | Governance       | —      |
