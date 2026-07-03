@@ -456,7 +456,15 @@ Bureau performance and team productivity read models for enterprise dashboards. 
 | GET    | `/reporting/bureau-performance` | read_only | Tradeline counts and dispute outcomes grouped by bureau |
 | GET    | `/reporting/team-productivity`  | read_only | Per-staff task and case productivity (30-day window)    |
 
-Materialized views, revenue metrics, and score-improvement trends are deferred to 5.0+.
+When `ENABLE_MATERIALIZED_REPORTING=true`, bureau and team endpoints read from PostgreSQL materialized views refreshed by a scheduled worker job (`0 4 * * *` UTC) or manual admin refresh.
+
+| Method | Path                                    | Min role  | Description                              |
+| ------ | --------------------------------------- | --------- | ---------------------------------------- |
+| GET    | `/reporting/materialized-views/status`  | read_only | Materialized view readiness and last run |
+| GET    | `/reporting/materialized-views/runs`    | read_only | Paginated refresh audit log              |
+| POST   | `/reporting/materialized-views/refresh` | admin     | Refresh all reporting materialized views |
+
+Revenue metrics and score-improvement trends remain deferred to 5.2+.
 
 ## Dashboard
 

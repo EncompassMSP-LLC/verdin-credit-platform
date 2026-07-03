@@ -4,9 +4,14 @@ import uuid
 from datetime import UTC, datetime, timedelta
 from typing import Any, cast
 
-from sqlalchemy import and_, func, select
+from sqlalchemy import and_, func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from api.core.materialized_reporting import (
+    BUREAU_ACCOUNT_MV,
+    BUREAU_SENT_LETTERS_MV,
+    TEAM_PRODUCTIVITY_MV,
+)
 from api.modules.accounts.dispute_letter_models import DisputeLetter, DisputeLetterStatus
 from api.modules.accounts.models import Account, AccountBureau, DisputeStatus
 from api.modules.auth.models import User
@@ -294,4 +299,157 @@ class OperationsReportingRepository:
             "completed_tasks_30d_total": sum(completed_tasks_by_user.values()),
             "assigned_open_cases_total": sum(open_cases_by_user.values()),
             "closed_cases_30d_total": sum(closed_cases_by_user.values()),
+        }
+
+    async def get_bureau_performance_from_views(
+        self,
+        organization_id: uuid.UUID,
+    ) -> dict[str, Any]:
+        account_rows = await self._session.execute(
+            text(
+                f"""
+                SELECT bureau, dispute_status, account_count
+                FROM {BUREAU_ACCOUNT_MV}
+                WHERE organization_id = :organization_id
+                """
+            ),
+            {"organization_id": organization_id},
+        )
+        letter_rows = await self._session.execute(
+            text(
+                f"""
+                SELECT bureau, sent_letter_count
+                FROM {BUREAU_SENT_LETTERS_MV}
+                WHERE organization_id = :organization_id
+                """
+            ),
+            {"organization_id": organization_id},
+        )
+
+        bureau_data: dict[str, dict[str, Any]] = {}
+        total_accounts = 0
+        for bureau, dispute_status, count in account_rows.all():
+            bureau_key = str(bureau)
+            status_key = str(dispute_status)
+            entry = bureau_data.setdefault(
+                bureau_key,
+                {
+                    "total_accounts": 0,
+                    "dispute_status": {},
+                    "sent_letters": 0,
+                    "resolved_accounts": 0,
+                },
+            )
+            account_count = int(count)
+            entry["total_accounts"] += account_count
+            entry["dispute_status"][status_key] = account_count
+            total_accounts += account_count
+            if status_key in {
+                DisputeStatus.CORRECTED.value,
+                DisputeStatus.DELETED.value,
+                DisputeStatus.VERIFIED.value,
+            }:
+                entry["resolved_accounts"] += account_count
+
+        for bureau, count in letter_rows.all():
+            bureau_key = str(bureau)
+            entry = bureau_data.setdefault(
+                bureau_key,
+                {
+                    "total_accounts": 0,
+                    "dispute_status": {},
+                    "sent_letters": 0,
+                    "resolved_accounts": 0,
+                },
+            )
+            entry["sent_letters"] = int(count)
+
+        bureaus = []
+        for bureau in AccountBureau:
+            entry = bureau_data.get(
+                bureau.value,
+                {
+                    "total_accounts": 0,
+                    "dispute_status": {},
+                    "sent_letters": 0,
+                    "resolved_accounts": 0,
+                },
+            )
+            if entry["total_accounts"] == 0 and entry["sent_letters"] == 0:
+                continue
+            bureaus.append({"bureau": bureau.value, **entry})
+
+        return {"bureaus": bureaus, "total_accounts": total_accounts}
+
+    async def get_team_productivity_from_views(
+        self,
+        organization_id: uuid.UUID,
+    ) -> dict[str, Any]:
+        metric_rows = await self._session.execute(
+            text(
+                f"""
+                SELECT
+                    user_id,
+                    open_tasks,
+                    completed_tasks_30d,
+                    assigned_open_cases,
+                    closed_cases_30d
+                FROM {TEAM_PRODUCTIVITY_MV}
+                WHERE organization_id = :organization_id
+                """
+            ),
+            {"organization_id": organization_id},
+        )
+        metrics_by_user = {
+            row[0]: {
+                "open_tasks": int(row[1]),
+                "completed_tasks_30d": int(row[2]),
+                "assigned_open_cases": int(row[3]),
+                "closed_cases_30d": int(row[4]),
+            }
+            for row in metric_rows.all()
+        }
+
+        users_result = await self._session.execute(
+            select(User).where(
+                User.organization_id == organization_id,
+                User.is_active.is_(True),
+                User.deleted_at.is_(None),
+            )
+        )
+        users = list(users_result.scalars().all())
+
+        members = []
+        for user in users:
+            metrics = metrics_by_user.get(
+                user.id,
+                {
+                    "open_tasks": 0,
+                    "completed_tasks_30d": 0,
+                    "assigned_open_cases": 0,
+                    "closed_cases_30d": 0,
+                },
+            )
+            members.append(
+                {
+                    "user_id": user.id,
+                    "email": user.email,
+                    "full_name": f"{user.first_name} {user.last_name}".strip(),
+                    **metrics,
+                }
+            )
+
+        members.sort(
+            key=lambda item: (
+                -cast(int, item["completed_tasks_30d"]),
+                cast(str, item["full_name"]).lower(),
+            )
+        )
+
+        return {
+            "members": members,
+            "open_tasks_total": sum(item["open_tasks"] for item in members),
+            "completed_tasks_30d_total": sum(item["completed_tasks_30d"] for item in members),
+            "assigned_open_cases_total": sum(item["assigned_open_cases"] for item in members),
+            "closed_cases_30d_total": sum(item["closed_cases_30d"] for item in members),
         }

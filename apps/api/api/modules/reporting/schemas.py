@@ -77,3 +77,47 @@ class EnterpriseReportingStatusResponse(BaseSchema):
     enterprise_reporting_enabled: bool
     capabilities: list[str]
     deferred_capabilities: list[str]
+
+
+class MaterializedReportingStatusResponse(BaseSchema):
+    enabled: bool
+    views: list[str]
+    last_refreshed_at: datetime | None
+
+
+class ReportingMvRefreshRunResponse(BaseSchema):
+    id: uuid.UUID
+    organization_id: uuid.UUID | None
+    trigger_source: str
+    status: str
+    views_refreshed: int
+    started_at: datetime
+    completed_at: datetime
+    error_message: str | None
+
+    @classmethod
+    def from_model(cls, run: object) -> "ReportingMvRefreshRunResponse":
+        from api.modules.reporting.materialized_models import ReportingMvRefreshRun
+
+        if not isinstance(run, ReportingMvRefreshRun):
+            raise TypeError("Expected ReportingMvRefreshRun")
+        return cls(
+            id=run.id,
+            organization_id=run.organization_id,
+            trigger_source=run.trigger_source.value,
+            status=run.status.value,
+            views_refreshed=run.views_refreshed,
+            started_at=run.started_at,
+            completed_at=run.completed_at,
+            error_message=run.error_message,
+        )
+
+
+class ReportingMvRefreshRunListParams(BaseSchema):
+    page: int = 1
+    page_size: int = 20
+
+
+class ReportingMvRefreshResultResponse(BaseSchema):
+    views_refreshed: int
+    run: ReportingMvRefreshRunResponse

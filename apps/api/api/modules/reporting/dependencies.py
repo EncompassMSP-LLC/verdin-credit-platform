@@ -1,4 +1,4 @@
-"""Reporting route authentication dependencies."""
+"""Reporting route authentication and feature gate dependencies."""
 
 import uuid
 
@@ -7,6 +7,7 @@ from fastapi.security import HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.core.api_keys import API_KEY_PREFIX
+from api.core.feature_flags import FeatureFlag, is_feature_enabled
 from api.core.permissions import has_permission
 from api.database.session import get_db
 from api.modules.auth.dependencies import authenticate_staff_user, optional_bearer
@@ -59,3 +60,11 @@ async def get_reporting_organization_id(
             detail="Insufficient permissions to view reporting",
         )
     return user.organization_id
+
+
+def require_materialized_reporting_enabled() -> None:
+    if not is_feature_enabled(FeatureFlag.ENABLE_MATERIALIZED_REPORTING):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Materialized reporting is not enabled",
+        )

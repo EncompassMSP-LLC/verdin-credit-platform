@@ -17,6 +17,7 @@ class FeatureFlag(StrEnum):
     ENABLE_COMPLIANCE_ENFORCEMENT = "ENABLE_COMPLIANCE_ENFORCEMENT"
     ENABLE_CLIENT_PORTAL = "ENABLE_CLIENT_PORTAL"
     ENABLE_PORTAL_PUSH = "ENABLE_PORTAL_PUSH"
+    ENABLE_MATERIALIZED_REPORTING = "ENABLE_MATERIALIZED_REPORTING"
 
 
 class FeatureFlags(BaseSettings):
@@ -56,6 +57,10 @@ class FeatureFlags(BaseSettings):
         default=False,
         description="Enable portal push notification scaffold",
     )
+    enable_materialized_reporting: bool = Field(
+        default=False,
+        description="Enable materialized reporting views for bureau and team metrics",
+    )
 
 
 _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
@@ -68,6 +73,7 @@ _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
     FeatureFlag.ENABLE_COMPLIANCE_ENFORCEMENT: "enable_compliance_enforcement",
     FeatureFlag.ENABLE_CLIENT_PORTAL: "enable_client_portal",
     FeatureFlag.ENABLE_PORTAL_PUSH: "enable_portal_push",
+    FeatureFlag.ENABLE_MATERIALIZED_REPORTING: "enable_materialized_reporting",
 }
 
 
