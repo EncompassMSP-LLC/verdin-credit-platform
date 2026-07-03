@@ -376,16 +376,29 @@ Requires `ENABLE_ENTERPRISE=true`. TOTP enrollment requires `ENTERPRISE_MFA_MODE
 
 Enterprise org administration scaffold for API key lifecycle and organization summary metrics. All endpoints require `ENABLE_ENTERPRISE=true` and **admin** role.
 
-| Method | Path                              | Min role | Description                                   |
-| ------ | --------------------------------- | -------- | --------------------------------------------- |
-| GET    | `/org-admin/status`               | admin    | Org admin capabilities overview               |
-| GET    | `/org-admin/organization`         | admin    | Organization summary (users, active API keys) |
-| GET    | `/org-admin/api-keys`             | admin    | List organization API keys (prefix only)      |
-| POST   | `/org-admin/api-keys`             | admin    | Create API key (full secret returned once)    |
-| GET    | `/org-admin/api-keys/{id}`        | admin    | Get API key metadata                          |
-| POST   | `/org-admin/api-keys/{id}/revoke` | admin    | Revoke an active API key                      |
+| Method | Path                              | Min role | Description                                     |
+| ------ | --------------------------------- | -------- | ----------------------------------------------- |
+| GET    | `/org-admin/status`               | admin    | Org admin capabilities overview                 |
+| GET    | `/org-admin/organization`         | admin    | Organization summary (users, API keys, billing) |
+| GET    | `/org-admin/api-keys`             | admin    | List organization API keys (prefix only)        |
+| POST   | `/org-admin/api-keys`             | admin    | Create API key (full secret returned once)      |
+| GET    | `/org-admin/api-keys/{id}`        | admin    | Get API key metadata                            |
+| POST   | `/org-admin/api-keys/{id}/revoke` | admin    | Revoke an active API key                        |
 
-API keys use prefix `vrd_live_` with SHA-256 hashed storage. Scopes: `read`, `write`. SCIM, billing admin, cross-org roles, and usage analytics are deferred to 5.0+.
+API keys use prefix `vrd_live_` with SHA-256 hashed storage. Scopes: `read`, `write`. SCIM, cross-org roles, and usage analytics are deferred to 5.2+.
+
+## Billing
+
+Stripe customer and subscription scaffold for organization billing. Admin setup/subscribe endpoints require `ENABLE_BILLING=true` and `ENABLE_ENTERPRISE=true`. The Stripe webhook endpoint verifies `Stripe-Signature` and does not require staff JWT auth.
+
+| Method | Path                       | Min role  | Description                                     |
+| ------ | -------------------------- | --------- | ----------------------------------------------- |
+| GET    | `/billing/status`          | read_only | Stripe billing readiness and blockers           |
+| POST   | `/billing/setup`           | admin     | Create Stripe customer for current organization |
+| POST   | `/billing/subscribe`       | admin     | Create subscription for org billing customer    |
+| POST   | `/billing/webhooks/stripe` | public    | Stripe webhook handler (signature verified)     |
+
+`GET /org-admin/organization` embeds a `billing` section when billing is configured. Env vars: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_DEFAULT_PRICE_ID`. Usage metering and invoicing PDFs are deferred.
 
 ## Compliance center
 
