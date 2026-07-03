@@ -13,6 +13,7 @@ from api.modules.auth.models import User
 from api.modules.cases.models import Case
 from api.modules.cases.repository import CaseRepository
 from api.modules.client_portal.models import ClientPortalUser
+from api.modules.client_portal.push_dispatcher import dispatch_staff_message_push
 from api.modules.messaging.models import (
     MessageSenderRole,
     MessageThread,
@@ -181,6 +182,15 @@ class MessagingService:
             await publish_platform_event(
                 self._session,
                 staff_message_sent_event(thread, message, staff_user_id=user.id),
+            )
+            await dispatch_staff_message_push(
+                self._session,
+                organization_id=organization_id,
+                case_id=case_id,
+                client_id=case.client_id,
+                thread_message_id=message.id,
+                title="New message from your case team",
+                body_preview=data.body[:500],
             )
             await self._session.commit()
 

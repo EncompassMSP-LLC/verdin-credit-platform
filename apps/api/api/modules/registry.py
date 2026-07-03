@@ -7,6 +7,11 @@ from api.modules.auth.models import Organization, User
 from api.modules.billing.models import BillingWebhookEvent, OrganizationBillingAccount
 from api.modules.cases.models import Case, CaseStatus
 from api.modules.client_portal.models import ClientPortalUser
+from api.modules.client_portal.push_models import (
+    PortalPushDeliveryLog,
+    PortalPushDeliveryStatus,
+    PortalPushSubscription,
+)
 from api.modules.clients.models import Client, ClientContact, ClientStatus, ContactRelationship
 from api.modules.compliance.models import (
     ConsentRecord,
@@ -60,6 +65,9 @@ __all__ = [
     "Organization",
     "OrganizationApiKey",
     "OrganizationBillingAccount",
+    "PortalPushDeliveryLog",
+    "PortalPushDeliveryStatus",
+    "PortalPushSubscription",
     "RetentionPolicy",
     "RetentionEnforcementRun",
     "RetentionScope",

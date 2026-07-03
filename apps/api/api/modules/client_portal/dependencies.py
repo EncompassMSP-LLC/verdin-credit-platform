@@ -22,6 +22,14 @@ def require_client_portal_enabled() -> None:
         )
 
 
+def require_portal_push_enabled() -> None:
+    if not is_feature_enabled(FeatureFlag.ENABLE_PORTAL_PUSH):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Portal push is not enabled",
+        )
+
+
 async def get_current_portal_user(
     credentials: HTTPAuthorizationCredentials = Depends(portal_security),
     db: AsyncSession = Depends(get_db),

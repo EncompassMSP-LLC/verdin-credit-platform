@@ -587,7 +587,7 @@ packages/job-orchestrator/
 
 **Reason:** 5.1 billing epic requires a durable Stripe integration foundation before usage metering or invoicing ships in later versions.
 
-**Follow-up work:** Slice 7 — LLM document summary UI.
+**Follow-up work:** Slice 6 — compliance enforcement jobs.
 
 ### Decision: Compliance retention enforcement jobs
 
@@ -595,4 +595,10 @@ packages/job-orchestrator/
 
 **Reason:** 5.1 compliance epic requires executable retention enforcement with auditability beyond v5.0 policy placeholders.
 
-**Follow-up work:** Slice 7 — LLM document summary UI.
+**Follow-up work:** Slice 8 — portal push notification scaffold.
+
+**Decision:** Add `portal_push_subscriptions` and `portal_push_delivery_logs` tables, portal endpoints (`GET /portal/push/status`, `POST /portal/push/subscribe`, `DELETE /portal/push/subscriptions/{id}`), Web Push provider scaffold in `api/core/portal_push.py`, staff-message dispatch hook, `PortalPushPanel` UI, and `@verdin/api-client` helpers. Gated by `ENABLE_PORTAL_PUSH`.
+
+**Reason:** 5.1 portal real-time epic requires auditable push delivery for secure messaging beyond polling-only portal UX.
+
+**Follow-up work:** Slice 9 — reporting materialized views.

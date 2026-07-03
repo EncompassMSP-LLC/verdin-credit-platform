@@ -166,6 +166,14 @@ Secure messaging uses one thread per case (`message_threads` + `thread_messages`
 | GET    | `/portal/cases/{id}/messages` | portal JWT | List messages on a linked case thread |
 | POST   | `/portal/cases/{id}/messages` | portal JWT | Send a secure portal message          |
 
+Portal push notifications require `ENABLE_PORTAL_PUSH=true` and `ENABLE_CLIENT_PORTAL=true`. Staff replies on linked cases enqueue push delivery attempts for active portal subscriptions; delivery is audited in `portal_push_delivery_logs`. Web Push provider configuration uses `PORTAL_PUSH_PROVIDER=web_push` with VAPID keys.
+
+| Method | Path                              | Auth       | Description                           |
+| ------ | --------------------------------- | ---------- | ------------------------------------- |
+| GET    | `/portal/push/status`             | portal JWT | Push readiness and subscription count |
+| POST   | `/portal/push/subscribe`          | portal JWT | Register Web Push subscription keys   |
+| DELETE | `/portal/push/subscriptions/{id}` | portal JWT | Deactivate a push subscription        |
+
 ## Secure messaging (staff)
 
 | Method | Path                                       | Min role     | Description                              |
