@@ -13,6 +13,7 @@ class FeatureFlag(StrEnum):
     ENABLE_EMAIL_DELIVERY = "ENABLE_EMAIL_DELIVERY"
     ENABLE_IMPORTS = "ENABLE_IMPORTS"
     ENABLE_ENTERPRISE = "ENABLE_ENTERPRISE"
+    ENABLE_BILLING = "ENABLE_BILLING"
     ENABLE_CLIENT_PORTAL = "ENABLE_CLIENT_PORTAL"
 
 
@@ -37,6 +38,10 @@ class FeatureFlags(BaseSettings):
     )
     enable_imports: bool = Field(default=False, description="Enable data import pipeline")
     enable_enterprise: bool = Field(default=False, description="Enable enterprise-tier features")
+    enable_billing: bool = Field(
+        default=False,
+        description="Enable Stripe billing scaffold",
+    )
     enable_client_portal: bool = Field(
         default=False,
         description="Enable client-facing portal",
@@ -49,6 +54,7 @@ _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
     FeatureFlag.ENABLE_EMAIL_DELIVERY: "enable_email_delivery",
     FeatureFlag.ENABLE_IMPORTS: "enable_imports",
     FeatureFlag.ENABLE_ENTERPRISE: "enable_enterprise",
+    FeatureFlag.ENABLE_BILLING: "enable_billing",
     FeatureFlag.ENABLE_CLIENT_PORTAL: "enable_client_portal",
 }
 

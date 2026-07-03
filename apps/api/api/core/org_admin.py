@@ -8,11 +8,11 @@ _ORG_ADMIN_CAPABILITIES = [
     "api_key_auth_middleware",
     "scoped_key_permissions",
     "key_revocation_audit",
+    "billing_status",
 ]
 
 _DEFERRED_CAPABILITIES = [
     "scim_provisioning",
-    "billing_administration",
     "cross_org_admin_roles",
     "api_key_usage_analytics",
     "api_key_rate_limiting",

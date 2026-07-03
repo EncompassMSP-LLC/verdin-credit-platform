@@ -5,6 +5,7 @@ from fastapi import APIRouter
 from api.core.router import router as system_router
 from api.modules.accounts.router import router as accounts_router
 from api.modules.auth.router import router as auth_router
+from api.modules.billing.router import router as billing_router
 from api.modules.cases.router import router as cases_router
 from api.modules.client_portal.cases_router import router as client_portal_cases_router
 from api.modules.client_portal.documents_router import router as client_portal_documents_router
@@ -41,6 +42,7 @@ router.include_router(notifications_router)
 router.include_router(timeline_router)
 router.include_router(enterprise_router)
 router.include_router(org_admin_router)
+router.include_router(billing_router)
 router.include_router(messaging_router)
 router.include_router(llm_router)
 router.include_router(reporting_router)

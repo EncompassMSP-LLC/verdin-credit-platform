@@ -11,6 +11,7 @@ from api.core.audit import apply_audit_on_create, apply_audit_on_update
 from api.core.org_admin import get_org_admin_status
 from api.core.permissions import has_permission
 from api.modules.auth.models import User
+from api.modules.billing.service import BillingService
 from api.modules.org_admin.models import OrganizationApiKey
 from api.modules.org_admin.permissions import ORG_ADMIN_READ_ROLE, ORG_ADMIN_WRITE_ROLE
 from api.modules.org_admin.repository import OrgAdminRepository
@@ -24,13 +25,23 @@ from api.modules.org_admin.schemas import (
 
 
 class OrgAdminService:
-    def __init__(self, repo: OrgAdminRepository, session: AsyncSession | None = None) -> None:
+    def __init__(
+        self,
+        repo: OrgAdminRepository,
+        session: AsyncSession | None = None,
+        billing_service: BillingService | None = None,
+    ) -> None:
         self._repo = repo
         self._session = session
+        self._billing = billing_service
 
     @classmethod
     def from_session(cls, session: AsyncSession) -> "OrgAdminService":
-        return cls(OrgAdminRepository(session), session=session)
+        return cls(
+            OrgAdminRepository(session),
+            session=session,
+            billing_service=BillingService.from_session(session),
+        )
 
     def _require_organization(self, user: User) -> uuid.UUID:
         if user.organization_id is None:
@@ -71,6 +82,9 @@ class OrgAdminService:
 
         active_users = await self._repo.count_active_users(organization_id)
         active_api_keys = await self._repo.count_active_api_keys(organization_id)
+        billing = None
+        if self._billing is not None:
+            billing = await self._billing.get_organization_billing_summary(organization_id)
         return OrganizationAdminSummary(
             id=organization.id,
             name=organization.name,
@@ -78,6 +92,7 @@ class OrgAdminService:
             is_active=organization.is_active,
             active_user_count=active_users,
             active_api_key_count=active_api_keys,
+            billing=billing,
         )
 
     async def list_api_keys(self, user: User) -> list[ApiKeyResponse]:

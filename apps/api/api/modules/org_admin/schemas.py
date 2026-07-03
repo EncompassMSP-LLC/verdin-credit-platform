@@ -6,6 +6,7 @@ from datetime import datetime
 from pydantic import Field
 
 from api.core.responses import BaseSchema
+from api.modules.billing.schemas import OrganizationBillingSummary
 from api.modules.org_admin.models import ApiKeyScope, OrganizationApiKey
 
 
@@ -23,6 +24,7 @@ class OrganizationAdminSummary(BaseSchema):
     is_active: bool
     active_user_count: int
     active_api_key_count: int
+    billing: OrganizationBillingSummary | None = None
 
 
 class ApiKeyCreate(BaseSchema):

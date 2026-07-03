@@ -1,5 +1,7 @@
 import { apiPath, request } from './http';
 
+import type { OrganizationBillingSummary } from './billing';
+
 export type ApiKeyScope = 'read' | 'write';
 
 export interface OrgAdminStatus {
@@ -16,6 +18,7 @@ export interface OrganizationAdminSummary {
   is_active: boolean;
   active_user_count: number;
   active_api_key_count: number;
+  billing?: OrganizationBillingSummary | null;
 }
 
 export interface ApiKey {

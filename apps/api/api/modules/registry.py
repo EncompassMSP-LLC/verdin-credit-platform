@@ -4,6 +4,7 @@ from api.core.constants import UserRole
 from api.modules.accounts.dispute_letter_models import DisputeLetter, DisputeLetterStatus
 from api.modules.accounts.models import Account
 from api.modules.auth.models import Organization, User
+from api.modules.billing.models import BillingWebhookEvent, OrganizationBillingAccount
 from api.modules.cases.models import Case, CaseStatus
 from api.modules.client_portal.models import ClientPortalUser
 from api.modules.clients.models import Client, ClientContact, ClientStatus, ContactRelationship
@@ -30,6 +31,7 @@ from api.modules.timeline.models import Communication, TimelineEvent
 __all__ = [
     "Account",
     "ApiKeyScope",
+    "BillingWebhookEvent",
     "Case",
     "CaseStatus",
     "Client",
@@ -52,6 +54,7 @@ __all__ = [
     "NotificationCategory",
     "Organization",
     "OrganizationApiKey",
+    "OrganizationBillingAccount",
     "RetentionPolicy",
     "RetentionScope",
     "Task",

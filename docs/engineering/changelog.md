@@ -580,3 +580,11 @@ packages/job-orchestrator/
 **Reason:** 5.1 identity epic requires staff enrollment beyond the v5.0 readiness scaffold before SCIM or multi-IdP federation.
 
 **Follow-up work:** Slice 5 — Stripe billing scaffold.
+
+### Decision: Stripe billing scaffold
+
+**Decision:** Add `organization_billing_accounts` and `billing_webhook_events` tables, Stripe customer/subscription helpers, admin billing setup/subscribe endpoints, webhook handler at `POST /billing/webhooks/stripe`, and embedded `billing` on `GET /org-admin/organization`. Gated by `ENABLE_BILLING`.
+
+**Reason:** 5.1 billing epic requires a durable Stripe integration foundation before usage metering or invoicing ships in later versions.
+
+**Follow-up work:** Slice 6 — compliance enforcement jobs.

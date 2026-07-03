@@ -119,6 +119,18 @@ export {
 } from './enterprise';
 
 export {
+  getBillingStatus,
+  setupOrganizationBilling,
+  subscribeOrganizationBilling,
+  type BillingSetupResponse,
+  type BillingStatus,
+  type BillingSubscribeInput,
+  type BillingSubscribeResponse,
+  type OrganizationBillingSummary,
+  type SubscriptionStatus,
+} from './billing';
+
+export {
   createOrganizationApiKey,
   getOrgAdminStatus,
   getOrganizationAdminSummary,
