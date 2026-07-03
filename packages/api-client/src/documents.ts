@@ -274,6 +274,22 @@ export async function retryDocumentOcr(documentId: string): Promise<DocumentOcrR
   });
 }
 
+export interface DocumentLlmSummary {
+  document_id: string;
+  summary: string;
+  model: string;
+  provider: string;
+  prompt_hash: string;
+  generated_at: string;
+  pii_scrubbed: boolean;
+}
+
+export async function generateDocumentLlmSummary(documentId: string): Promise<DocumentLlmSummary> {
+  return request<DocumentLlmSummary>(apiPath(`/documents/${documentId}/llm-summary`), {
+    method: 'POST',
+  });
+}
+
 export async function getDocumentMetadata(documentId: string): Promise<DocumentMetadata> {
   return request<DocumentMetadata>(apiPath(`/documents/${documentId}/metadata`));
 }

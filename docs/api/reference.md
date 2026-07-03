@@ -283,8 +283,11 @@ Secure document storage with MinIO, SHA-256 hashing, versioning, and duplicate d
 | POST   | `/documents/{document_id}/resolutions/resolve`                     | case_manager | Run entity resolution                           |
 | POST   | `/documents/{document_id}/resolutions/{resolution_id}/confirm`     | case_manager | Confirm or manually select match                |
 | POST   | `/documents/{document_id}/resolutions/{resolution_id}/reject`      | case_manager | Reject proposed match                           |
+| POST   | `/documents/{document_id}/llm-summary`                             | case_manager | Generate scrubbed document summary              |
 
 **List query parameters:** `metadata_status` (`pending`, `extracted`, `failed`), `resolution_status` (`matched`, `ambiguous`, `unmatched`, `confirmed`, `rejected`).
+
+`POST /documents/{document_id}/llm-summary` invokes the configured LLM provider when `ENABLE_LLM` and ADR-012 gates pass. Document context (metadata + truncated OCR text) is PII-scrubbed before the provider call; timeline event `DOCUMENT_LLM_SUMMARY_GENERATED` records model, provider, and prompt hash.
 
 ### Upload (multipart form)
 
