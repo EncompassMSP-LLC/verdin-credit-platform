@@ -28,3 +28,4 @@ pytest-cov>=6.0.0
 pypdf>=5.1.0
 ruff>=0.8.4
 mypy>=1.14.0
+pyotp>=2.9.0

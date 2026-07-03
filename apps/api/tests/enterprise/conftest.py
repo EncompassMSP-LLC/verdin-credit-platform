@@ -8,6 +8,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 import api.models  # noqa: F401 — register all ORM mappers
 from api.core.constants import UserRole
+from api.core.enterprise_identity import get_enterprise_identity_settings
+from api.core.feature_flags import get_feature_flags
 from api.core.security import hash_password
 from api.modules.auth.models import Organization, User
 
@@ -54,3 +56,33 @@ def _login(client: TestClient, email: str) -> dict[str, str]:
 @pytest.fixture
 def manager_headers(api_client: TestClient, case_manager_user: User) -> dict[str, str]:
     return _login(api_client, case_manager_user.email)
+
+
+@pytest.fixture
+def enterprise_oidc_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("ENABLE_ENTERPRISE", "true")
+    monkeypatch.setenv("ENTERPRISE_SSO_PROVIDER", "oidc")
+    monkeypatch.setenv("ENTERPRISE_SSO_ISSUER_URL", "https://idp.example.com")
+    monkeypatch.setenv("ENTERPRISE_SSO_CLIENT_ID", "verdin-client")
+    monkeypatch.setenv("ENTERPRISE_SSO_CLIENT_SECRET", "secret")
+    monkeypatch.setenv(
+        "ENTERPRISE_SSO_REDIRECT_URI",
+        "https://app.verdin.example/auth/sso/callback",
+    )
+    get_feature_flags.cache_clear()
+    get_enterprise_identity_settings.cache_clear()
+    yield
+    get_feature_flags.cache_clear()
+    get_enterprise_identity_settings.cache_clear()
+
+
+@pytest.fixture
+def enterprise_totp_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("ENABLE_ENTERPRISE", "true")
+    monkeypatch.setenv("ENTERPRISE_MFA_MODE", "totp")
+    monkeypatch.setenv("ENTERPRISE_MFA_ISSUER", "Verdin Credit Platform")
+    get_feature_flags.cache_clear()
+    get_enterprise_identity_settings.cache_clear()
+    yield
+    get_feature_flags.cache_clear()
+    get_enterprise_identity_settings.cache_clear()

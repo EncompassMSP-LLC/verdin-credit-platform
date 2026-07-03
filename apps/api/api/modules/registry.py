@@ -15,6 +15,7 @@ from api.modules.compliance.models import (
     RetentionScope,
 )
 from api.modules.documents.models import Document
+from api.modules.enterprise.models import UserSsoEnrollment, UserTotpEnrollment
 from api.modules.messaging.models import (
     MessageSenderRole,
     MessageThread,
@@ -60,4 +61,6 @@ __all__ = [
     "TimelineEvent",
     "User",
     "UserRole",
+    "UserSsoEnrollment",
+    "UserTotpEnrollment",
 ]

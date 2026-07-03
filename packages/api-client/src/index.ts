@@ -100,7 +100,23 @@ export {
 
 export { getLlmStatus, type LlmGateStatus } from './llm';
 
-export { getEnterpriseIdentityStatus, type EnterpriseIdentityStatus } from './enterprise';
+export {
+  completeSsoEnrollment,
+  confirmTotpEnrollment,
+  disableTotpEnrollment,
+  getEnterpriseIdentityStatus,
+  getSsoEnrollmentStatus,
+  getTotpEnrollmentStatus,
+  startSsoEnrollment,
+  startTotpEnrollment,
+  type EnterpriseIdentityStatus,
+  type SsoEnrollmentComplete,
+  type SsoEnrollmentCompleteInput,
+  type SsoEnrollmentStart,
+  type SsoEnrollmentStatus,
+  type TotpEnrollmentStart,
+  type TotpEnrollmentStatus,
+} from './enterprise';
 
 export {
   createOrganizationApiKey,

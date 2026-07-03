@@ -357,13 +357,20 @@ Requires `ENABLE_LLM=true` and `LLM_PROVIDER` / `LLM_API_KEY` / `LLM_MODEL` for 
 
 ## Enterprise identity
 
-MFA and SSO readiness scaffold for staff users. Portal authentication (`/portal/auth/*`) remains a separate partition and is unchanged.
+MFA and SSO readiness plus staff enrollment flows. Portal authentication (`/portal/auth/*`) remains a separate partition.
 
-| Method | Path                 | Min role  | Description                               |
-| ------ | -------------------- | --------- | ----------------------------------------- |
-| GET    | `/enterprise/status` | read_only | Enterprise MFA/SSO readiness and blockers |
+| Method | Path                                  | Min role  | Description                            |
+| ------ | ------------------------------------- | --------- | -------------------------------------- |
+| GET    | `/enterprise/status`                  | read_only | Enterprise MFA/SSO readiness           |
+| POST   | `/enterprise/mfa/totp/enroll`         | read_only | Start TOTP enrollment (secret + URI)   |
+| POST   | `/enterprise/mfa/totp/confirm`        | read_only | Confirm TOTP with verification code    |
+| GET    | `/enterprise/mfa/totp`                | read_only | Current user TOTP enrollment status    |
+| DELETE | `/enterprise/mfa/totp`                | read_only | Disable enrolled TOTP for current user |
+| POST   | `/enterprise/sso/enrollment/start`    | read_only | Start OIDC account linking             |
+| POST   | `/enterprise/sso/enrollment/complete` | read_only | Complete OIDC linking with auth code   |
+| GET    | `/enterprise/sso/enrollment`          | read_only | Current user OIDC link status          |
 
-Requires `ENABLE_ENTERPRISE=true`. Configure `ENTERPRISE_SSO_PROVIDER` (`oidc` / `saml`) with issuer and client credentials, and/or `ENTERPRISE_MFA_MODE=totp` with `ENTERPRISE_MFA_ISSUER`. No external IdP or TOTP enrollment calls are executed in this slice.
+Requires `ENABLE_ENTERPRISE=true`. TOTP enrollment requires `ENTERPRISE_MFA_MODE=totp` and `ENTERPRISE_MFA_ISSUER`. OIDC enrollment requires `ENTERPRISE_SSO_PROVIDER=oidc` with issuer, client credentials, and `ENTERPRISE_SSO_REDIRECT_URI`. SAML and SCIM remain deferred.
 
 ## Organization admin
 

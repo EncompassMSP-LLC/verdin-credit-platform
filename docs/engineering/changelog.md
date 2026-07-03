@@ -572,3 +572,11 @@ packages/job-orchestrator/
 **Reason:** 5.1 requires at least one production integration path authenticated by organization API keys before billing and external automation expand.
 
 **Follow-up work:** Slice 3 — production SMS delivery.
+
+### Decision: IdP and TOTP staff enrollment
+
+**Decision:** Add TOTP enrollment (`/enterprise/mfa/totp/*`) with encrypted secret storage and OIDC account linking (`/enterprise/sso/enrollment/*`) with signed state tokens, `user_totp_enrollments` and `user_sso_enrollments` tables, and `@verdin/api-client` enrollment helpers. Gated behind `ENABLE_ENTERPRISE`.
+
+**Reason:** 5.1 identity epic requires staff enrollment beyond the v5.0 readiness scaffold before SCIM or multi-IdP federation.
+
+**Follow-up work:** Slice 5 — Stripe billing scaffold.
