@@ -243,6 +243,7 @@ Scope: [version-5.1-scope.md](version-5.1-scope.md) · Checklist: [version-5.1-c
 | API key auth middleware | 5.1     | Partial | ✅      | —        | ✅  | —   | ✅    | Org admin    | `GET /reporting/operations` via `X-API-Key` or Bearer key |
 | Identity enrollment     | 5.1     | Partial | ✅      | —        | ✅  | —   | ✅    | Enterprise   | TOTP + OIDC staff enrollment behind `ENABLE_ENTERPRISE`   |
 | Stripe billing scaffold | 5.1     | Partial | ✅      | —        | ✅  | —   | ✅    | Org admin    | Customer + subscription + webhook; billing on org summary |
+| Retention enforcement   | 5.1     | Partial | ✅      | —        | ✅  | —   | ✅    | Compliance   | Manual + scheduled jobs; audit log; `audit_logs` skipped  |
 
 ---
 

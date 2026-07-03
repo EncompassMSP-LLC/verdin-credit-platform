@@ -14,6 +14,7 @@ class FeatureFlag(StrEnum):
     ENABLE_IMPORTS = "ENABLE_IMPORTS"
     ENABLE_ENTERPRISE = "ENABLE_ENTERPRISE"
     ENABLE_BILLING = "ENABLE_BILLING"
+    ENABLE_COMPLIANCE_ENFORCEMENT = "ENABLE_COMPLIANCE_ENFORCEMENT"
     ENABLE_CLIENT_PORTAL = "ENABLE_CLIENT_PORTAL"
 
 
@@ -42,6 +43,10 @@ class FeatureFlags(BaseSettings):
         default=False,
         description="Enable Stripe billing scaffold",
     )
+    enable_compliance_enforcement: bool = Field(
+        default=False,
+        description="Enable retention enforcement jobs",
+    )
     enable_client_portal: bool = Field(
         default=False,
         description="Enable client-facing portal",
@@ -55,6 +60,7 @@ _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
     FeatureFlag.ENABLE_IMPORTS: "enable_imports",
     FeatureFlag.ENABLE_ENTERPRISE: "enable_enterprise",
     FeatureFlag.ENABLE_BILLING: "enable_billing",
+    FeatureFlag.ENABLE_COMPLIANCE_ENFORCEMENT: "enable_compliance_enforcement",
     FeatureFlag.ENABLE_CLIENT_PORTAL: "enable_client_portal",
 }
 

@@ -8,13 +8,13 @@ _COMPLIANCE_CAPABILITIES = [
     "consent_withdrawal",
     "retention_policy_placeholders",
     "org_scoped_consent_history",
+    "retention_enforcement_jobs",
 ]
 
 _DEFERRED_CAPABILITIES = [
     "legal_sign_off_workflows",
     "automated_bureau_filing",
     "full_audit_export_suite",
-    "retention_enforcement_jobs",
 ]
 
 

@@ -587,4 +587,12 @@ packages/job-orchestrator/
 
 **Reason:** 5.1 billing epic requires a durable Stripe integration foundation before usage metering or invoicing ships in later versions.
 
-**Follow-up work:** Slice 6 — compliance enforcement jobs.
+**Follow-up work:** Slice 7 — LLM document summary UI.
+
+### Decision: Compliance retention enforcement jobs
+
+**Decision:** Add `retention_enforcement_runs` audit table, admin compliance endpoints (`GET /compliance/enforcement/status`, `GET /compliance/enforcement/runs`, `POST /compliance/enforcement/run`), worker job `retention_enforcement_scan` (`0 3 * * *` UTC), and soft-delete enforcement for `documents`, `communications`, and `client_profiles` scopes. `audit_logs` scope records `skipped` runs until append-only purge is implemented. Gated by `ENABLE_COMPLIANCE_ENFORCEMENT`.
+
+**Reason:** 5.1 compliance epic requires executable retention enforcement with auditability beyond v5.0 policy placeholders.
+
+**Follow-up work:** Slice 7 — LLM document summary UI.
