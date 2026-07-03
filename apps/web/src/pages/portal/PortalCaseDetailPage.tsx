@@ -4,6 +4,7 @@ import { Button, Card } from '@verdin/ui';
 import { Link, useParams } from 'react-router-dom';
 import { PortalCaseDocuments } from '../../components/portal/PortalCaseDocuments';
 import { PortalCaseMessages } from '../../components/portal/PortalCaseMessages';
+import { PortalPushPanel } from '../../components/portal/PortalPushPanel';
 import { usePortalAuth } from '../../lib/portal-auth';
 
 function formatDate(value: string | null) {
@@ -113,6 +114,7 @@ export function PortalCaseDetailPage() {
             ) : null}
 
             {caseId ? <PortalCaseDocuments caseId={caseId} /> : null}
+            <PortalPushPanel />
             {caseId ? <PortalCaseMessages caseId={caseId} /> : null}
           </Card>
         ) : null}

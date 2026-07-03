@@ -16,6 +16,7 @@ class FeatureFlag(StrEnum):
     ENABLE_BILLING = "ENABLE_BILLING"
     ENABLE_COMPLIANCE_ENFORCEMENT = "ENABLE_COMPLIANCE_ENFORCEMENT"
     ENABLE_CLIENT_PORTAL = "ENABLE_CLIENT_PORTAL"
+    ENABLE_PORTAL_PUSH = "ENABLE_PORTAL_PUSH"
 
 
 class FeatureFlags(BaseSettings):
@@ -51,6 +52,10 @@ class FeatureFlags(BaseSettings):
         default=False,
         description="Enable client-facing portal",
     )
+    enable_portal_push: bool = Field(
+        default=False,
+        description="Enable portal push notification scaffold",
+    )
 
 
 _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
@@ -62,6 +67,7 @@ _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
     FeatureFlag.ENABLE_BILLING: "enable_billing",
     FeatureFlag.ENABLE_COMPLIANCE_ENFORCEMENT: "enable_compliance_enforcement",
     FeatureFlag.ENABLE_CLIENT_PORTAL: "enable_client_portal",
+    FeatureFlag.ENABLE_PORTAL_PUSH: "enable_portal_push",
 }
 
 

@@ -9,6 +9,7 @@ from api.core.responses import BaseSchema
 from api.modules.auth.schemas import LoginRequest, Password, RefreshTokenRequest, TokenResponse
 from api.modules.cases.models import CaseStage, CaseStatus
 from api.modules.client_portal.models import ClientPortalUser
+from api.modules.client_portal.push_models import PortalPushSubscription
 
 PortalLoginRequest = LoginRequest
 PortalRefreshTokenRequest = RefreshTokenRequest
@@ -94,3 +95,37 @@ class PortalDocumentResponse(BaseSchema):
 
 class PortalCaseDocumentsResponse(BaseSchema):
     items: list[PortalDocumentResponse]
+
+
+class PortalPushSubscribeRequest(BaseSchema):
+    endpoint: str
+    p256dh_key: str
+    auth_key: str
+    user_agent: str | None = None
+
+
+class PortalPushStatusResponse(BaseSchema):
+    enabled: bool
+    ready: bool
+    provider: str
+    vapid_public_key: str | None
+    blockers: list[str]
+    active_subscription_count: int
+
+
+class PortalPushSubscriptionResponse(BaseSchema):
+    id: uuid.UUID
+    endpoint: str
+    is_active: bool
+    created_at: datetime
+    updated_at: datetime
+
+    @classmethod
+    def from_model(cls, subscription: PortalPushSubscription) -> "PortalPushSubscriptionResponse":
+        return cls(
+            id=subscription.id,
+            endpoint=subscription.endpoint,
+            is_active=subscription.is_active,
+            created_at=subscription.created_at,
+            updated_at=subscription.updated_at,
+        )

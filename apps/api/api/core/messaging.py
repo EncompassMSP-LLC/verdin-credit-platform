@@ -7,10 +7,11 @@ _MESSAGING_CAPABILITIES = [
     "portal_client_messages",
     "staff_replies",
     "org_scoped_message_history",
+    "portal_push_scaffold",
 ]
 
 _DEFERRED_CAPABILITIES = [
-    "real_time_push_notifications",
+    "websocket_live_feed",
     "email_bridge",
     "attachment_support",
     "message_encryption_at_rest",

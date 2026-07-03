@@ -178,6 +178,49 @@ export async function sendPortalCaseMessage(
   });
 }
 
+export interface PortalPushStatus {
+  enabled: boolean;
+  ready: boolean;
+  provider: string;
+  vapid_public_key: string | null;
+  blockers: string[];
+  active_subscription_count: number;
+}
+
+export interface PortalPushSubscribeInput {
+  endpoint: string;
+  p256dh_key: string;
+  auth_key: string;
+  user_agent?: string | null;
+}
+
+export interface PortalPushSubscription {
+  id: string;
+  endpoint: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export async function getPortalPushStatus(): Promise<PortalPushStatus> {
+  return request<PortalPushStatus>(apiPath('/portal/push/status'));
+}
+
+export async function subscribePortalPush(
+  input: PortalPushSubscribeInput,
+): Promise<PortalPushSubscription> {
+  return request<PortalPushSubscription>(apiPath('/portal/push/subscribe'), {
+    method: 'POST',
+    body: input,
+  });
+}
+
+export async function unsubscribePortalPush(subscriptionId: string): Promise<void> {
+  await request<void>(apiPath(`/portal/push/subscriptions/${subscriptionId}`), {
+    method: 'DELETE',
+  });
+}
+
 export async function provisionClientPortalUser(
   clientId: string,
   input: ProvisionPortalUserInput,

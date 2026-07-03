@@ -1,5 +1,10 @@
 export type FeatureFlag =
-  'ENABLE_AI' | 'ENABLE_LLM' | 'ENABLE_IMPORTS' | 'ENABLE_ENTERPRISE' | 'ENABLE_CLIENT_PORTAL';
+  | 'ENABLE_AI'
+  | 'ENABLE_LLM'
+  | 'ENABLE_IMPORTS'
+  | 'ENABLE_ENTERPRISE'
+  | 'ENABLE_CLIENT_PORTAL'
+  | 'ENABLE_PORTAL_PUSH';
 
 const VITE_ENV_KEYS: Record<FeatureFlag, keyof ImportMetaEnv> = {
   ENABLE_AI: 'VITE_ENABLE_AI',
@@ -7,6 +12,7 @@ const VITE_ENV_KEYS: Record<FeatureFlag, keyof ImportMetaEnv> = {
   ENABLE_IMPORTS: 'VITE_ENABLE_IMPORTS',
   ENABLE_ENTERPRISE: 'VITE_ENABLE_ENTERPRISE',
   ENABLE_CLIENT_PORTAL: 'VITE_ENABLE_CLIENT_PORTAL',
+  ENABLE_PORTAL_PUSH: 'VITE_ENABLE_PORTAL_PUSH',
 };
 
 function parseEnvBoolean(value: string | undefined): boolean {
@@ -28,4 +34,5 @@ export const featureFlags = {
   enableImports: isFeatureEnabled('ENABLE_IMPORTS'),
   enableEnterprise: isFeatureEnabled('ENABLE_ENTERPRISE'),
   enableClientPortal: isFeatureEnabled('ENABLE_CLIENT_PORTAL'),
+  enablePortalPush: isFeatureEnabled('ENABLE_PORTAL_PUSH'),
 } as const;

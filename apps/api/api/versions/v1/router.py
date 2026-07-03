@@ -10,6 +10,7 @@ from api.modules.cases.router import router as cases_router
 from api.modules.client_portal.cases_router import router as client_portal_cases_router
 from api.modules.client_portal.documents_router import router as client_portal_documents_router
 from api.modules.client_portal.messaging_router import router as client_portal_messaging_router
+from api.modules.client_portal.push_router import router as client_portal_push_router
 from api.modules.client_portal.router import router as client_portal_router
 from api.modules.clients.router import router as clients_router
 from api.modules.compliance.router import router as compliance_router
@@ -34,6 +35,7 @@ router.include_router(client_portal_router)
 router.include_router(client_portal_cases_router)
 router.include_router(client_portal_documents_router)
 router.include_router(client_portal_messaging_router)
+router.include_router(client_portal_push_router)
 router.include_router(dashboard_router)
 router.include_router(accounts_router)
 router.include_router(documents_router)
