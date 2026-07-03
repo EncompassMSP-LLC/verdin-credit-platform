@@ -9,6 +9,7 @@ from api.core.pagination import PaginatedResponse
 from api.database.session import get_db
 from api.modules.auth.dependencies import get_current_user
 from api.modules.auth.models import User
+from api.modules.compliance.dependencies import require_compliance_enforcement_enabled
 from api.modules.compliance.models import ConsentStatus, ConsentType, RetentionScope
 from api.modules.compliance.schemas import (
     ComplianceCenterStatusResponse,
@@ -17,6 +18,10 @@ from api.modules.compliance.schemas import (
     ConsentRecordResponse,
     ConsentSortField,
     ConsentSortOrder,
+    RetentionEnforcementRunListParams,
+    RetentionEnforcementRunResponse,
+    RetentionEnforcementRunResultResponse,
+    RetentionEnforcementStatusResponse,
     RetentionPolicyCreate,
     RetentionPolicyListParams,
     RetentionPolicyResponse,
@@ -156,3 +161,42 @@ async def update_retention_policy(
     service: ComplianceService = Depends(get_compliance_service),
 ) -> RetentionPolicyResponse:
     return await service.update_retention_policy(current_user, policy_id, body)
+
+
+@router.get(
+    "/enforcement/status",
+    response_model=RetentionEnforcementStatusResponse,
+    dependencies=[Depends(require_compliance_enforcement_enabled)],
+)
+async def get_enforcement_status(
+    current_user: User = Depends(get_current_user),
+    service: ComplianceService = Depends(get_compliance_service),
+) -> RetentionEnforcementStatusResponse:
+    return await service.get_enforcement_status(current_user)
+
+
+@router.get(
+    "/enforcement/runs",
+    response_model=PaginatedResponse[RetentionEnforcementRunResponse],
+    dependencies=[Depends(require_compliance_enforcement_enabled)],
+)
+async def list_enforcement_runs(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    current_user: User = Depends(get_current_user),
+    service: ComplianceService = Depends(get_compliance_service),
+) -> PaginatedResponse[RetentionEnforcementRunResponse]:
+    params = RetentionEnforcementRunListParams(page=page, page_size=page_size)
+    return await service.list_enforcement_runs(current_user, params)
+
+
+@router.post(
+    "/enforcement/run",
+    response_model=RetentionEnforcementRunResultResponse,
+    dependencies=[Depends(require_compliance_enforcement_enabled)],
+)
+async def run_retention_enforcement(
+    current_user: User = Depends(get_current_user),
+    service: ComplianceService = Depends(get_compliance_service),
+) -> RetentionEnforcementRunResultResponse:
+    return await service.run_enforcement(current_user)

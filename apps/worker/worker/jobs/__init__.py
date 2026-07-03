@@ -10,6 +10,7 @@ from worker.jobs import (
     ocr,
     overdue_investigation_scan,
     report_import,
+    retention_enforcement_scan,
 )
 
 __all__ = [
@@ -22,4 +23,5 @@ __all__ = [
     "ocr",
     "overdue_investigation_scan",
     "report_import",
+    "retention_enforcement_scan",
 ]

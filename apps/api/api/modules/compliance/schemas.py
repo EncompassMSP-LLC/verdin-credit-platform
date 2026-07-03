@@ -12,6 +12,9 @@ from api.modules.compliance.models import (
     ConsentRecord,
     ConsentStatus,
     ConsentType,
+    EnforcementRunStatus,
+    EnforcementTriggerSource,
+    RetentionEnforcementRun,
     RetentionPolicy,
     RetentionScope,
 )
@@ -138,3 +141,53 @@ class ComplianceCenterStatusResponse(BaseSchema):
     retention_scope_count: int
     capabilities: list[str]
     deferred_capabilities: list[str]
+
+
+class RetentionEnforcementStatusResponse(BaseSchema):
+    enabled: bool
+    active_policy_count: int
+    last_run_at: datetime | None
+
+
+class RetentionEnforcementRunResponse(BaseSchema):
+    id: uuid.UUID
+    organization_id: uuid.UUID
+    policy_id: uuid.UUID | None
+    scope: RetentionScope | None
+    trigger_source: EnforcementTriggerSource
+    status: EnforcementRunStatus
+    items_scanned: int
+    items_enforced: int
+    started_at: datetime
+    completed_at: datetime
+    error_message: str | None
+    created_at: datetime
+    updated_at: datetime
+
+    @classmethod
+    def from_model(cls, run: RetentionEnforcementRun) -> "RetentionEnforcementRunResponse":
+        return cls(
+            id=run.id,
+            organization_id=run.organization_id,
+            policy_id=run.policy_id,
+            scope=run.scope,
+            trigger_source=run.trigger_source,
+            status=run.status,
+            items_scanned=run.items_scanned,
+            items_enforced=run.items_enforced,
+            started_at=run.started_at,
+            completed_at=run.completed_at,
+            error_message=run.error_message,
+            created_at=run.created_at,
+            updated_at=run.updated_at,
+        )
+
+
+class RetentionEnforcementRunListParams(PaginationParams):
+    pass
+
+
+class RetentionEnforcementRunResultResponse(BaseSchema):
+    policies_processed: int
+    items_enforced: int
+    runs: list[RetentionEnforcementRunResponse]

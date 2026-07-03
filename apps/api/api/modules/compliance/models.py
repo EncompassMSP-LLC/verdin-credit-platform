@@ -80,3 +80,56 @@ class RetentionPolicy(Base, TimestampMixin, SoftDeleteMixin, AuditMixin):
     retention_days: Mapped[int] = mapped_column(Integer, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+
+class EnforcementTriggerSource(StrEnum):
+    MANUAL = "manual"
+    SCHEDULED = "scheduled"
+
+
+class EnforcementRunStatus(StrEnum):
+    COMPLETED = "completed"
+    FAILED = "failed"
+    SKIPPED = "skipped"
+
+
+class RetentionEnforcementRun(Base, TimestampMixin):
+    __tablename__ = "retention_enforcement_runs"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    organization_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("organizations.id"), nullable=False, index=True
+    )
+    policy_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("retention_policies.id"), nullable=True, index=True
+    )
+    scope: Mapped[RetentionScope | None] = mapped_column(
+        Enum(
+            RetentionScope,
+            name="retention_scope",
+            values_callable=lambda x: [e.value for e in x],
+            create_constraint=False,
+        ),
+        nullable=True,
+    )
+    trigger_source: Mapped[EnforcementTriggerSource] = mapped_column(
+        Enum(
+            EnforcementTriggerSource,
+            name="enforcement_trigger_source",
+            values_callable=lambda x: [e.value for e in x],
+        ),
+        nullable=False,
+    )
+    status: Mapped[EnforcementRunStatus] = mapped_column(
+        Enum(
+            EnforcementRunStatus,
+            name="enforcement_run_status",
+            values_callable=lambda x: [e.value for e in x],
+        ),
+        nullable=False,
+    )
+    items_scanned: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    items_enforced: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    completed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)

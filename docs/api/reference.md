@@ -416,6 +416,14 @@ Consent history and retention policy placeholders for CROA/FCRA-oriented operati
 | GET    | `/compliance/retention-policies/{policy_id}` | read_only    | Get retention policy                    |
 | PATCH  | `/compliance/retention-policies/{policy_id}` | admin        | Update retention policy placeholder     |
 
+Retention enforcement endpoints require `ENABLE_COMPLIANCE_ENFORCEMENT=true`. Active retention policies soft-delete expired records in supported scopes (`documents`, `communications`, `client_profiles`); `audit_logs` scope runs are recorded as `skipped` until append-only purge is implemented. Manual runs are admin-only; scheduled runs use worker job `retention_enforcement_scan` (`0 3 * * *` UTC).
+
+| Method | Path                             | Role      | Description                                      |
+| ------ | -------------------------------- | --------- | ------------------------------------------------ |
+| GET    | `/compliance/enforcement/status` | read_only | Enforcement feature status and last run metadata |
+| GET    | `/compliance/enforcement/runs`   | read_only | Paginated retention enforcement audit log        |
+| POST   | `/compliance/enforcement/run`    | admin     | Run retention enforcement for current org        |
+
 Consent types: `croa_services`, `fcra_dispute`, `fdcpa_contact`, `marketing`, `data_processing`. Retention scopes: `documents`, `communications`, `audit_logs`, `client_profiles`. Enforcement jobs and legal sign-off workflows are deferred to 5.0+.
 
 ## Reporting

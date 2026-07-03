@@ -8,12 +8,23 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.core.audit import apply_audit_on_create, apply_audit_on_update
 from api.core.compliance import get_compliance_center_status
+from api.core.feature_flags import FeatureFlag, is_feature_enabled
 from api.core.pagination import PaginatedResponse, paginate
 from api.core.permissions import has_permission
 from api.modules.auth.models import User
 from api.modules.cases.repository import CaseRepository
 from api.modules.clients.repository import ClientRepository
-from api.modules.compliance.models import ConsentRecord, ConsentStatus, RetentionPolicy
+from api.modules.compliance.enforcement import enforce_retention_policies_for_organization
+from api.modules.compliance.enforcement_repository import (
+    EnforcementRunListFilters,
+    RetentionEnforcementRunRepository,
+)
+from api.modules.compliance.models import (
+    ConsentRecord,
+    ConsentStatus,
+    EnforcementTriggerSource,
+    RetentionPolicy,
+)
 from api.modules.compliance.permissions import (
     COMPLIANCE_ADMIN_ROLE,
     COMPLIANCE_READ_ROLE,
@@ -30,6 +41,10 @@ from api.modules.compliance.schemas import (
     ConsentRecordCreate,
     ConsentRecordListParams,
     ConsentRecordResponse,
+    RetentionEnforcementRunListParams,
+    RetentionEnforcementRunResponse,
+    RetentionEnforcementRunResultResponse,
+    RetentionEnforcementStatusResponse,
     RetentionPolicyCreate,
     RetentionPolicyListParams,
     RetentionPolicyResponse,
@@ -44,12 +59,14 @@ class ComplianceService:
         retention_repo: RetentionPolicyRepository,
         client_repo: ClientRepository,
         case_repo: CaseRepository,
+        enforcement_run_repo: RetentionEnforcementRunRepository | None = None,
         session: AsyncSession | None = None,
     ) -> None:
         self._consents = consent_repo
         self._retention = retention_repo
         self._clients = client_repo
         self._cases = case_repo
+        self._enforcement_runs = enforcement_run_repo
         self._session = session
 
     @classmethod
@@ -59,6 +76,7 @@ class ComplianceService:
             RetentionPolicyRepository(session),
             ClientRepository(session),
             CaseRepository(session),
+            RetentionEnforcementRunRepository(session),
             session=session,
         )
 
@@ -292,3 +310,68 @@ class ComplianceService:
         if self._session is not None:
             await self._session.commit()
         return RetentionPolicyResponse.from_model(policy)
+
+    async def get_enforcement_status(self, user: User) -> RetentionEnforcementStatusResponse:
+        self._require_read(user)
+        organization_id = self._require_organization(user)
+        if self._enforcement_runs is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Enforcement repository is not configured",
+            )
+        active_policy_count = await self._enforcement_runs.count_active_policies(
+            organization_id=organization_id,
+        )
+        last_run_at = await self._enforcement_runs.get_latest_started_at(
+            organization_id=organization_id,
+        )
+        return RetentionEnforcementStatusResponse(
+            enabled=is_feature_enabled(FeatureFlag.ENABLE_COMPLIANCE_ENFORCEMENT),
+            active_policy_count=active_policy_count,
+            last_run_at=last_run_at,
+        )
+
+    async def list_enforcement_runs(
+        self,
+        user: User,
+        params: RetentionEnforcementRunListParams,
+    ) -> PaginatedResponse[RetentionEnforcementRunResponse]:
+        self._require_read(user)
+        organization_id = self._require_organization(user)
+        if self._enforcement_runs is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Enforcement repository is not configured",
+            )
+        skip = (params.page - 1) * params.page_size
+        runs, total = await self._enforcement_runs.list_runs(
+            EnforcementRunListFilters(
+                organization_id=organization_id,
+                skip=skip,
+                limit=params.page_size,
+            )
+        )
+        items = [RetentionEnforcementRunResponse.from_model(run) for run in runs]
+        return paginate(items, total=total, page=params.page, page_size=params.page_size)
+
+    async def run_enforcement(self, user: User) -> RetentionEnforcementRunResultResponse:
+        self._require_admin(user)
+        organization_id = self._require_organization(user)
+        if self._session is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Database session is not configured",
+            )
+        summary = await enforce_retention_policies_for_organization(
+            self._session,
+            organization_id=organization_id,
+            trigger_source=EnforcementTriggerSource.MANUAL,
+            retention_repo=self._retention,
+            run_repo=self._enforcement_runs,
+        )
+        await self._session.commit()
+        return RetentionEnforcementRunResultResponse(
+            policies_processed=summary.policies_processed,
+            items_enforced=summary.items_enforced,
+            runs=[RetentionEnforcementRunResponse.from_model(run) for run in summary.runs],
+        )

@@ -9,6 +9,43 @@ export type ConsentStatus = 'granted' | 'withdrawn';
 
 export type RetentionScope = 'documents' | 'communications' | 'audit_logs' | 'client_profiles';
 
+export type EnforcementTriggerSource = 'manual' | 'scheduled';
+
+export type EnforcementRunStatus = 'completed' | 'failed' | 'skipped';
+
+export interface RetentionEnforcementStatus {
+  enabled: boolean;
+  active_policy_count: number;
+  last_run_at: string | null;
+}
+
+export interface RetentionEnforcementRun {
+  id: string;
+  organization_id: string;
+  policy_id: string | null;
+  scope: RetentionScope | null;
+  trigger_source: EnforcementTriggerSource;
+  status: EnforcementRunStatus;
+  items_scanned: number;
+  items_enforced: number;
+  started_at: string;
+  completed_at: string;
+  error_message: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface RetentionEnforcementRunResult {
+  policies_processed: number;
+  items_enforced: number;
+  runs: RetentionEnforcementRun[];
+}
+
+export interface ListRetentionEnforcementRunsParams {
+  page?: number;
+  page_size?: number;
+}
+
 export interface ComplianceCenterStatus {
   consent_records_enabled: boolean;
   retention_policies_enabled: boolean;
@@ -162,5 +199,30 @@ export async function updateRetentionPolicy(
   return request<RetentionPolicy>(apiPath(`/compliance/retention-policies/${policyId}`), {
     method: 'PATCH',
     body: input,
+  });
+}
+
+export async function getRetentionEnforcementStatus(): Promise<RetentionEnforcementStatus> {
+  return request<RetentionEnforcementStatus>(apiPath('/compliance/enforcement/status'));
+}
+
+export async function listRetentionEnforcementRuns(
+  params: ListRetentionEnforcementRunsParams = {},
+): Promise<PaginatedResponse<RetentionEnforcementRun>> {
+  const search = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== null) {
+      search.set(key, String(value));
+    }
+  }
+  const query = search.toString();
+  return request<PaginatedResponse<RetentionEnforcementRun>>(
+    `${apiPath('/compliance/enforcement/runs')}${query ? `?${query}` : ''}`,
+  );
+}
+
+export async function runRetentionEnforcement(): Promise<RetentionEnforcementRunResult> {
+  return request<RetentionEnforcementRunResult>(apiPath('/compliance/enforcement/run'), {
+    method: 'POST',
   });
 }
