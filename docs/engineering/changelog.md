@@ -602,3 +602,19 @@ packages/job-orchestrator/
 **Reason:** 5.1 portal real-time epic requires auditable push delivery for secure messaging beyond polling-only portal UX.
 
 **Follow-up work:** Slice 9 — reporting materialized views.
+
+### Decision: Reporting materialized views
+
+**Decision:** Add PostgreSQL materialized views (`mv_bureau_account_counts`, `mv_bureau_sent_letter_counts`, `mv_team_member_productivity`), `reporting_mv_refresh_runs` audit table, admin refresh endpoints (`GET/POST /reporting/materialized-views/*`), worker job `reporting_mv_refresh` (`0 4 * * *` UTC), and bureau/team read paths that use MVs when `ENABLE_MATERIALIZED_REPORTING=true`.
+
+**Reason:** 5.1 reporting epic requires read-optimized bureau and team aggregates without live-query latency on every dashboard load.
+
+**Follow-up work:** Slice 10 — capability matrix 5.1 sign-off.
+
+### Decision: Version 5.1 epic sign-off
+
+**Decision:** Mark six Version 5.1 epics **Partial ✅** in `version-5.1-scope.md`, defer **Communications production** (SMS) and **LLM expansion** (document summary UI) to 5.2+, add capability matrix 5.1 epic sign-off table, complete checklist Phase 1 exit criteria (except release notes + tag), and update roadmap to v5.1.0 RC sign-off status.
+
+**Reason:** All ten recommended 5.1 implementation slices are shipped or explicitly deferred; governance docs reflect production-hardening outcomes before v5.1.0 release notes.
+
+**Follow-up work:** `docs/release-notes/v5.1.0.md` + tag `v5.1.0`; 5.2 planning for deferred SMS and LLM document summaries.

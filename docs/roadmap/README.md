@@ -158,9 +158,22 @@ Scope and checklist: [`docs/governance/version-5.0-plus-scope.md`](../governance
 
 **Pilot ready** — all 5.0+ checklist slices complete; deferrals documented in scope doc.
 
-### Version 5.1 — Production Hardening (in progress)
+### Version 5.1 — Production Hardening (sign-off)
 
 Scope and checklist: [`docs/governance/version-5.1-scope.md`](../governance/version-5.1-scope.md) · [`docs/development/version-5.1-completion-checklist.md`](../development/version-5.1-completion-checklist.md)
+
+| Epic | Theme                     | 5.1 outcome | Notes                                             |
+| ---- | ------------------------- | ----------- | ------------------------------------------------- |
+| 1    | API integrations          | Partial ✅  | API key middleware on `GET /reporting/operations` |
+| 2    | Identity enrollment       | Partial ✅  | TOTP + OIDC staff enrollment                      |
+| 3    | Billing                   | Partial ✅  | Stripe customer + subscription scaffold           |
+| 4    | Communications production | Deferred    | Production SMS → 5.2+                             |
+| 5    | Compliance enforcement    | Partial ✅  | Retention enforcement jobs + audit                |
+| 6    | LLM expansion             | Deferred    | Document summary UI → 5.2+                        |
+| 7    | Portal real-time          | Partial ✅  | Push notification scaffold for portal messaging   |
+| 8    | Reporting depth           | Partial ✅  | Materialized bureau/team reporting views          |
+
+**v5.1.0 RC sign-off** — six Partial epics shipped; SMS and LLM document summary explicitly deferred. Release notes + tag remain before GA.
 
 ## Sprint → version mapping
 

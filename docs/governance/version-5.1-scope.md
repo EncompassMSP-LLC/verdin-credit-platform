@@ -58,6 +58,21 @@ All v5.0.0 APIs, 5.0+ staff/portal UI, feature flags, migrations, and `@verdin/a
 
 **Not included:** Usage-based metering, invoicing PDFs, dunning automation.
 
+## v5.1 sign-off
+
+Six of eight epics ship as **Partial ✅**; **Communications production** (SMS) and **LLM expansion** (document summary UI) are **explicitly deferred** to **5.2+** — scaffold code may exist on open PRs but is not required for the v5.1.0 RC sign-off. All shipped capabilities are gated behind `ENABLE_*` feature flags documented in `.env.example`.
+
+| Epic                      | 5.1 status | Notes                                                                 |
+| ------------------------- | ---------- | --------------------------------------------------------------------- |
+| API integrations          | Partial ✅ | `GET /reporting/operations` accepts org API keys                      |
+| Identity enrollment       | Partial ✅ | TOTP + OIDC staff enrollment behind `ENABLE_ENTERPRISE`               |
+| Billing                   | Partial ✅ | Stripe customer + subscription scaffold behind `ENABLE_BILLING`       |
+| Communications production | Deferred   | Production SMS delivery → 5.2+ (Twilio scaffold not merged for RC)    |
+| Compliance enforcement    | Partial ✅ | Retention enforcement jobs behind `ENABLE_COMPLIANCE_ENFORCEMENT`     |
+| LLM expansion             | Deferred   | Document summary endpoint + staff UI → 5.2+                           |
+| Portal real-time          | Partial ✅ | Push notification scaffold behind `ENABLE_PORTAL_PUSH`                |
+| Reporting depth           | Partial ✅ | Materialized bureau/team views behind `ENABLE_MATERIALIZED_REPORTING` |
+
 ## Related documents
 
 - [Version 5.1 completion checklist](../development/version-5.1-completion-checklist.md)
