@@ -14,6 +14,13 @@ from api.core.email_delivery import (
 )
 from api.core.pagination import PaginatedResponse, paginate
 from api.core.permissions import has_permission
+from api.core.sms_delivery import (
+    SmsDeliveryNotReadyError,
+    SmsMessage,
+    get_sms_delivery_status,
+    require_sms_delivery_ready,
+    send_sms_message,
+)
 from api.modules.auth.models import User
 from api.modules.auth.repository import UserRepository
 from api.modules.notifications.email_delivery_repository import (
@@ -25,6 +32,8 @@ from api.modules.notifications.models import (
     EmailDeliveryLogStatus,
     Notification,
     NotificationCategory,
+    SmsDeliveryLog,
+    SmsDeliveryLogStatus,
 )
 from api.modules.notifications.permissions import NOTIFICATION_CREATE_ROLE
 from api.modules.notifications.repository import NotificationListFilters, NotificationRepository
@@ -36,7 +45,15 @@ from api.modules.notifications.schemas import (
     NotificationCreate,
     NotificationListParams,
     NotificationResponse,
+    SmsDeliveryAttemptResponse,
+    SmsDeliveryLogResponse,
+    SmsDeliveryStatusResponse,
+    SmsSendRequest,
     UnreadCountResponse,
+)
+from api.modules.notifications.sms_delivery_repository import (
+    SmsDeliveryLogListFilters,
+    SmsDeliveryLogRepository,
 )
 
 
@@ -46,10 +63,12 @@ class NotificationService:
         notification_repo: NotificationRepository,
         user_repo: UserRepository | None = None,
         email_delivery_repo: EmailDeliveryLogRepository | None = None,
+        sms_delivery_repo: SmsDeliveryLogRepository | None = None,
     ) -> None:
         self._notifications = notification_repo
         self._users = user_repo
         self._email_deliveries = email_delivery_repo
+        self._sms_deliveries = sms_delivery_repo
 
     @classmethod
     def from_session(cls, session: AsyncSession) -> "NotificationService":
@@ -57,6 +76,7 @@ class NotificationService:
             NotificationRepository(session),
             UserRepository(session),
             EmailDeliveryLogRepository(session),
+            SmsDeliveryLogRepository(session),
         )
 
     def _require_organization(self, user: User) -> uuid.UUID:
@@ -79,11 +99,13 @@ class NotificationService:
         notification: Notification,
         *,
         email_delivery: EmailDeliveryAttemptResponse | None = None,
+        sms_delivery: SmsDeliveryAttemptResponse | None = None,
     ) -> NotificationResponse:
         return NotificationResponse.model_validate(
             {
                 **NotificationResponse.model_validate(notification).model_dump(),
                 "email_delivery": email_delivery,
+                "sms_delivery": sms_delivery,
             }
         )
 
@@ -96,6 +118,24 @@ class NotificationService:
             recipient_user_id=log.recipient_user_id,
             recipient_email=log.recipient_email,
             subject=log.subject,
+            provider=log.provider,
+            status=log.status.value,
+            provider_message_id=log.provider_message_id,
+            error_message=log.error_message,
+            sent_by_user_id=log.sent_by_user_id,
+            created_at=log.created_at,
+            updated_at=log.updated_at,
+        )
+
+    @staticmethod
+    def _to_sms_delivery_log_response(log: SmsDeliveryLog) -> SmsDeliveryLogResponse:
+        return SmsDeliveryLogResponse(
+            id=log.id,
+            organization_id=log.organization_id,
+            notification_id=log.notification_id,
+            recipient_user_id=log.recipient_user_id,
+            recipient_phone=log.recipient_phone,
+            body=log.body,
             provider=log.provider,
             status=log.status.value,
             provider_message_id=log.provider_message_id,
@@ -229,7 +269,20 @@ class NotificationService:
                 notification=created,
             )
 
-        return self._to_response(created, email_delivery=email_delivery)
+        sms_delivery: SmsDeliveryAttemptResponse | None = None
+        if body.deliver_sms:
+            sms_delivery = await self._attempt_notification_sms(
+                actor=actor,
+                organization_id=organization_id,
+                recipient=recipient,
+                notification=created,
+            )
+
+        return self._to_response(
+            created,
+            email_delivery=email_delivery,
+            sms_delivery=sms_delivery,
+        )
 
     async def _attempt_notification_email(
         self,
@@ -281,6 +334,125 @@ class NotificationService:
             error=send_result.error,
         )
 
+    async def _record_sms_delivery(
+        self,
+        *,
+        organization_id: uuid.UUID,
+        recipient_user_id: uuid.UUID | None,
+        recipient_phone: str,
+        body: str,
+        provider: str,
+        send_result_success: bool,
+        provider_message_id: str | None,
+        error_message: str | None,
+        notification_id: uuid.UUID | None,
+        sent_by_user_id: uuid.UUID,
+    ) -> SmsDeliveryLog:
+        assert self._sms_deliveries is not None
+        log = SmsDeliveryLog(
+            organization_id=organization_id,
+            notification_id=notification_id,
+            recipient_user_id=recipient_user_id,
+            recipient_phone=recipient_phone,
+            body=body,
+            provider=provider,
+            status=(
+                SmsDeliveryLogStatus.SENT if send_result_success else SmsDeliveryLogStatus.FAILED
+            ),
+            provider_message_id=provider_message_id,
+            error_message=error_message,
+            sent_by_user_id=sent_by_user_id,
+        )
+        return await self._sms_deliveries.create(log)
+
+    async def _send_org_user_sms(
+        self,
+        *,
+        actor: User,
+        organization_id: uuid.UUID,
+        recipient: User,
+        body: str,
+        notification_id: uuid.UUID | None = None,
+    ) -> SmsDeliveryLogResponse:
+        self._require_create(actor)
+        if not recipient.phone_number:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Recipient user does not have a phone number",
+            )
+
+        try:
+            delivery_status = require_sms_delivery_ready()
+        except SmsDeliveryNotReadyError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail={"message": "SMS delivery is not ready", "blockers": exc.blockers},
+            ) from exc
+
+        send_result = await send_sms_message(
+            SmsMessage(to=recipient.phone_number, body=body),
+        )
+        log = await self._record_sms_delivery(
+            organization_id=organization_id,
+            recipient_user_id=recipient.id,
+            recipient_phone=recipient.phone_number,
+            body=body,
+            provider=delivery_status.provider,
+            send_result_success=send_result.success,
+            provider_message_id=send_result.provider_message_id,
+            error_message=send_result.error,
+            notification_id=notification_id,
+            sent_by_user_id=actor.id,
+        )
+        return self._to_sms_delivery_log_response(log)
+
+    async def _attempt_notification_sms(
+        self,
+        *,
+        actor: User,
+        organization_id: uuid.UUID,
+        recipient: User,
+        notification: Notification,
+    ) -> SmsDeliveryAttemptResponse:
+        if not recipient.phone_number:
+            return SmsDeliveryAttemptResponse(
+                attempted=True,
+                status="failed",
+                error="Recipient user does not have a phone number",
+            )
+
+        try:
+            delivery_status = require_sms_delivery_ready()
+        except SmsDeliveryNotReadyError as exc:
+            return SmsDeliveryAttemptResponse(
+                attempted=True,
+                status="failed",
+                error="; ".join(exc.blockers),
+            )
+
+        body = notification.body or notification.title
+        send_result = await send_sms_message(
+            SmsMessage(to=recipient.phone_number, body=body),
+        )
+        log = await self._record_sms_delivery(
+            organization_id=organization_id,
+            recipient_user_id=recipient.id,
+            recipient_phone=recipient.phone_number,
+            body=body,
+            provider=delivery_status.provider,
+            send_result_success=send_result.success,
+            provider_message_id=send_result.provider_message_id,
+            error_message=send_result.error,
+            notification_id=notification.id,
+            sent_by_user_id=actor.id,
+        )
+        return SmsDeliveryAttemptResponse(
+            attempted=True,
+            status=log.status.value,
+            delivery_log_id=log.id,
+            error=send_result.error,
+        )
+
     async def send_email(
         self,
         actor: User,
@@ -312,6 +484,36 @@ class NotificationService:
             notification_id=body.notification_id,
         )
 
+    async def send_sms(
+        self,
+        actor: User,
+        body: SmsSendRequest,
+    ) -> SmsDeliveryLogResponse:
+        organization_id = self._require_organization(actor)
+        recipient = await self._get_org_user(
+            body.recipient_user_id, organization_id=organization_id
+        )
+
+        if body.notification_id is not None:
+            notification = await self._notifications.get_by_id(
+                body.notification_id,
+                organization_id=organization_id,
+                recipient_user_id=recipient.id,
+            )
+            if notification is None:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Notification not found for recipient",
+                )
+
+        return await self._send_org_user_sms(
+            actor=actor,
+            organization_id=organization_id,
+            recipient=recipient,
+            body=body.body,
+            notification_id=body.notification_id,
+        )
+
     async def list_email_deliveries(
         self,
         user: User,
@@ -332,6 +534,31 @@ class NotificationService:
         items, total = await self._email_deliveries.list_and_count(filters)
         return paginate(
             [self._to_delivery_log_response(item) for item in items],
+            total=total,
+            page=page,
+            page_size=page_size,
+        )
+
+    async def list_sms_deliveries(
+        self,
+        user: User,
+        *,
+        page: int,
+        page_size: int,
+    ) -> PaginatedResponse[SmsDeliveryLogResponse]:
+        organization_id = self._require_organization(user)
+        self._require_create(user)
+        assert self._sms_deliveries is not None
+
+        skip = (page - 1) * page_size
+        filters = SmsDeliveryLogListFilters(
+            organization_id=organization_id,
+            skip=skip,
+            limit=page_size,
+        )
+        items, total = await self._sms_deliveries.list_and_count(filters)
+        return paginate(
+            [self._to_sms_delivery_log_response(item) for item in items],
             total=total,
             page=page,
             page_size=page_size,
@@ -434,5 +661,16 @@ class NotificationService:
             ready=delivery_status.ready,
             provider=delivery_status.provider,
             from_address=delivery_status.from_address,
+            blockers=delivery_status.blockers,
+        )
+
+    async def get_sms_delivery_status(self, user: User) -> SmsDeliveryStatusResponse:
+        self._require_organization(user)
+        delivery_status = get_sms_delivery_status()
+        return SmsDeliveryStatusResponse(
+            enabled=delivery_status.enabled,
+            ready=delivery_status.ready,
+            provider=delivery_status.provider,
+            from_number=delivery_status.from_number,
             blockers=delivery_status.blockers,
         )

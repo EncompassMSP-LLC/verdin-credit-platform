@@ -627,4 +627,20 @@ packages/job-orchestrator/
 
 **Reason:** Final exit criterion for the 5.1 production-hardening milestone.
 
-**Follow-up work:** 5.2 planning — deferred SMS, LLM document summaries, revenue analytics.
+**Follow-up work:** 5.2 kickoff — deferred SMS, LLM document summaries, Web Push HTTP.
+
+### Decision: Kick off Version 5.2 deferred production surfaces
+
+**Decision:** Add `version-5.2-scope.md`, `version-5.2-completion-checklist.md`, and `.cursor/rules/version-52-sprint-loop.mdc`; link 5.2 from product roadmap.
+
+**Reason:** v5.1.0 sign-off complete; SMS, LLM document summaries, and portal push production depth need a sequenced delivery path before v5.2.0 release.
+
+**Follow-up work:** Slice 2 — production SMS delivery.
+
+### Decision: Production SMS delivery
+
+**Decision:** Add Twilio SMS provider adapter, `sms_delivery_logs` audit table, optional `users.phone_number`, and notification endpoints `GET /notifications/sms/status`, `POST /notifications/sms/send`, `GET /notifications/sms/deliveries` gated by `ENABLE_SMS_DELIVERY`.
+
+**Reason:** 5.2 communications epic ships production SMS deferred from v5.1.0 alongside existing email delivery for staff notification workflows.
+
+**Follow-up work:** Slice 3 — LLM document summary UI.

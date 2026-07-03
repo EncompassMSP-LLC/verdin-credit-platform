@@ -19,6 +19,9 @@ from api.modules.notifications.schemas import (
     NotificationResponse,
     NotificationSortField,
     NotificationSortOrder,
+    SmsDeliveryLogResponse,
+    SmsDeliveryStatusResponse,
+    SmsSendRequest,
     UnreadCountResponse,
 )
 from api.modules.notifications.service import NotificationService
@@ -118,3 +121,32 @@ async def list_email_deliveries(
     service: NotificationService = Depends(get_notification_service),
 ) -> PaginatedResponse[EmailDeliveryLogResponse]:
     return await service.list_email_deliveries(current_user, page=page, page_size=page_size)
+
+
+@router.get("/sms/status", response_model=SmsDeliveryStatusResponse)
+async def get_sms_status(
+    current_user: User = Depends(get_current_user),
+    service: NotificationService = Depends(get_notification_service),
+) -> SmsDeliveryStatusResponse:
+    return await service.get_sms_delivery_status(current_user)
+
+
+@router.post(
+    "/sms/send", response_model=SmsDeliveryLogResponse, status_code=status.HTTP_201_CREATED
+)
+async def send_notification_sms(
+    body: SmsSendRequest,
+    current_user: User = Depends(get_current_user),
+    service: NotificationService = Depends(get_notification_service),
+) -> SmsDeliveryLogResponse:
+    return await service.send_sms(current_user, body)
+
+
+@router.get("/sms/deliveries", response_model=PaginatedResponse[SmsDeliveryLogResponse])
+async def list_sms_deliveries(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    current_user: User = Depends(get_current_user),
+    service: NotificationService = Depends(get_notification_service),
+) -> PaginatedResponse[SmsDeliveryLogResponse]:
+    return await service.list_sms_deliveries(current_user, page=page, page_size=page_size)

@@ -263,6 +263,16 @@ Scope: [version-5.1-scope.md](version-5.1-scope.md) · Checklist: [version-5.1-c
 
 ---
 
+## Version 5.2 — Deferred production surfaces (in progress)
+
+Scope: [version-5.2-scope.md](version-5.2-scope.md) · Checklist: [version-5.2-completion-checklist.md](../development/version-5.2-completion-checklist.md)
+
+| Capability     | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies  | Notes                                            |
+| -------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------- | ------------------------------------------------ |
+| Production SMS | 5.2     | Partial | ✅      | —        | ✅  | —   | ✅    | Notifications | Twilio send + audit log; `deliver_sms` on create |
+
+---
+
 ## AI capability tracker
 
 | AI feature                   | Phase | Version | Status  | Location                                                                 |
