@@ -34,16 +34,17 @@ Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (
 
 ## Version milestones
 
-| Version   | Theme                       | Status      | Focus                                                                                   |
-| --------- | --------------------------- | ----------- | --------------------------------------------------------------------------------------- |
-| **4.2**   | Platform Foundation         | **Shipped** | Monorepo, auth, RBAC, domain module pattern, worker scaffold, CI/CD                     |
-| **4.3.0** | Operational Core            | **Shipped** | Cases, accounts, documents, OCR, intelligence, timeline, tasks                          |
-| **4.3.1** | Operational Core Completion | **Shipped** | Mission Control dashboard, governance refinements, release stabilization                |
-| **4.5**   | Automation                  | **Shipped** | Import wizard, dispute lifecycle, workflow auto-tasks, rules AI (`v4.5.0`)              |
-| **4.8**   | Operations                  | **Shipped** | Client portal, notifications, LLM policy gates, reporting (`v4.8.0`)                    |
-| **5.0**   | Enterprise Edition          | **Shipped** | Compliance, SSO/MFA, LLM summaries, production email, portal expansion (`v5.0.0`)       |
-| **5.0+**  | Product Hardening           | **Shipped** | Pilot-ready staff + portal UI for 5.0 APIs                                              |
-| **5.1**   | Production Hardening        | **Shipped** | API keys, billing, IdP enrollment, enforcement, push, materialized reporting (`v5.1.0`) |
+| Version   | Theme                        | Status      | Focus                                                                                   |
+| --------- | ---------------------------- | ----------- | --------------------------------------------------------------------------------------- |
+| **4.2**   | Platform Foundation          | **Shipped** | Monorepo, auth, RBAC, domain module pattern, worker scaffold, CI/CD                     |
+| **4.3.0** | Operational Core             | **Shipped** | Cases, accounts, documents, OCR, intelligence, timeline, tasks                          |
+| **4.3.1** | Operational Core Completion  | **Shipped** | Mission Control dashboard, governance refinements, release stabilization                |
+| **4.5**   | Automation                   | **Shipped** | Import wizard, dispute lifecycle, workflow auto-tasks, rules AI (`v4.5.0`)              |
+| **4.8**   | Operations                   | **Shipped** | Client portal, notifications, LLM policy gates, reporting (`v4.8.0`)                    |
+| **5.0**   | Enterprise Edition           | **Shipped** | Compliance, SSO/MFA, LLM summaries, production email, portal expansion (`v5.0.0`)       |
+| **5.0+**  | Product Hardening            | **Shipped** | Pilot-ready staff + portal UI for 5.0 APIs                                              |
+| **5.1**   | Production Hardening         | **Shipped** | API keys, billing, IdP enrollment, enforcement, push, materialized reporting (`v5.1.0`) |
+| **5.2**   | Deferred Production Surfaces | In progress | SMS, LLM document summaries, Web Push HTTP, revenue analytics                           |
 
 ### Sprint milestones
 
@@ -176,6 +177,18 @@ Scope and checklist: [`docs/governance/version-5.1-scope.md`](../governance/vers
 **Tag:** `v5.1.0` — Production Hardening.
 
 Release notes: [`docs/release-notes/v5.1.0.md`](../release-notes/v5.1.0.md)
+
+### Version 5.2 — Deferred Production Surfaces (in progress)
+
+Scope and checklist: [`docs/governance/version-5.2-scope.md`](../governance/version-5.2-scope.md) · [`docs/development/version-5.2-completion-checklist.md`](../development/version-5.2-completion-checklist.md)
+
+| Epic | Theme                     | 5.2 target | Notes                                   |
+| ---- | ------------------------- | ---------- | --------------------------------------- |
+| 1    | Communications production | Partial    | Twilio SMS delivery (5.1 deferral)      |
+| 2    | LLM expansion             | Partial    | Document summary endpoint + staff UI    |
+| 3    | Portal push production    | Partial    | Real Web Push HTTP for portal messaging |
+| 4    | Revenue analytics         | Partial    | Billing-derived org revenue read model  |
+| 5    | API integrations depth    | Partial    | API key rate-limit scaffold             |
 
 ## Sprint → version mapping
 
