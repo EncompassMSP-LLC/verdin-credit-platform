@@ -21,7 +21,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | 2     | Invoicing & dunning scaffold     | Billing        | ✅     |
 | 3     | Multi-IdP federation scaffold    | Identity       | ✅     |
 | 4     | Marketing SMS campaigns scaffold | Communications | ✅     |
-| 5     | Agent observability scaffold     | AI operations  | —      |
+| 5     | Agent observability scaffold     | AI operations  | ✅     |
 | 6     | Capability matrix 5.4 sign-off   | Governance     | —      |
 
 Slice 2 requires `ENABLE_BILLING=true` + Stripe test data. Slice 3 requires `ENABLE_ENTERPRISE=true` and SCIM scaffold. Slice 4 requires `ENABLE_SMS_DELIVERY=true` + Twilio test credentials. Slice 5 requires `ENABLE_AI=true`; no external LLM calls without ADR-012 gates.

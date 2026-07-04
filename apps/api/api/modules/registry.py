@@ -40,6 +40,12 @@ from api.modules.enterprise.federation_models import (
     IdpFederationProviderType,
 )
 from api.modules.enterprise.models import UserSsoEnrollment, UserTotpEnrollment
+from api.modules.llm.agent_observability_models import (
+    AgentObservabilityKind,
+    AgentObservabilityRun,
+    AgentObservabilityRunStatus,
+    AgentObservabilityTriggerSource,
+)
 from api.modules.messaging.models import (
     MessageSenderRole,
     MessageThread,
@@ -75,6 +81,10 @@ from api.modules.timeline.models import Communication, TimelineEvent
 
 __all__ = [
     "Account",
+    "AgentObservabilityKind",
+    "AgentObservabilityRun",
+    "AgentObservabilityRunStatus",
+    "AgentObservabilityTriggerSource",
     "ApiKeyRotationLog",
     "ApiKeyScope",
     "BillingInvoicingRun",
