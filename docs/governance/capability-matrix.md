@@ -313,7 +313,7 @@ Scope: [version-5.3-scope.md](version-5.3-scope.md) · Checklist: [version-5.3-c
 
 ---
 
-## Version 5.4 — Production operations (in progress)
+## Version 5.4 — Production operations (shipped)
 
 Scope: [version-5.4-scope.md](version-5.4-scope.md) · Checklist: [version-5.4-completion-checklist.md](../development/version-5.4-completion-checklist.md)
 
@@ -323,6 +323,15 @@ Scope: [version-5.4-scope.md](version-5.4-scope.md) · Checklist: [version-5.4-c
 | Multi-IdP federation | 5.4     | Partial | ✅      | —        | ✅  | —   | ✅    | Enterprise    | `GET /enterprise/federation/providers`; provider registry        |
 | Marketing SMS        | 5.4     | Partial | ✅      | —        | ✅  | —   | ✅    | Notifications | `GET /notifications/sms-campaigns/status`; campaign run scaffold |
 | Agent observability  | 5.4     | Partial | ✅      | —        | ✅  | —   | ✅    | AI gates      | `GET /llm/agents/status`; agent run audit scaffold               |
+
+### Version 5.4 epic sign-off
+
+| Epic                     | 5.4 outcome | Exit note                                                            |
+| ------------------------ | ----------- | -------------------------------------------------------------------- |
+| Billing invoicing        | Partial ✅  | Invoice/dunning run scaffold; Stripe PDF + payment collection → 5.5+ |
+| Identity federation      | Partial ✅  | Multi-IdP provider registry; SAML metadata + HRIS sync → 5.5+        |
+| Communications marketing | Partial ✅  | Campaign enqueue audit; bulk send + deliverability dashboards → 5.5+ |
+| AI agent observability   | Partial ✅  | Agent run audit + timeline correlation; autonomous execution → 5.5+  |
 
 ---
 
@@ -344,6 +353,7 @@ Scope: [version-5.4-scope.md](version-5.4-scope.md) · Checklist: [version-5.4-c
 | AI workflow orchestration    | 3     | 5.0+    | Planned | Deferred from 5.0 RC — requires compliance + observability prerequisites  |
 | Predictive outcomes          | 3     | 5.3     | Partial | `GET /reporting/predictive/outcomes`; snapshot refresh scaffold           |
 | Batch document summaries     | 2     | 5.3     | Partial | `POST /documents/batch-llm-summaries/run`; worker job behind `ENABLE_LLM` |
+| Agent observability          | 3     | 5.4     | Partial | `GET /llm/agents/status`; run audit + timeline correlation scaffold       |
 | Autonomous dispute prep      | 4     | 5.0+    | Planned | Compliance gates required                                                 |
 
 See [AI Architecture](../architecture/ai-architecture.md).

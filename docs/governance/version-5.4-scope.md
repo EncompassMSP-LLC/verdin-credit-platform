@@ -9,14 +9,14 @@ Formal scope for **Version 5.4 — Production Operations**. Builds on shipped **
 
 Extend partial 5.3 enterprise foundations (usage metering, SCIM, predictive analytics, developer portal, batch LLM) toward operator-ready production workflows. Each epic ships as a **Partial** capability behind feature flags with tests and documentation.
 
-## Epic outcomes (planned)
+## Epic outcomes (shipped)
 
-| Epic | Theme                    | 5.4 target | Summary                                                         |
-| ---- | ------------------------ | ---------- | --------------------------------------------------------------- |
-| 1    | Billing invoicing        | Partial    | Org-scoped invoice/dunning scaffold + staff read endpoints      |
-| 2    | Identity federation      | Partial    | Multi-IdP federation config scaffold behind enterprise gate     |
-| 3    | Communications marketing | Partial    | Marketing SMS campaign enqueue scaffold with delivery audit     |
-| 4    | AI agent observability   | Partial    | Agent run audit log + status/read endpoints (no autonomous run) |
+| Epic | Theme                    | 5.4 outcome | Summary                                                         |
+| ---- | ------------------------ | ----------- | --------------------------------------------------------------- |
+| 1    | Billing invoicing        | Partial ✅  | Org-scoped invoice/dunning scaffold + staff read endpoints      |
+| 2    | Identity federation      | Partial ✅  | Multi-IdP federation config scaffold behind enterprise gate     |
+| 3    | Communications marketing | Partial ✅  | Marketing SMS campaign enqueue scaffold with delivery audit     |
+| 4    | AI agent observability   | Partial ✅  | Agent run audit log + status/read endpoints (no autonomous run) |
 
 ## Shipped from 5.3 (foundation — do not regress)
 
