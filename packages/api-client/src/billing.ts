@@ -56,3 +56,44 @@ export function subscribeOrganizationBilling(input: BillingSubscribeInput = {}) 
     body: JSON.stringify(input),
   });
 }
+
+export interface BillingUsageMetricTotal {
+  metric_name: string;
+  total_quantity: number;
+}
+
+export interface BillingUsageSummary {
+  organization_id: string;
+  metering_enabled: boolean;
+  stripe_customer_configured: boolean;
+  total_events: number;
+  metrics: BillingUsageMetricTotal[];
+  first_recorded_at: string | null;
+  last_recorded_at: string | null;
+}
+
+export interface BillingUsageRecordInput {
+  metric_name: string;
+  quantity?: number;
+  source?: string;
+}
+
+export interface BillingUsageRecordResponse {
+  id: string;
+  organization_id: string;
+  metric_name: string;
+  quantity: number;
+  source: string;
+  recorded_at: string;
+}
+
+export function getBillingUsageSummary() {
+  return request<BillingUsageSummary>(apiPath('/billing/usage/summary'));
+}
+
+export function recordBillingUsageEvent(input: BillingUsageRecordInput) {
+  return request<BillingUsageRecordResponse>(apiPath('/billing/usage/events'), {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}

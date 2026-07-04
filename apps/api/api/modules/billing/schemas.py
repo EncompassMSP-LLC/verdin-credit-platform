@@ -70,3 +70,33 @@ class StripeWebhookResponse(BaseSchema):
     received: bool
     event_id: str
     status: str
+
+
+class BillingUsageMetricTotal(BaseSchema):
+    metric_name: str
+    total_quantity: int
+
+
+class BillingUsageRecordRequest(BaseSchema):
+    metric_name: str = Field(min_length=1, max_length=64)
+    quantity: int = Field(default=1, ge=1, le=1_000_000)
+    source: str = Field(default="manual", min_length=1, max_length=64)
+
+
+class BillingUsageRecordResponse(BaseSchema):
+    id: uuid.UUID
+    organization_id: uuid.UUID
+    metric_name: str
+    quantity: int
+    source: str
+    recorded_at: datetime
+
+
+class BillingUsageSummaryResponse(BaseSchema):
+    organization_id: uuid.UUID
+    metering_enabled: bool
+    stripe_customer_configured: bool
+    total_events: int
+    metrics: list[BillingUsageMetricTotal]
+    first_recorded_at: datetime | None
+    last_recorded_at: datetime | None

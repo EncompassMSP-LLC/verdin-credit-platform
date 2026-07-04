@@ -129,12 +129,18 @@ export {
 
 export {
   getBillingStatus,
+  getBillingUsageSummary,
+  recordBillingUsageEvent,
   setupOrganizationBilling,
   subscribeOrganizationBilling,
   type BillingSetupResponse,
   type BillingStatus,
   type BillingSubscribeInput,
   type BillingSubscribeResponse,
+  type BillingUsageMetricTotal,
+  type BillingUsageRecordInput,
+  type BillingUsageRecordResponse,
+  type BillingUsageSummary,
   type OrganizationBillingSummary,
   type SubscriptionStatus,
 } from './billing';

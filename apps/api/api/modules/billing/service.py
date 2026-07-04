@@ -20,8 +20,10 @@ from api.core.stripe_billing import (
     require_billing_ready,
     verify_stripe_webhook_signature,
 )
+from api.core.usage_metering import build_usage_summary
 from api.modules.auth.models import User
 from api.modules.billing.models import (
+    BillingUsageEvent,
     BillingWebhookEvent,
     BillingWebhookEventStatus,
     OrganizationBillingAccount,
@@ -33,6 +35,10 @@ from api.modules.billing.schemas import (
     BillingStatusResponse,
     BillingSubscribeRequest,
     BillingSubscribeResponse,
+    BillingUsageMetricTotal,
+    BillingUsageRecordRequest,
+    BillingUsageRecordResponse,
+    BillingUsageSummaryResponse,
     OrganizationBillingSummary,
     StripeWebhookResponse,
 )
@@ -306,3 +312,60 @@ class BillingService:
         )
         await self._repo.save_billing_account(account)
         return account.organization_id, BillingWebhookEventStatus.PROCESSED, None
+
+    async def record_usage_event(
+        self,
+        user: User,
+        body: BillingUsageRecordRequest,
+    ) -> BillingUsageRecordResponse:
+        self._require_write(user)
+        organization_id = self._require_organization(user)
+        recorded_at = self._repo.utcnow()
+        event = BillingUsageEvent(
+            organization_id=organization_id,
+            metric_name=body.metric_name,
+            quantity=body.quantity,
+            source=body.source,
+            recorded_at=recorded_at,
+            created_by_id=user.id,
+        )
+        saved = await self._repo.create_usage_event(event)
+        if self._session is not None:
+            await self._session.commit()
+        return BillingUsageRecordResponse(
+            id=saved.id,
+            organization_id=saved.organization_id,
+            metric_name=saved.metric_name,
+            quantity=saved.quantity,
+            source=saved.source,
+            recorded_at=saved.recorded_at,
+        )
+
+    async def get_usage_summary(self, user: User) -> BillingUsageSummaryResponse:
+        self._require_read(user)
+        organization_id = self._require_organization(user)
+        account = await self._repo.get_billing_account(organization_id)
+        (
+            total_events,
+            metrics,
+            first_recorded_at,
+            last_recorded_at,
+        ) = await self._repo.aggregate_usage_by_metric(organization_id)
+        payload = build_usage_summary(
+            organization_id=str(organization_id),
+            metering_enabled=True,
+            stripe_customer_configured=account is not None,
+            total_events=total_events,
+            metrics=metrics,
+            first_recorded_at=first_recorded_at,
+            last_recorded_at=last_recorded_at,
+        )
+        return BillingUsageSummaryResponse(
+            organization_id=organization_id,
+            metering_enabled=payload["metering_enabled"],
+            stripe_customer_configured=payload["stripe_customer_configured"],
+            total_events=payload["total_events"],
+            metrics=[BillingUsageMetricTotal(**metric) for metric in payload["metrics"]],
+            first_recorded_at=payload["first_recorded_at"],
+            last_recorded_at=payload["last_recorded_at"],
+        )

@@ -700,3 +700,11 @@ packages/job-orchestrator/
 **Reason:** v5.2.0 sign-off complete; usage metering, SCIM, predictive analytics, and API developer surfaces need a sequenced delivery path before v5.3.0 release.
 
 **Follow-up work:** Slice 2 — billing usage metering scaffold.
+
+### Decision: Billing usage metering scaffold
+
+**Decision:** Add `billing_usage_events` table (migration `027`), `GET /billing/usage/summary` and `POST /billing/usage/events`, `api/core/usage_metering.py`, `ENABLE_BILLING_USAGE_METERING` flag, and promote `billing_usage_metering` to org admin capabilities when enabled.
+
+**Reason:** 5.3 billing epic ships org-scoped usage event recording and aggregated read model without Stripe metered billing or invoicing.
+
+**Follow-up work:** Slice 3 — SCIM provisioning scaffold.

@@ -6,12 +6,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from api.database.session import get_db
 from api.modules.auth.dependencies import get_current_user
 from api.modules.auth.models import User
-from api.modules.billing.dependencies import require_billing_enabled
+from api.modules.billing.dependencies import require_billing_enabled, require_usage_metering_enabled
 from api.modules.billing.schemas import (
     BillingSetupResponse,
     BillingStatusResponse,
     BillingSubscribeRequest,
     BillingSubscribeResponse,
+    BillingUsageRecordRequest,
+    BillingUsageRecordResponse,
+    BillingUsageSummaryResponse,
     StripeWebhookResponse,
 )
 from api.modules.billing.service import BillingService
@@ -62,3 +65,27 @@ async def stripe_billing_webhook(
 ) -> StripeWebhookResponse:
     payload = await request.body()
     return await service.handle_stripe_webhook(payload, stripe_signature)
+
+
+@router.get("/usage/summary", response_model=BillingUsageSummaryResponse)
+async def get_billing_usage_summary(
+    _: None = Depends(require_usage_metering_enabled),
+    current_user: User = Depends(get_current_user),
+    service: BillingService = Depends(get_billing_service),
+) -> BillingUsageSummaryResponse:
+    return await service.get_usage_summary(current_user)
+
+
+@router.post(
+    "/usage/events",
+    response_model=BillingUsageRecordResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def record_billing_usage_event(
+    body: BillingUsageRecordRequest,
+    _: None = Depends(require_usage_metering_enabled),
+    __: None = Depends(require_org_admin_enabled),
+    current_user: User = Depends(get_current_user),
+    service: BillingService = Depends(get_billing_service),
+) -> BillingUsageRecordResponse:
+    return await service.record_usage_event(current_user, body)

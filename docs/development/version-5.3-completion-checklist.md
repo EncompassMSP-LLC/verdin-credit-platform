@@ -18,7 +18,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | Order | Slice                            | Epic             | Status |
 | ----- | -------------------------------- | ---------------- | ------ |
 | 1     | 5.3 scope + completion checklist | Kickoff          | ✅     |
-| 2     | Billing usage metering scaffold  | Billing          | —      |
+| 2     | Billing usage metering scaffold  | Billing          | ✅     |
 | 3     | SCIM provisioning scaffold       | Identity         | —      |
 | 4     | Predictive analytics scaffold    | Reporting / AI   | —      |
 | 5     | API key rotation + dev portal    | API integrations | —      |
