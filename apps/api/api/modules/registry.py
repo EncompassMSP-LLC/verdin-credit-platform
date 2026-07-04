@@ -23,6 +23,11 @@ from api.modules.compliance.models import (
     RetentionPolicy,
     RetentionScope,
 )
+from api.modules.documents.batch_summary_models import (
+    BatchDocumentSummaryRun,
+    BatchSummaryRunStatus,
+    BatchSummaryTriggerSource,
+)
 from api.modules.documents.models import Document
 from api.modules.enterprise.models import UserSsoEnrollment, UserTotpEnrollment
 from api.modules.messaging.models import (
@@ -60,6 +65,9 @@ __all__ = [
     "BillingWebhookEvent",
     "Case",
     "CaseStatus",
+    "BatchDocumentSummaryRun",
+    "BatchSummaryRunStatus",
+    "BatchSummaryTriggerSource",
     "Client",
     "ClientContact",
     "ClientPortalUser",

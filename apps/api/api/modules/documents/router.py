@@ -10,6 +10,15 @@ from api.core.pagination import PaginatedResponse
 from api.database.session import get_db
 from api.modules.auth.dependencies import get_current_user
 from api.modules.auth.models import User
+from api.modules.documents.batch_summary_dependencies import require_batch_llm_summaries_enabled
+from api.modules.documents.batch_summary_schemas import (
+    BatchDocumentSummaryEnqueueResponse,
+    BatchDocumentSummaryRunListParams,
+    BatchDocumentSummaryRunRequest,
+    BatchDocumentSummaryRunResponse,
+    BatchLlmSummaryStatusResponse,
+)
+from api.modules.documents.batch_summary_service import BatchDocumentSummaryService
 from api.modules.documents.constants import (
     DocumentProcessingStatus,
     MetadataStatus,
@@ -59,6 +68,12 @@ def get_document_llm_summary_service(
     db: AsyncSession = Depends(get_db),
 ) -> DocumentLlmSummaryService:
     return DocumentLlmSummaryService.from_session(db)
+
+
+def get_batch_document_summary_service(
+    db: AsyncSession = Depends(get_db),
+) -> BatchDocumentSummaryService:
+    return BatchDocumentSummaryService.from_session(db)
 
 
 def get_document_list_params(
@@ -116,6 +131,46 @@ async def list_documents(
     service: DocumentService = Depends(get_document_service),
 ) -> PaginatedResponse[DocumentResponse]:
     return await service.list_documents(current_user, params)
+
+
+@router.get(
+    "/batch-llm-summaries/status",
+    response_model=BatchLlmSummaryStatusResponse,
+    dependencies=[Depends(require_batch_llm_summaries_enabled)],
+)
+async def get_batch_llm_summary_status(
+    current_user: User = Depends(get_current_user),
+    service: BatchDocumentSummaryService = Depends(get_batch_document_summary_service),
+) -> BatchLlmSummaryStatusResponse:
+    return await service.get_status(current_user)
+
+
+@router.get(
+    "/batch-llm-summaries/runs",
+    response_model=PaginatedResponse[BatchDocumentSummaryRunResponse],
+    dependencies=[Depends(require_batch_llm_summaries_enabled)],
+)
+async def list_batch_document_summary_runs(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    current_user: User = Depends(get_current_user),
+    service: BatchDocumentSummaryService = Depends(get_batch_document_summary_service),
+) -> PaginatedResponse[BatchDocumentSummaryRunResponse]:
+    params = BatchDocumentSummaryRunListParams(page=page, page_size=page_size)
+    return await service.list_runs(current_user, params)
+
+
+@router.post(
+    "/batch-llm-summaries/run",
+    response_model=BatchDocumentSummaryEnqueueResponse,
+    dependencies=[Depends(require_batch_llm_summaries_enabled)],
+)
+async def enqueue_batch_document_summary_run(
+    body: BatchDocumentSummaryRunRequest,
+    current_user: User = Depends(get_current_user),
+    service: BatchDocumentSummaryService = Depends(get_batch_document_summary_service),
+) -> BatchDocumentSummaryEnqueueResponse:
+    return await service.enqueue_batch_run(current_user, body)
 
 
 @router.get("/{document_id}", response_model=DocumentResponse)

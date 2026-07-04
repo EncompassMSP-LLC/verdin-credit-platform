@@ -24,6 +24,7 @@ class FeatureFlag(StrEnum):
     ENABLE_SCIM_PROVISIONING = "ENABLE_SCIM_PROVISIONING"
     ENABLE_PREDICTIVE_ANALYTICS = "ENABLE_PREDICTIVE_ANALYTICS"
     ENABLE_API_DEVELOPER_PORTAL = "ENABLE_API_DEVELOPER_PORTAL"
+    ENABLE_BATCH_LLM_SUMMARIES = "ENABLE_BATCH_LLM_SUMMARIES"
 
 
 class FeatureFlags(BaseSettings):
@@ -91,6 +92,10 @@ class FeatureFlags(BaseSettings):
         default=False,
         description="Enable internal API developer portal and key rotation workflow",
     )
+    enable_batch_llm_summaries: bool = Field(
+        default=False,
+        description="Enable batch document LLM summarization worker job scaffold",
+    )
 
 
 _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
@@ -110,6 +115,7 @@ _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
     FeatureFlag.ENABLE_SCIM_PROVISIONING: "enable_scim_provisioning",
     FeatureFlag.ENABLE_PREDICTIVE_ANALYTICS: "enable_predictive_analytics",
     FeatureFlag.ENABLE_API_DEVELOPER_PORTAL: "enable_api_developer_portal",
+    FeatureFlag.ENABLE_BATCH_LLM_SUMMARIES: "enable_batch_llm_summaries",
 }
 
 

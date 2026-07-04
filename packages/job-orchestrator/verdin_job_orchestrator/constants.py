@@ -15,6 +15,7 @@ class JobType(StrEnum):
     OVERDUE_INVESTIGATION_SCAN = "overdue_investigation_scan"
     RETENTION_ENFORCEMENT_SCAN = "retention_enforcement_scan"
     REPORTING_MV_REFRESH = "reporting_mv_refresh"
+    BATCH_DOCUMENT_LLM_SUMMARY = "batch_document_llm_summary"
 
 
 class JobStatus(StrEnum):

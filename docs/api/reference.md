@@ -289,6 +289,16 @@ Secure document storage with MinIO, SHA-256 hashing, versioning, and duplicate d
 
 `POST /documents/{document_id}/llm-summary` invokes the configured LLM provider when `ENABLE_LLM` and ADR-012 gates pass. Document context (metadata + truncated OCR text) is PII-scrubbed before the provider call; timeline event `DOCUMENT_LLM_SUMMARY_GENERATED` records model, provider, and prompt hash.
 
+When `ENABLE_BATCH_LLM_SUMMARIES=true` (and `ENABLE_LLM=true`), staff can enqueue org-scoped batch summarization runs processed by the `batch_document_llm_summary` worker job.
+
+| Method | Path                                    | Min role     | Description                                |
+| ------ | --------------------------------------- | ------------ | ------------------------------------------ |
+| GET    | `/documents/batch-llm-summaries/status` | case_manager | Batch summarization readiness and blockers |
+| GET    | `/documents/batch-llm-summaries/runs`   | case_manager | Paginated batch run audit log              |
+| POST   | `/documents/batch-llm-summaries/run`    | case_manager | Enqueue batch summarization worker job     |
+
+`POST /documents/batch-llm-summaries/run` accepts optional `document_ids`; when omitted, up to 25 documents with OCR text are selected. Returns `404` when batch summarization is disabled.
+
 ### Upload (multipart form)
 
 Fields: `file` (required), `title` (required), `case_id` (required), `description`, `account_id`
