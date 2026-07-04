@@ -116,10 +116,19 @@ export {
 } from './clients';
 
 export {
+  approveAgentExecutionStep,
+  getAgentExecutionStatus,
   getAgentObservabilityStatus,
   getLlmStatus,
+  listAgentExecutionSteps,
   listAgentObservabilityRuns,
   runAgentObservabilityScaffold,
+  submitAgentExecutionStep,
+  type AgentExecutionStatus,
+  type AgentExecutionStep,
+  type AgentExecutionStepResult,
+  type AgentExecutionStepStatus,
+  type AgentExecutionStepSubmitInput,
   type AgentObservabilityKind,
   type AgentObservabilityRun,
   type AgentObservabilityRunInput,

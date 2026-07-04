@@ -96,6 +96,28 @@ def _login(client: TestClient, email: str) -> dict[str, str]:
 
 
 @pytest.fixture
+async def admin_user(db_session: AsyncSession, test_org: Organization) -> User:
+    user = User(
+        id=uuid.uuid4(),
+        email=f"admin-{uuid.uuid4().hex[:8]}@test.example",
+        hashed_password=hash_password("password123"),
+        first_name="Test",
+        last_name="Admin",
+        role=UserRole.ADMIN,
+        organization_id=test_org.id,
+        is_active=True,
+    )
+    db_session.add(user)
+    await db_session.commit()
+    return user
+
+
+@pytest.fixture
+def admin_headers(api_client: TestClient, admin_user: User) -> dict[str, str]:
+    return _login(api_client, admin_user.email)
+
+
+@pytest.fixture
 def manager_headers(api_client: TestClient, case_manager_user: User) -> dict[str, str]:
     return _login(api_client, case_manager_user.email)
 

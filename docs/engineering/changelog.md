@@ -844,3 +844,11 @@ packages/job-orchestrator/
 **Reason:** 5.5 communications epic moves marketing SMS from audit-only enqueue to worker-driven Twilio delivery with org-scoped outcome audit.
 
 **Follow-up work:** Slice 5 — human-gated agent execution scaffold.
+
+### Decision: Human-gated agent execution scaffold
+
+**Decision:** Add `agent_execution_steps` table (migration `039`), `GET /llm/execution/status`, `GET /llm/execution/steps`, `POST /llm/execution/steps`, and `POST /llm/execution/steps/{id}/approve`, `api/core/agent_execution.py`, `ENABLE_AGENT_EXECUTION` flag (requires `ENABLE_AGENT_OBSERVABILITY`), and case timeline correlation on admin approval.
+
+**Reason:** 5.5 AI operations epic ships human-gated execution audit without autonomous dispute filing or external tool calling.
+
+**Follow-up work:** Slice 6 — v5.5.0 sign-off and release notes.
