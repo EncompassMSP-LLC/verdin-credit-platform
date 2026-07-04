@@ -44,7 +44,7 @@ Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (
 | **5.0**   | Enterprise Edition           | **Shipped** | Compliance, SSO/MFA, LLM summaries, production email, portal expansion (`v5.0.0`)       |
 | **5.0+**  | Product Hardening            | **Shipped** | Pilot-ready staff + portal UI for 5.0 APIs                                              |
 | **5.1**   | Production Hardening         | **Shipped** | API keys, billing, IdP enrollment, enforcement, push, materialized reporting (`v5.1.0`) |
-| **5.2**   | Deferred Production Surfaces | In progress | SMS, LLM document summaries, Web Push HTTP, revenue analytics                           |
+| **5.2**   | Deferred Production Surfaces | **Shipped** | SMS, LLM document summaries, Web Push HTTP, revenue analytics (`v5.2.0`)                |
 
 ### Sprint milestones
 
@@ -178,17 +178,21 @@ Scope and checklist: [`docs/governance/version-5.1-scope.md`](../governance/vers
 
 Release notes: [`docs/release-notes/v5.1.0.md`](../release-notes/v5.1.0.md)
 
-### Version 5.2 — Deferred Production Surfaces (in progress)
+### Version 5.2 — Deferred Production Surfaces (shipped)
 
 Scope and checklist: [`docs/governance/version-5.2-scope.md`](../governance/version-5.2-scope.md) · [`docs/development/version-5.2-completion-checklist.md`](../development/version-5.2-completion-checklist.md)
 
-| Epic | Theme                     | 5.2 target | Notes                                   |
-| ---- | ------------------------- | ---------- | --------------------------------------- |
-| 1    | Communications production | Partial    | Twilio SMS delivery (5.1 deferral)      |
-| 2    | LLM expansion             | Partial    | Document summary endpoint + staff UI    |
-| 3    | Portal push production    | Partial    | Real Web Push HTTP for portal messaging |
-| 4    | Revenue analytics         | Partial    | Billing-derived org revenue read model  |
-| 5    | API integrations depth    | Partial    | API key rate-limit scaffold             |
+| Epic | Theme                     | 5.2 outcome | Notes                                   |
+| ---- | ------------------------- | ----------- | --------------------------------------- |
+| 1    | Communications production | Partial ✅  | Twilio SMS delivery (5.1 deferral)      |
+| 2    | LLM expansion             | Partial ✅  | Document summary endpoint + staff UI    |
+| 3    | Portal push production    | Partial ✅  | Real Web Push HTTP for portal messaging |
+| 4    | Revenue analytics         | Partial ✅  | Billing-derived org revenue read model  |
+| 5    | API integrations depth    | Partial ✅  | API key rate-limit scaffold             |
+
+**Tag:** `v5.2.0` — Deferred Production Surfaces.
+
+Release notes: [`docs/release-notes/v5.2.0.md`](../release-notes/v5.2.0.md)
 
 ## Sprint → version mapping
 
