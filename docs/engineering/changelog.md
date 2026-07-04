@@ -652,3 +652,11 @@ packages/job-orchestrator/
 **Reason:** 5.2 portal push epic ships production HTTP delivery deferred from v5.1 scaffold when VAPID keys are configured.
 
 **Follow-up work:** Slice 5 — revenue analytics scaffold.
+
+### Decision: API key rate-limit scaffold
+
+**Decision:** Add Redis fixed-window rate limiting for API key auth on `GET /reporting/operations`, `ENABLE_API_KEY_RATE_LIMIT` flag, `GET /org-admin/api-keys/rate-limit/status`, and promote `api_key_rate_limiting` to org admin capabilities when enabled.
+
+**Reason:** 5.2 API integrations epic ships per-organization rate limits on the production API key path without per-route limit UI.
+
+**Follow-up work:** Slice 7 — capability matrix 5.2 sign-off.

@@ -22,7 +22,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | 3     | LLM document summary UI          | AI                | —      |
 | 4     | Web Push HTTP delivery           | Client Portal     | ✅     |
 | 5     | Revenue analytics scaffold       | Billing/Reporting | —      |
-| 6     | API key rate-limit scaffold      | API integrations  | —      |
+| 6     | API key rate-limit scaffold      | API integrations  | ✅     |
 | 7     | Capability matrix 5.2 sign-off   | Governance        | —      |
 
 Slice 2 requires Twilio test credentials. Slice 3 requires `ENABLE_LLM=true` and ADR-012 gates. Slice 4 requires `ENABLE_PORTAL_PUSH` + VAPID keys. Slice 5 requires `ENABLE_BILLING` + Stripe test data.

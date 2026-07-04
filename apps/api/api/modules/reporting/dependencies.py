@@ -6,6 +6,7 @@ from fastapi import Depends, Header, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from api.core.api_key_rate_limit import ApiKeyRateLimitExceededError, enforce_api_key_rate_limit
 from api.core.api_keys import API_KEY_PREFIX
 from api.core.feature_flags import FeatureFlag, is_feature_enabled
 from api.core.permissions import has_permission
@@ -39,6 +40,17 @@ async def get_reporting_organization_id(
             raw_key,
             required_scope=ApiKeyScope.READ,
         )
+        try:
+            await enforce_api_key_rate_limit(
+                organization_id=auth.organization_id,
+                api_key_id=auth.api_key_id,
+            )
+        except ApiKeyRateLimitExceededError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail="API key rate limit exceeded",
+                headers={"Retry-After": str(exc.retry_after_seconds)},
+            ) from exc
         return auth.organization_id
 
     if credentials is None:

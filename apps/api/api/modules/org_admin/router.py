@@ -12,6 +12,7 @@ from api.modules.org_admin.dependencies import require_org_admin_enabled
 from api.modules.org_admin.schemas import (
     ApiKeyCreate,
     ApiKeyCreateResponse,
+    ApiKeyRateLimitStatusResponse,
     ApiKeyResponse,
     OrgAdminStatusResponse,
     OrganizationAdminSummary,
@@ -32,6 +33,15 @@ async def get_org_admin_status(
     service: OrgAdminService = Depends(get_org_admin_service),
 ) -> OrgAdminStatusResponse:
     return await service.get_status(current_user)
+
+
+@router.get("/api-keys/rate-limit/status", response_model=ApiKeyRateLimitStatusResponse)
+async def get_api_key_rate_limit_status_endpoint(
+    _: None = Depends(require_org_admin_enabled),
+    current_user: User = Depends(get_current_user),
+    service: OrgAdminService = Depends(get_org_admin_service),
+) -> ApiKeyRateLimitStatusResponse:
+    return await service.get_api_key_rate_limit_status(current_user)
 
 
 @router.get("/organization", response_model=OrganizationAdminSummary)

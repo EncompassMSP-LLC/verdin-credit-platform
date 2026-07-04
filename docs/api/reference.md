@@ -393,14 +393,15 @@ Requires `ENABLE_ENTERPRISE=true`. TOTP enrollment requires `ENTERPRISE_MFA_MODE
 
 Enterprise org administration scaffold for API key lifecycle and organization summary metrics. All endpoints require `ENABLE_ENTERPRISE=true` and **admin** role.
 
-| Method | Path                              | Min role | Description                                     |
-| ------ | --------------------------------- | -------- | ----------------------------------------------- |
-| GET    | `/org-admin/status`               | admin    | Org admin capabilities overview                 |
-| GET    | `/org-admin/organization`         | admin    | Organization summary (users, API keys, billing) |
-| GET    | `/org-admin/api-keys`             | admin    | List organization API keys (prefix only)        |
-| POST   | `/org-admin/api-keys`             | admin    | Create API key (full secret returned once)      |
-| GET    | `/org-admin/api-keys/{id}`        | admin    | Get API key metadata                            |
-| POST   | `/org-admin/api-keys/{id}/revoke` | admin    | Revoke an active API key                        |
+| Method | Path                                    | Min role | Description                                     |
+| ------ | --------------------------------------- | -------- | ----------------------------------------------- |
+| GET    | `/org-admin/status`                     | admin    | Org admin capabilities overview                 |
+| GET    | `/org-admin/organization`               | admin    | Organization summary (users, API keys, billing) |
+| GET    | `/org-admin/api-keys`                   | admin    | List organization API keys (prefix only)        |
+| POST   | `/org-admin/api-keys`                   | admin    | Create API key (full secret returned once)      |
+| GET    | `/org-admin/api-keys/{id}`              | admin    | Get API key metadata                            |
+| POST   | `/org-admin/api-keys/{id}/revoke`       | admin    | Revoke an active API key                        |
+| GET    | `/org-admin/api-keys/rate-limit/status` | admin    | API key rate-limit configuration (5.2)          |
 
 API keys use prefix `vrd_live_` with SHA-256 hashed storage. Scopes: `read`, `write`. SCIM, cross-org roles, and usage analytics are deferred to 5.2+.
 
@@ -452,6 +453,8 @@ Read-optimized operations reporting for 4.8 dashboard expansions.
 | GET    | `/reporting/operations` | read_only | Org-scoped clients, disputes, notifications KPIs |
 
 `GET /reporting/operations` also accepts organization API keys when `ENABLE_ENTERPRISE=true`: pass `X-API-Key: vrd_live_…` or `Authorization: Bearer vrd_live_…` with a key that includes the `read` scope. Staff JWT auth with `read_only` role remains supported. Other reporting routes are JWT-only.
+
+When `ENABLE_API_KEY_RATE_LIMIT=true`, API key requests to `GET /reporting/operations` are limited per organization and key (`API_KEY_RATE_LIMIT_PER_MINUTE`, default `60`) using a Redis fixed-window counter. Exceeded limits return `429 Too Many Requests` with a `Retry-After` header.
 
 The Mission Control `GET /dashboard` response also embeds an `operations` section sourced from the same read model.
 

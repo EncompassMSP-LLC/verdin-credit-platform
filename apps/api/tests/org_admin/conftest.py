@@ -7,10 +7,14 @@ from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import api.models  # noqa: F401 — register all ORM mappers
+from api.core.api_keys import generate_api_key_material
+from api.core.audit import apply_audit_on_create
 from api.core.constants import UserRole
 from api.core.feature_flags import get_feature_flags
 from api.core.security import hash_password
 from api.modules.auth.models import Organization, User
+from api.modules.org_admin.models import ApiKeyScope, OrganizationApiKey
+from api.modules.org_admin.repository import OrgAdminRepository
 
 
 @pytest.fixture
@@ -93,3 +97,25 @@ def admin_headers(api_client: TestClient, admin_user: User) -> dict[str, str]:
 @pytest.fixture
 def manager_headers(api_client: TestClient, case_manager_user: User) -> dict[str, str]:
     return _login(api_client, case_manager_user.email)
+
+
+@pytest.fixture
+async def read_api_key(
+    db_session: AsyncSession,
+    test_org: Organization,
+    admin_user: User,
+) -> tuple[str, OrganizationApiKey]:
+    full_key, key_prefix, key_hash = generate_api_key_material()
+    api_key = OrganizationApiKey(
+        organization_id=test_org.id,
+        name="Integration read key",
+        key_prefix=key_prefix,
+        key_hash=key_hash,
+        is_active=True,
+    )
+    api_key.set_scopes([ApiKeyScope.READ])
+    apply_audit_on_create(api_key, admin_user.id)
+    repo = OrgAdminRepository(db_session)
+    await repo.create_api_key(api_key)
+    await db_session.commit()
+    return full_key, api_key

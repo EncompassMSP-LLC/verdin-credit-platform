@@ -267,10 +267,11 @@ Scope: [version-5.1-scope.md](version-5.1-scope.md) · Checklist: [version-5.1-c
 
 Scope: [version-5.2-scope.md](version-5.2-scope.md) · Checklist: [version-5.2-completion-checklist.md](../development/version-5.2-completion-checklist.md)
 
-| Capability           | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies  | Notes                                                      |
-| -------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------- | ---------------------------------------------------------- |
-| Production SMS       | 5.2     | Partial | ✅      | —        | ✅  | —   | ✅    | Notifications | Twilio send + audit log; `deliver_sms` on create           |
-| Portal Web Push HTTP | 5.2     | Partial | ✅      | ✅       | ✅  | —   | ✅    | Client portal | VAPID Web Push send on staff-message dispatch; `pywebpush` |
+| Capability            | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies  | Notes                                                           |
+| --------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------- | --------------------------------------------------------------- |
+| Production SMS        | 5.2     | Partial | ✅      | —        | ✅  | —   | ✅    | Notifications | Twilio send + audit log; `deliver_sms` on create                |
+| Portal Web Push HTTP  | 5.2     | Partial | ✅      | ✅       | ✅  | —   | ✅    | Client portal | VAPID Web Push send on staff-message dispatch; `pywebpush`      |
+| API key rate limiting | 5.2     | Partial | ✅      | —        | ✅  | —   | ✅    | Org admin     | Redis fixed-window limit on `GET /reporting/operations` via key |
 
 ---
 
