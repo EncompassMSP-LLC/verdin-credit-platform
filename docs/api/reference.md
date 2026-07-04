@@ -376,7 +376,7 @@ SMS provider env vars: `SMS_PROVIDER`, `SMS_FROM_NUMBER`, `SMS_TWILIO_ACCOUNT_SI
 
 ### Marketing SMS campaigns
 
-Marketing SMS campaign enqueue scaffold with org-scoped run audit log. Requires `ENABLE_SMS_DELIVERY=true` and `ENABLE_SMS_MARKETING_CAMPAIGNS=true`. Synchronous enqueue counts recipients with phone numbers; does not call Twilio (audit-only scaffold like invoicing).
+Marketing SMS campaign enqueue scaffold with org-scoped run audit log. Requires `ENABLE_SMS_DELIVERY=true` and `ENABLE_SMS_MARKETING_CAMPAIGNS=true`. When `ENABLE_SMS_MARKETING_DELIVERY=true`, `POST /notifications/sms-campaigns/run` creates a pending run and enqueues the `sms_marketing_campaign_delivery` worker job; delivery attempts are persisted to `sms_delivery_logs` with `campaign_run_id`. Without the delivery flag, enqueue remains audit-only (recipient counts, no Twilio calls).
 
 | Method | Path                                  | Min role  | Description                               |
 | ------ | ------------------------------------- | --------- | ----------------------------------------- |

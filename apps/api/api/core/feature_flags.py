@@ -30,6 +30,7 @@ class FeatureFlag(StrEnum):
     ENABLE_IDP_FEDERATION = "ENABLE_IDP_FEDERATION"
     ENABLE_SAML_FEDERATION_METADATA = "ENABLE_SAML_FEDERATION_METADATA"
     ENABLE_SMS_MARKETING_CAMPAIGNS = "ENABLE_SMS_MARKETING_CAMPAIGNS"
+    ENABLE_SMS_MARKETING_DELIVERY = "ENABLE_SMS_MARKETING_DELIVERY"
     ENABLE_AGENT_OBSERVABILITY = "ENABLE_AGENT_OBSERVABILITY"
 
 
@@ -122,6 +123,10 @@ class FeatureFlags(BaseSettings):
         default=False,
         description="Enable marketing SMS campaign enqueue scaffold",
     )
+    enable_sms_marketing_delivery: bool = Field(
+        default=False,
+        description="Enable marketing SMS campaign delivery worker",
+    )
     enable_agent_observability: bool = Field(
         default=False,
         description="Enable agent run audit and observability read scaffold",
@@ -151,6 +156,7 @@ _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
     FeatureFlag.ENABLE_IDP_FEDERATION: "enable_idp_federation",
     FeatureFlag.ENABLE_SAML_FEDERATION_METADATA: "enable_saml_federation_metadata",
     FeatureFlag.ENABLE_SMS_MARKETING_CAMPAIGNS: "enable_sms_marketing_campaigns",
+    FeatureFlag.ENABLE_SMS_MARKETING_DELIVERY: "enable_sms_marketing_delivery",
     FeatureFlag.ENABLE_AGENT_OBSERVABILITY: "enable_agent_observability",
 }
 

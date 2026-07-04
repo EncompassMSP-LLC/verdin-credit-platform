@@ -43,6 +43,18 @@ async def case_manager_user(db_session: AsyncSession, test_org: Organization) ->
 
 
 @pytest.fixture
+async def case_manager_with_phone(
+    db_session: AsyncSession,
+    case_manager_user: User,
+) -> User:
+    case_manager_user.phone_number = "+15555550123"
+    db_session.add(case_manager_user)
+    await db_session.commit()
+    await db_session.refresh(case_manager_user)
+    return case_manager_user
+
+
+@pytest.fixture
 async def admin_user(db_session: AsyncSession, test_org: Organization) -> User:
     user = User(
         id=uuid.uuid4(),

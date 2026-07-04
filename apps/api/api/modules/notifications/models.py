@@ -118,3 +118,9 @@ class SmsDeliveryLog(Base, TimestampMixin):
     sent_by_user_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id"), nullable=True
     )
+    campaign_run_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("sms_marketing_campaign_runs.id"),
+        nullable=True,
+        index=True,
+    )

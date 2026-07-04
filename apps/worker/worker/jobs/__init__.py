@@ -13,6 +13,7 @@ from worker.jobs import (
     report_import,
     reporting_mv_refresh,
     retention_enforcement_scan,
+    sms_marketing_campaign_delivery,
 )
 
 __all__ = [
@@ -28,4 +29,5 @@ __all__ = [
     "report_import",
     "reporting_mv_refresh",
     "retention_enforcement_scan",
+    "sms_marketing_campaign_delivery",
 ]

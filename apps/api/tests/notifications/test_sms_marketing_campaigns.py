@@ -4,7 +4,6 @@ import uuid
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.core.feature_flags import get_feature_flags
 from api.core.sms_delivery import get_sms_delivery_settings
@@ -24,18 +23,6 @@ def sms_marketing_env(monkeypatch: pytest.MonkeyPatch) -> None:
     yield
     get_feature_flags.cache_clear()
     get_sms_delivery_settings.cache_clear()
-
-
-@pytest.fixture
-async def case_manager_with_phone(
-    db_session: AsyncSession,
-    case_manager_user: User,
-) -> User:
-    case_manager_user.phone_number = "+15555550123"
-    db_session.add(case_manager_user)
-    await db_session.commit()
-    await db_session.refresh(case_manager_user)
-    return case_manager_user
 
 
 def test_sms_marketing_hidden_when_disabled(

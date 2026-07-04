@@ -209,6 +209,8 @@ export interface SmsMarketingCampaignStatus {
   enabled: boolean;
   ready: boolean;
   sms_delivery_ready: boolean;
+  delivery_enabled: boolean;
+  delivery_ready: boolean;
   blockers: string[];
 }
 
