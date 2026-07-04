@@ -47,7 +47,8 @@ Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (
 | **5.2**   | Deferred Production Surfaces | **Shipped** | SMS, LLM document summaries, Web Push HTTP, revenue analytics (`v5.2.0`)                |
 | **5.3**   | Enterprise Depth             | **Shipped** | Usage metering, SCIM, predictive analytics, API developer surfaces (`v5.3.0`)           |
 | **5.4**   | Production Operations        | **Shipped** | Invoicing/dunning, multi-IdP federation, marketing SMS, agent observability (`v5.4.0`)  |
-| **5.5**   | Production Automation        | Shipped     | Invoice collection, SAML metadata, SMS delivery worker, agent execution scaffold        |
+| **5.5**   | Production Automation        | **Shipped** | Invoice collection, SAML metadata, SMS delivery worker, agent execution scaffold        |
+| **5.6**   | Compliance-Reviewed Depth    | In progress | HRIS sync, SMS deliverability, LLM dispute augment, dispute filing prep                 |
 
 ### Sprint milestones
 
@@ -242,6 +243,19 @@ Scope and checklist: [`docs/governance/version-5.5-scope.md`](../governance/vers
 **Tag:** `v5.5.0` — Production Automation.
 
 Release notes: [`docs/release-notes/v5.5.0.md`](../release-notes/v5.5.0.md)
+
+### Version 5.6 — Compliance-Reviewed Production Depth (in progress)
+
+Scope and checklist: [`docs/governance/version-5.6-scope.md`](../governance/version-5.6-scope.md) · [`docs/development/version-5.6-completion-checklist.md`](../development/version-5.6-completion-checklist.md)
+
+| Epic | Theme                         | 5.6 outcome | Notes                                              |
+| ---- | ----------------------------- | ----------- | -------------------------------------------------- |
+| 1    | HRIS bidirectional sync       | Partial     | Sync run audit + status scaffold                   |
+| 2    | SMS deliverability dashboards | Partial     | Delivery metrics read model + status endpoint      |
+| 3    | LLM dispute draft augment     | Partial     | ADR-012-gated augment scaffold (no auto-send)      |
+| 4    | Dispute filing prep           | Partial     | Compliance-gated prep audit (no bureau submission) |
+
+**Target tag:** `v5.6.0`
 
 ## Sprint → version mapping
 
