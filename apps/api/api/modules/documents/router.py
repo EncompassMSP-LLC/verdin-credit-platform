@@ -15,6 +15,7 @@ from api.modules.documents.constants import (
     MetadataStatus,
     ResolutionStatus,
 )
+from api.modules.documents.llm_summary import DocumentLlmSummaryService
 from api.modules.documents.metadata_schemas import (
     DocumentMetadataResponse,
     DocumentResolutionsResponse,
@@ -25,6 +26,7 @@ from api.modules.documents.schemas import (
     DocumentClassificationResponse,
     DocumentDuplicateGroupResponse,
     DocumentListParams,
+    DocumentLlmSummaryResponse,
     DocumentOcrResponse,
     DocumentParsedCreditReportAccountCandidatesResponse,
     DocumentParsedCreditReportComparisonResponse,
@@ -51,6 +53,12 @@ def get_document_service(
     storage: DocumentStorage = Depends(get_storage),
 ) -> DocumentService:
     return DocumentService.from_session(db, storage)
+
+
+def get_document_llm_summary_service(
+    db: AsyncSession = Depends(get_db),
+) -> DocumentLlmSummaryService:
+    return DocumentLlmSummaryService.from_session(db)
 
 
 def get_document_list_params(
@@ -341,3 +349,12 @@ async def list_document_versions(
     service: DocumentService = Depends(get_document_service),
 ) -> list[DocumentVersionResponse]:
     return await service.list_versions(current_user, document_id)
+
+
+@router.post("/{document_id}/llm-summary", response_model=DocumentLlmSummaryResponse)
+async def generate_document_llm_summary(
+    document_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: DocumentLlmSummaryService = Depends(get_document_llm_summary_service),
+) -> DocumentLlmSummaryResponse:
+    return await service.generate_summary(current_user, document_id)

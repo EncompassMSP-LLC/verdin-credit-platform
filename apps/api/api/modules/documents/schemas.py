@@ -191,6 +191,16 @@ class DocumentOcrResponse(BaseSchema):
         )
 
 
+class DocumentLlmSummaryResponse(BaseSchema):
+    document_id: uuid.UUID
+    summary: str
+    model: str
+    provider: str
+    prompt_hash: str
+    generated_at: datetime
+    pii_scrubbed: bool = True
+
+
 class DocumentClassificationResponse(BaseSchema):
     document_id: uuid.UUID
     document_type: DocumentType | None

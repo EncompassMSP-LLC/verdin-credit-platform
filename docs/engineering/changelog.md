@@ -645,6 +645,14 @@ packages/job-orchestrator/
 
 **Follow-up work:** Slice 3 — LLM document summary UI.
 
+### Decision: LLM document summary UI
+
+**Decision:** Add `POST /documents/{document_id}/llm-summary` with PII-scrubbed document context, timeline event `DOCUMENT_LLM_SUMMARY_GENERATED`, `DocumentLlmSummaryPanel` on staff document detail, and `@verdin/api-client` helpers. Gated by `ENABLE_LLM`.
+
+**Reason:** 5.2 AI epic ships document summaries deferred from v5.1.0 alongside existing case summary UI from 5.0.
+
+**Follow-up work:** Slice 4 — Web Push HTTP delivery.
+
 ### Decision: Web Push HTTP delivery
 
 **Decision:** Replace scaffold `WebPushPortalPushAdapter` with real VAPID Web Push HTTP sends via `pywebpush`; staff-message dispatch records `sent`/`failed` in `portal_push_delivery_logs`. Messaging capability updated to `portal_web_push`.

@@ -267,12 +267,13 @@ Scope: [version-5.1-scope.md](version-5.1-scope.md) · Checklist: [version-5.1-c
 
 Scope: [version-5.2-scope.md](version-5.2-scope.md) · Checklist: [version-5.2-completion-checklist.md](../development/version-5.2-completion-checklist.md)
 
-| Capability            | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies  | Notes                                                           |
-| --------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------- | --------------------------------------------------------------- |
-| Production SMS        | 5.2     | Partial | ✅      | —        | ✅  | —   | ✅    | Notifications | Twilio send + audit log; `deliver_sms` on create                |
-| Portal Web Push HTTP  | 5.2     | Partial | ✅      | ✅       | ✅  | —   | ✅    | Client portal | VAPID Web Push send on staff-message dispatch; `pywebpush`      |
-| Revenue analytics     | 5.2     | Partial | ✅      | ✅       | ✅  | —   | ✅    | Billing       | `GET /reporting/revenue`; readiness score from billing state    |
-| API key rate limiting | 5.2     | Partial | ✅      | —        | ✅  | —   | ✅    | Org admin     | Redis fixed-window limit on `GET /reporting/operations` via key |
+| Capability             | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies  | Notes                                                           |
+| ---------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------- | --------------------------------------------------------------- |
+| Production SMS         | 5.2     | Partial | ✅      | —        | ✅  | —   | ✅    | Notifications | Twilio send + audit log; `deliver_sms` on create                |
+| LLM document summaries | 5.2     | Partial | ✅      | ✅       | ✅  | ✅  | ✅    | LLM gates     | `POST /documents/{id}/llm-summary`; `DocumentLlmSummaryPanel`   |
+| Portal Web Push HTTP   | 5.2     | Partial | ✅      | ✅       | ✅  | —   | ✅    | Client portal | VAPID Web Push send on staff-message dispatch; `pywebpush`      |
+| Revenue analytics      | 5.2     | Partial | ✅      | ✅       | ✅  | —   | ✅    | Billing       | `GET /reporting/revenue`; readiness score from billing state    |
+| API key rate limiting  | 5.2     | Partial | ✅      | —        | ✅  | —   | ✅    | Org admin     | Redis fixed-window limit on `GET /reporting/operations` via key |
 
 ---
 
@@ -289,7 +290,7 @@ Scope: [version-5.2-scope.md](version-5.2-scope.md) · Checklist: [version-5.2-c
 | Metadata / entity extraction | 1     | 4.5     | Partial | Parser bridge + candidates; LLM NER → 5.0                                |
 | LLM policy gates             | 2     | 4.8     | Partial | `packages/llm-gateway` + `GET /llm/status`; no provider calls            |
 | Case summaries (LLM)         | 2     | 5.0     | Partial | Endpoint + staff UI behind `ENABLE_LLM` + PII scrub                      |
-| Document summaries (LLM)     | 2     | 5.0     | —       | Deferred post-gate; requires approved provider integration               |
+| Document summaries (LLM)     | 2     | 5.2     | Partial | `POST /documents/{id}/llm-summary` + staff UI behind `ENABLE_LLM`        |
 | LLM dispute draft augment    | 2     | 5.0     | —       | Rules default in 4.5; LLM augment post-gate                              |
 | AI workflow orchestration    | 3     | 5.0+    | Planned | Deferred from 5.0 RC — requires compliance + observability prerequisites |
 | Predictive outcomes          | 3     | 5.1+    | Planned | Deferred — needs historical data pipeline                                |
