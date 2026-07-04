@@ -756,3 +756,11 @@ packages/job-orchestrator/
 **Reason:** Final exit criterion for the 5.3 enterprise depth milestone.
 
 **Follow-up work:** 5.4+ planning — autonomous workflows, invoicing, multi-IdP federation.
+
+### Decision: Kick off Version 5.4 production operations
+
+**Decision:** Add `version-5.4-scope.md`, `version-5.4-completion-checklist.md`, and `.cursor/rules/version-54-sprint-loop.mdc`; link 5.4 from product roadmap and capability matrix.
+
+**Reason:** v5.3.0 sign-off complete; invoicing/dunning, multi-IdP federation, marketing SMS, and agent observability need a sequenced delivery path before v5.4.0 release.
+
+**Follow-up work:** Slice 2 — invoicing & dunning scaffold.
