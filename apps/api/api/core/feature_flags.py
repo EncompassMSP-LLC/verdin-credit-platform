@@ -25,6 +25,7 @@ class FeatureFlag(StrEnum):
     ENABLE_PREDICTIVE_ANALYTICS = "ENABLE_PREDICTIVE_ANALYTICS"
     ENABLE_API_DEVELOPER_PORTAL = "ENABLE_API_DEVELOPER_PORTAL"
     ENABLE_BATCH_LLM_SUMMARIES = "ENABLE_BATCH_LLM_SUMMARIES"
+    ENABLE_BILLING_INVOICING = "ENABLE_BILLING_INVOICING"
 
 
 class FeatureFlags(BaseSettings):
@@ -96,6 +97,10 @@ class FeatureFlags(BaseSettings):
         default=False,
         description="Enable batch document LLM summarization worker job scaffold",
     )
+    enable_billing_invoicing: bool = Field(
+        default=False,
+        description="Enable org-scoped billing invoicing and dunning run scaffold",
+    )
 
 
 _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
@@ -116,6 +121,7 @@ _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
     FeatureFlag.ENABLE_PREDICTIVE_ANALYTICS: "enable_predictive_analytics",
     FeatureFlag.ENABLE_API_DEVELOPER_PORTAL: "enable_api_developer_portal",
     FeatureFlag.ENABLE_BATCH_LLM_SUMMARIES: "enable_batch_llm_summaries",
+    FeatureFlag.ENABLE_BILLING_INVOICING: "enable_billing_invoicing",
 }
 
 

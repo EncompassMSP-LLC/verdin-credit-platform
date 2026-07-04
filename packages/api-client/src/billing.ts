@@ -97,3 +97,56 @@ export function recordBillingUsageEvent(input: BillingUsageRecordInput) {
     body: JSON.stringify(input),
   });
 }
+
+export interface BillingInvoicingStatus {
+  enabled: boolean;
+  ready: boolean;
+  billing_ready: boolean;
+  blockers: string[];
+}
+
+export type BillingInvoicingRunKind = 'invoice_cycle' | 'dunning_reminder';
+
+export interface BillingInvoicingRun {
+  id: string;
+  organization_id: string;
+  run_kind: BillingInvoicingRunKind;
+  trigger_source: 'manual' | 'scheduled';
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  invoices_prepared: number;
+  dunning_reminders_queued: number;
+  performed_by_user_id: string | null;
+  started_at: string | null;
+  completed_at: string | null;
+  error_message: string | null;
+}
+
+export interface BillingInvoicingRunInput {
+  run_kind?: BillingInvoicingRunKind;
+}
+
+export interface BillingInvoicingRunResult {
+  completed_at: string;
+  run: BillingInvoicingRun;
+}
+
+export function getBillingInvoicingStatus() {
+  return request<BillingInvoicingStatus>(apiPath('/billing/invoicing/status'));
+}
+
+export function listBillingInvoicingRuns(page = 1, pageSize = 20) {
+  const params = new URLSearchParams({
+    page: String(page),
+    page_size: String(pageSize),
+  });
+  return request<{ items: BillingInvoicingRun[]; total: number; page: number; page_size: number }>(
+    apiPath(`/billing/invoicing/runs?${params.toString()}`),
+  );
+}
+
+export function runBillingInvoicingCycle(input: BillingInvoicingRunInput = {}) {
+  return request<BillingInvoicingRunResult>(apiPath('/billing/invoicing/run'), {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}

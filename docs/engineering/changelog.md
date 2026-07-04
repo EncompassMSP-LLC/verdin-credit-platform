@@ -764,3 +764,11 @@ packages/job-orchestrator/
 **Reason:** v5.3.0 sign-off complete; invoicing/dunning, multi-IdP federation, marketing SMS, and agent observability need a sequenced delivery path before v5.4.0 release.
 
 **Follow-up work:** Slice 2 — invoicing & dunning scaffold.
+
+### Decision: Billing invoicing and dunning scaffold
+
+**Decision:** Add `billing_invoicing_runs` table (migration `032`), `GET /billing/invoicing/status`, `GET /billing/invoicing/runs`, and `POST /billing/invoicing/run`, `api/core/billing_invoicing.py`, `ENABLE_BILLING_INVOICING` flag, and promote `billing_invoicing` to org admin capabilities when enabled.
+
+**Reason:** 5.4 billing epic ships org-scoped invoice/dunning run audit scaffold without Stripe invoice PDF generation or payment collection automation.
+
+**Follow-up work:** Slice 3 — multi-IdP federation scaffold.

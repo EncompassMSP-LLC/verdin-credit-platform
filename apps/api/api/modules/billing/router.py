@@ -3,10 +3,22 @@
 from fastapi import APIRouter, Depends, Header, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from api.core.pagination import PaginatedResponse
 from api.database.session import get_db
 from api.modules.auth.dependencies import get_current_user
 from api.modules.auth.models import User
-from api.modules.billing.dependencies import require_billing_enabled, require_usage_metering_enabled
+from api.modules.billing.dependencies import (
+    require_billing_enabled,
+    require_billing_invoicing_enabled,
+    require_usage_metering_enabled,
+)
+from api.modules.billing.invoicing_schemas import (
+    BillingInvoicingRunListParams,
+    BillingInvoicingRunRequest,
+    BillingInvoicingRunResponse,
+    BillingInvoicingRunResultResponse,
+    BillingInvoicingStatusResponse,
+)
 from api.modules.billing.schemas import (
     BillingSetupResponse,
     BillingStatusResponse,
@@ -89,3 +101,36 @@ async def record_billing_usage_event(
     service: BillingService = Depends(get_billing_service),
 ) -> BillingUsageRecordResponse:
     return await service.record_usage_event(current_user, body)
+
+
+@router.get("/invoicing/status", response_model=BillingInvoicingStatusResponse)
+async def get_billing_invoicing_status_endpoint(
+    _: None = Depends(require_billing_invoicing_enabled),
+    service: BillingService = Depends(get_billing_service),
+) -> BillingInvoicingStatusResponse:
+    return service.get_invoicing_status_response()
+
+
+@router.get(
+    "/invoicing/runs",
+    response_model=PaginatedResponse[BillingInvoicingRunResponse],
+)
+async def list_billing_invoicing_runs(
+    page: int = 1,
+    page_size: int = 20,
+    _: None = Depends(require_billing_invoicing_enabled),
+    current_user: User = Depends(get_current_user),
+    service: BillingService = Depends(get_billing_service),
+) -> PaginatedResponse[BillingInvoicingRunResponse]:
+    params = BillingInvoicingRunListParams(page=page, page_size=page_size)
+    return await service.list_invoicing_runs(current_user, params)
+
+
+@router.post("/invoicing/run", response_model=BillingInvoicingRunResultResponse)
+async def run_billing_invoicing_endpoint(
+    body: BillingInvoicingRunRequest,
+    _: None = Depends(require_billing_invoicing_enabled),
+    current_user: User = Depends(get_current_user),
+    service: BillingService = Depends(get_billing_service),
+) -> BillingInvoicingRunResultResponse:
+    return await service.run_invoicing_cycle(current_user, body)

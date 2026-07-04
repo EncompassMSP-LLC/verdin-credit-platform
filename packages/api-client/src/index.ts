@@ -149,11 +149,19 @@ export {
 } from './enterprise';
 
 export {
+  getBillingInvoicingStatus,
   getBillingStatus,
   getBillingUsageSummary,
+  listBillingInvoicingRuns,
   recordBillingUsageEvent,
+  runBillingInvoicingCycle,
   setupOrganizationBilling,
   subscribeOrganizationBilling,
+  type BillingInvoicingRun,
+  type BillingInvoicingRunInput,
+  type BillingInvoicingRunKind,
+  type BillingInvoicingRunResult,
+  type BillingInvoicingStatus,
   type BillingSetupResponse,
   type BillingStatus,
   type BillingSubscribeInput,

@@ -4,6 +4,12 @@ from api.core.constants import UserRole
 from api.modules.accounts.dispute_letter_models import DisputeLetter, DisputeLetterStatus
 from api.modules.accounts.models import Account
 from api.modules.auth.models import Organization, User
+from api.modules.billing.invoicing_models import (
+    BillingInvoicingRun,
+    BillingInvoicingRunKind,
+    BillingInvoicingRunStatus,
+    BillingInvoicingTriggerSource,
+)
 from api.modules.billing.models import BillingWebhookEvent, OrganizationBillingAccount
 from api.modules.cases.models import Case, CaseStatus
 from api.modules.client_portal.models import ClientPortalUser
@@ -62,6 +68,10 @@ __all__ = [
     "Account",
     "ApiKeyRotationLog",
     "ApiKeyScope",
+    "BillingInvoicingRun",
+    "BillingInvoicingRunKind",
+    "BillingInvoicingRunStatus",
+    "BillingInvoicingTriggerSource",
     "BillingWebhookEvent",
     "Case",
     "CaseStatus",

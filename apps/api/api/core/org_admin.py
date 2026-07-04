@@ -18,6 +18,7 @@ _DEFERRED_CAPABILITIES = [
     "api_key_usage_analytics",
     "api_key_rate_limiting",
     "billing_usage_metering",
+    "billing_invoicing",
     "api_key_rotation",
     "developer_portal",
 ]
@@ -32,6 +33,9 @@ def get_org_admin_status() -> OrgAdminStatusResponse:
     if is_feature_enabled(FeatureFlag.ENABLE_BILLING_USAGE_METERING):
         capabilities.append("billing_usage_metering")
         deferred.remove("billing_usage_metering")
+    if is_feature_enabled(FeatureFlag.ENABLE_BILLING_INVOICING):
+        capabilities.append("billing_invoicing")
+        deferred.remove("billing_invoicing")
     if is_feature_enabled(FeatureFlag.ENABLE_SCIM_PROVISIONING):
         capabilities.append("scim_provisioning")
         deferred.remove("scim_provisioning")

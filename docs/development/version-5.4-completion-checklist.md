@@ -18,7 +18,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | Order | Slice                            | Epic           | Status |
 | ----- | -------------------------------- | -------------- | ------ |
 | 1     | 5.4 scope + completion checklist | Kickoff        | ✅     |
-| 2     | Invoicing & dunning scaffold     | Billing        | —      |
+| 2     | Invoicing & dunning scaffold     | Billing        | ✅     |
 | 3     | Multi-IdP federation scaffold    | Identity       | —      |
 | 4     | Marketing SMS campaigns scaffold | Communications | —      |
 | 5     | Agent observability scaffold     | AI operations  | —      |
