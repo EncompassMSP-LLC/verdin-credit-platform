@@ -25,8 +25,10 @@ from api.modules.notifications.schemas import (
     UnreadCountResponse,
 )
 from api.modules.notifications.service import NotificationService
+from api.modules.notifications.sms_campaign_router import sms_campaign_router
 
 router = APIRouter(prefix="/notifications", tags=["Notifications"])
+router.include_router(sms_campaign_router)
 
 
 def get_notification_service(db: AsyncSession = Depends(get_db)) -> NotificationService:

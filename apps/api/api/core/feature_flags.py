@@ -27,6 +27,7 @@ class FeatureFlag(StrEnum):
     ENABLE_BATCH_LLM_SUMMARIES = "ENABLE_BATCH_LLM_SUMMARIES"
     ENABLE_BILLING_INVOICING = "ENABLE_BILLING_INVOICING"
     ENABLE_IDP_FEDERATION = "ENABLE_IDP_FEDERATION"
+    ENABLE_SMS_MARKETING_CAMPAIGNS = "ENABLE_SMS_MARKETING_CAMPAIGNS"
 
 
 class FeatureFlags(BaseSettings):
@@ -106,6 +107,10 @@ class FeatureFlags(BaseSettings):
         default=False,
         description="Enable multi-IdP federation provider registry scaffold",
     )
+    enable_sms_marketing_campaigns: bool = Field(
+        default=False,
+        description="Enable marketing SMS campaign enqueue scaffold",
+    )
 
 
 _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
@@ -128,6 +133,7 @@ _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
     FeatureFlag.ENABLE_BATCH_LLM_SUMMARIES: "enable_batch_llm_summaries",
     FeatureFlag.ENABLE_BILLING_INVOICING: "enable_billing_invoicing",
     FeatureFlag.ENABLE_IDP_FEDERATION: "enable_idp_federation",
+    FeatureFlag.ENABLE_SMS_MARKETING_CAMPAIGNS: "enable_sms_marketing_campaigns",
 }
 
 
