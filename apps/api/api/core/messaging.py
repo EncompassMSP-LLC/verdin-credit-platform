@@ -7,7 +7,7 @@ _MESSAGING_CAPABILITIES = [
     "portal_client_messages",
     "staff_replies",
     "org_scoped_message_history",
-    "portal_push_scaffold",
+    "portal_web_push",
 ]
 
 _DEFERRED_CAPABILITIES = [

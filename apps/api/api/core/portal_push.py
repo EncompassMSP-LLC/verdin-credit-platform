@@ -2,13 +2,16 @@
 
 from __future__ import annotations
 
+import asyncio
+import json
 from dataclasses import dataclass
 from enum import StrEnum
 from functools import lru_cache
-from typing import Protocol
+from typing import Any, Protocol
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pywebpush import WebPushException, webpush
 
 from api.core.feature_flags import FeatureFlag, is_feature_enabled
 
@@ -96,8 +99,29 @@ class NoopPortalPushAdapter:
         )
 
 
+def _build_web_push_payload(message: PortalPushMessage) -> str:
+    payload: dict[str, str | None] = {
+        "title": message.title,
+        "body": message.body,
+        "url": message.action_url,
+    }
+    return json.dumps(payload)
+
+
+def _provider_message_id_from_response(response: Any) -> str | None:
+    if response is None:
+        return None
+    status_code = getattr(response, "status_code", None)
+    if status_code is not None:
+        return f"web-push:{status_code}"
+    return None
+
+
 class WebPushPortalPushAdapter:
-    """Scaffold adapter — records intent without external Web Push HTTP calls."""
+    """Web Push HTTP adapter using VAPID authentication."""
+
+    def __init__(self, settings: PortalPushSettings) -> None:
+        self._settings = settings
 
     async def send(
         self,
@@ -107,12 +131,38 @@ class WebPushPortalPushAdapter:
         auth_key: str,
         message: PortalPushMessage,
     ) -> PortalPushSendResult:
-        _ = (p256dh_key, auth_key, message)
         if not endpoint:
             return PortalPushSendResult(success=False, error="Push endpoint is required")
+
+        private_key = self._settings.portal_push_vapid_private_key
+        subject = self._settings.portal_push_vapid_subject
+        if not private_key or not subject:
+            return PortalPushSendResult(
+                success=False,
+                error="VAPID keys are required for Web Push delivery",
+            )
+
+        subscription_info = {
+            "endpoint": endpoint,
+            "keys": {"p256dh": p256dh_key, "auth": auth_key},
+        }
+
+        try:
+            response = await asyncio.to_thread(
+                webpush,
+                subscription_info=subscription_info,
+                data=_build_web_push_payload(message),
+                vapid_private_key=private_key,
+                vapid_claims={"sub": subject},
+            )
+        except WebPushException as exc:
+            return PortalPushSendResult(success=False, error=str(exc))
+        except Exception as exc:  # noqa: BLE001 — provider errors surfaced to audit log
+            return PortalPushSendResult(success=False, error=str(exc))
+
         return PortalPushSendResult(
             success=True,
-            provider_message_id=f"web-push-scaffold:{endpoint[:48]}",
+            provider_message_id=_provider_message_id_from_response(response),
         )
 
 
@@ -159,7 +209,7 @@ def require_portal_push_ready(settings: PortalPushSettings | None = None) -> Por
 def get_portal_push_adapter(settings: PortalPushSettings | None = None) -> PortalPushAdapter:
     current = settings or get_portal_push_settings()
     if current.portal_push_provider == PortalPushProvider.WEB_PUSH:
-        return WebPushPortalPushAdapter()
+        return WebPushPortalPushAdapter(current)
     return NoopPortalPushAdapter()
 
 
@@ -170,12 +220,13 @@ async def send_portal_push_message(
     auth_key: str,
     message: PortalPushMessage,
     settings: PortalPushSettings | None = None,
+    adapter: PortalPushAdapter | None = None,
 ) -> PortalPushSendResult:
     current = settings or get_portal_push_settings()
     status = require_portal_push_ready(current)
-    adapter = get_portal_push_adapter(current)
+    provider = adapter or get_portal_push_adapter(current)
     _ = status
-    return await adapter.send(
+    return await provider.send(
         endpoint=endpoint,
         p256dh_key=p256dh_key,
         auth_key=auth_key,
