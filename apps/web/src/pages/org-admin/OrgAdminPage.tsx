@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   createOrganizationApiKey,
+  getDeveloperPortal,
   getOrgAdminStatus,
   getOrganizationAdminSummary,
   listOrganizationApiKeys,
   revokeOrganizationApiKey,
+  rotateOrganizationApiKey,
   type ApiKey,
   type ApiKeyScope,
 } from '@verdin/api-client';
@@ -49,6 +51,7 @@ export function OrgAdminPage() {
       </div>
 
       <OrgAdminStatusCard />
+      <DeveloperPortalCard onKeyRotated={setCreatedKey} />
       <OrganizationSummaryCard />
       <ApiKeysPanel onKeyCreated={setCreatedKey} />
 
@@ -103,6 +106,85 @@ function OrgAdminStatusCard() {
           </Badge>
         ))}
       </div>
+    </Card>
+  );
+}
+
+function DeveloperPortalCard({ onKeyRotated }: { onKeyRotated: (key: string) => void }) {
+  const queryClient = useQueryClient();
+  const portalQuery = useQuery({
+    queryKey: ['org-admin-developer-portal'],
+    queryFn: getDeveloperPortal,
+    retry: false,
+  });
+
+  const rotateMutation = useMutation({
+    mutationFn: (apiKeyId: string) => rotateOrganizationApiKey(apiKeyId),
+    onSuccess: (result) => {
+      void queryClient.invalidateQueries({ queryKey: ['org-admin-developer-portal'] });
+      void queryClient.invalidateQueries({ queryKey: ['org-admin-api-keys'] });
+      void queryClient.invalidateQueries({ queryKey: ['org-admin-summary'] });
+      onKeyRotated(result.api_key);
+    },
+  });
+
+  if (portalQuery.isError) {
+    return null;
+  }
+
+  if (portalQuery.isLoading) {
+    return (
+      <Card className="mb-6">
+        <p className="text-sm text-gray-500">Loading developer portal…</p>
+      </Card>
+    );
+  }
+
+  if (!portalQuery.data) {
+    return null;
+  }
+
+  const portal = portalQuery.data;
+
+  return (
+    <Card className="mb-6" title="API developer portal">
+      <p className="text-sm text-gray-500">
+        Internal integration surface for API keys, scopes, and rate-limit status.
+      </p>
+      <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-4">
+        <DashboardMetricCard label="Active keys" value={portal.active_api_key_count} />
+        <DashboardMetricCard
+          label="Rate limit"
+          value={
+            portal.rate_limit.enabled ? `${portal.rate_limit.limit_per_minute}/min` : 'Disabled'
+          }
+          tone={portal.rate_limit.enabled ? 'info' : 'default'}
+        />
+        <DashboardMetricCard
+          label="Rotation"
+          value={portal.rotation_enabled ? 'Enabled' : 'Disabled'}
+          tone={portal.rotation_enabled ? 'success' : 'warning'}
+        />
+        <DashboardMetricCard label="Backend" value={portal.rate_limit.backend} />
+      </div>
+      {portal.rotation_enabled && portal.api_keys.length > 0 ? (
+        <div className="mt-4 flex flex-wrap gap-2">
+          {portal.api_keys
+            .filter((key) => key.is_active && !key.revoked_at)
+            .map((key) => (
+              <Button
+                key={key.id}
+                type="button"
+                size="sm"
+                variant="secondary"
+                loading={rotateMutation.isPending}
+                onClick={() => rotateMutation.mutate(key.id)}
+              >
+                Rotate {key.name}
+              </Button>
+            ))}
+        </div>
+      ) : null}
     </Card>
   );
 }

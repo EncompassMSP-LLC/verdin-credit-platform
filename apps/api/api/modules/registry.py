@@ -38,6 +38,7 @@ from api.modules.notifications.models import (
     SmsDeliveryLog,
 )
 from api.modules.org_admin.models import ApiKeyScope, OrganizationApiKey
+from api.modules.org_admin.rotation_models import ApiKeyRotationLog
 from api.modules.reporting.materialized_models import (
     ReportingMvRefreshRun,
     ReportingMvRefreshStatus,
@@ -54,6 +55,7 @@ from api.modules.timeline.models import Communication, TimelineEvent
 
 __all__ = [
     "Account",
+    "ApiKeyRotationLog",
     "ApiKeyScope",
     "BillingWebhookEvent",
     "Case",

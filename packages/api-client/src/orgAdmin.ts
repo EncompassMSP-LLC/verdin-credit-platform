@@ -75,3 +75,39 @@ export function revokeOrganizationApiKey(apiKeyId: string) {
     method: 'POST',
   });
 }
+
+export interface ApiKeyRateLimitStatus {
+  enabled: boolean;
+  limit_per_minute: number;
+  backend: string;
+}
+
+export interface ApiKeyRotateResponse {
+  api_key: string;
+  previous_key: ApiKey;
+  new_key: ApiKey;
+}
+
+export interface DeveloperPortal {
+  enabled: boolean;
+  ready: boolean;
+  rotation_enabled: boolean;
+  blockers: string[];
+  active_api_key_count: number;
+  rate_limit: ApiKeyRateLimitStatus;
+  api_keys: ApiKey[];
+}
+
+export function getApiKeyRateLimitStatus() {
+  return request<ApiKeyRateLimitStatus>(apiPath('/org-admin/api-keys/rate-limit/status'));
+}
+
+export function getDeveloperPortal() {
+  return request<DeveloperPortal>(apiPath('/org-admin/developer-portal'));
+}
+
+export function rotateOrganizationApiKey(apiKeyId: string) {
+  return request<ApiKeyRotateResponse>(apiPath(`/org-admin/api-keys/${apiKeyId}/rotate`), {
+    method: 'POST',
+  });
+}

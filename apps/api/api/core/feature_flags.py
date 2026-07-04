@@ -23,6 +23,7 @@ class FeatureFlag(StrEnum):
     ENABLE_BILLING_USAGE_METERING = "ENABLE_BILLING_USAGE_METERING"
     ENABLE_SCIM_PROVISIONING = "ENABLE_SCIM_PROVISIONING"
     ENABLE_PREDICTIVE_ANALYTICS = "ENABLE_PREDICTIVE_ANALYTICS"
+    ENABLE_API_DEVELOPER_PORTAL = "ENABLE_API_DEVELOPER_PORTAL"
 
 
 class FeatureFlags(BaseSettings):
@@ -86,6 +87,10 @@ class FeatureFlags(BaseSettings):
         default=False,
         description="Enable org-scoped predictive outcome aggregates and refresh scaffold",
     )
+    enable_api_developer_portal: bool = Field(
+        default=False,
+        description="Enable internal API developer portal and key rotation workflow",
+    )
 
 
 _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
@@ -104,6 +109,7 @@ _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
     FeatureFlag.ENABLE_BILLING_USAGE_METERING: "enable_billing_usage_metering",
     FeatureFlag.ENABLE_SCIM_PROVISIONING: "enable_scim_provisioning",
     FeatureFlag.ENABLE_PREDICTIVE_ANALYTICS: "enable_predictive_analytics",
+    FeatureFlag.ENABLE_API_DEVELOPER_PORTAL: "enable_api_developer_portal",
 }
 
 

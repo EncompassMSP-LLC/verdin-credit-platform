@@ -8,12 +8,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from api.database.session import get_db
 from api.modules.auth.dependencies import get_current_user
 from api.modules.auth.models import User
-from api.modules.org_admin.dependencies import require_org_admin_enabled
+from api.modules.org_admin.dependencies import (
+    require_api_developer_portal_enabled,
+    require_org_admin_enabled,
+)
 from api.modules.org_admin.schemas import (
     ApiKeyCreate,
     ApiKeyCreateResponse,
     ApiKeyRateLimitStatusResponse,
     ApiKeyResponse,
+    ApiKeyRotateResponse,
+    DeveloperPortalResponse,
     OrgAdminStatusResponse,
     OrganizationAdminSummary,
 )
@@ -90,3 +95,28 @@ async def revoke_organization_api_key(
     service: OrgAdminService = Depends(get_org_admin_service),
 ) -> ApiKeyResponse:
     return await service.revoke_api_key(current_user, api_key_id)
+
+
+@router.get(
+    "/developer-portal",
+    response_model=DeveloperPortalResponse,
+    dependencies=[Depends(require_api_developer_portal_enabled)],
+)
+async def get_api_developer_portal(
+    current_user: User = Depends(get_current_user),
+    service: OrgAdminService = Depends(get_org_admin_service),
+) -> DeveloperPortalResponse:
+    return await service.get_developer_portal(current_user)
+
+
+@router.post(
+    "/api-keys/{api_key_id}/rotate",
+    response_model=ApiKeyRotateResponse,
+    dependencies=[Depends(require_api_developer_portal_enabled)],
+)
+async def rotate_organization_api_key(
+    api_key_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: OrgAdminService = Depends(get_org_admin_service),
+) -> ApiKeyRotateResponse:
+    return await service.rotate_api_key(current_user, api_key_id)

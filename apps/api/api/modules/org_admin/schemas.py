@@ -75,3 +75,19 @@ class ApiKeyRateLimitStatusResponse(BaseSchema):
     enabled: bool
     limit_per_minute: int
     backend: str
+
+
+class ApiKeyRotateResponse(BaseSchema):
+    api_key: str
+    previous_key: ApiKeyResponse
+    new_key: ApiKeyResponse
+
+
+class DeveloperPortalResponse(BaseSchema):
+    enabled: bool
+    ready: bool
+    rotation_enabled: bool
+    blockers: list[str]
+    active_api_key_count: int
+    rate_limit: ApiKeyRateLimitStatusResponse
+    api_keys: list[ApiKeyResponse]
