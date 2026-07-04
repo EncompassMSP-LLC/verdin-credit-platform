@@ -93,3 +93,82 @@ export function completeSsoEnrollment(input: SsoEnrollmentCompleteInput) {
 export function getSsoEnrollmentStatus() {
   return request<SsoEnrollmentStatus>(apiPath('/enterprise/sso/enrollment'));
 }
+
+export interface ScimProvisioningStatus {
+  enabled: boolean;
+  ready: boolean;
+  bearer_token_configured: boolean;
+  blockers: string[];
+}
+
+export interface ScimMeta {
+  resourceType: string;
+  created?: string | null;
+}
+
+export interface ScimUserResource {
+  schemas: string[];
+  id: string;
+  externalId: string;
+  userName: string;
+  active: boolean;
+  meta: ScimMeta;
+}
+
+export interface ScimGroupResource {
+  schemas: string[];
+  id: string;
+  externalId: string;
+  displayName: string;
+  meta: ScimMeta;
+}
+
+export interface ScimUserList {
+  schemas: string[];
+  totalResults: number;
+  resources: ScimUserResource[];
+}
+
+export interface ScimGroupList {
+  schemas: string[];
+  totalResults: number;
+  resources: ScimGroupResource[];
+}
+
+export interface ScimUserProvisionInput {
+  userName: string;
+  externalId: string;
+  active?: boolean;
+  name?: { givenName?: string; familyName?: string };
+}
+
+export interface ScimGroupProvisionInput {
+  displayName: string;
+  externalId: string;
+}
+
+export function getScimProvisioningStatus() {
+  return request<ScimProvisioningStatus>(apiPath('/enterprise/scim/status'));
+}
+
+export function provisionScimUser(input: ScimUserProvisionInput) {
+  return request<ScimUserResource>(apiPath('/enterprise/scim/v2/Users'), {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export function listScimUsers() {
+  return request<ScimUserList>(apiPath('/enterprise/scim/v2/Users'));
+}
+
+export function provisionScimGroup(input: ScimGroupProvisionInput) {
+  return request<ScimGroupResource>(apiPath('/enterprise/scim/v2/Groups'), {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export function listScimGroups() {
+  return request<ScimGroupList>(apiPath('/enterprise/scim/v2/Groups'));
+}

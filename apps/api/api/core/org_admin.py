@@ -30,6 +30,9 @@ def get_org_admin_status() -> OrgAdminStatusResponse:
     if is_feature_enabled(FeatureFlag.ENABLE_BILLING_USAGE_METERING):
         capabilities.append("billing_usage_metering")
         deferred.remove("billing_usage_metering")
+    if is_feature_enabled(FeatureFlag.ENABLE_SCIM_PROVISIONING):
+        capabilities.append("scim_provisioning")
+        deferred.remove("scim_provisioning")
 
     return OrgAdminStatusResponse(
         org_admin_enabled=True,

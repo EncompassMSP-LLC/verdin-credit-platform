@@ -390,7 +390,21 @@ MFA and SSO readiness plus staff enrollment flows. Portal authentication (`/port
 | POST   | `/enterprise/sso/enrollment/complete` | read_only | Complete OIDC linking with auth code   |
 | GET    | `/enterprise/sso/enrollment`          | read_only | Current user OIDC link status          |
 
-Requires `ENABLE_ENTERPRISE=true`. TOTP enrollment requires `ENTERPRISE_MFA_MODE=totp` and `ENTERPRISE_MFA_ISSUER`. OIDC enrollment requires `ENTERPRISE_SSO_PROVIDER=oidc` with issuer, client credentials, and `ENTERPRISE_SSO_REDIRECT_URI`. SAML and SCIM remain deferred.
+Requires `ENABLE_ENTERPRISE=true`. TOTP enrollment requires `ENTERPRISE_MFA_MODE=totp` and `ENTERPRISE_MFA_ISSUER`. OIDC enrollment requires `ENTERPRISE_SSO_PROVIDER=oidc` with issuer, client credentials, and `ENTERPRISE_SSO_REDIRECT_URI`. SAML remains deferred. SCIM provisioning is documented below.
+
+### SCIM provisioning
+
+SCIM 2.0 user/group provision scaffold with org-scoped audit logs. Requires `ENABLE_ENTERPRISE=true`, `ENABLE_SCIM_PROVISIONING=true`, and configured OIDC SSO (`ENTERPRISE_SSO_PROVIDER=oidc` with issuer and client credentials). Optional `SCIM_PROVISIONING_BEARER_TOKEN` for future IdP bearer auth (staff JWT used in this scaffold). Admin role required for write; read-only and above for list/status.
+
+| Method | Path                         | Min role  | Description                               |
+| ------ | ---------------------------- | --------- | ----------------------------------------- |
+| GET    | `/enterprise/scim/status`    | read_only | SCIM readiness and blockers               |
+| POST   | `/enterprise/scim/v2/Users`  | admin     | Provision or update a SCIM user audit log |
+| GET    | `/enterprise/scim/v2/Users`  | read_only | List provisioned SCIM users for the org   |
+| POST   | `/enterprise/scim/v2/Groups` | admin     | Provision or update a SCIM group log      |
+| GET    | `/enterprise/scim/v2/Groups` | read_only | List provisioned SCIM groups for the org  |
+
+Endpoints return `404` when `ENABLE_SCIM_PROVISIONING` is false. Full IdP-driven user lifecycle sync is deferred to 5.4+.
 
 ## Organization admin
 
@@ -406,7 +420,7 @@ Enterprise org administration scaffold for API key lifecycle and organization su
 | POST   | `/org-admin/api-keys/{id}/revoke`       | admin    | Revoke an active API key                        |
 | GET    | `/org-admin/api-keys/rate-limit/status` | admin    | API key rate-limit configuration (5.2)          |
 
-API keys use prefix `vrd_live_` with SHA-256 hashed storage. Scopes: `read`, `write`. SCIM, cross-org roles, and usage analytics are deferred to 5.2+.
+API keys use prefix `vrd_live_` with SHA-256 hashed storage. Scopes: `read`, `write`. SCIM provisioning is available when `ENABLE_SCIM_PROVISIONING=true` (see Enterprise identity). Cross-org roles and key usage analytics are deferred to 5.4+.
 
 ## Billing
 
