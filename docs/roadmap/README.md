@@ -45,6 +45,7 @@ Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (
 | **5.0+**  | Product Hardening            | **Shipped** | Pilot-ready staff + portal UI for 5.0 APIs                                              |
 | **5.1**   | Production Hardening         | **Shipped** | API keys, billing, IdP enrollment, enforcement, push, materialized reporting (`v5.1.0`) |
 | **5.2**   | Deferred Production Surfaces | **Shipped** | SMS, LLM document summaries, Web Push HTTP, revenue analytics (`v5.2.0`)                |
+| **5.3**   | Enterprise Depth             | In progress | Usage metering, SCIM, predictive analytics, API developer surfaces                      |
 
 ### Sprint milestones
 
@@ -193,6 +194,18 @@ Scope and checklist: [`docs/governance/version-5.2-scope.md`](../governance/vers
 **Tag:** `v5.2.0` — Deferred Production Surfaces.
 
 Release notes: [`docs/release-notes/v5.2.0.md`](../release-notes/v5.2.0.md)
+
+### Version 5.3 — Enterprise Depth (in progress)
+
+Scope and checklist: [`docs/governance/version-5.3-scope.md`](../governance/version-5.3-scope.md) · [`docs/development/version-5.3-completion-checklist.md`](../development/version-5.3-completion-checklist.md)
+
+| Epic | Theme                  | 5.3 target | Notes                                     |
+| ---- | ---------------------- | ---------- | ----------------------------------------- |
+| 1    | Billing usage metering | Partial    | Usage event scaffold + org read model     |
+| 2    | Identity provisioning  | Partial    | SCIM 2.0 provision scaffold               |
+| 3    | Predictive analytics   | Partial    | Historical outcome aggregates + reporting |
+| 4    | API integrations depth | Partial    | Key rotation + internal developer portal  |
+| 5    | LLM operations depth   | Partial    | Batch document summarization worker job   |
 
 ## Sprint → version mapping
 
