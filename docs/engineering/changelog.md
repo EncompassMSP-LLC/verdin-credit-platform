@@ -812,3 +812,11 @@ packages/job-orchestrator/
 **Reason:** Final exit criterion for the 5.4 production operations milestone.
 
 **Follow-up work:** 5.5+ planning — autonomous workflows, production invoicing automation, deeper identity federation.
+
+### Decision: Kick off Version 5.5 production automation
+
+**Decision:** Add `version-5.5-scope.md`, `version-5.5-completion-checklist.md`, and `.cursor/rules/version-55-sprint-loop.mdc`; link 5.5 from product roadmap and capability matrix.
+
+**Reason:** v5.4.0 sign-off complete; invoice collection, SAML metadata, marketing SMS delivery worker, and human-gated agent execution need a sequenced delivery path before v5.5.0 release.
+
+**Follow-up work:** Slice 2 — invoice collection scaffold.
