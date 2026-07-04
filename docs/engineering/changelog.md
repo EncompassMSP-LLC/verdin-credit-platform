@@ -796,3 +796,19 @@ packages/job-orchestrator/
 **Reason:** 5.4 AI operations epic ships agent run audit and staff review reads without autonomous execution or external LLM calls.
 
 **Follow-up work:** Slice 6 — v5.4.0 sign-off and release notes.
+
+### Decision: Version 5.4 epic sign-off
+
+**Decision:** Mark all four Version 5.4 epics **Partial ✅** in `version-5.4-scope.md`, add capability matrix 5.4 epic sign-off table, update AI tracker for agent observability, and complete checklist Phase 1 exit criteria.
+
+**Reason:** All 5.4 slices shipped behind feature flags with tests and docs; deferrals documented for 5.5+.
+
+**Follow-up work:** `docs/release-notes/v5.4.0.md` + tag `v5.4.0`.
+
+### Decision: Version 5.4.0 release notes
+
+**Decision:** Publish `docs/release-notes/v5.4.0.md`, mark Version 5.4 checklist complete, update roadmap to **Shipped** (`v5.4.0`), and tag `v5.4.0` on `main`.
+
+**Reason:** Final exit criterion for the 5.4 production operations milestone.
+
+**Follow-up work:** 5.5+ planning — autonomous workflows, production invoicing automation, deeper identity federation.

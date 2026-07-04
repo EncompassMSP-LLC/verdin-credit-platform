@@ -46,7 +46,7 @@ Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (
 | **5.1**   | Production Hardening         | **Shipped** | API keys, billing, IdP enrollment, enforcement, push, materialized reporting (`v5.1.0`) |
 | **5.2**   | Deferred Production Surfaces | **Shipped** | SMS, LLM document summaries, Web Push HTTP, revenue analytics (`v5.2.0`)                |
 | **5.3**   | Enterprise Depth             | **Shipped** | Usage metering, SCIM, predictive analytics, API developer surfaces (`v5.3.0`)           |
-| **5.4**   | Production Operations        | In progress | Invoicing/dunning, multi-IdP federation, marketing SMS, agent observability             |
+| **5.4**   | Production Operations        | **Shipped** | Invoicing/dunning, multi-IdP federation, marketing SMS, agent observability (`v5.4.0`)  |
 
 ### Sprint milestones
 
@@ -212,16 +212,20 @@ Scope and checklist: [`docs/governance/version-5.3-scope.md`](../governance/vers
 
 Release notes: [`docs/release-notes/v5.3.0.md`](../release-notes/v5.3.0.md)
 
-### Version 5.4 — Production Operations (in progress)
+### Version 5.4 — Production Operations (shipped)
 
 Scope and checklist: [`docs/governance/version-5.4-scope.md`](../governance/version-5.4-scope.md) · [`docs/development/version-5.4-completion-checklist.md`](../development/version-5.4-completion-checklist.md)
 
-| Epic | Theme                    | 5.4 target | Notes                                        |
-| ---- | ------------------------ | ---------- | -------------------------------------------- |
-| 1    | Billing invoicing        | Partial    | Invoice/dunning scaffold + staff reads       |
-| 2    | Identity federation      | Partial    | Multi-IdP federation config scaffold         |
-| 3    | Communications marketing | Partial    | Marketing SMS campaign enqueue scaffold      |
-| 4    | AI agent observability   | Partial    | Agent run audit + status (no autonomous run) |
+| Epic | Theme                    | 5.4 outcome | Notes                                        |
+| ---- | ------------------------ | ----------- | -------------------------------------------- |
+| 1    | Billing invoicing        | Partial ✅  | Invoice/dunning scaffold + staff reads       |
+| 2    | Identity federation      | Partial ✅  | Multi-IdP federation config scaffold         |
+| 3    | Communications marketing | Partial ✅  | Marketing SMS campaign enqueue scaffold      |
+| 4    | AI agent observability   | Partial ✅  | Agent run audit + status (no autonomous run) |
+
+**Tag:** `v5.4.0` — Production Operations.
+
+Release notes: [`docs/release-notes/v5.4.0.md`](../release-notes/v5.4.0.md)
 
 ## Sprint → version mapping
 
