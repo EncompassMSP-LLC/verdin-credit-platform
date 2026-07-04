@@ -374,6 +374,18 @@ Provider env vars: `EMAIL_PROVIDER`, `EMAIL_FROM_ADDRESS`, `EMAIL_SMTP_HOST`, `E
 
 SMS provider env vars: `SMS_PROVIDER`, `SMS_FROM_NUMBER`, `SMS_TWILIO_ACCOUNT_SID`, `SMS_TWILIO_AUTH_TOKEN`.
 
+### Marketing SMS campaigns
+
+Marketing SMS campaign enqueue scaffold with org-scoped run audit log. Requires `ENABLE_SMS_DELIVERY=true` and `ENABLE_SMS_MARKETING_CAMPAIGNS=true`. Synchronous enqueue counts recipients with phone numbers; does not call Twilio (audit-only scaffold like invoicing).
+
+| Method | Path                                  | Min role  | Description                               |
+| ------ | ------------------------------------- | --------- | ----------------------------------------- |
+| GET    | `/notifications/sms-campaigns/status` | read_only | Campaign readiness and blockers           |
+| GET    | `/notifications/sms-campaigns/runs`   | admin     | Paginated marketing campaign run audit    |
+| POST   | `/notifications/sms-campaigns/run`    | admin     | Enqueue a marketing SMS campaign scaffold |
+
+Returns `404` when either `ENABLE_SMS_DELIVERY` or `ENABLE_SMS_MARKETING_CAMPAIGNS` is false.
+
 ## LLM gateway
 
 LLM readiness and case summary generation behind ADR-012 gates.

@@ -780,3 +780,11 @@ packages/job-orchestrator/
 **Reason:** 5.4 identity epic ships org-scoped multi-IdP provider registry aligned with SCIM provision audit without SAML metadata upload or HRIS sync.
 
 **Follow-up work:** Slice 4 — marketing SMS campaigns scaffold.
+
+### Decision: Marketing SMS campaigns scaffold
+
+**Decision:** Add `sms_marketing_campaign_runs` table (migration `034`), `GET /notifications/sms-campaigns/status`, `GET /notifications/sms-campaigns/runs`, and `POST /notifications/sms-campaigns/run`, `api/core/sms_marketing.py`, `ENABLE_SMS_MARKETING_CAMPAIGNS` flag (requires `ENABLE_SMS_DELIVERY`), and synchronous enqueue processor with org-scoped run audit.
+
+**Reason:** 5.4 communications epic ships marketing SMS campaign enqueue scaffold without Twilio bulk send or opt-out compliance automation.
+
+**Follow-up work:** Slice 5 — agent observability scaffold.

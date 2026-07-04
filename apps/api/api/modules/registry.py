@@ -52,6 +52,11 @@ from api.modules.notifications.models import (
     NotificationCategory,
     SmsDeliveryLog,
 )
+from api.modules.notifications.sms_campaign_models import (
+    SmsMarketingCampaignRun,
+    SmsMarketingCampaignStatus,
+    SmsMarketingTriggerSource,
+)
 from api.modules.org_admin.models import ApiKeyScope, OrganizationApiKey
 from api.modules.org_admin.rotation_models import ApiKeyRotationLog
 from api.modules.reporting.materialized_models import (
@@ -121,6 +126,9 @@ __all__ = [
     "RetentionEnforcementRun",
     "RetentionScope",
     "SmsDeliveryLog",
+    "SmsMarketingCampaignRun",
+    "SmsMarketingCampaignStatus",
+    "SmsMarketingTriggerSource",
     "Task",
     "TaskPriority",
     "TaskStatus",

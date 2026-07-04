@@ -204,3 +204,62 @@ export function listNotificationSmsDeliveries(params: { page?: number; page_size
     apiPath(`/notifications/sms/deliveries${query ? `?${query}` : ''}`),
   );
 }
+
+export interface SmsMarketingCampaignStatus {
+  enabled: boolean;
+  ready: boolean;
+  sms_delivery_ready: boolean;
+  blockers: string[];
+}
+
+export type SmsMarketingCampaignRunStatus = 'pending' | 'running' | 'completed' | 'failed';
+export type SmsMarketingTriggerSource = 'manual' | 'scheduled';
+
+export interface SmsMarketingCampaignRun {
+  id: string;
+  organization_id: string;
+  campaign_name: string;
+  message_body: string;
+  recipient_user_ids: string[];
+  trigger_source: SmsMarketingTriggerSource;
+  status: SmsMarketingCampaignRunStatus;
+  recipients_queued: number;
+  messages_sent: number;
+  messages_failed: number;
+  performed_by_user_id: string | null;
+  started_at: string | null;
+  completed_at: string | null;
+  error_message: string | null;
+}
+
+export interface SmsMarketingCampaignRunInput {
+  campaign_name: string;
+  message_body: string;
+  recipient_user_ids: string[];
+}
+
+export interface SmsMarketingCampaignRunResult {
+  completed_at: string;
+  run: SmsMarketingCampaignRun;
+}
+
+export function getSmsMarketingCampaignStatus() {
+  return request<SmsMarketingCampaignStatus>(apiPath('/notifications/sms-campaigns/status'));
+}
+
+export function listSmsMarketingCampaignRuns(params: { page?: number; page_size?: number } = {}) {
+  const search = new URLSearchParams();
+  if (params.page) search.set('page', String(params.page));
+  if (params.page_size) search.set('page_size', String(params.page_size));
+  const query = search.toString();
+  return request<PaginatedResponse<SmsMarketingCampaignRun>>(
+    apiPath(`/notifications/sms-campaigns/runs${query ? `?${query}` : ''}`),
+  );
+}
+
+export function runSmsMarketingCampaign(input: SmsMarketingCampaignRunInput) {
+  return request<SmsMarketingCampaignRunResult>(apiPath('/notifications/sms-campaigns/run'), {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
