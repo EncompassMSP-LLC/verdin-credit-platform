@@ -467,6 +467,9 @@ Bureau performance and team productivity read models for enterprise dashboards. 
 | GET    | `/reporting/status`             | read_only | Enterprise reporting capabilities overview              |
 | GET    | `/reporting/bureau-performance` | read_only | Tradeline counts and dispute outcomes grouped by bureau |
 | GET    | `/reporting/team-productivity`  | read_only | Per-staff task and case productivity (30-day window)    |
+| GET    | `/reporting/revenue`            | read_only | Org revenue readiness from Stripe billing state         |
+
+When `ENABLE_BILLING=true`, `GET /reporting/revenue` returns subscription status, client/portal counts, and a heuristic readiness score (0–100) derived from billing configuration and operations metrics. Returns `404` when billing is disabled.
 
 When `ENABLE_MATERIALIZED_REPORTING=true`, bureau and team endpoints read from PostgreSQL materialized views refreshed by a scheduled worker job (`0 4 * * *` UTC) or manual admin refresh.
 

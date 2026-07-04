@@ -109,6 +109,31 @@ export function getTeamProductivityReporting() {
   return request<TeamProductivityReportingResponse>(apiPath('/reporting/team-productivity'));
 }
 
+export interface RevenueAnalytics {
+  billing_enabled: boolean;
+  billing_ready: boolean;
+  stripe_customer_configured: boolean;
+  stripe_subscription_configured: boolean;
+  subscription_active: boolean;
+  subscription_status: string;
+  price_id: string | null;
+  current_period_end: string | null;
+  renewal_within_30_days: boolean | null;
+  active_clients: number;
+  portal_enabled_clients: number;
+  portal_users: number;
+  readiness_score: number;
+}
+
+export interface RevenueAnalyticsReportingResponse {
+  generated_at: string;
+  revenue_analytics: RevenueAnalytics;
+}
+
+export function getRevenueAnalyticsReporting() {
+  return request<RevenueAnalyticsReportingResponse>(apiPath('/reporting/revenue'));
+}
+
 export function getMaterializedReportingStatus() {
   return request<MaterializedReportingStatus>(apiPath('/reporting/materialized-views/status'));
 }

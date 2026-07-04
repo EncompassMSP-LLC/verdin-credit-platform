@@ -4,13 +4,14 @@ import {
   getBureauPerformanceReporting,
   getEnterpriseReportingStatus,
   getOperationsReporting,
+  getRevenueAnalyticsReporting,
   getTeamProductivityReporting,
 } from '@verdin/api-client';
 import { Badge, Button, Card } from '@verdin/ui';
 import { DashboardMetricCard } from '../../components/dashboard/DashboardMetricCard';
 import { featureFlags } from '../../lib/feature-flags';
 
-type ReportingTab = 'operations' | 'bureau' | 'team';
+type ReportingTab = 'operations' | 'bureau' | 'team' | 'revenue';
 
 function formatGeneratedAt(value: string) {
   return new Date(value).toLocaleString();
@@ -65,7 +66,7 @@ export function ReportingCenterPage() {
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Enterprise reporting</h1>
         <p className="mt-1 text-gray-500">
-          Operations KPIs, bureau performance, and team productivity read models.
+          Operations KPIs, bureau performance, team productivity, and revenue readiness.
         </p>
       </div>
 
@@ -93,11 +94,19 @@ export function ReportingCenterPage() {
         >
           Team productivity
         </Button>
+        <Button
+          type="button"
+          variant={tab === 'revenue' ? 'primary' : 'secondary'}
+          onClick={() => setTab('revenue')}
+        >
+          Revenue readiness
+        </Button>
       </div>
 
       {tab === 'operations' ? <OperationsPanel /> : null}
       {tab === 'bureau' ? <BureauPerformancePanel /> : null}
       {tab === 'team' ? <TeamProductivityPanel /> : null}
+      {tab === 'revenue' ? <RevenueAnalyticsPanel /> : null}
     </div>
   );
 }
@@ -392,6 +401,109 @@ function TeamProductivityPanel() {
           </div>
         </Card>
       )}
+    </div>
+  );
+}
+
+function RevenueAnalyticsPanel() {
+  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
+    queryKey: ['reporting-revenue'],
+    queryFn: getRevenueAnalyticsReporting,
+    retry: false,
+  });
+
+  if (isLoading) {
+    return (
+      <Card>
+        <p className="text-sm text-gray-500">Loading revenue analytics…</p>
+      </Card>
+    );
+  }
+
+  if (isError || !data) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    const billingDisabled = message.toLowerCase().includes('not found') || message.includes('404');
+    return (
+      <Card>
+        <p className="text-sm text-gray-600">
+          {billingDisabled
+            ? 'Revenue analytics requires ENABLE_BILLING=true and Stripe configuration.'
+            : `Failed to load revenue analytics: ${message}`}
+        </p>
+        {!billingDisabled ? (
+          <Button className="mt-4" variant="secondary" onClick={() => refetch()}>
+            Retry
+          </Button>
+        ) : null}
+      </Card>
+    );
+  }
+
+  const analytics = data.revenue_analytics;
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between gap-4">
+        <p className="text-sm text-gray-600">
+          Readiness score {analytics.readiness_score}/100 · generated{' '}
+          {formatGeneratedAt(data.generated_at)}
+        </p>
+        <Button variant="secondary" onClick={() => refetch()} disabled={isFetching}>
+          {isFetching ? 'Refreshing…' : 'Refresh'}
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <DashboardMetricCard
+          label="Readiness score"
+          value={analytics.readiness_score}
+          tone={analytics.readiness_score >= 70 ? 'success' : 'warning'}
+        />
+        <DashboardMetricCard
+          label="Subscription"
+          value={
+            analytics.subscription_active ? 'Active' : formatLabel(analytics.subscription_status)
+          }
+          tone={analytics.subscription_active ? 'success' : 'default'}
+        />
+        <DashboardMetricCard label="Active clients" value={analytics.active_clients} />
+        <DashboardMetricCard label="Portal users" value={analytics.portal_users} />
+      </div>
+
+      <Card title="Billing readiness">
+        <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
+          <div>
+            <dt className="text-gray-500">Billing ready</dt>
+            <dd>{analytics.billing_ready ? 'Yes' : 'No'}</dd>
+          </div>
+          <div>
+            <dt className="text-gray-500">Stripe customer</dt>
+            <dd>{analytics.stripe_customer_configured ? 'Configured' : 'Not configured'}</dd>
+          </div>
+          <div>
+            <dt className="text-gray-500">Subscription record</dt>
+            <dd>{analytics.stripe_subscription_configured ? 'Configured' : 'Not configured'}</dd>
+          </div>
+          <div>
+            <dt className="text-gray-500">Renewal within 30 days</dt>
+            <dd>
+              {analytics.renewal_within_30_days === null
+                ? '—'
+                : analytics.renewal_within_30_days
+                  ? 'Yes'
+                  : 'No'}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-gray-500">Portal-enabled clients</dt>
+            <dd>{analytics.portal_enabled_clients}</dd>
+          </div>
+          <div>
+            <dt className="text-gray-500">Price ID</dt>
+            <dd className="break-all font-mono text-xs">{analytics.price_id ?? '—'}</dd>
+          </div>
+        </dl>
+      </Card>
     </div>
   );
 }

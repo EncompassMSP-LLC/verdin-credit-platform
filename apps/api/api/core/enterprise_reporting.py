@@ -23,6 +23,9 @@ def get_enterprise_reporting_status() -> EnterpriseReportingStatusResponse:
         capabilities.append("materialized_views")
     else:
         deferred.insert(0, "materialized_views")
+    if is_feature_enabled(FeatureFlag.ENABLE_BILLING):
+        capabilities.append("revenue_metrics")
+        deferred.remove("revenue_metrics")
 
     return EnterpriseReportingStatusResponse(
         enterprise_reporting_enabled=True,

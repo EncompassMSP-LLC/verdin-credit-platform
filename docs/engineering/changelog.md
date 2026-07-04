@@ -653,6 +653,14 @@ packages/job-orchestrator/
 
 **Follow-up work:** Slice 5 — revenue analytics scaffold.
 
+### Decision: Revenue analytics scaffold
+
+**Decision:** Add `GET /reporting/revenue` with billing-derived readiness metrics (subscription state, client/portal counts, heuristic readiness score), `api/core/revenue_analytics.py`, Revenue readiness tab on enterprise reporting UI, and promote `revenue_metrics` to enterprise reporting capabilities when `ENABLE_BILLING=true`.
+
+**Reason:** 5.2 revenue epic ships an org-scoped read model from Stripe billing account state without usage metering or cross-org benchmarks.
+
+**Follow-up work:** Slice 6 — API key rate-limit scaffold.
+
 ### Decision: API key rate-limit scaffold
 
 **Decision:** Add Redis fixed-window rate limiting for API key auth on `GET /reporting/operations`, `ENABLE_API_KEY_RATE_LIMIT` flag, `GET /org-admin/api-keys/rate-limit/status`, and promote `api_key_rate_limiting` to org admin capabilities when enabled.
