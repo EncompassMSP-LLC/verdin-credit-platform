@@ -21,6 +21,7 @@ class FeatureFlag(StrEnum):
     ENABLE_MATERIALIZED_REPORTING = "ENABLE_MATERIALIZED_REPORTING"
     ENABLE_API_KEY_RATE_LIMIT = "ENABLE_API_KEY_RATE_LIMIT"
     ENABLE_BILLING_USAGE_METERING = "ENABLE_BILLING_USAGE_METERING"
+    ENABLE_SCIM_PROVISIONING = "ENABLE_SCIM_PROVISIONING"
 
 
 class FeatureFlags(BaseSettings):
@@ -76,6 +77,10 @@ class FeatureFlags(BaseSettings):
         default=False,
         description="Enable org-scoped billing usage event recording and summary reads",
     )
+    enable_scim_provisioning: bool = Field(
+        default=False,
+        description="Enable SCIM 2.0 user and group provision scaffold",
+    )
 
 
 _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
@@ -92,6 +97,7 @@ _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
     FeatureFlag.ENABLE_MATERIALIZED_REPORTING: "enable_materialized_reporting",
     FeatureFlag.ENABLE_API_KEY_RATE_LIMIT: "enable_api_key_rate_limit",
     FeatureFlag.ENABLE_BILLING_USAGE_METERING: "enable_billing_usage_metering",
+    FeatureFlag.ENABLE_SCIM_PROVISIONING: "enable_scim_provisioning",
 }
 
 

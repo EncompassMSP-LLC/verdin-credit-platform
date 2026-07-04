@@ -708,3 +708,11 @@ packages/job-orchestrator/
 **Reason:** 5.3 billing epic ships org-scoped usage event recording and aggregated read model without Stripe metered billing or invoicing.
 
 **Follow-up work:** Slice 3 — SCIM provisioning scaffold.
+
+### Decision: SCIM provisioning scaffold
+
+**Decision:** Add `scim_provision_logs` table (migration `028`), `GET /enterprise/scim/status` and SCIM 2.0 `Users`/`Groups` provision/list endpoints, `api/core/scim_provisioning.py`, `ENABLE_SCIM_PROVISIONING` flag, and promote `scim_provisioning` to org admin capabilities when enabled.
+
+**Reason:** 5.3 identity epic ships org-scoped SCIM provision audit logs and readiness gate aligned with OIDC enrollment without full IdP lifecycle sync.
+
+**Follow-up work:** Slice 4 — predictive analytics scaffold.

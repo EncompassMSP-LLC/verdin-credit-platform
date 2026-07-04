@@ -18,9 +18,11 @@ from api.modules.enterprise.schemas import (
     TotpEnrollmentStartResponse,
     TotpEnrollmentStatusResponse,
 )
+from api.modules.enterprise.scim_router import scim_router
 from api.modules.enterprise.service import EnterpriseEnrollmentService
 
 router = APIRouter(prefix="/enterprise", tags=["Enterprise"])
+router.include_router(scim_router)
 
 
 class EnterpriseIdentityStatusResponse(BaseSchema):

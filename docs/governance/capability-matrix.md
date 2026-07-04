@@ -292,13 +292,13 @@ Scope: [version-5.2-scope.md](version-5.2-scope.md) · Checklist: [version-5.2-c
 
 Scope: [version-5.3-scope.md](version-5.3-scope.md) · Checklist: [version-5.3-completion-checklist.md](../development/version-5.3-completion-checklist.md)
 
-| Capability           | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                               |
-| -------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | --------------------------------------------------- |
-| Usage metering       | 5.3     | Partial | ✅      | —        | ✅  | —   | ✅    | Billing      | `GET /billing/usage/summary`; usage event audit log |
-| SCIM provisioning    | 5.3     | Planned | —       | —        | —   | —   | —     | Enterprise   | SCIM 2.0 provision scaffold → slice 3               |
-| Predictive analytics | 5.3     | Planned | —       | —        | —   | —   | —     | Reporting    | Historical outcome read model → slice 4             |
-| API developer portal | 5.3     | Planned | —       | —        | —   | —   | —     | Org admin    | Key rotation + dev portal → slice 5                 |
-| Batch LLM summaries  | 5.3     | Planned | —       | —        | —   | —   | —     | LLM gates    | Worker batch job scaffold → slice 6                 |
+| Capability           | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                 |
+| -------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ----------------------------------------------------- |
+| Usage metering       | 5.3     | Partial | ✅      | —        | ✅  | —   | ✅    | Billing      | `GET /billing/usage/summary`; usage event audit log   |
+| SCIM provisioning    | 5.3     | Partial | ✅      | —        | ✅  | —   | ✅    | Enterprise   | `GET/POST /enterprise/scim/v2/*`; provision audit log |
+| Predictive analytics | 5.3     | Planned | —       | —        | —   | —   | —     | Reporting    | Historical outcome read model → slice 4               |
+| API developer portal | 5.3     | Planned | —       | —        | —   | —   | —     | Org admin    | Key rotation + dev portal → slice 5                   |
+| Batch LLM summaries  | 5.3     | Planned | —       | —        | —   | —   | —     | LLM gates    | Worker batch job scaffold → slice 6                   |
 
 ---
 
