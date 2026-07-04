@@ -290,6 +290,61 @@ export async function generateDocumentLlmSummary(documentId: string): Promise<Do
   });
 }
 
+export interface BatchLlmSummaryStatus {
+  enabled: boolean;
+  ready: boolean;
+  blockers: string[];
+  last_completed_at: string | null;
+}
+
+export interface BatchDocumentSummaryRun {
+  id: string;
+  organization_id: string;
+  trigger_source: string;
+  status: string;
+  document_ids: string[];
+  documents_queued: number;
+  documents_succeeded: number;
+  documents_failed: number;
+  performed_by_user_id: string | null;
+  started_at: string | null;
+  completed_at: string | null;
+  error_message: string | null;
+  created_at: string;
+}
+
+export interface BatchDocumentSummaryEnqueueResponse {
+  run: BatchDocumentSummaryRun;
+  job_id: string;
+}
+
+export function getBatchLlmSummaryStatus() {
+  return request<BatchLlmSummaryStatus>(apiPath('/documents/batch-llm-summaries/status'));
+}
+
+export function listBatchDocumentSummaryRuns(page = 1, pageSize = 20) {
+  const params = new URLSearchParams({
+    page: String(page),
+    page_size: String(pageSize),
+  });
+  return request<{
+    items: BatchDocumentSummaryRun[];
+    total: number;
+    page: number;
+    page_size: number;
+  }>(`${apiPath('/documents/batch-llm-summaries/runs')}?${params.toString()}`);
+}
+
+export function enqueueBatchDocumentSummaryRun(documentIds: string[] = []) {
+  return request<BatchDocumentSummaryEnqueueResponse>(
+    apiPath('/documents/batch-llm-summaries/run'),
+    {
+      method: 'POST',
+      body: JSON.stringify({ document_ids: documentIds }),
+    },
+  );
+}
+
 export async function getDocumentMetadata(documentId: string): Promise<DocumentMetadata> {
   return request<DocumentMetadata>(apiPath(`/documents/${documentId}/metadata`));
 }

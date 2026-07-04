@@ -298,7 +298,7 @@ Scope: [version-5.3-scope.md](version-5.3-scope.md) · Checklist: [version-5.3-c
 | SCIM provisioning    | 5.3     | Partial | ✅      | —        | ✅  | —   | ✅    | Enterprise   | `GET/POST /enterprise/scim/v2/*`; provision audit log  |
 | Predictive analytics | 5.3     | Partial | ✅      | —        | ✅  | —   | ✅    | Reporting    | `GET /reporting/predictive/outcomes`; snapshot refresh |
 | API developer portal | 5.3     | Partial | ✅      | ✅       | ✅  | —   | ✅    | Org admin    | `GET /org-admin/developer-portal`; key rotation        |
-| Batch LLM summaries  | 5.3     | Planned | —       | —        | —   | —   | —     | LLM gates    | Worker batch job scaffold → slice 6                    |
+| Batch LLM summaries  | 5.3     | Partial | ✅      | —        | ✅  | ✅  | ✅    | LLM gates    | `POST /documents/batch-llm-summaries/run`; worker job  |
 
 ---
 

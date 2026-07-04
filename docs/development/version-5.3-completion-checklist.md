@@ -22,7 +22,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | 3     | SCIM provisioning scaffold       | Identity         | ✅     |
 | 4     | Predictive analytics scaffold    | Reporting / AI   | ✅     |
 | 5     | API key rotation + dev portal    | API integrations | ✅     |
-| 6     | Batch document summarization job | LLM operations   | —      |
+| 6     | Batch document summarization job | LLM operations   | ✅     |
 | 7     | Capability matrix 5.3 sign-off   | Governance       | —      |
 
 Slice 2 requires `ENABLE_BILLING=true` + Stripe test data. Slice 3 requires `ENABLE_ENTERPRISE=true` and stable OIDC enrollment. Slice 4 requires historical case/account data in test DB. Slice 6 requires `ENABLE_LLM=true` and ADR-012 gates.

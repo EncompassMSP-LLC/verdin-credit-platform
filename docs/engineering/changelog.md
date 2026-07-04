@@ -732,3 +732,11 @@ packages/job-orchestrator/
 **Reason:** 5.3 API integrations epic ships internal developer portal scaffold and rotation workflow without public external portal or OAuth client credentials.
 
 **Follow-up work:** Slice 6 — batch document summarization job.
+
+### Decision: Batch document LLM summarization job
+
+**Decision:** Add `batch_document_summary_runs` table (migration `031`), `GET/POST /documents/batch-llm-summaries/*` endpoints, `batch_document_llm_summary` worker job (`JobType.BATCH_DOCUMENT_LLM_SUMMARY`), `api/core/batch_llm_summaries.py`, and `ENABLE_BATCH_LLM_SUMMARIES` flag.
+
+**Reason:** 5.3 LLM operations epic ships org-scoped batch summarization enqueue + worker processing with PII scrubbing and timeline audit without autonomous agents or external batch export.
+
+**Follow-up work:** Slice 7 — capability matrix 5.3 sign-off.

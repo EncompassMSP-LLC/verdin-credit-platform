@@ -2,6 +2,7 @@
 
 from worker.jobs import (
     ai_summary,
+    batch_document_llm_summary,
     classify,
     credit_report_parse,
     entity_resolve,
@@ -16,6 +17,7 @@ from worker.jobs import (
 
 __all__ = [
     "ai_summary",
+    "batch_document_llm_summary",
     "classify",
     "credit_report_parse",
     "entity_resolve",
