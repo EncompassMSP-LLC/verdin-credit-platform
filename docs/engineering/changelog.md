@@ -644,3 +644,11 @@ packages/job-orchestrator/
 **Reason:** 5.2 communications epic ships production SMS deferred from v5.1.0 alongside existing email delivery for staff notification workflows.
 
 **Follow-up work:** Slice 3 — LLM document summary UI.
+
+### Decision: Web Push HTTP delivery
+
+**Decision:** Replace scaffold `WebPushPortalPushAdapter` with real VAPID Web Push HTTP sends via `pywebpush`; staff-message dispatch records `sent`/`failed` in `portal_push_delivery_logs`. Messaging capability updated to `portal_web_push`.
+
+**Reason:** 5.2 portal push epic ships production HTTP delivery deferred from v5.1 scaffold when VAPID keys are configured.
+
+**Follow-up work:** Slice 5 — revenue analytics scaffold.

@@ -132,7 +132,15 @@ async def test_staff_message_creates_portal_push_delivery_log(
     portal_enabled: None,
     portal_push_env: None,
     db_session: AsyncSession,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    fake_response = type("FakeResponse", (), {"status_code": 201})()
+
+    def fake_webpush(**_kwargs: object) -> object:
+        return fake_response
+
+    monkeypatch.setattr("api.core.portal_push.webpush", fake_webpush)
+
     client_id = _create_client(api_client, manager_headers)
     email = f"push-{uuid.uuid4().hex[:8]}@example.com"
     _provision_portal_user(api_client, manager_headers, client_id, email=email)
