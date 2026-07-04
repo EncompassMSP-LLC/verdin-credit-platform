@@ -313,6 +313,19 @@ Scope: [version-5.3-scope.md](version-5.3-scope.md) · Checklist: [version-5.3-c
 
 ---
 
+## Version 5.4 — Production operations (in progress)
+
+Scope: [version-5.4-scope.md](version-5.4-scope.md) · Checklist: [version-5.4-completion-checklist.md](../development/version-5.4-completion-checklist.md)
+
+| Capability           | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                |
+| -------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ------------------------------------ |
+| Billing invoicing    | 5.4     | Planned | —       | —        | —   | —   | —     | Billing      | Invoice/dunning scaffold → slice 2   |
+| Multi-IdP federation | 5.4     | Planned | —       | —        | —   | —   | —     | Enterprise   | Federation config scaffold → slice 3 |
+| Marketing SMS        | 5.4     | Planned | —       | —        | —   | —   | —     | SMS delivery | Campaign enqueue scaffold → slice 4  |
+| Agent observability  | 5.4     | Planned | —       | —        | —   | —   | —     | AI gates     | Run audit + status reads → slice 5   |
+
+---
+
 ## AI capability tracker
 
 | AI feature                   | Phase | Version | Status  | Location                                                                  |
