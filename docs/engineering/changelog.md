@@ -692,3 +692,11 @@ packages/job-orchestrator/
 **Reason:** Final exit criterion for the 5.2 deferred production surfaces milestone.
 
 **Follow-up work:** 5.3+ planning — SCIM, usage metering, predictive analytics.
+
+### Decision: Kick off Version 5.3 enterprise depth
+
+**Decision:** Add `version-5.3-scope.md`, `version-5.3-completion-checklist.md`, and `.cursor/rules/version-53-sprint-loop.mdc`; link 5.3 from product roadmap.
+
+**Reason:** v5.2.0 sign-off complete; usage metering, SCIM, predictive analytics, and API developer surfaces need a sequenced delivery path before v5.3.0 release.
+
+**Follow-up work:** Slice 2 — billing usage metering scaffold.
