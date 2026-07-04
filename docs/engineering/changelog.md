@@ -836,3 +836,11 @@ packages/job-orchestrator/
 **Reason:** 5.5 identity epic ships SAML metadata upload and basic XML validation without full IdP lifecycle sync or HRIS integration.
 
 **Follow-up work:** Slice 4 — marketing SMS delivery worker.
+
+### Decision: Marketing SMS campaign delivery worker
+
+**Decision:** Add `sms_marketing_campaign_delivery` worker job, `ENABLE_SMS_MARKETING_DELIVERY` flag (requires `ENABLE_SMS_MARKETING_CAMPAIGNS`), pending campaign runs with Redis enqueue, Twilio delivery from worker, and `campaign_run_id` on `sms_delivery_logs` (migration `038`).
+
+**Reason:** 5.5 communications epic moves marketing SMS from audit-only enqueue to worker-driven Twilio delivery with org-scoped outcome audit.
+
+**Follow-up work:** Slice 5 — human-gated agent execution scaffold.

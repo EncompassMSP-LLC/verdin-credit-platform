@@ -7,6 +7,7 @@ from pydantic import Field
 
 from api.core.responses import BaseSchema
 from api.core.sms_marketing import SmsMarketingCampaignStatus as SmsMarketingCampaignGateStatus
+from api.core.sms_marketing_delivery import get_sms_marketing_delivery_status
 from api.modules.notifications.sms_campaign_models import (
     SmsMarketingCampaignRun,
     SmsMarketingCampaignStatus,
@@ -18,16 +19,21 @@ class SmsMarketingCampaignStatusResponse(BaseSchema):
     enabled: bool
     ready: bool
     sms_delivery_ready: bool
+    delivery_enabled: bool
+    delivery_ready: bool
     blockers: list[str]
 
     @classmethod
     def from_status(
         cls, status: SmsMarketingCampaignGateStatus
     ) -> "SmsMarketingCampaignStatusResponse":
+        delivery_status = get_sms_marketing_delivery_status()
         return cls(
             enabled=status.enabled,
             ready=status.ready,
             sms_delivery_ready=status.sms_delivery_ready,
+            delivery_enabled=delivery_status.enabled,
+            delivery_ready=delivery_status.ready,
             blockers=list(status.blockers),
         )
 
