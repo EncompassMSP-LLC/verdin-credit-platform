@@ -740,3 +740,19 @@ packages/job-orchestrator/
 **Reason:** 5.3 LLM operations epic ships org-scoped batch summarization enqueue + worker processing with PII scrubbing and timeline audit without autonomous agents or external batch export.
 
 **Follow-up work:** Slice 7 — capability matrix 5.3 sign-off.
+
+### Decision: Version 5.3 epic sign-off
+
+**Decision:** Mark all five Version 5.3 epics **Partial ✅** in `version-5.3-scope.md`, add capability matrix 5.3 epic sign-off table, update AI tracker for predictive outcomes and batch document summaries, and complete checklist Phase 1 exit criteria.
+
+**Reason:** All 5.3 slices shipped behind feature flags with tests and docs; deferrals documented for 5.4+.
+
+**Follow-up work:** `docs/release-notes/v5.3.0.md` + tag `v5.3.0`.
+
+### Decision: Version 5.3.0 release notes
+
+**Decision:** Publish `docs/release-notes/v5.3.0.md`, mark Version 5.3 checklist complete, update roadmap to **Shipped** (`v5.3.0`), and tag `v5.3.0` on `main`.
+
+**Reason:** Final exit criterion for the 5.3 enterprise depth milestone.
+
+**Follow-up work:** 5.4+ planning — autonomous workflows, invoicing, multi-IdP federation.

@@ -11,6 +11,7 @@
 **Version 5.0+ sign-off:** [version-5.0-plus-scope.md](version-5.0-plus-scope.md) · Checklist: [version-5.0-plus-completion-checklist.md](../development/version-5.0-plus-completion-checklist.md)
 **Version 5.1 sign-off:** [version-5.1-scope.md](version-5.1-scope.md) · Release notes: [v5.1.0.md](../release-notes/v5.1.0.md)
 **Version 5.2 sign-off:** [version-5.2-scope.md](version-5.2-scope.md) · Release notes: [v5.2.0.md](../release-notes/v5.2.0.md)
+**Version 5.3 sign-off:** [version-5.3-scope.md](version-5.3-scope.md) · Release notes: [v5.3.0.md](../release-notes/v5.3.0.md)
 
 ## Status legend
 
@@ -288,9 +289,9 @@ Scope: [version-5.2-scope.md](version-5.2-scope.md) · Checklist: [version-5.2-c
 
 ---
 
-## Version 5.3 — Enterprise depth (in progress)
+## Version 5.3 — Enterprise depth (sign-off)
 
-Scope: [version-5.3-scope.md](version-5.3-scope.md) · Checklist: [version-5.3-completion-checklist.md](../development/version-5.3-completion-checklist.md)
+Scope: [version-5.3-scope.md](version-5.3-scope.md) · Checklist: [version-5.3-completion-checklist.md](../development/version-5.3-completion-checklist.md) · Release notes: [v5.3.0.md](../release-notes/v5.3.0.md)
 
 | Capability           | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                  |
 | -------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ------------------------------------------------------ |
@@ -300,26 +301,37 @@ Scope: [version-5.3-scope.md](version-5.3-scope.md) · Checklist: [version-5.3-c
 | API developer portal | 5.3     | Partial | ✅      | ✅       | ✅  | —   | ✅    | Org admin    | `GET /org-admin/developer-portal`; key rotation        |
 | Batch LLM summaries  | 5.3     | Partial | ✅      | —        | ✅  | ✅  | ✅    | LLM gates    | `POST /documents/batch-llm-summaries/run`; worker job  |
 
+### Version 5.3 epic sign-off
+
+| Epic                   | 5.3 outcome | Exit note                                                         |
+| ---------------------- | ----------- | ----------------------------------------------------------------- |
+| Billing usage metering | Partial ✅  | Usage event scaffold + summary read; invoicing/dunning → 5.4+     |
+| Identity provisioning  | Partial ✅  | SCIM 2.0 provision scaffold + audit; multi-IdP federation → 5.4+  |
+| Predictive analytics   | Partial ✅  | Org outcome aggregates + refresh; model serving/benchmarks → 5.4+ |
+| API integrations depth | Partial ✅  | Developer portal + key rotation; public OAuth portal → 5.4+       |
+| LLM operations depth   | Partial ✅  | Batch document summarization job; autonomous agents → 5.4+        |
+
 ---
 
 ## AI capability tracker
 
-| AI feature                   | Phase | Version | Status  | Location                                                                 |
-| ---------------------------- | ----- | ------- | ------- | ------------------------------------------------------------------------ |
-| Risk score (heuristic)       | —     | 4.3     | ✅      | `accounts/intelligence.py`                                               |
-| Readiness score (heuristic)  | —     | 4.3     | ✅      | `accounts/intelligence.py`                                               |
-| Dispute readiness rules      | —     | 4.3     | ✅      | `accounts/intelligence.py`                                               |
-| Next action recommendations  | —     | 4.3     | ✅      | Heuristic text; LLM in 4.5                                               |
-| OCR                          | 1     | 4.3     | ✅      | `worker/jobs/ocr.py`                                                     |
-| Document classification      | 1     | 4.3     | Partial | Rules in `modules/documents/classification/`; LLM augment → 5.0          |
-| Metadata / entity extraction | 1     | 4.5     | Partial | Parser bridge + candidates; LLM NER → 5.0                                |
-| LLM policy gates             | 2     | 4.8     | Partial | `packages/llm-gateway` + `GET /llm/status`; no provider calls            |
-| Case summaries (LLM)         | 2     | 5.0     | Partial | Endpoint + staff UI behind `ENABLE_LLM` + PII scrub                      |
-| Document summaries (LLM)     | 2     | 5.2     | Partial | `POST /documents/{id}/llm-summary` + staff UI behind `ENABLE_LLM`        |
-| LLM dispute draft augment    | 2     | 5.0     | —       | Rules default in 4.5; LLM augment post-gate                              |
-| AI workflow orchestration    | 3     | 5.0+    | Planned | Deferred from 5.0 RC — requires compliance + observability prerequisites |
-| Predictive outcomes          | 3     | 5.1+    | Planned | Deferred — needs historical data pipeline                                |
-| Autonomous dispute prep      | 4     | 5.0+    | Planned | Compliance gates required                                                |
+| AI feature                   | Phase | Version | Status  | Location                                                                  |
+| ---------------------------- | ----- | ------- | ------- | ------------------------------------------------------------------------- |
+| Risk score (heuristic)       | —     | 4.3     | ✅      | `accounts/intelligence.py`                                                |
+| Readiness score (heuristic)  | —     | 4.3     | ✅      | `accounts/intelligence.py`                                                |
+| Dispute readiness rules      | —     | 4.3     | ✅      | `accounts/intelligence.py`                                                |
+| Next action recommendations  | —     | 4.3     | ✅      | Heuristic text; LLM in 4.5                                                |
+| OCR                          | 1     | 4.3     | ✅      | `worker/jobs/ocr.py`                                                      |
+| Document classification      | 1     | 4.3     | Partial | Rules in `modules/documents/classification/`; LLM augment → 5.0           |
+| Metadata / entity extraction | 1     | 4.5     | Partial | Parser bridge + candidates; LLM NER → 5.0                                 |
+| LLM policy gates             | 2     | 4.8     | Partial | `packages/llm-gateway` + `GET /llm/status`; no provider calls             |
+| Case summaries (LLM)         | 2     | 5.0     | Partial | Endpoint + staff UI behind `ENABLE_LLM` + PII scrub                       |
+| Document summaries (LLM)     | 2     | 5.2     | Partial | `POST /documents/{id}/llm-summary` + staff UI behind `ENABLE_LLM`         |
+| LLM dispute draft augment    | 2     | 5.0     | —       | Rules default in 4.5; LLM augment post-gate                               |
+| AI workflow orchestration    | 3     | 5.0+    | Planned | Deferred from 5.0 RC — requires compliance + observability prerequisites  |
+| Predictive outcomes          | 3     | 5.3     | Partial | `GET /reporting/predictive/outcomes`; snapshot refresh scaffold           |
+| Batch document summaries     | 2     | 5.3     | Partial | `POST /documents/batch-llm-summaries/run`; worker job behind `ENABLE_LLM` |
+| Autonomous dispute prep      | 4     | 5.0+    | Planned | Compliance gates required                                                 |
 
 See [AI Architecture](../architecture/ai-architecture.md).
 
