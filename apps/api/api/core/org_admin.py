@@ -18,6 +18,8 @@ _DEFERRED_CAPABILITIES = [
     "api_key_usage_analytics",
     "api_key_rate_limiting",
     "billing_usage_metering",
+    "api_key_rotation",
+    "developer_portal",
 ]
 
 
@@ -33,6 +35,11 @@ def get_org_admin_status() -> OrgAdminStatusResponse:
     if is_feature_enabled(FeatureFlag.ENABLE_SCIM_PROVISIONING):
         capabilities.append("scim_provisioning")
         deferred.remove("scim_provisioning")
+    if is_feature_enabled(FeatureFlag.ENABLE_API_DEVELOPER_PORTAL):
+        capabilities.append("api_key_rotation")
+        deferred.remove("api_key_rotation")
+        capabilities.append("developer_portal")
+        deferred.remove("developer_portal")
 
     return OrgAdminStatusResponse(
         org_admin_enabled=True,

@@ -6,6 +6,7 @@ from datetime import UTC, datetime
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from api.core.api_developer_portal import get_api_developer_portal_status
 from api.core.api_key_rate_limit import get_api_key_rate_limit_status
 from api.core.api_keys import generate_api_key_material
 from api.core.audit import apply_audit_on_create, apply_audit_on_update
@@ -16,11 +17,14 @@ from api.modules.billing.service import BillingService
 from api.modules.org_admin.models import OrganizationApiKey
 from api.modules.org_admin.permissions import ORG_ADMIN_READ_ROLE, ORG_ADMIN_WRITE_ROLE
 from api.modules.org_admin.repository import OrgAdminRepository
+from api.modules.org_admin.rotation_repository import ApiKeyRotationRepository
 from api.modules.org_admin.schemas import (
     ApiKeyCreate,
     ApiKeyCreateResponse,
     ApiKeyRateLimitStatusResponse,
     ApiKeyResponse,
+    ApiKeyRotateResponse,
+    DeveloperPortalResponse,
     OrgAdminStatusResponse,
     OrganizationAdminSummary,
 )
@@ -36,6 +40,7 @@ class OrgAdminService:
         self._repo = repo
         self._session = session
         self._billing = billing_service
+        self._rotations = ApiKeyRotationRepository(session) if session is not None else None
 
     @classmethod
     def from_session(cls, session: AsyncSession) -> "OrgAdminService":
@@ -173,3 +178,79 @@ class OrgAdminService:
         if self._session is not None:
             await self._session.commit()
         return ApiKeyResponse.from_model(api_key)
+
+    async def rotate_api_key(self, user: User, api_key_id: uuid.UUID) -> ApiKeyRotateResponse:
+        self._require_write(user)
+        organization_id = self._require_organization(user)
+        if self._rotations is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="API key rotation repository is not configured",
+            )
+
+        api_key = await self._repo.get_api_key(api_key_id, organization_id=organization_id)
+        if api_key is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="API key not found",
+            )
+        if api_key.revoked_at is not None or not api_key.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Only active API keys can be rotated",
+            )
+
+        rotated_at = datetime.now(UTC)
+
+        api_key.is_active = False
+        api_key.revoked_at = rotated_at
+        apply_audit_on_update(api_key, user.id)
+        await self._repo.save_api_key(api_key)
+        previous_key = ApiKeyResponse.from_model(api_key)
+
+        full_key, key_prefix, key_hash = generate_api_key_material()
+        replacement = OrganizationApiKey(
+            organization_id=organization_id,
+            name=api_key.name,
+            key_prefix=key_prefix,
+            key_hash=key_hash,
+            is_active=True,
+            expires_at=api_key.expires_at,
+        )
+        replacement.set_scopes(api_key.scope_values)
+        apply_audit_on_create(replacement, user.id)
+        replacement = await self._repo.create_api_key(replacement)
+
+        await self._rotations.create_rotation_log(
+            organization_id=organization_id,
+            previous_api_key_id=api_key.id,
+            new_api_key_id=replacement.id,
+            rotated_by_user_id=user.id,
+            rotated_at=rotated_at,
+        )
+        if self._session is not None:
+            await self._session.commit()
+
+        new_key = ApiKeyResponse.from_model(replacement)
+        return ApiKeyRotateResponse(
+            api_key=full_key,
+            previous_key=previous_key,
+            new_key=new_key,
+        )
+
+    async def get_developer_portal(self, user: User) -> DeveloperPortalResponse:
+        self._require_read(user)
+        organization_id = self._require_organization(user)
+        portal_status = get_api_developer_portal_status()
+        rate_limit = await self.get_api_key_rate_limit_status(user)
+        keys = await self.list_api_keys(user)
+        active_count = await self._repo.count_active_api_keys(organization_id)
+        return DeveloperPortalResponse(
+            enabled=portal_status.enabled,
+            ready=portal_status.ready,
+            rotation_enabled=portal_status.rotation_enabled,
+            blockers=list(portal_status.blockers),
+            active_api_key_count=active_count,
+            rate_limit=rate_limit,
+            api_keys=keys,
+        )

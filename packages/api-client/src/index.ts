@@ -168,15 +168,21 @@ export {
 
 export {
   createOrganizationApiKey,
+  getApiKeyRateLimitStatus,
+  getDeveloperPortal,
   getOrgAdminStatus,
   getOrganizationAdminSummary,
   getOrganizationApiKey,
   listOrganizationApiKeys,
   revokeOrganizationApiKey,
+  rotateOrganizationApiKey,
   type ApiKey,
   type ApiKeyCreateInput,
   type ApiKeyCreateResponse,
+  type ApiKeyRateLimitStatus,
+  type ApiKeyRotateResponse,
   type ApiKeyScope,
+  type DeveloperPortal,
   type OrgAdminStatus,
   type OrganizationAdminSummary,
 } from './orgAdmin';

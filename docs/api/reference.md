@@ -420,6 +420,15 @@ Enterprise org administration scaffold for API key lifecycle and organization su
 | POST   | `/org-admin/api-keys/{id}/revoke`       | admin    | Revoke an active API key                        |
 | GET    | `/org-admin/api-keys/rate-limit/status` | admin    | API key rate-limit configuration (5.2)          |
 
+When `ENABLE_API_DEVELOPER_PORTAL=true`, admins can access the internal developer portal and rotate active keys.
+
+| Method | Path                              | Min role | Description                                            |
+| ------ | --------------------------------- | -------- | ------------------------------------------------------ |
+| GET    | `/org-admin/developer-portal`     | admin    | Keys, scopes, rate-limit status, rotation readiness    |
+| POST   | `/org-admin/api-keys/{id}/rotate` | admin    | Revoke key and issue replacement with same name/scopes |
+
+Rotation writes an `api_key_rotation_logs` audit record. Returns `404` when `ENABLE_API_DEVELOPER_PORTAL` is false. Public external developer portal and OAuth client credentials remain deferred to 5.4+.
+
 API keys use prefix `vrd_live_` with SHA-256 hashed storage. Scopes: `read`, `write`. SCIM provisioning is available when `ENABLE_SCIM_PROVISIONING=true` (see Enterprise identity). Cross-org roles and key usage analytics are deferred to 5.4+.
 
 ## Billing

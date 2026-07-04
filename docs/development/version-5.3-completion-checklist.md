@@ -21,7 +21,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | 2     | Billing usage metering scaffold  | Billing          | ✅     |
 | 3     | SCIM provisioning scaffold       | Identity         | ✅     |
 | 4     | Predictive analytics scaffold    | Reporting / AI   | ✅     |
-| 5     | API key rotation + dev portal    | API integrations | —      |
+| 5     | API key rotation + dev portal    | API integrations | ✅     |
 | 6     | Batch document summarization job | LLM operations   | —      |
 | 7     | Capability matrix 5.3 sign-off   | Governance       | —      |
 

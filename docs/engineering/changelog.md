@@ -724,3 +724,11 @@ packages/job-orchestrator/
 **Reason:** 5.3 reporting epic ships org-scoped historical outcome aggregates with snapshot refresh scaffold without cross-org benchmarks or model serving.
 
 **Follow-up work:** Slice 5 — API key rotation + dev portal.
+
+### Decision: API developer portal and key rotation
+
+**Decision:** Add `api_key_rotation_logs` table (migration `030`), `GET /org-admin/developer-portal` and `POST /org-admin/api-keys/{id}/rotate`, `api/core/api_developer_portal.py`, `ENABLE_API_DEVELOPER_PORTAL` flag, org admin UI developer portal card, and promote `api_key_rotation` + `developer_portal` capabilities when enabled.
+
+**Reason:** 5.3 API integrations epic ships internal developer portal scaffold and rotation workflow without public external portal or OAuth client credentials.
+
+**Follow-up work:** Slice 6 — batch document summarization job.
