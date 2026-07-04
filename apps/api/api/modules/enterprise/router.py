@@ -9,6 +9,7 @@ from api.core.responses import BaseSchema
 from api.database.session import get_db
 from api.modules.auth.dependencies import get_current_user
 from api.modules.auth.models import User
+from api.modules.enterprise.federation_router import federation_router
 from api.modules.enterprise.schemas import (
     SsoEnrollmentCompleteRequest,
     SsoEnrollmentCompleteResponse,
@@ -23,6 +24,7 @@ from api.modules.enterprise.service import EnterpriseEnrollmentService
 
 router = APIRouter(prefix="/enterprise", tags=["Enterprise"])
 router.include_router(scim_router)
+router.include_router(federation_router)
 
 
 class EnterpriseIdentityStatusResponse(BaseSchema):

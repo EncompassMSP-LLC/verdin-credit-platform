@@ -772,3 +772,11 @@ packages/job-orchestrator/
 **Reason:** 5.4 billing epic ships org-scoped invoice/dunning run audit scaffold without Stripe invoice PDF generation or payment collection automation.
 
 **Follow-up work:** Slice 3 — multi-IdP federation scaffold.
+
+### Decision: Multi-IdP federation scaffold
+
+**Decision:** Add `idp_federation_providers` table (migration `033`), `GET /enterprise/federation/status`, `GET /enterprise/federation/providers`, and `POST /enterprise/federation/providers`, `api/core/idp_federation.py`, `ENABLE_IDP_FEDERATION` flag, and promote `idp_federation` to org admin capabilities when enabled.
+
+**Reason:** 5.4 identity epic ships org-scoped multi-IdP provider registry aligned with SCIM provision audit without SAML metadata upload or HRIS sync.
+
+**Follow-up work:** Slice 4 — marketing SMS campaigns scaffold.
