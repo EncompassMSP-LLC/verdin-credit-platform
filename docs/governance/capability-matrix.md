@@ -344,7 +344,7 @@ Scope: [version-5.5-scope.md](version-5.5-scope.md) · Checklist: [version-5.5-c
 | Invoice collection     | 5.5     | Partial | ✅      | —        | ✅  | —   | ✅    | Billing       | `GET /billing/collection/status`; collection run scaffold |
 | SAML metadata upload   | 5.5     | Partial | ✅      | —        | ✅  | —   | ✅    | Enterprise    | `POST /enterprise/federation/saml-metadata/upload`        |
 | Marketing SMS delivery | 5.5     | Partial | ✅      | —        | ✅  | —   | ✅    | Notifications | `sms_marketing_campaign_delivery` worker + delivery audit |
-| Agent execution        | 5.5     | Planned | —       | —        | —   | —   | —     | AI gates      | Human-gated execution scaffold → slice 5                  |
+| Agent execution        | 5.5     | Partial | ✅      | —        | ✅  | —   | ✅    | AI gates      | `POST /llm/execution/steps/{id}/approve`                  |
 
 ---
 

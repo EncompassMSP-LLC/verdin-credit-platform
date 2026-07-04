@@ -21,7 +21,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | 2     | Invoice collection scaffold      | Billing        | ✅     |
 | 3     | SAML metadata upload scaffold    | Identity       | ✅     |
 | 4     | Marketing SMS delivery worker    | Communications | ✅     |
-| 5     | Agent execution scaffold         | AI operations  | —      |
+| 5     | Agent execution scaffold         | AI operations  | ✅     |
 | 6     | Capability matrix 5.5 sign-off   | Governance     | —      |
 
 Slice 2 requires `ENABLE_BILLING=true` + Stripe test data. Slice 3 requires `ENABLE_ENTERPRISE=true` and IdP federation scaffold. Slice 4 requires `ENABLE_SMS_MARKETING_CAMPAIGNS=true` + Twilio credentials. Slice 5 requires `ENABLE_AI=true` and agent observability; no autonomous dispute filing without compliance deferral docs.

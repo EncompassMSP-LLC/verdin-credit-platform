@@ -32,6 +32,7 @@ class FeatureFlag(StrEnum):
     ENABLE_SMS_MARKETING_CAMPAIGNS = "ENABLE_SMS_MARKETING_CAMPAIGNS"
     ENABLE_SMS_MARKETING_DELIVERY = "ENABLE_SMS_MARKETING_DELIVERY"
     ENABLE_AGENT_OBSERVABILITY = "ENABLE_AGENT_OBSERVABILITY"
+    ENABLE_AGENT_EXECUTION = "ENABLE_AGENT_EXECUTION"
 
 
 class FeatureFlags(BaseSettings):
@@ -131,6 +132,10 @@ class FeatureFlags(BaseSettings):
         default=False,
         description="Enable agent run audit and observability read scaffold",
     )
+    enable_agent_execution: bool = Field(
+        default=False,
+        description="Enable human-gated agent execution step scaffold",
+    )
 
 
 _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
@@ -158,6 +163,7 @@ _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
     FeatureFlag.ENABLE_SMS_MARKETING_CAMPAIGNS: "enable_sms_marketing_campaigns",
     FeatureFlag.ENABLE_SMS_MARKETING_DELIVERY: "enable_sms_marketing_delivery",
     FeatureFlag.ENABLE_AGENT_OBSERVABILITY: "enable_agent_observability",
+    FeatureFlag.ENABLE_AGENT_EXECUTION: "enable_agent_execution",
 }
 
 

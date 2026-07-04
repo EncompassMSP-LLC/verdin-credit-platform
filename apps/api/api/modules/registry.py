@@ -50,6 +50,10 @@ from api.modules.enterprise.federation_models import (
     IdpFederationProviderType,
 )
 from api.modules.enterprise.models import UserSsoEnrollment, UserTotpEnrollment
+from api.modules.llm.agent_execution_models import (
+    AgentExecutionStep,
+    AgentExecutionStepStatus,
+)
 from api.modules.llm.agent_observability_models import (
     AgentObservabilityKind,
     AgentObservabilityRun,
@@ -91,6 +95,8 @@ from api.modules.timeline.models import Communication, TimelineEvent
 
 __all__ = [
     "Account",
+    "AgentExecutionStep",
+    "AgentExecutionStepStatus",
     "AgentObservabilityKind",
     "AgentObservabilityRun",
     "AgentObservabilityRunStatus",

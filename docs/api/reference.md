@@ -409,6 +409,19 @@ Agent run audit scaffold with optional case timeline correlation. Requires `ENAB
 
 Returns `404` when either `ENABLE_AI` or `ENABLE_AGENT_OBSERVABILITY` is false.
 
+### Agent execution (human-gated)
+
+Human-gated agent step execution audit with admin approval and optional case timeline correlation. Requires `ENABLE_AI=true`, `ENABLE_AGENT_OBSERVABILITY=true`, and `ENABLE_AGENT_EXECUTION=true`. No external LLM calls or autonomous dispute filing.
+
+| Method | Path                                | Min role     | Description                            |
+| ------ | ----------------------------------- | ------------ | -------------------------------------- |
+| GET    | `/llm/execution/status`             | read_only    | Agent execution readiness and blockers |
+| GET    | `/llm/execution/steps`              | read_only    | Paginated execution step audit log     |
+| POST   | `/llm/execution/steps`              | case_manager | Submit a step for human approval       |
+| POST   | `/llm/execution/steps/{id}/approve` | admin        | Approve and record execution scaffold  |
+
+Returns `404` when agent execution flags are false.
+
 ## Enterprise identity
 
 MFA and SSO readiness plus staff enrollment flows. Portal authentication (`/portal/auth/*`) remains a separate partition.

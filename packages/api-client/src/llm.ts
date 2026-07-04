@@ -73,3 +73,66 @@ export function runAgentObservabilityScaffold(input: AgentObservabilityRunInput 
     body: JSON.stringify(input),
   });
 }
+
+export interface AgentExecutionStatus {
+  enabled: boolean;
+  ready: boolean;
+  observability_ready: boolean;
+  blockers: string[];
+}
+
+export type AgentExecutionStepStatus = 'pending_approval' | 'executed' | 'rejected' | 'failed';
+
+export interface AgentExecutionStep {
+  id: string;
+  organization_id: string;
+  agent_kind: AgentObservabilityKind;
+  status: AgentExecutionStepStatus;
+  case_id: string | null;
+  step_summary: string;
+  requested_by_user_id: string | null;
+  approved_by_user_id: string | null;
+  timeline_event_id: string | null;
+  requested_at: string | null;
+  approved_at: string | null;
+  executed_at: string | null;
+  error_message: string | null;
+}
+
+export interface AgentExecutionStepSubmitInput {
+  agent_kind?: AgentObservabilityKind;
+  step_summary: string;
+  case_id?: string | null;
+}
+
+export interface AgentExecutionStepResult {
+  completed_at: string;
+  step: AgentExecutionStep;
+}
+
+export function getAgentExecutionStatus() {
+  return request<AgentExecutionStatus>(apiPath('/llm/execution/status'));
+}
+
+export function listAgentExecutionSteps(params: { page?: number; page_size?: number } = {}) {
+  const search = new URLSearchParams();
+  if (params.page) search.set('page', String(params.page));
+  if (params.page_size) search.set('page_size', String(params.page_size));
+  const query = search.toString();
+  return request<PaginatedResponse<AgentExecutionStep>>(
+    apiPath(`/llm/execution/steps${query ? `?${query}` : ''}`),
+  );
+}
+
+export function submitAgentExecutionStep(input: AgentExecutionStepSubmitInput) {
+  return request<AgentExecutionStepResult>(apiPath('/llm/execution/steps'), {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export function approveAgentExecutionStep(stepId: string) {
+  return request<AgentExecutionStepResult>(apiPath(`/llm/execution/steps/${stepId}/approve`), {
+    method: 'POST',
+  });
+}
