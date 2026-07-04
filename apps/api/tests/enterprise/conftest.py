@@ -121,6 +121,16 @@ def enterprise_oidc_env(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 @pytest.fixture
+def federation_env(monkeypatch: pytest.MonkeyPatch, enterprise_oidc_env: None) -> None:
+    monkeypatch.setenv("ENABLE_IDP_FEDERATION", "true")
+    get_feature_flags.cache_clear()
+    get_enterprise_identity_settings.cache_clear()
+    yield
+    get_feature_flags.cache_clear()
+    get_enterprise_identity_settings.cache_clear()
+
+
+@pytest.fixture
 def enterprise_totp_env(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("ENABLE_ENTERPRISE", "true")
     monkeypatch.setenv("ENTERPRISE_MFA_MODE", "totp")

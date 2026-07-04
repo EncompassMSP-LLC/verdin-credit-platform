@@ -1,20 +1,6 @@
 """Multi-IdP federation integration tests."""
 
-import pytest
 from fastapi.testclient import TestClient
-
-from api.core.enterprise_identity import get_enterprise_identity_settings
-from api.core.feature_flags import get_feature_flags
-
-
-@pytest.fixture
-def federation_env(monkeypatch: pytest.MonkeyPatch, enterprise_oidc_env: None) -> None:
-    monkeypatch.setenv("ENABLE_IDP_FEDERATION", "true")
-    get_feature_flags.cache_clear()
-    get_enterprise_identity_settings.cache_clear()
-    yield
-    get_feature_flags.cache_clear()
-    get_enterprise_identity_settings.cache_clear()
 
 
 def test_federation_hidden_when_disabled(

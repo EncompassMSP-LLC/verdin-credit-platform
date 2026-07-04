@@ -223,3 +223,66 @@ export function registerIdpFederationProvider(input: IdpFederationProviderRegist
     body: JSON.stringify(input),
   });
 }
+
+export type SamlMetadataValidationStatus = 'valid' | 'invalid';
+
+export interface SamlFederationMetadataStatus {
+  enabled: boolean;
+  ready: boolean;
+  federation_ready: boolean;
+  blockers: string[];
+}
+
+export interface SamlFederationMetadataUpload {
+  id: string;
+  organization_id: string;
+  provider_key: string | null;
+  entity_id: string | null;
+  validation_status: SamlMetadataValidationStatus;
+  validation_message: string | null;
+  uploaded_by_user_id: string | null;
+  uploaded_at: string | null;
+}
+
+export interface SamlFederationMetadataUploadList {
+  total: number;
+  page: number;
+  page_size: number;
+  items: SamlFederationMetadataUpload[];
+}
+
+export interface SamlFederationMetadataUploadInput {
+  metadata_xml: string;
+  provider_key?: string | null;
+}
+
+export interface SamlFederationMetadataUploadResult {
+  uploaded_at: string;
+  upload: SamlFederationMetadataUpload;
+}
+
+export function getSamlFederationMetadataStatus() {
+  return request<SamlFederationMetadataStatus>(
+    apiPath('/enterprise/federation/saml-metadata/status'),
+  );
+}
+
+export function listSamlFederationMetadataUploads(page = 1, pageSize = 20) {
+  const params = new URLSearchParams({
+    page: String(page),
+    page_size: String(pageSize),
+  });
+  return request<SamlFederationMetadataUploadList>(
+    apiPath(`/enterprise/federation/saml-metadata/uploads?${params}`),
+  );
+}
+
+export function uploadSamlFederationMetadata(input: SamlFederationMetadataUploadInput) {
+  return request<SamlFederationMetadataUploadResult>(
+    apiPath('/enterprise/federation/saml-metadata/upload'),
+    {
+      method: 'POST',
+      body: JSON.stringify(input),
+    },
+  );
+}

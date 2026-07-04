@@ -7,6 +7,7 @@ from api.database.session import get_db
 from api.modules.auth.dependencies import get_current_user
 from api.modules.auth.models import User
 from api.modules.enterprise.dependencies import require_idp_federation_enabled
+from api.modules.enterprise.federation_metadata_router import saml_metadata_router
 from api.modules.enterprise.federation_schemas import (
     IdpFederationProviderListResponse,
     IdpFederationProviderRegisterRequest,
@@ -16,6 +17,7 @@ from api.modules.enterprise.federation_schemas import (
 from api.modules.enterprise.federation_service import IdpFederationService
 
 federation_router = APIRouter(prefix="/federation", tags=["Enterprise Federation"])
+federation_router.include_router(saml_metadata_router)
 
 
 def get_federation_service(db: AsyncSession = Depends(get_db)) -> IdpFederationService:

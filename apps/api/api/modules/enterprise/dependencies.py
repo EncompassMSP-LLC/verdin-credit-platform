@@ -29,3 +29,12 @@ def require_idp_federation_enabled() -> None:
             status_code=status.HTTP_404_NOT_FOUND,
             detail="IdP federation is not enabled",
         )
+
+
+def require_saml_federation_metadata_enabled() -> None:
+    require_idp_federation_enabled()
+    if not is_feature_enabled(FeatureFlag.ENABLE_SAML_FEDERATION_METADATA):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="SAML federation metadata upload is not enabled",
+        )
