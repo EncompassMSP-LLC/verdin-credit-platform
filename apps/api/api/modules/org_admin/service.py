@@ -6,6 +6,7 @@ from datetime import UTC, datetime
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from api.core.api_key_rate_limit import get_api_key_rate_limit_status
 from api.core.api_keys import generate_api_key_material
 from api.core.audit import apply_audit_on_create, apply_audit_on_update
 from api.core.org_admin import get_org_admin_status
@@ -18,6 +19,7 @@ from api.modules.org_admin.repository import OrgAdminRepository
 from api.modules.org_admin.schemas import (
     ApiKeyCreate,
     ApiKeyCreateResponse,
+    ApiKeyRateLimitStatusResponse,
     ApiKeyResponse,
     OrgAdminStatusResponse,
     OrganizationAdminSummary,
@@ -69,6 +71,16 @@ class OrgAdminService:
         self._require_read(user)
         self._require_organization(user)
         return get_org_admin_status()
+
+    async def get_api_key_rate_limit_status(self, user: User) -> ApiKeyRateLimitStatusResponse:
+        self._require_read(user)
+        self._require_organization(user)
+        status_payload = get_api_key_rate_limit_status()
+        return ApiKeyRateLimitStatusResponse(
+            enabled=status_payload.enabled,
+            limit_per_minute=status_payload.limit_per_minute,
+            backend=status_payload.backend,
+        )
 
     async def get_organization_summary(self, user: User) -> OrganizationAdminSummary:
         self._require_read(user)

@@ -19,6 +19,7 @@ class FeatureFlag(StrEnum):
     ENABLE_CLIENT_PORTAL = "ENABLE_CLIENT_PORTAL"
     ENABLE_PORTAL_PUSH = "ENABLE_PORTAL_PUSH"
     ENABLE_MATERIALIZED_REPORTING = "ENABLE_MATERIALIZED_REPORTING"
+    ENABLE_API_KEY_RATE_LIMIT = "ENABLE_API_KEY_RATE_LIMIT"
 
 
 class FeatureFlags(BaseSettings):
@@ -66,6 +67,10 @@ class FeatureFlags(BaseSettings):
         default=False,
         description="Enable materialized reporting views for bureau and team metrics",
     )
+    enable_api_key_rate_limit: bool = Field(
+        default=False,
+        description="Enable per-organization API key rate limiting on reporting operations",
+    )
 
 
 _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
@@ -80,6 +85,7 @@ _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
     FeatureFlag.ENABLE_CLIENT_PORTAL: "enable_client_portal",
     FeatureFlag.ENABLE_PORTAL_PUSH: "enable_portal_push",
     FeatureFlag.ENABLE_MATERIALIZED_REPORTING: "enable_materialized_reporting",
+    FeatureFlag.ENABLE_API_KEY_RATE_LIMIT: "enable_api_key_rate_limit",
 }
 
 

@@ -69,3 +69,9 @@ class ApiKeyResponse(BaseSchema):
 
 class ApiKeyCreateResponse(ApiKeyResponse):
     api_key: str
+
+
+class ApiKeyRateLimitStatusResponse(BaseSchema):
+    enabled: bool
+    limit_per_minute: int
+    backend: str
