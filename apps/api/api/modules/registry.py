@@ -4,6 +4,12 @@ from api.core.constants import UserRole
 from api.modules.accounts.dispute_letter_models import DisputeLetter, DisputeLetterStatus
 from api.modules.accounts.models import Account
 from api.modules.auth.models import Organization, User
+from api.modules.billing.collection_models import (
+    BillingInvoiceCollectionRun,
+    BillingInvoiceCollectionRunKind,
+    BillingInvoiceCollectionRunStatus,
+    BillingInvoiceCollectionTriggerSource,
+)
 from api.modules.billing.invoicing_models import (
     BillingInvoicingRun,
     BillingInvoicingRunKind,
@@ -87,6 +93,10 @@ __all__ = [
     "AgentObservabilityTriggerSource",
     "ApiKeyRotationLog",
     "ApiKeyScope",
+    "BillingInvoiceCollectionRun",
+    "BillingInvoiceCollectionRunKind",
+    "BillingInvoiceCollectionRunStatus",
+    "BillingInvoiceCollectionTriggerSource",
     "BillingInvoicingRun",
     "BillingInvoicingRunKind",
     "BillingInvoicingRunStatus",

@@ -339,12 +339,12 @@ Scope: [version-5.4-scope.md](version-5.4-scope.md) · Checklist: [version-5.4-c
 
 Scope: [version-5.5-scope.md](version-5.5-scope.md) · Checklist: [version-5.5-completion-checklist.md](../development/version-5.5-completion-checklist.md)
 
-| Capability             | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies  | Notes                                              |
-| ---------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------- | -------------------------------------------------- |
-| Invoice collection     | 5.5     | Planned | —       | —        | —   | —   | —     | Billing       | Stripe invoice PDF + collection scaffold → slice 2 |
-| SAML metadata upload   | 5.5     | Planned | —       | —        | —   | —   | —     | Enterprise    | Metadata upload scaffold → slice 3                 |
-| Marketing SMS delivery | 5.5     | Planned | —       | —        | —   | —   | —     | Notifications | Campaign delivery worker → slice 4                 |
-| Agent execution        | 5.5     | Planned | —       | —        | —   | —   | —     | AI gates      | Human-gated execution scaffold → slice 5           |
+| Capability             | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies  | Notes                                                     |
+| ---------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------- | --------------------------------------------------------- |
+| Invoice collection     | 5.5     | Partial | ✅      | —        | ✅  | —   | ✅    | Billing       | `GET /billing/collection/status`; collection run scaffold |
+| SAML metadata upload   | 5.5     | Planned | —       | —        | —   | —   | —     | Enterprise    | Metadata upload scaffold → slice 3                        |
+| Marketing SMS delivery | 5.5     | Planned | —       | —        | —   | —   | —     | Notifications | Campaign delivery worker → slice 4                        |
+| Agent execution        | 5.5     | Planned | —       | —        | —   | —   | —     | AI gates      | Human-gated execution scaffold → slice 5                  |
 
 ---
 

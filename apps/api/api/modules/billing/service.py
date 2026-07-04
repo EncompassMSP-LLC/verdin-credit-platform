@@ -9,6 +9,7 @@ from typing import Any
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from api.core.billing_invoice_collection import get_billing_invoice_collection_status
 from api.core.billing_invoicing import get_billing_invoicing_status
 from api.core.pagination import PaginatedResponse, paginate
 from api.core.permissions import has_permission
@@ -24,6 +25,19 @@ from api.core.stripe_billing import (
 )
 from api.core.usage_metering import build_usage_summary
 from api.modules.auth.models import User
+from api.modules.billing.collection_models import BillingInvoiceCollectionRunStatus
+from api.modules.billing.collection_processor import run_billing_invoice_collection
+from api.modules.billing.collection_repository import (
+    BillingInvoiceCollectionRunListFilters,
+    BillingInvoiceCollectionRunRepository,
+)
+from api.modules.billing.collection_schemas import (
+    BillingInvoiceCollectionRunListParams,
+    BillingInvoiceCollectionRunRequest,
+    BillingInvoiceCollectionRunResponse,
+    BillingInvoiceCollectionRunResultResponse,
+    BillingInvoiceCollectionStatusResponse,
+)
 from api.modules.billing.invoicing_models import BillingInvoicingRunStatus
 from api.modules.billing.invoicing_processor import run_billing_invoicing_cycle
 from api.modules.billing.invoicing_repository import (
@@ -454,4 +468,75 @@ class BillingService:
         return BillingInvoicingRunResultResponse(
             completed_at=summary.completed_at,
             run=BillingInvoicingRunResponse.from_model(summary.run),
+        )
+
+    def get_collection_status_response(self) -> BillingInvoiceCollectionStatusResponse:
+        status_payload = get_billing_invoice_collection_status()
+        return BillingInvoiceCollectionStatusResponse(
+            enabled=status_payload.enabled,
+            ready=status_payload.ready,
+            invoicing_ready=status_payload.invoicing_ready,
+            blockers=list(status_payload.blockers),
+        )
+
+    async def list_collection_runs(
+        self,
+        user: User,
+        params: BillingInvoiceCollectionRunListParams,
+    ) -> PaginatedResponse[BillingInvoiceCollectionRunResponse]:
+        self._require_read(user)
+        organization_id = self._require_organization(user)
+        if self._session is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Database session unavailable",
+            )
+        skip = (params.page - 1) * params.page_size
+        run_repo = BillingInvoiceCollectionRunRepository(self._session)
+        runs, total = await run_repo.list_runs(
+            organization_id,
+            BillingInvoiceCollectionRunListFilters(skip=skip, limit=params.page_size),
+        )
+        items = [BillingInvoiceCollectionRunResponse.from_model(run) for run in runs]
+        return paginate(items, total=total, page=params.page, page_size=params.page_size)
+
+    async def run_collection_cycle(
+        self,
+        user: User,
+        body: BillingInvoiceCollectionRunRequest,
+    ) -> BillingInvoiceCollectionRunResultResponse:
+        self._require_write(user)
+        organization_id = self._require_organization(user)
+        collection_status = get_billing_invoice_collection_status()
+        if not collection_status.ready:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail={
+                    "message": "Billing invoice collection is not ready",
+                    "blockers": list(collection_status.blockers),
+                },
+            )
+        if self._session is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Database session unavailable",
+            )
+        summary = await run_billing_invoice_collection(
+            session=self._session,
+            organization_id=organization_id,
+            run_kind=body.run_kind,
+            performed_by_user_id=user.id,
+        )
+        if summary.run.status == BillingInvoiceCollectionRunStatus.FAILED:
+            if self._session is not None:
+                await self._session.commit()
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=summary.run.error_message or "Billing invoice collection run failed",
+            )
+        if self._session is not None:
+            await self._session.commit()
+        return BillingInvoiceCollectionRunResultResponse(
+            completed_at=summary.completed_at,
+            run=BillingInvoiceCollectionRunResponse.from_model(summary.run),
         )

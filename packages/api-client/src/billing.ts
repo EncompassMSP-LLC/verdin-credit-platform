@@ -150,3 +150,59 @@ export function runBillingInvoicingCycle(input: BillingInvoicingRunInput = {}) {
     body: JSON.stringify(input),
   });
 }
+
+export interface BillingInvoiceCollectionStatus {
+  enabled: boolean;
+  ready: boolean;
+  invoicing_ready: boolean;
+  blockers: string[];
+}
+
+export type BillingInvoiceCollectionRunKind = 'invoice_pdf' | 'payment_reminder';
+
+export interface BillingInvoiceCollectionRun {
+  id: string;
+  organization_id: string;
+  run_kind: BillingInvoiceCollectionRunKind;
+  trigger_source: 'manual' | 'scheduled';
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  invoices_pdf_generated: number;
+  payment_reminders_queued: number;
+  performed_by_user_id: string | null;
+  started_at: string | null;
+  completed_at: string | null;
+  error_message: string | null;
+}
+
+export interface BillingInvoiceCollectionRunInput {
+  run_kind?: BillingInvoiceCollectionRunKind;
+}
+
+export interface BillingInvoiceCollectionRunResult {
+  completed_at: string;
+  run: BillingInvoiceCollectionRun;
+}
+
+export function getBillingInvoiceCollectionStatus() {
+  return request<BillingInvoiceCollectionStatus>(apiPath('/billing/collection/status'));
+}
+
+export function listBillingInvoiceCollectionRuns(page = 1, pageSize = 20) {
+  const params = new URLSearchParams({
+    page: String(page),
+    page_size: String(pageSize),
+  });
+  return request<{
+    items: BillingInvoiceCollectionRun[];
+    total: number;
+    page: number;
+    page_size: number;
+  }>(apiPath(`/billing/collection/runs?${params.toString()}`));
+}
+
+export function runBillingInvoiceCollection(input: BillingInvoiceCollectionRunInput = {}) {
+  return request<BillingInvoiceCollectionRunResult>(apiPath('/billing/collection/run'), {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}

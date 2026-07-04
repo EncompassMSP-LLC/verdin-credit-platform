@@ -18,7 +18,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | Order | Slice                            | Epic           | Status |
 | ----- | -------------------------------- | -------------- | ------ |
 | 1     | 5.5 scope + completion checklist | Kickoff        | ✅     |
-| 2     | Invoice collection scaffold      | Billing        | —      |
+| 2     | Invoice collection scaffold      | Billing        | ✅     |
 | 3     | SAML metadata upload scaffold    | Identity       | —      |
 | 4     | Marketing SMS delivery worker    | Communications | —      |
 | 5     | Agent execution scaffold         | AI operations  | —      |

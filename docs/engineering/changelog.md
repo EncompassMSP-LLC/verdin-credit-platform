@@ -820,3 +820,11 @@ packages/job-orchestrator/
 **Reason:** v5.4.0 sign-off complete; invoice collection, SAML metadata, marketing SMS delivery worker, and human-gated agent execution need a sequenced delivery path before v5.5.0 release.
 
 **Follow-up work:** Slice 2 — invoice collection scaffold.
+
+### Decision: Billing invoice collection scaffold
+
+**Decision:** Add `billing_invoice_collection_runs` table (migration `036`), `GET /billing/collection/status`, `GET /billing/collection/runs`, and `POST /billing/collection/run`, `api/core/billing_invoice_collection.py`, `ENABLE_BILLING_INVOICE_COLLECTION` flag (requires `ENABLE_BILLING_INVOICING`), and synchronous collection processor with org-scoped run audit.
+
+**Reason:** 5.5 billing epic ships invoice PDF and payment reminder collection scaffold without Stripe API calls or tax calculation.
+
+**Follow-up work:** Slice 3 — SAML metadata upload scaffold.
