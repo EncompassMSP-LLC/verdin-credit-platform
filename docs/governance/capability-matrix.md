@@ -317,12 +317,12 @@ Scope: [version-5.3-scope.md](version-5.3-scope.md) · Checklist: [version-5.3-c
 
 Scope: [version-5.4-scope.md](version-5.4-scope.md) · Checklist: [version-5.4-completion-checklist.md](../development/version-5.4-completion-checklist.md)
 
-| Capability           | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                 |
-| -------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ----------------------------------------------------- |
-| Billing invoicing    | 5.4     | Partial | ✅      | —        | ✅  | —   | ✅    | Billing      | `GET /billing/invoicing/status`; dunning run scaffold |
-| Multi-IdP federation | 5.4     | Planned | —       | —        | —   | —   | —     | Enterprise   | Federation config scaffold → slice 3                  |
-| Marketing SMS        | 5.4     | Planned | —       | —        | —   | —   | —     | SMS delivery | Campaign enqueue scaffold → slice 4                   |
-| Agent observability  | 5.4     | Planned | —       | —        | —   | —   | —     | AI gates     | Run audit + status reads → slice 5                    |
+| Capability           | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                     |
+| -------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | --------------------------------------------------------- |
+| Billing invoicing    | 5.4     | Partial | ✅      | —        | ✅  | —   | ✅    | Billing      | `GET /billing/invoicing/status`; dunning run scaffold     |
+| Multi-IdP federation | 5.4     | Partial | ✅      | —        | ✅  | —   | ✅    | Enterprise   | `GET /enterprise/federation/providers`; provider registry |
+| Marketing SMS        | 5.4     | Planned | —       | —        | —   | —   | —     | SMS delivery | Campaign enqueue scaffold → slice 4                       |
+| Agent observability  | 5.4     | Planned | —       | —        | —   | —   | —     | AI gates     | Run audit + status reads → slice 5                        |
 
 ---
 

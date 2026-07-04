@@ -172,3 +172,54 @@ export function provisionScimGroup(input: ScimGroupProvisionInput) {
 export function listScimGroups() {
   return request<ScimGroupList>(apiPath('/enterprise/scim/v2/Groups'));
 }
+
+export interface IdpFederationStatus {
+  enabled: boolean;
+  ready: boolean;
+  scim_provisioning_enabled: boolean;
+  provider_count: number;
+  blockers: string[];
+}
+
+export type IdpFederationProviderType = 'oidc' | 'saml';
+
+export interface IdpFederationProvider {
+  id: string;
+  organization_id: string;
+  provider_key: string;
+  provider_type: IdpFederationProviderType;
+  display_name: string;
+  issuer_url: string | null;
+  is_primary: boolean;
+  enabled: boolean;
+  registered_by_user_id: string | null;
+}
+
+export interface IdpFederationProviderList {
+  total_results: number;
+  providers: IdpFederationProvider[];
+}
+
+export interface IdpFederationProviderRegisterInput {
+  provider_key: string;
+  provider_type: IdpFederationProviderType;
+  display_name: string;
+  issuer_url?: string | null;
+  is_primary?: boolean;
+  enabled?: boolean;
+}
+
+export function getIdpFederationStatus() {
+  return request<IdpFederationStatus>(apiPath('/enterprise/federation/status'));
+}
+
+export function listIdpFederationProviders() {
+  return request<IdpFederationProviderList>(apiPath('/enterprise/federation/providers'));
+}
+
+export function registerIdpFederationProvider(input: IdpFederationProviderRegisterInput) {
+  return request<IdpFederationProvider>(apiPath('/enterprise/federation/providers'), {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}

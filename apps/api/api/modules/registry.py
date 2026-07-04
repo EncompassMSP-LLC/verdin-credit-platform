@@ -35,6 +35,10 @@ from api.modules.documents.batch_summary_models import (
     BatchSummaryTriggerSource,
 )
 from api.modules.documents.models import Document
+from api.modules.enterprise.federation_models import (
+    IdpFederationProvider,
+    IdpFederationProviderType,
+)
 from api.modules.enterprise.models import UserSsoEnrollment, UserTotpEnrollment
 from api.modules.messaging.models import (
     MessageSenderRole,
@@ -93,6 +97,8 @@ __all__ = [
     "EmailDeliveryLog",
     "EnforcementRunStatus",
     "EnforcementTriggerSource",
+    "IdpFederationProvider",
+    "IdpFederationProviderType",
     "MessageSenderRole",
     "MessageThread",
     "MessageThreadStatus",

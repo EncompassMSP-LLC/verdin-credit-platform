@@ -414,7 +414,15 @@ SCIM 2.0 user/group provision scaffold with org-scoped audit logs. Requires `ENA
 | POST   | `/enterprise/scim/v2/Groups` | admin     | Provision or update a SCIM group log      |
 | GET    | `/enterprise/scim/v2/Groups` | read_only | List provisioned SCIM groups for the org  |
 
-Endpoints return `404` when `ENABLE_SCIM_PROVISIONING` is false. Full IdP-driven user lifecycle sync is deferred to 5.4+.
+Multi-IdP federation scaffold (`ENABLE_IDP_FEDERATION=true`, requires `ENABLE_ENTERPRISE=true` and OIDC SSO config). SAML metadata upload and HRIS sync remain deferred.
+
+| Method | Path                               | Min role  | Description                               |
+| ------ | ---------------------------------- | --------- | ----------------------------------------- |
+| GET    | `/enterprise/federation/status`    | read_only | Federation readiness and provider count   |
+| GET    | `/enterprise/federation/providers` | read_only | List registered IdP providers for the org |
+| POST   | `/enterprise/federation/providers` | admin     | Register an IdP provider in org registry  |
+
+Endpoints return `404` when `ENABLE_IDP_FEDERATION` is false. Full IdP-driven user lifecycle sync is deferred to 5.5+.
 
 ## Organization admin
 
