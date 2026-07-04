@@ -335,7 +335,7 @@ Scope: [version-5.4-scope.md](version-5.4-scope.md) · Checklist: [version-5.4-c
 
 ---
 
-## Version 5.5 — Production automation (in progress)
+## Version 5.5 — Production automation (shipped)
 
 Scope: [version-5.5-scope.md](version-5.5-scope.md) · Checklist: [version-5.5-completion-checklist.md](../development/version-5.5-completion-checklist.md)
 
@@ -346,28 +346,38 @@ Scope: [version-5.5-scope.md](version-5.5-scope.md) · Checklist: [version-5.5-c
 | Marketing SMS delivery | 5.5     | Partial | ✅      | —        | ✅  | —   | ✅    | Notifications | `sms_marketing_campaign_delivery` worker + delivery audit |
 | Agent execution        | 5.5     | Partial | ✅      | —        | ✅  | —   | ✅    | AI gates      | `POST /llm/execution/steps/{id}/approve`                  |
 
+### Version 5.5 epic sign-off
+
+| Epic                       | 5.5 outcome | Exit note                                                         |
+| -------------------------- | ----------- | ----------------------------------------------------------------- |
+| Billing invoice collection | Partial ✅  | Collection run scaffold; Stripe PDF API + tax calc → 5.6+         |
+| SAML federation metadata   | Partial ✅  | Metadata upload audit; HRIS sync + cert rotation → 5.6+           |
+| Marketing SMS delivery     | Partial ✅  | Worker Twilio delivery audit; deliverability dashboards → 5.6+    |
+| Agent execution scaffold   | Partial ✅  | Human-gated approve path; autonomous filing + tool calling → 5.6+ |
+
 ---
 
 ## AI capability tracker
 
-| AI feature                   | Phase | Version | Status  | Location                                                                  |
-| ---------------------------- | ----- | ------- | ------- | ------------------------------------------------------------------------- |
-| Risk score (heuristic)       | —     | 4.3     | ✅      | `accounts/intelligence.py`                                                |
-| Readiness score (heuristic)  | —     | 4.3     | ✅      | `accounts/intelligence.py`                                                |
-| Dispute readiness rules      | —     | 4.3     | ✅      | `accounts/intelligence.py`                                                |
-| Next action recommendations  | —     | 4.3     | ✅      | Heuristic text; LLM in 4.5                                                |
-| OCR                          | 1     | 4.3     | ✅      | `worker/jobs/ocr.py`                                                      |
-| Document classification      | 1     | 4.3     | Partial | Rules in `modules/documents/classification/`; LLM augment → 5.0           |
-| Metadata / entity extraction | 1     | 4.5     | Partial | Parser bridge + candidates; LLM NER → 5.0                                 |
-| LLM policy gates             | 2     | 4.8     | Partial | `packages/llm-gateway` + `GET /llm/status`; no provider calls             |
-| Case summaries (LLM)         | 2     | 5.0     | Partial | Endpoint + staff UI behind `ENABLE_LLM` + PII scrub                       |
-| Document summaries (LLM)     | 2     | 5.2     | Partial | `POST /documents/{id}/llm-summary` + staff UI behind `ENABLE_LLM`         |
-| LLM dispute draft augment    | 2     | 5.0     | —       | Rules default in 4.5; LLM augment post-gate                               |
-| AI workflow orchestration    | 3     | 5.0+    | Planned | Deferred from 5.0 RC — requires compliance + observability prerequisites  |
-| Predictive outcomes          | 3     | 5.3     | Partial | `GET /reporting/predictive/outcomes`; snapshot refresh scaffold           |
-| Batch document summaries     | 2     | 5.3     | Partial | `POST /documents/batch-llm-summaries/run`; worker job behind `ENABLE_LLM` |
-| Agent observability          | 3     | 5.4     | Partial | `GET /llm/agents/status`; run audit + timeline correlation scaffold       |
-| Autonomous dispute prep      | 4     | 5.0+    | Planned | Compliance gates required                                                 |
+| AI feature                    | Phase | Version | Status  | Location                                                                  |
+| ----------------------------- | ----- | ------- | ------- | ------------------------------------------------------------------------- |
+| Risk score (heuristic)        | —     | 4.3     | ✅      | `accounts/intelligence.py`                                                |
+| Readiness score (heuristic)   | —     | 4.3     | ✅      | `accounts/intelligence.py`                                                |
+| Dispute readiness rules       | —     | 4.3     | ✅      | `accounts/intelligence.py`                                                |
+| Next action recommendations   | —     | 4.3     | ✅      | Heuristic text; LLM in 4.5                                                |
+| OCR                           | 1     | 4.3     | ✅      | `worker/jobs/ocr.py`                                                      |
+| Document classification       | 1     | 4.3     | Partial | Rules in `modules/documents/classification/`; LLM augment → 5.0           |
+| Metadata / entity extraction  | 1     | 4.5     | Partial | Parser bridge + candidates; LLM NER → 5.0                                 |
+| LLM policy gates              | 2     | 4.8     | Partial | `packages/llm-gateway` + `GET /llm/status`; no provider calls             |
+| Case summaries (LLM)          | 2     | 5.0     | Partial | Endpoint + staff UI behind `ENABLE_LLM` + PII scrub                       |
+| Document summaries (LLM)      | 2     | 5.2     | Partial | `POST /documents/{id}/llm-summary` + staff UI behind `ENABLE_LLM`         |
+| LLM dispute draft augment     | 2     | 5.0     | —       | Rules default in 4.5; LLM augment post-gate                               |
+| AI workflow orchestration     | 3     | 5.0+    | Planned | Deferred from 5.0 RC — requires compliance + observability prerequisites  |
+| Predictive outcomes           | 3     | 5.3     | Partial | `GET /reporting/predictive/outcomes`; snapshot refresh scaffold           |
+| Batch document summaries      | 2     | 5.3     | Partial | `POST /documents/batch-llm-summaries/run`; worker job behind `ENABLE_LLM` |
+| Agent observability           | 3     | 5.4     | Partial | `GET /llm/agents/status`; run audit + timeline correlation scaffold       |
+| Agent execution (human-gated) | 3     | 5.5     | Partial | `POST /llm/execution/steps/{id}/approve`; no autonomous filing            |
+| Autonomous dispute prep       | 4     | 5.6+    | Planned | Compliance gates required                                                 |
 
 See [AI Architecture](../architecture/ai-architecture.md).
 

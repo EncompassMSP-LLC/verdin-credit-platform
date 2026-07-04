@@ -1,15 +1,15 @@
 # Version 5.5 Completion Checklist
 
-Ordered path to **production automation** — **in progress**. Preceded by shipped **v5.4.0** production operations.
+Ordered path to **production automation** — **complete**. Preceded by shipped **v5.4.0** production operations.
 
 Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 
 ## Exit criteria for “5.5 done”
 
-- [ ] All four epics below are **✅ or explicitly deferred** with docs updated — see [`version-5.5-scope.md`](../governance/version-5.5-scope.md)
-- [ ] Capability matrix updated for 5.5 slices
-- [ ] Invoice collection and SAML metadata paths verified behind feature flags
-- [ ] `docs/release-notes/v5.5.0.md` + tag `v5.5.0`
+- [x] All four epics below are **✅ or explicitly deferred** with docs updated — see [`version-5.5-scope.md`](../governance/version-5.5-scope.md)
+- [x] Capability matrix updated for 5.5 slices
+- [x] Invoice collection and SAML metadata paths verified behind feature flags
+- [x] `docs/release-notes/v5.5.0.md` + tag `v5.5.0`
 
 ---
 
@@ -22,7 +22,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | 3     | SAML metadata upload scaffold    | Identity       | ✅     |
 | 4     | Marketing SMS delivery worker    | Communications | ✅     |
 | 5     | Agent execution scaffold         | AI operations  | ✅     |
-| 6     | Capability matrix 5.5 sign-off   | Governance     | —      |
+| 6     | Capability matrix 5.5 sign-off   | Governance     | ✅     |
 
 Slice 2 requires `ENABLE_BILLING=true` + Stripe test data. Slice 3 requires `ENABLE_ENTERPRISE=true` and IdP federation scaffold. Slice 4 requires `ENABLE_SMS_MARKETING_CAMPAIGNS=true` + Twilio credentials. Slice 5 requires `ENABLE_AI=true` and agent observability; no autonomous dispute filing without compliance deferral docs.
 
