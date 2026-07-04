@@ -41,6 +41,10 @@ from api.modules.documents.batch_summary_models import (
     BatchSummaryTriggerSource,
 )
 from api.modules.documents.models import Document
+from api.modules.enterprise.federation_metadata_models import (
+    SamlFederationMetadataUpload,
+    SamlMetadataValidationStatus,
+)
 from api.modules.enterprise.federation_models import (
     IdpFederationProvider,
     IdpFederationProviderType,
@@ -145,6 +149,8 @@ __all__ = [
     "RetentionPolicy",
     "RetentionEnforcementRun",
     "RetentionScope",
+    "SamlFederationMetadataUpload",
+    "SamlMetadataValidationStatus",
     "SmsDeliveryLog",
     "SmsMarketingCampaignRun",
     "SmsMarketingCampaignStatus",

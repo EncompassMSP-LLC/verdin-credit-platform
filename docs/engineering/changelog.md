@@ -828,3 +828,11 @@ packages/job-orchestrator/
 **Reason:** 5.5 billing epic ships invoice PDF and payment reminder collection scaffold without Stripe API calls or tax calculation.
 
 **Follow-up work:** Slice 3 — SAML metadata upload scaffold.
+
+### Decision: SAML federation metadata upload scaffold
+
+**Decision:** Add `saml_federation_metadata_uploads` table (migration `037`), `GET /enterprise/federation/saml-metadata/status`, `GET /enterprise/federation/saml-metadata/uploads`, and `POST /enterprise/federation/saml-metadata/upload`, `api/core/saml_federation_metadata.py`, `ENABLE_SAML_FEDERATION_METADATA` flag (requires `ENABLE_IDP_FEDERATION`), and org-scoped metadata validation with upload audit.
+
+**Reason:** 5.5 identity epic ships SAML metadata upload and basic XML validation without full IdP lifecycle sync or HRIS integration.
+
+**Follow-up work:** Slice 4 — marketing SMS delivery worker.

@@ -438,15 +438,18 @@ SCIM 2.0 user/group provision scaffold with org-scoped audit logs. Requires `ENA
 | POST   | `/enterprise/scim/v2/Groups` | admin     | Provision or update a SCIM group log      |
 | GET    | `/enterprise/scim/v2/Groups` | read_only | List provisioned SCIM groups for the org  |
 
-Multi-IdP federation scaffold (`ENABLE_IDP_FEDERATION=true`, requires `ENABLE_ENTERPRISE=true` and OIDC SSO config). SAML metadata upload and HRIS sync remain deferred.
+Multi-IdP federation scaffold (`ENABLE_IDP_FEDERATION=true`, requires `ENABLE_ENTERPRISE=true` and OIDC SSO config). SAML metadata upload scaffold requires `ENABLE_SAML_FEDERATION_METADATA=true` (and IdP federation). HRIS sync remains deferred.
 
-| Method | Path                               | Min role  | Description                               |
-| ------ | ---------------------------------- | --------- | ----------------------------------------- |
-| GET    | `/enterprise/federation/status`    | read_only | Federation readiness and provider count   |
-| GET    | `/enterprise/federation/providers` | read_only | List registered IdP providers for the org |
-| POST   | `/enterprise/federation/providers` | admin     | Register an IdP provider in org registry  |
+| Method | Path                                           | Min role  | Description                               |
+| ------ | ---------------------------------------------- | --------- | ----------------------------------------- |
+| GET    | `/enterprise/federation/status`                | read_only | Federation readiness and provider count   |
+| GET    | `/enterprise/federation/providers`             | read_only | List registered IdP providers for the org |
+| POST   | `/enterprise/federation/providers`             | admin     | Register an IdP provider in org registry  |
+| GET    | `/enterprise/federation/saml-metadata/status`  | read_only | SAML metadata upload readiness            |
+| GET    | `/enterprise/federation/saml-metadata/uploads` | read_only | List SAML metadata uploads for the org    |
+| POST   | `/enterprise/federation/saml-metadata/upload`  | admin     | Upload and validate SAML metadata XML     |
 
-Endpoints return `404` when `ENABLE_IDP_FEDERATION` is false. Full IdP-driven user lifecycle sync is deferred to 5.5+.
+Endpoints return `404` when the corresponding feature flag is false. Full IdP-driven user lifecycle sync is deferred to 5.5+.
 
 ## Organization admin
 
