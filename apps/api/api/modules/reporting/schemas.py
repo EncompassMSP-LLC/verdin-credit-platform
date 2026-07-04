@@ -121,3 +121,24 @@ class ReportingMvRefreshRunListParams(BaseSchema):
 class ReportingMvRefreshResultResponse(BaseSchema):
     views_refreshed: int
     run: ReportingMvRefreshRunResponse
+
+
+class RevenueAnalytics(BaseSchema):
+    billing_enabled: bool
+    billing_ready: bool
+    stripe_customer_configured: bool
+    stripe_subscription_configured: bool
+    subscription_active: bool
+    subscription_status: str
+    price_id: str | None
+    current_period_end: datetime | None
+    renewal_within_30_days: bool | None
+    active_clients: int
+    portal_enabled_clients: int
+    portal_users: int
+    readiness_score: int
+
+
+class RevenueAnalyticsReportingResponse(BaseSchema):
+    generated_at: datetime
+    revenue_analytics: RevenueAnalytics

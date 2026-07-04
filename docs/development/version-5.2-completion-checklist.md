@@ -21,7 +21,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | 2     | Production SMS delivery          | Communications    | ✅     |
 | 3     | LLM document summary UI          | AI                | —      |
 | 4     | Web Push HTTP delivery           | Client Portal     | ✅     |
-| 5     | Revenue analytics scaffold       | Billing/Reporting | —      |
+| 5     | Revenue analytics scaffold       | Billing/Reporting | ✅     |
 | 6     | API key rate-limit scaffold      | API integrations  | ✅     |
 | 7     | Capability matrix 5.2 sign-off   | Governance        | —      |
 

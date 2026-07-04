@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 import api.models  # noqa: F401 — register all ORM mappers
 from api.core.constants import UserRole
+from api.core.feature_flags import get_feature_flags
 from api.core.security import hash_password
 from api.modules.auth.models import Organization, User
 
@@ -76,3 +77,11 @@ def admin_headers(api_client: TestClient, admin_user: User) -> dict[str, str]:
 @pytest.fixture
 def manager_headers(api_client: TestClient, case_manager_user: User) -> dict[str, str]:
     return _login(api_client, case_manager_user.email)
+
+
+@pytest.fixture
+def enterprise_enabled(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("ENABLE_ENTERPRISE", "true")
+    get_feature_flags.cache_clear()
+    yield
+    get_feature_flags.cache_clear()

@@ -9,6 +9,7 @@ from api.core.pagination import PaginatedResponse
 from api.database.session import get_db
 from api.modules.auth.dependencies import get_current_user
 from api.modules.auth.models import User
+from api.modules.billing.dependencies import require_billing_enabled
 from api.modules.reporting.dependencies import (
     get_reporting_organization_id,
     require_materialized_reporting_enabled,
@@ -21,6 +22,7 @@ from api.modules.reporting.schemas import (
     ReportingMvRefreshResultResponse,
     ReportingMvRefreshRunListParams,
     ReportingMvRefreshRunResponse,
+    RevenueAnalyticsReportingResponse,
     TeamProductivityReportingResponse,
 )
 from api.modules.reporting.service import ReportingService
@@ -63,6 +65,18 @@ async def get_team_productivity_reporting(
     service: ReportingService = Depends(get_reporting_service),
 ) -> TeamProductivityReportingResponse:
     return await service.get_team_productivity(current_user)
+
+
+@router.get(
+    "/revenue",
+    response_model=RevenueAnalyticsReportingResponse,
+    dependencies=[Depends(require_billing_enabled)],
+)
+async def get_revenue_analytics_reporting(
+    current_user: User = Depends(get_current_user),
+    service: ReportingService = Depends(get_reporting_service),
+) -> RevenueAnalyticsReportingResponse:
+    return await service.get_revenue_analytics(current_user)
 
 
 @router.get(

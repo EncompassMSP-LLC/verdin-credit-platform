@@ -271,6 +271,7 @@ Scope: [version-5.2-scope.md](version-5.2-scope.md) · Checklist: [version-5.2-c
 | --------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------- | --------------------------------------------------------------- |
 | Production SMS        | 5.2     | Partial | ✅      | —        | ✅  | —   | ✅    | Notifications | Twilio send + audit log; `deliver_sms` on create                |
 | Portal Web Push HTTP  | 5.2     | Partial | ✅      | ✅       | ✅  | —   | ✅    | Client portal | VAPID Web Push send on staff-message dispatch; `pywebpush`      |
+| Revenue analytics     | 5.2     | Partial | ✅      | ✅       | ✅  | —   | ✅    | Billing       | `GET /reporting/revenue`; readiness score from billing state    |
 | API key rate limiting | 5.2     | Partial | ✅      | —        | ✅  | —   | ✅    | Org admin     | Redis fixed-window limit on `GET /reporting/operations` via key |
 
 ---

@@ -11,7 +11,10 @@ from api.core.feature_flags import FeatureFlag, is_feature_enabled
 from api.core.materialized_reporting import get_materialized_reporting_status
 from api.core.pagination import PaginatedResponse, paginate
 from api.core.permissions import has_permission
+from api.core.revenue_analytics import build_revenue_analytics
+from api.core.stripe_billing import get_billing_status
 from api.modules.auth.models import User
+from api.modules.billing.repository import BillingRepository
 from api.modules.reporting.materialized_models import (
     ReportingMvRefreshStatus,
     ReportingMvTriggerSource,
@@ -36,6 +39,8 @@ from api.modules.reporting.schemas import (
     ReportingMvRefreshResultResponse,
     ReportingMvRefreshRunListParams,
     ReportingMvRefreshRunResponse,
+    RevenueAnalytics,
+    RevenueAnalyticsReportingResponse,
     TeamMemberProductivity,
     TeamProductivityReporting,
     TeamProductivityReportingResponse,
@@ -52,6 +57,7 @@ class ReportingService:
         self._reporting = repo
         self._session = session
         self._mv_runs = ReportingMvRefreshRunRepository(session) if session is not None else None
+        self._billing = BillingRepository(session) if session is not None else None
 
     @classmethod
     def from_session(cls, session: AsyncSession) -> "ReportingService":
@@ -199,4 +205,31 @@ class ReportingService:
         return ReportingMvRefreshResultResponse(
             views_refreshed=summary.views_refreshed,
             run=ReportingMvRefreshRunResponse.from_model(summary.run),
+        )
+
+    async def get_revenue_analytics(self, user: User) -> RevenueAnalyticsReportingResponse:
+        self._require_read(user)
+        organization_id = self._require_organization(user)
+        if self._billing is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Billing repository is not configured",
+            )
+
+        billing_status = get_billing_status()
+        account = await self._billing.get_billing_account(organization_id)
+        operations = await self._reporting.get_operations_summary(organization_id)
+        clients = operations["clients"]
+
+        raw = build_revenue_analytics(
+            billing_enabled=billing_status.enabled,
+            billing_ready=billing_status.ready,
+            account=account,
+            active_clients=clients["active"],
+            portal_enabled_clients=clients["portal_enabled"],
+            portal_users=operations["portal_users"],
+        )
+        return RevenueAnalyticsReportingResponse(
+            generated_at=datetime.now(UTC),
+            revenue_analytics=RevenueAnalytics(**raw),
         )
