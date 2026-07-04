@@ -20,3 +20,12 @@ def require_usage_metering_enabled() -> None:
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Billing usage metering is not enabled",
         )
+
+
+def require_billing_invoicing_enabled() -> None:
+    require_billing_enabled()
+    if not is_feature_enabled(FeatureFlag.ENABLE_BILLING_INVOICING):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Billing invoicing is not enabled",
+        )
