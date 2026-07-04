@@ -498,7 +498,17 @@ When `ENABLE_MATERIALIZED_REPORTING=true`, bureau and team endpoints read from P
 | GET    | `/reporting/materialized-views/runs`    | read_only | Paginated refresh audit log              |
 | POST   | `/reporting/materialized-views/refresh` | admin     | Refresh all reporting materialized views |
 
-Revenue metrics and score-improvement trends remain deferred to 5.2+.
+When `ENABLE_PREDICTIVE_ANALYTICS=true`, staff can read org-scoped historical outcome aggregates and refresh cached snapshots.
+
+| Method | Path                             | Min role  | Description                                 |
+| ------ | -------------------------------- | --------- | ------------------------------------------- |
+| GET    | `/reporting/predictive/status`   | read_only | Predictive analytics readiness and blockers |
+| GET    | `/reporting/predictive/outcomes` | read_only | Historical case/dispute outcome aggregates  |
+| POST   | `/reporting/predictive/refresh`  | admin     | Recompute and persist org outcome snapshot  |
+
+Outcome metrics include case closure rates (90-day window), dispute resolution rates, letter send counts, and a heuristic `outcome_score` (0–100). Returns `404` when predictive analytics is disabled. Cross-org benchmarks and model serving remain deferred to 5.4+.
+
+Score-improvement trends remain deferred to 5.4+.
 
 ## Dashboard
 

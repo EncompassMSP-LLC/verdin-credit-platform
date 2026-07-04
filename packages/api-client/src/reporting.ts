@@ -156,3 +156,59 @@ export function refreshMaterializedReportingViews() {
     method: 'POST',
   });
 }
+
+export interface PredictiveAnalyticsStatus {
+  enabled: boolean;
+  ready: boolean;
+  blockers: string[];
+}
+
+export interface PredictiveOutcomes {
+  cases_by_status: Record<string, number>;
+  accounts_by_dispute_status: Record<string, number>;
+  dispute_letters_by_status: Record<string, number>;
+  total_cases: number;
+  disputed_accounts: number;
+  cases_closed_30d: number;
+  cases_closed_90d: number;
+  accounts_dispute_resolved: number;
+  dispute_letters_sent: number;
+  case_closure_rate_90d: number | null;
+  dispute_resolution_rate: number | null;
+  outcome_score: number;
+  last_refreshed_at: string | null;
+}
+
+export interface PredictiveOutcomesReportingResponse {
+  generated_at: string;
+  predictive_outcomes: PredictiveOutcomes;
+}
+
+export interface PredictiveOutcomeRefreshRun {
+  id: string;
+  organization_id: string;
+  trigger_source: string;
+  status: string;
+  started_at: string;
+  completed_at: string;
+  error_message: string | null;
+}
+
+export interface PredictiveOutcomeRefreshResult {
+  refreshed_at: string;
+  run: PredictiveOutcomeRefreshRun;
+}
+
+export function getPredictiveAnalyticsStatus() {
+  return request<PredictiveAnalyticsStatus>(apiPath('/reporting/predictive/status'));
+}
+
+export function getPredictiveOutcomesReporting() {
+  return request<PredictiveOutcomesReportingResponse>(apiPath('/reporting/predictive/outcomes'));
+}
+
+export function refreshPredictiveOutcomesReporting() {
+  return request<PredictiveOutcomeRefreshResult>(apiPath('/reporting/predictive/refresh'), {
+    method: 'POST',
+  });
+}

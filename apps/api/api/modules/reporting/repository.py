@@ -63,7 +63,7 @@ class OperationsReportingRepository:
 
     async def _count_by_enum(
         self,
-        model: type[Account] | type[DisputeLetter],
+        model: type[Account] | type[DisputeLetter] | type[Case],
         status_column: Any,
         *,
         organization_id: uuid.UUID,
@@ -452,4 +452,65 @@ class OperationsReportingRepository:
             "completed_tasks_30d_total": sum(item["completed_tasks_30d"] for item in members),
             "assigned_open_cases_total": sum(item["assigned_open_cases"] for item in members),
             "closed_cases_30d_total": sum(item["closed_cases_30d"] for item in members),
+        }
+
+    async def get_historical_outcome_raw(self, organization_id: uuid.UUID) -> dict[str, Any]:
+        now = datetime.now(UTC)
+        start_30d = now - timedelta(days=30)
+        start_90d = now - timedelta(days=90)
+
+        cases_by_status = await self._count_by_enum(
+            Case,
+            Case.status,
+            organization_id=organization_id,
+        )
+        accounts_by_dispute_status = await self._count_by_enum(
+            Account,
+            Account.dispute_status,
+            organization_id=organization_id,
+        )
+        dispute_letters_by_status = await self._count_by_enum(
+            DisputeLetter,
+            DisputeLetter.status,
+            organization_id=organization_id,
+        )
+
+        case_base = and_(
+            Case.organization_id == organization_id,
+            Case.deleted_at.is_(None),
+            Case.status.in_([CaseStatus.RESOLVED, CaseStatus.CLOSED]),
+        )
+        cases_closed_30d = await self._count(
+            select(Case).where(
+                case_base,
+                Case.closed_at.is_not(None),
+                Case.closed_at >= start_30d,
+            )
+        )
+        cases_closed_90d = await self._count(
+            select(Case).where(
+                case_base,
+                Case.closed_at.is_not(None),
+                Case.closed_at >= start_90d,
+            )
+        )
+
+        resolved_statuses = [DisputeStatus.CORRECTED, DisputeStatus.DELETED]
+        accounts_dispute_resolved = await self._count(
+            select(Account).where(
+                Account.organization_id == organization_id,
+                Account.deleted_at.is_(None),
+                Account.dispute_status.in_(resolved_statuses),
+            )
+        )
+        dispute_letters_sent = dispute_letters_by_status.get(DisputeLetterStatus.SENT.value, 0)
+
+        return {
+            "cases_by_status": cases_by_status,
+            "accounts_by_dispute_status": accounts_by_dispute_status,
+            "dispute_letters_by_status": dispute_letters_by_status,
+            "cases_closed_30d": cases_closed_30d,
+            "cases_closed_90d": cases_closed_90d,
+            "accounts_dispute_resolved": accounts_dispute_resolved,
+            "dispute_letters_sent": dispute_letters_sent,
         }

@@ -13,12 +13,16 @@ from api.modules.billing.dependencies import require_billing_enabled
 from api.modules.reporting.dependencies import (
     get_reporting_organization_id,
     require_materialized_reporting_enabled,
+    require_predictive_analytics_enabled,
 )
 from api.modules.reporting.schemas import (
     BureauPerformanceReportingResponse,
     EnterpriseReportingStatusResponse,
     MaterializedReportingStatusResponse,
     OperationsReportingResponse,
+    PredictiveAnalyticsStatusResponse,
+    PredictiveOutcomeRefreshResultResponse,
+    PredictiveOutcomesReportingResponse,
     ReportingMvRefreshResultResponse,
     ReportingMvRefreshRunListParams,
     ReportingMvRefreshRunResponse,
@@ -77,6 +81,42 @@ async def get_revenue_analytics_reporting(
     service: ReportingService = Depends(get_reporting_service),
 ) -> RevenueAnalyticsReportingResponse:
     return await service.get_revenue_analytics(current_user)
+
+
+@router.get(
+    "/predictive/status",
+    response_model=PredictiveAnalyticsStatusResponse,
+    dependencies=[Depends(require_predictive_analytics_enabled)],
+)
+async def get_predictive_analytics_status(
+    current_user: User = Depends(get_current_user),
+    service: ReportingService = Depends(get_reporting_service),
+) -> PredictiveAnalyticsStatusResponse:
+    return service.get_predictive_status(current_user)
+
+
+@router.get(
+    "/predictive/outcomes",
+    response_model=PredictiveOutcomesReportingResponse,
+    dependencies=[Depends(require_predictive_analytics_enabled)],
+)
+async def get_predictive_outcomes_reporting(
+    current_user: User = Depends(get_current_user),
+    service: ReportingService = Depends(get_reporting_service),
+) -> PredictiveOutcomesReportingResponse:
+    return await service.get_predictive_outcomes(current_user)
+
+
+@router.post(
+    "/predictive/refresh",
+    response_model=PredictiveOutcomeRefreshResultResponse,
+    dependencies=[Depends(require_predictive_analytics_enabled)],
+)
+async def refresh_predictive_outcomes_reporting(
+    current_user: User = Depends(get_current_user),
+    service: ReportingService = Depends(get_reporting_service),
+) -> PredictiveOutcomeRefreshResultResponse:
+    return await service.refresh_predictive_outcomes(current_user)
 
 
 @router.get(

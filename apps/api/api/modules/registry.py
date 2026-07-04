@@ -43,6 +43,12 @@ from api.modules.reporting.materialized_models import (
     ReportingMvRefreshStatus,
     ReportingMvTriggerSource,
 )
+from api.modules.reporting.predictive_models import (
+    PredictiveOutcomeRefreshRun,
+    PredictiveOutcomeRefreshStatus,
+    PredictiveOutcomeSnapshot,
+    PredictiveOutcomeTriggerSource,
+)
 from api.modules.tasks.models import Task, TaskPriority, TaskStatus
 from api.modules.timeline.models import Communication, TimelineEvent
 
@@ -81,6 +87,10 @@ __all__ = [
     "ReportingMvRefreshRun",
     "ReportingMvRefreshStatus",
     "ReportingMvTriggerSource",
+    "PredictiveOutcomeRefreshRun",
+    "PredictiveOutcomeRefreshStatus",
+    "PredictiveOutcomeSnapshot",
+    "PredictiveOutcomeTriggerSource",
     "RetentionPolicy",
     "RetentionEnforcementRun",
     "RetentionScope",

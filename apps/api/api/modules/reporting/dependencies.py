@@ -80,3 +80,11 @@ def require_materialized_reporting_enabled() -> None:
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Materialized reporting is not enabled",
         )
+
+
+def require_predictive_analytics_enabled() -> None:
+    if not is_feature_enabled(FeatureFlag.ENABLE_PREDICTIVE_ANALYTICS):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Predictive analytics is not enabled",
+        )

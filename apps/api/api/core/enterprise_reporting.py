@@ -13,6 +13,7 @@ _DEFERRED_CAPABILITIES = [
     "revenue_metrics",
     "score_improvement_trends",
     "cross_org_benchmarks",
+    "predictive_outcomes",
 ]
 
 
@@ -26,6 +27,9 @@ def get_enterprise_reporting_status() -> EnterpriseReportingStatusResponse:
     if is_feature_enabled(FeatureFlag.ENABLE_BILLING):
         capabilities.append("revenue_metrics")
         deferred.remove("revenue_metrics")
+    if is_feature_enabled(FeatureFlag.ENABLE_PREDICTIVE_ANALYTICS):
+        capabilities.append("predictive_outcomes")
+        deferred.remove("predictive_outcomes")
 
     return EnterpriseReportingStatusResponse(
         enterprise_reporting_enabled=True,
