@@ -47,6 +47,7 @@ Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (
 | **5.2**   | Deferred Production Surfaces | **Shipped** | SMS, LLM document summaries, Web Push HTTP, revenue analytics (`v5.2.0`)                |
 | **5.3**   | Enterprise Depth             | **Shipped** | Usage metering, SCIM, predictive analytics, API developer surfaces (`v5.3.0`)           |
 | **5.4**   | Production Operations        | **Shipped** | Invoicing/dunning, multi-IdP federation, marketing SMS, agent observability (`v5.4.0`)  |
+| **5.5**   | Production Automation        | In progress | Invoice collection, SAML metadata, SMS delivery worker, agent execution scaffold        |
 
 ### Sprint milestones
 
@@ -226,6 +227,17 @@ Scope and checklist: [`docs/governance/version-5.4-scope.md`](../governance/vers
 **Tag:** `v5.4.0` — Production Operations.
 
 Release notes: [`docs/release-notes/v5.4.0.md`](../release-notes/v5.4.0.md)
+
+### Version 5.5 — Production Automation (in progress)
+
+Scope and checklist: [`docs/governance/version-5.5-scope.md`](../governance/version-5.5-scope.md) · [`docs/development/version-5.5-completion-checklist.md`](../development/version-5.5-completion-checklist.md)
+
+| Epic | Theme                      | 5.5 target | Notes                                            |
+| ---- | -------------------------- | ---------- | ------------------------------------------------ |
+| 1    | Billing invoice collection | Partial    | Stripe invoice PDF + payment collection scaffold |
+| 2    | SAML federation metadata   | Partial    | Metadata upload + validation scaffold            |
+| 3    | Marketing SMS delivery     | Partial    | Worker job for campaign run delivery             |
+| 4    | Agent execution scaffold   | Partial    | Human-gated agent steps (no autonomous filing)   |
 
 ## Sprint → version mapping
 
