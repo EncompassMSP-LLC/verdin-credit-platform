@@ -676,3 +676,19 @@ packages/job-orchestrator/
 **Reason:** 5.2 API integrations epic ships per-organization rate limits on the production API key path without per-route limit UI.
 
 **Follow-up work:** Slice 7 — capability matrix 5.2 sign-off.
+
+### Decision: Version 5.2 epic sign-off
+
+**Decision:** Mark all five Version 5.2 epics **Partial ✅** in `version-5.2-scope.md`, add capability matrix 5.2 epic sign-off table, update AI tracker for document summaries, and complete checklist Phase 1 exit criteria.
+
+**Reason:** All 5.2 slices shipped behind feature flags with tests and docs; deferrals documented for 5.3+.
+
+**Follow-up work:** `docs/release-notes/v5.2.0.md` + tag `v5.2.0`.
+
+### Decision: Version 5.2.0 release notes
+
+**Decision:** Publish `docs/release-notes/v5.2.0.md`, mark Version 5.2 checklist complete, update roadmap to **Shipped** (`v5.2.0`), and tag `v5.2.0` on `main`.
+
+**Reason:** Final exit criterion for the 5.2 deferred production surfaces milestone.
+
+**Follow-up work:** 5.3+ planning — SCIM, usage metering, predictive analytics.

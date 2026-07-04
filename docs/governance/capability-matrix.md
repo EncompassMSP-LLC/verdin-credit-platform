@@ -2,7 +2,7 @@
 
 **Executive view** of Verdin platform capabilities — what exists, what version introduced it, readiness by layer, and dependencies.
 
-**Last updated:** 2026-07-03  
+**Last updated:** 2026-07-04  
 **Maintainers:** Update this document in every epic PR that ships or materially advances a capability.
 
 **Version 4.5 sign-off:** [version-4.5-scope.md](version-4.5-scope.md) · Release notes: [v4.5.0.md](../release-notes/v4.5.0.md)  
@@ -10,6 +10,7 @@
 **Version 5.0 sign-off:** [version-5.0-scope.md](version-5.0-scope.md) · Release notes: [v5.0.0.md](../release-notes/v5.0.0.md)  
 **Version 5.0+ sign-off:** [version-5.0-plus-scope.md](version-5.0-plus-scope.md) · Checklist: [version-5.0-plus-completion-checklist.md](../development/version-5.0-plus-completion-checklist.md)
 **Version 5.1 sign-off:** [version-5.1-scope.md](version-5.1-scope.md) · Release notes: [v5.1.0.md](../release-notes/v5.1.0.md)
+**Version 5.2 sign-off:** [version-5.2-scope.md](version-5.2-scope.md) · Release notes: [v5.2.0.md](../release-notes/v5.2.0.md)
 
 ## Status legend
 
@@ -263,9 +264,9 @@ Scope: [version-5.1-scope.md](version-5.1-scope.md) · Checklist: [version-5.1-c
 
 ---
 
-## Version 5.2 — Deferred production surfaces (in progress)
+## Version 5.2 — Deferred production surfaces (sign-off)
 
-Scope: [version-5.2-scope.md](version-5.2-scope.md) · Checklist: [version-5.2-completion-checklist.md](../development/version-5.2-completion-checklist.md)
+Scope: [version-5.2-scope.md](version-5.2-scope.md) · Checklist: [version-5.2-completion-checklist.md](../development/version-5.2-completion-checklist.md) · Release notes: [v5.2.0.md](../release-notes/v5.2.0.md)
 
 | Capability             | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies  | Notes                                                           |
 | ---------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------- | --------------------------------------------------------------- |
@@ -274,6 +275,16 @@ Scope: [version-5.2-scope.md](version-5.2-scope.md) · Checklist: [version-5.2-c
 | Portal Web Push HTTP   | 5.2     | Partial | ✅      | ✅       | ✅  | —   | ✅    | Client portal | VAPID Web Push send on staff-message dispatch; `pywebpush`      |
 | Revenue analytics      | 5.2     | Partial | ✅      | ✅       | ✅  | —   | ✅    | Billing       | `GET /reporting/revenue`; readiness score from billing state    |
 | API key rate limiting  | 5.2     | Partial | ✅      | —        | ✅  | —   | ✅    | Org admin     | Redis fixed-window limit on `GET /reporting/operations` via key |
+
+### Version 5.2 epic sign-off
+
+| Epic                      | 5.2 outcome | Exit note                                                          |
+| ------------------------- | ----------- | ------------------------------------------------------------------ |
+| Communications production | Partial ✅  | Twilio SMS + audit log; marketing campaigns → 5.3+                 |
+| LLM expansion             | Partial ✅  | Document summary endpoint + staff UI; batch jobs → 5.3+            |
+| Portal push production    | Partial ✅  | Web Push HTTP on staff dispatch; native mobile push → 5.3+         |
+| Revenue analytics         | Partial ✅  | Billing-derived readiness read model; usage metering → 5.3+        |
+| API integrations depth    | Partial ✅  | API key rate-limit scaffold; developer portal + rotation UI → 5.3+ |
 
 ---
 
