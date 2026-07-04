@@ -142,3 +142,61 @@ class RevenueAnalytics(BaseSchema):
 class RevenueAnalyticsReportingResponse(BaseSchema):
     generated_at: datetime
     revenue_analytics: RevenueAnalytics
+
+
+class PredictiveAnalyticsStatusResponse(BaseSchema):
+    enabled: bool
+    ready: bool
+    blockers: list[str]
+
+
+class PredictiveOutcomes(BaseSchema):
+    cases_by_status: dict[str, int]
+    accounts_by_dispute_status: dict[str, int]
+    dispute_letters_by_status: dict[str, int]
+    total_cases: int
+    disputed_accounts: int
+    cases_closed_30d: int
+    cases_closed_90d: int
+    accounts_dispute_resolved: int
+    dispute_letters_sent: int
+    case_closure_rate_90d: float | None
+    dispute_resolution_rate: float | None
+    outcome_score: int
+    last_refreshed_at: datetime | None
+
+
+class PredictiveOutcomesReportingResponse(BaseSchema):
+    generated_at: datetime
+    predictive_outcomes: PredictiveOutcomes
+
+
+class PredictiveOutcomeRefreshRunResponse(BaseSchema):
+    id: uuid.UUID
+    organization_id: uuid.UUID
+    trigger_source: str
+    status: str
+    started_at: datetime
+    completed_at: datetime
+    error_message: str | None
+
+    @classmethod
+    def from_model(cls, run: object) -> "PredictiveOutcomeRefreshRunResponse":
+        from api.modules.reporting.predictive_models import PredictiveOutcomeRefreshRun
+
+        if not isinstance(run, PredictiveOutcomeRefreshRun):
+            raise TypeError("Expected PredictiveOutcomeRefreshRun")
+        return cls(
+            id=run.id,
+            organization_id=run.organization_id,
+            trigger_source=run.trigger_source.value,
+            status=run.status.value,
+            started_at=run.started_at,
+            completed_at=run.completed_at,
+            error_message=run.error_message,
+        )
+
+
+class PredictiveOutcomeRefreshResultResponse(BaseSchema):
+    refreshed_at: datetime
+    run: PredictiveOutcomeRefreshRunResponse

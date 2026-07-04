@@ -11,6 +11,7 @@ from api.core.feature_flags import FeatureFlag, is_feature_enabled
 from api.core.materialized_reporting import get_materialized_reporting_status
 from api.core.pagination import PaginatedResponse, paginate
 from api.core.permissions import has_permission
+from api.core.predictive_analytics import build_predictive_outcomes, get_predictive_analytics_status
 from api.core.revenue_analytics import build_revenue_analytics
 from api.core.stripe_billing import get_billing_status
 from api.modules.auth.models import User
@@ -25,6 +26,12 @@ from api.modules.reporting.materialized_repository import (
     ReportingMvRefreshRunRepository,
 )
 from api.modules.reporting.permissions import REPORTING_ADMIN_ROLE, REPORTING_READ_ROLE
+from api.modules.reporting.predictive_models import (
+    PredictiveOutcomeRefreshStatus,
+    PredictiveOutcomeTriggerSource,
+)
+from api.modules.reporting.predictive_refresh import refresh_predictive_outcomes
+from api.modules.reporting.predictive_repository import PredictiveOutcomeSnapshotRepository
 from api.modules.reporting.repository import OperationsReportingRepository
 from api.modules.reporting.schemas import (
     BureauPerformanceItem,
@@ -36,6 +43,11 @@ from api.modules.reporting.schemas import (
     NotificationReportingMetrics,
     OperationsReporting,
     OperationsReportingResponse,
+    PredictiveAnalyticsStatusResponse,
+    PredictiveOutcomeRefreshResultResponse,
+    PredictiveOutcomeRefreshRunResponse,
+    PredictiveOutcomes,
+    PredictiveOutcomesReportingResponse,
     ReportingMvRefreshResultResponse,
     ReportingMvRefreshRunListParams,
     ReportingMvRefreshRunResponse,
@@ -58,6 +70,9 @@ class ReportingService:
         self._session = session
         self._mv_runs = ReportingMvRefreshRunRepository(session) if session is not None else None
         self._billing = BillingRepository(session) if session is not None else None
+        self._predictive_snapshots = (
+            PredictiveOutcomeSnapshotRepository(session) if session is not None else None
+        )
 
     @classmethod
     def from_session(cls, session: AsyncSession) -> "ReportingService":
@@ -232,4 +247,64 @@ class ReportingService:
         return RevenueAnalyticsReportingResponse(
             generated_at=datetime.now(UTC),
             revenue_analytics=RevenueAnalytics(**raw),
+        )
+
+    def get_predictive_status(self, user: User) -> PredictiveAnalyticsStatusResponse:
+        self._require_read(user)
+        self._require_organization(user)
+        status_value = get_predictive_analytics_status()
+        return PredictiveAnalyticsStatusResponse(
+            enabled=status_value.enabled,
+            ready=status_value.ready,
+            blockers=list(status_value.blockers),
+        )
+
+    async def get_predictive_outcomes(self, user: User) -> PredictiveOutcomesReportingResponse:
+        self._require_read(user)
+        organization_id = self._require_organization(user)
+        if self._predictive_snapshots is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Predictive analytics repository is not configured",
+            )
+
+        snapshot = await self._predictive_snapshots.get_snapshot(organization_id)
+        if snapshot is not None:
+            raw = dict(snapshot.payload)
+            raw["last_refreshed_at"] = snapshot.refreshed_at
+        else:
+            historical = await self._reporting.get_historical_outcome_raw(organization_id)
+            raw = build_predictive_outcomes(**historical, last_refreshed_at=None)
+
+        return PredictiveOutcomesReportingResponse(
+            generated_at=datetime.now(UTC),
+            predictive_outcomes=PredictiveOutcomes(**raw),
+        )
+
+    async def refresh_predictive_outcomes(
+        self, user: User
+    ) -> PredictiveOutcomeRefreshResultResponse:
+        self._require_admin(user)
+        organization_id = self._require_organization(user)
+        if self._session is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Database session is not configured",
+            )
+
+        summary = await refresh_predictive_outcomes(
+            self._session,
+            organization_id=organization_id,
+            trigger_source=PredictiveOutcomeTriggerSource.MANUAL,
+            snapshot_repo=self._predictive_snapshots,
+        )
+        await self._session.commit()
+        if summary.run.status is PredictiveOutcomeRefreshStatus.FAILED:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=summary.run.error_message or "Predictive outcome refresh failed",
+            )
+        return PredictiveOutcomeRefreshResultResponse(
+            refreshed_at=summary.refreshed_at,
+            run=PredictiveOutcomeRefreshRunResponse.from_model(summary.run),
         )

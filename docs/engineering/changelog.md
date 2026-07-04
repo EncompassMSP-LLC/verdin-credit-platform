@@ -716,3 +716,11 @@ packages/job-orchestrator/
 **Reason:** 5.3 identity epic ships org-scoped SCIM provision audit logs and readiness gate aligned with OIDC enrollment without full IdP lifecycle sync.
 
 **Follow-up work:** Slice 4 — predictive analytics scaffold.
+
+### Decision: Predictive analytics scaffold
+
+**Decision:** Add `predictive_outcome_snapshots` and `predictive_outcome_refresh_runs` tables (migration `029`), `GET /reporting/predictive/status`, `GET /reporting/predictive/outcomes`, and `POST /reporting/predictive/refresh`, `api/core/predictive_analytics.py`, `ENABLE_PREDICTIVE_ANALYTICS` flag, and promote `predictive_outcomes` to enterprise reporting capabilities when enabled.
+
+**Reason:** 5.3 reporting epic ships org-scoped historical outcome aggregates with snapshot refresh scaffold without cross-org benchmarks or model serving.
+
+**Follow-up work:** Slice 5 — API key rotation + dev portal.

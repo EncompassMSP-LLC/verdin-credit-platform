@@ -22,6 +22,7 @@ class FeatureFlag(StrEnum):
     ENABLE_API_KEY_RATE_LIMIT = "ENABLE_API_KEY_RATE_LIMIT"
     ENABLE_BILLING_USAGE_METERING = "ENABLE_BILLING_USAGE_METERING"
     ENABLE_SCIM_PROVISIONING = "ENABLE_SCIM_PROVISIONING"
+    ENABLE_PREDICTIVE_ANALYTICS = "ENABLE_PREDICTIVE_ANALYTICS"
 
 
 class FeatureFlags(BaseSettings):
@@ -81,6 +82,10 @@ class FeatureFlags(BaseSettings):
         default=False,
         description="Enable SCIM 2.0 user and group provision scaffold",
     )
+    enable_predictive_analytics: bool = Field(
+        default=False,
+        description="Enable org-scoped predictive outcome aggregates and refresh scaffold",
+    )
 
 
 _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
@@ -98,6 +103,7 @@ _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
     FeatureFlag.ENABLE_API_KEY_RATE_LIMIT: "enable_api_key_rate_limit",
     FeatureFlag.ENABLE_BILLING_USAGE_METERING: "enable_billing_usage_metering",
     FeatureFlag.ENABLE_SCIM_PROVISIONING: "enable_scim_provisioning",
+    FeatureFlag.ENABLE_PREDICTIVE_ANALYTICS: "enable_predictive_analytics",
 }
 
 
