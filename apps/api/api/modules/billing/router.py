@@ -7,8 +7,16 @@ from api.core.pagination import PaginatedResponse
 from api.database.session import get_db
 from api.modules.auth.dependencies import get_current_user
 from api.modules.auth.models import User
+from api.modules.billing.collection_schemas import (
+    BillingInvoiceCollectionRunListParams,
+    BillingInvoiceCollectionRunRequest,
+    BillingInvoiceCollectionRunResponse,
+    BillingInvoiceCollectionRunResultResponse,
+    BillingInvoiceCollectionStatusResponse,
+)
 from api.modules.billing.dependencies import (
     require_billing_enabled,
+    require_billing_invoice_collection_enabled,
     require_billing_invoicing_enabled,
     require_usage_metering_enabled,
 )
@@ -134,3 +142,36 @@ async def run_billing_invoicing_endpoint(
     service: BillingService = Depends(get_billing_service),
 ) -> BillingInvoicingRunResultResponse:
     return await service.run_invoicing_cycle(current_user, body)
+
+
+@router.get("/collection/status", response_model=BillingInvoiceCollectionStatusResponse)
+async def get_billing_invoice_collection_status_endpoint(
+    _: None = Depends(require_billing_invoice_collection_enabled),
+    service: BillingService = Depends(get_billing_service),
+) -> BillingInvoiceCollectionStatusResponse:
+    return service.get_collection_status_response()
+
+
+@router.get(
+    "/collection/runs",
+    response_model=PaginatedResponse[BillingInvoiceCollectionRunResponse],
+)
+async def list_billing_invoice_collection_runs(
+    page: int = 1,
+    page_size: int = 20,
+    _: None = Depends(require_billing_invoice_collection_enabled),
+    current_user: User = Depends(get_current_user),
+    service: BillingService = Depends(get_billing_service),
+) -> PaginatedResponse[BillingInvoiceCollectionRunResponse]:
+    params = BillingInvoiceCollectionRunListParams(page=page, page_size=page_size)
+    return await service.list_collection_runs(current_user, params)
+
+
+@router.post("/collection/run", response_model=BillingInvoiceCollectionRunResultResponse)
+async def run_billing_invoice_collection_endpoint(
+    body: BillingInvoiceCollectionRunRequest,
+    _: None = Depends(require_billing_invoice_collection_enabled),
+    current_user: User = Depends(get_current_user),
+    service: BillingService = Depends(get_billing_service),
+) -> BillingInvoiceCollectionRunResultResponse:
+    return await service.run_collection_cycle(current_user, body)

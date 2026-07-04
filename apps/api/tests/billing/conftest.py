@@ -116,6 +116,22 @@ def billing_env(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 @pytest.fixture
+def invoicing_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("ENABLE_BILLING", "true")
+    monkeypatch.setenv("ENABLE_BILLING_INVOICING", "true")
+    monkeypatch.setenv("STRIPE_SECRET_KEY", "sk_test_example")
+    monkeypatch.setenv("STRIPE_WEBHOOK_SECRET", "whsec_test_secret")
+    monkeypatch.setenv("STRIPE_DEFAULT_PRICE_ID", "price_test_default")
+    from api.core.stripe_billing import get_stripe_billing_settings
+
+    get_feature_flags.cache_clear()
+    get_stripe_billing_settings.cache_clear()
+    yield
+    get_feature_flags.cache_clear()
+    get_stripe_billing_settings.cache_clear()
+
+
+@pytest.fixture
 def manager_headers(api_client: TestClient, case_manager_user: User) -> dict[str, str]:
     return _login(api_client, case_manager_user.email)
 

@@ -26,6 +26,7 @@ class FeatureFlag(StrEnum):
     ENABLE_API_DEVELOPER_PORTAL = "ENABLE_API_DEVELOPER_PORTAL"
     ENABLE_BATCH_LLM_SUMMARIES = "ENABLE_BATCH_LLM_SUMMARIES"
     ENABLE_BILLING_INVOICING = "ENABLE_BILLING_INVOICING"
+    ENABLE_BILLING_INVOICE_COLLECTION = "ENABLE_BILLING_INVOICE_COLLECTION"
     ENABLE_IDP_FEDERATION = "ENABLE_IDP_FEDERATION"
     ENABLE_SMS_MARKETING_CAMPAIGNS = "ENABLE_SMS_MARKETING_CAMPAIGNS"
     ENABLE_AGENT_OBSERVABILITY = "ENABLE_AGENT_OBSERVABILITY"
@@ -104,6 +105,10 @@ class FeatureFlags(BaseSettings):
         default=False,
         description="Enable org-scoped billing invoicing and dunning run scaffold",
     )
+    enable_billing_invoice_collection: bool = Field(
+        default=False,
+        description="Enable org-scoped billing invoice PDF and payment collection scaffold",
+    )
     enable_idp_federation: bool = Field(
         default=False,
         description="Enable multi-IdP federation provider registry scaffold",
@@ -137,6 +142,7 @@ _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
     FeatureFlag.ENABLE_API_DEVELOPER_PORTAL: "enable_api_developer_portal",
     FeatureFlag.ENABLE_BATCH_LLM_SUMMARIES: "enable_batch_llm_summaries",
     FeatureFlag.ENABLE_BILLING_INVOICING: "enable_billing_invoicing",
+    FeatureFlag.ENABLE_BILLING_INVOICE_COLLECTION: "enable_billing_invoice_collection",
     FeatureFlag.ENABLE_IDP_FEDERATION: "enable_idp_federation",
     FeatureFlag.ENABLE_SMS_MARKETING_CAMPAIGNS: "enable_sms_marketing_campaigns",
     FeatureFlag.ENABLE_AGENT_OBSERVABILITY: "enable_agent_observability",
