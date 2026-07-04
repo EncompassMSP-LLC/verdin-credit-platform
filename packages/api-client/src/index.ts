@@ -115,7 +115,20 @@ export {
   type UpdateClientInput,
 } from './clients';
 
-export { getLlmStatus, type LlmGateStatus } from './llm';
+export {
+  getAgentObservabilityStatus,
+  getLlmStatus,
+  listAgentObservabilityRuns,
+  runAgentObservabilityScaffold,
+  type AgentObservabilityKind,
+  type AgentObservabilityRun,
+  type AgentObservabilityRunInput,
+  type AgentObservabilityRunResult,
+  type AgentObservabilityRunStatus,
+  type AgentObservabilityStatus,
+  type AgentObservabilityTriggerSource,
+  type LlmGateStatus,
+} from './llm';
 
 export {
   completeSsoEnrollment,

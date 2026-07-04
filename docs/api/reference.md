@@ -397,6 +397,18 @@ LLM readiness and case summary generation behind ADR-012 gates.
 
 Requires `ENABLE_LLM=true` and `LLM_PROVIDER` / `LLM_API_KEY` / `LLM_MODEL` for provider calls. See [ADR-012](../adr/012-llm-provider-policy.md).
 
+### Agent observability
+
+Agent run audit scaffold with optional case timeline correlation. Requires `ENABLE_AI=true` and `ENABLE_AGENT_OBSERVABILITY=true`. No external LLM calls or autonomous agent execution.
+
+| Method | Path                 | Min role     | Description                                |
+| ------ | -------------------- | ------------ | ------------------------------------------ |
+| GET    | `/llm/agents/status` | read_only    | Agent observability readiness and blockers |
+| GET    | `/llm/agents/runs`   | read_only    | Paginated agent run audit log              |
+| POST   | `/llm/agents/run`    | case_manager | Record agent observability scaffold run    |
+
+Returns `404` when either `ENABLE_AI` or `ENABLE_AGENT_OBSERVABILITY` is false.
+
 ## Enterprise identity
 
 MFA and SSO readiness plus staff enrollment flows. Portal authentication (`/portal/auth/*`) remains a separate partition.

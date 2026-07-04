@@ -28,6 +28,7 @@ class FeatureFlag(StrEnum):
     ENABLE_BILLING_INVOICING = "ENABLE_BILLING_INVOICING"
     ENABLE_IDP_FEDERATION = "ENABLE_IDP_FEDERATION"
     ENABLE_SMS_MARKETING_CAMPAIGNS = "ENABLE_SMS_MARKETING_CAMPAIGNS"
+    ENABLE_AGENT_OBSERVABILITY = "ENABLE_AGENT_OBSERVABILITY"
 
 
 class FeatureFlags(BaseSettings):
@@ -111,6 +112,10 @@ class FeatureFlags(BaseSettings):
         default=False,
         description="Enable marketing SMS campaign enqueue scaffold",
     )
+    enable_agent_observability: bool = Field(
+        default=False,
+        description="Enable agent run audit and observability read scaffold",
+    )
 
 
 _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
@@ -134,6 +139,7 @@ _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
     FeatureFlag.ENABLE_BILLING_INVOICING: "enable_billing_invoicing",
     FeatureFlag.ENABLE_IDP_FEDERATION: "enable_idp_federation",
     FeatureFlag.ENABLE_SMS_MARKETING_CAMPAIGNS: "enable_sms_marketing_campaigns",
+    FeatureFlag.ENABLE_AGENT_OBSERVABILITY: "enable_agent_observability",
 }
 
 

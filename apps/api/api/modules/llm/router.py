@@ -1,4 +1,4 @@
-"""LLM gateway status endpoints."""
+"""LLM gateway and agent observability endpoints."""
 
 from fastapi import APIRouter, Depends
 from verdin_llm_gateway import LlmGateStatus
@@ -7,8 +7,10 @@ from api.core.llm import get_llm_gate_status
 from api.core.responses import BaseSchema
 from api.modules.auth.dependencies import get_current_user
 from api.modules.auth.models import User
+from api.modules.llm.agent_observability_router import agent_observability_router
 
 router = APIRouter(prefix="/llm", tags=["LLM"])
+router.include_router(agent_observability_router)
 
 
 class LlmGateStatusResponse(BaseSchema):

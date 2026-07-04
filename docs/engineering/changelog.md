@@ -788,3 +788,11 @@ packages/job-orchestrator/
 **Reason:** 5.4 communications epic ships marketing SMS campaign enqueue scaffold without Twilio bulk send or opt-out compliance automation.
 
 **Follow-up work:** Slice 5 — agent observability scaffold.
+
+### Decision: Agent observability scaffold
+
+**Decision:** Add `agent_observability_runs` table (migration `035`), `GET /llm/agents/status`, `GET /llm/agents/runs`, and `POST /llm/agents/run`, `api/core/agent_observability.py`, `ENABLE_AGENT_OBSERVABILITY` flag (requires `ENABLE_AI`), and timeline event correlation for case-scoped runs.
+
+**Reason:** 5.4 AI operations epic ships agent run audit and staff review reads without autonomous execution or external LLM calls.
+
+**Follow-up work:** Slice 6 — v5.4.0 sign-off and release notes.

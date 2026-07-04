@@ -322,7 +322,7 @@ Scope: [version-5.4-scope.md](version-5.4-scope.md) · Checklist: [version-5.4-c
 | Billing invoicing    | 5.4     | Partial | ✅      | —        | ✅  | —   | ✅    | Billing       | `GET /billing/invoicing/status`; dunning run scaffold            |
 | Multi-IdP federation | 5.4     | Partial | ✅      | —        | ✅  | —   | ✅    | Enterprise    | `GET /enterprise/federation/providers`; provider registry        |
 | Marketing SMS        | 5.4     | Partial | ✅      | —        | ✅  | —   | ✅    | Notifications | `GET /notifications/sms-campaigns/status`; campaign run scaffold |
-| Agent observability  | 5.4     | Planned | —       | —        | —   | —   | —     | AI gates      | Run audit + status reads → slice 5                               |
+| Agent observability  | 5.4     | Partial | ✅      | —        | ✅  | —   | ✅    | AI gates      | `GET /llm/agents/status`; agent run audit scaffold               |
 
 ---
 
