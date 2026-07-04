@@ -852,3 +852,19 @@ packages/job-orchestrator/
 **Reason:** 5.5 AI operations epic ships human-gated execution audit without autonomous dispute filing or external tool calling.
 
 **Follow-up work:** Slice 6 — v5.5.0 sign-off and release notes.
+
+### Decision: Version 5.5 epic sign-off
+
+**Decision:** Mark all four Version 5.5 epics **Partial ✅** in `version-5.5-scope.md`, add capability matrix 5.5 epic sign-off table, update AI tracker for agent execution, and complete checklist Phase 1 exit criteria.
+
+**Reason:** All 5.5 slices shipped behind feature flags with tests and docs; deferrals documented for 5.6+.
+
+**Follow-up work:** `docs/release-notes/v5.5.0.md` + tag `v5.5.0`.
+
+### Decision: Version 5.5.0 release notes
+
+**Decision:** Publish `docs/release-notes/v5.5.0.md`, mark Version 5.5 checklist complete, update roadmap to **Shipped** (`v5.5.0`), and tag `v5.5.0` on `main`.
+
+**Reason:** Final exit criterion for the 5.5 production automation milestone.
+
+**Follow-up work:** 5.6+ planning — autonomous workflows, deliverability dashboards, HRIS sync.

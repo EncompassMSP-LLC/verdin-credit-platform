@@ -11,12 +11,12 @@ Extend partial 5.4 production operations (invoicing runs, IdP registry, marketin
 
 ## Epic outcomes (planned)
 
-| Epic | Theme                      | 5.5 target | Summary                                                               |
-| ---- | -------------------------- | ---------- | --------------------------------------------------------------------- |
-| 1    | Billing invoice collection | Partial    | Stripe invoice PDF + payment collection reminder scaffold             |
-| 2    | SAML federation metadata   | Partial    | Per-tenant SAML metadata upload and validation scaffold               |
-| 3    | Marketing SMS delivery     | Partial    | Worker job to deliver queued marketing SMS campaign runs              |
-| 4    | Agent execution scaffold   | Partial    | Human-gated agent step execution audit (no autonomous dispute filing) |
+| Epic | Theme                      | 5.5 outcome | Summary                                                               |
+| ---- | -------------------------- | ----------- | --------------------------------------------------------------------- |
+| 1    | Billing invoice collection | Partial ✅  | Stripe invoice PDF + payment collection reminder scaffold             |
+| 2    | SAML federation metadata   | Partial ✅  | Per-tenant SAML metadata upload and validation scaffold               |
+| 3    | Marketing SMS delivery     | Partial ✅  | Worker job to deliver queued marketing SMS campaign runs              |
+| 4    | Agent execution scaffold   | Partial ✅  | Human-gated agent step execution audit (no autonomous dispute filing) |
 
 ## Shipped from 5.4 (foundation — do not regress)
 
