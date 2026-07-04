@@ -83,5 +83,43 @@ def admin_headers(api_client: TestClient, admin_user: User) -> dict[str, str]:
 
 
 @pytest.fixture
+async def read_only_user(db_session: AsyncSession, test_org: Organization) -> User:
+    user = User(
+        id=uuid.uuid4(),
+        email=f"billing-readonly-{uuid.uuid4().hex[:8]}@test.example",
+        hashed_password=hash_password("password123"),
+        first_name="Billing",
+        last_name="Reader",
+        role=UserRole.READ_ONLY,
+        organization_id=test_org.id,
+        is_active=True,
+    )
+    db_session.add(user)
+    await db_session.commit()
+    return user
+
+
+@pytest.fixture
+def billing_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("ENABLE_BILLING", "true")
+    monkeypatch.setenv("ENABLE_ENTERPRISE", "true")
+    monkeypatch.setenv("STRIPE_SECRET_KEY", "sk_test_example")
+    monkeypatch.setenv("STRIPE_WEBHOOK_SECRET", "whsec_test_secret")
+    monkeypatch.setenv("STRIPE_DEFAULT_PRICE_ID", "price_test_default")
+    from api.core.stripe_billing import get_stripe_billing_settings
+
+    get_feature_flags.cache_clear()
+    get_stripe_billing_settings.cache_clear()
+    yield
+    get_feature_flags.cache_clear()
+    get_stripe_billing_settings.cache_clear()
+
+
+@pytest.fixture
 def manager_headers(api_client: TestClient, case_manager_user: User) -> dict[str, str]:
     return _login(api_client, case_manager_user.email)
+
+
+@pytest.fixture
+def readonly_headers(api_client: TestClient, read_only_user: User) -> dict[str, str]:
+    return _login(api_client, read_only_user.email)

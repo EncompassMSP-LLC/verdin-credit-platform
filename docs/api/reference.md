@@ -418,8 +418,10 @@ Stripe customer and subscription scaffold for organization billing. Admin setup/
 | POST   | `/billing/setup`           | admin     | Create Stripe customer for current organization |
 | POST   | `/billing/subscribe`       | admin     | Create subscription for org billing customer    |
 | POST   | `/billing/webhooks/stripe` | public    | Stripe webhook handler (signature verified)     |
+| GET    | `/billing/usage/summary`   | read_only | Org usage metric totals (metering scaffold)     |
+| POST   | `/billing/usage/events`    | admin     | Record a billing usage event for the org        |
 
-`GET /org-admin/organization` embeds a `billing` section when billing is configured. Env vars: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_DEFAULT_PRICE_ID`. Usage metering and invoicing PDFs are deferred.
+`GET /org-admin/organization` embeds a `billing` section when billing is configured. Env vars: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_DEFAULT_PRICE_ID`. Usage metering requires `ENABLE_BILLING_USAGE_METERING=true` (and `ENABLE_BILLING=true`). Invoicing PDFs are deferred.
 
 ## Compliance center
 

@@ -3,10 +3,14 @@
 import uuid
 from datetime import UTC, datetime
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.modules.billing.models import BillingWebhookEvent, OrganizationBillingAccount
+from api.modules.billing.models import (
+    BillingUsageEvent,
+    BillingWebhookEvent,
+    OrganizationBillingAccount,
+)
 
 
 class BillingRepository:
@@ -56,3 +60,37 @@ class BillingRepository:
     @staticmethod
     def utcnow() -> datetime:
         return datetime.now(UTC)
+
+    async def create_usage_event(self, event: BillingUsageEvent) -> BillingUsageEvent:
+        self._session.add(event)
+        await self._session.flush()
+        await self._session.refresh(event)
+        return event
+
+    async def aggregate_usage_by_metric(
+        self,
+        organization_id: uuid.UUID,
+    ) -> tuple[int, list[dict[str, int | str]], datetime | None, datetime | None]:
+        metrics_result = await self._session.execute(
+            select(
+                BillingUsageEvent.metric_name,
+                func.sum(BillingUsageEvent.quantity).label("total_quantity"),
+            )
+            .where(BillingUsageEvent.organization_id == organization_id)
+            .group_by(BillingUsageEvent.metric_name)
+            .order_by(BillingUsageEvent.metric_name),
+        )
+        metrics = [
+            {"metric_name": row.metric_name, "total_quantity": int(row.total_quantity)}
+            for row in metrics_result.all()
+        ]
+
+        bounds_result = await self._session.execute(
+            select(
+                func.count(BillingUsageEvent.id),
+                func.min(BillingUsageEvent.recorded_at),
+                func.max(BillingUsageEvent.recorded_at),
+            ).where(BillingUsageEvent.organization_id == organization_id),
+        )
+        total_events, first_recorded_at, last_recorded_at = bounds_result.one()
+        return int(total_events), metrics, first_recorded_at, last_recorded_at
