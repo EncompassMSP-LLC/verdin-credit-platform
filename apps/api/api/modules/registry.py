@@ -74,6 +74,10 @@ from api.modules.llm.agent_observability_models import (
     AgentObservabilityRunStatus,
     AgentObservabilityTriggerSource,
 )
+from api.modules.llm.agent_supervised_loop_models import (
+    AgentSupervisedLoopRun,
+    AgentSupervisedLoopStatus,
+)
 from api.modules.llm.agent_tool_calling_models import (
     AgentExternalToolKind,
     AgentToolInvocationRequest,
@@ -117,6 +121,8 @@ __all__ = [
     "AgentExecutionStep",
     "AgentExecutionStepStatus",
     "AgentExternalToolKind",
+    "AgentSupervisedLoopRun",
+    "AgentSupervisedLoopStatus",
     "AgentToolInvocationRequest",
     "AgentToolInvocationStatus",
     "AgentObservabilityKind",

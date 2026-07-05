@@ -18,7 +18,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | Order | Slice                                | Epic          | Status |
 | ----- | ------------------------------------ | ------------- | ------ |
 | 1     | 5.8 scope + completion checklist     | Kickoff       | ✅     |
-| 2     | Agent supervised loop scaffold       | AI operations | —      |
+| 2     | Agent supervised loop scaffold       | AI operations | ✅     |
 | 3     | Bureau live API integration scaffold | Disputes      | —      |
 | 4     | Stripe tax calculation scaffold      | Billing       | —      |
 | 5     | HRIS lifecycle sync scaffold         | Identity      | —      |
