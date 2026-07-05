@@ -924,3 +924,11 @@ packages/job-orchestrator/
 **Reason:** v5.6.0 sign-off complete (`v5.6.0` tagged); bureau submission, agent tool-calling, SAML cert rotation, and Stripe invoice PDF scaffolds need a sequenced delivery path before v5.7.0 release.
 
 **Follow-up work:** Slice 2 — dispute bureau submission scaffold.
+
+### Decision: Dispute bureau submission scaffold
+
+**Decision:** Add `dispute_bureau_submission_runs` table (migration `043`), `GET /compliance/dispute-bureau-submission/status`, `GET .../runs`, `POST .../prep-runs/{id}/submit`, and `POST .../runs/{id}/approve`, `api/core/dispute_bureau_submission.py`, `ENABLE_DISPUTE_BUREAU_SUBMISSION` flag (requires `prepared` filing prep run), admin-gated submission audit, and case timeline correlation.
+
+**Reason:** 5.7 disputes epic ships bureau submission run audit scaffold without unsupervised filing or live bureau API integration.
+
+**Follow-up work:** Slice 3 — agent external tool-calling scaffold.

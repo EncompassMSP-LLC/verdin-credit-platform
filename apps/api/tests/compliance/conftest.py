@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 import api.models  # noqa: F401 — register all ORM mappers
 from api.core.constants import UserRole
+from api.core.feature_flags import get_feature_flags
 from api.core.security import hash_password
 from api.modules.auth.models import Organization, User
 from api.modules.clients.models import Client, ClientStatus
@@ -113,3 +114,55 @@ def readonly_headers(api_client: TestClient, read_only_user: User) -> dict[str, 
 @pytest.fixture
 def admin_headers(api_client: TestClient, admin_user: User) -> dict[str, str]:
     return _login(api_client, admin_user.email)
+
+
+def sample_case_id(api_client: TestClient, manager_headers: dict[str, str]) -> str:
+    response = api_client.post(
+        "/api/v1/cases",
+        headers=manager_headers,
+        json={"title": "Dispute Filing Prep Case", "client_name": "Prep Client"},
+    )
+    assert response.status_code == 201, response.text
+    return response.json()["id"]
+
+
+def create_account(api_client: TestClient, headers: dict[str, str], case_id: str) -> str:
+    response = api_client.post(
+        "/api/v1/accounts",
+        headers=headers,
+        json={
+            "case_id": case_id,
+            "creditor_name": "Example Bank",
+            "bureau": "equifax",
+            "account_type": "credit_card",
+            "account_status": "open",
+            "payment_status": "late_60",
+            "account_number_masked": "****1234",
+            "balance": "1500.00",
+            "past_due_amount": "300.00",
+        },
+    )
+    assert response.status_code == 201, response.text
+    return response.json()["id"]
+
+
+@pytest.fixture
+def dispute_filing_prep_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("ENABLE_AI", "true")
+    monkeypatch.setenv("ENABLE_AGENT_OBSERVABILITY", "true")
+    monkeypatch.setenv("ENABLE_AGENT_EXECUTION", "true")
+    monkeypatch.setenv("ENABLE_DISPUTE_FILING_PREP", "true")
+    get_feature_flags.cache_clear()
+    yield
+    get_feature_flags.cache_clear()
+
+
+@pytest.fixture
+def dispute_bureau_submission_env(
+    monkeypatch: pytest.MonkeyPatch,
+    dispute_filing_prep_env: None,
+) -> None:
+    monkeypatch.setenv("ENABLE_DISPUTE_BUREAU_SUBMISSION", "true")
+    get_feature_flags.cache_clear()
+    yield
+    get_feature_flags.cache_clear()

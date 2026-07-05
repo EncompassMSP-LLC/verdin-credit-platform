@@ -302,3 +302,87 @@ export function approveDisputeFilingPrepRun(runId: string) {
     },
   );
 }
+
+export interface DisputeBureauSubmissionStatus {
+  enabled: boolean;
+  ready: boolean;
+  filing_prep_ready: boolean;
+  blockers: string[];
+}
+
+export type DisputeBureauSubmissionRunStatus =
+  'pending_approval' | 'submitted' | 'rejected' | 'failed';
+
+export interface DisputeBureauSubmissionRun {
+  id: string;
+  organization_id: string;
+  account_id: string;
+  case_id: string;
+  filing_prep_run_id: string;
+  bureau_target: string;
+  status: DisputeBureauSubmissionRunStatus;
+  submission_summary: string;
+  requested_by_user_id: string | null;
+  approved_by_user_id: string | null;
+  timeline_event_id: string | null;
+  requested_at: string | null;
+  approved_at: string | null;
+  submitted_at: string | null;
+  error_message: string | null;
+}
+
+export interface DisputeBureauSubmissionRunResult {
+  completed_at: string;
+  run: DisputeBureauSubmissionRun;
+}
+
+export interface DisputeBureauSubmissionRequest {
+  submission_summary: string;
+}
+
+export interface ListDisputeBureauSubmissionRunsParams {
+  page?: number;
+  page_size?: number;
+  account_id?: string;
+}
+
+export function getDisputeBureauSubmissionStatus() {
+  return request<DisputeBureauSubmissionStatus>(
+    apiPath('/compliance/dispute-bureau-submission/status'),
+  );
+}
+
+export function listDisputeBureauSubmissionRuns(
+  params: ListDisputeBureauSubmissionRunsParams = {},
+) {
+  const search = new URLSearchParams();
+  if (params.page) search.set('page', String(params.page));
+  if (params.page_size) search.set('page_size', String(params.page_size));
+  if (params.account_id) search.set('account_id', params.account_id);
+  const query = search.toString();
+  return request<PaginatedResponse<DisputeBureauSubmissionRun>>(
+    apiPath(`/compliance/dispute-bureau-submission/runs${query ? `?${query}` : ''}`),
+  );
+}
+
+export function submitDisputeBureauSubmission(
+  filingPrepRunId: string,
+  input: DisputeBureauSubmissionRequest,
+) {
+  return request<DisputeBureauSubmissionRunResult>(
+    apiPath(`/compliance/dispute-bureau-submission/prep-runs/${filingPrepRunId}/submit`),
+    {
+      method: 'POST',
+      body: JSON.stringify(input),
+    },
+  );
+}
+
+export function approveDisputeBureauSubmissionRun(runId: string) {
+  return request<DisputeBureauSubmissionRunResult>(
+    apiPath(`/compliance/dispute-bureau-submission/runs/${runId}/approve`),
+    {
+      method: 'POST',
+    },
+  );
+}

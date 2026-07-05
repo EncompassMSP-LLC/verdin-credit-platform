@@ -1,50 +1,8 @@
 """Compliance-gated dispute filing prep endpoint tests."""
 
-import pytest
 from fastapi.testclient import TestClient
 
-from api.core.feature_flags import get_feature_flags
-
-
-def sample_case_id(api_client: TestClient, manager_headers: dict[str, str]) -> str:
-    response = api_client.post(
-        "/api/v1/cases",
-        headers=manager_headers,
-        json={"title": "Dispute Filing Prep Case", "client_name": "Prep Client"},
-    )
-    assert response.status_code == 201, response.text
-    return response.json()["id"]
-
-
-def create_account(api_client: TestClient, headers: dict[str, str], case_id: str) -> str:
-    response = api_client.post(
-        "/api/v1/accounts",
-        headers=headers,
-        json={
-            "case_id": case_id,
-            "creditor_name": "Example Bank",
-            "bureau": "equifax",
-            "account_type": "credit_card",
-            "account_status": "open",
-            "payment_status": "late_60",
-            "account_number_masked": "****1234",
-            "balance": "1500.00",
-            "past_due_amount": "300.00",
-        },
-    )
-    assert response.status_code == 201, response.text
-    return response.json()["id"]
-
-
-@pytest.fixture
-def dispute_filing_prep_env(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("ENABLE_AI", "true")
-    monkeypatch.setenv("ENABLE_AGENT_OBSERVABILITY", "true")
-    monkeypatch.setenv("ENABLE_AGENT_EXECUTION", "true")
-    monkeypatch.setenv("ENABLE_DISPUTE_FILING_PREP", "true")
-    get_feature_flags.cache_clear()
-    yield
-    get_feature_flags.cache_clear()
+from tests.compliance.conftest import create_account, sample_case_id
 
 
 def test_dispute_filing_prep_hidden_when_disabled(
