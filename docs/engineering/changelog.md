@@ -971,4 +971,12 @@ packages/job-orchestrator/
 
 **Reason:** v5.7.0 sign-off complete (`v5.7.0` tagged); supervised agent loops, bureau live API integration, Stripe tax calculation, and HRIS lifecycle sync scaffolds need a sequenced delivery path before v5.8.0 release.
 
-**Follow-up work:** Slice 2 — agent supervised loop scaffold.
+**Follow-up work:** Slice 3 — bureau live API integration scaffold.
+
+### Decision: Agent supervised loop scaffold (Version 5.8 slice 2)
+
+**Decision:** Ship human-gated agent supervised loop audit (`agent_supervised_loop_runs` migration 047) with status, list, start-from-invoked-tool-request, and admin approve endpoints behind `ENABLE_AGENT_SUPERVISED_LOOPS`.
+
+**Reason:** 5.8 AI operations epic extends 5.7 tool-calling with multi-step loop audit and human gates between steps without fully unsupervised loops.
+
+**Follow-up work:** Slice 3 — bureau live API integration scaffold.

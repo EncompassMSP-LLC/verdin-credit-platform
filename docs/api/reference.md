@@ -454,6 +454,19 @@ Human-gated external tool invocation audit with admin approval and optional case
 
 Returns `404` when agent external tool-calling flags are false.
 
+### Agent supervised loops (human-gated)
+
+Multi-step agent loop audit with human gates between steps. Requires `ENABLE_AI=true`, `ENABLE_AGENT_OBSERVABILITY=true`, `ENABLE_AGENT_EXECUTION=true`, `ENABLE_AGENT_EXTERNAL_TOOL_CALLING=true`, and `ENABLE_AGENT_SUPERVISED_LOOPS=true`. A supervised loop run can only start from an `invoked` tool invocation request. No fully unsupervised loops.
+
+| Method | Path                                                          | Min role     | Description                                      |
+| ------ | ------------------------------------------------------------- | ------------ | ------------------------------------------------ |
+| GET    | `/llm/supervised-loops/status`                                | read_only    | Supervised loop readiness and blockers           |
+| GET    | `/llm/supervised-loops/runs`                                  | read_only    | Paginated supervised loop audit log              |
+| POST   | `/llm/supervised-loops/tool-requests/{tool_request_id}/start` | case_manager | Start a supervised loop from an invoked tool run |
+| POST   | `/llm/supervised-loops/runs/{run_id}/approve`                 | admin        | Approve and complete a supervised loop step      |
+
+Returns `404` when agent supervised loop flags are false.
+
 ## Enterprise identity
 
 MFA and SSO readiness plus staff enrollment flows. Portal authentication (`/portal/auth/*`) remains a separate partition.
