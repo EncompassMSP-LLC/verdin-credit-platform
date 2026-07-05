@@ -27,6 +27,12 @@ class HrisBidirectionalSyncRunRepository:
     def utcnow(self) -> datetime:
         return datetime.now(UTC)
 
+    async def get_run_by_id(self, run_id: uuid.UUID) -> HrisBidirectionalSyncRun | None:
+        result = await self._session.execute(
+            select(HrisBidirectionalSyncRun).where(HrisBidirectionalSyncRun.id == run_id)
+        )
+        return result.scalar_one_or_none()
+
     async def create_run(
         self,
         *,

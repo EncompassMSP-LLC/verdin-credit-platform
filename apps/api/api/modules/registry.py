@@ -64,6 +64,10 @@ from api.modules.enterprise.federation_models import (
     IdpFederationProvider,
     IdpFederationProviderType,
 )
+from api.modules.enterprise.hris_lifecycle_models import (
+    HrisLifecycleSyncRun,
+    HrisLifecycleSyncRunStatus,
+)
 from api.modules.enterprise.models import UserSsoEnrollment, UserTotpEnrollment
 from api.modules.enterprise.saml_cert_rotation_models import (
     SamlCertificateRotationRun,
@@ -178,6 +182,8 @@ __all__ = [
     "IdpFederationProvider",
     "IdpFederationProviderType",
     "LlmDisputeDraftAugment",
+    "HrisLifecycleSyncRun",
+    "HrisLifecycleSyncRunStatus",
     "MessageSenderRole",
     "MessageThread",
     "MessageThreadStatus",

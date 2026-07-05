@@ -996,3 +996,11 @@ packages/job-orchestrator/
 **Reason:** 5.8 billing epic extends 5.7 invoice PDF with tax calculation run audit without live Stripe Tax API calls.
 
 **Follow-up work:** Slice 5 — HRIS lifecycle sync scaffold.
+
+### Decision: HRIS lifecycle sync scaffold (Version 5.8 slice 5)
+
+**Decision:** Ship admin-gated HRIS lifecycle sync audit (`hris_lifecycle_sync_runs` migration 050) with status, list, start-from-completed-bidirectional-run, and admin approve endpoints behind `ENABLE_HRIS_LIFECYCLE_SYNC`.
+
+**Reason:** 5.8 enterprise epic extends 5.6 HRIS bidirectional sync with full employee lifecycle sync run audit without passwordless enrollment UI or multi-IdP bulk provisioning.
+
+**Follow-up work:** Slice 6 — capability matrix 5.8 sign-off + `v5.8.0` release.

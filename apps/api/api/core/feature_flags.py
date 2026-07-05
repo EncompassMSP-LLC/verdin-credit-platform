@@ -44,6 +44,7 @@ class FeatureFlag(StrEnum):
     ENABLE_AGENT_SUPERVISED_LOOPS = "ENABLE_AGENT_SUPERVISED_LOOPS"
     ENABLE_BUREAU_LIVE_API = "ENABLE_BUREAU_LIVE_API"
     ENABLE_STRIPE_TAX_CALCULATION = "ENABLE_STRIPE_TAX_CALCULATION"
+    ENABLE_HRIS_LIFECYCLE_SYNC = "ENABLE_HRIS_LIFECYCLE_SYNC"
 
 
 class FeatureFlags(BaseSettings):
@@ -191,6 +192,10 @@ class FeatureFlags(BaseSettings):
         default=False,
         description="Enable admin-gated Stripe tax calculation audit scaffold",
     )
+    enable_hris_lifecycle_sync: bool = Field(
+        default=False,
+        description="Enable admin-gated HRIS lifecycle sync audit scaffold",
+    )
 
 
 _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
@@ -230,6 +235,7 @@ _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
     FeatureFlag.ENABLE_AGENT_SUPERVISED_LOOPS: "enable_agent_supervised_loops",
     FeatureFlag.ENABLE_BUREAU_LIVE_API: "enable_bureau_live_api",
     FeatureFlag.ENABLE_STRIPE_TAX_CALCULATION: "enable_stripe_tax_calculation",
+    FeatureFlag.ENABLE_HRIS_LIFECYCLE_SYNC: "enable_hris_lifecycle_sync",
 }
 
 
