@@ -1060,3 +1060,11 @@ packages/job-orchestrator/
 **Reason:** v5.9.0 completes compliance-gated autonomous production scaffolds; arbitrary agent execution, unsupervised bureau re-filing, and automated charge retries remain deferred to 5.10+.
 
 **Follow-up work:** Version 5.10 planning — production automation depth where compliance-approved.
+
+### Decision: Kick off Version 5.10 compliance-gated production automation
+
+**Decision:** Add `version-5.10-scope.md`, `version-5.10-completion-checklist.md`, and `.cursor/rules/version-510-sprint-loop.mdc`; link 5.10 from product roadmap and capability matrix.
+
+**Reason:** v5.9.0 sign-off complete (`v5.9.0` tagged); arbitrary agent execution, bureau re-filing audit, Stripe charge retry, and SAML passwordless enrollment scaffolds need a sequenced delivery path before v5.10.0 release.
+
+**Follow-up work:** Slice 2 — agent arbitrary execution scaffold.
