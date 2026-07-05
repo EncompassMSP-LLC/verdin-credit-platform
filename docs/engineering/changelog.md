@@ -1044,3 +1044,11 @@ packages/job-orchestrator/
 **Reason:** 5.9 billing epic extends 5.8 tax calculation with admin-gated live Tax API invocation audit without automated charge retries.
 
 **Follow-up work:** Slice 5 — SAML automated rotation scaffold.
+
+### Decision: SAML automated rotation scaffold (Version 5.9 slice 5)
+
+**Decision:** Add admin-gated SAML automated rotation run audit (`saml_automated_rotation_runs`) behind `ENABLE_SAML_AUTOMATED_ROTATION` (requires `ENABLE_SAML_CERTIFICATE_ROTATION`). Operators start automated rotation from a **rotated** SAML certificate rotation run; admin approve transitions status to `automated`.
+
+**Reason:** 5.9 enterprise epic extends certificate rotation with operator-gated automated rotation audit without unsupervised IdP credential changes.
+
+**Follow-up work:** Slice 6 — v5.9.0 sign-off.

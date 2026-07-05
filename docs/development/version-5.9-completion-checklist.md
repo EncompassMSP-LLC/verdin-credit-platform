@@ -21,7 +21,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | 2     | Agent unsupervised loop scaffold  | AI operations | ✅     |
 | 3     | Autonomous bureau filing scaffold | Disputes      | ✅     |
 | 4     | Live Stripe Tax API scaffold      | Billing       | ✅     |
-| 5     | SAML automated rotation scaffold  | Identity      | —      |
+| 5     | SAML automated rotation scaffold  | Identity      | ✅     |
 | 6     | Capability matrix 5.9 sign-off    | Governance    | —      |
 
 Slice 2 requires `ENABLE_AGENT_SUPERVISED_LOOPS=true` and a `completed` supervised loop run. Slice 3 requires `ENABLE_BUREAU_LIVE_API=true` and an `invoked` bureau live API run. Slice 4 requires `ENABLE_STRIPE_TAX_CALCULATION=true`; no live Stripe Tax API calls without compliance deferral docs. Slice 5 requires `ENABLE_SAML_CERTIFICATE_ROTATION=true` and a `rotated` SAML cert rotation run.
