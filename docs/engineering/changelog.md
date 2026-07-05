@@ -1052,3 +1052,11 @@ packages/job-orchestrator/
 **Reason:** 5.9 enterprise epic extends certificate rotation with operator-gated automated rotation audit without unsupervised IdP credential changes.
 
 **Follow-up work:** Slice 6 — v5.9.0 sign-off.
+
+### Decision: Version 5.9 epic sign-off
+
+**Decision:** Mark all four Version 5.9 epics **Partial ✅** in `version-5.9-scope.md`, add capability matrix 5.9 epic sign-off table, complete checklist exit criteria, and publish `docs/release-notes/v5.9.0.md`.
+
+**Reason:** v5.9.0 completes compliance-gated autonomous production scaffolds; arbitrary agent execution, unsupervised bureau re-filing, and automated charge retries remain deferred to 5.10+.
+
+**Follow-up work:** Version 5.10 planning — production automation depth where compliance-approved.

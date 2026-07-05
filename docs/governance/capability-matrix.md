@@ -15,7 +15,7 @@
 **Version 5.6 sign-off:** [version-5.6-scope.md](version-5.6-scope.md) · Release notes: [v5.6.0.md](../release-notes/v5.6.0.md)
 **Version 5.7 sign-off:** [version-5.7-scope.md](version-5.7-scope.md) · Release notes: [v5.7.0.md](../release-notes/v5.7.0.md)
 **Version 5.8 sign-off:** [version-5.8-scope.md](version-5.8-scope.md) · Release notes: [v5.8.0.md](../release-notes/v5.8.0.md)
-**Version 5.9 planning:** [version-5.9-scope.md](version-5.9-scope.md) · Checklist: [version-5.9-completion-checklist.md](../development/version-5.9-completion-checklist.md)
+**Version 5.9 sign-off:** [version-5.9-scope.md](version-5.9-scope.md) · Release notes: [v5.9.0.md](../release-notes/v5.9.0.md)
 
 ## Status legend
 
@@ -455,9 +455,9 @@ Scope: [version-5.8-scope.md](version-5.8-scope.md) · Checklist: [version-5.8-c
 
 ---
 
-## Version 5.9 — Compliance-gated autonomous production (in progress)
+## Version 5.9 — Compliance-gated autonomous production (sign-off)
 
-Scope: [version-5.9-scope.md](version-5.9-scope.md) · Checklist: [version-5.9-completion-checklist.md](../development/version-5.9-completion-checklist.md)
+Scope: [version-5.9-scope.md](version-5.9-scope.md) · Checklist: [version-5.9-completion-checklist.md](../development/version-5.9-completion-checklist.md) · Release notes: [v5.9.0.md](../release-notes/v5.9.0.md)
 
 | Capability               | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                          |
 | ------------------------ | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ------------------------------------------------------------------------------ |
@@ -465,6 +465,15 @@ Scope: [version-5.9-scope.md](version-5.9-scope.md) · Checklist: [version-5.9-c
 | Autonomous bureau filing | 5.9     | Partial | ✅      | —        | ✅  | —   | ✅    | Disputes     | `POST /compliance/autonomous-bureau-filing/live-api-runs/{id}/file`            |
 | Live Stripe Tax API      | 5.9     | Partial | ✅      | —        | ✅  | —   | ✅    | Billing      | `POST /billing/live-tax-api/tax-calculation-runs/{id}/invoke`                  |
 | SAML automated rotation  | 5.9     | Partial | ✅      | —        | ✅  | —   | ✅    | Enterprise   | `POST /enterprise/federation/saml-automated-rotation/rotation-runs/{id}/start` |
+
+### Version 5.9 epic sign-off
+
+| Epic                     | 5.9 outcome | Exit note                                                              |
+| ------------------------ | ----------- | ---------------------------------------------------------------------- |
+| Agent unsupervised loops | Partial ✅  | Loop audit; arbitrary execution + PII export → 5.10+                   |
+| Autonomous bureau filing | Partial ✅  | Filing audit; unsupervised re-filing + live calls → 5.10+              |
+| Live Stripe Tax API      | Partial ✅  | Invocation audit; live calls without deferral + charge retries → 5.10+ |
+| SAML automated rotation  | Partial ✅  | Rotation audit; bulk rollout + passwordless UI → 5.10+                 |
 
 ---
 
