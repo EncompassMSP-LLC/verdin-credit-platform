@@ -59,6 +59,10 @@ from api.modules.enterprise.federation_models import (
     IdpFederationProviderType,
 )
 from api.modules.enterprise.models import UserSsoEnrollment, UserTotpEnrollment
+from api.modules.enterprise.saml_cert_rotation_models import (
+    SamlCertificateRotationRun,
+    SamlCertificateRotationStatus,
+)
 from api.modules.llm.agent_execution_models import (
     AgentExecutionStep,
     AgentExecutionStepStatus,
@@ -179,6 +183,8 @@ __all__ = [
     "RetentionScope",
     "SamlFederationMetadataUpload",
     "SamlMetadataValidationStatus",
+    "SamlCertificateRotationRun",
+    "SamlCertificateRotationStatus",
     "SmsDeliveryLog",
     "SmsMarketingCampaignRun",
     "SmsMarketingCampaignStatus",

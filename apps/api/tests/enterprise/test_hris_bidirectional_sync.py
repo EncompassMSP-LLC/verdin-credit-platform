@@ -1,44 +1,9 @@
 """HRIS bidirectional sync integration tests."""
 
-import pytest
 from fastapi.testclient import TestClient
 
-from api.core.enterprise_identity import get_enterprise_identity_settings
-from api.core.feature_flags import get_feature_flags
 from api.modules.enterprise.hris_sync_models import HrisBidirectionalSyncRunKind
-
-VALID_SAML_METADATA = """<?xml version="1.0"?>
-<EntityDescriptor entityID="https://idp.example.com/metadata"
-  xmlns="urn:oasis:names:tc:SAML:2.0:metadata">
-  <IDPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol"/>
-</EntityDescriptor>"""
-
-
-@pytest.fixture
-def hris_sync_env(
-    monkeypatch: pytest.MonkeyPatch,
-    federation_env: None,
-) -> None:
-    monkeypatch.setenv("ENABLE_SAML_FEDERATION_METADATA", "true")
-    monkeypatch.setenv("ENABLE_HRIS_BIDIRECTIONAL_SYNC", "true")
-    get_feature_flags.cache_clear()
-    get_enterprise_identity_settings.cache_clear()
-    yield
-    get_feature_flags.cache_clear()
-    get_enterprise_identity_settings.cache_clear()
-
-
-@pytest.fixture
-def saml_metadata_only_env(
-    monkeypatch: pytest.MonkeyPatch,
-    federation_env: None,
-) -> None:
-    monkeypatch.setenv("ENABLE_SAML_FEDERATION_METADATA", "true")
-    get_feature_flags.cache_clear()
-    get_enterprise_identity_settings.cache_clear()
-    yield
-    get_feature_flags.cache_clear()
-    get_enterprise_identity_settings.cache_clear()
+from tests.enterprise.conftest import VALID_SAML_METADATA
 
 
 def test_hris_sync_hidden_when_disabled(

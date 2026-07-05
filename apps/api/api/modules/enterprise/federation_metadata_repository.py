@@ -81,3 +81,9 @@ class SamlFederationMetadataUploadRepository:
             )
         )
         return int(result.scalar_one())
+
+    async def get_upload_by_id(self, upload_id: uuid.UUID) -> SamlFederationMetadataUpload | None:
+        result = await self._session.execute(
+            select(SamlFederationMetadataUpload).where(SamlFederationMetadataUpload.id == upload_id)
+        )
+        return result.scalar_one_or_none()
