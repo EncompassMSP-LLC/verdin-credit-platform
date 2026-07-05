@@ -1028,3 +1028,11 @@ packages/job-orchestrator/
 **Reason:** 5.9 AI operations epic extends 5.8 supervised loops with multi-step loop audit without per-step human gates, while retaining admin approval before completion.
 
 **Follow-up work:** Slice 3 — autonomous bureau filing scaffold.
+
+### Decision: Autonomous bureau filing scaffold (Version 5.9 slice 3)
+
+**Decision:** Ship admin-gated autonomous bureau filing audit (`autonomous_bureau_filing_runs` migration 052) with status, list, start-from-invoked-live-api-run, and admin approve endpoints behind `ENABLE_AUTONOMOUS_BUREAU_FILING`.
+
+**Reason:** 5.9 disputes epic extends 5.8 bureau live API with operator-gated autonomous filing run audit without unsupervised re-filing loops.
+
+**Follow-up work:** Slice 4 — live Stripe Tax API scaffold.
