@@ -564,6 +564,15 @@ Stripe customer and subscription scaffold for organization billing. Admin setup/
 | POST   | `/billing/invoice-pdf/collection-runs/{id}/generate` | admin     | Submit PDF generation run for admin review        |
 | POST   | `/billing/invoice-pdf/runs/{run_id}/approve`         | admin     | Approve PDF generation scaffold (no live Stripe)  |
 
+Stripe tax calculation scaffold requires `ENABLE_STRIPE_TAX_CALCULATION=true` (and `ENABLE_STRIPE_INVOICE_PDF=true`). No live Stripe Tax API calls without compliance deferral docs.
+
+| Method | Path                                               | Min role  | Description                                    |
+| ------ | -------------------------------------------------- | --------- | ---------------------------------------------- |
+| GET    | `/billing/tax-calculation/status`                  | read_only | Stripe tax calculation readiness and blockers  |
+| GET    | `/billing/tax-calculation/runs`                    | read_only | Paginated Stripe tax calculation audit log     |
+| POST   | `/billing/tax-calculation/pdf-runs/{id}/calculate` | admin     | Submit tax calculation run from generated PDF  |
+| POST   | `/billing/tax-calculation/runs/{run_id}/approve`   | admin     | Approve tax calculation scaffold (no live API) |
+
 `GET /org-admin/organization` embeds a `billing` section when billing is configured. Env vars: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_DEFAULT_PRICE_ID`. Usage metering requires `ENABLE_BILLING_USAGE_METERING=true` (and `ENABLE_BILLING=true`). Invoicing scaffold requires `ENABLE_BILLING_INVOICING=true`. Invoice collection scaffold requires `ENABLE_BILLING_INVOICE_COLLECTION=true` (and `ENABLE_BILLING_INVOICING=true`). Stripe invoice PDF generation scaffold requires `ENABLE_STRIPE_INVOICE_PDF=true` (and `ENABLE_BILLING_INVOICE_COLLECTION=true`). Actual Stripe invoice PDF API calls remain deferred.
 
 ## Compliance center
