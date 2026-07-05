@@ -37,6 +37,7 @@ class FeatureFlag(StrEnum):
     ENABLE_AGENT_OBSERVABILITY = "ENABLE_AGENT_OBSERVABILITY"
     ENABLE_AGENT_EXECUTION = "ENABLE_AGENT_EXECUTION"
     ENABLE_DISPUTE_FILING_PREP = "ENABLE_DISPUTE_FILING_PREP"
+    ENABLE_DISPUTE_BUREAU_SUBMISSION = "ENABLE_DISPUTE_BUREAU_SUBMISSION"
 
 
 class FeatureFlags(BaseSettings):
@@ -156,6 +157,10 @@ class FeatureFlags(BaseSettings):
         default=False,
         description="Enable compliance-gated dispute filing prep audit scaffold",
     )
+    enable_dispute_bureau_submission: bool = Field(
+        default=False,
+        description="Enable admin-gated dispute bureau submission audit scaffold",
+    )
 
 
 _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
@@ -188,6 +193,7 @@ _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
     FeatureFlag.ENABLE_AGENT_OBSERVABILITY: "enable_agent_observability",
     FeatureFlag.ENABLE_AGENT_EXECUTION: "enable_agent_execution",
     FeatureFlag.ENABLE_DISPUTE_FILING_PREP: "enable_dispute_filing_prep",
+    FeatureFlag.ENABLE_DISPUTE_BUREAU_SUBMISSION: "enable_dispute_bureau_submission",
 }
 
 

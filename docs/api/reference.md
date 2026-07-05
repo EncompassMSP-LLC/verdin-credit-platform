@@ -565,6 +565,15 @@ Dispute filing prep endpoints require `ENABLE_DISPUTE_FILING_PREP=true` (and hum
 | POST   | `/compliance/dispute-filing/accounts/{account_id}/prep` | case_manager | Submit filing prep run for admin review |
 | POST   | `/compliance/dispute-filing/runs/{run_id}/approve`      | admin        | Approve prep run (no bureau submission) |
 
+Dispute bureau submission endpoints require `ENABLE_DISPUTE_BUREAU_SUBMISSION=true` (and a `prepared` filing prep run). Admin approval records a submission scaffold without live bureau API integration.
+
+| Method | Path                                                          | Role         | Description                                   |
+| ------ | ------------------------------------------------------------- | ------------ | --------------------------------------------- |
+| GET    | `/compliance/dispute-bureau-submission/status`                | read_only    | Bureau submission readiness and blockers      |
+| GET    | `/compliance/dispute-bureau-submission/runs`                  | read_only    | Paginated bureau submission audit log         |
+| POST   | `/compliance/dispute-bureau-submission/prep-runs/{id}/submit` | case_manager | Submit bureau submission run for admin review |
+| POST   | `/compliance/dispute-bureau-submission/runs/{run_id}/approve` | admin        | Approve submission scaffold (no live bureau)  |
+
 Consent types: `croa_services`, `fcra_dispute`, `fdcpa_contact`, `marketing`, `data_processing`. Retention scopes: `documents`, `communications`, `audit_logs`, `client_profiles`. Enforcement jobs and legal sign-off workflows are deferred to 5.0+.
 
 ## Reporting

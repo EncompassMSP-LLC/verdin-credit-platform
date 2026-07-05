@@ -1,6 +1,10 @@
 """Register all ORM models with SQLAlchemy metadata."""
 
 from api.core.constants import UserRole
+from api.modules.accounts.dispute_bureau_submission_models import (
+    DisputeBureauSubmissionRun,
+    DisputeBureauSubmissionStatus,
+)
 from api.modules.accounts.dispute_draft_augment_models import LlmDisputeDraftAugment
 from api.modules.accounts.dispute_filing_prep_models import (
     DisputeFilingPrepRun,
@@ -136,6 +140,8 @@ __all__ = [
     "DisputeLetterStatus",
     "DisputeFilingPrepRun",
     "DisputeFilingPrepStatus",
+    "DisputeBureauSubmissionRun",
+    "DisputeBureauSubmissionStatus",
     "EmailDeliveryLog",
     "EnforcementRunStatus",
     "EnforcementTriggerSource",
