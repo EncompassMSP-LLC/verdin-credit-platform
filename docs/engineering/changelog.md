@@ -1012,3 +1012,11 @@ packages/job-orchestrator/
 **Reason:** v5.8.0 completes compliance-gated production integration scaffolds; fully unsupervised agent loops, autonomous bureau filing, and live Stripe Tax API calls remain deferred to 5.9+.
 
 **Follow-up work:** Version 5.9 planning — unsupervised agent loops and production integration depth (compliance-gated).
+
+### Decision: Kick off Version 5.9 compliance-gated autonomous production
+
+**Decision:** Add `version-5.9-scope.md`, `version-5.9-completion-checklist.md`, and `.cursor/rules/version-59-sprint-loop.mdc`; link 5.9 from product roadmap and capability matrix.
+
+**Reason:** v5.8.0 sign-off complete (`v5.8.0` tagged); unsupervised agent loops, autonomous bureau filing, live Stripe Tax API, and SAML automated rotation scaffolds need a sequenced delivery path before v5.9.0 release.
+
+**Follow-up work:** Slice 2 — agent unsupervised loop scaffold.

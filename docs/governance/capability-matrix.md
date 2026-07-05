@@ -15,6 +15,7 @@
 **Version 5.6 sign-off:** [version-5.6-scope.md](version-5.6-scope.md) · Release notes: [v5.6.0.md](../release-notes/v5.6.0.md)
 **Version 5.7 sign-off:** [version-5.7-scope.md](version-5.7-scope.md) · Release notes: [v5.7.0.md](../release-notes/v5.7.0.md)
 **Version 5.8 sign-off:** [version-5.8-scope.md](version-5.8-scope.md) · Release notes: [v5.8.0.md](../release-notes/v5.8.0.md)
+**Version 5.9 planning:** [version-5.9-scope.md](version-5.9-scope.md) · Checklist: [version-5.9-completion-checklist.md](../development/version-5.9-completion-checklist.md)
 
 ## Status legend
 
@@ -451,6 +452,19 @@ Scope: [version-5.8-scope.md](version-5.8-scope.md) · Checklist: [version-5.8-c
 | Bureau live API integration | Partial ✅  | API invocation audit; unsupervised filing + live calls → 5.9+      |
 | Stripe tax calculation      | Partial ✅  | Tax calculation audit; live Stripe Tax API + charge retries → 5.9+ |
 | HRIS lifecycle sync         | Partial ✅  | Lifecycle sync audit; passwordless UI + bulk provisioning → 5.9+   |
+
+---
+
+## Version 5.9 — Compliance-gated autonomous production (in progress)
+
+Scope: [version-5.9-scope.md](version-5.9-scope.md) · Checklist: [version-5.9-completion-checklist.md](../development/version-5.9-completion-checklist.md)
+
+| Capability               | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                            |
+| ------------------------ | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ------------------------------------------------ |
+| Agent unsupervised loops | 5.9     | Planned | —       | —        | —   | —   | —     | AI gates     | Multi-step loop without per-step gates → slice 2 |
+| Autonomous bureau filing | 5.9     | Planned | —       | —        | —   | —   | —     | Disputes     | Filing run audit from invoked API runs → slice 3 |
+| Live Stripe Tax API      | 5.9     | Planned | —       | —        | —   | —   | —     | Billing      | Live tax API invocation audit → slice 4          |
+| SAML automated rotation  | 5.9     | Planned | —       | —        | —   | —   | —     | Enterprise   | Automated rotation run audit → slice 5           |
 
 ---
 
