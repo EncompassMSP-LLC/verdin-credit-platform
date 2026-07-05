@@ -51,7 +51,7 @@ Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (
 | **5.6**   | Compliance-Reviewed Depth       | Released    | HRIS sync, SMS deliverability, LLM dispute augment, dispute filing prep                 |
 | **5.7**   | Autonomous Workflows (gated)    | Released    | Bureau submission, agent tool-calling, SAML cert rotation, Stripe invoice PDF           |
 | **5.8**   | Production Integrations (gated) | Released    | Supervised agent loops, bureau live API, Stripe tax, HRIS lifecycle sync (`v5.8.0`)     |
-| **5.9**   | Autonomous Production (gated)   | In progress | Unsupervised agent loops, bureau filing, live Stripe Tax, SAML rotation                 |
+| **5.9**   | Autonomous Production (gated)   | Released    | Unsupervised agent loops, bureau filing, live Stripe Tax, SAML rotation (`v5.9.0`)      |
 
 ### Sprint milestones
 
@@ -292,18 +292,20 @@ Scope and checklist: [`docs/governance/version-5.8-scope.md`](../governance/vers
 
 Release notes: [`docs/release-notes/v5.8.0.md`](../release-notes/v5.8.0.md)
 
-### Version 5.9 — Compliance-Gated Autonomous Production (in progress)
+### Version 5.9 — Compliance-Gated Autonomous Production (released)
 
 Scope and checklist: [`docs/governance/version-5.9-scope.md`](../governance/version-5.9-scope.md) · [`docs/development/version-5.9-completion-checklist.md`](../development/version-5.9-completion-checklist.md)
 
 | Epic | Theme                    | 5.9 outcome | Notes                                                    |
 | ---- | ------------------------ | ----------- | -------------------------------------------------------- |
-| 1    | Agent unsupervised loops | Partial     | Multi-step loop audit without per-step human gates       |
-| 2    | Autonomous bureau filing | Partial     | Operator-gated autonomous filing run audit scaffold      |
-| 3    | Live Stripe Tax API      | Partial     | Admin-gated live Stripe Tax calculation invocation audit |
-| 4    | SAML automated rotation  | Partial     | Federation cert automated rotation run audit scaffold    |
+| 1    | Agent unsupervised loops | Partial ✅  | Multi-step loop audit without per-step human gates       |
+| 2    | Autonomous bureau filing | Partial ✅  | Operator-gated autonomous filing run audit scaffold      |
+| 3    | Live Stripe Tax API      | Partial ✅  | Admin-gated live Stripe Tax calculation invocation audit |
+| 4    | SAML automated rotation  | Partial ✅  | Federation cert automated rotation run audit scaffold    |
 
-**Target tag:** `v5.9.0`
+**Tag:** `v5.9.0` — Compliance-Gated Autonomous Production.
+
+Release notes: [`docs/release-notes/v5.9.0.md`](../release-notes/v5.9.0.md)
 
 ## Sprint → version mapping
 

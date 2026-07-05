@@ -9,14 +9,14 @@ Formal scope for **Version 5.9 — Compliance-Gated Autonomous Production**. Bui
 
 Extend partial 5.8 compliance-gated scaffolds (supervised loops, bureau live API, tax calculation, HRIS lifecycle) toward compliance-approved autonomous production execution. Each epic ships as a **Partial** capability behind feature flags with tests and documentation.
 
-## Epic outcomes (planned)
+## Epic outcomes (shipped — Partial ✅)
 
 | Epic | Theme                    | 5.9 outcome | Summary                                                           |
 | ---- | ------------------------ | ----------- | ----------------------------------------------------------------- |
-| 1    | Agent unsupervised loops | Partial     | Multi-step loop audit without per-step human gates between steps  |
-| 2    | Autonomous bureau filing | Partial     | Operator-gated autonomous filing run audit from invoked API runs  |
-| 3    | Live Stripe Tax API      | Partial     | Admin-gated live Stripe Tax calculation invocation audit scaffold |
-| 4    | SAML automated rotation  | Partial     | Federation cert automated rotation run audit scaffold             |
+| 1    | Agent unsupervised loops | Partial ✅  | Multi-step loop audit without per-step human gates between steps  |
+| 2    | Autonomous bureau filing | Partial ✅  | Operator-gated autonomous filing run audit from invoked API runs  |
+| 3    | Live Stripe Tax API      | Partial ✅  | Admin-gated live Stripe Tax calculation invocation audit scaffold |
+| 4    | SAML automated rotation  | Partial ✅  | Federation cert automated rotation run audit scaffold             |
 
 ## Shipped from 5.8 (foundation — do not regress)
 
