@@ -351,3 +351,78 @@ export function approveStripeTaxCalculationRun(runId: string) {
     },
   );
 }
+
+export type StripeLiveTaxApiRunStatus = 'pending_approval' | 'invoked' | 'rejected' | 'failed';
+
+export interface StripeLiveTaxApiGateStatus {
+  enabled: boolean;
+  ready: boolean;
+  tax_calculation_ready: boolean;
+  blockers: string[];
+}
+
+export interface StripeLiveTaxApiRun {
+  id: string;
+  organization_id: string;
+  stripe_tax_calculation_run_id: string;
+  status: StripeLiveTaxApiRunStatus;
+  invocation_summary: string;
+  requested_by_user_id: string | null;
+  approved_by_user_id: string | null;
+  requested_at: string | null;
+  approved_at: string | null;
+  invoked_at: string | null;
+  error_message: string | null;
+}
+
+export interface StripeLiveTaxApiInvokeInput {
+  invocation_summary: string;
+}
+
+export interface StripeLiveTaxApiRunResult {
+  completed_at: string;
+  run: StripeLiveTaxApiRun;
+}
+
+export interface StripeLiveTaxApiRunList {
+  items: StripeLiveTaxApiRun[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export function getStripeLiveTaxApiStatus() {
+  return request<StripeLiveTaxApiGateStatus>(apiPath('/billing/live-tax-api/status'));
+}
+
+export function listStripeLiveTaxApiRuns(page = 1, pageSize = 20) {
+  const params = new URLSearchParams({
+    page: String(page),
+    page_size: String(pageSize),
+  });
+  return request<StripeLiveTaxApiRunList>(
+    apiPath(`/billing/live-tax-api/runs?${params.toString()}`),
+  );
+}
+
+export function invokeStripeLiveTaxApiFromTaxCalculationRun(
+  stripeTaxCalculationRunId: string,
+  input: StripeLiveTaxApiInvokeInput,
+) {
+  return request<StripeLiveTaxApiRunResult>(
+    apiPath(`/billing/live-tax-api/tax-calculation-runs/${stripeTaxCalculationRunId}/invoke`),
+    {
+      method: 'POST',
+      body: JSON.stringify(input),
+    },
+  );
+}
+
+export function approveStripeLiveTaxApiRun(runId: string) {
+  return request<StripeLiveTaxApiRunResult>(
+    apiPath(`/billing/live-tax-api/runs/${runId}/approve`),
+    {
+      method: 'POST',
+    },
+  );
+}

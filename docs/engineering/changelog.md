@@ -1036,3 +1036,11 @@ packages/job-orchestrator/
 **Reason:** 5.9 disputes epic extends 5.8 bureau live API with operator-gated autonomous filing run audit without unsupervised re-filing loops.
 
 **Follow-up work:** Slice 4 — live Stripe Tax API scaffold.
+
+### Decision: Live Stripe Tax API scaffold (Version 5.9 slice 4)
+
+**Decision:** Ship admin-gated Stripe live Tax API invocation audit (`stripe_live_tax_api_runs` migration 053) with status, list, start-from-calculated-tax-run, and admin approve endpoints behind `ENABLE_STRIPE_LIVE_TAX_API`.
+
+**Reason:** 5.9 billing epic extends 5.8 tax calculation with admin-gated live Tax API invocation audit without automated charge retries.
+
+**Follow-up work:** Slice 5 — SAML automated rotation scaffold.

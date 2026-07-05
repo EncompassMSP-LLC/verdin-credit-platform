@@ -463,7 +463,7 @@ Scope: [version-5.9-scope.md](version-5.9-scope.md) · Checklist: [version-5.9-c
 | ------------------------ | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ------------------------------------------------------------------- |
 | Agent unsupervised loops | 5.9     | Partial | ✅      | —        | ✅  | —   | ✅    | AI gates     | `POST /llm/unsupervised-loops/supervised-runs/{id}/start`           |
 | Autonomous bureau filing | 5.9     | Partial | ✅      | —        | ✅  | —   | ✅    | Disputes     | `POST /compliance/autonomous-bureau-filing/live-api-runs/{id}/file` |
-| Live Stripe Tax API      | 5.9     | Planned | —       | —        | —   | —   | —     | Billing      | Live tax API invocation audit → slice 4                             |
+| Live Stripe Tax API      | 5.9     | Partial | ✅      | —        | ✅  | —   | ✅    | Billing      | `POST /billing/live-tax-api/tax-calculation-runs/{id}/invoke`       |
 | SAML automated rotation  | 5.9     | Planned | —       | —        | —   | —   | —     | Enterprise   | Automated rotation run audit → slice 5                              |
 
 ---
