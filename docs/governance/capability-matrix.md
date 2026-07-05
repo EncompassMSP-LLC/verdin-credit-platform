@@ -361,12 +361,12 @@ Scope: [version-5.5-scope.md](version-5.5-scope.md) · Checklist: [version-5.5-c
 
 Scope: [version-5.6-scope.md](version-5.6-scope.md) · Checklist: [version-5.6-completion-checklist.md](../development/version-5.6-completion-checklist.md)
 
-| Capability                   | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies  | Notes                                 |
-| ---------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------- | ------------------------------------- |
-| HRIS bidirectional sync      | 5.6     | Planned | —       | —        | —   | —   | —     | Enterprise    | Sync run audit scaffold → slice 2     |
-| SMS deliverability dashboard | 5.6     | Planned | —       | —        | —   | —   | —     | Notifications | Delivery metrics read model → slice 3 |
-| LLM dispute draft augment    | 5.6     | Planned | —       | —        | —   | —   | —     | AI gates      | ADR-012 augment scaffold → slice 4    |
-| Dispute filing prep          | 5.6     | Planned | —       | —        | —   | —   | —     | Disputes      | Compliance-gated prep audit → slice 5 |
+| Capability                   | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies  | Notes                                         |
+| ---------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------- | --------------------------------------------- |
+| HRIS bidirectional sync      | 5.6     | Partial | ✅      | —        | ✅  | —   | ✅    | Enterprise    | `GET /enterprise/federation/hris-sync/status` |
+| SMS deliverability dashboard | 5.6     | Planned | —       | —        | —   | —   | —     | Notifications | Delivery metrics read model → slice 3         |
+| LLM dispute draft augment    | 5.6     | Planned | —       | —        | —   | —   | —     | AI gates      | ADR-012 augment scaffold → slice 4            |
+| Dispute filing prep          | 5.6     | Planned | —       | —        | —   | —   | —     | Disputes      | Compliance-gated prep audit → slice 5         |
 
 ---
 

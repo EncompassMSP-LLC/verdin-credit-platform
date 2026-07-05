@@ -38,3 +38,12 @@ def require_saml_federation_metadata_enabled() -> None:
             status_code=status.HTTP_404_NOT_FOUND,
             detail="SAML federation metadata upload is not enabled",
         )
+
+
+def require_hris_bidirectional_sync_enabled() -> None:
+    require_saml_federation_metadata_enabled()
+    if not is_feature_enabled(FeatureFlag.ENABLE_HRIS_BIDIRECTIONAL_SYNC):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="HRIS bidirectional sync is not enabled",
+        )

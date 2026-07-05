@@ -286,3 +286,67 @@ export function uploadSamlFederationMetadata(input: SamlFederationMetadataUpload
     },
   );
 }
+
+export type HrisBidirectionalSyncRunKind = 'employees_inbound' | 'employees_outbound';
+
+export type HrisBidirectionalSyncRunStatus = 'pending' | 'running' | 'completed' | 'failed';
+
+export type HrisBidirectionalSyncTriggerSource = 'manual' | 'scheduled';
+
+export interface HrisBidirectionalSyncStatus {
+  enabled: boolean;
+  ready: boolean;
+  saml_metadata_ready: boolean;
+  blockers: string[];
+}
+
+export interface HrisBidirectionalSyncRun {
+  id: string;
+  organization_id: string;
+  run_kind: HrisBidirectionalSyncRunKind;
+  trigger_source: HrisBidirectionalSyncTriggerSource;
+  status: HrisBidirectionalSyncRunStatus;
+  records_synced: number;
+  records_skipped: number;
+  performed_by_user_id: string | null;
+  started_at: string | null;
+  completed_at: string | null;
+  error_message: string | null;
+}
+
+export interface HrisBidirectionalSyncRunList {
+  total: number;
+  page: number;
+  page_size: number;
+  items: HrisBidirectionalSyncRun[];
+}
+
+export interface HrisBidirectionalSyncRunInput {
+  run_kind?: HrisBidirectionalSyncRunKind;
+}
+
+export interface HrisBidirectionalSyncRunResult {
+  completed_at: string;
+  run: HrisBidirectionalSyncRun;
+}
+
+export function getHrisBidirectionalSyncStatus() {
+  return request<HrisBidirectionalSyncStatus>(apiPath('/enterprise/federation/hris-sync/status'));
+}
+
+export function listHrisBidirectionalSyncRuns(page = 1, pageSize = 20) {
+  const params = new URLSearchParams({
+    page: String(page),
+    page_size: String(pageSize),
+  });
+  return request<HrisBidirectionalSyncRunList>(
+    apiPath(`/enterprise/federation/hris-sync/runs?${params}`),
+  );
+}
+
+export function runHrisBidirectionalSync(input: HrisBidirectionalSyncRunInput = {}) {
+  return request<HrisBidirectionalSyncRunResult>(apiPath('/enterprise/federation/hris-sync/run'), {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}

@@ -70,3 +70,14 @@ class SamlFederationMetadataUploadRepository:
         total = int(count_result.scalar_one())
         result = await self._session.execute(base.offset(filters.skip).limit(filters.limit))
         return list(result.scalars().all()), total
+
+    async def count_valid_uploads(self, organization_id: uuid.UUID) -> int:
+        result = await self._session.execute(
+            select(func.count())
+            .select_from(SamlFederationMetadataUpload)
+            .where(SamlFederationMetadataUpload.organization_id == organization_id)
+            .where(
+                SamlFederationMetadataUpload.validation_status == SamlMetadataValidationStatus.VALID
+            )
+        )
+        return int(result.scalar_one())
