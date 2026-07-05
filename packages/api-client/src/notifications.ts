@@ -265,3 +265,45 @@ export function runSmsMarketingCampaign(input: SmsMarketingCampaignRunInput) {
     body: JSON.stringify(input),
   });
 }
+
+export interface SmsDeliverabilityDashboardStatus {
+  enabled: boolean;
+  ready: boolean;
+  delivery_ready: boolean;
+  blockers: string[];
+}
+
+export interface SmsDeliverabilityCampaignOutcome {
+  id: string;
+  campaign_name: string;
+  status: SmsMarketingCampaignRunStatus;
+  trigger_source: SmsMarketingTriggerSource;
+  recipients_queued: number;
+  messages_sent: number;
+  messages_failed: number;
+  started_at: string | null;
+  completed_at: string | null;
+}
+
+export interface SmsDeliverabilityMetrics {
+  total_campaign_runs: number;
+  completed_campaign_runs: number;
+  failed_campaign_runs: number;
+  pending_campaign_runs: number;
+  delivery_logs_sent: number;
+  delivery_logs_failed: number;
+  delivery_success_rate: number | null;
+  recent_campaign_outcomes: SmsDeliverabilityCampaignOutcome[];
+}
+
+export function getSmsDeliverabilityDashboardStatus() {
+  return request<SmsDeliverabilityDashboardStatus>(
+    apiPath('/notifications/sms-campaigns/deliverability/status'),
+  );
+}
+
+export function getSmsDeliverabilitySummary() {
+  return request<SmsDeliverabilityMetrics>(
+    apiPath('/notifications/sms-campaigns/deliverability/summary'),
+  );
+}

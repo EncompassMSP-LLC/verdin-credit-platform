@@ -884,3 +884,11 @@ packages/job-orchestrator/
 **Reason:** 5.6 identity epic ships HRIS sync run audit scaffold without full employee lifecycle sync or certificate rotation.
 
 **Follow-up work:** Slice 3 — SMS deliverability dashboard scaffold.
+
+### Decision: SMS deliverability dashboard scaffold
+
+**Decision:** Add `GET /notifications/sms-campaigns/deliverability/status` and `GET /notifications/sms-campaigns/deliverability/summary`, `api/core/sms_deliverability_dashboard.py`, `ENABLE_SMS_DELIVERABILITY_DASHBOARD` flag (requires `ENABLE_SMS_MARKETING_DELIVERY`), and org-scoped delivery metrics aggregate from campaign runs and delivery logs.
+
+**Reason:** 5.6 communications epic ships deliverability read model without multi-provider failover or real-time alerting.
+
+**Follow-up work:** Slice 4 — LLM dispute draft augment scaffold.
