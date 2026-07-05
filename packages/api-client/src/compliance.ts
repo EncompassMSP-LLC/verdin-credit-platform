@@ -465,3 +465,84 @@ export function approveBureauLiveApiRun(runId: string) {
     },
   );
 }
+
+export interface AutonomousBureauFilingStatus {
+  enabled: boolean;
+  ready: boolean;
+  bureau_live_api_ready: boolean;
+  blockers: string[];
+}
+
+export type AutonomousBureauFilingRunStatus = 'pending_approval' | 'filed' | 'rejected' | 'failed';
+
+export interface AutonomousBureauFilingRun {
+  id: string;
+  organization_id: string;
+  bureau_live_api_run_id: string;
+  account_id: string;
+  case_id: string;
+  bureau_target: string;
+  status: AutonomousBureauFilingRunStatus;
+  filing_summary: string;
+  requested_by_user_id: string | null;
+  approved_by_user_id: string | null;
+  timeline_event_id: string | null;
+  requested_at: string | null;
+  approved_at: string | null;
+  filed_at: string | null;
+  error_message: string | null;
+}
+
+export interface AutonomousBureauFilingSubmitRequest {
+  filing_summary: string;
+}
+
+export interface AutonomousBureauFilingRunResult {
+  completed_at: string;
+  run: AutonomousBureauFilingRun;
+}
+
+export interface ListAutonomousBureauFilingRunsParams {
+  page?: number;
+  page_size?: number;
+  account_id?: string;
+}
+
+export function getAutonomousBureauFilingStatus() {
+  return request<AutonomousBureauFilingStatus>(
+    apiPath('/compliance/autonomous-bureau-filing/status'),
+  );
+}
+
+export function listAutonomousBureauFilingRuns(params: ListAutonomousBureauFilingRunsParams = {}) {
+  const search = new URLSearchParams();
+  if (params.page) search.set('page', String(params.page));
+  if (params.page_size) search.set('page_size', String(params.page_size));
+  if (params.account_id) search.set('account_id', params.account_id);
+  const query = search.toString();
+  return request<PaginatedResponse<AutonomousBureauFilingRun>>(
+    apiPath(`/compliance/autonomous-bureau-filing/runs${query ? `?${query}` : ''}`),
+  );
+}
+
+export function fileAutonomousBureauFilingFromLiveApiRun(
+  bureauLiveApiRunId: string,
+  input: AutonomousBureauFilingSubmitRequest,
+) {
+  return request<AutonomousBureauFilingRunResult>(
+    apiPath(`/compliance/autonomous-bureau-filing/live-api-runs/${bureauLiveApiRunId}/file`),
+    {
+      method: 'POST',
+      body: JSON.stringify(input),
+    },
+  );
+}
+
+export function approveAutonomousBureauFilingRun(runId: string) {
+  return request<AutonomousBureauFilingRunResult>(
+    apiPath(`/compliance/autonomous-bureau-filing/runs/${runId}/approve`),
+    {
+      method: 'POST',
+    },
+  );
+}

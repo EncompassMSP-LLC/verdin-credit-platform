@@ -653,6 +653,17 @@ Operator-gated external bureau API invocation audit. Requires `ENABLE_AI=true`, 
 
 Returns `404` when bureau live API flags are false.
 
+### Autonomous bureau filing (v5.9)
+
+| Method | Path                                                                    | Role         | Description                                      |
+| ------ | ----------------------------------------------------------------------- | ------------ | ------------------------------------------------ |
+| GET    | `/compliance/autonomous-bureau-filing/status`                           | read_only    | Autonomous filing readiness and blockers         |
+| GET    | `/compliance/autonomous-bureau-filing/runs`                             | read_only    | Paginated autonomous bureau filing audit log     |
+| POST   | `/compliance/autonomous-bureau-filing/live-api-runs/{live_api_id}/file` | case_manager | Start filing from an invoked bureau live API run |
+| POST   | `/compliance/autonomous-bureau-filing/runs/{run_id}/approve`            | admin        | Approve and record autonomous filing scaffold    |
+
+Returns `404` when autonomous bureau filing flags are false.
+
 Consent types: `croa_services`, `fcra_dispute`, `fdcpa_contact`, `marketing`, `data_processing`. Retention scopes: `documents`, `communications`, `audit_logs`, `client_profiles`. Enforcement jobs and legal sign-off workflows are deferred to 5.0+.
 
 ## Reporting

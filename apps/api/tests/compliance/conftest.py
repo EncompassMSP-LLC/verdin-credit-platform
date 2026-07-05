@@ -177,3 +177,14 @@ def bureau_live_api_env(
     get_feature_flags.cache_clear()
     yield
     get_feature_flags.cache_clear()
+
+
+@pytest.fixture
+def autonomous_bureau_filing_env(
+    monkeypatch: pytest.MonkeyPatch,
+    bureau_live_api_env: None,
+) -> None:
+    monkeypatch.setenv("ENABLE_AUTONOMOUS_BUREAU_FILING", "true")
+    get_feature_flags.cache_clear()
+    yield
+    get_feature_flags.cache_clear()

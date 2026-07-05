@@ -459,12 +459,12 @@ Scope: [version-5.8-scope.md](version-5.8-scope.md) · Checklist: [version-5.8-c
 
 Scope: [version-5.9-scope.md](version-5.9-scope.md) · Checklist: [version-5.9-completion-checklist.md](../development/version-5.9-completion-checklist.md)
 
-| Capability               | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                     |
-| ------------------------ | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | --------------------------------------------------------- |
-| Agent unsupervised loops | 5.9     | Partial | ✅      | —        | ✅  | —   | ✅    | AI gates     | `POST /llm/unsupervised-loops/supervised-runs/{id}/start` |
-| Autonomous bureau filing | 5.9     | Planned | —       | —        | —   | —   | —     | Disputes     | Filing run audit from invoked API runs → slice 3          |
-| Live Stripe Tax API      | 5.9     | Planned | —       | —        | —   | —   | —     | Billing      | Live tax API invocation audit → slice 4                   |
-| SAML automated rotation  | 5.9     | Planned | —       | —        | —   | —   | —     | Enterprise   | Automated rotation run audit → slice 5                    |
+| Capability               | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                               |
+| ------------------------ | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ------------------------------------------------------------------- |
+| Agent unsupervised loops | 5.9     | Partial | ✅      | —        | ✅  | —   | ✅    | AI gates     | `POST /llm/unsupervised-loops/supervised-runs/{id}/start`           |
+| Autonomous bureau filing | 5.9     | Partial | ✅      | —        | ✅  | —   | ✅    | Disputes     | `POST /compliance/autonomous-bureau-filing/live-api-runs/{id}/file` |
+| Live Stripe Tax API      | 5.9     | Planned | —       | —        | —   | —   | —     | Billing      | Live tax API invocation audit → slice 4                             |
+| SAML automated rotation  | 5.9     | Planned | —       | —        | —   | —   | —     | Enterprise   | Automated rotation run audit → slice 5                              |
 
 ---
 
