@@ -16,6 +16,7 @@
 **Version 5.7 sign-off:** [version-5.7-scope.md](version-5.7-scope.md) · Release notes: [v5.7.0.md](../release-notes/v5.7.0.md)
 **Version 5.8 sign-off:** [version-5.8-scope.md](version-5.8-scope.md) · Release notes: [v5.8.0.md](../release-notes/v5.8.0.md)
 **Version 5.9 sign-off:** [version-5.9-scope.md](version-5.9-scope.md) · Release notes: [v5.9.0.md](../release-notes/v5.9.0.md)
+**Version 5.10 planning:** [version-5.10-scope.md](version-5.10-scope.md) · Checklist: [version-5.10-completion-checklist.md](../development/version-5.10-completion-checklist.md)
 
 ## Status legend
 
@@ -474,6 +475,19 @@ Scope: [version-5.9-scope.md](version-5.9-scope.md) · Checklist: [version-5.9-c
 | Autonomous bureau filing | Partial ✅  | Filing audit; unsupervised re-filing + live calls → 5.10+              |
 | Live Stripe Tax API      | Partial ✅  | Invocation audit; live calls without deferral + charge retries → 5.10+ |
 | SAML automated rotation  | Partial ✅  | Rotation audit; bulk rollout + passwordless UI → 5.10+                 |
+
+---
+
+## Version 5.10 — Compliance-gated production automation (in progress)
+
+Scope: [version-5.10-scope.md](version-5.10-scope.md) · Checklist: [version-5.10-completion-checklist.md](../development/version-5.10-completion-checklist.md)
+
+| Capability                   | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                   |
+| ---------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | --------------------------------------- |
+| Agent arbitrary execution    | 5.10    | Planned | —       | —        | —   | —   | —     | AI gates     | Arbitrary execution audit → slice 2     |
+| Bureau re-filing audit       | 5.10    | Planned | —       | —        | —   | —   | —     | Disputes     | Re-filing run audit → slice 3           |
+| Stripe charge retry          | 5.10    | Planned | —       | —        | —   | —   | —     | Billing      | Charge retry audit → slice 4            |
+| SAML passwordless enrollment | 5.10    | Planned | —       | —        | —   | —   | —     | Enterprise   | Passwordless enrollment audit → slice 5 |
 
 ---
 
