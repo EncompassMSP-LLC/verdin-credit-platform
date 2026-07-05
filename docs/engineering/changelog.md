@@ -964,3 +964,11 @@ packages/job-orchestrator/
 **Reason:** v5.7.0 completes compliance-gated autonomous workflow scaffolds; unsupervised agent loops, live bureau filing, and Stripe tax calculation remain deferred to 5.8+.
 
 **Follow-up work:** Version 5.8 planning — unsupervised agent loops and production integration depth (compliance-gated).
+
+### Decision: Kick off Version 5.8 compliance-gated production integrations
+
+**Decision:** Add `version-5.8-scope.md`, `version-5.8-completion-checklist.md`, and `.cursor/rules/version-58-sprint-loop.mdc`; link 5.8 from product roadmap and capability matrix.
+
+**Reason:** v5.7.0 sign-off complete (`v5.7.0` tagged); supervised agent loops, bureau live API integration, Stripe tax calculation, and HRIS lifecycle sync scaffolds need a sequenced delivery path before v5.8.0 release.
+
+**Follow-up work:** Slice 2 — agent supervised loop scaffold.

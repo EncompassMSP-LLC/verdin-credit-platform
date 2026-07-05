@@ -430,6 +430,19 @@ Scope: [version-5.7-scope.md](version-5.7-scope.md) · Checklist: [version-5.7-c
 
 ---
 
+## Version 5.8 — Compliance-gated production integrations (in progress)
+
+Scope: [version-5.8-scope.md](version-5.8-scope.md) · Checklist: [version-5.8-completion-checklist.md](../development/version-5.8-completion-checklist.md)
+
+| Capability                  | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                          |
+| --------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ---------------------------------------------- |
+| Agent supervised loops      | 5.8     | Planned | —       | —        | —   | —   | —     | AI gates     | Multi-step loop audit → slice 2                |
+| Bureau live API integration | 5.8     | Planned | —       | —        | —   | —   | —     | Disputes     | External bureau API invocation audit → slice 3 |
+| Stripe tax calculation      | 5.8     | Planned | —       | —        | —   | —   | —     | Billing      | Tax calculation run audit → slice 4            |
+| HRIS lifecycle sync         | 5.8     | Planned | —       | —        | —   | —   | —     | Enterprise   | Lifecycle sync run audit → slice 5             |
+
+---
+
 ## Related documents
 
 - [Governance hub](README.md) — lifecycle and build order
