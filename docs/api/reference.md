@@ -478,6 +478,17 @@ Returns `404` when agent supervised loop flags are false.
 
 Returns `404` when agent unsupervised loop flags are false.
 
+### Agent arbitrary execution (v5.10)
+
+| Method | Path                                                                     | Role         | Description                                                 |
+| ------ | ------------------------------------------------------------------------ | ------------ | ----------------------------------------------------------- |
+| GET    | `/llm/arbitrary-execution/status`                                        | read_only    | Arbitrary execution readiness and blockers                  |
+| GET    | `/llm/arbitrary-execution/runs`                                          | read_only    | Paginated arbitrary execution audit log                     |
+| POST   | `/llm/arbitrary-execution/unsupervised-runs/{unsupervised_run_id}/start` | case_manager | Start arbitrary execution from a completed unsupervised run |
+| POST   | `/llm/arbitrary-execution/runs/{run_id}/approve`                         | admin        | Approve and record arbitrary execution scaffold             |
+
+Returns `404` when agent arbitrary execution flags are false.
+
 ## Enterprise identity
 
 MFA and SSO readiness plus staff enrollment flows. Portal authentication (`/portal/auth/*`) remains a separate partition.
