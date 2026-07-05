@@ -178,6 +178,19 @@ def saml_cert_rotation_env(
 
 
 @pytest.fixture
+def hris_lifecycle_sync_env(
+    monkeypatch: pytest.MonkeyPatch,
+    hris_sync_env: None,
+) -> None:
+    monkeypatch.setenv("ENABLE_HRIS_LIFECYCLE_SYNC", "true")
+    get_feature_flags.cache_clear()
+    get_enterprise_identity_settings.cache_clear()
+    yield
+    get_feature_flags.cache_clear()
+    get_enterprise_identity_settings.cache_clear()
+
+
+@pytest.fixture
 def enterprise_totp_env(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("ENABLE_ENTERPRISE", "true")
     monkeypatch.setenv("ENTERPRISE_MFA_MODE", "totp")

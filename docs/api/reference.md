@@ -498,21 +498,31 @@ SCIM 2.0 user/group provision scaffold with org-scoped audit logs. Requires `ENA
 
 Multi-IdP federation scaffold (`ENABLE_IDP_FEDERATION=true`, requires `ENABLE_ENTERPRISE=true` and OIDC SSO config). SAML metadata upload scaffold requires `ENABLE_SAML_FEDERATION_METADATA=true` (and IdP federation). HRIS bidirectional sync requires `ENABLE_HRIS_BIDIRECTIONAL_SYNC=true` (and SAML metadata scaffold).
 
-| Method | Path                                                                     | Min role  | Description                               |
-| ------ | ------------------------------------------------------------------------ | --------- | ----------------------------------------- |
-| GET    | `/enterprise/federation/status`                                          | read_only | Federation readiness and provider count   |
-| GET    | `/enterprise/federation/providers`                                       | read_only | List registered IdP providers for the org |
-| POST   | `/enterprise/federation/providers`                                       | admin     | Register an IdP provider in org registry  |
-| GET    | `/enterprise/federation/saml-metadata/status`                            | read_only | SAML metadata upload readiness            |
-| GET    | `/enterprise/federation/saml-metadata/uploads`                           | read_only | List SAML metadata uploads for the org    |
-| POST   | `/enterprise/federation/saml-metadata/upload`                            | admin     | Upload and validate SAML metadata XML     |
-| GET    | `/enterprise/federation/hris-sync/status`                                | read_only | HRIS sync readiness and blockers          |
-| GET    | `/enterprise/federation/hris-sync/runs`                                  | read_only | List HRIS sync runs for the org           |
-| POST   | `/enterprise/federation/hris-sync/run`                                   | admin     | Enqueue HRIS sync run audit scaffold      |
-| GET    | `/enterprise/federation/saml-cert-rotation/status`                       | read_only | SAML cert rotation readiness and blockers |
-| GET    | `/enterprise/federation/saml-cert-rotation/runs`                         | read_only | List SAML certificate rotation audit log  |
-| POST   | `/enterprise/federation/saml-cert-rotation/metadata-uploads/{id}/rotate` | admin     | Submit cert rotation run for admin review |
-| POST   | `/enterprise/federation/saml-cert-rotation/runs/{run_id}/approve`        | admin     | Approve rotation scaffold (no live IdP)   |
+| Method | Path                                           | Min role  | Description                               |
+| ------ | ---------------------------------------------- | --------- | ----------------------------------------- |
+| GET    | `/enterprise/federation/status`                | read_only | Federation readiness and provider count   |
+| GET    | `/enterprise/federation/providers`             | read_only | List registered IdP providers for the org |
+| POST   | `/enterprise/federation/providers`             | admin     | Register an IdP provider in org registry  |
+| GET    | `/enterprise/federation/saml-metadata/status`  | read_only | SAML metadata upload readiness            |
+| GET    | `/enterprise/federation/saml-metadata/uploads` | read_only | List SAML metadata uploads for the org    |
+| POST   | `/enterprise/federation/saml-metadata/upload`  | admin     | Upload and validate SAML metadata XML     |
+| GET    | `/enterprise/federation/hris-sync/status`      | read_only | HRIS sync readiness and blockers          |
+| GET    | `/enterprise/federation/hris-sync/runs`        | read_only | List HRIS sync runs for the org           |
+| POST   | `/enterprise/federation/hris-sync/run`         | admin     | Enqueue HRIS sync run audit scaffold      |
+
+HRIS lifecycle sync scaffold requires `ENABLE_HRIS_LIFECYCLE_SYNC=true` (and `ENABLE_HRIS_BIDIRECTIONAL_SYNC=true`). No passwordless enrollment UI or multi-IdP bulk provisioning.
+
+| Method | Path                                                          | Min role  | Description                                           |
+| ------ | ------------------------------------------------------------- | --------- | ----------------------------------------------------- |
+| GET    | `/enterprise/federation/hris-lifecycle/status`                | read_only | HRIS lifecycle sync readiness and blockers            |
+| GET    | `/enterprise/federation/hris-lifecycle/runs`                  | read_only | Paginated HRIS lifecycle sync audit log               |
+| POST   | `/enterprise/federation/hris-lifecycle/sync-runs/{id}/start`  | admin     | Start lifecycle sync from completed bidirectional run |
+| POST   | `/enterprise/federation/hris-lifecycle/runs/{run_id}/approve` | admin     | Approve lifecycle sync scaffold                       |
+
+| GET | `/enterprise/federation/saml-cert-rotation/status` | read_only | SAML cert rotation readiness and blockers |
+| GET | `/enterprise/federation/saml-cert-rotation/runs` | read_only | List SAML certificate rotation audit log |
+| POST | `/enterprise/federation/saml-cert-rotation/metadata-uploads/{id}/rotate` | admin | Submit cert rotation run for admin review |
+| POST | `/enterprise/federation/saml-cert-rotation/runs/{run_id}/approve` | admin | Approve rotation scaffold (no live IdP) |
 
 Endpoints return `404` when the corresponding feature flag is false. Full employee lifecycle HRIS sync is deferred to 5.7+.
 

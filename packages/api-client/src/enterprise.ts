@@ -351,6 +351,84 @@ export function runHrisBidirectionalSync(input: HrisBidirectionalSyncRunInput = 
   });
 }
 
+export type HrisLifecycleSyncRunStatus = 'pending_approval' | 'completed' | 'rejected' | 'failed';
+
+export interface HrisLifecycleSyncGateStatus {
+  enabled: boolean;
+  ready: boolean;
+  hris_sync_ready: boolean;
+  blockers: string[];
+}
+
+export interface HrisLifecycleSyncRun {
+  id: string;
+  organization_id: string;
+  hris_bidirectional_sync_run_id: string;
+  run_kind: HrisBidirectionalSyncRunKind;
+  status: HrisLifecycleSyncRunStatus;
+  lifecycle_summary: string;
+  requested_by_user_id: string | null;
+  approved_by_user_id: string | null;
+  requested_at: string | null;
+  approved_at: string | null;
+  completed_at: string | null;
+  error_message: string | null;
+}
+
+export interface HrisLifecycleSyncRunList {
+  total: number;
+  page: number;
+  page_size: number;
+  items: HrisLifecycleSyncRun[];
+}
+
+export interface HrisLifecycleSyncSubmitInput {
+  lifecycle_summary: string;
+}
+
+export interface HrisLifecycleSyncRunResult {
+  completed_at: string;
+  run: HrisLifecycleSyncRun;
+}
+
+export function getHrisLifecycleSyncStatus() {
+  return request<HrisLifecycleSyncGateStatus>(
+    apiPath('/enterprise/federation/hris-lifecycle/status'),
+  );
+}
+
+export function listHrisLifecycleSyncRuns(page = 1, pageSize = 20) {
+  const params = new URLSearchParams({
+    page: String(page),
+    page_size: String(pageSize),
+  });
+  return request<HrisLifecycleSyncRunList>(
+    apiPath(`/enterprise/federation/hris-lifecycle/runs?${params}`),
+  );
+}
+
+export function startHrisLifecycleSyncFromBidirectionalRun(
+  hrisBidirectionalSyncRunId: string,
+  input: HrisLifecycleSyncSubmitInput,
+) {
+  return request<HrisLifecycleSyncRunResult>(
+    apiPath(`/enterprise/federation/hris-lifecycle/sync-runs/${hrisBidirectionalSyncRunId}/start`),
+    {
+      method: 'POST',
+      body: JSON.stringify(input),
+    },
+  );
+}
+
+export function approveHrisLifecycleSyncRun(runId: string) {
+  return request<HrisLifecycleSyncRunResult>(
+    apiPath(`/enterprise/federation/hris-lifecycle/runs/${runId}/approve`),
+    {
+      method: 'POST',
+    },
+  );
+}
+
 export type SamlCertificateRotationStatus = 'pending_approval' | 'rotated' | 'rejected' | 'failed';
 
 export interface SamlCertificateRotationGateStatus {
