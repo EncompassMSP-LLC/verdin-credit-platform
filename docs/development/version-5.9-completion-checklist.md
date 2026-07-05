@@ -18,7 +18,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | Order | Slice                             | Epic          | Status |
 | ----- | --------------------------------- | ------------- | ------ |
 | 1     | 5.9 scope + completion checklist  | Kickoff       | ✅     |
-| 2     | Agent unsupervised loop scaffold  | AI operations | —      |
+| 2     | Agent unsupervised loop scaffold  | AI operations | ✅     |
 | 3     | Autonomous bureau filing scaffold | Disputes      | —      |
 | 4     | Live Stripe Tax API scaffold      | Billing       | —      |
 | 5     | SAML automated rotation scaffold  | Identity      | —      |

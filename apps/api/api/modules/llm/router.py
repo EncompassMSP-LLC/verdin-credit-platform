@@ -20,12 +20,14 @@ from api.modules.llm.agent_execution_router import agent_execution_router
 from api.modules.llm.agent_observability_router import agent_observability_router
 from api.modules.llm.agent_supervised_loop_router import agent_supervised_loop_router
 from api.modules.llm.agent_tool_calling_router import agent_tool_calling_router
+from api.modules.llm.agent_unsupervised_loop_router import agent_unsupervised_loop_router
 
 router = APIRouter(prefix="/llm", tags=["LLM"])
 router.include_router(agent_observability_router)
 router.include_router(agent_execution_router)
 router.include_router(agent_tool_calling_router)
 router.include_router(agent_supervised_loop_router)
+router.include_router(agent_unsupervised_loop_router)
 
 
 class LlmGateStatusResponse(BaseSchema):

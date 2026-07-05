@@ -282,6 +282,81 @@ export function approveAgentSupervisedLoopRun(runId: string) {
   );
 }
 
+export type AgentUnsupervisedLoopStatus = 'pending_approval' | 'completed' | 'rejected' | 'failed';
+
+export interface AgentUnsupervisedLoopGateStatus {
+  enabled: boolean;
+  ready: boolean;
+  supervised_loops_ready: boolean;
+  blockers: string[];
+}
+
+export interface AgentUnsupervisedLoopRun {
+  id: string;
+  organization_id: string;
+  agent_supervised_loop_run_id: string;
+  case_id: string | null;
+  tool_kind: string;
+  status: AgentUnsupervisedLoopStatus;
+  loop_summary: string;
+  steps_completed: number;
+  requested_by_user_id: string | null;
+  approved_by_user_id: string | null;
+  timeline_event_id: string | null;
+  requested_at: string | null;
+  approved_at: string | null;
+  completed_at: string | null;
+  error_message: string | null;
+}
+
+export interface AgentUnsupervisedLoopSubmitInput {
+  loop_summary: string;
+}
+
+export interface AgentUnsupervisedLoopRunResult {
+  completed_at: string;
+  run: AgentUnsupervisedLoopRun;
+}
+
+export function getAgentUnsupervisedLoopStatus() {
+  return request<AgentUnsupervisedLoopGateStatus>(apiPath('/llm/unsupervised-loops/status'));
+}
+
+export function listAgentUnsupervisedLoopRuns(
+  params: { page?: number; page_size?: number; case_id?: string } = {},
+) {
+  const search = new URLSearchParams();
+  if (params.page) search.set('page', String(params.page));
+  if (params.page_size) search.set('page_size', String(params.page_size));
+  if (params.case_id) search.set('case_id', params.case_id);
+  const query = search.toString();
+  return request<PaginatedResponse<AgentUnsupervisedLoopRun>>(
+    apiPath(`/llm/unsupervised-loops/runs${query ? `?${query}` : ''}`),
+  );
+}
+
+export function startAgentUnsupervisedLoopFromSupervisedRun(
+  agentSupervisedLoopRunId: string,
+  input: AgentUnsupervisedLoopSubmitInput,
+) {
+  return request<AgentUnsupervisedLoopRunResult>(
+    apiPath(`/llm/unsupervised-loops/supervised-runs/${agentSupervisedLoopRunId}/start`),
+    {
+      method: 'POST',
+      body: JSON.stringify(input),
+    },
+  );
+}
+
+export function approveAgentUnsupervisedLoopRun(runId: string) {
+  return request<AgentUnsupervisedLoopRunResult>(
+    apiPath(`/llm/unsupervised-loops/runs/${runId}/approve`),
+    {
+      method: 'POST',
+    },
+  );
+}
+
 export interface LlmDisputeDraftAugmentStatus {
   enabled: boolean;
   ready: boolean;

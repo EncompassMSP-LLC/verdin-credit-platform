@@ -385,27 +385,27 @@ Scope: [version-5.6-scope.md](version-5.6-scope.md) · Checklist: [version-5.6-c
 
 ## AI capability tracker
 
-| AI feature                    | Phase | Version | Status  | Location                                                                     |
-| ----------------------------- | ----- | ------- | ------- | ---------------------------------------------------------------------------- |
-| Risk score (heuristic)        | —     | 4.3     | ✅      | `accounts/intelligence.py`                                                   |
-| Readiness score (heuristic)   | —     | 4.3     | ✅      | `accounts/intelligence.py`                                                   |
-| Dispute readiness rules       | —     | 4.3     | ✅      | `accounts/intelligence.py`                                                   |
-| Next action recommendations   | —     | 4.3     | ✅      | Heuristic text; LLM in 4.5                                                   |
-| OCR                           | 1     | 4.3     | ✅      | `worker/jobs/ocr.py`                                                         |
-| Document classification       | 1     | 4.3     | Partial | Rules in `modules/documents/classification/`; LLM augment → 5.0              |
-| Metadata / entity extraction  | 1     | 4.5     | Partial | Parser bridge + candidates; LLM NER → 5.0                                    |
-| LLM policy gates              | 2     | 4.8     | Partial | `packages/llm-gateway` + `GET /llm/status`; no provider calls                |
-| Case summaries (LLM)          | 2     | 5.0     | Partial | Endpoint + staff UI behind `ENABLE_LLM` + PII scrub                          |
-| Document summaries (LLM)      | 2     | 5.2     | Partial | `POST /documents/{id}/llm-summary` + staff UI behind `ENABLE_LLM`            |
-| LLM dispute draft augment     | 2     | 5.6     | Partial | `POST /accounts/{id}/dispute-draft/llm-augment`; no auto-send                |
-| AI workflow orchestration     | 3     | 5.0+    | Planned | Deferred from 5.0 RC — requires compliance + observability prerequisites     |
-| Predictive outcomes           | 3     | 5.3     | Partial | `GET /reporting/predictive/outcomes`; snapshot refresh scaffold              |
-| Batch document summaries      | 2     | 5.3     | Partial | `POST /documents/batch-llm-summaries/run`; worker job behind `ENABLE_LLM`    |
-| Agent observability           | 3     | 5.4     | Partial | `GET /llm/agents/status`; run audit + timeline correlation scaffold          |
-| Agent execution (human-gated) | 3     | 5.5     | Partial | `POST /llm/execution/steps/{id}/approve`; no autonomous filing               |
-| Autonomous dispute prep       | 4     | 5.6     | Partial | Compliance-gated filing prep audit; bureau submission → 5.7                  |
-| Agent external tool-calling   | 3     | 5.7     | Partial | `POST /llm/tool-calling/requests/{id}/approve`; supervised loops → 5.8       |
-| Agent supervised loops        | 3     | 5.8     | Partial | `POST /llm/supervised-loops/tool-requests/{id}/start`; no unsupervised loops |
+| AI feature                    | Phase | Version | Status  | Location                                                                        |
+| ----------------------------- | ----- | ------- | ------- | ------------------------------------------------------------------------------- |
+| Risk score (heuristic)        | —     | 4.3     | ✅      | `accounts/intelligence.py`                                                      |
+| Readiness score (heuristic)   | —     | 4.3     | ✅      | `accounts/intelligence.py`                                                      |
+| Dispute readiness rules       | —     | 4.3     | ✅      | `accounts/intelligence.py`                                                      |
+| Next action recommendations   | —     | 4.3     | ✅      | Heuristic text; LLM in 4.5                                                      |
+| OCR                           | 1     | 4.3     | ✅      | `worker/jobs/ocr.py`                                                            |
+| Document classification       | 1     | 4.3     | Partial | Rules in `modules/documents/classification/`; LLM augment → 5.0                 |
+| Metadata / entity extraction  | 1     | 4.5     | Partial | Parser bridge + candidates; LLM NER → 5.0                                       |
+| LLM policy gates              | 2     | 4.8     | Partial | `packages/llm-gateway` + `GET /llm/status`; no provider calls                   |
+| Case summaries (LLM)          | 2     | 5.0     | Partial | Endpoint + staff UI behind `ENABLE_LLM` + PII scrub                             |
+| Document summaries (LLM)      | 2     | 5.2     | Partial | `POST /documents/{id}/llm-summary` + staff UI behind `ENABLE_LLM`               |
+| LLM dispute draft augment     | 2     | 5.6     | Partial | `POST /accounts/{id}/dispute-draft/llm-augment`; no auto-send                   |
+| AI workflow orchestration     | 3     | 5.0+    | Planned | Deferred from 5.0 RC — requires compliance + observability prerequisites        |
+| Predictive outcomes           | 3     | 5.3     | Partial | `GET /reporting/predictive/outcomes`; snapshot refresh scaffold                 |
+| Batch document summaries      | 2     | 5.3     | Partial | `POST /documents/batch-llm-summaries/run`; worker job behind `ENABLE_LLM`       |
+| Agent observability           | 3     | 5.4     | Partial | `GET /llm/agents/status`; run audit + timeline correlation scaffold             |
+| Agent execution (human-gated) | 3     | 5.5     | Partial | `POST /llm/execution/steps/{id}/approve`; no autonomous filing                  |
+| Autonomous dispute prep       | 4     | 5.6     | Partial | Compliance-gated filing prep audit; bureau submission → 5.7                     |
+| Agent external tool-calling   | 3     | 5.7     | Partial | `POST /llm/tool-calling/requests/{id}/approve`; supervised loops → 5.8          |
+| Agent supervised loops        | 3     | 5.8     | Partial | `POST /llm/supervised-loops/tool-requests/{id}/start`; unsupervised loops → 5.9 |
 
 See [AI Architecture](../architecture/ai-architecture.md).
 
@@ -459,12 +459,12 @@ Scope: [version-5.8-scope.md](version-5.8-scope.md) · Checklist: [version-5.8-c
 
 Scope: [version-5.9-scope.md](version-5.9-scope.md) · Checklist: [version-5.9-completion-checklist.md](../development/version-5.9-completion-checklist.md)
 
-| Capability               | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                            |
-| ------------------------ | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ------------------------------------------------ |
-| Agent unsupervised loops | 5.9     | Planned | —       | —        | —   | —   | —     | AI gates     | Multi-step loop without per-step gates → slice 2 |
-| Autonomous bureau filing | 5.9     | Planned | —       | —        | —   | —   | —     | Disputes     | Filing run audit from invoked API runs → slice 3 |
-| Live Stripe Tax API      | 5.9     | Planned | —       | —        | —   | —   | —     | Billing      | Live tax API invocation audit → slice 4          |
-| SAML automated rotation  | 5.9     | Planned | —       | —        | —   | —   | —     | Enterprise   | Automated rotation run audit → slice 5           |
+| Capability               | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                     |
+| ------------------------ | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | --------------------------------------------------------- |
+| Agent unsupervised loops | 5.9     | Partial | ✅      | —        | ✅  | —   | ✅    | AI gates     | `POST /llm/unsupervised-loops/supervised-runs/{id}/start` |
+| Autonomous bureau filing | 5.9     | Planned | —       | —        | —   | —   | —     | Disputes     | Filing run audit from invoked API runs → slice 3          |
+| Live Stripe Tax API      | 5.9     | Planned | —       | —        | —   | —   | —     | Billing      | Live tax API invocation audit → slice 4                   |
+| SAML automated rotation  | 5.9     | Planned | —       | —        | —   | —   | —     | Enterprise   | Automated rotation run audit → slice 5                    |
 
 ---
 
