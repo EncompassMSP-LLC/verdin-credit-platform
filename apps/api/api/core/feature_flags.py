@@ -29,6 +29,7 @@ class FeatureFlag(StrEnum):
     ENABLE_BILLING_INVOICE_COLLECTION = "ENABLE_BILLING_INVOICE_COLLECTION"
     ENABLE_IDP_FEDERATION = "ENABLE_IDP_FEDERATION"
     ENABLE_SAML_FEDERATION_METADATA = "ENABLE_SAML_FEDERATION_METADATA"
+    ENABLE_HRIS_BIDIRECTIONAL_SYNC = "ENABLE_HRIS_BIDIRECTIONAL_SYNC"
     ENABLE_SMS_MARKETING_CAMPAIGNS = "ENABLE_SMS_MARKETING_CAMPAIGNS"
     ENABLE_SMS_MARKETING_DELIVERY = "ENABLE_SMS_MARKETING_DELIVERY"
     ENABLE_AGENT_OBSERVABILITY = "ENABLE_AGENT_OBSERVABILITY"
@@ -120,6 +121,10 @@ class FeatureFlags(BaseSettings):
         default=False,
         description="Enable SAML metadata upload and validation scaffold",
     )
+    enable_hris_bidirectional_sync: bool = Field(
+        default=False,
+        description="Enable HRIS bidirectional sync run audit scaffold",
+    )
     enable_sms_marketing_campaigns: bool = Field(
         default=False,
         description="Enable marketing SMS campaign enqueue scaffold",
@@ -160,6 +165,7 @@ _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
     FeatureFlag.ENABLE_BILLING_INVOICE_COLLECTION: "enable_billing_invoice_collection",
     FeatureFlag.ENABLE_IDP_FEDERATION: "enable_idp_federation",
     FeatureFlag.ENABLE_SAML_FEDERATION_METADATA: "enable_saml_federation_metadata",
+    FeatureFlag.ENABLE_HRIS_BIDIRECTIONAL_SYNC: "enable_hris_bidirectional_sync",
     FeatureFlag.ENABLE_SMS_MARKETING_CAMPAIGNS: "enable_sms_marketing_campaigns",
     FeatureFlag.ENABLE_SMS_MARKETING_DELIVERY: "enable_sms_marketing_delivery",
     FeatureFlag.ENABLE_AGENT_OBSERVABILITY: "enable_agent_observability",

@@ -876,3 +876,11 @@ packages/job-orchestrator/
 **Reason:** v5.5.0 sign-off complete (`v5.5.0` tagged); HRIS sync, SMS deliverability dashboards, LLM dispute draft augment, and compliance-gated dispute filing prep need a sequenced delivery path before v5.6.0 release.
 
 **Follow-up work:** Slice 2 — HRIS bidirectional sync scaffold.
+
+### Decision: HRIS bidirectional sync scaffold
+
+**Decision:** Add `hris_bidirectional_sync_runs` table (migration `040`), `GET /enterprise/federation/hris-sync/status`, `GET /enterprise/federation/hris-sync/runs`, and `POST /enterprise/federation/hris-sync/run`, `api/core/hris_bidirectional_sync.py`, `ENABLE_HRIS_BIDIRECTIONAL_SYNC` flag (requires `ENABLE_SAML_FEDERATION_METADATA`), and org-scoped sync run audit with valid metadata prerequisite.
+
+**Reason:** 5.6 identity epic ships HRIS sync run audit scaffold without full employee lifecycle sync or certificate rotation.
+
+**Follow-up work:** Slice 3 — SMS deliverability dashboard scaffold.

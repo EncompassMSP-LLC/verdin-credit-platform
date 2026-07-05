@@ -451,7 +451,7 @@ SCIM 2.0 user/group provision scaffold with org-scoped audit logs. Requires `ENA
 | POST   | `/enterprise/scim/v2/Groups` | admin     | Provision or update a SCIM group log      |
 | GET    | `/enterprise/scim/v2/Groups` | read_only | List provisioned SCIM groups for the org  |
 
-Multi-IdP federation scaffold (`ENABLE_IDP_FEDERATION=true`, requires `ENABLE_ENTERPRISE=true` and OIDC SSO config). SAML metadata upload scaffold requires `ENABLE_SAML_FEDERATION_METADATA=true` (and IdP federation). HRIS sync remains deferred.
+Multi-IdP federation scaffold (`ENABLE_IDP_FEDERATION=true`, requires `ENABLE_ENTERPRISE=true` and OIDC SSO config). SAML metadata upload scaffold requires `ENABLE_SAML_FEDERATION_METADATA=true` (and IdP federation). HRIS bidirectional sync requires `ENABLE_HRIS_BIDIRECTIONAL_SYNC=true` (and SAML metadata scaffold).
 
 | Method | Path                                           | Min role  | Description                               |
 | ------ | ---------------------------------------------- | --------- | ----------------------------------------- |
@@ -461,8 +461,11 @@ Multi-IdP federation scaffold (`ENABLE_IDP_FEDERATION=true`, requires `ENABLE_EN
 | GET    | `/enterprise/federation/saml-metadata/status`  | read_only | SAML metadata upload readiness            |
 | GET    | `/enterprise/federation/saml-metadata/uploads` | read_only | List SAML metadata uploads for the org    |
 | POST   | `/enterprise/federation/saml-metadata/upload`  | admin     | Upload and validate SAML metadata XML     |
+| GET    | `/enterprise/federation/hris-sync/status`      | read_only | HRIS sync readiness and blockers          |
+| GET    | `/enterprise/federation/hris-sync/runs`        | read_only | List HRIS sync runs for the org           |
+| POST   | `/enterprise/federation/hris-sync/run`         | admin     | Enqueue HRIS sync run audit scaffold      |
 
-Endpoints return `404` when the corresponding feature flag is false. Full IdP-driven user lifecycle sync is deferred to 5.5+.
+Endpoints return `404` when the corresponding feature flag is false. Full employee lifecycle HRIS sync is deferred to 5.7+.
 
 ## Organization admin
 

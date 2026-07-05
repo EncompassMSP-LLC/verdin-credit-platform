@@ -15,9 +15,11 @@ from api.modules.enterprise.federation_schemas import (
     IdpFederationStatusResponse,
 )
 from api.modules.enterprise.federation_service import IdpFederationService
+from api.modules.enterprise.hris_sync_router import hris_sync_router
 
 federation_router = APIRouter(prefix="/federation", tags=["Enterprise Federation"])
 federation_router.include_router(saml_metadata_router)
+federation_router.include_router(hris_sync_router)
 
 
 def get_federation_service(db: AsyncSession = Depends(get_db)) -> IdpFederationService:
