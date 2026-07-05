@@ -9,14 +9,14 @@ Formal scope for **Version 5.8 — Compliance-Gated Production Integrations**. B
 
 Extend partial 5.7 compliance-gated scaffolds (bureau submission, tool-calling, cert rotation, invoice PDF) toward operator-supervised production integration execution. Each epic ships as a **Partial** capability behind feature flags with tests and documentation.
 
-## Epic outcomes (planned)
+## Epic outcomes (shipped — Partial ✅)
 
 | Epic | Theme                       | 5.8 outcome | Summary                                                      |
 | ---- | --------------------------- | ----------- | ------------------------------------------------------------ |
-| 1    | Agent supervised loops      | Partial     | Multi-step agent loop audit with human gates between steps   |
-| 2    | Bureau live API integration | Partial     | Operator-gated external bureau API invocation audit scaffold |
-| 3    | Stripe tax calculation      | Partial     | Org-scoped tax calculation run audit scaffold                |
-| 4    | HRIS lifecycle sync         | Partial     | Full employee lifecycle sync run audit scaffold              |
+| 1    | Agent supervised loops      | Partial ✅  | Multi-step agent loop audit with human gates between steps   |
+| 2    | Bureau live API integration | Partial ✅  | Operator-gated external bureau API invocation audit scaffold |
+| 3    | Stripe tax calculation      | Partial ✅  | Org-scoped tax calculation run audit scaffold                |
+| 4    | HRIS lifecycle sync         | Partial ✅  | Full employee lifecycle sync run audit scaffold              |
 
 ## Shipped from 5.7 (foundation — do not regress)
 

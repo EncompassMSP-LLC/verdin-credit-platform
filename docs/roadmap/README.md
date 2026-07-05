@@ -50,7 +50,7 @@ Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (
 | **5.5**   | Production Automation           | **Shipped** | Invoice collection, SAML metadata, SMS delivery worker, agent execution scaffold        |
 | **5.6**   | Compliance-Reviewed Depth       | Released    | HRIS sync, SMS deliverability, LLM dispute augment, dispute filing prep                 |
 | **5.7**   | Autonomous Workflows (gated)    | Released    | Bureau submission, agent tool-calling, SAML cert rotation, Stripe invoice PDF           |
-| **5.8**   | Production Integrations (gated) | In progress | Supervised agent loops, bureau live API, Stripe tax, HRIS lifecycle sync                |
+| **5.8**   | Production Integrations (gated) | Released    | Supervised agent loops, bureau live API, Stripe tax, HRIS lifecycle sync (`v5.8.0`)     |
 
 ### Sprint milestones
 
@@ -276,18 +276,20 @@ Scope and checklist: [`docs/governance/version-5.7-scope.md`](../governance/vers
 
 Release notes: [`docs/release-notes/v5.7.0.md`](../release-notes/v5.7.0.md)
 
-### Version 5.8 — Compliance-Gated Production Integrations (in progress)
+### Version 5.8 — Compliance-Gated Production Integrations (released)
 
 Scope and checklist: [`docs/governance/version-5.8-scope.md`](../governance/version-5.8-scope.md) · [`docs/development/version-5.8-completion-checklist.md`](../development/version-5.8-completion-checklist.md)
 
 | Epic | Theme                       | 5.8 outcome | Notes                                                |
 | ---- | --------------------------- | ----------- | ---------------------------------------------------- |
-| 1    | Agent supervised loops      | Partial     | Multi-step loop audit with human gates between steps |
-| 2    | Bureau live API integration | Partial     | Operator-gated bureau API invocation audit scaffold  |
-| 3    | Stripe tax calculation      | Partial     | Tax calculation run audit scaffold                   |
-| 4    | HRIS lifecycle sync         | Partial     | Full employee lifecycle sync run audit scaffold      |
+| 1    | Agent supervised loops      | Partial ✅  | Multi-step loop audit with human gates between steps |
+| 2    | Bureau live API integration | Partial ✅  | Operator-gated bureau API invocation audit scaffold  |
+| 3    | Stripe tax calculation      | Partial ✅  | Tax calculation run audit scaffold                   |
+| 4    | HRIS lifecycle sync         | Partial ✅  | Full employee lifecycle sync run audit scaffold      |
 
-**Target tag:** `v5.8.0`
+**Tag:** `v5.8.0` — Compliance-Gated Production Integrations.
+
+Release notes: [`docs/release-notes/v5.8.0.md`](../release-notes/v5.8.0.md)
 
 ## Sprint → version mapping
 
