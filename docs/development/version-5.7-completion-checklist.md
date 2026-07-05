@@ -19,7 +19,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | ----- | ------------------------------------ | ------------- | ------ |
 | 1     | 5.7 scope + completion checklist     | Kickoff       | ✅     |
 | 2     | Dispute bureau submission scaffold   | Disputes      | ✅     |
-| 3     | Agent external tool-calling scaffold | AI operations | —      |
+| 3     | Agent external tool-calling scaffold | AI operations | ✅     |
 | 4     | SAML certificate rotation scaffold   | Identity      | —      |
 | 5     | Stripe invoice PDF scaffold          | Billing       | —      |
 | 6     | Capability matrix 5.7 sign-off       | Governance    | —      |

@@ -69,6 +69,11 @@ from api.modules.llm.agent_observability_models import (
     AgentObservabilityRunStatus,
     AgentObservabilityTriggerSource,
 )
+from api.modules.llm.agent_tool_calling_models import (
+    AgentExternalToolKind,
+    AgentToolInvocationRequest,
+    AgentToolInvocationStatus,
+)
 from api.modules.messaging.models import (
     MessageSenderRole,
     MessageThread,
@@ -106,6 +111,9 @@ __all__ = [
     "Account",
     "AgentExecutionStep",
     "AgentExecutionStepStatus",
+    "AgentExternalToolKind",
+    "AgentToolInvocationRequest",
+    "AgentToolInvocationStatus",
     "AgentObservabilityKind",
     "AgentObservabilityRun",
     "AgentObservabilityRunStatus",

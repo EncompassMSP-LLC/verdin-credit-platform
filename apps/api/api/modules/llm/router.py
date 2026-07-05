@@ -18,10 +18,12 @@ from api.modules.auth.dependencies import get_current_user
 from api.modules.auth.models import User
 from api.modules.llm.agent_execution_router import agent_execution_router
 from api.modules.llm.agent_observability_router import agent_observability_router
+from api.modules.llm.agent_tool_calling_router import agent_tool_calling_router
 
 router = APIRouter(prefix="/llm", tags=["LLM"])
 router.include_router(agent_observability_router)
 router.include_router(agent_execution_router)
+router.include_router(agent_tool_calling_router)
 
 
 class LlmGateStatusResponse(BaseSchema):

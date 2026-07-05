@@ -413,7 +413,7 @@ Scope: [version-5.7-scope.md](version-5.7-scope.md) · Checklist: [version-5.7-c
 | Capability                  | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                              |
 | --------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ------------------------------------------------------------------ |
 | Dispute bureau submission   | 5.7     | Partial | ✅      | —        | ✅  | —   | ✅    | Disputes     | `POST /compliance/dispute-bureau-submission/prep-runs/{id}/submit` |
-| Agent external tool-calling | 5.7     | Planned | —       | —        | —   | —   | —     | AI gates     | Human-gated tool invocation audit → slice 3                        |
+| Agent external tool-calling | 5.7     | Partial | ✅      | —        | ✅  | —   | ✅    | AI gates     | `POST /llm/tool-calling/requests`                                  |
 | SAML certificate rotation   | 5.7     | Planned | —       | —        | —   | —   | —     | Enterprise   | Cert rotation run audit → slice 4                                  |
 | Stripe invoice PDF          | 5.7     | Planned | —       | —        | —   | —   | —     | Billing      | PDF generation run audit → slice 5                                 |
 
