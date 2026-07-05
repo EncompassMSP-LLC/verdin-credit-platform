@@ -33,6 +33,7 @@ class FeatureFlag(StrEnum):
     ENABLE_SMS_MARKETING_CAMPAIGNS = "ENABLE_SMS_MARKETING_CAMPAIGNS"
     ENABLE_SMS_MARKETING_DELIVERY = "ENABLE_SMS_MARKETING_DELIVERY"
     ENABLE_SMS_DELIVERABILITY_DASHBOARD = "ENABLE_SMS_DELIVERABILITY_DASHBOARD"
+    ENABLE_LLM_DISPUTE_DRAFT_AUGMENT = "ENABLE_LLM_DISPUTE_DRAFT_AUGMENT"
     ENABLE_AGENT_OBSERVABILITY = "ENABLE_AGENT_OBSERVABILITY"
     ENABLE_AGENT_EXECUTION = "ENABLE_AGENT_EXECUTION"
 
@@ -138,6 +139,10 @@ class FeatureFlags(BaseSettings):
         default=False,
         description="Enable SMS marketing deliverability metrics read model",
     )
+    enable_llm_dispute_draft_augment: bool = Field(
+        default=False,
+        description="Enable ADR-012-gated LLM dispute draft augment scaffold",
+    )
     enable_agent_observability: bool = Field(
         default=False,
         description="Enable agent run audit and observability read scaffold",
@@ -174,6 +179,7 @@ _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
     FeatureFlag.ENABLE_SMS_MARKETING_CAMPAIGNS: "enable_sms_marketing_campaigns",
     FeatureFlag.ENABLE_SMS_MARKETING_DELIVERY: "enable_sms_marketing_delivery",
     FeatureFlag.ENABLE_SMS_DELIVERABILITY_DASHBOARD: "enable_sms_deliverability_dashboard",
+    FeatureFlag.ENABLE_LLM_DISPUTE_DRAFT_AUGMENT: "enable_llm_dispute_draft_augment",
     FeatureFlag.ENABLE_AGENT_OBSERVABILITY: "enable_agent_observability",
     FeatureFlag.ENABLE_AGENT_EXECUTION: "enable_agent_execution",
 }

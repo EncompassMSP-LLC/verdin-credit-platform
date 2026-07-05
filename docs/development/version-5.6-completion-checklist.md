@@ -20,7 +20,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | 1     | 5.6 scope + completion checklist   | Kickoff        | ✅     |
 | 2     | HRIS bidirectional sync scaffold   | Identity       | ✅     |
 | 3     | SMS deliverability dashboard       | Communications | ✅     |
-| 4     | LLM dispute draft augment scaffold | AI assistance  | —      |
+| 4     | LLM dispute draft augment scaffold | AI assistance  | ✅     |
 | 5     | Dispute filing prep scaffold       | Disputes       | —      |
 | 6     | Capability matrix 5.6 sign-off     | Governance     | —      |
 

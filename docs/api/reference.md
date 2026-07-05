@@ -399,12 +399,22 @@ Returns `404` when either `ENABLE_SMS_DELIVERY` or `ENABLE_SMS_MARKETING_CAMPAIG
 
 LLM readiness and case summary generation behind ADR-012 gates.
 
-| Method | Path                           | Min role     | Description                      |
-| ------ | ------------------------------ | ------------ | -------------------------------- |
-| GET    | `/llm/status`                  | read_only    | LLM feature + provider readiness |
-| POST   | `/cases/{case_id}/llm-summary` | case_manager | Generate scrubbed case summary   |
+| Method | Path                           | Min role     | Description                         |
+| ------ | ------------------------------ | ------------ | ----------------------------------- |
+| GET    | `/llm/status`                  | read_only    | LLM feature + provider readiness    |
+| GET    | `/llm/dispute-draft/status`    | read_only    | LLM dispute draft augment readiness |
+| POST   | `/cases/{case_id}/llm-summary` | case_manager | Generate scrubbed case summary      |
 
 Requires `ENABLE_LLM=true` and `LLM_PROVIDER` / `LLM_API_KEY` / `LLM_MODEL` for provider calls. See [ADR-012](../adr/012-llm-provider-policy.md).
+
+LLM dispute draft augment scaffold (`ENABLE_LLM_DISPUTE_DRAFT_AUGMENT=true`, requires `ENABLE_LLM`). Improves rule-based dispute letter drafts for staff review; does not auto-send letters.
+
+| Method | Path                                                | Min role     | Description                             |
+| ------ | --------------------------------------------------- | ------------ | --------------------------------------- |
+| POST   | `/accounts/{account_id}/dispute-draft/llm-augment`  | case_manager | Generate LLM augment audit for draft    |
+| GET    | `/accounts/{account_id}/dispute-draft/llm-augments` | read_only    | Paginated augment audit log for account |
+
+Returns `404` when augment flag is false. Emits `DISPUTE_DRAFT_LLM_AUGMENT` timeline events on success.
 
 ### Agent observability
 

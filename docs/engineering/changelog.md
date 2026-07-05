@@ -892,3 +892,11 @@ packages/job-orchestrator/
 **Reason:** 5.6 communications epic ships deliverability read model without multi-provider failover or real-time alerting.
 
 **Follow-up work:** Slice 4 — LLM dispute draft augment scaffold.
+
+### Decision: LLM dispute draft augment scaffold
+
+**Decision:** Add `llm_dispute_draft_augments` table (migration `041`), `GET /llm/dispute-draft/status`, `GET /accounts/{account_id}/dispute-draft/llm-augments`, and `POST /accounts/{account_id}/dispute-draft/llm-augment`, `api/core/llm_dispute_draft_augment.py`, `ENABLE_LLM_DISPUTE_DRAFT_AUGMENT` flag (requires `ENABLE_LLM`), scrubbed LLM augment audit, and case timeline correlation.
+
+**Reason:** 5.6 AI assistance epic ships ADR-012-gated dispute letter augment without auto-send or unsupervised LLM loops.
+
+**Follow-up work:** Slice 5 — compliance-gated dispute filing prep scaffold.

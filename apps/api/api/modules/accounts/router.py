@@ -9,6 +9,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.core.pagination import PaginatedResponse
 from api.database.session import get_db
+from api.modules.accounts.dispute_draft_augment_dependencies import (
+    require_llm_dispute_draft_augment_enabled,
+)
+from api.modules.accounts.dispute_draft_augment_schemas import (
+    LlmDisputeDraftAugmentListParams,
+    LlmDisputeDraftAugmentRequest,
+    LlmDisputeDraftAugmentResponse,
+)
+from api.modules.accounts.dispute_draft_augment_service import LlmDisputeDraftAugmentService
 from api.modules.accounts.dispute_letter_export import sanitize_content_disposition_filename
 from api.modules.accounts.models import (
     AccountBureau,
@@ -148,6 +157,43 @@ async def create_account_dispute_letter_draft(
         account_id,
         recipient_type=recipient_type,
     )
+
+
+def get_llm_dispute_draft_augment_service(
+    db: AsyncSession = Depends(get_db),
+) -> LlmDisputeDraftAugmentService:
+    return LlmDisputeDraftAugmentService.from_session(db)
+
+
+@router.get(
+    "/{account_id}/dispute-draft/llm-augments",
+    response_model=PaginatedResponse[LlmDisputeDraftAugmentResponse],
+)
+async def list_account_dispute_draft_llm_augments(
+    account_id: uuid.UUID,
+    page: int = 1,
+    page_size: int = 20,
+    _: None = Depends(require_llm_dispute_draft_augment_enabled),
+    current_user: User = Depends(get_current_user),
+    service: LlmDisputeDraftAugmentService = Depends(get_llm_dispute_draft_augment_service),
+) -> PaginatedResponse[LlmDisputeDraftAugmentResponse]:
+    params = LlmDisputeDraftAugmentListParams(page=page, page_size=page_size)
+    return await service.list_augments(current_user, account_id, params)
+
+
+@router.post(
+    "/{account_id}/dispute-draft/llm-augment",
+    response_model=LlmDisputeDraftAugmentResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def create_account_dispute_draft_llm_augment(
+    account_id: uuid.UUID,
+    body: LlmDisputeDraftAugmentRequest,
+    _: None = Depends(require_llm_dispute_draft_augment_enabled),
+    current_user: User = Depends(get_current_user),
+    service: LlmDisputeDraftAugmentService = Depends(get_llm_dispute_draft_augment_service),
+) -> LlmDisputeDraftAugmentResponse:
+    return await service.augment_draft(current_user, account_id, body)
 
 
 @router.get("/{account_id}/dispute-letters", response_model=list[DisputeLetterResponse])

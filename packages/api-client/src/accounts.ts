@@ -366,6 +366,59 @@ export async function escalateAccountOverdueInvestigation(accountId: string): Pr
   });
 }
 
+export type LlmDisputeDraftAugmentStatusValue = 'completed' | 'failed';
+
+export interface LlmDisputeDraftAugment {
+  id: string;
+  organization_id: string;
+  account_id: string;
+  case_id: string;
+  recipient_type: string;
+  base_template_id: string;
+  base_subject: string;
+  base_body: string;
+  augmented_body: string | null;
+  status: LlmDisputeDraftAugmentStatusValue;
+  provider: string | null;
+  model: string | null;
+  prompt_hash: string | null;
+  requested_by_user_id: string | null;
+  requested_at: string | null;
+  completed_at: string | null;
+  error_message: string | null;
+  pii_scrubbed: boolean;
+}
+
+export interface LlmDisputeDraftAugmentInput {
+  recipient_type?: 'credit_bureau' | 'furnisher';
+}
+
+export function listAccountDisputeDraftLlmAugments(
+  accountId: string,
+  params: { page?: number; page_size?: number } = {},
+) {
+  const search = new URLSearchParams();
+  if (params.page) search.set('page', String(params.page));
+  if (params.page_size) search.set('page_size', String(params.page_size));
+  const query = search.toString();
+  return request<PaginatedResponse<LlmDisputeDraftAugment>>(
+    apiPath(`/accounts/${accountId}/dispute-draft/llm-augments${query ? `?${query}` : ''}`),
+  );
+}
+
+export function createAccountDisputeDraftLlmAugment(
+  accountId: string,
+  input: LlmDisputeDraftAugmentInput = {},
+) {
+  return request<LlmDisputeDraftAugment>(
+    apiPath(`/accounts/${accountId}/dispute-draft/llm-augment`),
+    {
+      method: 'POST',
+      body: JSON.stringify(input),
+    },
+  );
+}
+
 export async function updateAccount(
   accountId: string,
   input: UpdateAccountInput,

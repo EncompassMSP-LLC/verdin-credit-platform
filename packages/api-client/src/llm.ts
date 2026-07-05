@@ -136,3 +136,14 @@ export function approveAgentExecutionStep(stepId: string) {
     method: 'POST',
   });
 }
+
+export interface LlmDisputeDraftAugmentStatus {
+  enabled: boolean;
+  ready: boolean;
+  llm_ready: boolean;
+  blockers: string[];
+}
+
+export function getLlmDisputeDraftAugmentStatus() {
+  return request<LlmDisputeDraftAugmentStatus>(apiPath('/llm/dispute-draft/status'));
+}

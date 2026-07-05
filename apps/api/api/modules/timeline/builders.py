@@ -15,6 +15,7 @@ from verdin_event_types import (
     TaskEventType,
 )
 
+from api.modules.accounts.dispute_draft_augment_models import LlmDisputeDraftAugment
 from api.modules.accounts.dispute_letter_models import DisputeLetter
 from api.modules.accounts.models import Account
 from api.modules.auth.models import User
@@ -253,6 +254,33 @@ def dispute_letter_draft_created_event(
                 if hasattr(dispute_letter.status, "value")
                 else dispute_letter.status
             ),
+        },
+    )
+
+
+def dispute_draft_llm_augment_event(
+    *,
+    augment: LlmDisputeDraftAugment,
+    performed_by: uuid.UUID,
+) -> PlatformEvent:
+    return PlatformEvent(
+        event_type="DISPUTE_DRAFT_LLM_AUGMENT",
+        event_category=EventCategory.ACCOUNT.value,
+        title="LLM dispute draft augment generated",
+        description=(f"An LLM augment was generated for dispute draft '{augment.base_subject}'."),
+        organization_id=augment.organization_id,
+        case_id=augment.case_id,
+        account_id=augment.account_id,
+        performed_by=performed_by,
+        source_module="accounts",
+        metadata={
+            "augment_id": str(augment.id),
+            "template_id": augment.base_template_id,
+            "recipient_type": augment.recipient_type,
+            "model": augment.model,
+            "provider": augment.provider,
+            "prompt_hash": augment.prompt_hash,
+            "status": augment.status.value,
         },
     )
 
