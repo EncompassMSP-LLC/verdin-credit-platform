@@ -916,3 +916,11 @@ packages/job-orchestrator/
 **Reason:** v5.6.0 completes compliance-reviewed production depth scaffolds; autonomous bureau filing and unsupervised agent loops remain deferred to 5.7+.
 
 **Follow-up work:** Version 5.7 planning — autonomous dispute filing and deeper agent automation (compliance-gated).
+
+### Decision: Kick off Version 5.7 compliance-gated autonomous workflows
+
+**Decision:** Add `version-5.7-scope.md`, `version-5.7-completion-checklist.md`, and `.cursor/rules/version-57-sprint-loop.mdc`; link 5.7 from product roadmap and capability matrix.
+
+**Reason:** v5.6.0 sign-off complete (`v5.6.0` tagged); bureau submission, agent tool-calling, SAML cert rotation, and Stripe invoice PDF scaffolds need a sequenced delivery path before v5.7.0 release.
+
+**Follow-up work:** Slice 2 — dispute bureau submission scaffold.

@@ -406,6 +406,19 @@ See [AI Architecture](../architecture/ai-architecture.md).
 
 ---
 
+## Version 5.7 — Compliance-gated autonomous workflows (in progress)
+
+Scope: [version-5.7-scope.md](version-5.7-scope.md) · Checklist: [version-5.7-completion-checklist.md](../development/version-5.7-completion-checklist.md)
+
+| Capability                  | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                       |
+| --------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ------------------------------------------- |
+| Dispute bureau submission   | 5.7     | Planned | —       | —        | —   | —   | —     | Disputes     | Admin-gated submission audit → slice 2      |
+| Agent external tool-calling | 5.7     | Planned | —       | —        | —   | —   | —     | AI gates     | Human-gated tool invocation audit → slice 3 |
+| SAML certificate rotation   | 5.7     | Planned | —       | —        | —   | —   | —     | Enterprise   | Cert rotation run audit → slice 4           |
+| Stripe invoice PDF          | 5.7     | Planned | —       | —        | —   | —   | —     | Billing      | PDF generation run audit → slice 5          |
+
+---
+
 ## Related documents
 
 - [Governance hub](README.md) — lifecycle and build order
