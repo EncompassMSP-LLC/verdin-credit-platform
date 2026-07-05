@@ -1,6 +1,8 @@
-"""Fixtures for LLM endpoint tests."""
+"""Fixtures for LLM gateway tests."""
 
 import uuid
+from collections.abc import Generator
+from unittest.mock import patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -8,8 +10,33 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 import api.models  # noqa: F401 — register all ORM mappers
 from api.core.constants import UserRole
+from api.core.job_queue import JobMessage, JobType
 from api.core.security import hash_password
 from api.modules.auth.models import Organization, User
+from api.modules.documents.storage import (
+    MemoryDocumentStorage,
+    reset_document_storage,
+    set_document_storage,
+)
+
+
+def _fake_enqueue(job_type: JobType, payload: dict | None = None) -> JobMessage:
+    return JobMessage(job_type=job_type, payload=payload or {}, job_id="test-ocr-job")
+
+
+@pytest.fixture(autouse=True)
+def mock_ocr_enqueue() -> Generator[None]:
+    with patch("api.modules.documents.service.enqueue_job", side_effect=_fake_enqueue):
+        yield
+
+
+@pytest.fixture(autouse=True)
+def memory_storage() -> Generator[MemoryDocumentStorage]:
+    storage = MemoryDocumentStorage()
+    reset_document_storage()
+    set_document_storage(storage)
+    yield storage
+    reset_document_storage()
 
 
 @pytest.fixture
@@ -66,6 +93,28 @@ def _login(client: TestClient, email: str) -> dict[str, str]:
     )
     assert response.status_code == 200, response.text
     return {"Authorization": f"Bearer {response.json()['access_token']}"}
+
+
+@pytest.fixture
+async def admin_user(db_session: AsyncSession, test_org: Organization) -> User:
+    user = User(
+        id=uuid.uuid4(),
+        email=f"admin-{uuid.uuid4().hex[:8]}@test.example",
+        hashed_password=hash_password("password123"),
+        first_name="Test",
+        last_name="Admin",
+        role=UserRole.ADMIN,
+        organization_id=test_org.id,
+        is_active=True,
+    )
+    db_session.add(user)
+    await db_session.commit()
+    return user
+
+
+@pytest.fixture
+def admin_headers(api_client: TestClient, admin_user: User) -> dict[str, str]:
+    return _login(api_client, admin_user.email)
 
 
 @pytest.fixture
