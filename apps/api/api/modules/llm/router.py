@@ -1,10 +1,19 @@
 """LLM gateway and agent observability endpoints."""
 
 from fastapi import APIRouter, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
 from verdin_llm_gateway import LlmGateStatus
 
 from api.core.llm import get_llm_gate_status
 from api.core.responses import BaseSchema
+from api.database.session import get_db
+from api.modules.accounts.dispute_draft_augment_dependencies import (
+    require_llm_dispute_draft_augment_enabled,
+)
+from api.modules.accounts.dispute_draft_augment_schemas import (
+    LlmDisputeDraftAugmentStatusResponse,
+)
+from api.modules.accounts.dispute_draft_augment_service import LlmDisputeDraftAugmentService
 from api.modules.auth.dependencies import get_current_user
 from api.modules.auth.models import User
 from api.modules.llm.agent_execution_router import agent_execution_router
@@ -40,3 +49,17 @@ class LlmGateStatusResponse(BaseSchema):
 @router.get("/status", response_model=LlmGateStatusResponse)
 async def get_llm_status(_current_user: User = Depends(get_current_user)) -> LlmGateStatusResponse:
     return LlmGateStatusResponse.from_status(get_llm_gate_status())
+
+
+def get_llm_dispute_draft_augment_service(
+    db: AsyncSession = Depends(get_db),
+) -> LlmDisputeDraftAugmentService:
+    return LlmDisputeDraftAugmentService.from_session(db)
+
+
+@router.get("/dispute-draft/status", response_model=LlmDisputeDraftAugmentStatusResponse)
+async def get_llm_dispute_draft_augment_status(
+    _: None = Depends(require_llm_dispute_draft_augment_enabled),
+    service: LlmDisputeDraftAugmentService = Depends(get_llm_dispute_draft_augment_service),
+) -> LlmDisputeDraftAugmentStatusResponse:
+    return service.get_status_response()

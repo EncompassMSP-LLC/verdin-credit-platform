@@ -119,6 +119,7 @@ export {
   approveAgentExecutionStep,
   getAgentExecutionStatus,
   getAgentObservabilityStatus,
+  getLlmDisputeDraftAugmentStatus,
   getLlmStatus,
   listAgentExecutionSteps,
   listAgentObservabilityRuns,
@@ -137,6 +138,7 @@ export {
   type AgentObservabilityStatus,
   type AgentObservabilityTriggerSource,
   type LlmGateStatus,
+  type LlmDisputeDraftAugmentStatus,
 } from './llm';
 
 export {
@@ -299,6 +301,7 @@ export {
 export {
   createAccount,
   createAccountDisputeDraftReviewTask,
+  createAccountDisputeDraftLlmAugment,
   createAccountDisputeLetterDraft,
   createAccountDisputeLetterReviewTask,
   approveAccountDisputeLetter,
@@ -308,6 +311,7 @@ export {
   getAccount,
   getAccountDisputeDraft,
   getAccountIntelligenceSummary,
+  listAccountDisputeDraftLlmAugments,
   listAccountDisputeLetters,
   getAccountDisputeLetter,
   downloadAccountDisputeLetterExport,
@@ -328,6 +332,9 @@ export {
   type DisputeLetter,
   type DisputeLetterExportFormat,
   type DisputeLetterStatus,
+  type LlmDisputeDraftAugment,
+  type LlmDisputeDraftAugmentInput,
+  type LlmDisputeDraftAugmentStatusValue,
   type ListAccountsParams,
   type NextActionItem,
   type UpdateAccountInput,

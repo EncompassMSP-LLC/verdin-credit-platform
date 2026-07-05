@@ -125,3 +125,28 @@ def manager_headers(api_client: TestClient, case_manager_user: User) -> dict[str
 @pytest.fixture
 def readonly_headers(api_client: TestClient, read_only_user: User) -> dict[str, str]:
     return _login(api_client, read_only_user.email)
+
+
+@pytest.fixture
+def sample_case_id(api_client: TestClient, manager_headers: dict[str, str]) -> str:
+    response = api_client.post(
+        "/api/v1/cases",
+        headers=manager_headers,
+        json={"title": "LLM Dispute Augment Case", "client_name": "Account Client"},
+    )
+    assert response.status_code == 201, response.text
+    return response.json()["id"]
+
+
+def sample_account_payload(case_id: str) -> dict[str, object]:
+    return {
+        "case_id": case_id,
+        "creditor_name": "Example Bank",
+        "bureau": "equifax",
+        "account_type": "credit_card",
+        "account_status": "open",
+        "payment_status": "late_60",
+        "account_number_masked": "****1234",
+        "balance": "1500.00",
+        "past_due_amount": "300.00",
+    }

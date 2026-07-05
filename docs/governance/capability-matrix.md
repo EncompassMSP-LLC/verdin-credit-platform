@@ -365,7 +365,7 @@ Scope: [version-5.6-scope.md](version-5.6-scope.md) · Checklist: [version-5.6-c
 | ---------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------- | --------------------------------------------------------- |
 | HRIS bidirectional sync      | 5.6     | Partial | ✅      | —        | ✅  | —   | ✅    | Enterprise    | `GET /enterprise/federation/hris-sync/status`             |
 | SMS deliverability dashboard | 5.6     | Partial | ✅      | —        | ✅  | —   | ✅    | Notifications | `GET /notifications/sms-campaigns/deliverability/summary` |
-| LLM dispute draft augment    | 5.6     | Planned | —       | —        | —   | —   | —     | AI gates      | ADR-012 augment scaffold → slice 4                        |
+| LLM dispute draft augment    | 5.6     | Partial | ✅      | —        | ✅  | ✅  | ✅    | AI gates      | `POST /accounts/{id}/dispute-draft/llm-augment`           |
 | Dispute filing prep          | 5.6     | Planned | —       | —        | —   | —   | —     | Disputes      | Compliance-gated prep audit → slice 5                     |
 
 ---
@@ -384,7 +384,7 @@ Scope: [version-5.6-scope.md](version-5.6-scope.md) · Checklist: [version-5.6-c
 | LLM policy gates              | 2     | 4.8     | Partial | `packages/llm-gateway` + `GET /llm/status`; no provider calls             |
 | Case summaries (LLM)          | 2     | 5.0     | Partial | Endpoint + staff UI behind `ENABLE_LLM` + PII scrub                       |
 | Document summaries (LLM)      | 2     | 5.2     | Partial | `POST /documents/{id}/llm-summary` + staff UI behind `ENABLE_LLM`         |
-| LLM dispute draft augment     | 2     | 5.6     | Planned | ADR-012-gated augment scaffold → slice 4                                  |
+| LLM dispute draft augment     | 2     | 5.6     | Partial | `POST /accounts/{id}/dispute-draft/llm-augment`; no auto-send             |
 | AI workflow orchestration     | 3     | 5.0+    | Planned | Deferred from 5.0 RC — requires compliance + observability prerequisites  |
 | Predictive outcomes           | 3     | 5.3     | Partial | `GET /reporting/predictive/outcomes`; snapshot refresh scaffold           |
 | Batch document summaries      | 2     | 5.3     | Partial | `POST /documents/batch-llm-summaries/run`; worker job behind `ENABLE_LLM` |
