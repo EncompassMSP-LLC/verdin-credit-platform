@@ -1004,3 +1004,11 @@ packages/job-orchestrator/
 **Reason:** 5.8 enterprise epic extends 5.6 HRIS bidirectional sync with full employee lifecycle sync run audit without passwordless enrollment UI or multi-IdP bulk provisioning.
 
 **Follow-up work:** Slice 6 — capability matrix 5.8 sign-off + `v5.8.0` release.
+
+### Decision: Version 5.8 epic sign-off
+
+**Decision:** Mark all four Version 5.8 epics **Partial ✅** in `version-5.8-scope.md`, add capability matrix 5.8 epic sign-off table, update AI tracker for agent supervised loops, complete checklist exit criteria, and publish `docs/release-notes/v5.8.0.md`.
+
+**Reason:** v5.8.0 completes compliance-gated production integration scaffolds; fully unsupervised agent loops, autonomous bureau filing, and live Stripe Tax API calls remain deferred to 5.9+.
+
+**Follow-up work:** Version 5.9 planning — unsupervised agent loops and production integration depth (compliance-gated).

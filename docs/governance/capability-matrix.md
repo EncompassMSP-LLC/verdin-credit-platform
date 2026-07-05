@@ -14,6 +14,7 @@
 **Version 5.3 sign-off:** [version-5.3-scope.md](version-5.3-scope.md) · Release notes: [v5.3.0.md](../release-notes/v5.3.0.md)
 **Version 5.6 sign-off:** [version-5.6-scope.md](version-5.6-scope.md) · Release notes: [v5.6.0.md](../release-notes/v5.6.0.md)
 **Version 5.7 sign-off:** [version-5.7-scope.md](version-5.7-scope.md) · Release notes: [v5.7.0.md](../release-notes/v5.7.0.md)
+**Version 5.8 sign-off:** [version-5.8-scope.md](version-5.8-scope.md) · Release notes: [v5.8.0.md](../release-notes/v5.8.0.md)
 
 ## Status legend
 
@@ -383,26 +384,27 @@ Scope: [version-5.6-scope.md](version-5.6-scope.md) · Checklist: [version-5.6-c
 
 ## AI capability tracker
 
-| AI feature                    | Phase | Version | Status  | Location                                                                  |
-| ----------------------------- | ----- | ------- | ------- | ------------------------------------------------------------------------- |
-| Risk score (heuristic)        | —     | 4.3     | ✅      | `accounts/intelligence.py`                                                |
-| Readiness score (heuristic)   | —     | 4.3     | ✅      | `accounts/intelligence.py`                                                |
-| Dispute readiness rules       | —     | 4.3     | ✅      | `accounts/intelligence.py`                                                |
-| Next action recommendations   | —     | 4.3     | ✅      | Heuristic text; LLM in 4.5                                                |
-| OCR                           | 1     | 4.3     | ✅      | `worker/jobs/ocr.py`                                                      |
-| Document classification       | 1     | 4.3     | Partial | Rules in `modules/documents/classification/`; LLM augment → 5.0           |
-| Metadata / entity extraction  | 1     | 4.5     | Partial | Parser bridge + candidates; LLM NER → 5.0                                 |
-| LLM policy gates              | 2     | 4.8     | Partial | `packages/llm-gateway` + `GET /llm/status`; no provider calls             |
-| Case summaries (LLM)          | 2     | 5.0     | Partial | Endpoint + staff UI behind `ENABLE_LLM` + PII scrub                       |
-| Document summaries (LLM)      | 2     | 5.2     | Partial | `POST /documents/{id}/llm-summary` + staff UI behind `ENABLE_LLM`         |
-| LLM dispute draft augment     | 2     | 5.6     | Partial | `POST /accounts/{id}/dispute-draft/llm-augment`; no auto-send             |
-| AI workflow orchestration     | 3     | 5.0+    | Planned | Deferred from 5.0 RC — requires compliance + observability prerequisites  |
-| Predictive outcomes           | 3     | 5.3     | Partial | `GET /reporting/predictive/outcomes`; snapshot refresh scaffold           |
-| Batch document summaries      | 2     | 5.3     | Partial | `POST /documents/batch-llm-summaries/run`; worker job behind `ENABLE_LLM` |
-| Agent observability           | 3     | 5.4     | Partial | `GET /llm/agents/status`; run audit + timeline correlation scaffold       |
-| Agent execution (human-gated) | 3     | 5.5     | Partial | `POST /llm/execution/steps/{id}/approve`; no autonomous filing            |
-| Autonomous dispute prep       | 4     | 5.6     | Partial | Compliance-gated filing prep audit; bureau submission → 5.7               |
-| Agent external tool-calling   | 3     | 5.7     | Partial | `POST /llm/tool-calling/requests/{id}/approve`; no unsupervised loops     |
+| AI feature                    | Phase | Version | Status  | Location                                                                     |
+| ----------------------------- | ----- | ------- | ------- | ---------------------------------------------------------------------------- |
+| Risk score (heuristic)        | —     | 4.3     | ✅      | `accounts/intelligence.py`                                                   |
+| Readiness score (heuristic)   | —     | 4.3     | ✅      | `accounts/intelligence.py`                                                   |
+| Dispute readiness rules       | —     | 4.3     | ✅      | `accounts/intelligence.py`                                                   |
+| Next action recommendations   | —     | 4.3     | ✅      | Heuristic text; LLM in 4.5                                                   |
+| OCR                           | 1     | 4.3     | ✅      | `worker/jobs/ocr.py`                                                         |
+| Document classification       | 1     | 4.3     | Partial | Rules in `modules/documents/classification/`; LLM augment → 5.0              |
+| Metadata / entity extraction  | 1     | 4.5     | Partial | Parser bridge + candidates; LLM NER → 5.0                                    |
+| LLM policy gates              | 2     | 4.8     | Partial | `packages/llm-gateway` + `GET /llm/status`; no provider calls                |
+| Case summaries (LLM)          | 2     | 5.0     | Partial | Endpoint + staff UI behind `ENABLE_LLM` + PII scrub                          |
+| Document summaries (LLM)      | 2     | 5.2     | Partial | `POST /documents/{id}/llm-summary` + staff UI behind `ENABLE_LLM`            |
+| LLM dispute draft augment     | 2     | 5.6     | Partial | `POST /accounts/{id}/dispute-draft/llm-augment`; no auto-send                |
+| AI workflow orchestration     | 3     | 5.0+    | Planned | Deferred from 5.0 RC — requires compliance + observability prerequisites     |
+| Predictive outcomes           | 3     | 5.3     | Partial | `GET /reporting/predictive/outcomes`; snapshot refresh scaffold              |
+| Batch document summaries      | 2     | 5.3     | Partial | `POST /documents/batch-llm-summaries/run`; worker job behind `ENABLE_LLM`    |
+| Agent observability           | 3     | 5.4     | Partial | `GET /llm/agents/status`; run audit + timeline correlation scaffold          |
+| Agent execution (human-gated) | 3     | 5.5     | Partial | `POST /llm/execution/steps/{id}/approve`; no autonomous filing               |
+| Autonomous dispute prep       | 4     | 5.6     | Partial | Compliance-gated filing prep audit; bureau submission → 5.7                  |
+| Agent external tool-calling   | 3     | 5.7     | Partial | `POST /llm/tool-calling/requests/{id}/approve`; supervised loops → 5.8       |
+| Agent supervised loops        | 3     | 5.8     | Partial | `POST /llm/supervised-loops/tool-requests/{id}/start`; no unsupervised loops |
 
 See [AI Architecture](../architecture/ai-architecture.md).
 
@@ -430,9 +432,9 @@ Scope: [version-5.7-scope.md](version-5.7-scope.md) · Checklist: [version-5.7-c
 
 ---
 
-## Version 5.8 — Compliance-gated production integrations (in progress)
+## Version 5.8 — Compliance-gated production integrations (sign-off)
 
-Scope: [version-5.8-scope.md](version-5.8-scope.md) · Checklist: [version-5.8-completion-checklist.md](../development/version-5.8-completion-checklist.md)
+Scope: [version-5.8-scope.md](version-5.8-scope.md) · Checklist: [version-5.8-completion-checklist.md](../development/version-5.8-completion-checklist.md) · Release notes: [v5.8.0.md](../release-notes/v5.8.0.md)
 
 | Capability                  | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                             |
 | --------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ----------------------------------------------------------------- |
@@ -440,6 +442,15 @@ Scope: [version-5.8-scope.md](version-5.8-scope.md) · Checklist: [version-5.8-c
 | Bureau live API integration | 5.8     | Partial | ✅      | —        | ✅  | —   | ✅    | Disputes     | `POST /compliance/bureau-live-api/submission-runs/{id}/invoke`    |
 | Stripe tax calculation      | 5.8     | Partial | ✅      | —        | ✅  | —   | ✅    | Billing      | `POST /billing/tax-calculation/pdf-runs/{id}/calculate`           |
 | HRIS lifecycle sync         | 5.8     | Partial | ✅      | —        | ✅  | —   | ✅    | Enterprise   | `POST /enterprise/federation/hris-lifecycle/sync-runs/{id}/start` |
+
+### Version 5.8 epic sign-off
+
+| Epic                        | 5.8 outcome | Exit note                                                          |
+| --------------------------- | ----------- | ------------------------------------------------------------------ |
+| Agent supervised loops      | Partial ✅  | Loop audit; fully unsupervised loops + arbitrary execution → 5.9+  |
+| Bureau live API integration | Partial ✅  | API invocation audit; unsupervised filing + live calls → 5.9+      |
+| Stripe tax calculation      | Partial ✅  | Tax calculation audit; live Stripe Tax API + charge retries → 5.9+ |
+| HRIS lifecycle sync         | Partial ✅  | Lifecycle sync audit; passwordless UI + bulk provisioning → 5.9+   |
 
 ---
 
