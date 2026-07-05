@@ -130,6 +130,53 @@ def federation_env(monkeypatch: pytest.MonkeyPatch, enterprise_oidc_env: None) -
     get_enterprise_identity_settings.cache_clear()
 
 
+VALID_SAML_METADATA = """<?xml version="1.0"?>
+<EntityDescriptor entityID="https://idp.example.com/metadata"
+  xmlns="urn:oasis:names:tc:SAML:2.0:metadata">
+  <IDPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol"/>
+</EntityDescriptor>"""
+
+
+@pytest.fixture
+def saml_metadata_only_env(
+    monkeypatch: pytest.MonkeyPatch,
+    federation_env: None,
+) -> None:
+    monkeypatch.setenv("ENABLE_SAML_FEDERATION_METADATA", "true")
+    get_feature_flags.cache_clear()
+    get_enterprise_identity_settings.cache_clear()
+    yield
+    get_feature_flags.cache_clear()
+    get_enterprise_identity_settings.cache_clear()
+
+
+@pytest.fixture
+def hris_sync_env(
+    monkeypatch: pytest.MonkeyPatch,
+    federation_env: None,
+) -> None:
+    monkeypatch.setenv("ENABLE_SAML_FEDERATION_METADATA", "true")
+    monkeypatch.setenv("ENABLE_HRIS_BIDIRECTIONAL_SYNC", "true")
+    get_feature_flags.cache_clear()
+    get_enterprise_identity_settings.cache_clear()
+    yield
+    get_feature_flags.cache_clear()
+    get_enterprise_identity_settings.cache_clear()
+
+
+@pytest.fixture
+def saml_cert_rotation_env(
+    monkeypatch: pytest.MonkeyPatch,
+    hris_sync_env: None,
+) -> None:
+    monkeypatch.setenv("ENABLE_SAML_CERTIFICATE_ROTATION", "true")
+    get_feature_flags.cache_clear()
+    get_enterprise_identity_settings.cache_clear()
+    yield
+    get_feature_flags.cache_clear()
+    get_enterprise_identity_settings.cache_clear()
+
+
 @pytest.fixture
 def enterprise_totp_env(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("ENABLE_ENTERPRISE", "true")

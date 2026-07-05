@@ -39,6 +39,7 @@ class FeatureFlag(StrEnum):
     ENABLE_DISPUTE_FILING_PREP = "ENABLE_DISPUTE_FILING_PREP"
     ENABLE_DISPUTE_BUREAU_SUBMISSION = "ENABLE_DISPUTE_BUREAU_SUBMISSION"
     ENABLE_AGENT_EXTERNAL_TOOL_CALLING = "ENABLE_AGENT_EXTERNAL_TOOL_CALLING"
+    ENABLE_SAML_CERTIFICATE_ROTATION = "ENABLE_SAML_CERTIFICATE_ROTATION"
 
 
 class FeatureFlags(BaseSettings):
@@ -166,6 +167,10 @@ class FeatureFlags(BaseSettings):
         default=False,
         description="Enable human-gated agent external tool invocation audit scaffold",
     )
+    enable_saml_certificate_rotation: bool = Field(
+        default=False,
+        description="Enable admin-gated SAML certificate rotation audit scaffold",
+    )
 
 
 _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
@@ -200,6 +205,7 @@ _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
     FeatureFlag.ENABLE_DISPUTE_FILING_PREP: "enable_dispute_filing_prep",
     FeatureFlag.ENABLE_DISPUTE_BUREAU_SUBMISSION: "enable_dispute_bureau_submission",
     FeatureFlag.ENABLE_AGENT_EXTERNAL_TOOL_CALLING: "enable_agent_external_tool_calling",
+    FeatureFlag.ENABLE_SAML_CERTIFICATE_ROTATION: "enable_saml_certificate_rotation",
 }
 
 

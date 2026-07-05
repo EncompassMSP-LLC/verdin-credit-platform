@@ -350,3 +350,83 @@ export function runHrisBidirectionalSync(input: HrisBidirectionalSyncRunInput = 
     body: JSON.stringify(input),
   });
 }
+
+export type SamlCertificateRotationStatus = 'pending_approval' | 'rotated' | 'rejected' | 'failed';
+
+export interface SamlCertificateRotationGateStatus {
+  enabled: boolean;
+  ready: boolean;
+  hris_sync_ready: boolean;
+  blockers: string[];
+}
+
+export interface SamlCertificateRotationRun {
+  id: string;
+  organization_id: string;
+  metadata_upload_id: string;
+  entity_id: string;
+  status: SamlCertificateRotationStatus;
+  rotation_summary: string;
+  requested_by_user_id: string | null;
+  approved_by_user_id: string | null;
+  requested_at: string | null;
+  approved_at: string | null;
+  rotated_at: string | null;
+  error_message: string | null;
+}
+
+export interface SamlCertificateRotationRunList {
+  total: number;
+  page: number;
+  page_size: number;
+  items: SamlCertificateRotationRun[];
+}
+
+export interface SamlCertificateRotationInput {
+  rotation_summary: string;
+}
+
+export interface SamlCertificateRotationRunResult {
+  completed_at: string;
+  run: SamlCertificateRotationRun;
+}
+
+export function getSamlCertificateRotationStatus() {
+  return request<SamlCertificateRotationGateStatus>(
+    apiPath('/enterprise/federation/saml-cert-rotation/status'),
+  );
+}
+
+export function listSamlCertificateRotationRuns(page = 1, pageSize = 20) {
+  const params = new URLSearchParams({
+    page: String(page),
+    page_size: String(pageSize),
+  });
+  return request<SamlCertificateRotationRunList>(
+    apiPath(`/enterprise/federation/saml-cert-rotation/runs?${params}`),
+  );
+}
+
+export function submitSamlCertificateRotation(
+  metadataUploadId: string,
+  input: SamlCertificateRotationInput,
+) {
+  return request<SamlCertificateRotationRunResult>(
+    apiPath(
+      `/enterprise/federation/saml-cert-rotation/metadata-uploads/${metadataUploadId}/rotate`,
+    ),
+    {
+      method: 'POST',
+      body: JSON.stringify(input),
+    },
+  );
+}
+
+export function approveSamlCertificateRotationRun(runId: string) {
+  return request<SamlCertificateRotationRunResult>(
+    apiPath(`/enterprise/federation/saml-cert-rotation/runs/${runId}/approve`),
+    {
+      method: 'POST',
+    },
+  );
+}

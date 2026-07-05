@@ -47,3 +47,12 @@ def require_hris_bidirectional_sync_enabled() -> None:
             status_code=status.HTTP_404_NOT_FOUND,
             detail="HRIS bidirectional sync is not enabled",
         )
+
+
+def require_saml_certificate_rotation_enabled() -> None:
+    require_hris_bidirectional_sync_enabled()
+    if not is_feature_enabled(FeatureFlag.ENABLE_SAML_CERTIFICATE_ROTATION):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="SAML certificate rotation is not enabled",
+        )

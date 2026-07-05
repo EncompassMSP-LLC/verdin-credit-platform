@@ -940,3 +940,11 @@ packages/job-orchestrator/
 **Reason:** 5.7 AI operations epic ships human-gated external tool invocation audit without live tool calls or unsupervised loops.
 
 **Follow-up work:** Slice 4 — SAML certificate rotation scaffold.
+
+### Decision: SAML certificate rotation scaffold
+
+**Decision:** Add `saml_certificate_rotation_runs` table (migration `045`), `GET /enterprise/federation/saml-cert-rotation/status`, `GET .../runs`, `POST .../metadata-uploads/{id}/rotate`, and `POST .../runs/{id}/approve`, `api/core/saml_certificate_rotation.py`, `ENABLE_SAML_CERTIFICATE_ROTATION` flag (requires HRIS sync + SAML metadata readiness), admin-gated rotation audit scaffold.
+
+**Reason:** 5.7 identity epic ships federation cert rotation run audit without automated IdP rotation or operator-bypass flows.
+
+**Follow-up work:** Slice 5 — Stripe invoice PDF scaffold.
