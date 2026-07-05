@@ -13,10 +13,10 @@ Extend partial 5.5 production automation (invoice collection, SAML metadata, mar
 
 | Epic | Theme                         | 5.6 outcome | Summary                                                              |
 | ---- | ----------------------------- | ----------- | -------------------------------------------------------------------- |
-| 1    | HRIS bidirectional sync       | Partial     | Org-scoped HRIS sync run audit + status scaffold                     |
-| 2    | SMS deliverability dashboards | Partial     | Marketing SMS delivery metrics read model + staff status endpoint    |
-| 3    | LLM dispute draft augment     | Partial     | ADR-012-gated dispute letter augment scaffold (no auto-send)         |
-| 4    | Dispute filing prep           | Partial     | Compliance-gated filing prep audit (no autonomous bureau submission) |
+| 1    | HRIS bidirectional sync       | Partial ✅  | Org-scoped HRIS sync run audit + status scaffold                     |
+| 2    | SMS deliverability dashboards | Partial ✅  | Marketing SMS delivery metrics read model + staff status endpoint    |
+| 3    | LLM dispute draft augment     | Partial ✅  | ADR-012-gated dispute letter augment scaffold (no auto-send)         |
+| 4    | Dispute filing prep           | Partial ✅  | Compliance-gated filing prep audit (no autonomous bureau submission) |
 
 ## Shipped from 5.5 (foundation — do not regress)
 
