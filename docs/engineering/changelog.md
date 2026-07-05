@@ -979,4 +979,12 @@ packages/job-orchestrator/
 
 **Reason:** 5.8 AI operations epic extends 5.7 tool-calling with multi-step loop audit and human gates between steps without fully unsupervised loops.
 
-**Follow-up work:** Slice 3 — bureau live API integration scaffold.
+**Follow-up work:** Slice 4 — Stripe tax calculation scaffold.
+
+### Decision: Bureau live API integration scaffold (Version 5.8 slice 3)
+
+**Decision:** Ship operator-gated bureau live API invocation audit (`bureau_live_api_runs` migration 048) with status, list, invoke-from-submitted-submission-run, and admin approve endpoints behind `ENABLE_BUREAU_LIVE_API`.
+
+**Reason:** 5.8 disputes epic extends 5.7 bureau submission with external API invocation audit and operator gates without unsupervised filing loops.
+
+**Follow-up work:** Slice 4 — Stripe tax calculation scaffold.

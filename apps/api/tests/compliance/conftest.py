@@ -166,3 +166,14 @@ def dispute_bureau_submission_env(
     get_feature_flags.cache_clear()
     yield
     get_feature_flags.cache_clear()
+
+
+@pytest.fixture
+def bureau_live_api_env(
+    monkeypatch: pytest.MonkeyPatch,
+    dispute_bureau_submission_env: None,
+) -> None:
+    monkeypatch.setenv("ENABLE_BUREAU_LIVE_API", "true")
+    get_feature_flags.cache_clear()
+    yield
+    get_feature_flags.cache_clear()

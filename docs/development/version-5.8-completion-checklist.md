@@ -19,7 +19,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | ----- | ------------------------------------ | ------------- | ------ |
 | 1     | 5.8 scope + completion checklist     | Kickoff       | ✅     |
 | 2     | Agent supervised loop scaffold       | AI operations | ✅     |
-| 3     | Bureau live API integration scaffold | Disputes      | —      |
+| 3     | Bureau live API integration scaffold | Disputes      | ✅     |
 | 4     | Stripe tax calculation scaffold      | Billing       | —      |
 | 5     | HRIS lifecycle sync scaffold         | Identity      | —      |
 | 6     | Capability matrix 5.8 sign-off       | Governance    | —      |

@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.core.pagination import PaginatedResponse
 from api.database.session import get_db
+from api.modules.accounts.bureau_live_api_router import bureau_live_api_router
 from api.modules.accounts.dispute_bureau_submission_router import dispute_bureau_submission_router
 from api.modules.accounts.dispute_filing_prep_router import dispute_filing_prep_router
 from api.modules.auth.dependencies import get_current_user
@@ -36,6 +37,7 @@ from api.modules.compliance.service import ComplianceService
 router = APIRouter(prefix="/compliance", tags=["Compliance"])
 router.include_router(dispute_filing_prep_router)
 router.include_router(dispute_bureau_submission_router)
+router.include_router(bureau_live_api_router)
 
 
 def get_compliance_service(db: AsyncSession = Depends(get_db)) -> ComplianceService:

@@ -386,3 +386,82 @@ export function approveDisputeBureauSubmissionRun(runId: string) {
     },
   );
 }
+
+export interface BureauLiveApiStatus {
+  enabled: boolean;
+  ready: boolean;
+  bureau_submission_ready: boolean;
+  blockers: string[];
+}
+
+export type BureauLiveApiRunStatus = 'pending_approval' | 'invoked' | 'rejected' | 'failed';
+
+export interface BureauLiveApiRun {
+  id: string;
+  organization_id: string;
+  bureau_submission_run_id: string;
+  account_id: string;
+  case_id: string;
+  bureau_target: string;
+  status: BureauLiveApiRunStatus;
+  invocation_summary: string;
+  requested_by_user_id: string | null;
+  approved_by_user_id: string | null;
+  timeline_event_id: string | null;
+  requested_at: string | null;
+  approved_at: string | null;
+  invoked_at: string | null;
+  error_message: string | null;
+}
+
+export interface BureauLiveApiInvokeRequest {
+  invocation_summary: string;
+}
+
+export interface BureauLiveApiRunResult {
+  completed_at: string;
+  run: BureauLiveApiRun;
+}
+
+export interface ListBureauLiveApiRunsParams {
+  page?: number;
+  page_size?: number;
+  account_id?: string;
+}
+
+export function getBureauLiveApiStatus() {
+  return request<BureauLiveApiStatus>(apiPath('/compliance/bureau-live-api/status'));
+}
+
+export function listBureauLiveApiRuns(params: ListBureauLiveApiRunsParams = {}) {
+  const search = new URLSearchParams();
+  if (params.page) search.set('page', String(params.page));
+  if (params.page_size) search.set('page_size', String(params.page_size));
+  if (params.account_id) search.set('account_id', params.account_id);
+  const query = search.toString();
+  return request<PaginatedResponse<BureauLiveApiRun>>(
+    apiPath(`/compliance/bureau-live-api/runs${query ? `?${query}` : ''}`),
+  );
+}
+
+export function invokeBureauLiveApiFromSubmissionRun(
+  bureauSubmissionRunId: string,
+  input: BureauLiveApiInvokeRequest,
+) {
+  return request<BureauLiveApiRunResult>(
+    apiPath(`/compliance/bureau-live-api/submission-runs/${bureauSubmissionRunId}/invoke`),
+    {
+      method: 'POST',
+      body: JSON.stringify(input),
+    },
+  );
+}
+
+export function approveBureauLiveApiRun(runId: string) {
+  return request<BureauLiveApiRunResult>(
+    apiPath(`/compliance/bureau-live-api/runs/${runId}/approve`),
+    {
+      method: 'POST',
+    },
+  );
+}

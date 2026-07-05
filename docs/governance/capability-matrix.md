@@ -434,12 +434,12 @@ Scope: [version-5.7-scope.md](version-5.7-scope.md) · Checklist: [version-5.7-c
 
 Scope: [version-5.8-scope.md](version-5.8-scope.md) · Checklist: [version-5.8-completion-checklist.md](../development/version-5.8-completion-checklist.md)
 
-| Capability                  | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                 |
-| --------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ----------------------------------------------------- |
-| Agent supervised loops      | 5.8     | Partial | ✅      | —        | ✅  | —   | ✅    | AI gates     | `POST /llm/supervised-loops/tool-requests/{id}/start` |
-| Bureau live API integration | 5.8     | Planned | —       | —        | —   | —   | —     | Disputes     | External bureau API invocation audit → slice 3        |
-| Stripe tax calculation      | 5.8     | Planned | —       | —        | —   | —   | —     | Billing      | Tax calculation run audit → slice 4                   |
-| HRIS lifecycle sync         | 5.8     | Planned | —       | —        | —   | —   | —     | Enterprise   | Lifecycle sync run audit → slice 5                    |
+| Capability                  | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                          |
+| --------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | -------------------------------------------------------------- |
+| Agent supervised loops      | 5.8     | Partial | ✅      | —        | ✅  | —   | ✅    | AI gates     | `POST /llm/supervised-loops/tool-requests/{id}/start`          |
+| Bureau live API integration | 5.8     | Partial | ✅      | —        | ✅  | —   | ✅    | Disputes     | `POST /compliance/bureau-live-api/submission-runs/{id}/invoke` |
+| Stripe tax calculation      | 5.8     | Planned | —       | —        | —   | —   | —     | Billing      | Tax calculation run audit → slice 4                            |
+| HRIS lifecycle sync         | 5.8     | Planned | —       | —        | —   | —   | —     | Enterprise   | Lifecycle sync run audit → slice 5                             |
 
 ---
 

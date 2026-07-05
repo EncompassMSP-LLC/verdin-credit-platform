@@ -1,6 +1,7 @@
 """Register all ORM models with SQLAlchemy metadata."""
 
 from api.core.constants import UserRole
+from api.modules.accounts.bureau_live_api_models import BureauLiveApiRun, BureauLiveApiRunStatus
 from api.modules.accounts.dispute_bureau_submission_models import (
     DisputeBureauSubmissionRun,
     DisputeBureauSubmissionStatus,
@@ -142,6 +143,8 @@ __all__ = [
     "BillingInvoicingRunStatus",
     "BillingInvoicingTriggerSource",
     "BillingWebhookEvent",
+    "BureauLiveApiRun",
+    "BureauLiveApiRunStatus",
     "Case",
     "CaseStatus",
     "BatchDocumentSummaryRun",
