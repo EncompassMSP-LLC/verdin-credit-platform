@@ -42,6 +42,7 @@ class FeatureFlag(StrEnum):
     ENABLE_SAML_CERTIFICATE_ROTATION = "ENABLE_SAML_CERTIFICATE_ROTATION"
     ENABLE_STRIPE_INVOICE_PDF = "ENABLE_STRIPE_INVOICE_PDF"
     ENABLE_AGENT_SUPERVISED_LOOPS = "ENABLE_AGENT_SUPERVISED_LOOPS"
+    ENABLE_BUREAU_LIVE_API = "ENABLE_BUREAU_LIVE_API"
 
 
 class FeatureFlags(BaseSettings):
@@ -181,6 +182,10 @@ class FeatureFlags(BaseSettings):
         default=False,
         description="Enable human-gated agent supervised loop audit scaffold",
     )
+    enable_bureau_live_api: bool = Field(
+        default=False,
+        description="Enable operator-gated bureau live API invocation audit scaffold",
+    )
 
 
 _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
@@ -218,6 +223,7 @@ _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
     FeatureFlag.ENABLE_SAML_CERTIFICATE_ROTATION: "enable_saml_certificate_rotation",
     FeatureFlag.ENABLE_STRIPE_INVOICE_PDF: "enable_stripe_invoice_pdf",
     FeatureFlag.ENABLE_AGENT_SUPERVISED_LOOPS: "enable_agent_supervised_loops",
+    FeatureFlag.ENABLE_BUREAU_LIVE_API: "enable_bureau_live_api",
 }
 
 

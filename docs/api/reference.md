@@ -608,6 +608,21 @@ Dispute bureau submission endpoints require `ENABLE_DISPUTE_BUREAU_SUBMISSION=tr
 | POST   | `/compliance/dispute-bureau-submission/prep-runs/{id}/submit` | case_manager | Submit bureau submission run for admin review |
 | POST   | `/compliance/dispute-bureau-submission/runs/{run_id}/approve` | admin        | Approve submission scaffold (no live bureau)  |
 
+Returns `404` when dispute bureau submission flags are false.
+
+### Bureau live API integration (operator-gated)
+
+Operator-gated external bureau API invocation audit. Requires `ENABLE_AI=true`, `ENABLE_AGENT_OBSERVABILITY=true`, `ENABLE_AGENT_EXECUTION=true`, `ENABLE_DISPUTE_FILING_PREP=true`, `ENABLE_DISPUTE_BUREAU_SUBMISSION=true`, and `ENABLE_BUREAU_LIVE_API=true`. A live API invocation run can only start from a `submitted` bureau submission run. No unsupervised filing loops or live bureau calls without operator review.
+
+| Method | Path                                                                 | Min role     | Description                                         |
+| ------ | -------------------------------------------------------------------- | ------------ | --------------------------------------------------- |
+| GET    | `/compliance/bureau-live-api/status`                                 | read_only    | Bureau live API readiness and blockers              |
+| GET    | `/compliance/bureau-live-api/runs`                                   | read_only    | Paginated bureau live API invocation audit log      |
+| POST   | `/compliance/bureau-live-api/submission-runs/{submission_id}/invoke` | case_manager | Start live API invocation from submitted submission |
+| POST   | `/compliance/bureau-live-api/runs/{run_id}/approve`                  | admin        | Approve and record invocation scaffold              |
+
+Returns `404` when bureau live API flags are false.
+
 Consent types: `croa_services`, `fcra_dispute`, `fdcpa_contact`, `marketing`, `data_processing`. Retention scopes: `documents`, `communications`, `audit_logs`, `client_profiles`. Enforcement jobs and legal sign-off workflows are deferred to 5.0+.
 
 ## Reporting
