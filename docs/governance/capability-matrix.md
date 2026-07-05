@@ -357,6 +357,19 @@ Scope: [version-5.5-scope.md](version-5.5-scope.md) · Checklist: [version-5.5-c
 
 ---
 
+## Version 5.6 — Compliance-reviewed production depth (in progress)
+
+Scope: [version-5.6-scope.md](version-5.6-scope.md) · Checklist: [version-5.6-completion-checklist.md](../development/version-5.6-completion-checklist.md)
+
+| Capability                   | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies  | Notes                                 |
+| ---------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------- | ------------------------------------- |
+| HRIS bidirectional sync      | 5.6     | Planned | —       | —        | —   | —   | —     | Enterprise    | Sync run audit scaffold → slice 2     |
+| SMS deliverability dashboard | 5.6     | Planned | —       | —        | —   | —   | —     | Notifications | Delivery metrics read model → slice 3 |
+| LLM dispute draft augment    | 5.6     | Planned | —       | —        | —   | —   | —     | AI gates      | ADR-012 augment scaffold → slice 4    |
+| Dispute filing prep          | 5.6     | Planned | —       | —        | —   | —   | —     | Disputes      | Compliance-gated prep audit → slice 5 |
+
+---
+
 ## AI capability tracker
 
 | AI feature                    | Phase | Version | Status  | Location                                                                  |
@@ -371,13 +384,13 @@ Scope: [version-5.5-scope.md](version-5.5-scope.md) · Checklist: [version-5.5-c
 | LLM policy gates              | 2     | 4.8     | Partial | `packages/llm-gateway` + `GET /llm/status`; no provider calls             |
 | Case summaries (LLM)          | 2     | 5.0     | Partial | Endpoint + staff UI behind `ENABLE_LLM` + PII scrub                       |
 | Document summaries (LLM)      | 2     | 5.2     | Partial | `POST /documents/{id}/llm-summary` + staff UI behind `ENABLE_LLM`         |
-| LLM dispute draft augment     | 2     | 5.0     | —       | Rules default in 4.5; LLM augment post-gate                               |
+| LLM dispute draft augment     | 2     | 5.6     | Planned | ADR-012-gated augment scaffold → slice 4                                  |
 | AI workflow orchestration     | 3     | 5.0+    | Planned | Deferred from 5.0 RC — requires compliance + observability prerequisites  |
 | Predictive outcomes           | 3     | 5.3     | Partial | `GET /reporting/predictive/outcomes`; snapshot refresh scaffold           |
 | Batch document summaries      | 2     | 5.3     | Partial | `POST /documents/batch-llm-summaries/run`; worker job behind `ENABLE_LLM` |
 | Agent observability           | 3     | 5.4     | Partial | `GET /llm/agents/status`; run audit + timeline correlation scaffold       |
 | Agent execution (human-gated) | 3     | 5.5     | Partial | `POST /llm/execution/steps/{id}/approve`; no autonomous filing            |
-| Autonomous dispute prep       | 4     | 5.6+    | Planned | Compliance gates required                                                 |
+| Autonomous dispute prep       | 4     | 5.6     | Planned | Compliance-gated filing prep audit → slice 5                              |
 
 See [AI Architecture](../architecture/ai-architecture.md).
 

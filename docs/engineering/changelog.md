@@ -868,3 +868,11 @@ packages/job-orchestrator/
 **Reason:** Final exit criterion for the 5.5 production automation milestone.
 
 **Follow-up work:** 5.6+ planning — autonomous workflows, deliverability dashboards, HRIS sync.
+
+### Decision: Kick off Version 5.6 compliance-reviewed production depth
+
+**Decision:** Add `version-5.6-scope.md`, `version-5.6-completion-checklist.md`, and `.cursor/rules/version-56-sprint-loop.mdc`; link 5.6 from product roadmap and capability matrix.
+
+**Reason:** v5.5.0 sign-off complete (`v5.5.0` tagged); HRIS sync, SMS deliverability dashboards, LLM dispute draft augment, and compliance-gated dispute filing prep need a sequenced delivery path before v5.6.0 release.
+
+**Follow-up work:** Slice 2 — HRIS bidirectional sync scaffold.
