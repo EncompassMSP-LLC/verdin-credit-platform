@@ -1068,3 +1068,11 @@ packages/job-orchestrator/
 **Reason:** v5.9.0 sign-off complete (`v5.9.0` tagged); arbitrary agent execution, bureau re-filing audit, Stripe charge retry, and SAML passwordless enrollment scaffolds need a sequenced delivery path before v5.10.0 release.
 
 **Follow-up work:** Slice 2 — agent arbitrary execution scaffold.
+
+### Decision: Agent arbitrary execution scaffold (Version 5.10 slice 2)
+
+**Decision:** Ship admin-gated agent arbitrary execution audit (`agent_arbitrary_execution_runs` migration 055) with status, list, start-from-completed-unsupervised-run, and admin approve endpoints behind `ENABLE_AGENT_ARBITRARY_EXECUTION`.
+
+**Reason:** 5.10 AI operations epic extends 5.9 unsupervised loops with arbitrary execution run audit without PII export or fully autonomous agents without admin approval.
+
+**Follow-up work:** Slice 3 — bureau re-filing audit scaffold.

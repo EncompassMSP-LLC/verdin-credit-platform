@@ -44,6 +44,7 @@ class FeatureFlag(StrEnum):
     ENABLE_STRIPE_INVOICE_PDF = "ENABLE_STRIPE_INVOICE_PDF"
     ENABLE_AGENT_SUPERVISED_LOOPS = "ENABLE_AGENT_SUPERVISED_LOOPS"
     ENABLE_AGENT_UNSUPERVISED_LOOPS = "ENABLE_AGENT_UNSUPERVISED_LOOPS"
+    ENABLE_AGENT_ARBITRARY_EXECUTION = "ENABLE_AGENT_ARBITRARY_EXECUTION"
     ENABLE_BUREAU_LIVE_API = "ENABLE_BUREAU_LIVE_API"
     ENABLE_AUTONOMOUS_BUREAU_FILING = "ENABLE_AUTONOMOUS_BUREAU_FILING"
     ENABLE_STRIPE_TAX_CALCULATION = "ENABLE_STRIPE_TAX_CALCULATION"
@@ -196,6 +197,10 @@ class FeatureFlags(BaseSettings):
         default=False,
         description="Enable admin-gated agent unsupervised loop audit scaffold",
     )
+    enable_agent_arbitrary_execution: bool = Field(
+        default=False,
+        description="Enable admin-gated agent arbitrary execution audit scaffold",
+    )
     enable_bureau_live_api: bool = Field(
         default=False,
         description="Enable operator-gated bureau live API invocation audit scaffold",
@@ -255,6 +260,7 @@ _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
     FeatureFlag.ENABLE_STRIPE_INVOICE_PDF: "enable_stripe_invoice_pdf",
     FeatureFlag.ENABLE_AGENT_SUPERVISED_LOOPS: "enable_agent_supervised_loops",
     FeatureFlag.ENABLE_AGENT_UNSUPERVISED_LOOPS: "enable_agent_unsupervised_loops",
+    FeatureFlag.ENABLE_AGENT_ARBITRARY_EXECUTION: "enable_agent_arbitrary_execution",
     FeatureFlag.ENABLE_BUREAU_LIVE_API: "enable_bureau_live_api",
     FeatureFlag.ENABLE_AUTONOMOUS_BUREAU_FILING: "enable_autonomous_bureau_filing",
     FeatureFlag.ENABLE_STRIPE_TAX_CALCULATION: "enable_stripe_tax_calculation",

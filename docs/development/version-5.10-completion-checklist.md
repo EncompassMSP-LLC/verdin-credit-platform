@@ -18,7 +18,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | Order | Slice                                 | Epic          | Status |
 | ----- | ------------------------------------- | ------------- | ------ |
 | 1     | 5.10 scope + completion checklist     | Kickoff       | ✅     |
-| 2     | Agent arbitrary execution scaffold    | AI operations | —      |
+| 2     | Agent arbitrary execution scaffold    | AI operations | ✅     |
 | 3     | Bureau re-filing audit scaffold       | Disputes      | —      |
 | 4     | Stripe charge retry scaffold          | Billing       | —      |
 | 5     | SAML passwordless enrollment scaffold | Identity      | —      |

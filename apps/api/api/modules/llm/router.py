@@ -16,6 +16,7 @@ from api.modules.accounts.dispute_draft_augment_schemas import (
 from api.modules.accounts.dispute_draft_augment_service import LlmDisputeDraftAugmentService
 from api.modules.auth.dependencies import get_current_user
 from api.modules.auth.models import User
+from api.modules.llm.agent_arbitrary_execution_router import agent_arbitrary_execution_router
 from api.modules.llm.agent_execution_router import agent_execution_router
 from api.modules.llm.agent_observability_router import agent_observability_router
 from api.modules.llm.agent_supervised_loop_router import agent_supervised_loop_router
@@ -28,6 +29,7 @@ router.include_router(agent_execution_router)
 router.include_router(agent_tool_calling_router)
 router.include_router(agent_supervised_loop_router)
 router.include_router(agent_unsupervised_loop_router)
+router.include_router(agent_arbitrary_execution_router)
 
 
 class LlmGateStatusResponse(BaseSchema):

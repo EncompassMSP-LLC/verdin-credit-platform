@@ -357,6 +357,80 @@ export function approveAgentUnsupervisedLoopRun(runId: string) {
   );
 }
 
+export type AgentArbitraryExecutionStatus = 'pending_approval' | 'executed' | 'rejected' | 'failed';
+
+export interface AgentArbitraryExecutionGateStatus {
+  enabled: boolean;
+  ready: boolean;
+  unsupervised_loops_ready: boolean;
+  blockers: string[];
+}
+
+export interface AgentArbitraryExecutionRun {
+  id: string;
+  organization_id: string;
+  agent_unsupervised_loop_run_id: string;
+  case_id: string | null;
+  tool_kind: string;
+  status: AgentArbitraryExecutionStatus;
+  execution_summary: string;
+  requested_by_user_id: string | null;
+  approved_by_user_id: string | null;
+  timeline_event_id: string | null;
+  requested_at: string | null;
+  approved_at: string | null;
+  executed_at: string | null;
+  error_message: string | null;
+}
+
+export interface AgentArbitraryExecutionSubmitInput {
+  execution_summary: string;
+}
+
+export interface AgentArbitraryExecutionRunResult {
+  completed_at: string;
+  run: AgentArbitraryExecutionRun;
+}
+
+export function getAgentArbitraryExecutionStatus() {
+  return request<AgentArbitraryExecutionGateStatus>(apiPath('/llm/arbitrary-execution/status'));
+}
+
+export function listAgentArbitraryExecutionRuns(
+  params: { page?: number; page_size?: number; case_id?: string } = {},
+) {
+  const search = new URLSearchParams();
+  if (params.page) search.set('page', String(params.page));
+  if (params.page_size) search.set('page_size', String(params.page_size));
+  if (params.case_id) search.set('case_id', params.case_id);
+  const query = search.toString();
+  return request<PaginatedResponse<AgentArbitraryExecutionRun>>(
+    apiPath(`/llm/arbitrary-execution/runs${query ? `?${query}` : ''}`),
+  );
+}
+
+export function startAgentArbitraryExecutionFromUnsupervisedRun(
+  agentUnsupervisedLoopRunId: string,
+  input: AgentArbitraryExecutionSubmitInput,
+) {
+  return request<AgentArbitraryExecutionRunResult>(
+    apiPath(`/llm/arbitrary-execution/unsupervised-runs/${agentUnsupervisedLoopRunId}/start`),
+    {
+      method: 'POST',
+      body: JSON.stringify(input),
+    },
+  );
+}
+
+export function approveAgentArbitraryExecutionRun(runId: string) {
+  return request<AgentArbitraryExecutionRunResult>(
+    apiPath(`/llm/arbitrary-execution/runs/${runId}/approve`),
+    {
+      method: 'POST',
+    },
+  );
+}
+
 export interface LlmDisputeDraftAugmentStatus {
   enabled: boolean;
   ready: boolean;
