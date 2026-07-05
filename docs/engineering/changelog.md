@@ -988,3 +988,11 @@ packages/job-orchestrator/
 **Reason:** 5.8 disputes epic extends 5.7 bureau submission with external API invocation audit and operator gates without unsupervised filing loops.
 
 **Follow-up work:** Slice 4 — Stripe tax calculation scaffold.
+
+### Decision: Stripe tax calculation scaffold (Version 5.8 slice 4)
+
+**Decision:** Ship admin-gated Stripe tax calculation audit (`stripe_tax_calculation_runs` migration 049) with status, list, calculate-from-generated-pdf-run, and admin approve endpoints behind `ENABLE_STRIPE_TAX_CALCULATION`.
+
+**Reason:** 5.8 billing epic extends 5.7 invoice PDF with tax calculation run audit without live Stripe Tax API calls.
+
+**Follow-up work:** Slice 5 — HRIS lifecycle sync scaffold.

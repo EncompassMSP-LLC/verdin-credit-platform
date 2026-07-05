@@ -275,3 +275,79 @@ export function approveStripeInvoicePdfRun(runId: string) {
     method: 'POST',
   });
 }
+
+export type StripeTaxCalculationRunStatus =
+  'pending_approval' | 'calculated' | 'rejected' | 'failed';
+
+export interface StripeTaxCalculationGateStatus {
+  enabled: boolean;
+  ready: boolean;
+  invoice_pdf_ready: boolean;
+  blockers: string[];
+}
+
+export interface StripeTaxCalculationRun {
+  id: string;
+  organization_id: string;
+  invoice_pdf_run_id: string;
+  status: StripeTaxCalculationRunStatus;
+  calculation_summary: string;
+  requested_by_user_id: string | null;
+  approved_by_user_id: string | null;
+  requested_at: string | null;
+  approved_at: string | null;
+  calculated_at: string | null;
+  error_message: string | null;
+}
+
+export interface StripeTaxCalculationInput {
+  calculation_summary: string;
+}
+
+export interface StripeTaxCalculationRunResult {
+  completed_at: string;
+  run: StripeTaxCalculationRun;
+}
+
+export interface StripeTaxCalculationRunList {
+  items: StripeTaxCalculationRun[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export function getStripeTaxCalculationStatus() {
+  return request<StripeTaxCalculationGateStatus>(apiPath('/billing/tax-calculation/status'));
+}
+
+export function listStripeTaxCalculationRuns(page = 1, pageSize = 20) {
+  const params = new URLSearchParams({
+    page: String(page),
+    page_size: String(pageSize),
+  });
+  return request<StripeTaxCalculationRunList>(
+    apiPath(`/billing/tax-calculation/runs?${params.toString()}`),
+  );
+}
+
+export function submitStripeTaxCalculationRun(
+  invoicePdfRunId: string,
+  input: StripeTaxCalculationInput,
+) {
+  return request<StripeTaxCalculationRunResult>(
+    apiPath(`/billing/tax-calculation/pdf-runs/${invoicePdfRunId}/calculate`),
+    {
+      method: 'POST',
+      body: JSON.stringify(input),
+    },
+  );
+}
+
+export function approveStripeTaxCalculationRun(runId: string) {
+  return request<StripeTaxCalculationRunResult>(
+    apiPath(`/billing/tax-calculation/runs/${runId}/approve`),
+    {
+      method: 'POST',
+    },
+  );
+}

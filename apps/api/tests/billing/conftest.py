@@ -169,3 +169,18 @@ def stripe_invoice_pdf_env(monkeypatch: pytest.MonkeyPatch, collection_env: None
     yield
     get_feature_flags.cache_clear()
     get_stripe_billing_settings.cache_clear()
+
+
+@pytest.fixture
+def stripe_tax_calculation_env(
+    monkeypatch: pytest.MonkeyPatch,
+    stripe_invoice_pdf_env: None,
+) -> None:
+    monkeypatch.setenv("ENABLE_STRIPE_TAX_CALCULATION", "true")
+    from api.core.stripe_billing import get_stripe_billing_settings
+
+    get_feature_flags.cache_clear()
+    get_stripe_billing_settings.cache_clear()
+    yield
+    get_feature_flags.cache_clear()
+    get_stripe_billing_settings.cache_clear()

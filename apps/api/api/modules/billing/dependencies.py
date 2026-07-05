@@ -47,3 +47,12 @@ def require_stripe_invoice_pdf_enabled() -> None:
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Stripe invoice PDF generation is not enabled",
         )
+
+
+def require_stripe_tax_calculation_enabled() -> None:
+    require_stripe_invoice_pdf_enabled()
+    if not is_feature_enabled(FeatureFlag.ENABLE_STRIPE_TAX_CALCULATION):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Stripe tax calculation is not enabled",
+        )
