@@ -1,23 +1,8 @@
 """Admin-gated dispute bureau submission endpoint tests."""
 
-import pytest
 from fastapi.testclient import TestClient
 
-from api.core.feature_flags import get_feature_flags
-from tests.compliance.test_dispute_filing_prep import (
-    create_account,
-    sample_case_id,
-)
-
-
-@pytest.fixture
-def dispute_bureau_submission_env(dispute_filing_prep_env: None) -> None:
-    import os
-
-    os.environ["ENABLE_DISPUTE_BUREAU_SUBMISSION"] = "true"
-    get_feature_flags.cache_clear()
-    yield
-    get_feature_flags.cache_clear()
+from tests.compliance.conftest import create_account, sample_case_id
 
 
 def _prepare_filing_prep_run(
