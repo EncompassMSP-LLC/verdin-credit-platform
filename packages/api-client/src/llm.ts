@@ -137,6 +137,76 @@ export function approveAgentExecutionStep(stepId: string) {
   });
 }
 
+export type AgentExternalToolKind = 'web_lookup' | 'document_fetch' | 'crm_update';
+export type AgentToolInvocationStatus = 'pending_approval' | 'invoked' | 'rejected' | 'failed';
+
+export interface AgentExternalToolCallingStatus {
+  enabled: boolean;
+  ready: boolean;
+  agent_execution_ready: boolean;
+  blockers: string[];
+}
+
+export interface AgentToolInvocationRequest {
+  id: string;
+  organization_id: string;
+  tool_kind: AgentExternalToolKind;
+  status: AgentToolInvocationStatus;
+  case_id: string | null;
+  invocation_summary: string;
+  requested_by_user_id: string | null;
+  approved_by_user_id: string | null;
+  timeline_event_id: string | null;
+  requested_at: string | null;
+  approved_at: string | null;
+  invoked_at: string | null;
+  error_message: string | null;
+}
+
+export interface AgentToolInvocationSubmitInput {
+  tool_kind?: AgentExternalToolKind;
+  invocation_summary: string;
+  case_id?: string | null;
+}
+
+export interface AgentToolInvocationRequestResult {
+  completed_at: string;
+  request: AgentToolInvocationRequest;
+}
+
+export function getAgentExternalToolCallingStatus() {
+  return request<AgentExternalToolCallingStatus>(apiPath('/llm/tool-calling/status'));
+}
+
+export function listAgentToolInvocationRequests(
+  params: { page?: number; page_size?: number; case_id?: string } = {},
+) {
+  const search = new URLSearchParams();
+  if (params.page) search.set('page', String(params.page));
+  if (params.page_size) search.set('page_size', String(params.page_size));
+  if (params.case_id) search.set('case_id', params.case_id);
+  const query = search.toString();
+  return request<PaginatedResponse<AgentToolInvocationRequest>>(
+    apiPath(`/llm/tool-calling/requests${query ? `?${query}` : ''}`),
+  );
+}
+
+export function submitAgentToolInvocationRequest(input: AgentToolInvocationSubmitInput) {
+  return request<AgentToolInvocationRequestResult>(apiPath('/llm/tool-calling/requests'), {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export function approveAgentToolInvocationRequest(requestId: string) {
+  return request<AgentToolInvocationRequestResult>(
+    apiPath(`/llm/tool-calling/requests/${requestId}/approve`),
+    {
+      method: 'POST',
+    },
+  );
+}
+
 export interface LlmDisputeDraftAugmentStatus {
   enabled: boolean;
   ready: boolean;

@@ -441,6 +441,19 @@ Human-gated agent step execution audit with admin approval and optional case tim
 
 Returns `404` when agent execution flags are false.
 
+### Agent external tool-calling (human-gated)
+
+Human-gated external tool invocation audit with admin approval and optional case timeline correlation. Requires `ENABLE_AI=true`, `ENABLE_AGENT_OBSERVABILITY=true`, `ENABLE_AGENT_EXECUTION=true`, and `ENABLE_AGENT_EXTERNAL_TOOL_CALLING=true`. No live external tool calls or unsupervised invocation loops.
+
+| Method | Path                                      | Min role     | Description                            |
+| ------ | ----------------------------------------- | ------------ | -------------------------------------- |
+| GET    | `/llm/tool-calling/status`                | read_only    | Tool-calling readiness and blockers    |
+| GET    | `/llm/tool-calling/requests`              | read_only    | Paginated tool invocation audit log    |
+| POST   | `/llm/tool-calling/requests`              | case_manager | Submit a tool invocation for approval  |
+| POST   | `/llm/tool-calling/requests/{id}/approve` | admin        | Approve and record invocation scaffold |
+
+Returns `404` when agent external tool-calling flags are false.
+
 ## Enterprise identity
 
 MFA and SSO readiness plus staff enrollment flows. Portal authentication (`/portal/auth/*`) remains a separate partition.

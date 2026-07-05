@@ -932,3 +932,11 @@ packages/job-orchestrator/
 **Reason:** 5.7 disputes epic ships bureau submission run audit scaffold without unsupervised filing or live bureau API integration.
 
 **Follow-up work:** Slice 3 — agent external tool-calling scaffold.
+
+### Decision: Agent external tool-calling scaffold
+
+**Decision:** Add `agent_tool_invocation_requests` table (migration `044`), `GET /llm/tool-calling/status`, `GET .../requests`, `POST .../requests`, and `POST .../requests/{id}/approve`, `api/core/agent_external_tool_calling.py`, `ENABLE_AGENT_EXTERNAL_TOOL_CALLING` flag (requires agent execution readiness), admin-gated invocation audit, and case timeline correlation.
+
+**Reason:** 5.7 AI operations epic ships human-gated external tool invocation audit without live tool calls or unsupervised loops.
+
+**Follow-up work:** Slice 4 — SAML certificate rotation scaffold.

@@ -38,6 +38,7 @@ class FeatureFlag(StrEnum):
     ENABLE_AGENT_EXECUTION = "ENABLE_AGENT_EXECUTION"
     ENABLE_DISPUTE_FILING_PREP = "ENABLE_DISPUTE_FILING_PREP"
     ENABLE_DISPUTE_BUREAU_SUBMISSION = "ENABLE_DISPUTE_BUREAU_SUBMISSION"
+    ENABLE_AGENT_EXTERNAL_TOOL_CALLING = "ENABLE_AGENT_EXTERNAL_TOOL_CALLING"
 
 
 class FeatureFlags(BaseSettings):
@@ -161,6 +162,10 @@ class FeatureFlags(BaseSettings):
         default=False,
         description="Enable admin-gated dispute bureau submission audit scaffold",
     )
+    enable_agent_external_tool_calling: bool = Field(
+        default=False,
+        description="Enable human-gated agent external tool invocation audit scaffold",
+    )
 
 
 _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
@@ -194,6 +199,7 @@ _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
     FeatureFlag.ENABLE_AGENT_EXECUTION: "enable_agent_execution",
     FeatureFlag.ENABLE_DISPUTE_FILING_PREP: "enable_dispute_filing_prep",
     FeatureFlag.ENABLE_DISPUTE_BUREAU_SUBMISSION: "enable_dispute_bureau_submission",
+    FeatureFlag.ENABLE_AGENT_EXTERNAL_TOOL_CALLING: "enable_agent_external_tool_calling",
 }
 
 
