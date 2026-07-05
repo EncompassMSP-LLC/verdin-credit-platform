@@ -2,7 +2,7 @@
 
 **Executive view** of Verdin platform capabilities — what exists, what version introduced it, readiness by layer, and dependencies.
 
-**Last updated:** 2026-07-04  
+**Last updated:** 2026-07-05  
 **Maintainers:** Update this document in every epic PR that ships or materially advances a capability.
 
 **Version 4.5 sign-off:** [version-4.5-scope.md](version-4.5-scope.md) · Release notes: [v4.5.0.md](../release-notes/v4.5.0.md)  
@@ -12,6 +12,7 @@
 **Version 5.1 sign-off:** [version-5.1-scope.md](version-5.1-scope.md) · Release notes: [v5.1.0.md](../release-notes/v5.1.0.md)
 **Version 5.2 sign-off:** [version-5.2-scope.md](version-5.2-scope.md) · Release notes: [v5.2.0.md](../release-notes/v5.2.0.md)
 **Version 5.3 sign-off:** [version-5.3-scope.md](version-5.3-scope.md) · Release notes: [v5.3.0.md](../release-notes/v5.3.0.md)
+**Version 5.6 sign-off:** [version-5.6-scope.md](version-5.6-scope.md) · Release notes: [v5.6.0.md](../release-notes/v5.6.0.md)
 
 ## Status legend
 
@@ -357,9 +358,9 @@ Scope: [version-5.5-scope.md](version-5.5-scope.md) · Checklist: [version-5.5-c
 
 ---
 
-## Version 5.6 — Compliance-reviewed production depth (in progress)
+## Version 5.6 — Compliance-reviewed production depth (sign-off)
 
-Scope: [version-5.6-scope.md](version-5.6-scope.md) · Checklist: [version-5.6-completion-checklist.md](../development/version-5.6-completion-checklist.md)
+Scope: [version-5.6-scope.md](version-5.6-scope.md) · Checklist: [version-5.6-completion-checklist.md](../development/version-5.6-completion-checklist.md) · Release notes: [v5.6.0.md](../release-notes/v5.6.0.md)
 
 | Capability                   | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies  | Notes                                                     |
 | ---------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------- | --------------------------------------------------------- |
@@ -367,6 +368,15 @@ Scope: [version-5.6-scope.md](version-5.6-scope.md) · Checklist: [version-5.6-c
 | SMS deliverability dashboard | 5.6     | Partial | ✅      | —        | ✅  | —   | ✅    | Notifications | `GET /notifications/sms-campaigns/deliverability/summary` |
 | LLM dispute draft augment    | 5.6     | Partial | ✅      | —        | ✅  | ✅  | ✅    | AI gates      | `POST /accounts/{id}/dispute-draft/llm-augment`           |
 | Dispute filing prep          | 5.6     | Partial | ✅      | —        | ✅  | —   | ✅    | Disputes      | `POST /compliance/dispute-filing/accounts/{id}/prep`      |
+
+### Version 5.6 epic sign-off
+
+| Epic                         | 5.6 outcome | Exit note                                                           |
+| ---------------------------- | ----------- | ------------------------------------------------------------------- |
+| HRIS bidirectional sync      | Partial ✅  | Sync run audit scaffold; full lifecycle sync + cert rotation → 5.7+ |
+| SMS deliverability dashboard | Partial ✅  | Metrics read model; failover + alerting → 5.7+                      |
+| LLM dispute draft augment    | Partial ✅  | ADR-012-gated augment audit; auto-send + unsupervised loops → 5.7+  |
+| Dispute filing prep          | Partial ✅  | Admin-gated prep audit; autonomous bureau filing → 5.7+             |
 
 ---
 

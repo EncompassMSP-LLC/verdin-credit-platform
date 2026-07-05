@@ -908,3 +908,11 @@ packages/job-orchestrator/
 **Reason:** 5.6 disputes epic ships compliance-gated filing prep without autonomous bureau submission.
 
 **Follow-up work:** Slice 6 — v5.6.0 capability matrix sign-off and release tag.
+
+### Decision: Version 5.6 epic sign-off
+
+**Decision:** Mark all four Version 5.6 epics **Partial ✅** in `version-5.6-scope.md`, add capability matrix 5.6 epic sign-off table, update AI tracker for LLM dispute augment and filing prep, complete checklist exit criteria, and publish `docs/release-notes/v5.6.0.md`.
+
+**Reason:** v5.6.0 completes compliance-reviewed production depth scaffolds; autonomous bureau filing and unsupervised agent loops remain deferred to 5.7+.
+
+**Follow-up work:** Version 5.7 planning — autonomous dispute filing and deeper agent automation (compliance-gated).
