@@ -900,3 +900,11 @@ packages/job-orchestrator/
 **Reason:** 5.6 AI assistance epic ships ADR-012-gated dispute letter augment without auto-send or unsupervised LLM loops.
 
 **Follow-up work:** Slice 5 — compliance-gated dispute filing prep scaffold.
+
+### Decision: Compliance-gated dispute filing prep scaffold
+
+**Decision:** Add `dispute_filing_prep_runs` table (migration `042`), `GET /compliance/dispute-filing/status`, `GET /compliance/dispute-filing/runs`, `POST /compliance/dispute-filing/accounts/{account_id}/prep`, and `POST /compliance/dispute-filing/runs/{run_id}/approve`, `api/core/dispute_filing_prep.py`, `ENABLE_DISPUTE_FILING_PREP` flag (requires human-gated agent execution readiness), admin approval audit, and case timeline correlation.
+
+**Reason:** 5.6 disputes epic ships compliance-gated filing prep without autonomous bureau submission.
+
+**Follow-up work:** Slice 6 — v5.6.0 capability matrix sign-off and release tag.

@@ -226,3 +226,79 @@ export async function runRetentionEnforcement(): Promise<RetentionEnforcementRun
     method: 'POST',
   });
 }
+
+export interface DisputeFilingPrepStatus {
+  enabled: boolean;
+  ready: boolean;
+  agent_execution_ready: boolean;
+  blockers: string[];
+}
+
+export type DisputeFilingPrepRunStatus = 'pending_approval' | 'prepared' | 'rejected' | 'failed';
+
+export interface DisputeFilingPrepRun {
+  id: string;
+  organization_id: string;
+  account_id: string;
+  case_id: string;
+  bureau_target: string;
+  status: DisputeFilingPrepRunStatus;
+  prep_summary: string;
+  requested_by_user_id: string | null;
+  approved_by_user_id: string | null;
+  timeline_event_id: string | null;
+  requested_at: string | null;
+  approved_at: string | null;
+  prepared_at: string | null;
+  error_message: string | null;
+}
+
+export interface DisputeFilingPrepRunResult {
+  completed_at: string;
+  run: DisputeFilingPrepRun;
+}
+
+export interface DisputeFilingPrepRequest {
+  prep_summary: string;
+  bureau_target?: 'equifax' | 'experian' | 'transunion' | 'innovis';
+}
+
+export interface ListDisputeFilingPrepRunsParams {
+  page?: number;
+  page_size?: number;
+  account_id?: string;
+}
+
+export function getDisputeFilingPrepStatus() {
+  return request<DisputeFilingPrepStatus>(apiPath('/compliance/dispute-filing/status'));
+}
+
+export function listDisputeFilingPrepRuns(params: ListDisputeFilingPrepRunsParams = {}) {
+  const search = new URLSearchParams();
+  if (params.page) search.set('page', String(params.page));
+  if (params.page_size) search.set('page_size', String(params.page_size));
+  if (params.account_id) search.set('account_id', params.account_id);
+  const query = search.toString();
+  return request<PaginatedResponse<DisputeFilingPrepRun>>(
+    apiPath(`/compliance/dispute-filing/runs${query ? `?${query}` : ''}`),
+  );
+}
+
+export function submitDisputeFilingPrep(accountId: string, input: DisputeFilingPrepRequest) {
+  return request<DisputeFilingPrepRunResult>(
+    apiPath(`/compliance/dispute-filing/accounts/${accountId}/prep`),
+    {
+      method: 'POST',
+      body: JSON.stringify(input),
+    },
+  );
+}
+
+export function approveDisputeFilingPrepRun(runId: string) {
+  return request<DisputeFilingPrepRunResult>(
+    apiPath(`/compliance/dispute-filing/runs/${runId}/approve`),
+    {
+      method: 'POST',
+    },
+  );
+}

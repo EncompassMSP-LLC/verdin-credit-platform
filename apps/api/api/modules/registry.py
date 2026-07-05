@@ -2,6 +2,10 @@
 
 from api.core.constants import UserRole
 from api.modules.accounts.dispute_draft_augment_models import LlmDisputeDraftAugment
+from api.modules.accounts.dispute_filing_prep_models import (
+    DisputeFilingPrepRun,
+    DisputeFilingPrepStatus,
+)
 from api.modules.accounts.dispute_letter_models import DisputeLetter, DisputeLetterStatus
 from api.modules.accounts.models import Account
 from api.modules.auth.models import Organization, User
@@ -130,6 +134,8 @@ __all__ = [
     "Document",
     "DisputeLetter",
     "DisputeLetterStatus",
+    "DisputeFilingPrepRun",
+    "DisputeFilingPrepStatus",
     "EmailDeliveryLog",
     "EnforcementRunStatus",
     "EnforcementTriggerSource",

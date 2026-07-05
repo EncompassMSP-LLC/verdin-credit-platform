@@ -366,7 +366,7 @@ Scope: [version-5.6-scope.md](version-5.6-scope.md) · Checklist: [version-5.6-c
 | HRIS bidirectional sync      | 5.6     | Partial | ✅      | —        | ✅  | —   | ✅    | Enterprise    | `GET /enterprise/federation/hris-sync/status`             |
 | SMS deliverability dashboard | 5.6     | Partial | ✅      | —        | ✅  | —   | ✅    | Notifications | `GET /notifications/sms-campaigns/deliverability/summary` |
 | LLM dispute draft augment    | 5.6     | Partial | ✅      | —        | ✅  | ✅  | ✅    | AI gates      | `POST /accounts/{id}/dispute-draft/llm-augment`           |
-| Dispute filing prep          | 5.6     | Planned | —       | —        | —   | —   | —     | Disputes      | Compliance-gated prep audit → slice 5                     |
+| Dispute filing prep          | 5.6     | Partial | ✅      | —        | ✅  | —   | ✅    | Disputes      | `POST /compliance/dispute-filing/accounts/{id}/prep`      |
 
 ---
 
@@ -390,7 +390,7 @@ Scope: [version-5.6-scope.md](version-5.6-scope.md) · Checklist: [version-5.6-c
 | Batch document summaries      | 2     | 5.3     | Partial | `POST /documents/batch-llm-summaries/run`; worker job behind `ENABLE_LLM` |
 | Agent observability           | 3     | 5.4     | Partial | `GET /llm/agents/status`; run audit + timeline correlation scaffold       |
 | Agent execution (human-gated) | 3     | 5.5     | Partial | `POST /llm/execution/steps/{id}/approve`; no autonomous filing            |
-| Autonomous dispute prep       | 4     | 5.6     | Planned | Compliance-gated filing prep audit → slice 5                              |
+| Autonomous dispute prep       | 4     | 5.6     | Partial | Compliance-gated filing prep audit; no bureau submission                  |
 
 See [AI Architecture](../architecture/ai-architecture.md).
 
