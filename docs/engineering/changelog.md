@@ -956,3 +956,11 @@ packages/job-orchestrator/
 **Reason:** 5.7 billing epic ships Stripe invoice PDF generation run audit without live Stripe API calls or tax calculation.
 
 **Follow-up work:** Slice 6 — capability matrix 5.7 sign-off + `v5.7.0` release.
+
+### Decision: Version 5.7 epic sign-off
+
+**Decision:** Mark all four Version 5.7 epics **Partial ✅** in `version-5.7-scope.md`, add capability matrix 5.7 epic sign-off table, update AI tracker for agent external tool-calling, complete checklist exit criteria, and publish `docs/release-notes/v5.7.0.md`.
+
+**Reason:** v5.7.0 completes compliance-gated autonomous workflow scaffolds; unsupervised agent loops, live bureau filing, and Stripe tax calculation remain deferred to 5.8+.
+
+**Follow-up work:** Version 5.8 planning — unsupervised agent loops and production integration depth (compliance-gated).

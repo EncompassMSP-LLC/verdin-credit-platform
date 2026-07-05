@@ -13,6 +13,7 @@
 **Version 5.2 sign-off:** [version-5.2-scope.md](version-5.2-scope.md) · Release notes: [v5.2.0.md](../release-notes/v5.2.0.md)
 **Version 5.3 sign-off:** [version-5.3-scope.md](version-5.3-scope.md) · Release notes: [v5.3.0.md](../release-notes/v5.3.0.md)
 **Version 5.6 sign-off:** [version-5.6-scope.md](version-5.6-scope.md) · Release notes: [v5.6.0.md](../release-notes/v5.6.0.md)
+**Version 5.7 sign-off:** [version-5.7-scope.md](version-5.7-scope.md) · Release notes: [v5.7.0.md](../release-notes/v5.7.0.md)
 
 ## Status legend
 
@@ -400,15 +401,16 @@ Scope: [version-5.6-scope.md](version-5.6-scope.md) · Checklist: [version-5.6-c
 | Batch document summaries      | 2     | 5.3     | Partial | `POST /documents/batch-llm-summaries/run`; worker job behind `ENABLE_LLM` |
 | Agent observability           | 3     | 5.4     | Partial | `GET /llm/agents/status`; run audit + timeline correlation scaffold       |
 | Agent execution (human-gated) | 3     | 5.5     | Partial | `POST /llm/execution/steps/{id}/approve`; no autonomous filing            |
-| Autonomous dispute prep       | 4     | 5.6     | Partial | Compliance-gated filing prep audit; no bureau submission                  |
+| Autonomous dispute prep       | 4     | 5.6     | Partial | Compliance-gated filing prep audit; bureau submission → 5.7               |
+| Agent external tool-calling   | 3     | 5.7     | Partial | `POST /llm/tool-calling/requests/{id}/approve`; no unsupervised loops     |
 
 See [AI Architecture](../architecture/ai-architecture.md).
 
 ---
 
-## Version 5.7 — Compliance-gated autonomous workflows (in progress)
+## Version 5.7 — Compliance-gated autonomous workflows (sign-off)
 
-Scope: [version-5.7-scope.md](version-5.7-scope.md) · Checklist: [version-5.7-completion-checklist.md](../development/version-5.7-completion-checklist.md)
+Scope: [version-5.7-scope.md](version-5.7-scope.md) · Checklist: [version-5.7-completion-checklist.md](../development/version-5.7-completion-checklist.md) · Release notes: [v5.7.0.md](../release-notes/v5.7.0.md)
 
 | Capability                  | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                         |
 | --------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ----------------------------------------------------------------------------- |
@@ -416,6 +418,15 @@ Scope: [version-5.7-scope.md](version-5.7-scope.md) · Checklist: [version-5.7-c
 | Agent external tool-calling | 5.7     | Partial | ✅      | —        | ✅  | —   | ✅    | AI gates     | `POST /llm/tool-calling/requests`                                             |
 | SAML certificate rotation   | 5.7     | Partial | ✅      | —        | ✅  | —   | ✅    | Enterprise   | `POST /enterprise/federation/saml-cert-rotation/metadata-uploads/{id}/rotate` |
 | Stripe invoice PDF          | 5.7     | Partial | ✅      | —        | ✅  | —   | ✅    | Billing      | `POST /billing/invoice-pdf/collection-runs/{id}/generate`                     |
+
+### Version 5.7 epic sign-off
+
+| Epic                        | 5.7 outcome | Exit note                                                              |
+| --------------------------- | ----------- | ---------------------------------------------------------------------- |
+| Dispute bureau submission   | Partial ✅  | Submission run audit; unsupervised filing + live bureau API → 5.8+     |
+| Agent external tool-calling | Partial ✅  | Tool invocation audit; unsupervised loops + arbitrary execution → 5.8+ |
+| SAML certificate rotation   | Partial ✅  | Rotation run audit; automated rotation without review → 5.8+           |
+| Stripe invoice PDF          | Partial ✅  | PDF generation audit; live Stripe API + tax calculation → 5.8+         |
 
 ---
 

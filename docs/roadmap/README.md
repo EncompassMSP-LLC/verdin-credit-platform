@@ -49,7 +49,7 @@ Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (
 | **5.4**   | Production Operations        | **Shipped** | Invoicing/dunning, multi-IdP federation, marketing SMS, agent observability (`v5.4.0`)  |
 | **5.5**   | Production Automation        | **Shipped** | Invoice collection, SAML metadata, SMS delivery worker, agent execution scaffold        |
 | **5.6**   | Compliance-Reviewed Depth    | Released    | HRIS sync, SMS deliverability, LLM dispute augment, dispute filing prep                 |
-| **5.7**   | Autonomous Workflows (gated) | In progress | Bureau submission, agent tool-calling, SAML cert rotation, Stripe invoice PDF           |
+| **5.7**   | Autonomous Workflows (gated) | Released    | Bureau submission, agent tool-calling, SAML cert rotation, Stripe invoice PDF           |
 
 ### Sprint milestones
 
@@ -260,18 +260,20 @@ Scope and checklist: [`docs/governance/version-5.6-scope.md`](../governance/vers
 
 Release notes: [`docs/release-notes/v5.6.0.md`](../release-notes/v5.6.0.md)
 
-### Version 5.7 — Compliance-Gated Autonomous Workflows (in progress)
+### Version 5.7 — Compliance-Gated Autonomous Workflows (released)
 
 Scope and checklist: [`docs/governance/version-5.7-scope.md`](../governance/version-5.7-scope.md) · [`docs/development/version-5.7-completion-checklist.md`](../development/version-5.7-completion-checklist.md)
 
 | Epic | Theme                       | 5.7 outcome | Notes                                                     |
 | ---- | --------------------------- | ----------- | --------------------------------------------------------- |
-| 1    | Dispute bureau submission   | Partial     | Admin-gated submission run audit (no unsupervised filing) |
-| 2    | Agent external tool-calling | Partial     | Human-gated tool invocation audit scaffold                |
-| 3    | SAML certificate rotation   | Partial     | Cert rotation run audit + status scaffold                 |
-| 4    | Stripe invoice PDF          | Partial     | Invoice PDF generation run audit scaffold                 |
+| 1    | Dispute bureau submission   | Partial ✅  | Admin-gated submission run audit (no unsupervised filing) |
+| 2    | Agent external tool-calling | Partial ✅  | Human-gated tool invocation audit scaffold                |
+| 3    | SAML certificate rotation   | Partial ✅  | Cert rotation run audit + status scaffold                 |
+| 4    | Stripe invoice PDF          | Partial ✅  | Invoice PDF generation run audit scaffold                 |
 
-**Target tag:** `v5.7.0`
+**Tag:** `v5.7.0` — Compliance-Gated Autonomous Workflows.
+
+Release notes: [`docs/release-notes/v5.7.0.md`](../release-notes/v5.7.0.md)
 
 ## Sprint → version mapping
 

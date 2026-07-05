@@ -6,10 +6,10 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 
 ## Exit criteria for “5.7 done”
 
-- [ ] All four epics below are **✅ or explicitly deferred** with docs updated — see [`version-5.7-scope.md`](../governance/version-5.7-scope.md)
-- [ ] Capability matrix updated for 5.7 slices
-- [ ] Bureau submission, tool-calling, cert rotation, and invoice PDF paths verified behind feature flags
-- [ ] `docs/release-notes/v5.7.0.md` + tag `v5.7.0`
+- [x] All four epics below are **✅ or explicitly deferred** with docs updated — see [`version-5.7-scope.md`](../governance/version-5.7-scope.md)
+- [x] Capability matrix updated for 5.7 slices
+- [x] Bureau submission, tool-calling, cert rotation, and invoice PDF paths verified behind feature flags
+- [x] `docs/release-notes/v5.7.0.md` + tag `v5.7.0`
 
 ---
 
@@ -22,7 +22,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | 3     | Agent external tool-calling scaffold | AI operations | ✅     |
 | 4     | SAML certificate rotation scaffold   | Identity      | ✅     |
 | 5     | Stripe invoice PDF scaffold          | Billing       | ✅     |
-| 6     | Capability matrix 5.7 sign-off       | Governance    | —      |
+| 6     | Capability matrix 5.7 sign-off       | Governance    | ✅     |
 
 Slice 2 requires `ENABLE_DISPUTE_FILING_PREP=true` and a `prepared` filing prep run. Slice 3 requires `ENABLE_AGENT_EXECUTION=true`. Slice 4 requires `ENABLE_HRIS_BIDIRECTIONAL_SYNC=true` and SAML metadata scaffold. Slice 5 requires `ENABLE_BILLING_INVOICE_COLLECTION=true`; no live Stripe PDF API calls without compliance deferral docs.
 
