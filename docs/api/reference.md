@@ -556,6 +556,15 @@ Retention enforcement endpoints require `ENABLE_COMPLIANCE_ENFORCEMENT=true`. Ac
 | GET    | `/compliance/enforcement/runs`   | read_only | Paginated retention enforcement audit log        |
 | POST   | `/compliance/enforcement/run`    | admin     | Run retention enforcement for current org        |
 
+Dispute filing prep endpoints require `ENABLE_DISPUTE_FILING_PREP=true` (and human-gated agent execution readiness). Admin approval marks a prep run as `prepared` without autonomous bureau submission.
+
+| Method | Path                                                    | Role         | Description                             |
+| ------ | ------------------------------------------------------- | ------------ | --------------------------------------- |
+| GET    | `/compliance/dispute-filing/status`                     | read_only    | Filing prep readiness and blockers      |
+| GET    | `/compliance/dispute-filing/runs`                       | read_only    | Paginated filing prep audit log         |
+| POST   | `/compliance/dispute-filing/accounts/{account_id}/prep` | case_manager | Submit filing prep run for admin review |
+| POST   | `/compliance/dispute-filing/runs/{run_id}/approve`      | admin        | Approve prep run (no bureau submission) |
+
 Consent types: `croa_services`, `fcra_dispute`, `fdcpa_contact`, `marketing`, `data_processing`. Retention scopes: `documents`, `communications`, `audit_logs`, `client_profiles`. Enforcement jobs and legal sign-off workflows are deferred to 5.0+.
 
 ## Reporting

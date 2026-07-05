@@ -21,7 +21,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | 2     | HRIS bidirectional sync scaffold   | Identity       | ✅     |
 | 3     | SMS deliverability dashboard       | Communications | ✅     |
 | 4     | LLM dispute draft augment scaffold | AI assistance  | ✅     |
-| 5     | Dispute filing prep scaffold       | Disputes       | —      |
+| 5     | Dispute filing prep scaffold       | Disputes       | ✅     |
 | 6     | Capability matrix 5.6 sign-off     | Governance     | —      |
 
 Slice 2 requires `ENABLE_ENTERPRISE=true` and SAML metadata scaffold. Slice 3 requires `ENABLE_SMS_MARKETING_DELIVERY=true` and delivery logs. Slice 4 requires `ENABLE_LLM=true` and ADR-012 gates; no provider calls without scrub config. Slice 5 requires human-gated agent execution; no autonomous bureau filing without compliance deferral docs.
