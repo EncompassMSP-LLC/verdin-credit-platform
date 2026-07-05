@@ -20,6 +20,7 @@ from api.modules.billing.dependencies import (
     require_billing_invoicing_enabled,
     require_usage_metering_enabled,
 )
+from api.modules.billing.invoice_pdf_router import invoice_pdf_router
 from api.modules.billing.invoicing_schemas import (
     BillingInvoicingRunListParams,
     BillingInvoicingRunRequest,
@@ -41,6 +42,7 @@ from api.modules.billing.service import BillingService
 from api.modules.org_admin.dependencies import require_org_admin_enabled
 
 router = APIRouter(prefix="/billing", tags=["Billing"])
+router.include_router(invoice_pdf_router)
 
 
 def get_billing_service(db: AsyncSession = Depends(get_db)) -> BillingService:

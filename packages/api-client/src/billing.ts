@@ -206,3 +206,72 @@ export function runBillingInvoiceCollection(input: BillingInvoiceCollectionRunIn
     body: JSON.stringify(input),
   });
 }
+
+export type StripeInvoicePdfRunStatus = 'pending_approval' | 'generated' | 'rejected' | 'failed';
+
+export interface StripeInvoicePdfGateStatus {
+  enabled: boolean;
+  ready: boolean;
+  collection_ready: boolean;
+  blockers: string[];
+}
+
+export interface StripeInvoicePdfRun {
+  id: string;
+  organization_id: string;
+  collection_run_id: string;
+  status: StripeInvoicePdfRunStatus;
+  generation_summary: string;
+  requested_by_user_id: string | null;
+  approved_by_user_id: string | null;
+  requested_at: string | null;
+  approved_at: string | null;
+  generated_at: string | null;
+  error_message: string | null;
+}
+
+export interface StripeInvoicePdfRunList {
+  total: number;
+  page: number;
+  page_size: number;
+  items: StripeInvoicePdfRun[];
+}
+
+export interface StripeInvoicePdfInput {
+  generation_summary: string;
+}
+
+export interface StripeInvoicePdfRunResult {
+  completed_at: string;
+  run: StripeInvoicePdfRun;
+}
+
+export function getStripeInvoicePdfStatus() {
+  return request<StripeInvoicePdfGateStatus>(apiPath('/billing/invoice-pdf/status'));
+}
+
+export function listStripeInvoicePdfRuns(page = 1, pageSize = 20) {
+  const params = new URLSearchParams({
+    page: String(page),
+    page_size: String(pageSize),
+  });
+  return request<StripeInvoicePdfRunList>(
+    apiPath(`/billing/invoice-pdf/runs?${params.toString()}`),
+  );
+}
+
+export function submitStripeInvoicePdfRun(collectionRunId: string, input: StripeInvoicePdfInput) {
+  return request<StripeInvoicePdfRunResult>(
+    apiPath(`/billing/invoice-pdf/collection-runs/${collectionRunId}/generate`),
+    {
+      method: 'POST',
+      body: JSON.stringify(input),
+    },
+  );
+}
+
+export function approveStripeInvoicePdfRun(runId: string) {
+  return request<StripeInvoicePdfRunResult>(apiPath(`/billing/invoice-pdf/runs/${runId}/approve`), {
+    method: 'POST',
+  });
+}

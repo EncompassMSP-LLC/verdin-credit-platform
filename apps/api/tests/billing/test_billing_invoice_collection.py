@@ -1,26 +1,8 @@
 """Billing invoice collection scaffold integration tests."""
 
-import pytest
 from fastapi.testclient import TestClient
 
-from api.core.feature_flags import get_feature_flags
-from api.core.stripe_billing import get_stripe_billing_settings
 from api.modules.billing.collection_models import BillingInvoiceCollectionRunKind
-
-
-@pytest.fixture
-def collection_env(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("ENABLE_BILLING", "true")
-    monkeypatch.setenv("ENABLE_BILLING_INVOICING", "true")
-    monkeypatch.setenv("ENABLE_BILLING_INVOICE_COLLECTION", "true")
-    monkeypatch.setenv("STRIPE_SECRET_KEY", "sk_test_example")
-    monkeypatch.setenv("STRIPE_WEBHOOK_SECRET", "whsec_test_secret")
-    monkeypatch.setenv("STRIPE_DEFAULT_PRICE_ID", "price_test_default")
-    get_feature_flags.cache_clear()
-    get_stripe_billing_settings.cache_clear()
-    yield
-    get_feature_flags.cache_clear()
-    get_stripe_billing_settings.cache_clear()
 
 
 def test_collection_hidden_when_disabled(

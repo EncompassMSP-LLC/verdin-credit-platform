@@ -532,22 +532,26 @@ API keys use prefix `vrd_live_` with SHA-256 hashed storage. Scopes: `read`, `wr
 
 Stripe customer and subscription scaffold for organization billing. Admin setup/subscribe endpoints require `ENABLE_BILLING=true` and `ENABLE_ENTERPRISE=true`. The Stripe webhook endpoint verifies `Stripe-Signature` and does not require staff JWT auth.
 
-| Method | Path                         | Min role  | Description                                     |
-| ------ | ---------------------------- | --------- | ----------------------------------------------- |
-| GET    | `/billing/status`            | read_only | Stripe billing readiness and blockers           |
-| POST   | `/billing/setup`             | admin     | Create Stripe customer for current organization |
-| POST   | `/billing/subscribe`         | admin     | Create subscription for org billing customer    |
-| POST   | `/billing/webhooks/stripe`   | public    | Stripe webhook handler (signature verified)     |
-| GET    | `/billing/usage/summary`     | read_only | Org usage metric totals (metering scaffold)     |
-| POST   | `/billing/usage/events`      | admin     | Record a billing usage event for the org        |
-| GET    | `/billing/invoicing/status`  | read_only | Invoicing/dunning readiness and blockers        |
-| GET    | `/billing/invoicing/runs`    | read_only | Paginated invoicing/dunning run audit log       |
-| POST   | `/billing/invoicing/run`     | admin     | Run invoice cycle or dunning reminder scaffold  |
-| GET    | `/billing/collection/status` | read_only | Invoice collection readiness and blockers       |
-| GET    | `/billing/collection/runs`   | read_only | Paginated invoice collection run audit log      |
-| POST   | `/billing/collection/run`    | admin     | Run invoice PDF or payment reminder scaffold    |
+| Method | Path                                                 | Min role  | Description                                       |
+| ------ | ---------------------------------------------------- | --------- | ------------------------------------------------- |
+| GET    | `/billing/status`                                    | read_only | Stripe billing readiness and blockers             |
+| POST   | `/billing/setup`                                     | admin     | Create Stripe customer for current organization   |
+| POST   | `/billing/subscribe`                                 | admin     | Create subscription for org billing customer      |
+| POST   | `/billing/webhooks/stripe`                           | public    | Stripe webhook handler (signature verified)       |
+| GET    | `/billing/usage/summary`                             | read_only | Org usage metric totals (metering scaffold)       |
+| POST   | `/billing/usage/events`                              | admin     | Record a billing usage event for the org          |
+| GET    | `/billing/invoicing/status`                          | read_only | Invoicing/dunning readiness and blockers          |
+| GET    | `/billing/invoicing/runs`                            | read_only | Paginated invoicing/dunning run audit log         |
+| POST   | `/billing/invoicing/run`                             | admin     | Run invoice cycle or dunning reminder scaffold    |
+| GET    | `/billing/collection/status`                         | read_only | Invoice collection readiness and blockers         |
+| GET    | `/billing/collection/runs`                           | read_only | Paginated invoice collection run audit log        |
+| POST   | `/billing/collection/run`                            | admin     | Run invoice PDF or payment reminder scaffold      |
+| GET    | `/billing/invoice-pdf/status`                        | read_only | Stripe invoice PDF readiness and blockers         |
+| GET    | `/billing/invoice-pdf/runs`                          | read_only | Paginated Stripe invoice PDF generation audit log |
+| POST   | `/billing/invoice-pdf/collection-runs/{id}/generate` | admin     | Submit PDF generation run for admin review        |
+| POST   | `/billing/invoice-pdf/runs/{run_id}/approve`         | admin     | Approve PDF generation scaffold (no live Stripe)  |
 
-`GET /org-admin/organization` embeds a `billing` section when billing is configured. Env vars: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_DEFAULT_PRICE_ID`. Usage metering requires `ENABLE_BILLING_USAGE_METERING=true` (and `ENABLE_BILLING=true`). Invoicing scaffold requires `ENABLE_BILLING_INVOICING=true`. Invoice collection scaffold requires `ENABLE_BILLING_INVOICE_COLLECTION=true` (and `ENABLE_BILLING_INVOICING=true`). Actual Stripe invoice PDF API calls remain deferred.
+`GET /org-admin/organization` embeds a `billing` section when billing is configured. Env vars: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_DEFAULT_PRICE_ID`. Usage metering requires `ENABLE_BILLING_USAGE_METERING=true` (and `ENABLE_BILLING=true`). Invoicing scaffold requires `ENABLE_BILLING_INVOICING=true`. Invoice collection scaffold requires `ENABLE_BILLING_INVOICE_COLLECTION=true` (and `ENABLE_BILLING_INVOICING=true`). Stripe invoice PDF generation scaffold requires `ENABLE_STRIPE_INVOICE_PDF=true` (and `ENABLE_BILLING_INVOICE_COLLECTION=true`). Actual Stripe invoice PDF API calls remain deferred.
 
 ## Compliance center
 

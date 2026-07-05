@@ -415,7 +415,7 @@ Scope: [version-5.7-scope.md](version-5.7-scope.md) · Checklist: [version-5.7-c
 | Dispute bureau submission   | 5.7     | Partial | ✅      | —        | ✅  | —   | ✅    | Disputes     | `POST /compliance/dispute-bureau-submission/prep-runs/{id}/submit`            |
 | Agent external tool-calling | 5.7     | Partial | ✅      | —        | ✅  | —   | ✅    | AI gates     | `POST /llm/tool-calling/requests`                                             |
 | SAML certificate rotation   | 5.7     | Partial | ✅      | —        | ✅  | —   | ✅    | Enterprise   | `POST /enterprise/federation/saml-cert-rotation/metadata-uploads/{id}/rotate` |
-| Stripe invoice PDF          | 5.7     | Planned | —       | —        | —   | —   | —     | Billing      | PDF generation run audit → slice 5                                            |
+| Stripe invoice PDF          | 5.7     | Partial | ✅      | —        | ✅  | —   | ✅    | Billing      | `POST /billing/invoice-pdf/collection-runs/{id}/generate`                     |
 
 ---
 
