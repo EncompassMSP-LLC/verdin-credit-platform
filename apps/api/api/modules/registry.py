@@ -92,6 +92,10 @@ from api.modules.llm.agent_tool_calling_models import (
     AgentToolInvocationRequest,
     AgentToolInvocationStatus,
 )
+from api.modules.llm.agent_unsupervised_loop_models import (
+    AgentUnsupervisedLoopRun,
+    AgentUnsupervisedLoopStatus,
+)
 from api.modules.messaging.models import (
     MessageSenderRole,
     MessageThread,
@@ -132,6 +136,8 @@ __all__ = [
     "AgentExternalToolKind",
     "AgentSupervisedLoopRun",
     "AgentSupervisedLoopStatus",
+    "AgentUnsupervisedLoopRun",
+    "AgentUnsupervisedLoopStatus",
     "AgentToolInvocationRequest",
     "AgentToolInvocationStatus",
     "AgentObservabilityKind",

@@ -467,6 +467,17 @@ Multi-step agent loop audit with human gates between steps. Requires `ENABLE_AI=
 
 Returns `404` when agent supervised loop flags are false.
 
+### Agent unsupervised loops (v5.9)
+
+| Method | Path                                                                | Role         | Description                                                |
+| ------ | ------------------------------------------------------------------- | ------------ | ---------------------------------------------------------- |
+| GET    | `/llm/unsupervised-loops/status`                                    | read_only    | Unsupervised loop readiness and blockers                   |
+| GET    | `/llm/unsupervised-loops/runs`                                      | read_only    | Paginated unsupervised loop audit log                      |
+| POST   | `/llm/unsupervised-loops/supervised-runs/{supervised_run_id}/start` | case_manager | Start an unsupervised loop from a completed supervised run |
+| POST   | `/llm/unsupervised-loops/runs/{run_id}/approve`                     | admin        | Approve and complete an unsupervised multi-step loop       |
+
+Returns `404` when agent unsupervised loop flags are false.
+
 ## Enterprise identity
 
 MFA and SSO readiness plus staff enrollment flows. Portal authentication (`/portal/auth/*`) remains a separate partition.

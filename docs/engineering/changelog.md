@@ -1020,3 +1020,11 @@ packages/job-orchestrator/
 **Reason:** v5.8.0 sign-off complete (`v5.8.0` tagged); unsupervised agent loops, autonomous bureau filing, live Stripe Tax API, and SAML automated rotation scaffolds need a sequenced delivery path before v5.9.0 release.
 
 **Follow-up work:** Slice 2 — agent unsupervised loop scaffold.
+
+### Decision: Agent unsupervised loop scaffold (Version 5.9 slice 2)
+
+**Decision:** Ship admin-gated agent unsupervised loop audit (`agent_unsupervised_loop_runs` migration 051) with status, list, start-from-completed-supervised-run, and admin approve endpoints behind `ENABLE_AGENT_UNSUPERVISED_LOOPS`.
+
+**Reason:** 5.9 AI operations epic extends 5.8 supervised loops with multi-step loop audit without per-step human gates, while retaining admin approval before completion.
+
+**Follow-up work:** Slice 3 — autonomous bureau filing scaffold.
