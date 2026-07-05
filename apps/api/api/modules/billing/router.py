@@ -39,12 +39,14 @@ from api.modules.billing.schemas import (
     StripeWebhookResponse,
 )
 from api.modules.billing.service import BillingService
+from api.modules.billing.stripe_live_tax_api_router import stripe_live_tax_api_router
 from api.modules.billing.tax_calculation_router import tax_calculation_router
 from api.modules.org_admin.dependencies import require_org_admin_enabled
 
 router = APIRouter(prefix="/billing", tags=["Billing"])
 router.include_router(invoice_pdf_router)
 router.include_router(tax_calculation_router)
+router.include_router(stripe_live_tax_api_router)
 
 
 def get_billing_service(db: AsyncSession = Depends(get_db)) -> BillingService:

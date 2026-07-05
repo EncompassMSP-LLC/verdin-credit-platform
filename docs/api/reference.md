@@ -594,6 +594,15 @@ Stripe tax calculation scaffold requires `ENABLE_STRIPE_TAX_CALCULATION=true` (a
 | POST   | `/billing/tax-calculation/pdf-runs/{id}/calculate` | admin     | Submit tax calculation run from generated PDF  |
 | POST   | `/billing/tax-calculation/runs/{run_id}/approve`   | admin     | Approve tax calculation scaffold (no live API) |
 
+Stripe live Tax API scaffold requires `ENABLE_STRIPE_LIVE_TAX_API=true` (and `ENABLE_STRIPE_TAX_CALCULATION=true`). No live Stripe Tax API calls without compliance deferral docs.
+
+| Method | Path                                                     | Min role  | Description                                        |
+| ------ | -------------------------------------------------------- | --------- | -------------------------------------------------- |
+| GET    | `/billing/live-tax-api/status`                           | read_only | Live Stripe Tax API readiness and blockers         |
+| GET    | `/billing/live-tax-api/runs`                             | read_only | Paginated live Stripe Tax API invocation audit     |
+| POST   | `/billing/live-tax-api/tax-calculation-runs/{id}/invoke` | admin     | Submit live Tax API invocation from calculated run |
+| POST   | `/billing/live-tax-api/runs/{run_id}/approve`            | admin     | Approve live Tax API invocation scaffold           |
+
 `GET /org-admin/organization` embeds a `billing` section when billing is configured. Env vars: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_DEFAULT_PRICE_ID`. Usage metering requires `ENABLE_BILLING_USAGE_METERING=true` (and `ENABLE_BILLING=true`). Invoicing scaffold requires `ENABLE_BILLING_INVOICING=true`. Invoice collection scaffold requires `ENABLE_BILLING_INVOICE_COLLECTION=true` (and `ENABLE_BILLING_INVOICING=true`). Stripe invoice PDF generation scaffold requires `ENABLE_STRIPE_INVOICE_PDF=true` (and `ENABLE_BILLING_INVOICE_COLLECTION=true`). Actual Stripe invoice PDF API calls remain deferred.
 
 ## Compliance center
