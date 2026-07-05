@@ -139,3 +139,33 @@ def manager_headers(api_client: TestClient, case_manager_user: User) -> dict[str
 @pytest.fixture
 def readonly_headers(api_client: TestClient, read_only_user: User) -> dict[str, str]:
     return _login(api_client, read_only_user.email)
+
+
+@pytest.fixture
+def collection_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("ENABLE_BILLING", "true")
+    monkeypatch.setenv("ENABLE_ENTERPRISE", "true")
+    monkeypatch.setenv("ENABLE_BILLING_INVOICING", "true")
+    monkeypatch.setenv("ENABLE_BILLING_INVOICE_COLLECTION", "true")
+    monkeypatch.setenv("STRIPE_SECRET_KEY", "sk_test_example")
+    monkeypatch.setenv("STRIPE_WEBHOOK_SECRET", "whsec_test_secret")
+    monkeypatch.setenv("STRIPE_DEFAULT_PRICE_ID", "price_test_default")
+    from api.core.stripe_billing import get_stripe_billing_settings
+
+    get_feature_flags.cache_clear()
+    get_stripe_billing_settings.cache_clear()
+    yield
+    get_feature_flags.cache_clear()
+    get_stripe_billing_settings.cache_clear()
+
+
+@pytest.fixture
+def stripe_invoice_pdf_env(monkeypatch: pytest.MonkeyPatch, collection_env: None) -> None:
+    monkeypatch.setenv("ENABLE_STRIPE_INVOICE_PDF", "true")
+    from api.core.stripe_billing import get_stripe_billing_settings
+
+    get_feature_flags.cache_clear()
+    get_stripe_billing_settings.cache_clear()
+    yield
+    get_feature_flags.cache_clear()
+    get_stripe_billing_settings.cache_clear()

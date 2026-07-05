@@ -38,3 +38,12 @@ def require_billing_invoice_collection_enabled() -> None:
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Billing invoice collection is not enabled",
         )
+
+
+def require_stripe_invoice_pdf_enabled() -> None:
+    require_billing_invoice_collection_enabled()
+    if not is_feature_enabled(FeatureFlag.ENABLE_STRIPE_INVOICE_PDF):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Stripe invoice PDF generation is not enabled",
+        )

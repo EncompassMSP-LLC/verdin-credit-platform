@@ -948,3 +948,11 @@ packages/job-orchestrator/
 **Reason:** 5.7 identity epic ships federation cert rotation run audit without automated IdP rotation or operator-bypass flows.
 
 **Follow-up work:** Slice 5 — Stripe invoice PDF scaffold.
+
+### Decision: Stripe invoice PDF scaffold
+
+**Decision:** Add `stripe_invoice_pdf_runs` table (migration `046`), `GET /billing/invoice-pdf/status`, `GET .../runs`, `POST .../collection-runs/{id}/generate`, and `POST .../runs/{id}/approve`, `api/core/stripe_invoice_pdf.py`, `ENABLE_STRIPE_INVOICE_PDF` flag (requires invoice collection readiness), admin-gated PDF generation audit scaffold.
+
+**Reason:** 5.7 billing epic ships Stripe invoice PDF generation run audit without live Stripe API calls or tax calculation.
+
+**Follow-up work:** Slice 6 — capability matrix 5.7 sign-off + `v5.7.0` release.

@@ -76,3 +76,9 @@ class BillingInvoiceCollectionRunRepository:
         total = int(count_result.scalar_one())
         result = await self._session.execute(base.offset(filters.skip).limit(filters.limit))
         return list(result.scalars().all()), total
+
+    async def get_run_by_id(self, run_id: uuid.UUID) -> BillingInvoiceCollectionRun | None:
+        result = await self._session.execute(
+            select(BillingInvoiceCollectionRun).where(BillingInvoiceCollectionRun.id == run_id)
+        )
+        return result.scalar_one_or_none()

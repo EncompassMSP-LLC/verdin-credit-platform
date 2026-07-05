@@ -19,6 +19,7 @@ from api.modules.billing.collection_models import (
     BillingInvoiceCollectionRunStatus,
     BillingInvoiceCollectionTriggerSource,
 )
+from api.modules.billing.invoice_pdf_models import StripeInvoicePdfRun, StripeInvoicePdfRunStatus
 from api.modules.billing.invoicing_models import (
     BillingInvoicingRun,
     BillingInvoicingRunKind,
@@ -128,6 +129,8 @@ __all__ = [
     "BillingInvoiceCollectionRunKind",
     "BillingInvoiceCollectionRunStatus",
     "BillingInvoiceCollectionTriggerSource",
+    "StripeInvoicePdfRun",
+    "StripeInvoicePdfRunStatus",
     "BillingInvoicingRun",
     "BillingInvoicingRunKind",
     "BillingInvoicingRunStatus",

@@ -21,7 +21,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | 2     | Dispute bureau submission scaffold   | Disputes      | ✅     |
 | 3     | Agent external tool-calling scaffold | AI operations | ✅     |
 | 4     | SAML certificate rotation scaffold   | Identity      | ✅     |
-| 5     | Stripe invoice PDF scaffold          | Billing       | —      |
+| 5     | Stripe invoice PDF scaffold          | Billing       | ✅     |
 | 6     | Capability matrix 5.7 sign-off       | Governance    | —      |
 
 Slice 2 requires `ENABLE_DISPUTE_FILING_PREP=true` and a `prepared` filing prep run. Slice 3 requires `ENABLE_AGENT_EXECUTION=true`. Slice 4 requires `ENABLE_HRIS_BIDIRECTIONAL_SYNC=true` and SAML metadata scaffold. Slice 5 requires `ENABLE_BILLING_INVOICE_COLLECTION=true`; no live Stripe PDF API calls without compliance deferral docs.
