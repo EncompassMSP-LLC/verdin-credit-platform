@@ -77,6 +77,10 @@ from api.modules.enterprise.hris_lifecycle_models import (
     HrisLifecycleSyncRunStatus,
 )
 from api.modules.enterprise.models import UserSsoEnrollment, UserTotpEnrollment
+from api.modules.enterprise.saml_automated_rotation_models import (
+    SamlAutomatedRotationRun,
+    SamlAutomatedRotationRunStatus,
+)
 from api.modules.enterprise.saml_cert_rotation_models import (
     SamlCertificateRotationRun,
     SamlCertificateRotationStatus,
@@ -225,6 +229,8 @@ __all__ = [
     "RetentionScope",
     "SamlFederationMetadataUpload",
     "SamlMetadataValidationStatus",
+    "SamlAutomatedRotationRun",
+    "SamlAutomatedRotationRunStatus",
     "SamlCertificateRotationRun",
     "SamlCertificateRotationStatus",
     "SmsDeliveryLog",

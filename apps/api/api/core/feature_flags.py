@@ -40,6 +40,7 @@ class FeatureFlag(StrEnum):
     ENABLE_DISPUTE_BUREAU_SUBMISSION = "ENABLE_DISPUTE_BUREAU_SUBMISSION"
     ENABLE_AGENT_EXTERNAL_TOOL_CALLING = "ENABLE_AGENT_EXTERNAL_TOOL_CALLING"
     ENABLE_SAML_CERTIFICATE_ROTATION = "ENABLE_SAML_CERTIFICATE_ROTATION"
+    ENABLE_SAML_AUTOMATED_ROTATION = "ENABLE_SAML_AUTOMATED_ROTATION"
     ENABLE_STRIPE_INVOICE_PDF = "ENABLE_STRIPE_INVOICE_PDF"
     ENABLE_AGENT_SUPERVISED_LOOPS = "ENABLE_AGENT_SUPERVISED_LOOPS"
     ENABLE_AGENT_UNSUPERVISED_LOOPS = "ENABLE_AGENT_UNSUPERVISED_LOOPS"
@@ -179,6 +180,10 @@ class FeatureFlags(BaseSettings):
         default=False,
         description="Enable admin-gated SAML certificate rotation audit scaffold",
     )
+    enable_saml_automated_rotation: bool = Field(
+        default=False,
+        description="Enable admin-gated SAML automated rotation audit scaffold",
+    )
     enable_stripe_invoice_pdf: bool = Field(
         default=False,
         description="Enable admin-gated Stripe invoice PDF generation audit scaffold",
@@ -246,6 +251,7 @@ _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
     FeatureFlag.ENABLE_DISPUTE_BUREAU_SUBMISSION: "enable_dispute_bureau_submission",
     FeatureFlag.ENABLE_AGENT_EXTERNAL_TOOL_CALLING: "enable_agent_external_tool_calling",
     FeatureFlag.ENABLE_SAML_CERTIFICATE_ROTATION: "enable_saml_certificate_rotation",
+    FeatureFlag.ENABLE_SAML_AUTOMATED_ROTATION: "enable_saml_automated_rotation",
     FeatureFlag.ENABLE_STRIPE_INVOICE_PDF: "enable_stripe_invoice_pdf",
     FeatureFlag.ENABLE_AGENT_SUPERVISED_LOOPS: "enable_agent_supervised_loops",
     FeatureFlag.ENABLE_AGENT_UNSUPERVISED_LOOPS: "enable_agent_unsupervised_loops",

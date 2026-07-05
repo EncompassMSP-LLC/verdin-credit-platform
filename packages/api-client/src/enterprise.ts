@@ -508,3 +508,84 @@ export function approveSamlCertificateRotationRun(runId: string) {
     },
   );
 }
+
+export type SamlAutomatedRotationRunStatus =
+  'pending_approval' | 'automated' | 'rejected' | 'failed';
+
+export interface SamlAutomatedRotationGateStatus {
+  enabled: boolean;
+  ready: boolean;
+  cert_rotation_ready: boolean;
+  blockers: string[];
+}
+
+export interface SamlAutomatedRotationRun {
+  id: string;
+  organization_id: string;
+  saml_certificate_rotation_run_id: string;
+  entity_id: string;
+  status: SamlAutomatedRotationRunStatus;
+  rotation_summary: string;
+  requested_by_user_id: string | null;
+  approved_by_user_id: string | null;
+  requested_at: string | null;
+  approved_at: string | null;
+  automated_at: string | null;
+  error_message: string | null;
+}
+
+export interface SamlAutomatedRotationSubmitInput {
+  rotation_summary: string;
+}
+
+export interface SamlAutomatedRotationRunResult {
+  completed_at: string;
+  run: SamlAutomatedRotationRun;
+}
+
+export interface SamlAutomatedRotationRunList {
+  items: SamlAutomatedRotationRun[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export function getSamlAutomatedRotationStatus() {
+  return request<SamlAutomatedRotationGateStatus>(
+    apiPath('/enterprise/federation/saml-automated-rotation/status'),
+  );
+}
+
+export function listSamlAutomatedRotationRuns(page = 1, pageSize = 20) {
+  const params = new URLSearchParams({
+    page: String(page),
+    page_size: String(pageSize),
+  });
+  return request<SamlAutomatedRotationRunList>(
+    apiPath(`/enterprise/federation/saml-automated-rotation/runs?${params}`),
+  );
+}
+
+export function startSamlAutomatedRotationFromRotationRun(
+  samlCertificateRotationRunId: string,
+  input: SamlAutomatedRotationSubmitInput,
+) {
+  return request<SamlAutomatedRotationRunResult>(
+    apiPath(
+      `/enterprise/federation/saml-automated-rotation/rotation-runs/${samlCertificateRotationRunId}/start`,
+    ),
+    {
+      method: 'POST',
+      body: JSON.stringify(input),
+    },
+  );
+}
+
+export function approveSamlAutomatedRotationRun(runId: string) {
+  return request<SamlAutomatedRotationRunResult>(
+    apiPath(`/enterprise/federation/saml-automated-rotation/runs/${runId}/approve`),
+    {
+      method: 'POST',
+    },
+  );
+}

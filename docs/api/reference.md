@@ -535,7 +535,14 @@ HRIS lifecycle sync scaffold requires `ENABLE_HRIS_LIFECYCLE_SYNC=true` (and `EN
 | POST | `/enterprise/federation/saml-cert-rotation/metadata-uploads/{id}/rotate` | admin | Submit cert rotation run for admin review |
 | POST | `/enterprise/federation/saml-cert-rotation/runs/{run_id}/approve` | admin | Approve rotation scaffold (no live IdP) |
 
-Endpoints return `404` when the corresponding feature flag is false. Full employee lifecycle HRIS sync is deferred to 5.7+.
+SAML automated rotation scaffold requires `ENABLE_SAML_AUTOMATED_ROTATION=true` (and `ENABLE_SAML_CERTIFICATE_ROTATION=true`).
+
+| GET | `/enterprise/federation/saml-automated-rotation/status` | read_only | SAML automated rotation readiness and blockers |
+| GET | `/enterprise/federation/saml-automated-rotation/runs` | read_only | Paginated SAML automated rotation audit log |
+| POST | `/enterprise/federation/saml-automated-rotation/rotation-runs/{id}/start` | admin | Start automated rotation from rotated cert run |
+| POST | `/enterprise/federation/saml-automated-rotation/runs/{run_id}/approve` | admin | Approve automated rotation scaffold |
+
+Endpoints return `404` when the corresponding feature flag is false.
 
 ## Organization admin
 
