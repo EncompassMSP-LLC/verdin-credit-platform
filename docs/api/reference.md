@@ -384,6 +384,15 @@ Marketing SMS campaign enqueue scaffold with org-scoped run audit log. Requires 
 | GET    | `/notifications/sms-campaigns/runs`   | admin     | Paginated marketing campaign run audit    |
 | POST   | `/notifications/sms-campaigns/run`    | admin     | Enqueue a marketing SMS campaign scaffold |
 
+SMS deliverability dashboard (`ENABLE_SMS_DELIVERABILITY_DASHBOARD=true`, requires marketing SMS delivery). Aggregates campaign run and delivery log metrics for the org.
+
+| Method | Path                                                  | Min role  | Description                              |
+| ------ | ----------------------------------------------------- | --------- | ---------------------------------------- |
+| GET    | `/notifications/sms-campaigns/deliverability/status`  | read_only | Deliverability dashboard readiness       |
+| GET    | `/notifications/sms-campaigns/deliverability/summary` | read_only | Org delivery metrics and recent outcomes |
+
+Endpoints return `404` when the corresponding feature flag is false. Multi-provider failover and real-time alerting remain deferred.
+
 Returns `404` when either `ENABLE_SMS_DELIVERY` or `ENABLE_SMS_MARKETING_CAMPAIGNS` is false.
 
 ## LLM gateway

@@ -26,9 +26,11 @@ from api.modules.notifications.schemas import (
 )
 from api.modules.notifications.service import NotificationService
 from api.modules.notifications.sms_campaign_router import sms_campaign_router
+from api.modules.notifications.sms_deliverability_router import sms_deliverability_router
 
 router = APIRouter(prefix="/notifications", tags=["Notifications"])
 router.include_router(sms_campaign_router)
+router.include_router(sms_deliverability_router)
 
 
 def get_notification_service(db: AsyncSession = Depends(get_db)) -> NotificationService:
