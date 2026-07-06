@@ -426,3 +426,78 @@ export function approveStripeLiveTaxApiRun(runId: string) {
     },
   );
 }
+
+export type StripeChargeRetryRunStatus = 'pending_approval' | 'retried' | 'rejected' | 'failed';
+
+export interface StripeChargeRetryGateStatus {
+  enabled: boolean;
+  ready: boolean;
+  live_tax_api_ready: boolean;
+  blockers: string[];
+}
+
+export interface StripeChargeRetryRun {
+  id: string;
+  organization_id: string;
+  stripe_live_tax_api_run_id: string;
+  status: StripeChargeRetryRunStatus;
+  retry_summary: string;
+  requested_by_user_id: string | null;
+  approved_by_user_id: string | null;
+  requested_at: string | null;
+  approved_at: string | null;
+  retried_at: string | null;
+  error_message: string | null;
+}
+
+export interface StripeChargeRetrySubmitInput {
+  retry_summary: string;
+}
+
+export interface StripeChargeRetryRunResult {
+  completed_at: string;
+  run: StripeChargeRetryRun;
+}
+
+export interface StripeChargeRetryRunList {
+  items: StripeChargeRetryRun[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export function getStripeChargeRetryStatus() {
+  return request<StripeChargeRetryGateStatus>(apiPath('/billing/charge-retry/status'));
+}
+
+export function listStripeChargeRetryRuns(page = 1, pageSize = 20) {
+  const params = new URLSearchParams({
+    page: String(page),
+    page_size: String(pageSize),
+  });
+  return request<StripeChargeRetryRunList>(
+    apiPath(`/billing/charge-retry/runs?${params.toString()}`),
+  );
+}
+
+export function submitStripeChargeRetryFromLiveTaxApiRun(
+  stripeLiveTaxApiRunId: string,
+  input: StripeChargeRetrySubmitInput,
+) {
+  return request<StripeChargeRetryRunResult>(
+    apiPath(`/billing/charge-retry/live-tax-api-runs/${stripeLiveTaxApiRunId}/retry`),
+    {
+      method: 'POST',
+      body: JSON.stringify(input),
+    },
+  );
+}
+
+export function approveStripeChargeRetryRun(runId: string) {
+  return request<StripeChargeRetryRunResult>(
+    apiPath(`/billing/charge-retry/runs/${runId}/approve`),
+    {
+      method: 'POST',
+    },
+  );
+}

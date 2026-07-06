@@ -199,3 +199,18 @@ def stripe_live_tax_api_env(
     yield
     get_feature_flags.cache_clear()
     get_stripe_billing_settings.cache_clear()
+
+
+@pytest.fixture
+def stripe_charge_retry_env(
+    monkeypatch: pytest.MonkeyPatch,
+    stripe_live_tax_api_env: None,
+) -> None:
+    monkeypatch.setenv("ENABLE_STRIPE_CHARGE_RETRY", "true")
+    from api.core.stripe_billing import get_stripe_billing_settings
+
+    get_feature_flags.cache_clear()
+    get_stripe_billing_settings.cache_clear()
+    yield
+    get_feature_flags.cache_clear()
+    get_stripe_billing_settings.cache_clear()

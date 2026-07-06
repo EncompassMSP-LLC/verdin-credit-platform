@@ -621,6 +621,15 @@ Stripe live Tax API scaffold requires `ENABLE_STRIPE_LIVE_TAX_API=true` (and `EN
 | POST   | `/billing/live-tax-api/tax-calculation-runs/{id}/invoke` | admin     | Submit live Tax API invocation from calculated run |
 | POST   | `/billing/live-tax-api/runs/{run_id}/approve`            | admin     | Approve live Tax API invocation scaffold           |
 
+Stripe charge retry scaffold requires `ENABLE_STRIPE_CHARGE_RETRY=true` (and `ENABLE_STRIPE_LIVE_TAX_API=true`). No live charge retries without compliance deferral docs.
+
+| Method | Path                                                 | Min role  | Description                                      |
+| ------ | ---------------------------------------------------- | --------- | ------------------------------------------------ |
+| GET    | `/billing/charge-retry/status`                       | read_only | Stripe charge retry readiness and blockers       |
+| GET    | `/billing/charge-retry/runs`                         | read_only | Paginated Stripe charge retry audit log          |
+| POST   | `/billing/charge-retry/live-tax-api-runs/{id}/retry` | admin     | Submit charge retry from invoked live Tax run    |
+| POST   | `/billing/charge-retry/runs/{run_id}/approve`        | admin     | Approve charge retry scaffold (no live API call) |
+
 `GET /org-admin/organization` embeds a `billing` section when billing is configured. Env vars: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_DEFAULT_PRICE_ID`. Usage metering requires `ENABLE_BILLING_USAGE_METERING=true` (and `ENABLE_BILLING=true`). Invoicing scaffold requires `ENABLE_BILLING_INVOICING=true`. Invoice collection scaffold requires `ENABLE_BILLING_INVOICE_COLLECTION=true` (and `ENABLE_BILLING_INVOICING=true`). Stripe invoice PDF generation scaffold requires `ENABLE_STRIPE_INVOICE_PDF=true` (and `ENABLE_BILLING_INVOICE_COLLECTION=true`). Actual Stripe invoice PDF API calls remain deferred.
 
 ## Compliance center

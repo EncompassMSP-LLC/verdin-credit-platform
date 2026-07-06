@@ -1084,3 +1084,11 @@ packages/job-orchestrator/
 **Reason:** 5.10 disputes epic extends 5.9 autonomous filing with operator-gated re-filing run audit without unsupervised re-filing loops.
 
 **Follow-up work:** Slice 4 — Stripe charge retry scaffold.
+
+### Decision: Stripe charge retry scaffold (Version 5.10 slice 4)
+
+**Decision:** Ship admin-gated Stripe charge retry audit (`stripe_charge_retry_runs` migration 057) with status, list, submit-from-invoked-live-tax-api-run, and admin approve endpoints behind `ENABLE_STRIPE_CHARGE_RETRY`.
+
+**Reason:** 5.10 billing epic extends 5.9 live Tax API invocation with operator-gated charge retry run audit without live charge retries.
+
+**Follow-up work:** Slice 5 — SAML passwordless enrollment scaffold.
