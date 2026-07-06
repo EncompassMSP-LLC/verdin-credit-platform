@@ -17,6 +17,7 @@
 **Version 5.8 sign-off:** [version-5.8-scope.md](version-5.8-scope.md) · Release notes: [v5.8.0.md](../release-notes/v5.8.0.md)
 **Version 5.9 sign-off:** [version-5.9-scope.md](version-5.9-scope.md) · Release notes: [v5.9.0.md](../release-notes/v5.9.0.md)
 **Version 5.10 sign-off:** [version-5.10-scope.md](version-5.10-scope.md) · Release notes: [v5.10.0.md](../release-notes/v5.10.0.md)
+**Version 5.11 planning:** [version-5.11-scope.md](version-5.11-scope.md) · Checklist: [version-5.11-completion-checklist.md](../development/version-5.11-completion-checklist.md)
 
 ## Status legend
 
@@ -488,6 +489,19 @@ Scope: [version-5.10-scope.md](version-5.10-scope.md) · Release notes: [v5.10.0
 | Bureau re-filing audit       | 5.10    | Partial ✅ | ✅      | —        | ✅  | —   | ✅    | Disputes     | `POST /compliance/bureau-refiling/filing-runs/{id}/refile`                                     |
 | Stripe charge retry          | 5.10    | Partial ✅ | ✅      | —        | ✅  | —   | ✅    | Billing      | `POST /billing/charge-retry/live-tax-api-runs/{id}/retry`                                      |
 | SAML passwordless enrollment | 5.10    | Partial ✅ | ✅      | —        | ✅  | —   | ✅    | Enterprise   | `POST /enterprise/federation/saml-passwordless-enrollment/automated-rotation-runs/{id}/enroll` |
+
+---
+
+## Version 5.11 — Compliance-gated production execution (in progress)
+
+Scope: [version-5.11-scope.md](version-5.11-scope.md) · Checklist: [version-5.11-completion-checklist.md](../development/version-5.11-completion-checklist.md)
+
+| Capability                    | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                       |
+| ----------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ------------------------------------------- |
+| Unsupervised bureau re-filing | 5.11    | Planned | —       | —        | —   | —   | —     | Disputes     | Unsupervised re-filing audit → slice 2      |
+| Live charge retry execution   | 5.11    | Planned | —       | —        | —   | —   | —     | Billing      | Live charge retry execution audit → slice 3 |
+| HRIS passwordless UI          | 5.11    | Planned | —       | —        | —   | —   | —     | Enterprise   | HRIS passwordless UI audit → slice 4        |
+| Multi-IdP bulk provisioning   | 5.11    | Planned | —       | —        | —   | —   | —     | Enterprise   | Bulk IdP provisioning audit → slice 5       |
 
 ---
 
