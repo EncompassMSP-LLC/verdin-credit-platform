@@ -499,7 +499,7 @@ Scope: [version-5.11-scope.md](version-5.11-scope.md) · Checklist: [version-5.1
 | Capability                    | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                    |
 | ----------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ------------------------------------------------------------------------ |
 | Unsupervised bureau re-filing | 5.11    | Partial | ✅      | —        | ✅  | —   | ✅    | Disputes     | `POST /compliance/bureau-unsupervised-refiling/refiling-runs/{id}/start` |
-| Live charge retry execution   | 5.11    | Planned | —       | —        | —   | —   | —     | Billing      | Live charge retry execution audit → slice 3                              |
+| Live charge retry execution   | 5.11    | Partial | ✅      | —        | ✅  | —   | ✅    | Billing      | `POST /billing/live-charge-retry/charge-retry-runs/{id}/execute`         |
 | HRIS passwordless UI          | 5.11    | Planned | —       | —        | —   | —   | —     | Enterprise   | HRIS passwordless UI audit → slice 4                                     |
 | Multi-IdP bulk provisioning   | 5.11    | Planned | —       | —        | —   | —   | —     | Enterprise   | Bulk IdP provisioning audit → slice 5                                    |
 

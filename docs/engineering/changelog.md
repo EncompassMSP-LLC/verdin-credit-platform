@@ -1124,3 +1124,11 @@ packages/job-orchestrator/
 **Reason:** 5.11 disputes epic extends 5.10 bureau re-filing with operator-gated unsupervised re-filing run audit without live bureau API calls.
 
 **Follow-up work:** Slice 3 — live charge retry execution scaffold.
+
+### Decision: Stripe live charge retry execution scaffold (Version 5.11 slice 3)
+
+**Decision:** Ship admin-gated Stripe live charge retry execution audit (`stripe_live_charge_retry_execution_runs` migration 060) with status, list, submit-from-retried-charge-retry-run, and admin approve endpoints behind `ENABLE_STRIPE_LIVE_CHARGE_RETRY_EXECUTION`.
+
+**Reason:** 5.11 billing epic extends 5.10 charge retry with operator-gated live execution run audit without live Stripe charge API calls.
+
+**Follow-up work:** Slice 4 — HRIS passwordless UI scaffold.

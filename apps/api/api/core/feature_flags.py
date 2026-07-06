@@ -53,6 +53,7 @@ class FeatureFlag(StrEnum):
     ENABLE_STRIPE_TAX_CALCULATION = "ENABLE_STRIPE_TAX_CALCULATION"
     ENABLE_STRIPE_LIVE_TAX_API = "ENABLE_STRIPE_LIVE_TAX_API"
     ENABLE_STRIPE_CHARGE_RETRY = "ENABLE_STRIPE_CHARGE_RETRY"
+    ENABLE_STRIPE_LIVE_CHARGE_RETRY_EXECUTION = "ENABLE_STRIPE_LIVE_CHARGE_RETRY_EXECUTION"
     ENABLE_HRIS_LIFECYCLE_SYNC = "ENABLE_HRIS_LIFECYCLE_SYNC"
 
 
@@ -237,6 +238,10 @@ class FeatureFlags(BaseSettings):
         default=False,
         description="Enable admin-gated Stripe charge retry audit scaffold",
     )
+    enable_stripe_live_charge_retry_execution: bool = Field(
+        default=False,
+        description="Enable admin-gated Stripe live charge retry execution audit scaffold",
+    )
     enable_hris_lifecycle_sync: bool = Field(
         default=False,
         description="Enable admin-gated HRIS lifecycle sync audit scaffold",
@@ -289,6 +294,9 @@ _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
     FeatureFlag.ENABLE_STRIPE_TAX_CALCULATION: "enable_stripe_tax_calculation",
     FeatureFlag.ENABLE_STRIPE_LIVE_TAX_API: "enable_stripe_live_tax_api",
     FeatureFlag.ENABLE_STRIPE_CHARGE_RETRY: "enable_stripe_charge_retry",
+    FeatureFlag.ENABLE_STRIPE_LIVE_CHARGE_RETRY_EXECUTION: (
+        "enable_stripe_live_charge_retry_execution"
+    ),
     FeatureFlag.ENABLE_HRIS_LIFECYCLE_SYNC: "enable_hris_lifecycle_sync",
 }
 
