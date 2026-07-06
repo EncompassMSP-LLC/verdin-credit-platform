@@ -559,6 +559,10 @@ SAML passwordless enrollment scaffold requires `ENABLE_SAML_PASSWORDLESS_ENROLLM
 | GET | `/enterprise/federation/saml-passwordless-enrollment/runs` | read_only | Paginated SAML passwordless enrollment audit log |
 | POST | `/enterprise/federation/saml-passwordless-enrollment/automated-rotation-runs/{id}/enroll` | admin | Start passwordless enrollment from automated rotation run |
 | POST | `/enterprise/federation/saml-passwordless-enrollment/runs/{run_id}/approve` | admin | Approve passwordless enrollment scaffold |
+| GET | `/enterprise/federation/hris-passwordless-ui/status` | read_only | HRIS passwordless UI readiness and blockers |
+| GET | `/enterprise/federation/hris-passwordless-ui/runs` | read_only | Paginated HRIS passwordless UI audit log |
+| POST | `/enterprise/federation/hris-passwordless-ui/enrollment-runs/{id}/start` | admin | Start HRIS UI scaffold from enrolled enrollment run |
+| POST | `/enterprise/federation/hris-passwordless-ui/runs/{run_id}/approve` | admin | Approve HRIS passwordless UI scaffold |
 
 Endpoints return `404` when the corresponding feature flag is false.
 

@@ -89,6 +89,10 @@ from api.modules.enterprise.hris_lifecycle_models import (
     HrisLifecycleSyncRun,
     HrisLifecycleSyncRunStatus,
 )
+from api.modules.enterprise.hris_passwordless_ui_models import (
+    HrisPasswordlessUiRun,
+    HrisPasswordlessUiRunStatus,
+)
 from api.modules.enterprise.models import UserSsoEnrollment, UserTotpEnrollment
 from api.modules.enterprise.saml_automated_rotation_models import (
     SamlAutomatedRotationRun,
@@ -258,6 +262,8 @@ __all__ = [
     "SamlAutomatedRotationRunStatus",
     "SamlPasswordlessEnrollmentRun",
     "SamlPasswordlessEnrollmentRunStatus",
+    "HrisPasswordlessUiRun",
+    "HrisPasswordlessUiRunStatus",
     "SamlCertificateRotationRun",
     "SamlCertificateRotationStatus",
     "SmsDeliveryLog",
