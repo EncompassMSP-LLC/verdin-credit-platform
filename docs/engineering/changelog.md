@@ -1108,3 +1108,11 @@ packages/job-orchestrator/
 **Reason:** v5.10.0 completes compliance-gated production automation scaffolds; unsupervised re-filing, live charge retries, and passwordless rollout UI remain deferred to 5.11+.
 
 **Follow-up work:** Version 5.11 planning — production automation depth where compliance-approved.
+
+### Decision: Version 5.11 kickoff (slice 1)
+
+**Decision:** Publish `version-5.11-scope.md`, `version-5.11-completion-checklist.md`, capability matrix 5.11 planning table, roadmap 5.11 section, and `.cursor/rules/version-511-sprint-loop.mdc`.
+
+**Reason:** v5.10.0 sign-off complete (`v5.10.0` tagged); unsupervised re-filing, live charge retry execution, HRIS passwordless UI, and multi-IdP bulk provisioning scaffolds need a sequenced delivery path before v5.11.0 release.
+
+**Follow-up work:** Slice 2 — unsupervised bureau re-filing scaffold.
