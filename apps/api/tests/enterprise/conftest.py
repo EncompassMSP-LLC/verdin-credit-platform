@@ -191,6 +191,19 @@ def saml_automated_rotation_env(
 
 
 @pytest.fixture
+def saml_passwordless_enrollment_env(
+    monkeypatch: pytest.MonkeyPatch,
+    saml_automated_rotation_env: None,
+) -> None:
+    monkeypatch.setenv("ENABLE_SAML_PASSWORDLESS_ENROLLMENT", "true")
+    get_feature_flags.cache_clear()
+    get_enterprise_identity_settings.cache_clear()
+    yield
+    get_feature_flags.cache_clear()
+    get_enterprise_identity_settings.cache_clear()
+
+
+@pytest.fixture
 def hris_lifecycle_sync_env(
     monkeypatch: pytest.MonkeyPatch,
     hris_sync_env: None,

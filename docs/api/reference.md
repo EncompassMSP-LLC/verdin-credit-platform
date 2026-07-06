@@ -553,6 +553,13 @@ SAML automated rotation scaffold requires `ENABLE_SAML_AUTOMATED_ROTATION=true` 
 | POST | `/enterprise/federation/saml-automated-rotation/rotation-runs/{id}/start` | admin | Start automated rotation from rotated cert run |
 | POST | `/enterprise/federation/saml-automated-rotation/runs/{run_id}/approve` | admin | Approve automated rotation scaffold |
 
+SAML passwordless enrollment scaffold requires `ENABLE_SAML_PASSWORDLESS_ENROLLMENT=true` (and `ENABLE_SAML_AUTOMATED_ROTATION=true`). No passwordless rollout without operator review.
+
+| GET | `/enterprise/federation/saml-passwordless-enrollment/status` | read_only | SAML passwordless enrollment readiness and blockers |
+| GET | `/enterprise/federation/saml-passwordless-enrollment/runs` | read_only | Paginated SAML passwordless enrollment audit log |
+| POST | `/enterprise/federation/saml-passwordless-enrollment/automated-rotation-runs/{id}/enroll` | admin | Start passwordless enrollment from automated rotation run |
+| POST | `/enterprise/federation/saml-passwordless-enrollment/runs/{run_id}/approve` | admin | Approve passwordless enrollment scaffold |
+
 Endpoints return `404` when the corresponding feature flag is false.
 
 ## Organization admin

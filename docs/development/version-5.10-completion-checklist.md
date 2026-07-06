@@ -21,7 +21,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | 2     | Agent arbitrary execution scaffold    | AI operations | ✅     |
 | 3     | Bureau re-filing audit scaffold       | Disputes      | ✅     |
 | 4     | Stripe charge retry scaffold          | Billing       | ✅     |
-| 5     | SAML passwordless enrollment scaffold | Identity      | —      |
+| 5     | SAML passwordless enrollment scaffold | Identity      | ✅     |
 | 6     | Capability matrix 5.10 sign-off       | Governance    | —      |
 
 Slice 2 requires `ENABLE_AGENT_UNSUPERVISED_LOOPS=true` and an `approved` unsupervised loop run. Slice 3 requires `ENABLE_AUTONOMOUS_BUREAU_FILING=true` and an `approved` autonomous filing run. Slice 4 requires `ENABLE_STRIPE_LIVE_TAX_API=true`; no live charge retries without compliance deferral docs. Slice 5 requires `ENABLE_SAML_AUTOMATED_ROTATION=true` and an `automated` SAML automated rotation run.

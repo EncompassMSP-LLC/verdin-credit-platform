@@ -1092,3 +1092,11 @@ packages/job-orchestrator/
 **Reason:** 5.10 billing epic extends 5.9 live Tax API invocation with operator-gated charge retry run audit without live charge retries.
 
 **Follow-up work:** Slice 5 — SAML passwordless enrollment scaffold.
+
+### Decision: SAML passwordless enrollment scaffold (Version 5.10 slice 5)
+
+**Decision:** Ship admin-gated SAML passwordless enrollment audit (`saml_passwordless_enrollment_runs` migration 058) with status, list, enroll-from-automated-rotation-run, and admin approve endpoints behind `ENABLE_SAML_PASSWORDLESS_ENROLLMENT`.
+
+**Reason:** 5.10 identity epic extends 5.9 SAML automated rotation with operator-gated passwordless enrollment run audit without passwordless rollout UI.
+
+**Follow-up work:** Slice 6 — v5.10.0 sign-off and release notes.
