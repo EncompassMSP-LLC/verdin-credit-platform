@@ -501,3 +501,81 @@ export function approveStripeChargeRetryRun(runId: string) {
     },
   );
 }
+
+export type StripeLiveChargeRetryExecutionRunStatus =
+  'pending_approval' | 'executed' | 'rejected' | 'failed';
+
+export interface StripeLiveChargeRetryExecutionGateStatus {
+  enabled: boolean;
+  ready: boolean;
+  charge_retry_ready: boolean;
+  blockers: string[];
+}
+
+export interface StripeLiveChargeRetryExecutionRun {
+  id: string;
+  organization_id: string;
+  stripe_charge_retry_run_id: string;
+  status: StripeLiveChargeRetryExecutionRunStatus;
+  execution_summary: string;
+  requested_by_user_id: string | null;
+  approved_by_user_id: string | null;
+  requested_at: string | null;
+  approved_at: string | null;
+  executed_at: string | null;
+  error_message: string | null;
+}
+
+export interface StripeLiveChargeRetryExecutionSubmitInput {
+  execution_summary: string;
+}
+
+export interface StripeLiveChargeRetryExecutionRunResult {
+  completed_at: string;
+  run: StripeLiveChargeRetryExecutionRun;
+}
+
+export interface StripeLiveChargeRetryExecutionRunList {
+  items: StripeLiveChargeRetryExecutionRun[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export function getStripeLiveChargeRetryExecutionStatus() {
+  return request<StripeLiveChargeRetryExecutionGateStatus>(
+    apiPath('/billing/live-charge-retry/status'),
+  );
+}
+
+export function listStripeLiveChargeRetryExecutionRuns(page = 1, pageSize = 20) {
+  const params = new URLSearchParams({
+    page: String(page),
+    page_size: String(pageSize),
+  });
+  return request<StripeLiveChargeRetryExecutionRunList>(
+    apiPath(`/billing/live-charge-retry/runs?${params.toString()}`),
+  );
+}
+
+export function submitStripeLiveChargeRetryExecutionFromChargeRetryRun(
+  stripeChargeRetryRunId: string,
+  input: StripeLiveChargeRetryExecutionSubmitInput,
+) {
+  return request<StripeLiveChargeRetryExecutionRunResult>(
+    apiPath(`/billing/live-charge-retry/charge-retry-runs/${stripeChargeRetryRunId}/execute`),
+    {
+      method: 'POST',
+      body: JSON.stringify(input),
+    },
+  );
+}
+
+export function approveStripeLiveChargeRetryExecutionRun(runId: string) {
+  return request<StripeLiveChargeRetryExecutionRunResult>(
+    apiPath(`/billing/live-charge-retry/runs/${runId}/approve`),
+    {
+      method: 'POST',
+    },
+  );
+}
