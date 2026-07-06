@@ -485,7 +485,7 @@ Scope: [version-5.10-scope.md](version-5.10-scope.md) · Checklist: [version-5.1
 | Capability                   | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                        |
 | ---------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ------------------------------------------------------------ |
 | Agent arbitrary execution    | 5.10    | Partial | ✅      | —        | ✅  | —   | ✅    | AI gates     | `POST /llm/arbitrary-execution/unsupervised-runs/{id}/start` |
-| Bureau re-filing audit       | 5.10    | Planned | —       | —        | —   | —   | —     | Disputes     | Re-filing run audit → slice 3                                |
+| Bureau re-filing audit       | 5.10    | Partial | ✅      | —        | ✅  | —   | ✅    | Disputes     | `POST /compliance/bureau-refiling/filing-runs/{id}/refile`   |
 | Stripe charge retry          | 5.10    | Planned | —       | —        | —   | —   | —     | Billing      | Charge retry audit → slice 4                                 |
 | SAML passwordless enrollment | 5.10    | Planned | —       | —        | —   | —   | —     | Enterprise   | Passwordless enrollment audit → slice 5                      |
 

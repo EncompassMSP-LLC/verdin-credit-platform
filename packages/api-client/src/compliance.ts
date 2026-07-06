@@ -546,3 +546,82 @@ export function approveAutonomousBureauFilingRun(runId: string) {
     },
   );
 }
+
+export interface BureauRefilingStatus {
+  enabled: boolean;
+  ready: boolean;
+  autonomous_filing_ready: boolean;
+  blockers: string[];
+}
+
+export type BureauRefilingRunStatus = 'pending_approval' | 'refiled' | 'rejected' | 'failed';
+
+export interface BureauRefilingRun {
+  id: string;
+  organization_id: string;
+  autonomous_bureau_filing_run_id: string;
+  account_id: string;
+  case_id: string;
+  bureau_target: string;
+  status: BureauRefilingRunStatus;
+  refiling_summary: string;
+  requested_by_user_id: string | null;
+  approved_by_user_id: string | null;
+  timeline_event_id: string | null;
+  requested_at: string | null;
+  approved_at: string | null;
+  refiled_at: string | null;
+  error_message: string | null;
+}
+
+export interface BureauRefilingSubmitRequest {
+  refiling_summary: string;
+}
+
+export interface BureauRefilingRunResult {
+  completed_at: string;
+  run: BureauRefilingRun;
+}
+
+export interface ListBureauRefilingRunsParams {
+  page?: number;
+  page_size?: number;
+  account_id?: string;
+}
+
+export function getBureauRefilingStatus() {
+  return request<BureauRefilingStatus>(apiPath('/compliance/bureau-refiling/status'));
+}
+
+export function listBureauRefilingRuns(params: ListBureauRefilingRunsParams = {}) {
+  const search = new URLSearchParams();
+  if (params.page) search.set('page', String(params.page));
+  if (params.page_size) search.set('page_size', String(params.page_size));
+  if (params.account_id) search.set('account_id', params.account_id);
+  const query = search.toString();
+  return request<PaginatedResponse<BureauRefilingRun>>(
+    apiPath(`/compliance/bureau-refiling/runs${query ? `?${query}` : ''}`),
+  );
+}
+
+export function refileBureauFromAutonomousFilingRun(
+  autonomousBureauFilingRunId: string,
+  input: BureauRefilingSubmitRequest,
+) {
+  return request<BureauRefilingRunResult>(
+    apiPath(`/compliance/bureau-refiling/filing-runs/${autonomousBureauFilingRunId}/refile`),
+    {
+      method: 'POST',
+      body: JSON.stringify(input),
+    },
+  );
+}
+
+export function approveBureauRefilingRun(runId: string) {
+  return request<BureauRefilingRunResult>(
+    apiPath(`/compliance/bureau-refiling/runs/${runId}/approve`),
+    {
+      method: 'POST',
+    },
+  );
+}

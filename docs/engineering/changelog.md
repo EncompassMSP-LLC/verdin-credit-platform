@@ -1076,3 +1076,11 @@ packages/job-orchestrator/
 **Reason:** 5.10 AI operations epic extends 5.9 unsupervised loops with arbitrary execution run audit without PII export or fully autonomous agents without admin approval.
 
 **Follow-up work:** Slice 3 — bureau re-filing audit scaffold.
+
+### Decision: Bureau re-filing audit scaffold (Version 5.10 slice 3)
+
+**Decision:** Ship operator-gated bureau re-filing audit (`bureau_refiling_runs` migration 056) with status, list, start-from-filed-autonomous-filing-run, and admin approve endpoints behind `ENABLE_BUREAU_REFILING`.
+
+**Reason:** 5.10 disputes epic extends 5.9 autonomous filing with operator-gated re-filing run audit without unsupervised re-filing loops.
+
+**Follow-up work:** Slice 4 — Stripe charge retry scaffold.

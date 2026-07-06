@@ -6,6 +6,7 @@ from api.modules.accounts.autonomous_bureau_filing_models import (
     AutonomousBureauFilingRunStatus,
 )
 from api.modules.accounts.bureau_live_api_models import BureauLiveApiRun, BureauLiveApiRunStatus
+from api.modules.accounts.bureau_refiling_models import BureauRefilingRun, BureauRefilingRunStatus
 from api.modules.accounts.dispute_bureau_submission_models import (
     DisputeBureauSubmissionRun,
     DisputeBureauSubmissionStatus,
@@ -175,6 +176,8 @@ __all__ = [
     "BillingWebhookEvent",
     "AutonomousBureauFilingRun",
     "AutonomousBureauFilingRunStatus",
+    "BureauRefilingRun",
+    "BureauRefilingRunStatus",
     "BureauLiveApiRun",
     "BureauLiveApiRunStatus",
     "Case",

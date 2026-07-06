@@ -691,6 +691,17 @@ Returns `404` when bureau live API flags are false.
 
 Returns `404` when autonomous bureau filing flags are false.
 
+### Bureau re-filing audit (v5.10)
+
+| Method | Path                                                             | Role         | Description                                               |
+| ------ | ---------------------------------------------------------------- | ------------ | --------------------------------------------------------- |
+| GET    | `/compliance/bureau-refiling/status`                             | read_only    | Bureau re-filing readiness and blockers                   |
+| GET    | `/compliance/bureau-refiling/runs`                               | read_only    | Paginated bureau re-filing audit log                      |
+| POST   | `/compliance/bureau-refiling/filing-runs/{filing_run_id}/refile` | case_manager | Start re-filing from a filed autonomous bureau filing run |
+| POST   | `/compliance/bureau-refiling/runs/{run_id}/approve`              | admin        | Approve and record bureau re-filing scaffold              |
+
+Returns `404` when bureau re-filing flags are false.
+
 Consent types: `croa_services`, `fcra_dispute`, `fdcpa_contact`, `marketing`, `data_processing`. Retention scopes: `documents`, `communications`, `audit_logs`, `client_profiles`. Enforcement jobs and legal sign-off workflows are deferred to 5.0+.
 
 ## Reporting
