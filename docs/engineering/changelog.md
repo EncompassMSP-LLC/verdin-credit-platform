@@ -1116,3 +1116,11 @@ packages/job-orchestrator/
 **Reason:** v5.10.0 sign-off complete (`v5.10.0` tagged); unsupervised re-filing, live charge retry execution, HRIS passwordless UI, and multi-IdP bulk provisioning scaffolds need a sequenced delivery path before v5.11.0 release.
 
 **Follow-up work:** Slice 2 — unsupervised bureau re-filing scaffold.
+
+### Decision: Bureau unsupervised re-filing scaffold (Version 5.11 slice 2)
+
+**Decision:** Ship operator-gated bureau unsupervised re-filing audit (`bureau_unsupervised_refiling_runs` migration 059) with status, list, start-from-refiled-bureau-refiling-run, and admin approve endpoints behind `ENABLE_BUREAU_UNSUPERVISED_REFILING`.
+
+**Reason:** 5.11 disputes epic extends 5.10 bureau re-filing with operator-gated unsupervised re-filing run audit without live bureau API calls.
+
+**Follow-up work:** Slice 3 — live charge retry execution scaffold.

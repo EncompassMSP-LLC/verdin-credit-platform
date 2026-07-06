@@ -7,6 +7,10 @@ from api.modules.accounts.autonomous_bureau_filing_models import (
 )
 from api.modules.accounts.bureau_live_api_models import BureauLiveApiRun, BureauLiveApiRunStatus
 from api.modules.accounts.bureau_refiling_models import BureauRefilingRun, BureauRefilingRunStatus
+from api.modules.accounts.bureau_unsupervised_refiling_models import (
+    BureauUnsupervisedRefilingRun,
+    BureauUnsupervisedRefilingRunStatus,
+)
 from api.modules.accounts.dispute_bureau_submission_models import (
     DisputeBureauSubmissionRun,
     DisputeBureauSubmissionStatus,
@@ -188,6 +192,8 @@ __all__ = [
     "AutonomousBureauFilingRunStatus",
     "BureauRefilingRun",
     "BureauRefilingRunStatus",
+    "BureauUnsupervisedRefilingRun",
+    "BureauUnsupervisedRefilingRunStatus",
     "BureauLiveApiRun",
     "BureauLiveApiRunStatus",
     "Case",
