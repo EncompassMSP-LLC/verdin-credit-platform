@@ -1132,3 +1132,11 @@ packages/job-orchestrator/
 **Reason:** 5.11 billing epic extends 5.10 charge retry with operator-gated live execution run audit without live Stripe charge API calls.
 
 **Follow-up work:** Slice 4 — HRIS passwordless UI scaffold.
+
+### Decision: HRIS passwordless UI scaffold (Version 5.11 slice 4)
+
+**Decision:** Ship admin-gated HRIS passwordless UI audit (`hris_passwordless_ui_runs` migration 061) with status, list, start-from-enrolled-saml-passwordless-enrollment-run, and admin approve endpoints behind `ENABLE_HRIS_PASSWORDLESS_UI`.
+
+**Reason:** 5.11 identity epic extends 5.10 SAML passwordless enrollment with operator-gated HRIS-linked UI run audit without native mobile passkey UI.
+
+**Follow-up work:** Slice 5 — multi-IdP bulk provisioning scaffold.

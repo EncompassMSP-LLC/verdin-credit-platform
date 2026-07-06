@@ -20,7 +20,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | 1     | 5.11 scope + completion checklist      | Kickoff    | ✅     |
 | 2     | Unsupervised bureau re-filing scaffold | Disputes   | ✅     |
 | 3     | Live charge retry execution scaffold   | Billing    | ✅     |
-| 4     | HRIS passwordless UI scaffold          | Identity   | —      |
+| 4     | HRIS passwordless UI scaffold          | Identity   | ✅     |
 | 5     | Multi-IdP bulk provisioning scaffold   | Enterprise | —      |
 | 6     | Capability matrix 5.11 sign-off        | Governance | —      |
 

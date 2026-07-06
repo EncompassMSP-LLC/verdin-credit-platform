@@ -204,6 +204,19 @@ def saml_passwordless_enrollment_env(
 
 
 @pytest.fixture
+def hris_passwordless_ui_env(
+    monkeypatch: pytest.MonkeyPatch,
+    saml_passwordless_enrollment_env: None,
+) -> None:
+    monkeypatch.setenv("ENABLE_HRIS_PASSWORDLESS_UI", "true")
+    get_feature_flags.cache_clear()
+    get_enterprise_identity_settings.cache_clear()
+    yield
+    get_feature_flags.cache_clear()
+    get_enterprise_identity_settings.cache_clear()
+
+
+@pytest.fixture
 def hris_lifecycle_sync_env(
     monkeypatch: pytest.MonkeyPatch,
     hris_sync_env: None,

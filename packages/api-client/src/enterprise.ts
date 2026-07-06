@@ -670,3 +670,82 @@ export function approveSamlPasswordlessEnrollmentRun(runId: string) {
     },
   );
 }
+
+export type HrisPasswordlessUiRunStatus = 'pending_approval' | 'approved' | 'rejected' | 'failed';
+
+export interface HrisPasswordlessUiGateStatus {
+  enabled: boolean;
+  ready: boolean;
+  passwordless_enrollment_ready: boolean;
+  blockers: string[];
+}
+
+export interface HrisPasswordlessUiRun {
+  id: string;
+  organization_id: string;
+  saml_passwordless_enrollment_run_id: string;
+  entity_id: string;
+  status: HrisPasswordlessUiRunStatus;
+  ui_summary: string;
+  requested_by_user_id: string | null;
+  approved_by_user_id: string | null;
+  requested_at: string | null;
+  approved_at: string | null;
+  error_message: string | null;
+}
+
+export interface HrisPasswordlessUiSubmitInput {
+  ui_summary: string;
+}
+
+export interface HrisPasswordlessUiRunResult {
+  completed_at: string;
+  run: HrisPasswordlessUiRun;
+}
+
+export interface HrisPasswordlessUiRunList {
+  items: HrisPasswordlessUiRun[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export function getHrisPasswordlessUiStatus() {
+  return request<HrisPasswordlessUiGateStatus>(
+    apiPath('/enterprise/federation/hris-passwordless-ui/status'),
+  );
+}
+
+export function listHrisPasswordlessUiRuns(page = 1, pageSize = 20) {
+  const params = new URLSearchParams({
+    page: String(page),
+    page_size: String(pageSize),
+  });
+  return request<HrisPasswordlessUiRunList>(
+    apiPath(`/enterprise/federation/hris-passwordless-ui/runs?${params}`),
+  );
+}
+
+export function startHrisPasswordlessUiFromEnrollmentRun(
+  samlPasswordlessEnrollmentRunId: string,
+  input: HrisPasswordlessUiSubmitInput,
+) {
+  return request<HrisPasswordlessUiRunResult>(
+    apiPath(
+      `/enterprise/federation/hris-passwordless-ui/enrollment-runs/${samlPasswordlessEnrollmentRunId}/start`,
+    ),
+    {
+      method: 'POST',
+      body: JSON.stringify(input),
+    },
+  );
+}
+
+export function approveHrisPasswordlessUiRun(runId: string) {
+  return request<HrisPasswordlessUiRunResult>(
+    apiPath(`/enterprise/federation/hris-passwordless-ui/runs/${runId}/approve`),
+    {
+      method: 'POST',
+    },
+  );
+}
