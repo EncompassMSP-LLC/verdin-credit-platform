@@ -20,7 +20,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | 1     | 5.10 scope + completion checklist     | Kickoff       | ✅     |
 | 2     | Agent arbitrary execution scaffold    | AI operations | ✅     |
 | 3     | Bureau re-filing audit scaffold       | Disputes      | ✅     |
-| 4     | Stripe charge retry scaffold          | Billing       | —      |
+| 4     | Stripe charge retry scaffold          | Billing       | ✅     |
 | 5     | SAML passwordless enrollment scaffold | Identity      | —      |
 | 6     | Capability matrix 5.10 sign-off       | Governance    | —      |
 

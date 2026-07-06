@@ -33,6 +33,10 @@ from api.modules.billing.invoicing_models import (
     BillingInvoicingTriggerSource,
 )
 from api.modules.billing.models import BillingWebhookEvent, OrganizationBillingAccount
+from api.modules.billing.stripe_charge_retry_models import (
+    StripeChargeRetryRun,
+    StripeChargeRetryRunStatus,
+)
 from api.modules.billing.stripe_live_tax_api_models import (
     StripeLiveTaxApiRun,
     StripeLiveTaxApiRunStatus,
@@ -167,6 +171,8 @@ __all__ = [
     "StripeInvoicePdfRunStatus",
     "StripeLiveTaxApiRun",
     "StripeLiveTaxApiRunStatus",
+    "StripeChargeRetryRun",
+    "StripeChargeRetryRunStatus",
     "StripeTaxCalculationRun",
     "StripeTaxCalculationRunStatus",
     "BillingInvoicingRun",
