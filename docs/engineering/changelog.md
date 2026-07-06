@@ -1100,3 +1100,11 @@ packages/job-orchestrator/
 **Reason:** 5.10 identity epic extends 5.9 SAML automated rotation with operator-gated passwordless enrollment run audit without passwordless rollout UI.
 
 **Follow-up work:** Slice 6 — v5.10.0 sign-off and release notes.
+
+### Decision: Version 5.10 epic sign-off
+
+**Decision:** Mark all four Version 5.10 epics **Partial ✅** in `version-5.10-scope.md`, add capability matrix 5.10 epic sign-off table, complete checklist exit criteria, and publish `docs/release-notes/v5.10.0.md`.
+
+**Reason:** v5.10.0 completes compliance-gated production automation scaffolds; unsupervised re-filing, live charge retries, and passwordless rollout UI remain deferred to 5.11+.
+
+**Follow-up work:** Version 5.11 planning — production automation depth where compliance-approved.

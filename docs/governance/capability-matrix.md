@@ -2,7 +2,7 @@
 
 **Executive view** of Verdin platform capabilities — what exists, what version introduced it, readiness by layer, and dependencies.
 
-**Last updated:** 2026-07-05  
+**Last updated:** 2026-07-06  
 **Maintainers:** Update this document in every epic PR that ships or materially advances a capability.
 
 **Version 4.5 sign-off:** [version-4.5-scope.md](version-4.5-scope.md) · Release notes: [v4.5.0.md](../release-notes/v4.5.0.md)  
@@ -16,7 +16,7 @@
 **Version 5.7 sign-off:** [version-5.7-scope.md](version-5.7-scope.md) · Release notes: [v5.7.0.md](../release-notes/v5.7.0.md)
 **Version 5.8 sign-off:** [version-5.8-scope.md](version-5.8-scope.md) · Release notes: [v5.8.0.md](../release-notes/v5.8.0.md)
 **Version 5.9 sign-off:** [version-5.9-scope.md](version-5.9-scope.md) · Release notes: [v5.9.0.md](../release-notes/v5.9.0.md)
-**Version 5.10 planning:** [version-5.10-scope.md](version-5.10-scope.md) · Checklist: [version-5.10-completion-checklist.md](../development/version-5.10-completion-checklist.md)
+**Version 5.10 sign-off:** [version-5.10-scope.md](version-5.10-scope.md) · Release notes: [v5.10.0.md](../release-notes/v5.10.0.md)
 
 ## Status legend
 
@@ -478,16 +478,16 @@ Scope: [version-5.9-scope.md](version-5.9-scope.md) · Checklist: [version-5.9-c
 
 ---
 
-## Version 5.10 — Compliance-gated production automation (in progress)
+## Version 5.10 — Compliance-gated production automation (shipped — Partial ✅)
 
-Scope: [version-5.10-scope.md](version-5.10-scope.md) · Checklist: [version-5.10-completion-checklist.md](../development/version-5.10-completion-checklist.md)
+Scope: [version-5.10-scope.md](version-5.10-scope.md) · Release notes: [v5.10.0.md](../release-notes/v5.10.0.md) · Checklist: [version-5.10-completion-checklist.md](../development/version-5.10-completion-checklist.md)
 
-| Capability                   | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                                          |
-| ---------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ---------------------------------------------------------------------------------------------- |
-| Agent arbitrary execution    | 5.10    | Partial | ✅      | —        | ✅  | —   | ✅    | AI gates     | `POST /llm/arbitrary-execution/unsupervised-runs/{id}/start`                                   |
-| Bureau re-filing audit       | 5.10    | Partial | ✅      | —        | ✅  | —   | ✅    | Disputes     | `POST /compliance/bureau-refiling/filing-runs/{id}/refile`                                     |
-| Stripe charge retry          | 5.10    | Partial | ✅      | —        | ✅  | —   | ✅    | Billing      | `POST /billing/charge-retry/live-tax-api-runs/{id}/retry`                                      |
-| SAML passwordless enrollment | 5.10    | Partial | ✅      | —        | ✅  | —   | ✅    | Enterprise   | `POST /enterprise/federation/saml-passwordless-enrollment/automated-rotation-runs/{id}/enroll` |
+| Capability                   | Version | Status     | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                                          |
+| ---------------------------- | ------- | ---------- | ------- | -------- | --- | --- | ----- | ------------ | ---------------------------------------------------------------------------------------------- |
+| Agent arbitrary execution    | 5.10    | Partial ✅ | ✅      | —        | ✅  | —   | ✅    | AI gates     | `POST /llm/arbitrary-execution/unsupervised-runs/{id}/start`                                   |
+| Bureau re-filing audit       | 5.10    | Partial ✅ | ✅      | —        | ✅  | —   | ✅    | Disputes     | `POST /compliance/bureau-refiling/filing-runs/{id}/refile`                                     |
+| Stripe charge retry          | 5.10    | Partial ✅ | ✅      | —        | ✅  | —   | ✅    | Billing      | `POST /billing/charge-retry/live-tax-api-runs/{id}/retry`                                      |
+| SAML passwordless enrollment | 5.10    | Partial ✅ | ✅      | —        | ✅  | —   | ✅    | Enterprise   | `POST /enterprise/federation/saml-passwordless-enrollment/automated-rotation-runs/{id}/enroll` |
 
 ---
 

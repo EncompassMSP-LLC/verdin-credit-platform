@@ -9,14 +9,14 @@ Formal scope for **Version 5.10 — Compliance-Gated Production Automation**. Bu
 
 Extend partial 5.9 compliance-gated scaffolds (unsupervised loops, autonomous filing, live Tax API, SAML automated rotation) toward compliance-approved production automation execution. Each epic ships as a **Partial** capability behind feature flags with tests and documentation.
 
-## Epic outcomes (planned)
+## Epic outcomes (shipped — Partial ✅)
 
 | Epic | Theme                        | 5.10 outcome | Summary                                                        |
 | ---- | ---------------------------- | ------------ | -------------------------------------------------------------- |
-| 1    | Agent arbitrary execution    | Partial      | Admin-gated arbitrary execution run audit from completed loops |
-| 2    | Bureau re-filing audit       | Partial      | Operator-gated re-filing run audit from approved filing runs   |
-| 3    | Stripe charge retry          | Partial      | Admin-gated charge retry run audit from approved live Tax runs |
-| 4    | SAML passwordless enrollment | Partial      | Federation passwordless enrollment run audit scaffold          |
+| 1    | Agent arbitrary execution    | Partial ✅   | Admin-gated arbitrary execution run audit from completed loops |
+| 2    | Bureau re-filing audit       | Partial ✅   | Operator-gated re-filing run audit from approved filing runs   |
+| 3    | Stripe charge retry          | Partial ✅   | Admin-gated charge retry run audit from approved live Tax runs |
+| 4    | SAML passwordless enrollment | Partial ✅   | Federation passwordless enrollment run audit scaffold          |
 
 ## Shipped from 5.9 (foundation — do not regress)
 
