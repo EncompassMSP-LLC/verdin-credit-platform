@@ -718,6 +718,19 @@ Returns `404` when autonomous bureau filing flags are false.
 
 Returns `404` when bureau re-filing flags are false.
 
+### Bureau unsupervised re-filing audit (v5.11)
+
+| Method | Path                                                                             | Role         | Description                                     |
+| ------ | -------------------------------------------------------------------------------- | ------------ | ----------------------------------------------- |
+| GET    | `/compliance/bureau-unsupervised-refiling/status`                                | read_only    | Unsupervised re-filing readiness and blockers   |
+| GET    | `/compliance/bureau-unsupervised-refiling/runs`                                  | read_only    | Paginated unsupervised re-filing audit log      |
+| POST   | `/compliance/bureau-unsupervised-refiling/refiling-runs/{refiling_run_id}/start` | case_manager | Start unsupervised re-filing from a refiled run |
+| POST   | `/compliance/bureau-unsupervised-refiling/runs/{run_id}/approve`                 | admin        | Approve unsupervised re-filing scaffold         |
+
+Bureau unsupervised re-filing scaffold requires `ENABLE_BUREAU_UNSUPERVISED_REFILING=true` (and `ENABLE_BUREAU_REFILING=true`). No live bureau API calls without compliance deferral docs.
+
+Returns `404` when unsupervised re-filing flags are false.
+
 Consent types: `croa_services`, `fcra_dispute`, `fdcpa_contact`, `marketing`, `data_processing`. Retention scopes: `documents`, `communications`, `audit_logs`, `client_profiles`. Enforcement jobs and legal sign-off workflows are deferred to 5.0+.
 
 ## Reporting

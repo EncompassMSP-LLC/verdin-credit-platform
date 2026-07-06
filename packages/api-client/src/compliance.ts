@@ -625,3 +625,87 @@ export function approveBureauRefilingRun(runId: string) {
     },
   );
 }
+
+export interface BureauUnsupervisedRefilingStatus {
+  enabled: boolean;
+  ready: boolean;
+  bureau_refiling_ready: boolean;
+  blockers: string[];
+}
+
+export type BureauUnsupervisedRefilingRunStatus =
+  'pending_approval' | 'unsupervised_refiled' | 'rejected' | 'failed';
+
+export interface BureauUnsupervisedRefilingRun {
+  id: string;
+  organization_id: string;
+  bureau_refiling_run_id: string;
+  account_id: string;
+  case_id: string;
+  bureau_target: string;
+  status: BureauUnsupervisedRefilingRunStatus;
+  refiling_summary: string;
+  requested_by_user_id: string | null;
+  approved_by_user_id: string | null;
+  timeline_event_id: string | null;
+  requested_at: string | null;
+  approved_at: string | null;
+  unsupervised_refiled_at: string | null;
+  error_message: string | null;
+}
+
+export interface BureauUnsupervisedRefilingSubmitRequest {
+  refiling_summary: string;
+}
+
+export interface BureauUnsupervisedRefilingRunResult {
+  completed_at: string;
+  run: BureauUnsupervisedRefilingRun;
+}
+
+export interface ListBureauUnsupervisedRefilingRunsParams {
+  page?: number;
+  page_size?: number;
+  account_id?: string;
+}
+
+export function getBureauUnsupervisedRefilingStatus() {
+  return request<BureauUnsupervisedRefilingStatus>(
+    apiPath('/compliance/bureau-unsupervised-refiling/status'),
+  );
+}
+
+export function listBureauUnsupervisedRefilingRuns(
+  params: ListBureauUnsupervisedRefilingRunsParams = {},
+) {
+  const search = new URLSearchParams();
+  if (params.page) search.set('page', String(params.page));
+  if (params.page_size) search.set('page_size', String(params.page_size));
+  if (params.account_id) search.set('account_id', params.account_id);
+  const query = search.toString();
+  return request<PaginatedResponse<BureauUnsupervisedRefilingRun>>(
+    apiPath(`/compliance/bureau-unsupervised-refiling/runs${query ? `?${query}` : ''}`),
+  );
+}
+
+export function startBureauUnsupervisedRefilingFromRefilingRun(
+  bureauRefilingRunId: string,
+  input: BureauUnsupervisedRefilingSubmitRequest,
+) {
+  return request<BureauUnsupervisedRefilingRunResult>(
+    apiPath(`/compliance/bureau-unsupervised-refiling/refiling-runs/${bureauRefilingRunId}/start`),
+    {
+      method: 'POST',
+      body: JSON.stringify(input),
+    },
+  );
+}
+
+export function approveBureauUnsupervisedRefilingRun(runId: string) {
+  return request<BureauUnsupervisedRefilingRunResult>(
+    apiPath(`/compliance/bureau-unsupervised-refiling/runs/${runId}/approve`),
+    {
+      method: 'POST',
+    },
+  );
+}

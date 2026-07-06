@@ -199,3 +199,14 @@ def bureau_refiling_env(
     get_feature_flags.cache_clear()
     yield
     get_feature_flags.cache_clear()
+
+
+@pytest.fixture
+def bureau_unsupervised_refiling_env(
+    monkeypatch: pytest.MonkeyPatch,
+    bureau_refiling_env: None,
+) -> None:
+    monkeypatch.setenv("ENABLE_BUREAU_UNSUPERVISED_REFILING", "true")
+    get_feature_flags.cache_clear()
+    yield
+    get_feature_flags.cache_clear()
