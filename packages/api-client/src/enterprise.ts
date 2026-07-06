@@ -589,3 +589,84 @@ export function approveSamlAutomatedRotationRun(runId: string) {
     },
   );
 }
+
+export type SamlPasswordlessEnrollmentRunStatus =
+  'pending_approval' | 'enrolled' | 'rejected' | 'failed';
+
+export interface SamlPasswordlessEnrollmentGateStatus {
+  enabled: boolean;
+  ready: boolean;
+  automated_rotation_ready: boolean;
+  blockers: string[];
+}
+
+export interface SamlPasswordlessEnrollmentRun {
+  id: string;
+  organization_id: string;
+  saml_automated_rotation_run_id: string;
+  entity_id: string;
+  status: SamlPasswordlessEnrollmentRunStatus;
+  enrollment_summary: string;
+  requested_by_user_id: string | null;
+  approved_by_user_id: string | null;
+  requested_at: string | null;
+  approved_at: string | null;
+  enrolled_at: string | null;
+  error_message: string | null;
+}
+
+export interface SamlPasswordlessEnrollmentSubmitInput {
+  enrollment_summary: string;
+}
+
+export interface SamlPasswordlessEnrollmentRunResult {
+  completed_at: string;
+  run: SamlPasswordlessEnrollmentRun;
+}
+
+export interface SamlPasswordlessEnrollmentRunList {
+  items: SamlPasswordlessEnrollmentRun[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export function getSamlPasswordlessEnrollmentStatus() {
+  return request<SamlPasswordlessEnrollmentGateStatus>(
+    apiPath('/enterprise/federation/saml-passwordless-enrollment/status'),
+  );
+}
+
+export function listSamlPasswordlessEnrollmentRuns(page = 1, pageSize = 20) {
+  const params = new URLSearchParams({
+    page: String(page),
+    page_size: String(pageSize),
+  });
+  return request<SamlPasswordlessEnrollmentRunList>(
+    apiPath(`/enterprise/federation/saml-passwordless-enrollment/runs?${params}`),
+  );
+}
+
+export function enrollSamlPasswordlessFromAutomatedRotationRun(
+  samlAutomatedRotationRunId: string,
+  input: SamlPasswordlessEnrollmentSubmitInput,
+) {
+  return request<SamlPasswordlessEnrollmentRunResult>(
+    apiPath(
+      `/enterprise/federation/saml-passwordless-enrollment/automated-rotation-runs/${samlAutomatedRotationRunId}/enroll`,
+    ),
+    {
+      method: 'POST',
+      body: JSON.stringify(input),
+    },
+  );
+}
+
+export function approveSamlPasswordlessEnrollmentRun(runId: string) {
+  return request<SamlPasswordlessEnrollmentRunResult>(
+    apiPath(`/enterprise/federation/saml-passwordless-enrollment/runs/${runId}/approve`),
+    {
+      method: 'POST',
+    },
+  );
+}

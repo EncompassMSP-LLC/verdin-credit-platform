@@ -90,6 +90,10 @@ from api.modules.enterprise.saml_cert_rotation_models import (
     SamlCertificateRotationRun,
     SamlCertificateRotationStatus,
 )
+from api.modules.enterprise.saml_passwordless_enrollment_models import (
+    SamlPasswordlessEnrollmentRun,
+    SamlPasswordlessEnrollmentRunStatus,
+)
 from api.modules.llm.agent_execution_models import (
     AgentExecutionStep,
     AgentExecutionStepStatus,
@@ -240,6 +244,8 @@ __all__ = [
     "SamlMetadataValidationStatus",
     "SamlAutomatedRotationRun",
     "SamlAutomatedRotationRunStatus",
+    "SamlPasswordlessEnrollmentRun",
+    "SamlPasswordlessEnrollmentRunStatus",
     "SamlCertificateRotationRun",
     "SamlCertificateRotationStatus",
     "SmsDeliveryLog",
