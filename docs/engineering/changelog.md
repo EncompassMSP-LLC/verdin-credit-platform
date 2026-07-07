@@ -1234,3 +1234,14 @@ migration `068`), org-admin status/list/start-from-approved-oauth-app/approve en
 marketplace listing audit while deferring public marketplace distribution and partner trust scoring.
 
 **Follow-up work:** Slice 3 — fully autonomous bureau API filing scaffold or cross-org benchmark export.
+
+### Decision: Fully autonomous bureau API filing scaffold (Version 5.13 slice 3)
+
+**Decision:** Ship admin-gated fully autonomous bureau API filing audit (`fully_autonomous_bureau_api_filing_runs`
+migration `069_full_auto_bureau_api`), compliance status/list/start-from-filed-autonomous-filing/approve endpoints, and
+`@verdin/api-client` support behind `ENABLE_FULLY_AUTONOMOUS_BUREAU_API_FILING`.
+
+**Reason:** 5.13 disputes epic extends 5.9 autonomous bureau filing with operator-gated fully
+autonomous API execution audit while deferring unsupervised live bureau submission loops.
+
+**Follow-up work:** Slice 4 — unredacted cross-org benchmark export scaffold or v5.13 sign-off.

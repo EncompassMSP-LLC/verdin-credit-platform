@@ -734,6 +734,17 @@ Returns `404` when bureau live API flags are false.
 
 Returns `404` when autonomous bureau filing flags are false.
 
+### Fully autonomous bureau API filing (v5.13)
+
+| Method | Path                                                                                 | Role         | Description                                                          |
+| ------ | ------------------------------------------------------------------------------------ | ------------ | -------------------------------------------------------------------- |
+| GET    | `/compliance/fully-autonomous-bureau-api-filing/status`                              | read_only    | Fully autonomous API filing readiness and blockers                   |
+| GET    | `/compliance/fully-autonomous-bureau-api-filing/runs`                                | read_only    | Paginated fully autonomous bureau API filing audit log               |
+| POST   | `/compliance/fully-autonomous-bureau-api-filing/filing-runs/{filing_run_id}/execute` | case_manager | Start API filing execution from a filed autonomous bureau filing run |
+| POST   | `/compliance/fully-autonomous-bureau-api-filing/runs/{run_id}/approve`               | admin        | Approve and record fully autonomous bureau API filing scaffold       |
+
+Returns `404` when fully autonomous bureau API filing flags are false.
+
 ### Bureau re-filing audit (v5.10)
 
 | Method | Path                                                             | Role         | Description                                               |

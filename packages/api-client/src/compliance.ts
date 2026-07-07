@@ -549,6 +549,94 @@ export function approveAutonomousBureauFilingRun(runId: string) {
   );
 }
 
+export interface FullyAutonomousBureauApiFilingStatus {
+  enabled: boolean;
+  ready: boolean;
+  autonomous_bureau_filing_ready: boolean;
+  blockers: string[];
+}
+
+export type FullyAutonomousBureauApiFilingRunStatus =
+  'pending_approval' | 'executed' | 'rejected' | 'failed';
+
+export interface FullyAutonomousBureauApiFilingRun {
+  id: string;
+  organization_id: string;
+  autonomous_bureau_filing_run_id: string;
+  account_id: string;
+  case_id: string;
+  bureau_target: string;
+  status: FullyAutonomousBureauApiFilingRunStatus;
+  api_filing_summary: string;
+  execution_reference_id: string | null;
+  requested_by_user_id: string | null;
+  approved_by_user_id: string | null;
+  timeline_event_id: string | null;
+  requested_at: string | null;
+  approved_at: string | null;
+  executed_at: string | null;
+  error_message: string | null;
+}
+
+export interface FullyAutonomousBureauApiFilingSubmitRequest {
+  api_filing_summary: string;
+  execution_reference_id?: string | null;
+}
+
+export interface FullyAutonomousBureauApiFilingRunResult {
+  completed_at: string;
+  run: FullyAutonomousBureauApiFilingRun;
+}
+
+export interface ListFullyAutonomousBureauApiFilingRunsParams {
+  page?: number;
+  page_size?: number;
+  account_id?: string;
+}
+
+export function getFullyAutonomousBureauApiFilingStatus() {
+  return request<FullyAutonomousBureauApiFilingStatus>(
+    apiPath('/compliance/fully-autonomous-bureau-api-filing/status'),
+  );
+}
+
+export function listFullyAutonomousBureauApiFilingRuns(
+  params: ListFullyAutonomousBureauApiFilingRunsParams = {},
+) {
+  const search = new URLSearchParams();
+  if (params.page) search.set('page', String(params.page));
+  if (params.page_size) search.set('page_size', String(params.page_size));
+  if (params.account_id) search.set('account_id', params.account_id);
+  const query = search.toString();
+  return request<PaginatedResponse<FullyAutonomousBureauApiFilingRun>>(
+    apiPath(`/compliance/fully-autonomous-bureau-api-filing/runs${query ? `?${query}` : ''}`),
+  );
+}
+
+export function executeFullyAutonomousBureauApiFilingFromFilingRun(
+  autonomousBureauFilingRunId: string,
+  input: FullyAutonomousBureauApiFilingSubmitRequest,
+) {
+  return request<FullyAutonomousBureauApiFilingRunResult>(
+    apiPath(
+      `/compliance/fully-autonomous-bureau-api-filing/filing-runs/${autonomousBureauFilingRunId}/execute`,
+    ),
+    {
+      method: 'POST',
+      body: JSON.stringify(input),
+    },
+  );
+}
+
+export function approveFullyAutonomousBureauApiFilingRun(runId: string) {
+  return request<FullyAutonomousBureauApiFilingRunResult>(
+    apiPath(`/compliance/fully-autonomous-bureau-api-filing/runs/${runId}/approve`),
+    {
+      method: 'POST',
+    },
+  );
+}
+
 export interface BureauRefilingStatus {
   enabled: boolean;
   ready: boolean;
