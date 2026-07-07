@@ -217,6 +217,19 @@ def hris_passwordless_ui_env(
 
 
 @pytest.fixture
+def mobile_passkey_readiness_env(
+    monkeypatch: pytest.MonkeyPatch,
+    hris_passwordless_ui_env: None,
+) -> None:
+    monkeypatch.setenv("ENABLE_MOBILE_PASSKEY_READINESS", "true")
+    get_feature_flags.cache_clear()
+    get_enterprise_identity_settings.cache_clear()
+    yield
+    get_feature_flags.cache_clear()
+    get_enterprise_identity_settings.cache_clear()
+
+
+@pytest.fixture
 def bulk_idp_provisioning_env(
     monkeypatch: pytest.MonkeyPatch,
     hris_passwordless_ui_env: None,

@@ -1192,3 +1192,15 @@ comparisons and explicit run audit while keeping tenant-level exports and sensit
 deferred.
 
 **Follow-up work:** Slice 5 — mobile passkey readiness scaffold.
+
+### Decision: Mobile passkey readiness scaffold (Version 5.12 slice 5)
+
+**Decision:** Ship admin-gated mobile passkey readiness audit (`mobile_passkey_readiness_runs`
+migration `066`), federation status/list/start-from-approved-hris-ui-run/approve endpoints, and
+`@verdin/api-client` support behind `ENABLE_MOBILE_PASSKEY_READINESS`.
+
+**Reason:** 5.12 identity epic extends HRIS passwordless UI scaffolds with web-first passkey
+readiness and operator-gated enrollment audit while deferring native mobile clients and device
+attestation.
+
+**Follow-up work:** Slice 6 — capability matrix 5.12 sign-off and `v5.12.0` release.

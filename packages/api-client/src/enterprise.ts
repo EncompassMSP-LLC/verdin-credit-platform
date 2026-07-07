@@ -750,6 +750,86 @@ export function approveHrisPasswordlessUiRun(runId: string) {
   );
 }
 
+export type MobilePasskeyReadinessRunStatus =
+  'pending_approval' | 'approved' | 'rejected' | 'failed';
+
+export interface MobilePasskeyReadinessGateStatus {
+  enabled: boolean;
+  ready: boolean;
+  hris_passwordless_ui_ready: boolean;
+  blockers: string[];
+}
+
+export interface MobilePasskeyReadinessRun {
+  id: string;
+  organization_id: string;
+  hris_passwordless_ui_run_id: string;
+  entity_id: string;
+  status: MobilePasskeyReadinessRunStatus;
+  readiness_summary: string;
+  requested_by_user_id: string | null;
+  approved_by_user_id: string | null;
+  requested_at: string | null;
+  approved_at: string | null;
+  error_message: string | null;
+}
+
+export interface MobilePasskeyReadinessSubmitInput {
+  readiness_summary: string;
+}
+
+export interface MobilePasskeyReadinessRunResult {
+  completed_at: string;
+  run: MobilePasskeyReadinessRun;
+}
+
+export interface MobilePasskeyReadinessRunList {
+  items: MobilePasskeyReadinessRun[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export function getMobilePasskeyReadinessStatus() {
+  return request<MobilePasskeyReadinessGateStatus>(
+    apiPath('/enterprise/federation/mobile-passkey-readiness/status'),
+  );
+}
+
+export function listMobilePasskeyReadinessRuns(page = 1, pageSize = 20) {
+  const params = new URLSearchParams({
+    page: String(page),
+    page_size: String(pageSize),
+  });
+  return request<MobilePasskeyReadinessRunList>(
+    apiPath(`/enterprise/federation/mobile-passkey-readiness/runs?${params}`),
+  );
+}
+
+export function startMobilePasskeyReadinessFromUiRun(
+  hrisPasswordlessUiRunId: string,
+  input: MobilePasskeyReadinessSubmitInput,
+) {
+  return request<MobilePasskeyReadinessRunResult>(
+    apiPath(
+      `/enterprise/federation/mobile-passkey-readiness/ui-runs/${hrisPasswordlessUiRunId}/start`,
+    ),
+    {
+      method: 'POST',
+      body: JSON.stringify(input),
+    },
+  );
+}
+
+export function approveMobilePasskeyReadinessRun(runId: string) {
+  return request<MobilePasskeyReadinessRunResult>(
+    apiPath(`/enterprise/federation/mobile-passkey-readiness/runs/${runId}/approve`),
+    {
+      method: 'POST',
+    },
+  );
+}
+
 export type BulkIdpProvisioningRunStatus =
   'pending_approval' | 'provisioned' | 'rejected' | 'failed';
 

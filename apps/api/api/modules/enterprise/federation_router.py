@@ -19,6 +19,7 @@ from api.modules.enterprise.federation_service import IdpFederationService
 from api.modules.enterprise.hris_lifecycle_router import hris_lifecycle_router
 from api.modules.enterprise.hris_passwordless_ui_router import hris_passwordless_ui_router
 from api.modules.enterprise.hris_sync_router import hris_sync_router
+from api.modules.enterprise.mobile_passkey_readiness_router import mobile_passkey_readiness_router
 from api.modules.enterprise.saml_automated_rotation_router import saml_automated_rotation_router
 from api.modules.enterprise.saml_cert_rotation_router import saml_cert_rotation_router
 from api.modules.enterprise.saml_passwordless_enrollment_router import (
@@ -34,6 +35,7 @@ federation_router.include_router(saml_automated_rotation_router)
 federation_router.include_router(saml_passwordless_enrollment_router)
 federation_router.include_router(hris_passwordless_ui_router)
 federation_router.include_router(bulk_idp_provisioning_router)
+federation_router.include_router(mobile_passkey_readiness_router)
 
 
 def get_federation_service(db: AsyncSession = Depends(get_db)) -> IdpFederationService:

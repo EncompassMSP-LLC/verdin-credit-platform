@@ -510,12 +510,12 @@ Scope: [version-5.11-scope.md](version-5.11-scope.md) · Release notes: [v5.11.0
 
 Scope: [version-5.12-scope.md](version-5.12-scope.md) · Checklist: [version-5.12-completion-checklist.md](../development/version-5.12-completion-checklist.md)
 
-| Capability                    | Version | Status     | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                    |
-| ----------------------------- | ------- | ---------- | ------- | -------- | --- | --- | ----- | ------------ | ------------------------------------------------------------------------ |
-| Bureau live API invocation    | 5.12    | Partial ✅ | ✅      | —        | ✅  | —   | ✅    | Disputes     | Adds invocation reference/channel audit fields to invocation runs        |
-| Public OAuth developer portal | 5.12    | Partial ✅ | ✅      | —        | ✅  | —   | ✅    | Platform     | `/org-admin/developer-portal/oauth-apps` registration + approval audit   |
-| Cross-org benchmark analytics | 5.12    | Partial ✅ | ✅      | —        | ✅  | —   | ✅    | Reporting    | `/reporting/cross-org-benchmarks` aggregate + refresh run audit scaffold |
-| Mobile passkey readiness      | 5.12    | Planned    | —       | —        | —   | —   | —     | Identity     | Web-first passkey readiness scaffold → slice 5                           |
+| Capability                    | Version | Status     | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                       |
+| ----------------------------- | ------- | ---------- | ------- | -------- | --- | --- | ----- | ------------ | --------------------------------------------------------------------------- |
+| Bureau live API invocation    | 5.12    | Partial ✅ | ✅      | —        | ✅  | —   | ✅    | Disputes     | Adds invocation reference/channel audit fields to invocation runs           |
+| Public OAuth developer portal | 5.12    | Partial ✅ | ✅      | —        | ✅  | —   | ✅    | Platform     | `/org-admin/developer-portal/oauth-apps` registration + approval audit      |
+| Cross-org benchmark analytics | 5.12    | Partial ✅ | ✅      | —        | ✅  | —   | ✅    | Reporting    | `/reporting/cross-org-benchmarks` aggregate + refresh run audit scaffold    |
+| Mobile passkey readiness      | 5.12    | Partial ✅ | ✅      | —        | ✅  | —   | ✅    | Identity     | `/enterprise/federation/mobile-passkey-readiness` enrollment audit scaffold |
 
 ---
 

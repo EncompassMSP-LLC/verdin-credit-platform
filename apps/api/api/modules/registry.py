@@ -97,6 +97,10 @@ from api.modules.enterprise.hris_passwordless_ui_models import (
     HrisPasswordlessUiRun,
     HrisPasswordlessUiRunStatus,
 )
+from api.modules.enterprise.mobile_passkey_readiness_models import (
+    MobilePasskeyReadinessRun,
+    MobilePasskeyReadinessRunStatus,
+)
 from api.modules.enterprise.models import UserSsoEnrollment, UserTotpEnrollment
 from api.modules.enterprise.saml_automated_rotation_models import (
     SamlAutomatedRotationRun,
@@ -283,6 +287,8 @@ __all__ = [
     "SamlPasswordlessEnrollmentRunStatus",
     "HrisPasswordlessUiRun",
     "HrisPasswordlessUiRunStatus",
+    "MobilePasskeyReadinessRun",
+    "MobilePasskeyReadinessRunStatus",
     "BulkIdpProvisioningRun",
     "BulkIdpProvisioningRunStatus",
     "SamlCertificateRotationRun",

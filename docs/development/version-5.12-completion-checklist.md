@@ -21,7 +21,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | 2     | Bureau live API invocation scaffold    | Disputes   | ✅     |
 | 3     | Public OAuth developer portal scaffold | Platform   | ✅     |
 | 4     | Cross-org benchmark analytics scaffold | Reporting  | ✅     |
-| 5     | Mobile passkey readiness scaffold      | Identity   | —      |
+| 5     | Mobile passkey readiness scaffold      | Identity   | ✅     |
 | 6     | Capability matrix 5.12 sign-off        | Governance | —      |
 
 Slice 2 requires the prior filing-prep/filing workflow gate to be enabled and an approved source run. Slice 3 requires enterprise identity and API key governance scaffolds enabled. Slice 4 requires governance-approved aggregate benchmark sources. Slice 5 requires passkey readiness gates and approved identity enrollment prerequisites.
