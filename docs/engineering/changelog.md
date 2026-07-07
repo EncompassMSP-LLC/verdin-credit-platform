@@ -1164,3 +1164,11 @@ packages/job-orchestrator/
 **Reason:** v5.11.0 sign-off complete (`v5.11.0` tagged); bureau live API invocation, public OAuth developer portal, cross-org benchmarks, and mobile passkey readiness need sequenced delivery before v5.12.0 release.
 
 **Follow-up work:** Slice 2 — bureau live API invocation scaffold.
+
+### Decision: Bureau live API invocation audit enrichment (Version 5.12 slice 2)
+
+**Decision:** Extend bureau live API invocation runs with `invocation_reference_id` and `invocation_channel` audit fields (migration `063_bureau_live_api_audit`) and expose both fields via API and `@verdin/api-client`.
+
+**Reason:** 5.12 disputes epic keeps operator-gated invocation flow while improving downstream traceability for live-integration readiness and reconciliation.
+
+**Follow-up work:** Slice 3 — public OAuth developer portal scaffold.

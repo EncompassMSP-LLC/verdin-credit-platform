@@ -42,6 +42,8 @@ class BureauLiveApiRunResponse(BaseSchema):
     requested_by_user_id: uuid.UUID | None
     approved_by_user_id: uuid.UUID | None
     timeline_event_id: uuid.UUID | None
+    invocation_reference_id: str | None
+    invocation_channel: str | None
     requested_at: datetime | None
     approved_at: datetime | None
     invoked_at: datetime | None
@@ -61,6 +63,8 @@ class BureauLiveApiRunResponse(BaseSchema):
             requested_by_user_id=run.requested_by_user_id,
             approved_by_user_id=run.approved_by_user_id,
             timeline_event_id=run.timeline_event_id,
+            invocation_reference_id=run.invocation_reference_id,
+            invocation_channel=run.invocation_channel,
             requested_at=run.requested_at,
             approved_at=run.approved_at,
             invoked_at=run.invoked_at,

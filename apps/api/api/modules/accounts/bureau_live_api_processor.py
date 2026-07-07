@@ -102,6 +102,8 @@ async def approve_bureau_live_api_run(
     run.approved_by_user_id = approved_by_user_id
     run.approved_at = approved_at
     run.invoked_at = invoked_at
+    run.invocation_reference_id = f"bureau-live-api:{run.id}"
+    run.invocation_channel = "operator_approved"
     run.timeline_event_id = timeline_event.id
     await session.flush()
     await session.refresh(run)

@@ -109,6 +109,8 @@ def test_submit_and_approve_bureau_live_api_run_with_timeline(
     assert approved["status"] == "invoked"
     assert approved["invoked_at"] is not None
     assert approved["timeline_event_id"] is not None
+    assert approved["invocation_reference_id"] is not None
+    assert approved["invocation_channel"] == "operator_approved"
 
     case_id = approved["case_id"]
     timeline = api_client.get(

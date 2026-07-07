@@ -18,7 +18,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | Order | Slice                                  | Epic       | Status |
 | ----- | -------------------------------------- | ---------- | ------ |
 | 1     | 5.12 scope + completion checklist      | Kickoff    | ✅     |
-| 2     | Bureau live API invocation scaffold    | Disputes   | —      |
+| 2     | Bureau live API invocation scaffold    | Disputes   | ✅     |
 | 3     | Public OAuth developer portal scaffold | Platform   | —      |
 | 4     | Cross-org benchmark analytics scaffold | Reporting  | —      |
 | 5     | Mobile passkey readiness scaffold      | Identity   | —      |
