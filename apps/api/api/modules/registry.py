@@ -102,6 +102,10 @@ from api.modules.enterprise.mobile_passkey_readiness_models import (
     MobilePasskeyReadinessRunStatus,
 )
 from api.modules.enterprise.models import UserSsoEnrollment, UserTotpEnrollment
+from api.modules.enterprise.native_mobile_passkey_client_models import (
+    NativeMobilePasskeyClientRun,
+    NativeMobilePasskeyClientRunStatus,
+)
 from api.modules.enterprise.saml_automated_rotation_models import (
     SamlAutomatedRotationRun,
     SamlAutomatedRotationRunStatus,
@@ -289,6 +293,8 @@ __all__ = [
     "HrisPasswordlessUiRunStatus",
     "MobilePasskeyReadinessRun",
     "MobilePasskeyReadinessRunStatus",
+    "NativeMobilePasskeyClientRun",
+    "NativeMobilePasskeyClientRunStatus",
     "BulkIdpProvisioningRun",
     "BulkIdpProvisioningRunStatus",
     "SamlCertificateRotationRun",
