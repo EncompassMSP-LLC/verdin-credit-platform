@@ -25,6 +25,7 @@ class FeatureFlag(StrEnum):
     ENABLE_PREDICTIVE_ANALYTICS = "ENABLE_PREDICTIVE_ANALYTICS"
     ENABLE_API_DEVELOPER_PORTAL = "ENABLE_API_DEVELOPER_PORTAL"
     ENABLE_PUBLIC_OAUTH_DEVELOPER_PORTAL = "ENABLE_PUBLIC_OAUTH_DEVELOPER_PORTAL"
+    ENABLE_CROSS_ORG_BENCHMARK_ANALYTICS = "ENABLE_CROSS_ORG_BENCHMARK_ANALYTICS"
     ENABLE_BATCH_LLM_SUMMARIES = "ENABLE_BATCH_LLM_SUMMARIES"
     ENABLE_BILLING_INVOICING = "ENABLE_BILLING_INVOICING"
     ENABLE_BILLING_INVOICE_COLLECTION = "ENABLE_BILLING_INVOICE_COLLECTION"
@@ -128,6 +129,10 @@ class FeatureFlags(BaseSettings):
     enable_public_oauth_developer_portal: bool = Field(
         default=False,
         description="Enable public OAuth developer portal app registration audit scaffold",
+    )
+    enable_cross_org_benchmark_analytics: bool = Field(
+        default=False,
+        description="Enable governance-gated cross-org benchmark analytics scaffold",
     )
     enable_batch_llm_summaries: bool = Field(
         default=False,
@@ -281,6 +286,7 @@ _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
     FeatureFlag.ENABLE_PREDICTIVE_ANALYTICS: "enable_predictive_analytics",
     FeatureFlag.ENABLE_API_DEVELOPER_PORTAL: "enable_api_developer_portal",
     FeatureFlag.ENABLE_PUBLIC_OAUTH_DEVELOPER_PORTAL: "enable_public_oauth_developer_portal",
+    FeatureFlag.ENABLE_CROSS_ORG_BENCHMARK_ANALYTICS: "enable_cross_org_benchmark_analytics",
     FeatureFlag.ENABLE_BATCH_LLM_SUMMARIES: "enable_batch_llm_summaries",
     FeatureFlag.ENABLE_BILLING_INVOICING: "enable_billing_invoicing",
     FeatureFlag.ENABLE_BILLING_INVOICE_COLLECTION: "enable_billing_invoice_collection",

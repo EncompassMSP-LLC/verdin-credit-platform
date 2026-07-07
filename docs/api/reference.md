@@ -791,7 +791,21 @@ When `ENABLE_PREDICTIVE_ANALYTICS=true`, staff can read org-scoped historical ou
 | GET    | `/reporting/predictive/outcomes` | read_only | Historical case/dispute outcome aggregates  |
 | POST   | `/reporting/predictive/refresh`  | admin     | Recompute and persist org outcome snapshot  |
 
-Outcome metrics include case closure rates (90-day window), dispute resolution rates, letter send counts, and a heuristic `outcome_score` (0–100). Returns `404` when predictive analytics is disabled. Cross-org benchmarks and model serving remain deferred to 5.4+.
+Outcome metrics include case closure rates (90-day window), dispute resolution rates, letter send
+counts, and a heuristic `outcome_score` (0–100). Returns `404` when predictive analytics is
+disabled.
+
+When `ENABLE_CROSS_ORG_BENCHMARK_ANALYTICS=true`, staff can view governance-gated aggregate
+cross-org benchmark comparisons and refresh benchmark audit runs.
+
+| Method | Path                                      | Min role  | Description                                         |
+| ------ | ----------------------------------------- | --------- | --------------------------------------------------- |
+| GET    | `/reporting/cross-org-benchmarks/status`  | read_only | Cross-org benchmark readiness and blockers          |
+| GET    | `/reporting/cross-org-benchmarks`         | read_only | Aggregate benchmark summary for caller organization |
+| GET    | `/reporting/cross-org-benchmarks/runs`    | read_only | Recent benchmark refresh run audit                  |
+| POST   | `/reporting/cross-org-benchmarks/refresh` | admin     | Create a manual benchmark refresh audit run         |
+
+Cross-org benchmark responses remain aggregate-only and do not expose raw tenant exports.
 
 Score-improvement trends remain deferred to 5.4+.
 

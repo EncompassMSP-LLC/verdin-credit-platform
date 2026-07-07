@@ -11,6 +11,7 @@ from api.modules.documents.metadata_models import DocumentEntityResolution, Docu
 from api.modules.documents.models import Document, DocumentVersion
 from api.modules.documents.parsed_report_models import DocumentParsedCreditReport
 from api.modules.notifications.models import Notification, NotificationCategory
+from api.modules.reporting.cross_org_benchmark_models import CrossOrgBenchmarkRun
 from api.modules.tasks.models import Task, TaskPriority, TaskStatus
 from api.modules.timeline.models import Communication, TimelineEvent
 
@@ -25,6 +26,7 @@ __all__ = [
     "ClientPortalUser",
     "ClientStatus",
     "ContactRelationship",
+    "CrossOrgBenchmarkRun",
     "Communication",
     "Document",
     "DocumentEntityResolution",

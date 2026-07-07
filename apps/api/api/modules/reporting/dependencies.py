@@ -88,3 +88,11 @@ def require_predictive_analytics_enabled() -> None:
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Predictive analytics is not enabled",
         )
+
+
+def require_cross_org_benchmark_analytics_enabled() -> None:
+    if not is_feature_enabled(FeatureFlag.ENABLE_CROSS_ORG_BENCHMARK_ANALYTICS):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Cross-org benchmark analytics is not enabled",
+        )

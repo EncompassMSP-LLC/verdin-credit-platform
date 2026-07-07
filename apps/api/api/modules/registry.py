@@ -157,6 +157,11 @@ from api.modules.org_admin.models import (
     OrganizationApiKey,
 )
 from api.modules.org_admin.rotation_models import ApiKeyRotationLog
+from api.modules.reporting.cross_org_benchmark_models import (
+    CrossOrgBenchmarkRun,
+    CrossOrgBenchmarkRunStatus,
+    CrossOrgBenchmarkTriggerSource,
+)
 from api.modules.reporting.materialized_models import (
     ReportingMvRefreshRun,
     ReportingMvRefreshStatus,
@@ -260,6 +265,9 @@ __all__ = [
     "ReportingMvRefreshRun",
     "ReportingMvRefreshStatus",
     "ReportingMvTriggerSource",
+    "CrossOrgBenchmarkRun",
+    "CrossOrgBenchmarkRunStatus",
+    "CrossOrgBenchmarkTriggerSource",
     "PredictiveOutcomeRefreshRun",
     "PredictiveOutcomeRefreshStatus",
     "PredictiveOutcomeSnapshot",
