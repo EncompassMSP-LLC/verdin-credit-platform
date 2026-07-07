@@ -749,3 +749,84 @@ export function approveHrisPasswordlessUiRun(runId: string) {
     },
   );
 }
+
+export type BulkIdpProvisioningRunStatus =
+  'pending_approval' | 'provisioned' | 'rejected' | 'failed';
+
+export interface BulkIdpProvisioningGateStatus {
+  enabled: boolean;
+  ready: boolean;
+  hris_passwordless_ui_ready: boolean;
+  blockers: string[];
+}
+
+export interface BulkIdpProvisioningRun {
+  id: string;
+  organization_id: string;
+  hris_passwordless_ui_run_id: string;
+  entity_id: string;
+  status: BulkIdpProvisioningRunStatus;
+  provisioning_summary: string;
+  requested_by_user_id: string | null;
+  approved_by_user_id: string | null;
+  requested_at: string | null;
+  approved_at: string | null;
+  provisioned_at: string | null;
+  error_message: string | null;
+}
+
+export interface BulkIdpProvisioningSubmitInput {
+  provisioning_summary: string;
+}
+
+export interface BulkIdpProvisioningRunResult {
+  completed_at: string;
+  run: BulkIdpProvisioningRun;
+}
+
+export interface BulkIdpProvisioningRunList {
+  items: BulkIdpProvisioningRun[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export function getBulkIdpProvisioningStatus() {
+  return request<BulkIdpProvisioningGateStatus>(
+    apiPath('/enterprise/federation/bulk-idp-provisioning/status'),
+  );
+}
+
+export function listBulkIdpProvisioningRuns(page = 1, pageSize = 20) {
+  const params = new URLSearchParams({
+    page: String(page),
+    page_size: String(pageSize),
+  });
+  return request<BulkIdpProvisioningRunList>(
+    apiPath(`/enterprise/federation/bulk-idp-provisioning/runs?${params}`),
+  );
+}
+
+export function startBulkIdpProvisioningFromUiRun(
+  hrisPasswordlessUiRunId: string,
+  input: BulkIdpProvisioningSubmitInput,
+) {
+  return request<BulkIdpProvisioningRunResult>(
+    apiPath(
+      `/enterprise/federation/bulk-idp-provisioning/ui-runs/${hrisPasswordlessUiRunId}/start`,
+    ),
+    {
+      method: 'POST',
+      body: JSON.stringify(input),
+    },
+  );
+}
+
+export function approveBulkIdpProvisioningRun(runId: string) {
+  return request<BulkIdpProvisioningRunResult>(
+    apiPath(`/enterprise/federation/bulk-idp-provisioning/runs/${runId}/approve`),
+    {
+      method: 'POST',
+    },
+  );
+}

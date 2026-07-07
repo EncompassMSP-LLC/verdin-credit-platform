@@ -77,6 +77,10 @@ from api.modules.documents.batch_summary_models import (
     BatchSummaryTriggerSource,
 )
 from api.modules.documents.models import Document
+from api.modules.enterprise.bulk_idp_provisioning_models import (
+    BulkIdpProvisioningRun,
+    BulkIdpProvisioningRunStatus,
+)
 from api.modules.enterprise.federation_metadata_models import (
     SamlFederationMetadataUpload,
     SamlMetadataValidationStatus,
@@ -264,6 +268,8 @@ __all__ = [
     "SamlPasswordlessEnrollmentRunStatus",
     "HrisPasswordlessUiRun",
     "HrisPasswordlessUiRunStatus",
+    "BulkIdpProvisioningRun",
+    "BulkIdpProvisioningRunStatus",
     "SamlCertificateRotationRun",
     "SamlCertificateRotationStatus",
     "SmsDeliveryLog",

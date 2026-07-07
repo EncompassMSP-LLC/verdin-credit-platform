@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from api.database.session import get_db
 from api.modules.auth.dependencies import get_current_user
 from api.modules.auth.models import User
+from api.modules.enterprise.bulk_idp_provisioning_router import bulk_idp_provisioning_router
 from api.modules.enterprise.dependencies import require_idp_federation_enabled
 from api.modules.enterprise.federation_metadata_router import saml_metadata_router
 from api.modules.enterprise.federation_schemas import (
@@ -32,6 +33,7 @@ federation_router.include_router(saml_cert_rotation_router)
 federation_router.include_router(saml_automated_rotation_router)
 federation_router.include_router(saml_passwordless_enrollment_router)
 federation_router.include_router(hris_passwordless_ui_router)
+federation_router.include_router(bulk_idp_provisioning_router)
 
 
 def get_federation_service(db: AsyncSession = Depends(get_db)) -> IdpFederationService:
