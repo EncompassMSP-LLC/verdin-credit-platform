@@ -567,6 +567,10 @@ SAML passwordless enrollment scaffold requires `ENABLE_SAML_PASSWORDLESS_ENROLLM
 | GET | `/enterprise/federation/bulk-idp-provisioning/runs` | read_only | Paginated bulk IdP provisioning audit log |
 | POST | `/enterprise/federation/bulk-idp-provisioning/ui-runs/{id}/start` | admin | Start bulk provisioning from approved HRIS UI run |
 | POST | `/enterprise/federation/bulk-idp-provisioning/runs/{run_id}/approve` | admin | Approve bulk IdP provisioning scaffold |
+| GET | `/enterprise/federation/mobile-passkey-readiness/status` | read_only | Mobile passkey readiness and blockers |
+| GET | `/enterprise/federation/mobile-passkey-readiness/runs` | read_only | Paginated mobile passkey readiness audit log |
+| POST | `/enterprise/federation/mobile-passkey-readiness/ui-runs/{id}/start` | admin | Start passkey readiness from approved HRIS UI run |
+| POST | `/enterprise/federation/mobile-passkey-readiness/runs/{run_id}/approve` | admin | Approve mobile passkey readiness scaffold |
 
 Endpoints return `404` when the corresponding feature flag is false.
 
