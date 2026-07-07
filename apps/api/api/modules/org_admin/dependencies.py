@@ -20,3 +20,12 @@ def require_api_developer_portal_enabled() -> None:
             status_code=status.HTTP_404_NOT_FOUND,
             detail="API developer portal is not enabled",
         )
+
+
+def require_public_oauth_developer_portal_enabled() -> None:
+    require_api_developer_portal_enabled()
+    if not is_feature_enabled(FeatureFlag.ENABLE_PUBLIC_OAUTH_DEVELOPER_PORTAL):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Public OAuth developer portal is not enabled",
+        )

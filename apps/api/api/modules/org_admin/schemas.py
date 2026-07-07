@@ -7,7 +7,12 @@ from pydantic import Field
 
 from api.core.responses import BaseSchema
 from api.modules.billing.schemas import OrganizationBillingSummary
-from api.modules.org_admin.models import ApiKeyScope, OrganizationApiKey
+from api.modules.org_admin.models import (
+    ApiKeyScope,
+    OAuthDeveloperApp,
+    OAuthDeveloperAppStatus,
+    OrganizationApiKey,
+)
 
 
 class OrgAdminStatusResponse(BaseSchema):
@@ -91,3 +96,45 @@ class DeveloperPortalResponse(BaseSchema):
     active_api_key_count: int
     rate_limit: ApiKeyRateLimitStatusResponse
     api_keys: list[ApiKeyResponse]
+
+
+class OAuthDeveloperAppCreate(BaseSchema):
+    name: str = Field(min_length=1, max_length=255)
+    redirect_uri: str = Field(min_length=1, max_length=1024)
+    scopes: list[str] = Field(default_factory=lambda: ["read"])
+
+
+class OAuthDeveloperAppResponse(BaseSchema):
+    id: uuid.UUID
+    organization_id: uuid.UUID
+    name: str
+    redirect_uri: str
+    scopes: list[str]
+    status: OAuthDeveloperAppStatus
+    requested_by_user_id: uuid.UUID | None
+    approved_by_user_id: uuid.UUID | None
+    requested_at: datetime | None
+    approved_at: datetime | None
+    revoked_at: datetime | None
+    error_message: str | None
+    created_at: datetime
+    updated_at: datetime
+
+    @classmethod
+    def from_model(cls, app: OAuthDeveloperApp) -> "OAuthDeveloperAppResponse":
+        return cls(
+            id=app.id,
+            organization_id=app.organization_id,
+            name=app.name,
+            redirect_uri=app.redirect_uri,
+            scopes=app.scopes,
+            status=app.status,
+            requested_by_user_id=app.requested_by_user_id,
+            approved_by_user_id=app.approved_by_user_id,
+            requested_at=app.requested_at,
+            approved_at=app.approved_at,
+            revoked_at=app.revoked_at,
+            error_message=app.error_message,
+            created_at=app.created_at,
+            updated_at=app.updated_at,
+        )

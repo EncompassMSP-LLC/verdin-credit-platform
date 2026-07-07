@@ -19,7 +19,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | ----- | -------------------------------------- | ---------- | ------ |
 | 1     | 5.12 scope + completion checklist      | Kickoff    | ✅     |
 | 2     | Bureau live API invocation scaffold    | Disputes   | ✅     |
-| 3     | Public OAuth developer portal scaffold | Platform   | —      |
+| 3     | Public OAuth developer portal scaffold | Platform   | ✅     |
 | 4     | Cross-org benchmark analytics scaffold | Reporting  | —      |
 | 5     | Mobile passkey readiness scaffold      | Identity   | —      |
 | 6     | Capability matrix 5.12 sign-off        | Governance | —      |

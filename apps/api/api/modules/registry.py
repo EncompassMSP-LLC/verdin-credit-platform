@@ -150,7 +150,12 @@ from api.modules.notifications.sms_campaign_models import (
     SmsMarketingCampaignStatus,
     SmsMarketingTriggerSource,
 )
-from api.modules.org_admin.models import ApiKeyScope, OrganizationApiKey
+from api.modules.org_admin.models import (
+    ApiKeyScope,
+    OAuthDeveloperApp,
+    OAuthDeveloperAppStatus,
+    OrganizationApiKey,
+)
 from api.modules.org_admin.rotation_models import ApiKeyRotationLog
 from api.modules.reporting.materialized_models import (
     ReportingMvRefreshRun,
@@ -183,6 +188,8 @@ __all__ = [
     "AgentObservabilityTriggerSource",
     "ApiKeyRotationLog",
     "ApiKeyScope",
+    "OAuthDeveloperApp",
+    "OAuthDeveloperAppStatus",
     "BillingInvoiceCollectionRun",
     "BillingInvoiceCollectionRunKind",
     "BillingInvoiceCollectionRunStatus",

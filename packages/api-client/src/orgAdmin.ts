@@ -98,6 +98,31 @@ export interface DeveloperPortal {
   api_keys: ApiKey[];
 }
 
+export type OAuthDeveloperAppStatus = 'pending_approval' | 'approved' | 'revoked' | 'failed';
+
+export interface OAuthDeveloperApp {
+  id: string;
+  organization_id: string;
+  name: string;
+  redirect_uri: string;
+  scopes: string[];
+  status: OAuthDeveloperAppStatus;
+  requested_by_user_id: string | null;
+  approved_by_user_id: string | null;
+  requested_at: string | null;
+  approved_at: string | null;
+  revoked_at: string | null;
+  error_message: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OAuthDeveloperAppCreateInput {
+  name: string;
+  redirect_uri: string;
+  scopes?: string[];
+}
+
 export function getApiKeyRateLimitStatus() {
   return request<ApiKeyRateLimitStatus>(apiPath('/org-admin/api-keys/rate-limit/status'));
 }
@@ -110,4 +135,24 @@ export function rotateOrganizationApiKey(apiKeyId: string) {
   return request<ApiKeyRotateResponse>(apiPath(`/org-admin/api-keys/${apiKeyId}/rotate`), {
     method: 'POST',
   });
+}
+
+export function listOAuthDeveloperApps() {
+  return request<OAuthDeveloperApp[]>(apiPath('/org-admin/developer-portal/oauth-apps'));
+}
+
+export function createOAuthDeveloperApp(input: OAuthDeveloperAppCreateInput) {
+  return request<OAuthDeveloperApp>(apiPath('/org-admin/developer-portal/oauth-apps'), {
+    method: 'POST',
+    body: input,
+  });
+}
+
+export function approveOAuthDeveloperApp(appId: string) {
+  return request<OAuthDeveloperApp>(
+    apiPath(`/org-admin/developer-portal/oauth-apps/${appId}/approve`),
+    {
+      method: 'POST',
+    },
+  );
 }
