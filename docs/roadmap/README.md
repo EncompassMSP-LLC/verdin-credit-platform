@@ -53,7 +53,7 @@ Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (
 | **5.8**   | Production Integrations (gated) | Released    | Supervised agent loops, bureau live API, Stripe tax, HRIS lifecycle sync (`v5.8.0`)     |
 | **5.9**   | Autonomous Production (gated)   | Released    | Unsupervised agent loops, bureau filing, live Stripe Tax, SAML rotation (`v5.9.0`)      |
 | **5.10**  | Production Automation (gated)   | Released    | Arbitrary execution, bureau re-filing, charge retry, SAML passwordless                  |
-| **5.11**  | Production Execution (gated)    | In progress | Unsupervised re-filing, live charge retry, HRIS passwordless UI, bulk IdP provisioning  |
+| **5.11**  | Production Execution (gated)    | Released    | Unsupervised re-filing, live charge retry, HRIS passwordless UI, bulk IdP provisioning  |
 
 ### Sprint milestones
 
@@ -324,18 +324,20 @@ Scope and checklist: [`docs/governance/version-5.10-scope.md`](../governance/ver
 
 Release notes: [`docs/release-notes/v5.10.0.md`](../release-notes/v5.10.0.md)
 
-### Version 5.11 — Compliance-Gated Production Execution (in progress)
+### Version 5.11 — Compliance-Gated Production Execution (released)
 
 Scope and checklist: [`docs/governance/version-5.11-scope.md`](../governance/version-5.11-scope.md) · [`docs/development/version-5.11-completion-checklist.md`](../development/version-5.11-completion-checklist.md)
 
 | Epic | Theme                         | 5.11 outcome | Notes                                                    |
 | ---- | ----------------------------- | ------------ | -------------------------------------------------------- |
-| 1    | Unsupervised bureau re-filing | Partial      | Operator-gated unsupervised re-filing run audit scaffold |
-| 2    | Live charge retry execution   | Partial      | Admin-gated live charge retry execution audit scaffold   |
-| 3    | HRIS passwordless UI          | Partial      | HRIS-linked passwordless enrollment UI audit scaffold    |
-| 4    | Multi-IdP bulk provisioning   | Partial      | Federation bulk IdP provisioning run audit scaffold      |
+| 1    | Unsupervised bureau re-filing | Partial ✅   | Operator-gated unsupervised re-filing run audit scaffold |
+| 2    | Live charge retry execution   | Partial ✅   | Admin-gated live charge retry execution audit scaffold   |
+| 3    | HRIS passwordless UI          | Partial ✅   | HRIS-linked passwordless enrollment UI audit scaffold    |
+| 4    | Multi-IdP bulk provisioning   | Partial ✅   | Federation bulk IdP provisioning run audit scaffold      |
 
-**Target tag:** `v5.11.0`
+**Tag:** `v5.11.0` — Compliance-Gated Production Execution.
+
+Release notes: [`docs/release-notes/v5.11.0.md`](../release-notes/v5.11.0.md)
 
 ## Sprint → version mapping
 

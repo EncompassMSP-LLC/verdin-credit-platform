@@ -2,7 +2,7 @@
 
 **Executive view** of Verdin platform capabilities — what exists, what version introduced it, readiness by layer, and dependencies.
 
-**Last updated:** 2026-07-06  
+**Last updated:** 2026-07-07  
 **Maintainers:** Update this document in every epic PR that ships or materially advances a capability.
 
 **Version 4.5 sign-off:** [version-4.5-scope.md](version-4.5-scope.md) · Release notes: [v4.5.0.md](../release-notes/v4.5.0.md)  
@@ -17,7 +17,7 @@
 **Version 5.8 sign-off:** [version-5.8-scope.md](version-5.8-scope.md) · Release notes: [v5.8.0.md](../release-notes/v5.8.0.md)
 **Version 5.9 sign-off:** [version-5.9-scope.md](version-5.9-scope.md) · Release notes: [v5.9.0.md](../release-notes/v5.9.0.md)
 **Version 5.10 sign-off:** [version-5.10-scope.md](version-5.10-scope.md) · Release notes: [v5.10.0.md](../release-notes/v5.10.0.md)
-**Version 5.11 planning:** [version-5.11-scope.md](version-5.11-scope.md) · Checklist: [version-5.11-completion-checklist.md](../development/version-5.11-completion-checklist.md)
+**Version 5.11 sign-off:** [version-5.11-scope.md](version-5.11-scope.md) · Release notes: [v5.11.0.md](../release-notes/v5.11.0.md)
 
 ## Status legend
 
@@ -492,16 +492,16 @@ Scope: [version-5.10-scope.md](version-5.10-scope.md) · Release notes: [v5.10.0
 
 ---
 
-## Version 5.11 — Compliance-gated production execution (in progress)
+## Version 5.11 — Compliance-gated production execution (shipped — Partial ✅)
 
-Scope: [version-5.11-scope.md](version-5.11-scope.md) · Checklist: [version-5.11-completion-checklist.md](../development/version-5.11-completion-checklist.md)
+Scope: [version-5.11-scope.md](version-5.11-scope.md) · Release notes: [v5.11.0.md](../release-notes/v5.11.0.md) · Checklist: [version-5.11-completion-checklist.md](../development/version-5.11-completion-checklist.md)
 
-| Capability                    | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                         |
-| ----------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ----------------------------------------------------------------------------- |
-| Unsupervised bureau re-filing | 5.11    | Partial | ✅      | —        | ✅  | —   | ✅    | Disputes     | `POST /compliance/bureau-unsupervised-refiling/refiling-runs/{id}/start`      |
-| Live charge retry execution   | 5.11    | Partial | ✅      | —        | ✅  | —   | ✅    | Billing      | `POST /billing/live-charge-retry/charge-retry-runs/{id}/execute`              |
-| HRIS passwordless UI          | 5.11    | Partial | ✅      | —        | ✅  | —   | ✅    | Enterprise   | `POST /enterprise/federation/hris-passwordless-ui/enrollment-runs/{id}/start` |
-| Multi-IdP bulk provisioning   | 5.11    | Partial | ✅      | —        | ✅  | —   | ✅    | Enterprise   | `POST /enterprise/federation/bulk-idp-provisioning/ui-runs/{id}/start`        |
+| Capability                    | Version | Status     | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                         |
+| ----------------------------- | ------- | ---------- | ------- | -------- | --- | --- | ----- | ------------ | ----------------------------------------------------------------------------- |
+| Unsupervised bureau re-filing | 5.11    | Partial ✅ | ✅      | —        | ✅  | —   | ✅    | Disputes     | `POST /compliance/bureau-unsupervised-refiling/refiling-runs/{id}/start`      |
+| Live charge retry execution   | 5.11    | Partial ✅ | ✅      | —        | ✅  | —   | ✅    | Billing      | `POST /billing/live-charge-retry/charge-retry-runs/{id}/execute`              |
+| HRIS passwordless UI          | 5.11    | Partial ✅ | ✅      | —        | ✅  | —   | ✅    | Enterprise   | `POST /enterprise/federation/hris-passwordless-ui/enrollment-runs/{id}/start` |
+| Multi-IdP bulk provisioning   | 5.11    | Partial ✅ | ✅      | —        | ✅  | —   | ✅    | Enterprise   | `POST /enterprise/federation/bulk-idp-provisioning/ui-runs/{id}/start`        |
 
 ---
 

@@ -9,14 +9,14 @@ Formal scope for **Version 5.11 — Compliance-Gated Production Execution**. Bui
 
 Extend partial 5.10 compliance-gated scaffolds (arbitrary execution, bureau re-filing, charge retry, SAML passwordless enrollment) toward compliance-approved production execution. Each epic ships as a **Partial** capability behind feature flags with tests and documentation.
 
-## Epic outcomes (planned)
+## Epic outcomes (shipped — Partial ✅)
 
 | Epic | Theme                         | 5.11 outcome | Summary                                                           |
 | ---- | ----------------------------- | ------------ | ----------------------------------------------------------------- |
-| 1    | Unsupervised bureau re-filing | Partial      | Operator-gated unsupervised re-filing run audit from refiled runs |
-| 2    | Live charge retry execution   | Partial      | Admin-gated live charge retry execution audit from retried runs   |
-| 3    | HRIS passwordless UI          | Partial      | HRIS-linked passwordless enrollment UI audit scaffold             |
-| 4    | Multi-IdP bulk provisioning   | Partial      | Federation bulk IdP provisioning run audit scaffold               |
+| 1    | Unsupervised bureau re-filing | Partial ✅   | Operator-gated unsupervised re-filing run audit from refiled runs |
+| 2    | Live charge retry execution   | Partial ✅   | Admin-gated live charge retry execution audit from retried runs   |
+| 3    | HRIS passwordless UI          | Partial ✅   | HRIS-linked passwordless enrollment UI audit scaffold             |
+| 4    | Multi-IdP bulk provisioning   | Partial ✅   | Federation bulk IdP provisioning run audit scaffold               |
 
 ## Shipped from 5.10 (foundation — do not regress)
 
