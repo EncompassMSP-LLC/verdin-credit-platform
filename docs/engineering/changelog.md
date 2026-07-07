@@ -1204,3 +1204,11 @@ readiness and operator-gated enrollment audit while deferring native mobile clie
 attestation.
 
 **Follow-up work:** Slice 6 — capability matrix 5.12 sign-off and `v5.12.0` release.
+
+### Decision: Version 5.12 epic sign-off
+
+**Decision:** Mark all four Version 5.12 epics **Partial ✅** in `version-5.12-scope.md`, add capability matrix 5.12 epic sign-off table, complete checklist exit criteria, and publish `docs/release-notes/v5.12.0.md`.
+
+**Reason:** v5.12.0 completes compliance-gated expansion surface scaffolds; native mobile apps, OAuth marketplace publishing, autonomous bureau filing, and unredacted benchmark exports remain deferred to 5.13+.
+
+**Follow-up work:** Version 5.13 planning — production depth where compliance-approved.

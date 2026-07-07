@@ -6,10 +6,10 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 
 ## Exit criteria for "5.12 done"
 
-- [ ] All four epics below are **✅ or explicitly deferred** with docs updated — see [`version-5.12-scope.md`](../governance/version-5.12-scope.md)
-- [ ] Capability matrix updated for 5.12 slices
-- [ ] Bureau live API invocation, public OAuth developer portal, cross-org benchmark analytics, and mobile passkey readiness paths verified behind feature flags
-- [ ] `docs/release-notes/v5.12.0.md` + tag `v5.12.0`
+- [x] All four epics below are **✅ or explicitly deferred** with docs updated — see [`version-5.12-scope.md`](../governance/version-5.12-scope.md)
+- [x] Capability matrix updated for 5.12 slices
+- [x] Bureau live API invocation, public OAuth developer portal, cross-org benchmark analytics, and mobile passkey readiness paths verified behind feature flags
+- [x] `docs/release-notes/v5.12.0.md` + tag `v5.12.0`
 
 ---
 
@@ -22,7 +22,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | 3     | Public OAuth developer portal scaffold | Platform   | ✅     |
 | 4     | Cross-org benchmark analytics scaffold | Reporting  | ✅     |
 | 5     | Mobile passkey readiness scaffold      | Identity   | ✅     |
-| 6     | Capability matrix 5.12 sign-off        | Governance | —      |
+| 6     | Capability matrix 5.12 sign-off        | Governance | ✅     |
 
 Slice 2 requires the prior filing-prep/filing workflow gate to be enabled and an approved source run. Slice 3 requires enterprise identity and API key governance scaffolds enabled. Slice 4 requires governance-approved aggregate benchmark sources. Slice 5 requires passkey readiness gates and approved identity enrollment prerequisites.
 
