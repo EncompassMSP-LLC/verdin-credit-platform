@@ -54,6 +54,7 @@ Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (
 | **5.9**   | Autonomous Production (gated)   | Released    | Unsupervised agent loops, bureau filing, live Stripe Tax, SAML rotation (`v5.9.0`)      |
 | **5.10**  | Production Automation (gated)   | Released    | Arbitrary execution, bureau re-filing, charge retry, SAML passwordless                  |
 | **5.11**  | Production Execution (gated)    | Released    | Unsupervised re-filing, live charge retry, HRIS passwordless UI, bulk IdP provisioning  |
+| **5.12**  | Expansion Surfaces (gated)      | In progress | Bureau live API scaffold, public OAuth portal scaffold, cross-org benchmarks, passkeys  |
 
 ### Sprint milestones
 
@@ -338,6 +339,19 @@ Scope and checklist: [`docs/governance/version-5.11-scope.md`](../governance/ver
 **Tag:** `v5.11.0` — Compliance-Gated Production Execution.
 
 Release notes: [`docs/release-notes/v5.11.0.md`](../release-notes/v5.11.0.md)
+
+### Version 5.12 — Compliance-Gated Expansion Surfaces (in progress)
+
+Scope and checklist: [`docs/governance/version-5.12-scope.md`](../governance/version-5.12-scope.md) · [`docs/development/version-5.12-completion-checklist.md`](../development/version-5.12-completion-checklist.md)
+
+| Epic | Theme                         | 5.12 outcome | Notes                                                    |
+| ---- | ----------------------------- | ------------ | -------------------------------------------------------- |
+| 1    | Bureau live API invocation    | Partial      | Operator-gated bureau API invocation run audit scaffold  |
+| 2    | Public OAuth developer portal | Partial      | Org-scoped OAuth developer portal registration scaffold  |
+| 3    | Cross-org benchmark analytics | Partial      | Governance-gated cross-org benchmark read model scaffold |
+| 4    | Mobile passkey readiness      | Partial      | Web-first passkey readiness and audit scaffold           |
+
+**Target tag:** `v5.12.0`
 
 ## Sprint → version mapping
 

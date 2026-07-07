@@ -2,7 +2,7 @@
 
 **Executive view** of Verdin platform capabilities — what exists, what version introduced it, readiness by layer, and dependencies.
 
-**Last updated:** 2026-07-07  
+**Last updated:** 2026-07-08  
 **Maintainers:** Update this document in every epic PR that ships or materially advances a capability.
 
 **Version 4.5 sign-off:** [version-4.5-scope.md](version-4.5-scope.md) · Release notes: [v4.5.0.md](../release-notes/v4.5.0.md)  
@@ -18,6 +18,7 @@
 **Version 5.9 sign-off:** [version-5.9-scope.md](version-5.9-scope.md) · Release notes: [v5.9.0.md](../release-notes/v5.9.0.md)
 **Version 5.10 sign-off:** [version-5.10-scope.md](version-5.10-scope.md) · Release notes: [v5.10.0.md](../release-notes/v5.10.0.md)
 **Version 5.11 sign-off:** [version-5.11-scope.md](version-5.11-scope.md) · Release notes: [v5.11.0.md](../release-notes/v5.11.0.md)
+**Version 5.12 planning:** [version-5.12-scope.md](version-5.12-scope.md) · Checklist: [version-5.12-completion-checklist.md](../development/version-5.12-completion-checklist.md)
 
 ## Status legend
 

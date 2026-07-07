@@ -1156,3 +1156,11 @@ packages/job-orchestrator/
 **Reason:** v5.11.0 completes compliance-gated production execution scaffolds; native mobile apps, public OAuth dev portal, cross-org benchmarks, and live bureau API calls remain deferred to 5.12+.
 
 **Follow-up work:** Version 5.12 planning — production depth where compliance-approved.
+
+### Decision: Version 5.12 kickoff (slice 1)
+
+**Decision:** Publish `version-5.12-scope.md`, `version-5.12-completion-checklist.md`, roadmap 5.12 section, capability matrix 5.12 planning status, and `.cursor/rules/version-512-sprint-loop.mdc`.
+
+**Reason:** v5.11.0 sign-off complete (`v5.11.0` tagged); bureau live API invocation, public OAuth developer portal, cross-org benchmarks, and mobile passkey readiness need sequenced delivery before v5.12.0 release.
+
+**Follow-up work:** Slice 2 — bureau live API invocation scaffold.
