@@ -6,10 +6,10 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 
 ## Exit criteria for “5.11 done”
 
-- [ ] All four epics below are **✅ or explicitly deferred** with docs updated — see [`version-5.11-scope.md`](../governance/version-5.11-scope.md)
-- [ ] Capability matrix updated for 5.11 slices
-- [ ] Unsupervised re-filing, live charge retry execution, HRIS passwordless UI, and bulk provisioning paths verified behind feature flags
-- [ ] `docs/release-notes/v5.11.0.md` + tag `v5.11.0`
+- [x] All four epics below are **✅ or explicitly deferred** with docs updated — see [`version-5.11-scope.md`](../governance/version-5.11-scope.md)
+- [x] Capability matrix updated for 5.11 slices
+- [x] Unsupervised re-filing, live charge retry execution, HRIS passwordless UI, and bulk provisioning paths verified behind feature flags
+- [x] `docs/release-notes/v5.11.0.md` + tag `v5.11.0`
 
 ---
 
@@ -22,7 +22,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | 3     | Live charge retry execution scaffold   | Billing    | ✅     |
 | 4     | HRIS passwordless UI scaffold          | Identity   | ✅     |
 | 5     | Multi-IdP bulk provisioning scaffold   | Enterprise | ✅     |
-| 6     | Capability matrix 5.11 sign-off        | Governance | —      |
+| 6     | Capability matrix 5.11 sign-off        | Governance | ✅     |
 
 Slice 2 requires `ENABLE_BUREAU_REFILING=true` and a `refiled` bureau re-filing run. Slice 3 requires `ENABLE_STRIPE_CHARGE_RETRY=true` and a `retried` charge retry run. Slice 4 requires `ENABLE_SAML_PASSWORDLESS_ENROLLMENT=true` and an `enrolled` passwordless enrollment run. Slice 5 requires `ENABLE_HRIS_PASSWORDLESS_UI=true` and an approved HRIS passwordless UI run.
 

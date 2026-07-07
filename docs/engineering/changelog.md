@@ -1148,3 +1148,11 @@ packages/job-orchestrator/
 **Reason:** 5.11 enterprise epic extends HRIS passwordless UI with operator-gated bulk IdP provisioning run audit without cross-org IdP templates or automated cert rotation.
 
 **Follow-up work:** Slice 6 — capability matrix 5.11 sign-off.
+
+### Decision: Version 5.11 epic sign-off
+
+**Decision:** Mark all four Version 5.11 epics **Partial ✅** in `version-5.11-scope.md`, add capability matrix 5.11 epic sign-off table, complete checklist exit criteria, and publish `docs/release-notes/v5.11.0.md`.
+
+**Reason:** v5.11.0 completes compliance-gated production execution scaffolds; native mobile apps, public OAuth dev portal, cross-org benchmarks, and live bureau API calls remain deferred to 5.12+.
+
+**Follow-up work:** Version 5.12 planning — production depth where compliance-approved.
