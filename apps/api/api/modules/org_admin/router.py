@@ -11,6 +11,7 @@ from api.modules.auth.models import User
 from api.modules.org_admin.dependencies import (
     require_api_developer_portal_enabled,
     require_org_admin_enabled,
+    require_public_oauth_developer_portal_enabled,
 )
 from api.modules.org_admin.schemas import (
     ApiKeyCreate,
@@ -19,6 +20,8 @@ from api.modules.org_admin.schemas import (
     ApiKeyResponse,
     ApiKeyRotateResponse,
     DeveloperPortalResponse,
+    OAuthDeveloperAppCreate,
+    OAuthDeveloperAppResponse,
     OrgAdminStatusResponse,
     OrganizationAdminSummary,
 )
@@ -120,3 +123,42 @@ async def rotate_organization_api_key(
     service: OrgAdminService = Depends(get_org_admin_service),
 ) -> ApiKeyRotateResponse:
     return await service.rotate_api_key(current_user, api_key_id)
+
+
+@router.get(
+    "/developer-portal/oauth-apps",
+    response_model=list[OAuthDeveloperAppResponse],
+    dependencies=[Depends(require_public_oauth_developer_portal_enabled)],
+)
+async def list_oauth_developer_apps(
+    current_user: User = Depends(get_current_user),
+    service: OrgAdminService = Depends(get_org_admin_service),
+) -> list[OAuthDeveloperAppResponse]:
+    return await service.list_oauth_developer_apps(current_user)
+
+
+@router.post(
+    "/developer-portal/oauth-apps",
+    response_model=OAuthDeveloperAppResponse,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_public_oauth_developer_portal_enabled)],
+)
+async def create_oauth_developer_app(
+    body: OAuthDeveloperAppCreate,
+    current_user: User = Depends(get_current_user),
+    service: OrgAdminService = Depends(get_org_admin_service),
+) -> OAuthDeveloperAppResponse:
+    return await service.create_oauth_developer_app(current_user, body)
+
+
+@router.post(
+    "/developer-portal/oauth-apps/{app_id}/approve",
+    response_model=OAuthDeveloperAppResponse,
+    dependencies=[Depends(require_public_oauth_developer_portal_enabled)],
+)
+async def approve_oauth_developer_app(
+    app_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: OrgAdminService = Depends(get_org_admin_service),
+) -> OAuthDeveloperAppResponse:
+    return await service.approve_oauth_developer_app(current_user, app_id)

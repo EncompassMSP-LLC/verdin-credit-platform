@@ -1172,3 +1172,11 @@ packages/job-orchestrator/
 **Reason:** 5.12 disputes epic keeps operator-gated invocation flow while improving downstream traceability for live-integration readiness and reconciliation.
 
 **Follow-up work:** Slice 3 — public OAuth developer portal scaffold.
+
+### Decision: Public OAuth developer portal scaffold (Version 5.12 slice 3)
+
+**Decision:** Ship admin-gated OAuth developer portal app registration audit (`oauth_developer_apps` migration 064) with list, create, and approve endpoints behind `ENABLE_PUBLIC_OAUTH_DEVELOPER_PORTAL`.
+
+**Reason:** 5.12 platform epic extends internal developer portal controls with an auditable public OAuth app scaffold while preserving explicit admin approval.
+
+**Follow-up work:** Slice 4 — cross-org benchmark analytics scaffold.

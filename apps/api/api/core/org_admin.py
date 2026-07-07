@@ -22,6 +22,7 @@ _DEFERRED_CAPABILITIES = [
     "idp_federation",
     "api_key_rotation",
     "developer_portal",
+    "public_oauth_developer_portal",
 ]
 
 
@@ -48,6 +49,9 @@ def get_org_admin_status() -> OrgAdminStatusResponse:
         deferred.remove("api_key_rotation")
         capabilities.append("developer_portal")
         deferred.remove("developer_portal")
+    if is_feature_enabled(FeatureFlag.ENABLE_PUBLIC_OAUTH_DEVELOPER_PORTAL):
+        capabilities.append("public_oauth_developer_portal")
+        deferred.remove("public_oauth_developer_portal")
 
     return OrgAdminStatusResponse(
         org_admin_enabled=True,

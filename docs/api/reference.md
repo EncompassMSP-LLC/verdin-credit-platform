@@ -584,14 +584,17 @@ Enterprise org administration scaffold for API key lifecycle and organization su
 | POST   | `/org-admin/api-keys/{id}/revoke`       | admin    | Revoke an active API key                        |
 | GET    | `/org-admin/api-keys/rate-limit/status` | admin    | API key rate-limit configuration (5.2)          |
 
-When `ENABLE_API_DEVELOPER_PORTAL=true`, admins can access the internal developer portal and rotate active keys.
+When `ENABLE_API_DEVELOPER_PORTAL=true`, admins can access the internal developer portal and rotate active keys. When `ENABLE_PUBLIC_OAUTH_DEVELOPER_PORTAL=true`, admins can register and approve OAuth developer portal apps.
 
-| Method | Path                              | Min role | Description                                            |
-| ------ | --------------------------------- | -------- | ------------------------------------------------------ |
-| GET    | `/org-admin/developer-portal`     | admin    | Keys, scopes, rate-limit status, rotation readiness    |
-| POST   | `/org-admin/api-keys/{id}/rotate` | admin    | Revoke key and issue replacement with same name/scopes |
+| Method | Path                                                      | Min role | Description                                            |
+| ------ | --------------------------------------------------------- | -------- | ------------------------------------------------------ |
+| GET    | `/org-admin/developer-portal`                             | admin    | Keys, scopes, rate-limit status, rotation readiness    |
+| POST   | `/org-admin/api-keys/{id}/rotate`                         | admin    | Revoke key and issue replacement with same name/scopes |
+| GET    | `/org-admin/developer-portal/oauth-apps`                  | admin    | List OAuth developer portal app audit entries          |
+| POST   | `/org-admin/developer-portal/oauth-apps`                  | admin    | Register OAuth developer portal app scaffold           |
+| POST   | `/org-admin/developer-portal/oauth-apps/{app_id}/approve` | admin    | Approve OAuth developer portal app scaffold            |
 
-Rotation writes an `api_key_rotation_logs` audit record. Returns `404` when `ENABLE_API_DEVELOPER_PORTAL` is false. Public external developer portal and OAuth client credentials remain deferred to 5.4+.
+Rotation writes an `api_key_rotation_logs` audit record. OAuth app registration writes `oauth_developer_apps` audit rows. Returns `404` when corresponding portal flags are false.
 
 API keys use prefix `vrd_live_` with SHA-256 hashed storage. Scopes: `read`, `write`. SCIM provisioning is available when `ENABLE_SCIM_PROVISIONING=true` (see Enterprise identity). Cross-org roles and key usage analytics are deferred to 5.4+.
 

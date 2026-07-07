@@ -14,7 +14,7 @@ from api.core.org_admin import get_org_admin_status
 from api.core.permissions import has_permission
 from api.modules.auth.models import User
 from api.modules.billing.service import BillingService
-from api.modules.org_admin.models import OrganizationApiKey
+from api.modules.org_admin.models import OAuthDeveloperAppStatus, OrganizationApiKey
 from api.modules.org_admin.permissions import ORG_ADMIN_READ_ROLE, ORG_ADMIN_WRITE_ROLE
 from api.modules.org_admin.repository import OrgAdminRepository
 from api.modules.org_admin.rotation_repository import ApiKeyRotationRepository
@@ -25,6 +25,8 @@ from api.modules.org_admin.schemas import (
     ApiKeyResponse,
     ApiKeyRotateResponse,
     DeveloperPortalResponse,
+    OAuthDeveloperAppCreate,
+    OAuthDeveloperAppResponse,
     OrgAdminStatusResponse,
     OrganizationAdminSummary,
 )
@@ -254,3 +256,49 @@ class OrgAdminService:
             rate_limit=rate_limit,
             api_keys=keys,
         )
+
+    async def list_oauth_developer_apps(self, user: User) -> list[OAuthDeveloperAppResponse]:
+        self._require_read(user)
+        organization_id = self._require_organization(user)
+        apps = await self._repo.list_oauth_developer_apps(organization_id)
+        return [OAuthDeveloperAppResponse.from_model(app) for app in apps]
+
+    async def create_oauth_developer_app(
+        self, user: User, data: OAuthDeveloperAppCreate
+    ) -> OAuthDeveloperAppResponse:
+        self._require_write(user)
+        organization_id = self._require_organization(user)
+        requested_at = datetime.now(UTC)
+        app = await self._repo.create_oauth_developer_app(
+            organization_id=organization_id,
+            name=data.name,
+            redirect_uri=data.redirect_uri,
+            scopes=data.scopes,
+            requested_by_user_id=user.id,
+            requested_at=requested_at,
+        )
+        if self._session is not None:
+            await self._session.commit()
+        return OAuthDeveloperAppResponse.from_model(app)
+
+    async def approve_oauth_developer_app(
+        self, user: User, app_id: uuid.UUID
+    ) -> OAuthDeveloperAppResponse:
+        self._require_write(user)
+        organization_id = self._require_organization(user)
+        app = await self._repo.get_oauth_developer_app(app_id, organization_id=organization_id)
+        if app is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="OAuth app not found")
+        if app.status.value != "pending_approval":
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="OAuth app is not pending approval",
+            )
+
+        app.status = OAuthDeveloperAppStatus.APPROVED
+        app.approved_by_user_id = user.id
+        app.approved_at = datetime.now(UTC)
+        app = await self._repo.save_oauth_developer_app(app)
+        if self._session is not None:
+            await self._session.commit()
+        return OAuthDeveloperAppResponse.from_model(app)

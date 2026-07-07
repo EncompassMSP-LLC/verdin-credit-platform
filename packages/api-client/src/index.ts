@@ -382,12 +382,15 @@ export {
 } from './billing';
 
 export {
+  approveOAuthDeveloperApp,
+  createOAuthDeveloperApp,
   createOrganizationApiKey,
   getApiKeyRateLimitStatus,
   getDeveloperPortal,
   getOrgAdminStatus,
   getOrganizationAdminSummary,
   getOrganizationApiKey,
+  listOAuthDeveloperApps,
   listOrganizationApiKeys,
   revokeOrganizationApiKey,
   rotateOrganizationApiKey,
@@ -398,6 +401,9 @@ export {
   type ApiKeyRotateResponse,
   type ApiKeyScope,
   type DeveloperPortal,
+  type OAuthDeveloperApp,
+  type OAuthDeveloperAppCreateInput,
+  type OAuthDeveloperAppStatus,
   type OrgAdminStatus,
   type OrganizationAdminSummary,
 } from './orgAdmin';

@@ -34,6 +34,18 @@ def enterprise_disabled(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 @pytest.fixture
+def public_oauth_portal_env(
+    monkeypatch: pytest.MonkeyPatch,
+    enterprise_enabled: None,
+) -> None:
+    monkeypatch.setenv("ENABLE_API_DEVELOPER_PORTAL", "true")
+    monkeypatch.setenv("ENABLE_PUBLIC_OAUTH_DEVELOPER_PORTAL", "true")
+    get_feature_flags.cache_clear()
+    yield
+    get_feature_flags.cache_clear()
+
+
+@pytest.fixture
 async def test_org(db_session: AsyncSession) -> Organization:
     org = Organization(
         id=uuid.uuid4(),
