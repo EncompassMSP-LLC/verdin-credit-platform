@@ -1223,3 +1223,14 @@ and `@verdin/api-client` support behind `ENABLE_NATIVE_MOBILE_PASSKEY_CLIENT`.
 client enrollment audit while deferring device attestation and app store distribution.
 
 **Follow-up work:** Slice 2 — OAuth marketplace publishing scaffold or next 5.13 deferred epic.
+
+### Decision: OAuth marketplace publishing scaffold (Version 5.13 slice 2)
+
+**Decision:** Ship admin-gated OAuth marketplace publishing audit (`oauth_marketplace_publishing_runs`
+migration `068`), org-admin status/list/start-from-approved-oauth-app/approve endpoints, and
+`@verdin/api-client` support behind `ENABLE_OAUTH_MARKETPLACE_PUBLISHING`.
+
+**Reason:** 5.13 platform epic extends 5.12 public OAuth developer portal with operator-gated
+marketplace listing audit while deferring public marketplace distribution and partner trust scoring.
+
+**Follow-up work:** Slice 3 — fully autonomous bureau API filing scaffold or cross-org benchmark export.

@@ -164,6 +164,10 @@ from api.modules.org_admin.models import (
     OAuthDeveloperAppStatus,
     OrganizationApiKey,
 )
+from api.modules.org_admin.oauth_marketplace_publishing_models import (
+    OAuthMarketplacePublishingRun,
+    OAuthMarketplacePublishingRunStatus,
+)
 from api.modules.org_admin.rotation_models import ApiKeyRotationLog
 from api.modules.reporting.cross_org_benchmark_models import (
     CrossOrgBenchmarkRun,
@@ -203,6 +207,8 @@ __all__ = [
     "ApiKeyScope",
     "OAuthDeveloperApp",
     "OAuthDeveloperAppStatus",
+    "OAuthMarketplacePublishingRun",
+    "OAuthMarketplacePublishingRunStatus",
     "BillingInvoiceCollectionRun",
     "BillingInvoiceCollectionRunKind",
     "BillingInvoiceCollectionRunStatus",

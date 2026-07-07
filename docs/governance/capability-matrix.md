@@ -521,9 +521,10 @@ Scope: [version-5.12-scope.md](version-5.12-scope.md) · Release notes: [v5.12.0
 
 ## Version 5.13 — Native mobile depth (in progress)
 
-| Capability                   | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                           |
-| ---------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ------------------------------------------------------------------------------- |
-| Native mobile passkey client | 5.13    | Partial | ✅      | —        | ✅  | —   | ✅    | Identity     | `/enterprise/federation/native-mobile-passkey-client` enrollment audit scaffold |
+| Capability                   | Version | Status     | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                             |
+| ---------------------------- | ------- | ---------- | ------- | -------- | --- | --- | ----- | ------------ | --------------------------------------------------------------------------------- |
+| Native mobile passkey client | 5.13    | Partial ✅ | ✅      | —        | ✅  | —   | ✅    | Identity     | `/enterprise/federation/native-mobile-passkey-client` enrollment audit scaffold   |
+| OAuth marketplace publishing | 5.13    | Partial ✅ | ✅      | —        | ✅  | —   | ✅    | Platform     | `/org-admin/developer-portal/oauth-marketplace-publishing` publish audit scaffold |
 
 ---
 

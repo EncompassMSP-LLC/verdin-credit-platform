@@ -46,6 +46,17 @@ def public_oauth_portal_env(
 
 
 @pytest.fixture
+def oauth_marketplace_publishing_env(
+    monkeypatch: pytest.MonkeyPatch,
+    public_oauth_portal_env: None,
+) -> None:
+    monkeypatch.setenv("ENABLE_OAUTH_MARKETPLACE_PUBLISHING", "true")
+    get_feature_flags.cache_clear()
+    yield
+    get_feature_flags.cache_clear()
+
+
+@pytest.fixture
 async def test_org(db_session: AsyncSession) -> Organization:
     org = Organization(
         id=uuid.uuid4(),

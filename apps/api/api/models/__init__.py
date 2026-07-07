@@ -13,6 +13,7 @@ from api.modules.documents.parsed_report_models import DocumentParsedCreditRepor
 from api.modules.enterprise.mobile_passkey_readiness_models import MobilePasskeyReadinessRun
 from api.modules.enterprise.native_mobile_passkey_client_models import NativeMobilePasskeyClientRun
 from api.modules.notifications.models import Notification, NotificationCategory
+from api.modules.org_admin.oauth_marketplace_publishing_models import OAuthMarketplacePublishingRun
 from api.modules.reporting.cross_org_benchmark_models import CrossOrgBenchmarkRun
 from api.modules.tasks.models import Task, TaskPriority, TaskStatus
 from api.modules.timeline.models import Communication, TimelineEvent
@@ -31,6 +32,7 @@ __all__ = [
     "CrossOrgBenchmarkRun",
     "MobilePasskeyReadinessRun",
     "NativeMobilePasskeyClientRun",
+    "OAuthMarketplacePublishingRun",
     "Communication",
     "Document",
     "DocumentEntityResolution",

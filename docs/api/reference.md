@@ -594,13 +594,17 @@ Enterprise org administration scaffold for API key lifecycle and organization su
 
 When `ENABLE_API_DEVELOPER_PORTAL=true`, admins can access the internal developer portal and rotate active keys. When `ENABLE_PUBLIC_OAUTH_DEVELOPER_PORTAL=true`, admins can register and approve OAuth developer portal apps.
 
-| Method | Path                                                      | Min role | Description                                            |
-| ------ | --------------------------------------------------------- | -------- | ------------------------------------------------------ |
-| GET    | `/org-admin/developer-portal`                             | admin    | Keys, scopes, rate-limit status, rotation readiness    |
-| POST   | `/org-admin/api-keys/{id}/rotate`                         | admin    | Revoke key and issue replacement with same name/scopes |
-| GET    | `/org-admin/developer-portal/oauth-apps`                  | admin    | List OAuth developer portal app audit entries          |
-| POST   | `/org-admin/developer-portal/oauth-apps`                  | admin    | Register OAuth developer portal app scaffold           |
-| POST   | `/org-admin/developer-portal/oauth-apps/{app_id}/approve` | admin    | Approve OAuth developer portal app scaffold            |
+| Method | Path                                                                             | Min role  | Description                                            |
+| ------ | -------------------------------------------------------------------------------- | --------- | ------------------------------------------------------ |
+| GET    | `/org-admin/developer-portal`                                                    | admin     | Keys, scopes, rate-limit status, rotation readiness    |
+| POST   | `/org-admin/api-keys/{id}/rotate`                                                | admin     | Revoke key and issue replacement with same name/scopes |
+| GET    | `/org-admin/developer-portal/oauth-apps`                                         | admin     | List OAuth developer portal app audit entries          |
+| POST   | `/org-admin/developer-portal/oauth-apps`                                         | admin     | Register OAuth developer portal app scaffold           |
+| POST   | `/org-admin/developer-portal/oauth-apps/{app_id}/approve`                        | admin     | Approve OAuth developer portal app scaffold            |
+| GET    | `/org-admin/developer-portal/oauth-marketplace-publishing/status`                | read_only | OAuth marketplace publishing readiness and blockers    |
+| GET    | `/org-admin/developer-portal/oauth-marketplace-publishing/runs`                  | read_only | Paginated OAuth marketplace publishing audit log       |
+| POST   | `/org-admin/developer-portal/oauth-marketplace-publishing/oauth-apps/{id}/start` | admin     | Start marketplace publish from approved OAuth app      |
+| POST   | `/org-admin/developer-portal/oauth-marketplace-publishing/runs/{run_id}/approve` | admin     | Approve OAuth marketplace publishing scaffold          |
 
 Rotation writes an `api_key_rotation_logs` audit record. OAuth app registration writes `oauth_developer_apps` audit rows. Returns `404` when corresponding portal flags are false.
 

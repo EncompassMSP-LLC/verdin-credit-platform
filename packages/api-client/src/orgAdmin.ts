@@ -156,3 +156,85 @@ export function approveOAuthDeveloperApp(appId: string) {
     },
   );
 }
+
+export type OAuthMarketplacePublishingRunStatus =
+  'pending_approval' | 'approved' | 'rejected' | 'failed';
+
+export interface OAuthMarketplacePublishingGateStatus {
+  enabled: boolean;
+  ready: boolean;
+  public_oauth_developer_portal_ready: boolean;
+  blockers: string[];
+}
+
+export interface OAuthMarketplacePublishingRun {
+  id: string;
+  organization_id: string;
+  oauth_developer_app_id: string;
+  entity_id: string;
+  status: OAuthMarketplacePublishingRunStatus;
+  publishing_summary: string;
+  marketplace_listing_slug: string;
+  requested_by_user_id: string | null;
+  approved_by_user_id: string | null;
+  requested_at: string | null;
+  approved_at: string | null;
+  error_message: string | null;
+}
+
+export interface OAuthMarketplacePublishingSubmitInput {
+  publishing_summary: string;
+  marketplace_listing_slug: string;
+}
+
+export interface OAuthMarketplacePublishingRunResult {
+  completed_at: string;
+  run: OAuthMarketplacePublishingRun;
+}
+
+export interface OAuthMarketplacePublishingRunList {
+  items: OAuthMarketplacePublishingRun[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export function getOAuthMarketplacePublishingStatus() {
+  return request<OAuthMarketplacePublishingGateStatus>(
+    apiPath('/org-admin/developer-portal/oauth-marketplace-publishing/status'),
+  );
+}
+
+export function listOAuthMarketplacePublishingRuns(page = 1, pageSize = 20) {
+  const params = new URLSearchParams({
+    page: String(page),
+    page_size: String(pageSize),
+  });
+  return request<OAuthMarketplacePublishingRunList>(
+    apiPath(`/org-admin/developer-portal/oauth-marketplace-publishing/runs?${params}`),
+  );
+}
+
+export function startOAuthMarketplacePublishingFromApp(
+  oauthDeveloperAppId: string,
+  input: OAuthMarketplacePublishingSubmitInput,
+) {
+  return request<OAuthMarketplacePublishingRunResult>(
+    apiPath(
+      `/org-admin/developer-portal/oauth-marketplace-publishing/oauth-apps/${oauthDeveloperAppId}/start`,
+    ),
+    {
+      method: 'POST',
+      body: JSON.stringify(input),
+    },
+  );
+}
+
+export function approveOAuthMarketplacePublishingRun(runId: string) {
+  return request<OAuthMarketplacePublishingRunResult>(
+    apiPath(`/org-admin/developer-portal/oauth-marketplace-publishing/runs/${runId}/approve`),
+    {
+      method: 'POST',
+    },
+  );
+}

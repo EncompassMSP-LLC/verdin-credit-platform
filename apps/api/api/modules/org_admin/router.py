@@ -13,6 +13,9 @@ from api.modules.org_admin.dependencies import (
     require_org_admin_enabled,
     require_public_oauth_developer_portal_enabled,
 )
+from api.modules.org_admin.oauth_marketplace_publishing_router import (
+    oauth_marketplace_publishing_router,
+)
 from api.modules.org_admin.schemas import (
     ApiKeyCreate,
     ApiKeyCreateResponse,
@@ -28,6 +31,7 @@ from api.modules.org_admin.schemas import (
 from api.modules.org_admin.service import OrgAdminService
 
 router = APIRouter(prefix="/org-admin", tags=["Organization Admin"])
+router.include_router(oauth_marketplace_publishing_router)
 
 
 def get_org_admin_service(db: AsyncSession = Depends(get_db)) -> OrgAdminService:
