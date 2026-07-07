@@ -247,6 +247,8 @@ export interface DisputeFilingPrepRun {
   requested_by_user_id: string | null;
   approved_by_user_id: string | null;
   timeline_event_id: string | null;
+  invocation_reference_id: string | null;
+  invocation_channel: string | null;
   requested_at: string | null;
   approved_at: string | null;
   prepared_at: string | null;

@@ -506,6 +506,19 @@ Scope: [version-5.11-scope.md](version-5.11-scope.md) · Release notes: [v5.11.0
 
 ---
 
+## Version 5.12 — Compliance-gated expansion surfaces (in progress)
+
+Scope: [version-5.12-scope.md](version-5.12-scope.md) · Checklist: [version-5.12-completion-checklist.md](../development/version-5.12-completion-checklist.md)
+
+| Capability                    | Version | Status     | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                             |
+| ----------------------------- | ------- | ---------- | ------- | -------- | --- | --- | ----- | ------------ | ----------------------------------------------------------------- |
+| Bureau live API invocation    | 5.12    | Partial ✅ | ✅      | —        | ✅  | —   | ✅    | Disputes     | Adds invocation reference/channel audit fields to invocation runs |
+| Public OAuth developer portal | 5.12    | Planned    | —       | —        | —   | —   | —     | Platform     | OAuth app registration scaffold → slice 3                         |
+| Cross-org benchmark analytics | 5.12    | Planned    | —       | —        | —   | —   | —     | Reporting    | Governance-gated benchmark read model scaffold → slice 4          |
+| Mobile passkey readiness      | 5.12    | Planned    | —       | —        | —   | —   | —     | Identity     | Web-first passkey readiness scaffold → slice 5                    |
+
+---
+
 ## Related documents
 
 - [Governance hub](README.md) — lifecycle and build order

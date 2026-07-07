@@ -697,7 +697,7 @@ Returns `404` when dispute bureau submission flags are false.
 
 ### Bureau live API integration (operator-gated)
 
-Operator-gated external bureau API invocation audit. Requires `ENABLE_AI=true`, `ENABLE_AGENT_OBSERVABILITY=true`, `ENABLE_AGENT_EXECUTION=true`, `ENABLE_DISPUTE_FILING_PREP=true`, `ENABLE_DISPUTE_BUREAU_SUBMISSION=true`, and `ENABLE_BUREAU_LIVE_API=true`. A live API invocation run can only start from a `submitted` bureau submission run. No unsupervised filing loops or live bureau calls without operator review.
+Operator-gated external bureau API invocation audit. Requires `ENABLE_AI=true`, `ENABLE_AGENT_OBSERVABILITY=true`, `ENABLE_AGENT_EXECUTION=true`, `ENABLE_DISPUTE_FILING_PREP=true`, `ENABLE_DISPUTE_BUREAU_SUBMISSION=true`, and `ENABLE_BUREAU_LIVE_API=true`. A live API invocation run can only start from a `submitted` bureau submission run. Invoked runs now include `invocation_reference_id` and `invocation_channel` audit fields. No unsupervised filing loops or live bureau calls without operator review.
 
 | Method | Path                                                                 | Min role     | Description                                         |
 | ------ | -------------------------------------------------------------------- | ------------ | --------------------------------------------------- |

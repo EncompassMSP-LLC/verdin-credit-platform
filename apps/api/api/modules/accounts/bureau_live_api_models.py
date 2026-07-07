@@ -73,6 +73,8 @@ class BureauLiveApiRun(Base, TimestampMixin):
         ForeignKey("timeline_events.id", ondelete="SET NULL"),
         nullable=True,
     )
+    invocation_reference_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    invocation_channel: Mapped[str | None] = mapped_column(String(32), nullable=True)
     requested_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     invoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
