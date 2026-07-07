@@ -1140,3 +1140,11 @@ packages/job-orchestrator/
 **Reason:** 5.11 identity epic extends 5.10 SAML passwordless enrollment with operator-gated HRIS-linked UI run audit without native mobile passkey UI.
 
 **Follow-up work:** Slice 5 — multi-IdP bulk provisioning scaffold.
+
+### Decision: Multi-IdP bulk provisioning scaffold (Version 5.11 slice 5)
+
+**Decision:** Ship admin-gated multi-IdP bulk provisioning audit (`bulk_idp_provisioning_runs` migration 062) with status, list, start-from-approved-hris-passwordless-ui-run, and admin approve endpoints behind `ENABLE_MULTI_IDP_BULK_PROVISIONING`.
+
+**Reason:** 5.11 enterprise epic extends HRIS passwordless UI with operator-gated bulk IdP provisioning run audit without cross-org IdP templates or automated cert rotation.
+
+**Follow-up work:** Slice 6 — capability matrix 5.11 sign-off.

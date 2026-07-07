@@ -21,7 +21,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | 2     | Unsupervised bureau re-filing scaffold | Disputes   | ✅     |
 | 3     | Live charge retry execution scaffold   | Billing    | ✅     |
 | 4     | HRIS passwordless UI scaffold          | Identity   | ✅     |
-| 5     | Multi-IdP bulk provisioning scaffold   | Enterprise | —      |
+| 5     | Multi-IdP bulk provisioning scaffold   | Enterprise | ✅     |
 | 6     | Capability matrix 5.11 sign-off        | Governance | —      |
 
 Slice 2 requires `ENABLE_BUREAU_REFILING=true` and a `refiled` bureau re-filing run. Slice 3 requires `ENABLE_STRIPE_CHARGE_RETRY=true` and a `retried` charge retry run. Slice 4 requires `ENABLE_SAML_PASSWORDLESS_ENROLLMENT=true` and an `enrolled` passwordless enrollment run. Slice 5 requires `ENABLE_HRIS_PASSWORDLESS_UI=true` and an approved HRIS passwordless UI run.

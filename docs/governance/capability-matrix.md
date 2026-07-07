@@ -501,7 +501,7 @@ Scope: [version-5.11-scope.md](version-5.11-scope.md) · Checklist: [version-5.1
 | Unsupervised bureau re-filing | 5.11    | Partial | ✅      | —        | ✅  | —   | ✅    | Disputes     | `POST /compliance/bureau-unsupervised-refiling/refiling-runs/{id}/start`      |
 | Live charge retry execution   | 5.11    | Partial | ✅      | —        | ✅  | —   | ✅    | Billing      | `POST /billing/live-charge-retry/charge-retry-runs/{id}/execute`              |
 | HRIS passwordless UI          | 5.11    | Partial | ✅      | —        | ✅  | —   | ✅    | Enterprise   | `POST /enterprise/federation/hris-passwordless-ui/enrollment-runs/{id}/start` |
-| Multi-IdP bulk provisioning   | 5.11    | Planned | —       | —        | —   | —   | —     | Enterprise   | Bulk IdP provisioning audit → slice 5                                         |
+| Multi-IdP bulk provisioning   | 5.11    | Partial | ✅      | —        | ✅  | —   | ✅    | Enterprise   | `POST /enterprise/federation/bulk-idp-provisioning/ui-runs/{id}/start`        |
 
 ---
 

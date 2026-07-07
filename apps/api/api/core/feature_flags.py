@@ -43,6 +43,7 @@ class FeatureFlag(StrEnum):
     ENABLE_SAML_AUTOMATED_ROTATION = "ENABLE_SAML_AUTOMATED_ROTATION"
     ENABLE_SAML_PASSWORDLESS_ENROLLMENT = "ENABLE_SAML_PASSWORDLESS_ENROLLMENT"
     ENABLE_HRIS_PASSWORDLESS_UI = "ENABLE_HRIS_PASSWORDLESS_UI"
+    ENABLE_MULTI_IDP_BULK_PROVISIONING = "ENABLE_MULTI_IDP_BULK_PROVISIONING"
     ENABLE_STRIPE_INVOICE_PDF = "ENABLE_STRIPE_INVOICE_PDF"
     ENABLE_AGENT_SUPERVISED_LOOPS = "ENABLE_AGENT_SUPERVISED_LOOPS"
     ENABLE_AGENT_UNSUPERVISED_LOOPS = "ENABLE_AGENT_UNSUPERVISED_LOOPS"
@@ -199,6 +200,10 @@ class FeatureFlags(BaseSettings):
         default=False,
         description="Enable admin-gated HRIS passwordless UI audit scaffold",
     )
+    enable_multi_idp_bulk_provisioning: bool = Field(
+        default=False,
+        description="Enable admin-gated multi-IdP bulk provisioning audit scaffold",
+    )
     enable_stripe_invoice_pdf: bool = Field(
         default=False,
         description="Enable admin-gated Stripe invoice PDF generation audit scaffold",
@@ -289,6 +294,7 @@ _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
     FeatureFlag.ENABLE_SAML_AUTOMATED_ROTATION: "enable_saml_automated_rotation",
     FeatureFlag.ENABLE_SAML_PASSWORDLESS_ENROLLMENT: "enable_saml_passwordless_enrollment",
     FeatureFlag.ENABLE_HRIS_PASSWORDLESS_UI: "enable_hris_passwordless_ui",
+    FeatureFlag.ENABLE_MULTI_IDP_BULK_PROVISIONING: "enable_multi_idp_bulk_provisioning",
     FeatureFlag.ENABLE_STRIPE_INVOICE_PDF: "enable_stripe_invoice_pdf",
     FeatureFlag.ENABLE_AGENT_SUPERVISED_LOOPS: "enable_agent_supervised_loops",
     FeatureFlag.ENABLE_AGENT_UNSUPERVISED_LOOPS: "enable_agent_unsupervised_loops",

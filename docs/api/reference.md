@@ -563,6 +563,10 @@ SAML passwordless enrollment scaffold requires `ENABLE_SAML_PASSWORDLESS_ENROLLM
 | GET | `/enterprise/federation/hris-passwordless-ui/runs` | read_only | Paginated HRIS passwordless UI audit log |
 | POST | `/enterprise/federation/hris-passwordless-ui/enrollment-runs/{id}/start` | admin | Start HRIS UI scaffold from enrolled enrollment run |
 | POST | `/enterprise/federation/hris-passwordless-ui/runs/{run_id}/approve` | admin | Approve HRIS passwordless UI scaffold |
+| GET | `/enterprise/federation/bulk-idp-provisioning/status` | read_only | Multi-IdP bulk provisioning readiness and blockers |
+| GET | `/enterprise/federation/bulk-idp-provisioning/runs` | read_only | Paginated bulk IdP provisioning audit log |
+| POST | `/enterprise/federation/bulk-idp-provisioning/ui-runs/{id}/start` | admin | Start bulk provisioning from approved HRIS UI run |
+| POST | `/enterprise/federation/bulk-idp-provisioning/runs/{run_id}/approve` | admin | Approve bulk IdP provisioning scaffold |
 
 Endpoints return `404` when the corresponding feature flag is false.
 
