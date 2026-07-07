@@ -16,7 +16,7 @@ Extend partial 5.11 compliance-gated scaffolds (unsupervised re-filing, live cha
 | 1    | Bureau live API invocation    | Partial ✅   | Operator-gated bureau API invocation audit from approved filing prep |
 | 2    | Public OAuth developer portal | Partial ✅   | Org-scoped OAuth app registration audit scaffold                     |
 | 3    | Cross-org benchmark analytics | Partial ✅   | Governance-gated cross-org benchmark read model scaffold             |
-| 4    | Mobile passkey readiness      | Partial      | Passkey enrollment readiness and audit surface (no native app)       |
+| 4    | Mobile passkey readiness      | Partial ✅   | Passkey enrollment readiness and audit surface (no native app)       |
 
 ## Shipped from 5.11 (foundation — do not regress)
 
