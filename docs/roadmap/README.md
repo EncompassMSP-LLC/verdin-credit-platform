@@ -348,7 +348,7 @@ Scope and checklist: [`docs/governance/version-5.12-scope.md`](../governance/ver
 | ---- | ----------------------------- | ------------ | -------------------------------------------------------- |
 | 1    | Bureau live API invocation    | Partial ✅   | Operator-gated bureau API invocation run audit scaffold  |
 | 2    | Public OAuth developer portal | Partial ✅   | Org-scoped OAuth developer portal registration scaffold  |
-| 3    | Cross-org benchmark analytics | Partial      | Governance-gated cross-org benchmark read model scaffold |
+| 3    | Cross-org benchmark analytics | Partial ✅   | Governance-gated cross-org benchmark read model scaffold |
 | 4    | Mobile passkey readiness      | Partial      | Web-first passkey readiness and audit scaffold           |
 
 **Target tag:** `v5.12.0`

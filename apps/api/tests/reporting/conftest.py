@@ -85,3 +85,12 @@ def enterprise_enabled(monkeypatch: pytest.MonkeyPatch) -> None:
     get_feature_flags.cache_clear()
     yield
     get_feature_flags.cache_clear()
+
+
+@pytest.fixture
+def cross_org_benchmark_enabled(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("ENABLE_ENTERPRISE", "true")
+    monkeypatch.setenv("ENABLE_CROSS_ORG_BENCHMARK_ANALYTICS", "true")
+    get_feature_flags.cache_clear()
+    yield
+    get_feature_flags.cache_clear()

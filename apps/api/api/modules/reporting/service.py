@@ -6,6 +6,7 @@ from datetime import UTC, datetime
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from api.core.cross_org_benchmark import get_cross_org_benchmark_status
 from api.core.enterprise_reporting import get_enterprise_reporting_status
 from api.core.feature_flags import FeatureFlag, is_feature_enabled
 from api.core.materialized_reporting import get_materialized_reporting_status
@@ -16,6 +17,7 @@ from api.core.revenue_analytics import build_revenue_analytics
 from api.core.stripe_billing import get_billing_status
 from api.modules.auth.models import User
 from api.modules.billing.repository import BillingRepository
+from api.modules.reporting.cross_org_benchmark_repository import CrossOrgBenchmarkRepository
 from api.modules.reporting.materialized_models import (
     ReportingMvRefreshStatus,
     ReportingMvTriggerSource,
@@ -38,6 +40,11 @@ from api.modules.reporting.schemas import (
     BureauPerformanceReporting,
     BureauPerformanceReportingResponse,
     ClientReportingMetrics,
+    CrossOrgBenchmarkAnalytics,
+    CrossOrgBenchmarkAnalyticsResponse,
+    CrossOrgBenchmarkAnalyticsStatusResponse,
+    CrossOrgBenchmarkRefreshResponse,
+    CrossOrgBenchmarkRunResponse,
     EnterpriseReportingStatusResponse,
     MaterializedReportingStatusResponse,
     NotificationReportingMetrics,
@@ -72,6 +79,9 @@ class ReportingService:
         self._billing = BillingRepository(session) if session is not None else None
         self._predictive_snapshots = (
             PredictiveOutcomeSnapshotRepository(session) if session is not None else None
+        )
+        self._cross_org_benchmarks = (
+            CrossOrgBenchmarkRepository(session) if session is not None else None
         )
 
     @classmethod
@@ -308,3 +318,92 @@ class ReportingService:
             refreshed_at=summary.refreshed_at,
             run=PredictiveOutcomeRefreshRunResponse.from_model(summary.run),
         )
+
+    def get_cross_org_benchmark_status(
+        self, user: User
+    ) -> CrossOrgBenchmarkAnalyticsStatusResponse:
+        self._require_read(user)
+        self._require_organization(user)
+        status_value = get_cross_org_benchmark_status()
+        return CrossOrgBenchmarkAnalyticsStatusResponse(
+            enabled=status_value.enabled,
+            ready=status_value.ready,
+            blockers=list(status_value.blockers),
+        )
+
+    async def get_cross_org_benchmark_summary(
+        self, user: User
+    ) -> CrossOrgBenchmarkAnalyticsResponse:
+        self._require_read(user)
+        organization_id = self._require_organization(user)
+        if self._cross_org_benchmarks is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Cross-org benchmark repository is not configured",
+            )
+        summary = await self._cross_org_benchmarks.build_summary(organization_id)
+        return CrossOrgBenchmarkAnalyticsResponse(
+            generated_at=datetime.now(UTC),
+            benchmarks=CrossOrgBenchmarkAnalytics(
+                organization_id=summary.organization_id,
+                active_clients=summary.active_clients,
+                open_cases=summary.open_cases,
+                resolved_accounts=summary.resolved_accounts,
+                cohort_average_active_clients=summary.cohort_average_active_clients,
+                cohort_average_open_cases=summary.cohort_average_open_cases,
+                cohort_average_resolved_accounts=summary.cohort_average_resolved_accounts,
+                active_clients_percentile=summary.active_clients_percentile,
+                open_cases_percentile=summary.open_cases_percentile,
+                resolved_accounts_percentile=summary.resolved_accounts_percentile,
+                organizations_evaluated=summary.organizations_evaluated,
+            ),
+        )
+
+    async def refresh_cross_org_benchmarks(self, user: User) -> CrossOrgBenchmarkRefreshResponse:
+        self._require_admin(user)
+        organization_id = self._require_organization(user)
+        if self._cross_org_benchmarks is None or self._session is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Cross-org benchmark repository is not configured",
+            )
+        summary = await self._cross_org_benchmarks.build_summary(organization_id)
+        run = await self._cross_org_benchmarks.create_run(
+            requested_by_id=user.id,
+            organizations_evaluated=summary.organizations_evaluated,
+        )
+        await self._session.commit()
+        return CrossOrgBenchmarkRefreshResponse(
+            generated_at=run.generated_at,
+            run=CrossOrgBenchmarkRunResponse(
+                id=run.id,
+                requested_by_id=run.requested_by_id,
+                trigger_source=run.trigger_source.value,
+                status=run.status.value,
+                organizations_evaluated=run.organizations_evaluated,
+                generated_at=run.generated_at,
+                error_message=run.error_message,
+            ),
+        )
+
+    async def list_cross_org_benchmark_runs(self, user: User) -> list[CrossOrgBenchmarkRunResponse]:
+        self._require_read(user)
+        self._require_organization(user)
+        if self._cross_org_benchmarks is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Cross-org benchmark repository is not configured",
+            )
+        runs = await self._cross_org_benchmarks.list_runs()
+        return [
+            CrossOrgBenchmarkRunResponse(
+                id=run.id,
+                requested_by_id=run.requested_by_id,
+                trigger_source=run.trigger_source.value,
+                status=run.status.value,
+                organizations_evaluated=run.organizations_evaluated,
+                generated_at=run.generated_at,
+                error_message=run.error_message,
+            )
+            for run in runs
+        ]

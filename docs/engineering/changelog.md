@@ -1180,3 +1180,15 @@ packages/job-orchestrator/
 **Reason:** 5.12 platform epic extends internal developer portal controls with an auditable public OAuth app scaffold while preserving explicit admin approval.
 
 **Follow-up work:** Slice 4 — cross-org benchmark analytics scaffold.
+
+### Decision: Cross-org benchmark analytics scaffold (Version 5.12 slice 4)
+
+**Decision:** Ship governance-gated cross-org benchmark analytics with `cross_org_benchmark_runs`
+(migration `065`), reporting status/summary/run endpoints, and `@verdin/api-client` support behind
+`ENABLE_CROSS_ORG_BENCHMARK_ANALYTICS`.
+
+**Reason:** 5.12 reporting epic extends predictive scaffolds with aggregate-only benchmark
+comparisons and explicit run audit while keeping tenant-level exports and sensitive dimensions
+deferred.
+
+**Follow-up work:** Slice 5 — mobile passkey readiness scaffold.

@@ -12,11 +12,16 @@ from api.modules.auth.models import User
 from api.modules.billing.dependencies import require_billing_enabled
 from api.modules.reporting.dependencies import (
     get_reporting_organization_id,
+    require_cross_org_benchmark_analytics_enabled,
     require_materialized_reporting_enabled,
     require_predictive_analytics_enabled,
 )
 from api.modules.reporting.schemas import (
     BureauPerformanceReportingResponse,
+    CrossOrgBenchmarkAnalyticsResponse,
+    CrossOrgBenchmarkAnalyticsStatusResponse,
+    CrossOrgBenchmarkRefreshResponse,
+    CrossOrgBenchmarkRunResponse,
     EnterpriseReportingStatusResponse,
     MaterializedReportingStatusResponse,
     OperationsReportingResponse,
@@ -117,6 +122,54 @@ async def refresh_predictive_outcomes_reporting(
     service: ReportingService = Depends(get_reporting_service),
 ) -> PredictiveOutcomeRefreshResultResponse:
     return await service.refresh_predictive_outcomes(current_user)
+
+
+@router.get(
+    "/cross-org-benchmarks/status",
+    response_model=CrossOrgBenchmarkAnalyticsStatusResponse,
+    dependencies=[Depends(require_cross_org_benchmark_analytics_enabled)],
+)
+async def get_cross_org_benchmark_status(
+    current_user: User = Depends(get_current_user),
+    service: ReportingService = Depends(get_reporting_service),
+) -> CrossOrgBenchmarkAnalyticsStatusResponse:
+    return service.get_cross_org_benchmark_status(current_user)
+
+
+@router.get(
+    "/cross-org-benchmarks",
+    response_model=CrossOrgBenchmarkAnalyticsResponse,
+    dependencies=[Depends(require_cross_org_benchmark_analytics_enabled)],
+)
+async def get_cross_org_benchmark_summary(
+    current_user: User = Depends(get_current_user),
+    service: ReportingService = Depends(get_reporting_service),
+) -> CrossOrgBenchmarkAnalyticsResponse:
+    return await service.get_cross_org_benchmark_summary(current_user)
+
+
+@router.get(
+    "/cross-org-benchmarks/runs",
+    response_model=list[CrossOrgBenchmarkRunResponse],
+    dependencies=[Depends(require_cross_org_benchmark_analytics_enabled)],
+)
+async def list_cross_org_benchmark_runs(
+    current_user: User = Depends(get_current_user),
+    service: ReportingService = Depends(get_reporting_service),
+) -> list[CrossOrgBenchmarkRunResponse]:
+    return await service.list_cross_org_benchmark_runs(current_user)
+
+
+@router.post(
+    "/cross-org-benchmarks/refresh",
+    response_model=CrossOrgBenchmarkRefreshResponse,
+    dependencies=[Depends(require_cross_org_benchmark_analytics_enabled)],
+)
+async def refresh_cross_org_benchmarks(
+    current_user: User = Depends(get_current_user),
+    service: ReportingService = Depends(get_reporting_service),
+) -> CrossOrgBenchmarkRefreshResponse:
+    return await service.refresh_cross_org_benchmarks(current_user)
 
 
 @router.get(

@@ -212,3 +212,66 @@ export function refreshPredictiveOutcomesReporting() {
     method: 'POST',
   });
 }
+
+export interface CrossOrgBenchmarkAnalyticsStatus {
+  enabled: boolean;
+  ready: boolean;
+  blockers: string[];
+}
+
+export interface CrossOrgBenchmarkAnalytics {
+  organization_id: string;
+  active_clients: number;
+  open_cases: number;
+  resolved_accounts: number;
+  cohort_average_active_clients: number;
+  cohort_average_open_cases: number;
+  cohort_average_resolved_accounts: number;
+  active_clients_percentile: number;
+  open_cases_percentile: number;
+  resolved_accounts_percentile: number;
+  organizations_evaluated: number;
+}
+
+export interface CrossOrgBenchmarkAnalyticsResponse {
+  generated_at: string;
+  benchmarks: CrossOrgBenchmarkAnalytics;
+}
+
+export interface CrossOrgBenchmarkRun {
+  id: string;
+  requested_by_id: string;
+  trigger_source: string;
+  status: string;
+  organizations_evaluated: number;
+  generated_at: string;
+  error_message: string | null;
+}
+
+export interface CrossOrgBenchmarkRefreshResponse {
+  generated_at: string;
+  run: CrossOrgBenchmarkRun;
+}
+
+export function getCrossOrgBenchmarkAnalyticsStatus() {
+  return request<CrossOrgBenchmarkAnalyticsStatus>(
+    apiPath('/reporting/cross-org-benchmarks/status'),
+  );
+}
+
+export function getCrossOrgBenchmarkAnalytics() {
+  return request<CrossOrgBenchmarkAnalyticsResponse>(apiPath('/reporting/cross-org-benchmarks'));
+}
+
+export function listCrossOrgBenchmarkRuns() {
+  return request<CrossOrgBenchmarkRun[]>(apiPath('/reporting/cross-org-benchmarks/runs'));
+}
+
+export function refreshCrossOrgBenchmarks() {
+  return request<CrossOrgBenchmarkRefreshResponse>(
+    apiPath('/reporting/cross-org-benchmarks/refresh'),
+    {
+      method: 'POST',
+    },
+  );
+}

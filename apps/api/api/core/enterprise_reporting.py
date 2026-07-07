@@ -30,6 +30,9 @@ def get_enterprise_reporting_status() -> EnterpriseReportingStatusResponse:
     if is_feature_enabled(FeatureFlag.ENABLE_PREDICTIVE_ANALYTICS):
         capabilities.append("predictive_outcomes")
         deferred.remove("predictive_outcomes")
+    if is_feature_enabled(FeatureFlag.ENABLE_CROSS_ORG_BENCHMARK_ANALYTICS):
+        capabilities.append("cross_org_benchmarks")
+        deferred.remove("cross_org_benchmarks")
 
     return EnterpriseReportingStatusResponse(
         enterprise_reporting_enabled=True,

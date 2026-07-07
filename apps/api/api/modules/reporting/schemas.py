@@ -200,3 +200,43 @@ class PredictiveOutcomeRefreshRunResponse(BaseSchema):
 class PredictiveOutcomeRefreshResultResponse(BaseSchema):
     refreshed_at: datetime
     run: PredictiveOutcomeRefreshRunResponse
+
+
+class CrossOrgBenchmarkAnalyticsStatusResponse(BaseSchema):
+    enabled: bool
+    ready: bool
+    blockers: list[str]
+
+
+class CrossOrgBenchmarkAnalytics(BaseSchema):
+    organization_id: uuid.UUID
+    active_clients: int
+    open_cases: int
+    resolved_accounts: int
+    cohort_average_active_clients: float
+    cohort_average_open_cases: float
+    cohort_average_resolved_accounts: float
+    active_clients_percentile: int
+    open_cases_percentile: int
+    resolved_accounts_percentile: int
+    organizations_evaluated: int
+
+
+class CrossOrgBenchmarkAnalyticsResponse(BaseSchema):
+    generated_at: datetime
+    benchmarks: CrossOrgBenchmarkAnalytics
+
+
+class CrossOrgBenchmarkRunResponse(BaseSchema):
+    id: uuid.UUID
+    requested_by_id: uuid.UUID
+    trigger_source: str
+    status: str
+    organizations_evaluated: int
+    generated_at: datetime
+    error_message: str | None
+
+
+class CrossOrgBenchmarkRefreshResponse(BaseSchema):
+    generated_at: datetime
+    run: CrossOrgBenchmarkRunResponse
