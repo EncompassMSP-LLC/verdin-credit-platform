@@ -11,6 +11,7 @@ from api.modules.documents.metadata_models import DocumentEntityResolution, Docu
 from api.modules.documents.models import Document, DocumentVersion
 from api.modules.documents.parsed_report_models import DocumentParsedCreditReport
 from api.modules.enterprise.mobile_passkey_readiness_models import MobilePasskeyReadinessRun
+from api.modules.enterprise.native_mobile_passkey_client_models import NativeMobilePasskeyClientRun
 from api.modules.notifications.models import Notification, NotificationCategory
 from api.modules.reporting.cross_org_benchmark_models import CrossOrgBenchmarkRun
 from api.modules.tasks.models import Task, TaskPriority, TaskStatus
@@ -29,6 +30,7 @@ __all__ = [
     "ContactRelationship",
     "CrossOrgBenchmarkRun",
     "MobilePasskeyReadinessRun",
+    "NativeMobilePasskeyClientRun",
     "Communication",
     "Document",
     "DocumentEntityResolution",

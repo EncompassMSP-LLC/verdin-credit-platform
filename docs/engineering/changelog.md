@@ -1212,3 +1212,14 @@ attestation.
 **Reason:** v5.12.0 completes compliance-gated expansion surface scaffolds; native mobile apps, OAuth marketplace publishing, autonomous bureau filing, and unredacted benchmark exports remain deferred to 5.13+.
 
 **Follow-up work:** Version 5.13 planning — production depth where compliance-approved.
+
+### Decision: Native mobile passkey client scaffold (Version 5.13 slice 1)
+
+**Decision:** Ship admin-gated native mobile passkey client audit (`native_mobile_passkey_client_runs`
+migration `067`), federation status/list/start-from-approved-passkey-readiness-run/approve endpoints,
+and `@verdin/api-client` support behind `ENABLE_NATIVE_MOBILE_PASSKEY_CLIENT`.
+
+**Reason:** 5.13 identity epic extends 5.12 mobile passkey readiness with operator-gated native
+client enrollment audit while deferring device attestation and app store distribution.
+
+**Follow-up work:** Slice 2 — OAuth marketplace publishing scaffold or next 5.13 deferred epic.

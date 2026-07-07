@@ -230,6 +230,19 @@ def mobile_passkey_readiness_env(
 
 
 @pytest.fixture
+def native_mobile_passkey_client_env(
+    monkeypatch: pytest.MonkeyPatch,
+    mobile_passkey_readiness_env: None,
+) -> None:
+    monkeypatch.setenv("ENABLE_NATIVE_MOBILE_PASSKEY_CLIENT", "true")
+    get_feature_flags.cache_clear()
+    get_enterprise_identity_settings.cache_clear()
+    yield
+    get_feature_flags.cache_clear()
+    get_enterprise_identity_settings.cache_clear()
+
+
+@pytest.fixture
 def bulk_idp_provisioning_env(
     monkeypatch: pytest.MonkeyPatch,
     hris_passwordless_ui_env: None,

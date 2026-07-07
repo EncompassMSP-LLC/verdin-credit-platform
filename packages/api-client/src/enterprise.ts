@@ -830,6 +830,88 @@ export function approveMobilePasskeyReadinessRun(runId: string) {
   );
 }
 
+export type NativeMobilePasskeyClientRunStatus =
+  'pending_approval' | 'approved' | 'rejected' | 'failed';
+
+export interface NativeMobilePasskeyClientGateStatus {
+  enabled: boolean;
+  ready: boolean;
+  mobile_passkey_readiness_ready: boolean;
+  blockers: string[];
+}
+
+export interface NativeMobilePasskeyClientRun {
+  id: string;
+  organization_id: string;
+  mobile_passkey_readiness_run_id: string;
+  entity_id: string;
+  status: NativeMobilePasskeyClientRunStatus;
+  client_summary: string;
+  platform: string;
+  requested_by_user_id: string | null;
+  approved_by_user_id: string | null;
+  requested_at: string | null;
+  approved_at: string | null;
+  error_message: string | null;
+}
+
+export interface NativeMobilePasskeyClientSubmitInput {
+  client_summary: string;
+  platform: string;
+}
+
+export interface NativeMobilePasskeyClientRunResult {
+  completed_at: string;
+  run: NativeMobilePasskeyClientRun;
+}
+
+export interface NativeMobilePasskeyClientRunList {
+  items: NativeMobilePasskeyClientRun[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export function getNativeMobilePasskeyClientStatus() {
+  return request<NativeMobilePasskeyClientGateStatus>(
+    apiPath('/enterprise/federation/native-mobile-passkey-client/status'),
+  );
+}
+
+export function listNativeMobilePasskeyClientRuns(page = 1, pageSize = 20) {
+  const params = new URLSearchParams({
+    page: String(page),
+    page_size: String(pageSize),
+  });
+  return request<NativeMobilePasskeyClientRunList>(
+    apiPath(`/enterprise/federation/native-mobile-passkey-client/runs?${params}`),
+  );
+}
+
+export function startNativeMobilePasskeyClientFromReadinessRun(
+  mobilePasskeyReadinessRunId: string,
+  input: NativeMobilePasskeyClientSubmitInput,
+) {
+  return request<NativeMobilePasskeyClientRunResult>(
+    apiPath(
+      `/enterprise/federation/native-mobile-passkey-client/readiness-runs/${mobilePasskeyReadinessRunId}/start`,
+    ),
+    {
+      method: 'POST',
+      body: JSON.stringify(input),
+    },
+  );
+}
+
+export function approveNativeMobilePasskeyClientRun(runId: string) {
+  return request<NativeMobilePasskeyClientRunResult>(
+    apiPath(`/enterprise/federation/native-mobile-passkey-client/runs/${runId}/approve`),
+    {
+      method: 'POST',
+    },
+  );
+}
+
 export type BulkIdpProvisioningRunStatus =
   'pending_approval' | 'provisioned' | 'rejected' | 'failed';
 

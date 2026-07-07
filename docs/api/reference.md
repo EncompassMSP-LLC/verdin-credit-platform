@@ -571,6 +571,10 @@ SAML passwordless enrollment scaffold requires `ENABLE_SAML_PASSWORDLESS_ENROLLM
 | GET | `/enterprise/federation/mobile-passkey-readiness/runs` | read_only | Paginated mobile passkey readiness audit log |
 | POST | `/enterprise/federation/mobile-passkey-readiness/ui-runs/{id}/start` | admin | Start passkey readiness from approved HRIS UI run |
 | POST | `/enterprise/federation/mobile-passkey-readiness/runs/{run_id}/approve` | admin | Approve mobile passkey readiness scaffold |
+| GET | `/enterprise/federation/native-mobile-passkey-client/status` | read_only | Native mobile passkey client readiness and blockers |
+| GET | `/enterprise/federation/native-mobile-passkey-client/runs` | read_only | Paginated native mobile passkey client audit log |
+| POST | `/enterprise/federation/native-mobile-passkey-client/readiness-runs/{id}/start` | admin | Start native client scaffold from approved passkey readiness run |
+| POST | `/enterprise/federation/native-mobile-passkey-client/runs/{run_id}/approve` | admin | Approve native mobile passkey client scaffold |
 
 Endpoints return `404` when the corresponding feature flag is false.
 
