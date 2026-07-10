@@ -1265,3 +1265,14 @@ audit while deferring live unredacted CSV/JSON/blob generation and raw tenant PI
 **Reason:** v5.13.0 completes native mobile depth scaffolds; live unredacted blob export, unsupervised autonomous filing loops, public marketplace listings, and native app store distribution remain deferred to 5.14+.
 
 **Follow-up work:** Version 5.14 planning — production depth where compliance-approved.
+
+### Decision: Version 5.14 kickoff (scope + checklist)
+
+**Decision:** Publish `version-5.14-scope.md` and `version-5.14-completion-checklist.md` for Production
+Distribution Depth — live unredacted blob export, unsupervised filing loops, public marketplace listings,
+and native app store distribution readiness — with explicit 5.15+ deferrals.
+
+**Reason:** v5.13.0 sign-off complete (`v5.13.0` tagged); deferred distribution and live export surfaces
+need sequenced delivery before v5.14.0 release.
+
+**Follow-up work:** Slice 2 — live unredacted benchmark blob export scaffold.

@@ -56,6 +56,7 @@ Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (
 | **5.11**  | Production Execution (gated)    | Released    | Unsupervised re-filing, live charge retry, HRIS passwordless UI, bulk IdP provisioning    |
 | **5.12**  | Expansion Surfaces (gated)      | Released    | Bureau live API scaffold, public OAuth portal, cross-org benchmarks, passkeys (`v5.12.0`) |
 | **5.13**  | Native Mobile Depth (gated)     | Released    | Native passkey client, OAuth marketplace, autonomous API filing, export audit (`v5.13.0`) |
+| **5.14**  | Production Distribution (gated) | Planned     | Live blob export, unsupervised filing loops, public marketplace, app store readiness      |
 
 ### Sprint milestones
 
@@ -370,6 +371,17 @@ Scope and checklist: [`docs/governance/version-5.13-scope.md`](../governance/ver
 **Tag:** `v5.13.0`
 
 Release notes: [`docs/release-notes/v5.13.0.md`](../release-notes/v5.13.0.md)
+
+### Version 5.14 — Production Distribution Depth (planned)
+
+Scope and checklist: [`docs/governance/version-5.14-scope.md`](../governance/version-5.14-scope.md) · [`docs/development/version-5.14-completion-checklist.md`](../development/version-5.14-completion-checklist.md)
+
+| Epic | Theme                                 | 5.14 outcome | Notes                                                             |
+| ---- | ------------------------------------- | ------------ | ----------------------------------------------------------------- |
+| 1    | Live unredacted benchmark blob export | Planned      | Secure export pipeline from approved unredacted export audit runs |
+| 2    | Unsupervised autonomous filing loops  | Planned      | Operator-gated unsupervised filing loop audit scaffold            |
+| 3    | Public OAuth marketplace listings     | Planned      | Public listing publish from approved marketplace publishing runs  |
+| 4    | Native mobile app store distribution  | Planned      | App store distribution readiness from native passkey client runs  |
 
 ## Sprint → version mapping
 
