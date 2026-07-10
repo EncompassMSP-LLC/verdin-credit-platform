@@ -540,7 +540,7 @@ Scope: [version-5.14-scope.md](version-5.14-scope.md) · Checklist: [version-5.1
 | Capability                            | Version | Status     | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                         |
 | ------------------------------------- | ------- | ---------- | ------- | -------- | --- | --- | ----- | ------------ | ----------------------------------------------------------------------------- |
 | Live unredacted benchmark blob export | 5.14    | Partial ✅ | ✅      | —        | ✅  | —   | ✅    | Reporting    | `/reporting/live-unredacted-benchmark-blob-exports` placeholder blob scaffold |
-| Unsupervised autonomous filing loops  | 5.14    | Planned    | —       | —        | —   | —   | —     | Disputes     | Operator-gated unsupervised filing loop audit scaffold                        |
+| Unsupervised autonomous filing loops  | 5.14    | Partial ✅ | ✅      | —        | ✅  | —   | ✅    | Disputes     | `/compliance/unsupervised-autonomous-filing-loops` operator-gated audit       |
 | Public OAuth marketplace listings     | 5.14    | Planned    | —       | —        | —   | —   | —     | Platform     | Public listing publish from approved marketplace publishing runs              |
 | Native mobile app store distribution  | 5.14    | Planned    | —       | —        | —   | —   | —     | Identity     | App store distribution readiness from native passkey client runs              |
 

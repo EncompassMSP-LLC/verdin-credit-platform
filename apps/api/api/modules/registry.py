@@ -26,6 +26,10 @@ from api.modules.accounts.fully_autonomous_bureau_api_filing_models import (
     FullyAutonomousBureauApiFilingRunStatus,
 )
 from api.modules.accounts.models import Account
+from api.modules.accounts.unsupervised_autonomous_filing_loop_models import (
+    UnsupervisedAutonomousFilingLoopRun,
+    UnsupervisedAutonomousFilingLoopRunStatus,
+)
 from api.modules.auth.models import Organization, User
 from api.modules.billing.collection_models import (
     BillingInvoiceCollectionRun,
@@ -244,6 +248,8 @@ __all__ = [
     "AutonomousBureauFilingRunStatus",
     "FullyAutonomousBureauApiFilingRun",
     "FullyAutonomousBureauApiFilingRunStatus",
+    "UnsupervisedAutonomousFilingLoopRun",
+    "UnsupervisedAutonomousFilingLoopRunStatus",
     "BureauRefilingRun",
     "BureauRefilingRunStatus",
     "BureauUnsupervisedRefilingRun",

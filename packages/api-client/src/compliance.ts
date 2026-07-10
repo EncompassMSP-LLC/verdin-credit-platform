@@ -725,6 +725,93 @@ export function approveFullyAutonomousBureauApiFilingRun(runId: string) {
   );
 }
 
+export interface UnsupervisedAutonomousFilingLoopStatus {
+  enabled: boolean;
+  ready: boolean;
+  fully_autonomous_bureau_api_filing_ready: boolean;
+  blockers: string[];
+}
+
+export type UnsupervisedAutonomousFilingLoopRunStatus =
+  'pending_approval' | 'approved' | 'rejected' | 'failed';
+
+export interface UnsupervisedAutonomousFilingLoopRun {
+  id: string;
+  organization_id: string;
+  fully_autonomous_bureau_api_filing_run_id: string;
+  account_id: string;
+  case_id: string;
+  bureau_target: string;
+  status: UnsupervisedAutonomousFilingLoopRunStatus;
+  loop_summary: string;
+  loop_reference_id: string | null;
+  requested_by_user_id: string | null;
+  approved_by_user_id: string | null;
+  timeline_event_id: string | null;
+  requested_at: string | null;
+  approved_at: string | null;
+  error_message: string | null;
+}
+
+export interface UnsupervisedAutonomousFilingLoopSubmitRequest {
+  loop_summary: string;
+  loop_reference_id?: string | null;
+}
+
+export interface UnsupervisedAutonomousFilingLoopRunResult {
+  completed_at: string;
+  run: UnsupervisedAutonomousFilingLoopRun;
+}
+
+export interface ListUnsupervisedAutonomousFilingLoopRunsParams {
+  page?: number;
+  page_size?: number;
+  account_id?: string;
+}
+
+export function getUnsupervisedAutonomousFilingLoopStatus() {
+  return request<UnsupervisedAutonomousFilingLoopStatus>(
+    apiPath('/compliance/unsupervised-autonomous-filing-loops/status'),
+  );
+}
+
+export function listUnsupervisedAutonomousFilingLoopRuns(
+  params: ListUnsupervisedAutonomousFilingLoopRunsParams = {},
+) {
+  const search = new URLSearchParams();
+  if (params.page) search.set('page', String(params.page));
+  if (params.page_size) search.set('page_size', String(params.page_size));
+  if (params.account_id) search.set('account_id', params.account_id);
+  const query = search.toString();
+  return request<PaginatedResponse<UnsupervisedAutonomousFilingLoopRun>>(
+    apiPath(`/compliance/unsupervised-autonomous-filing-loops/runs${query ? `?${query}` : ''}`),
+  );
+}
+
+export function startUnsupervisedAutonomousFilingLoopFromApiFilingRun(
+  fullyAutonomousBureauApiFilingRunId: string,
+  input: UnsupervisedAutonomousFilingLoopSubmitRequest,
+) {
+  return request<UnsupervisedAutonomousFilingLoopRunResult>(
+    apiPath(
+      `/compliance/unsupervised-autonomous-filing-loops/api-filing-runs/${fullyAutonomousBureauApiFilingRunId}/start`,
+    ),
+    {
+      method: 'POST',
+      body: JSON.stringify(input),
+    },
+  );
+}
+
+export function approveUnsupervisedAutonomousFilingLoopRun(runId: string) {
+  return request<UnsupervisedAutonomousFilingLoopRunResult>(
+    apiPath(`/compliance/unsupervised-autonomous-filing-loops/runs/${runId}/approve`),
+    {
+      method: 'POST',
+    },
+  );
+}
+
 export interface BureauRefilingStatus {
   enabled: boolean;
   ready: boolean;
