@@ -16,6 +16,9 @@ from api.modules.reporting.dependencies import (
     require_materialized_reporting_enabled,
     require_predictive_analytics_enabled,
 )
+from api.modules.reporting.live_unredacted_benchmark_blob_export_router import (
+    live_unredacted_benchmark_blob_export_router,
+)
 from api.modules.reporting.schemas import (
     BureauPerformanceReportingResponse,
     CrossOrgBenchmarkAnalyticsResponse,
@@ -215,3 +218,4 @@ async def refresh_materialized_reporting_views(
 
 
 router.include_router(unredacted_cross_org_benchmark_export_router)
+router.include_router(live_unredacted_benchmark_blob_export_router)

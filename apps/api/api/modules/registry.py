@@ -178,6 +178,10 @@ from api.modules.reporting.cross_org_benchmark_models import (
     CrossOrgBenchmarkRunStatus,
     CrossOrgBenchmarkTriggerSource,
 )
+from api.modules.reporting.live_unredacted_benchmark_blob_export_models import (
+    LiveUnredactedBenchmarkBlobExportRun,
+    LiveUnredactedBenchmarkBlobExportRunStatus,
+)
 from api.modules.reporting.materialized_models import (
     ReportingMvRefreshRun,
     ReportingMvRefreshStatus,
@@ -294,6 +298,8 @@ __all__ = [
     "CrossOrgBenchmarkTriggerSource",
     "UnredactedCrossOrgBenchmarkExportRun",
     "UnredactedCrossOrgBenchmarkExportRunStatus",
+    "LiveUnredactedBenchmarkBlobExportRun",
+    "LiveUnredactedBenchmarkBlobExportRunStatus",
     "PredictiveOutcomeRefreshRun",
     "PredictiveOutcomeRefreshStatus",
     "PredictiveOutcomeSnapshot",

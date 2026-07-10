@@ -18,7 +18,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | Order | Slice                                 | Epic       | Status |
 | ----- | ------------------------------------- | ---------- | ------ |
 | 1     | 5.14 scope + completion checklist     | Kickoff    | ✅     |
-| 2     | Live unredacted benchmark blob export | Reporting  | —      |
+| 2     | Live unredacted benchmark blob export | Reporting  | ✅     |
 | 3     | Unsupervised autonomous filing loops  | Disputes   | —      |
 | 4     | Public OAuth marketplace listings     | Platform   | —      |
 | 5     | Native mobile app store distribution  | Identity   | —      |

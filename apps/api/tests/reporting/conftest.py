@@ -104,3 +104,14 @@ def unredacted_cross_org_benchmark_export_env(monkeypatch: pytest.MonkeyPatch) -
     get_feature_flags.cache_clear()
     yield
     get_feature_flags.cache_clear()
+
+
+@pytest.fixture
+def live_unredacted_benchmark_blob_export_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("ENABLE_ENTERPRISE", "true")
+    monkeypatch.setenv("ENABLE_CROSS_ORG_BENCHMARK_ANALYTICS", "true")
+    monkeypatch.setenv("ENABLE_UNREDACTED_CROSS_ORG_BENCHMARK_EXPORT", "true")
+    monkeypatch.setenv("ENABLE_LIVE_UNREDACTED_BENCHMARK_BLOB_EXPORT", "true")
+    get_feature_flags.cache_clear()
+    yield
+    get_feature_flags.cache_clear()

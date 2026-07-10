@@ -841,6 +841,18 @@ export is produced; responses record operator intent and approval only.
 | POST   | `/reporting/unredacted-cross-org-benchmark-exports/benchmark-runs/{id}/start` | admin     | Submit export run from completed benchmark refresh        |
 | POST   | `/reporting/unredacted-cross-org-benchmark-exports/runs/{run_id}/approve`     | admin     | Approve pending export run (owner/admin only for approve) |
 
+When `ENABLE_LIVE_UNREDACTED_BENCHMARK_BLOB_EXPORT=true` (requires unredacted export), admins can
+submit and approve live blob export pipeline runs from approved unredacted export runs. Approve
+writes a redacted placeholder JSON artifact to object storage and records `storage_key`,
+`content_type`, and `byte_size` only — no raw tenant PII dump.
+
+| Method | Path                                                                                  | Min role  | Description                                            |
+| ------ | ------------------------------------------------------------------------------------- | --------- | ------------------------------------------------------ |
+| GET    | `/reporting/live-unredacted-benchmark-blob-exports/status`                            | —         | Blob export readiness and blockers                     |
+| GET    | `/reporting/live-unredacted-benchmark-blob-exports/runs`                              | read_only | Paginated blob export run audit                        |
+| POST   | `/reporting/live-unredacted-benchmark-blob-exports/unredacted-export-runs/{id}/start` | admin     | Submit blob export from approved unredacted export run |
+| POST   | `/reporting/live-unredacted-benchmark-blob-exports/runs/{run_id}/approve`             | admin     | Approve and write placeholder artifact (owner/admin)   |
+
 Score-improvement trends remain deferred to 5.4+.
 
 ## Dashboard
