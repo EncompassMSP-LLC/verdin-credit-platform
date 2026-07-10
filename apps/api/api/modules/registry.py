@@ -189,6 +189,10 @@ from api.modules.reporting.predictive_models import (
     PredictiveOutcomeSnapshot,
     PredictiveOutcomeTriggerSource,
 )
+from api.modules.reporting.unredacted_cross_org_benchmark_export_models import (
+    UnredactedCrossOrgBenchmarkExportRun,
+    UnredactedCrossOrgBenchmarkExportRunStatus,
+)
 from api.modules.tasks.models import Task, TaskPriority, TaskStatus
 from api.modules.timeline.models import Communication, TimelineEvent
 
@@ -288,6 +292,8 @@ __all__ = [
     "CrossOrgBenchmarkRun",
     "CrossOrgBenchmarkRunStatus",
     "CrossOrgBenchmarkTriggerSource",
+    "UnredactedCrossOrgBenchmarkExportRun",
+    "UnredactedCrossOrgBenchmarkExportRunStatus",
     "PredictiveOutcomeRefreshRun",
     "PredictiveOutcomeRefreshStatus",
     "PredictiveOutcomeSnapshot",

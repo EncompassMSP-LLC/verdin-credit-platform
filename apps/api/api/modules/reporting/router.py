@@ -35,6 +35,9 @@ from api.modules.reporting.schemas import (
     TeamProductivityReportingResponse,
 )
 from api.modules.reporting.service import ReportingService
+from api.modules.reporting.unredacted_cross_org_benchmark_export_router import (
+    unredacted_cross_org_benchmark_export_router,
+)
 
 router = APIRouter(prefix="/reporting", tags=["Reporting"])
 
@@ -209,3 +212,6 @@ async def refresh_materialized_reporting_views(
     service: ReportingService = Depends(get_reporting_service),
 ) -> ReportingMvRefreshResultResponse:
     return await service.refresh_materialized_views(current_user)
+
+
+router.include_router(unredacted_cross_org_benchmark_export_router)

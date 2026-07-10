@@ -275,3 +275,80 @@ export function refreshCrossOrgBenchmarks() {
     },
   );
 }
+
+export interface UnredactedCrossOrgBenchmarkExportStatus {
+  enabled: boolean;
+  ready: boolean;
+  cross_org_benchmark_ready: boolean;
+  blockers: string[];
+}
+
+export interface UnredactedCrossOrgBenchmarkExportRun {
+  id: string;
+  organization_id: string;
+  cross_org_benchmark_run_id: string;
+  status: string;
+  export_summary: string;
+  export_reference_id: string | null;
+  requested_by_user_id: string | null;
+  approved_by_user_id: string | null;
+  requested_at: string | null;
+  approved_at: string | null;
+  error_message: string | null;
+}
+
+export interface UnredactedCrossOrgBenchmarkExportRunResult {
+  completed_at: string;
+  run: UnredactedCrossOrgBenchmarkExportRun;
+}
+
+export interface UnredactedCrossOrgBenchmarkExportSubmitRequest {
+  export_summary: string;
+  export_reference_id?: string | null;
+}
+
+export function getUnredactedCrossOrgBenchmarkExportStatus() {
+  return request<UnredactedCrossOrgBenchmarkExportStatus>(
+    apiPath('/reporting/unredacted-cross-org-benchmark-exports/status'),
+  );
+}
+
+export function listUnredactedCrossOrgBenchmarkExportRuns(params?: {
+  page?: number;
+  page_size?: number;
+}) {
+  const search = new URLSearchParams();
+  if (params?.page) search.set('page', String(params.page));
+  if (params?.page_size) search.set('page_size', String(params.page_size));
+  const query = search.toString();
+  return request<{
+    items: UnredactedCrossOrgBenchmarkExportRun[];
+    total: number;
+    page: number;
+    page_size: number;
+  }>(apiPath(`/reporting/unredacted-cross-org-benchmark-exports/runs${query ? `?${query}` : ''}`));
+}
+
+export function submitUnredactedCrossOrgBenchmarkExport(
+  crossOrgBenchmarkRunId: string,
+  body: UnredactedCrossOrgBenchmarkExportSubmitRequest,
+) {
+  return request<UnredactedCrossOrgBenchmarkExportRunResult>(
+    apiPath(
+      `/reporting/unredacted-cross-org-benchmark-exports/benchmark-runs/${crossOrgBenchmarkRunId}/start`,
+    ),
+    {
+      method: 'POST',
+      body: JSON.stringify(body),
+    },
+  );
+}
+
+export function approveUnredactedCrossOrgBenchmarkExportRun(runId: string) {
+  return request<UnredactedCrossOrgBenchmarkExportRunResult>(
+    apiPath(`/reporting/unredacted-cross-org-benchmark-exports/runs/${runId}/approve`),
+    {
+      method: 'POST',
+    },
+  );
+}

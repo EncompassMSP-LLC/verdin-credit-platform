@@ -1245,3 +1245,15 @@ migration `069_full_auto_bureau_api`), compliance status/list/start-from-filed-a
 autonomous API execution audit while deferring unsupervised live bureau submission loops.
 
 **Follow-up work:** Slice 4 — unredacted cross-org benchmark export scaffold or v5.13 sign-off.
+
+### Decision: Unredacted cross-org benchmark export scaffold (Version 5.13 slice 4)
+
+**Decision:** Ship admin-gated unredacted cross-org benchmark export audit
+(`unredacted_cross_org_benchmark_export_runs` migration `076_unredacted_benchmark_export`),
+reporting status/list/submit-from-benchmark-run/approve endpoints, and `@verdin/api-client` support behind
+`ENABLE_UNREDACTED_CROSS_ORG_BENCHMARK_EXPORT` chained to cross-org benchmark analytics.
+
+**Reason:** 5.13 reporting epic extends 5.12 aggregate benchmark analytics with operator-gated export
+audit while deferring live unredacted CSV/JSON/blob generation and raw tenant PII export.
+
+**Follow-up work:** v5.13 sign-off — capability matrix, release notes, and tag `v5.13.0`.
