@@ -2,7 +2,7 @@
 
 **Executive view** of Verdin platform capabilities — what exists, what version introduced it, readiness by layer, and dependencies.
 
-**Last updated:** 2026-07-08  
+**Last updated:** 2026-07-10  
 **Maintainers:** Update this document in every epic PR that ships or materially advances a capability.
 
 **Version 4.5 sign-off:** [version-4.5-scope.md](version-4.5-scope.md) · Release notes: [v4.5.0.md](../release-notes/v4.5.0.md)  
@@ -19,6 +19,7 @@
 **Version 5.10 sign-off:** [version-5.10-scope.md](version-5.10-scope.md) · Release notes: [v5.10.0.md](../release-notes/v5.10.0.md)
 **Version 5.11 sign-off:** [version-5.11-scope.md](version-5.11-scope.md) · Release notes: [v5.11.0.md](../release-notes/v5.11.0.md)
 **Version 5.12 sign-off:** [version-5.12-scope.md](version-5.12-scope.md) · Release notes: [v5.12.0.md](../release-notes/v5.12.0.md)
+**Version 5.13 sign-off:** [version-5.13-scope.md](version-5.13-scope.md) · Release notes: [v5.13.0.md](../release-notes/v5.13.0.md)
 
 ## Status legend
 
@@ -519,7 +520,9 @@ Scope: [version-5.12-scope.md](version-5.12-scope.md) · Release notes: [v5.12.0
 
 ---
 
-## Version 5.13 — Native mobile depth (in progress)
+## Version 5.13 — Native mobile depth (shipped — Partial ✅)
+
+Scope: [version-5.13-scope.md](version-5.13-scope.md) · Release notes: [v5.13.0.md](../release-notes/v5.13.0.md) · Checklist: [version-5.13-completion-checklist.md](../development/version-5.13-completion-checklist.md)
 
 | Capability                            | Version | Status     | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                             |
 | ------------------------------------- | ------- | ---------- | ------- | -------- | --- | --- | ----- | ------------ | --------------------------------------------------------------------------------- |

@@ -6,10 +6,10 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 
 ## Exit criteria for "5.13 done"
 
-- [ ] All four epics below are **✅ or explicitly deferred** with docs updated — see [`version-5.13-scope.md`](../governance/version-5.13-scope.md) (create at sign-off)
+- [x] All four epics below are **✅ or explicitly deferred** with docs updated — see [`version-5.13-scope.md`](../governance/version-5.13-scope.md)
 - [x] Capability matrix updated for 5.13 slices
-- [ ] Native mobile passkey client, OAuth marketplace publishing, fully autonomous bureau API filing, and unredacted benchmark export paths verified behind feature flags
-- [ ] `docs/release-notes/v5.13.0.md` + tag `v5.13.0`
+- [x] Native mobile passkey client, OAuth marketplace publishing, fully autonomous bureau API filing, and unredacted benchmark export paths verified behind feature flags
+- [x] `docs/release-notes/v5.13.0.md` + tag `v5.13.0`
 
 ---
 
@@ -21,7 +21,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | 2     | OAuth marketplace publishing scaffold       | Platform   | ✅     |
 | 3     | Fully autonomous bureau API filing scaffold | Disputes   | ✅     |
 | 4     | Unredacted cross-org benchmark export       | Reporting  | ✅     |
-| 5     | Capability matrix 5.13 sign-off             | Governance | —      |
+| 5     | Capability matrix 5.13 sign-off             | Governance | ✅     |
 
 Slice 1 requires mobile passkey readiness gates. Slice 2 requires public OAuth developer portal and approved OAuth apps. Slice 3 requires filed autonomous bureau filing runs. Slice 4 requires completed cross-org benchmark refresh runs and governance-approved export policy.
 

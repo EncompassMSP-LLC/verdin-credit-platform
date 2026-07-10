@@ -1257,3 +1257,11 @@ reporting status/list/submit-from-benchmark-run/approve endpoints, and `@verdin/
 audit while deferring live unredacted CSV/JSON/blob generation and raw tenant PII export.
 
 **Follow-up work:** v5.13 sign-off — capability matrix, release notes, and tag `v5.13.0`.
+
+### Decision: Version 5.13 epic sign-off
+
+**Decision:** Mark all four Version 5.13 epics **Partial ✅** in `version-5.13-scope.md`, add capability matrix 5.13 epic sign-off table, complete checklist exit criteria, and publish `docs/release-notes/v5.13.0.md`.
+
+**Reason:** v5.13.0 completes native mobile depth scaffolds; live unredacted blob export, unsupervised autonomous filing loops, public marketplace listings, and native app store distribution remain deferred to 5.14+.
+
+**Follow-up work:** Version 5.14 planning — production depth where compliance-approved.
