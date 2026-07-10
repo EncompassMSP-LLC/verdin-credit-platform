@@ -1,8 +1,8 @@
 """Client self-enrollment persistence models."""
 
-import enum
 import uuid
 from datetime import datetime
+from enum import StrEnum
 
 from sqlalchemy import DateTime, Enum, ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import UUID
@@ -11,7 +11,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from api.database.base import Base
 
 
-class ClientEnrollmentStatus(str, enum.Enum):
+class ClientEnrollmentStatus(StrEnum):
     PENDING_PAYMENT = "pending_payment"
     COMPLETED = "completed"
     FAILED = "failed"
