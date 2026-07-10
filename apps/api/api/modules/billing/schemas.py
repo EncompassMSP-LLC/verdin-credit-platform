@@ -53,6 +53,11 @@ class BillingSetupResponse(BaseSchema):
     created: bool
 
 
+class BillingDisconnectResponse(BaseSchema):
+    organization_id: uuid.UUID
+    disconnected: bool
+
+
 class BillingSubscribeRequest(BaseSchema):
     price_id: str | None = Field(default=None, max_length=255)
 

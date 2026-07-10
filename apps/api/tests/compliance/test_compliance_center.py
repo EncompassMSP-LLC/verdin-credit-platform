@@ -16,7 +16,8 @@ def test_compliance_center_status_payload() -> None:
     assert status.retention_scope_count == 4
     assert "consent_record_crud" in status.capabilities
     assert "retention_enforcement_jobs" in status.capabilities
-    assert "legal_sign_off_workflows" in status.deferred_capabilities
+    assert "consent_enforcement_gates" in status.capabilities
+    assert "automated_bureau_filing" in status.deferred_capabilities
 
 
 def test_get_compliance_status(api_client: TestClient, readonly_headers: dict[str, str]) -> None:

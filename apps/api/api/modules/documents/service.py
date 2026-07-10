@@ -33,6 +33,10 @@ from api.modules.documents.constants import (
     ResolutionStatus,
     is_ocr_eligible,
 )
+from api.modules.documents.cross_bureau_comparison import (
+    CrossBureauComparisonResult,
+    compare_cross_bureau_reports,
+)
 from api.modules.documents.metadata_repository import DocumentMetadataRepository
 from api.modules.documents.metadata_schemas import (
     DocumentEntityResolutionResponse,
@@ -43,12 +47,18 @@ from api.modules.documents.metadata_schemas import (
 )
 from api.modules.documents.metadata_service import run_entity_resolution, run_metadata_extraction
 from api.modules.documents.models import Document, DocumentVersion
+from api.modules.documents.parsed_report_models import DocumentParsedCreditReport
 from api.modules.documents.permissions import (
     DOCUMENT_DELETE_ROLE,
     DOCUMENT_WRITE_ROLE,
 )
 from api.modules.documents.repository import DocumentListFilters, DocumentRepository
 from api.modules.documents.schemas import (
+    BureauTradelineSnapshotResponse,
+    CaseCreditReportDiscrepanciesResponse,
+    CrossBureauComparisonSummary,
+    CrossBureauDiscrepancyResponse,
+    CrossBureauPossibleCauseResponse,
     DocumentClassificationResponse,
     DocumentDuplicateGroupResponse,
     DocumentListParams,
@@ -59,9 +69,15 @@ from api.modules.documents.schemas import (
     DocumentResponse,
     DocumentUpdate,
     DocumentVersionResponse,
+    ImportedParsedReportAccountItem,
+    ImportParsedReportAccountsRequest,
+    ImportParsedReportAccountsResponse,
     ParsedReportAccountCandidate,
     ParsedReportAccountChange,
     ParsedReportComparisonSummary,
+    PrepareCreditReportDisputesRequest,
+    PrepareCreditReportDisputesResponse,
+    PreparedCreditReportDisputeItem,
 )
 from api.modules.documents.storage import (
     DocumentStorage,
@@ -361,6 +377,336 @@ class DocumentService:
             await publish_platform_event(self._session, document_uploaded_event(document, user.id))
 
         return DocumentResponse.from_model(document)
+
+    async def upload_identity_document(
+        self,
+        user: User,
+        *,
+        case_id: uuid.UUID,
+        file: UploadFile,
+        title: str | None = None,
+        client_id: uuid.UUID | None = None,
+    ) -> DocumentResponse:
+        """Upload a government ID copy and link it to the case (and linked client)."""
+        from api.modules.clients.models import Client
+        from api.modules.documents.constants import DocumentType
+
+        self._require_write(user)
+        if self._session is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Database session is not configured",
+            )
+        organization_id = self._require_organization(user)
+        case = await self._cases.get_by_id(case_id, organization_id=organization_id)
+        if case is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Case not found",
+            )
+        if client_id is not None and case.client_id != client_id:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Case does not belong to this client",
+            )
+
+        document_title = title or "Driver's license"
+        response = await self.upload_document(
+            user,
+            file=file,
+            title=document_title,
+            case_id=case_id,
+            description="Government-issued photo ID for dispute mail packets",
+        )
+
+        document = await self._documents.get_by_id(
+            response.id,
+            organization_id=organization_id,
+        )
+        if document is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Uploaded identity document could not be loaded",
+            )
+
+        document.document_type = DocumentType.IDENTITY_DOCUMENT.value
+        apply_audit_on_update(document, user.id)
+        await self._documents.update(document)
+
+        case.identity_document_id = document.id
+        apply_audit_on_update(case, user.id)
+        await self._cases.update(case)
+
+        if case.client_id is not None:
+            client = await self._session.get(Client, case.client_id)
+            if client is not None and client.organization_id == organization_id:
+                client.identity_document_id = document.id
+                apply_audit_on_update(client, user.id)
+
+        await self._session.commit()
+
+        return DocumentResponse.from_model(document)
+
+    async def upload_proof_of_address_document(
+        self,
+        user: User,
+        *,
+        case_id: uuid.UUID,
+        file: UploadFile,
+        title: str | None = None,
+        client_id: uuid.UUID | None = None,
+    ) -> DocumentResponse:
+        """Upload proof of mailing address and link it to the case (and linked client)."""
+        from api.modules.clients.models import Client
+        from api.modules.documents.constants import DocumentType
+
+        self._require_write(user)
+        if self._session is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Database session is not configured",
+            )
+        organization_id = self._require_organization(user)
+        case = await self._cases.get_by_id(case_id, organization_id=organization_id)
+        if case is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Case not found",
+            )
+        if client_id is not None and case.client_id != client_id:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Case does not belong to this client",
+            )
+
+        document_title = title or "Proof of mailing address"
+        response = await self.upload_document(
+            user,
+            file=file,
+            title=document_title,
+            case_id=case_id,
+            description="Proof of current mailing address for dispute mail packets",
+        )
+
+        document = await self._documents.get_by_id(
+            response.id,
+            organization_id=organization_id,
+        )
+        if document is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Uploaded proof-of-address document could not be loaded",
+            )
+
+        document.document_type = DocumentType.PROOF_OF_ADDRESS.value
+        apply_audit_on_update(document, user.id)
+        await self._documents.update(document)
+
+        case.proof_of_address_document_id = document.id
+        apply_audit_on_update(case, user.id)
+        await self._cases.update(case)
+
+        if case.client_id is not None:
+            client = await self._session.get(Client, case.client_id)
+            if client is not None and client.organization_id == organization_id:
+                client.proof_of_address_document_id = document.id
+                apply_audit_on_update(client, user.id)
+
+        await self._session.commit()
+
+        return DocumentResponse.from_model(document)
+
+    async def upload_signed_consent_document(
+        self,
+        user: User,
+        *,
+        case_id: uuid.UUID,
+        file: UploadFile,
+        consent_type: str,
+        title: str | None = None,
+        client_id: uuid.UUID | None = None,
+    ) -> DocumentResponse:
+        """Upload a signed consent form and tag it for compliance records."""
+        from api.modules.documents.constants import DocumentType
+
+        self._require_write(user)
+        organization_id = self._require_organization(user)
+        case = await self._cases.get_by_id(case_id, organization_id=organization_id)
+        if case is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Case not found",
+            )
+        if client_id is not None and case.client_id != client_id:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Case does not belong to this client",
+            )
+
+        document_title = title or f"Signed consent — {consent_type.replace('_', ' ')}"
+        response = await self.upload_document(
+            user,
+            file=file,
+            title=document_title,
+            case_id=case_id,
+            description="Signed client consent form",
+        )
+
+        document = await self._documents.get_by_id(
+            response.id,
+            organization_id=organization_id,
+        )
+        if document is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Uploaded consent document could not be loaded",
+            )
+
+        document.document_type = DocumentType.SIGNED_CONSENT.value
+        apply_audit_on_update(document, user.id)
+        await self._documents.update(document)
+
+        if self._session is not None:
+            await self._session.commit()
+
+        return DocumentResponse.from_model(document)
+
+    async def upload_portal_consent_document(
+        self,
+        *,
+        organization_id: uuid.UUID,
+        portal_user_id: uuid.UUID,
+        case_id: uuid.UUID,
+        file: UploadFile,
+        consent_type: str,
+        title: str,
+    ) -> Document:
+        from api.modules.documents.constants import DocumentType
+
+        await self._validate_case(case_id, organization_id)
+
+        data, content_type = await self._read_upload(file)
+        file_hash = self._compute_hash(data)
+        file_name = file.filename or "consent-signature.png"
+
+        existing = await self._documents.find_by_hash(organization_id, file_hash)
+        is_duplicate = existing is not None
+        duplicate_of_id = existing.id if existing else None
+
+        document_id = uuid.uuid4()
+        storage_key = self._storage_key(organization_id, case_id, document_id, 1, file_name)
+        await async_put(self._storage, storage_key, data, content_type)
+
+        now = datetime.now(UTC)
+        document = Document(
+            id=document_id,
+            organization_id=organization_id,
+            case_id=case_id,
+            account_id=None,
+            title=title,
+            description=f"Portal consent signature for {consent_type}",
+            file_name=file_name,
+            storage_key=storage_key,
+            mime_type=content_type,
+            file_size=len(data),
+            file_hash=file_hash,
+            version_number=1,
+            is_duplicate=is_duplicate,
+            duplicate_of_id=duplicate_of_id,
+            document_type=DocumentType.SIGNED_CONSENT.value,
+        )
+        self._apply_initial_processing_status(document)
+        await self._documents.create(document)
+
+        version = DocumentVersion(
+            id=uuid.uuid4(),
+            document_id=document.id,
+            version_number=1,
+            storage_key=storage_key,
+            file_hash=file_hash,
+            file_name=file_name,
+            mime_type=content_type,
+            file_size=len(data),
+            created_at=now,
+            created_by_id=portal_user_id,
+        )
+        await self._documents.create_version(version)
+
+        if self._session is not None:
+            await self._session.commit()
+
+        self._queue_ocr_job(document)
+        await self._documents.update(document)
+        return document
+
+    async def store_generated_consent_pdf(
+        self,
+        *,
+        organization_id: uuid.UUID,
+        case_id: uuid.UUID,
+        created_by_id: uuid.UUID,
+        title: str,
+        pdf_bytes: bytes,
+        template_key: str,
+        description: str | None = None,
+    ) -> Document:
+        from api.modules.documents.constants import DocumentType
+
+        await self._validate_case(case_id, organization_id)
+
+        content_type = "application/pdf"
+        file_hash = self._compute_hash(pdf_bytes)
+        file_name = f"signed-consent-{template_key}.pdf"
+
+        existing = await self._documents.find_by_hash(organization_id, file_hash)
+        is_duplicate = existing is not None
+        duplicate_of_id = existing.id if existing else None
+
+        document_id = uuid.uuid4()
+        storage_key = self._storage_key(organization_id, case_id, document_id, 1, file_name)
+        await async_put(self._storage, storage_key, pdf_bytes, content_type)
+
+        now = datetime.now(UTC)
+        document = Document(
+            id=document_id,
+            organization_id=organization_id,
+            case_id=case_id,
+            account_id=None,
+            title=title,
+            description=description or f"Signed consent document ({template_key})",
+            file_name=file_name,
+            storage_key=storage_key,
+            mime_type=content_type,
+            file_size=len(pdf_bytes),
+            file_hash=file_hash,
+            version_number=1,
+            is_duplicate=is_duplicate,
+            duplicate_of_id=duplicate_of_id,
+            document_type=DocumentType.SIGNED_CONSENT.value,
+        )
+        self._apply_initial_processing_status(document)
+        await self._documents.create(document)
+
+        version = DocumentVersion(
+            id=uuid.uuid4(),
+            document_id=document.id,
+            version_number=1,
+            storage_key=storage_key,
+            file_hash=file_hash,
+            file_name=file_name,
+            mime_type=content_type,
+            file_size=len(pdf_bytes),
+            created_at=now,
+            created_by_id=created_by_id,
+        )
+        await self._documents.create_version(version)
+
+        if self._session is not None:
+            await self._session.commit()
+
+        self._queue_ocr_job(document)
+        await self._documents.update(document)
+        return document
 
     async def upload_document_for_portal(
         self,
@@ -1034,6 +1380,323 @@ class DocumentService:
             document_id=document.id,
             bureau=parsed_report.bureau,
             candidates=candidates,
+        )
+
+    async def import_parsed_credit_report_accounts(
+        self,
+        user: User,
+        document_id: uuid.UUID,
+        request: ImportParsedReportAccountsRequest,
+    ) -> ImportParsedReportAccountsResponse:
+        from decimal import Decimal
+
+        from api.modules.accounts.models import (
+            AccountBureau,
+            AccountStatus,
+            AccountType,
+            PaymentStatus,
+        )
+        from api.modules.accounts.schemas import AccountCreate, AccountListParams
+        from api.modules.accounts.service import AccountService
+        from api.modules.documents.cross_bureau_comparison import tradeline_match_key
+
+        self._require_write(user)
+        document = await self._get_document_for_user(document_id, user)
+        candidates_response = await self.get_parsed_credit_report_account_candidates(
+            user,
+            document_id,
+        )
+        if not candidates_response.candidates:
+            return ImportParsedReportAccountsResponse(
+                document_id=document_id,
+                case_id=document.case_id,
+                imported=[],
+                skipped_indices=[],
+            )
+
+        case_id = candidates_response.candidates[0].case_id
+        selected_indices = (
+            set(request.source_indices)
+            if request.source_indices is not None
+            else {candidate.source_index for candidate in candidates_response.candidates}
+        )
+
+        account_service = AccountService.from_session(self._session)  # type: ignore[arg-type]
+        existing_accounts = []
+        page = 1
+        while True:
+            page_result = await account_service.list_case_accounts(
+                user,
+                case_id,
+                params=AccountListParams(page=page, page_size=100),
+            )
+            existing_accounts.extend(page_result.items)
+            if page >= page_result.pages:
+                break
+            page += 1
+
+        existing_by_key = {
+            tradeline_match_key(account.creditor_name, account.account_number_masked): account
+            for account in existing_accounts
+        }
+
+        imported: list[ImportedParsedReportAccountItem] = []
+        skipped_indices: list[int] = []
+
+        for candidate in candidates_response.candidates:
+            if candidate.source_index not in selected_indices:
+                continue
+
+            match_key = tradeline_match_key(
+                candidate.creditor_name,
+                candidate.account_number_masked,
+            )
+            if request.skip_existing and match_key in existing_by_key:
+                skipped_indices.append(candidate.source_index)
+                continue
+
+            account = await account_service.create_account(
+                user,
+                AccountCreate(
+                    case_id=case_id,
+                    bureau=AccountBureau(candidate.bureau)
+                    if candidate.bureau in {"experian", "equifax", "transunion", "innovis"}
+                    else AccountBureau.UNKNOWN,
+                    creditor_name=candidate.creditor_name,
+                    original_creditor=candidate.original_creditor,
+                    account_number_masked=candidate.account_number_masked,
+                    account_type=AccountType(self._normalize_account_type(candidate.account_type)),
+                    account_status=AccountStatus(
+                        self._normalize_account_status(candidate.account_status)
+                    ),
+                    payment_status=PaymentStatus(
+                        self._normalize_payment_status(candidate.payment_status)
+                    ),
+                    balance=Decimal(candidate.balance) if candidate.balance else None,
+                    past_due_amount=(
+                        Decimal(candidate.past_due_amount) if candidate.past_due_amount else None
+                    ),
+                    remarks=candidate.remarks,
+                ),
+            )
+            imported.append(
+                ImportedParsedReportAccountItem(
+                    source_index=candidate.source_index,
+                    account_id=account.id,
+                    created=True,
+                    creditor_name=candidate.creditor_name,
+                )
+            )
+            existing_by_key[match_key] = account
+
+        return ImportParsedReportAccountsResponse(
+            document_id=document_id,
+            case_id=case_id,
+            imported=imported,
+            skipped_indices=skipped_indices,
+        )
+
+    def _latest_parsed_reports_by_bureau(
+        self,
+        parsed_reports: list[DocumentParsedCreditReport],
+    ) -> dict[str, tuple[uuid.UUID, dict[str, object]]]:
+        latest: dict[str, tuple[uuid.UUID, dict[str, object]]] = {}
+        for parsed_report in parsed_reports:
+            bureau = str(parsed_report.bureau).lower()
+            if bureau in latest:
+                continue
+            latest[bureau] = (parsed_report.document_id, parsed_report.parsed_report)
+        return latest
+
+    def _discrepancies_response(
+        self,
+        result: CrossBureauComparisonResult,
+    ) -> CaseCreditReportDiscrepanciesResponse:
+        return CaseCreditReportDiscrepanciesResponse(
+            case_id=result.case_id,
+            reports_compared=list(result.reports_compared),
+            document_ids_by_bureau={
+                bureau: document_id for bureau, document_id in result.document_ids_by_bureau.items()
+            },
+            summary=CrossBureauComparisonSummary(**result.summary),
+            discrepancies=[
+                CrossBureauDiscrepancyResponse(
+                    match_key=item.match_key,
+                    creditor_name=item.creditor_name,
+                    account_number_masked=item.account_number_masked,
+                    discrepancy_types=list(item.discrepancy_types),
+                    classification=item.classification,
+                    classification_label=item.classification_label,
+                    confidence_score=item.confidence_score,
+                    workflow_tier=item.workflow_tier,
+                    bureaus_reporting=list(item.bureaus_reporting),
+                    bureaus_missing=list(item.bureaus_missing),
+                    bureau_snapshots=[
+                        BureauTradelineSnapshotResponse(
+                            bureau=snapshot.bureau,
+                            document_id=snapshot.document_id,
+                            creditor_name=snapshot.creditor_name,
+                            account_number_masked=snapshot.account_number_masked,
+                            balance=snapshot.balance,
+                            payment_status=snapshot.payment_status,
+                            account_type=snapshot.account_type,
+                        )
+                        for snapshot in item.bureau_snapshots
+                    ],
+                    possible_causes=[
+                        CrossBureauPossibleCauseResponse(
+                            label=cause.label,
+                            likelihood=cause.likelihood,
+                        )
+                        for cause in item.possible_causes
+                    ],
+                    recommended_next_step=item.recommended_next_step,
+                    recommended_action=item.recommended_action,
+                    requires_investigation=item.requires_investigation,
+                    dispute_ready=item.dispute_ready,
+                    is_actionable=item.is_actionable,
+                )
+                for item in result.discrepancies
+            ],
+        )
+
+    async def get_case_credit_report_discrepancies(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+    ) -> CaseCreditReportDiscrepanciesResponse:
+        organization_id = self._require_organization(user)
+        await self._validate_case(case_id, organization_id)
+        parsed_reports = await self._documents.list_case_parsed_credit_reports(
+            organization_id=organization_id,
+            case_id=case_id,
+        )
+        reports_by_bureau = self._latest_parsed_reports_by_bureau(parsed_reports)
+        if len(reports_by_bureau) < 2:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="At least two bureau credit reports are required for cross-bureau comparison",
+            )
+
+        result = compare_cross_bureau_reports(
+            case_id=case_id,
+            reports_by_bureau=reports_by_bureau,
+        )
+        return self._discrepancies_response(result)
+
+    async def prepare_case_credit_report_disputes(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+        request: PrepareCreditReportDisputesRequest,
+    ) -> PrepareCreditReportDisputesResponse:
+        from decimal import Decimal
+
+        from api.modules.accounts.models import (
+            AccountBureau,
+            AccountStatus,
+            AccountType,
+            DisputeStatus,
+            PaymentStatus,
+        )
+        from api.modules.accounts.schemas import AccountCreate, AccountListParams
+        from api.modules.accounts.service import AccountService
+        from api.modules.documents.cross_bureau_comparison import tradeline_match_key
+
+        self._require_write(user)
+        discrepancies = await self.get_case_credit_report_discrepancies(user, case_id)
+        selected_keys = set(request.match_keys) if request.match_keys else None
+
+        account_service = AccountService.from_session(self._session)  # type: ignore[arg-type]
+        existing_accounts = []
+        page = 1
+        while True:
+            page_result = await account_service.list_case_accounts(
+                user,
+                case_id,
+                params=AccountListParams(page=page, page_size=100),
+            )
+            existing_accounts.extend(page_result.items)
+            if page >= page_result.pages:
+                break
+            page += 1
+        existing_by_key = {
+            tradeline_match_key(account.creditor_name, account.account_number_masked): account
+            for account in existing_accounts
+        }
+
+        prepared: list[PreparedCreditReportDisputeItem] = []
+        skipped: list[str] = []
+
+        for discrepancy in discrepancies.discrepancies:
+            if not discrepancy.dispute_ready:
+                skipped.append(discrepancy.match_key)
+                continue
+            if selected_keys is not None and discrepancy.match_key not in selected_keys:
+                continue
+
+            existing = existing_by_key.get(discrepancy.match_key)
+            created_account = False
+            if existing is None:
+                primary = max(
+                    discrepancy.bureau_snapshots,
+                    key=lambda snapshot: snapshot.balance or 0.0,
+                )
+                account = await account_service.create_account(
+                    user,
+                    AccountCreate(
+                        case_id=case_id,
+                        bureau=AccountBureau(primary.bureau)
+                        if primary.bureau in {"experian", "equifax", "transunion"}
+                        else AccountBureau.UNKNOWN,
+                        creditor_name=discrepancy.creditor_name,
+                        account_number_masked=discrepancy.account_number_masked,
+                        account_type=AccountType(
+                            self._normalize_account_type(primary.account_type)
+                        ),
+                        account_status=AccountStatus(
+                            self._normalize_account_status(primary.payment_status)
+                        ),
+                        payment_status=PaymentStatus(
+                            self._normalize_payment_status(primary.payment_status)
+                        ),
+                        balance=Decimal(str(primary.balance))
+                        if primary.balance is not None
+                        else None,
+                        remarks=(
+                            "Cross-bureau discrepancy detected: "
+                            f"{', '.join(discrepancy.discrepancy_types)}. "
+                            f"{discrepancy.recommended_action}"
+                        ),
+                        dispute_status=DisputeStatus.READY_FOR_DISPUTE,
+                    ),
+                )
+                account_id = account.id
+                created_account = True
+                existing_by_key[discrepancy.match_key] = account
+            else:
+                account_id = existing.id
+
+            dispute_letter = await account_service.create_dispute_letter_draft(
+                user,
+                account_id,
+                recipient_type=request.recipient_type,
+            )
+            prepared.append(
+                PreparedCreditReportDisputeItem(
+                    match_key=discrepancy.match_key,
+                    account_id=account_id,
+                    dispute_letter_id=dispute_letter.id,
+                    created_account=created_account,
+                    creditor_name=discrepancy.creditor_name,
+                    recommended_action=discrepancy.recommended_action,
+                )
+            )
+
+        return PrepareCreditReportDisputesResponse(
+            case_id=case_id,
+            prepared=prepared,
+            skipped=skipped,
         )
 
     async def create_parsed_credit_report_review_task(

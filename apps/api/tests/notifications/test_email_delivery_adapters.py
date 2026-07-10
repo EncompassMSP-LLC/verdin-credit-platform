@@ -101,3 +101,47 @@ def test_get_email_delivery_status_sendgrid_blocker() -> None:
     )
     status = get_email_delivery_status(settings)
     assert any("EMAIL_SENDGRID_API_KEY" in blocker for blocker in status.blockers)
+
+
+@pytest.mark.asyncio
+async def test_smtp_adapter_skips_tls_when_disabled(monkeypatch: pytest.MonkeyPatch) -> None:
+    tls_called: list[bool] = []
+
+    class FakeSmtp:
+        def __init__(self, host: str, port: int, timeout: int) -> None:
+            assert host == "mailpit"
+            assert port == 1025
+
+        def __enter__(self) -> "FakeSmtp":
+            return self
+
+        def __exit__(self, *args: object) -> None:
+            return None
+
+        def starttls(self) -> None:
+            tls_called.append(True)
+
+        def login(self, username: str, password: str) -> None:
+            raise AssertionError("login should not be called for Mailpit")
+
+        def send_message(self, msg: object) -> None:
+            return None
+
+    monkeypatch.setattr("api.core.email_delivery.smtplib.SMTP", FakeSmtp)
+
+    from api.core.email_delivery import SmtpEmailAdapter
+
+    settings = EmailDeliverySettings(
+        email_provider=EmailProvider.SMTP,
+        email_from_address="no-reply@example.com",
+        email_smtp_host="mailpit",
+        email_smtp_port=1025,
+        email_smtp_use_tls=False,
+    )
+    adapter = SmtpEmailAdapter(settings)
+    result = await adapter.send(
+        EmailMessage(to="user@example.com", subject="Hello", body_text="Body"),
+        from_address="no-reply@example.com",
+    )
+    assert result.success is True
+    assert tls_called == []

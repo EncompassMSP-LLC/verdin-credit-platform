@@ -11,6 +11,24 @@ from api.core.constants import UserRole
 from api.core.feature_flags import get_feature_flags
 from api.core.security import hash_password
 from api.modules.auth.models import Organization, User
+from api.modules.billing.models import OrganizationBillingAccount, SubscriptionStatus
+
+
+@pytest.fixture
+async def pilot_billing_account(
+    db_session: AsyncSession,
+    test_org: Organization,
+) -> OrganizationBillingAccount:
+    account = OrganizationBillingAccount(
+        organization_id=test_org.id,
+        stripe_customer_id="cus_pilot_demo123",
+        stripe_subscription_id="sub_pilot_demo123",
+        subscription_status=SubscriptionStatus.ACTIVE,
+        price_id="price_pilot_demo_monthly",
+    )
+    db_session.add(account)
+    await db_session.commit()
+    return account
 
 
 @pytest.fixture

@@ -25,6 +25,15 @@ def test_health() -> None:
     assert "version" in data
 
 
+def test_readiness() -> None:
+    response = client.get("/api/v1/health/ready")
+    assert response.status_code in (200, 503)
+    data = response.json()
+    assert data["status"] in ("ready", "not_ready")
+    assert "database" in data["checks"]
+    assert "redis" in data["checks"]
+
+
 def test_version() -> None:
     response = client.get("/api/v1/version")
     assert response.status_code == 200

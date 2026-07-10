@@ -21,6 +21,11 @@ from api.modules.accounts.models import (
 )
 
 AccountSortField = Literal[
+    "creditor_name",
+    "bureau",
+    "account_type",
+    "account_status",
+    "dispute_status",
     "balance",
     "date_reported",
     "risk_score",
@@ -98,6 +103,7 @@ class AccountUpdate(BaseSchema):
 class AccountListParams(PaginationParams):
     search: str | None = Field(default=None, max_length=255)
     case_id: uuid.UUID | None = None
+    client_id: uuid.UUID | None = None
     bureau: AccountBureau | None = None
     account_type: AccountType | None = None
     account_status: AccountStatus | None = None
@@ -210,6 +216,16 @@ class NextActionItem(BaseSchema):
     recommended_action: str
 
 
+class CrossBureauIntelligenceSummary(BaseSchema):
+    available: bool
+    reports_compared: list[str] = Field(default_factory=list)
+    actionable_discrepancies: int = 0
+    dispute_ready_discrepancies: int = 0
+    investigation_needed: int = 0
+    consistent_tradelines: int = 0
+    total_tradelines: int = 0
+
+
 class AccountIntelligenceSummary(BaseSchema):
     total_accounts: int
     total_balance: Decimal
@@ -225,6 +241,19 @@ class AccountIntelligenceSummary(BaseSchema):
     highest_balance_accounts: list[AccountResponse]
     highest_risk_accounts: list[AccountResponse]
     next_action_queue: list[NextActionItem]
+    scoring_model: Literal["heuristic", "calibrated"] = "heuristic"
+    cross_bureau: CrossBureauIntelligenceSummary | None = None
+
+
+class AccountLlmRecommendationResponse(BaseSchema):
+    account_id: uuid.UUID
+    recommendation: str
+    provider: str
+    model: str
+    prompt_hash: str
+    pii_scrubbed: bool
+    generated_at: datetime
+    cross_bureau_informed: bool
 
 
 class AccountDisputeDraftResponse(BaseSchema):

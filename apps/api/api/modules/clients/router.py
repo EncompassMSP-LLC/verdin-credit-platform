@@ -2,11 +2,25 @@
 
 import uuid
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, File, Form, Query, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.core.pagination import PaginatedResponse
 from api.database.session import get_db
+from api.modules.accounts.models import (
+    AccountBureau,
+    AccountStatus,
+    AccountType,
+    DisputeStatus,
+    PaymentStatus,
+)
+from api.modules.accounts.schemas import (
+    AccountListParams,
+    AccountResponse,
+    AccountSortField,
+    AccountSortOrder,
+)
+from api.modules.accounts.service import AccountService
 from api.modules.auth.dependencies import get_current_user
 from api.modules.auth.models import User
 from api.modules.client_portal.schemas import (
@@ -31,6 +45,8 @@ from api.modules.clients.schemas import (
     ContactSortOrder,
 )
 from api.modules.clients.service import ClientService
+from api.modules.documents.schemas import DocumentResponse
+from api.modules.documents.service import DocumentService
 
 router = APIRouter(prefix="/clients", tags=["Clients"])
 
@@ -39,10 +55,44 @@ def get_client_service(db: AsyncSession = Depends(get_db)) -> ClientService:
     return ClientService.from_session(db)
 
 
+def get_account_service(db: AsyncSession = Depends(get_db)) -> AccountService:
+    return AccountService.from_session(db)
+
+
 def get_portal_provisioning_service(
     db: AsyncSession = Depends(get_db),
 ) -> ClientPortalProvisioningService:
     return ClientPortalProvisioningService.from_session(db)
+
+
+def get_document_service(db: AsyncSession = Depends(get_db)) -> DocumentService:
+    return DocumentService.from_session(db)
+
+
+def get_client_account_list_params(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    search: str | None = Query(None, max_length=255),
+    bureau: AccountBureau | None = None,
+    account_type: AccountType | None = None,
+    account_status: AccountStatus | None = None,
+    payment_status: PaymentStatus | None = None,
+    dispute_status: DisputeStatus | None = None,
+    sort_by: AccountSortField = "created_at",
+    sort_order: AccountSortOrder = "desc",
+) -> AccountListParams:
+    return AccountListParams(
+        page=page,
+        page_size=page_size,
+        search=search,
+        bureau=bureau,
+        account_type=account_type,
+        account_status=account_status,
+        payment_status=payment_status,
+        dispute_status=dispute_status,
+        sort_by=sort_by,
+        sort_order=sort_order,
+    )
 
 
 def get_client_list_params(
@@ -110,6 +160,18 @@ async def get_client(
     return await service.get_client(current_user, client_id)
 
 
+@router.get("/{client_id}/accounts", response_model=PaginatedResponse[AccountResponse])
+async def list_client_accounts(
+    client_id: uuid.UUID,
+    params: AccountListParams = Depends(get_client_account_list_params),
+    current_user: User = Depends(get_current_user),
+    client_service: ClientService = Depends(get_client_service),
+    account_service: AccountService = Depends(get_account_service),
+) -> PaginatedResponse[AccountResponse]:
+    await client_service.get_client(current_user, client_id)
+    return await account_service.list_client_accounts(current_user, client_id, params)
+
+
 @router.patch("/{client_id}", response_model=ClientResponse)
 async def update_client(
     client_id: uuid.UUID,
@@ -118,6 +180,54 @@ async def update_client(
     service: ClientService = Depends(get_client_service),
 ) -> ClientResponse:
     return await service.update_client(current_user, client_id, body)
+
+
+@router.post(
+    "/{client_id}/identity-document",
+    response_model=DocumentResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def upload_client_identity_document(
+    client_id: uuid.UUID,
+    case_id: uuid.UUID = Form(...),
+    file: UploadFile = File(...),
+    title: str | None = Form(None),
+    current_user: User = Depends(get_current_user),
+    client_service: ClientService = Depends(get_client_service),
+    document_service: DocumentService = Depends(get_document_service),
+) -> DocumentResponse:
+    await client_service.get_client(current_user, client_id)
+    return await document_service.upload_identity_document(
+        current_user,
+        case_id=case_id,
+        file=file,
+        title=title,
+        client_id=client_id,
+    )
+
+
+@router.post(
+    "/{client_id}/proof-of-address-document",
+    response_model=DocumentResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def upload_client_proof_of_address_document(
+    client_id: uuid.UUID,
+    case_id: uuid.UUID = Form(...),
+    file: UploadFile = File(...),
+    title: str | None = Form(None),
+    current_user: User = Depends(get_current_user),
+    client_service: ClientService = Depends(get_client_service),
+    document_service: DocumentService = Depends(get_document_service),
+) -> DocumentResponse:
+    await client_service.get_client(current_user, client_id)
+    return await document_service.upload_proof_of_address_document(
+        current_user,
+        case_id=case_id,
+        file=file,
+        title=title,
+        client_id=client_id,
+    )
 
 
 @router.delete("/{client_id}", status_code=status.HTTP_204_NO_CONTENT)

@@ -8,6 +8,8 @@ from pydantic import Field
 
 from api.core.pagination import PaginationParams
 from api.core.responses import BaseSchema
+from api.modules.compliance.consent_signature import is_consent_signed
+from api.modules.compliance.consent_templates.keys import ConsentDocumentTemplateKey
 from api.modules.compliance.models import (
     ConsentRecord,
     ConsentStatus,
@@ -55,6 +57,12 @@ class ConsentRecordResponse(BaseSchema):
     withdrawn_at: datetime | None
     source: str
     notes: str | None
+    document_id: uuid.UUID | None
+    signature_method: str | None
+    signed_at: datetime | None
+    signer_name: str | None
+    document_template_key: str | None
+    is_signed: bool
     created_at: datetime
     updated_at: datetime
     created_by_id: uuid.UUID | None
@@ -73,11 +81,74 @@ class ConsentRecordResponse(BaseSchema):
             withdrawn_at=record.withdrawn_at,
             source=record.source,
             notes=record.notes,
+            document_id=record.document_id,
+            signature_method=record.signature_method,
+            signed_at=record.signed_at,
+            signer_name=record.signer_name,
+            document_template_key=record.document_template_key,
+            is_signed=is_consent_signed(record),
             created_at=record.created_at,
             updated_at=record.updated_at,
             created_by_id=record.created_by_id,
             updated_by_id=record.updated_by_id,
         )
+
+
+class ConsentUploadCreate(BaseSchema):
+    client_id: uuid.UUID
+    case_id: uuid.UUID
+    consent_type: ConsentType
+    signer_name: str | None = Field(default=None, max_length=255)
+    notes: str | None = None
+
+
+class PortalConsentSignCreate(BaseSchema):
+    template_key: ConsentDocumentTemplateKey
+    signer_name: str = Field(min_length=1, max_length=255)
+    attestation_accepted: bool
+
+
+class PortalConsentRequirementResponse(BaseSchema):
+    template_key: ConsentDocumentTemplateKey
+    consent_type: ConsentType
+    label: str
+    title: str
+    is_signed: bool
+    consent_id: uuid.UUID | None
+    legal_review_status: str
+
+
+class PortalCaseConsentsResponse(BaseSchema):
+    items: list[PortalConsentRequirementResponse]
+    legal_review_notice: str
+
+
+class ConsentDocumentTemplateResponse(BaseSchema):
+    template_key: ConsentDocumentTemplateKey
+    title: str
+    body_text: str
+    merge_field_defaults: dict[str, str] | None
+    legal_review_status: str
+    is_customized: bool
+    updated_at: datetime | None
+
+
+class ConsentDocumentTemplateUpdate(BaseSchema):
+    title: str = Field(min_length=1, max_length=255)
+    body_text: str = Field(min_length=1)
+    merge_field_defaults: dict[str, str] | None = None
+    legal_review_status: str = Field(default="draft", max_length=20)
+
+
+class ConsentTemplatePreviewParams(BaseSchema):
+    client_id: uuid.UUID
+    case_id: uuid.UUID | None = None
+
+
+class ClientConsentGapsResponse(BaseSchema):
+    missing_template_keys: list[str]
+    missing_template_labels: list[str]
+    missing_consent_types: list[str]
 
 
 class RetentionPolicyCreate(BaseSchema):

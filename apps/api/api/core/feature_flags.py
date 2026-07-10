@@ -17,6 +17,7 @@ class FeatureFlag(StrEnum):
     ENABLE_BILLING = "ENABLE_BILLING"
     ENABLE_COMPLIANCE_ENFORCEMENT = "ENABLE_COMPLIANCE_ENFORCEMENT"
     ENABLE_CLIENT_PORTAL = "ENABLE_CLIENT_PORTAL"
+    ENABLE_CLIENT_ENROLLMENT = "ENABLE_CLIENT_ENROLLMENT"
     ENABLE_PORTAL_PUSH = "ENABLE_PORTAL_PUSH"
     ENABLE_MATERIALIZED_REPORTING = "ENABLE_MATERIALIZED_REPORTING"
     ENABLE_API_KEY_RATE_LIMIT = "ENABLE_API_KEY_RATE_LIMIT"
@@ -37,6 +38,8 @@ class FeatureFlag(StrEnum):
     ENABLE_SMS_MARKETING_DELIVERY = "ENABLE_SMS_MARKETING_DELIVERY"
     ENABLE_SMS_DELIVERABILITY_DASHBOARD = "ENABLE_SMS_DELIVERABILITY_DASHBOARD"
     ENABLE_LLM_DISPUTE_DRAFT_AUGMENT = "ENABLE_LLM_DISPUTE_DRAFT_AUGMENT"
+    ENABLE_LLM_ACCOUNT_RECOMMENDATIONS = "ENABLE_LLM_ACCOUNT_RECOMMENDATIONS"
+    ENABLE_ML_SCORING = "ENABLE_ML_SCORING"
     ENABLE_AGENT_OBSERVABILITY = "ENABLE_AGENT_OBSERVABILITY"
     ENABLE_AGENT_EXECUTION = "ENABLE_AGENT_EXECUTION"
     ENABLE_DISPUTE_FILING_PREP = "ENABLE_DISPUTE_FILING_PREP"
@@ -101,6 +104,10 @@ class FeatureFlags(BaseSettings):
     enable_client_portal: bool = Field(
         default=False,
         description="Enable client-facing portal",
+    )
+    enable_client_enrollment: bool = Field(
+        default=False,
+        description="Enable public client self-enrollment with optional Stripe checkout",
     )
     enable_portal_push: bool = Field(
         default=False,
@@ -181,6 +188,14 @@ class FeatureFlags(BaseSettings):
     enable_llm_dispute_draft_augment: bool = Field(
         default=False,
         description="Enable ADR-012-gated LLM dispute draft augment scaffold",
+    )
+    enable_llm_account_recommendations: bool = Field(
+        default=False,
+        description="Enable ADR-012-gated LLM account recommendation generation",
+    )
+    enable_ml_scoring: bool = Field(
+        default=False,
+        description="Enable cross-bureau calibrated account risk/readiness scoring",
     )
     enable_agent_observability: bool = Field(
         default=False,
@@ -298,6 +313,7 @@ _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
     FeatureFlag.ENABLE_BILLING: "enable_billing",
     FeatureFlag.ENABLE_COMPLIANCE_ENFORCEMENT: "enable_compliance_enforcement",
     FeatureFlag.ENABLE_CLIENT_PORTAL: "enable_client_portal",
+    FeatureFlag.ENABLE_CLIENT_ENROLLMENT: "enable_client_enrollment",
     FeatureFlag.ENABLE_PORTAL_PUSH: "enable_portal_push",
     FeatureFlag.ENABLE_MATERIALIZED_REPORTING: "enable_materialized_reporting",
     FeatureFlag.ENABLE_API_KEY_RATE_LIMIT: "enable_api_key_rate_limit",
@@ -318,6 +334,8 @@ _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
     FeatureFlag.ENABLE_SMS_MARKETING_DELIVERY: "enable_sms_marketing_delivery",
     FeatureFlag.ENABLE_SMS_DELIVERABILITY_DASHBOARD: "enable_sms_deliverability_dashboard",
     FeatureFlag.ENABLE_LLM_DISPUTE_DRAFT_AUGMENT: "enable_llm_dispute_draft_augment",
+    FeatureFlag.ENABLE_LLM_ACCOUNT_RECOMMENDATIONS: "enable_llm_account_recommendations",
+    FeatureFlag.ENABLE_ML_SCORING: "enable_ml_scoring",
     FeatureFlag.ENABLE_AGENT_OBSERVABILITY: "enable_agent_observability",
     FeatureFlag.ENABLE_AGENT_EXECUTION: "enable_agent_execution",
     FeatureFlag.ENABLE_DISPUTE_FILING_PREP: "enable_dispute_filing_prep",

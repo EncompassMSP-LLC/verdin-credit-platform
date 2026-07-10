@@ -2,7 +2,7 @@
 
 from enum import StrEnum
 
-APP_NAME = "Verdin Credit Platform"
+APP_NAME = "Ultimate Credit Repair LLC"
 APP_VERSION = "4.2.0"
 
 TOKEN_TYPE_ACCESS = "access"

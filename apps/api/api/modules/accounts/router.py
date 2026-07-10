@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.core.pagination import PaginatedResponse
 from api.database.session import get_db
+from api.modules.accounts.account_llm_recommendation import AccountLlmRecommendationService
 from api.modules.accounts.dispute_draft_augment_dependencies import (
     require_llm_dispute_draft_augment_enabled,
 )
@@ -32,6 +33,7 @@ from api.modules.accounts.schemas import (
     AccountDisputeResponseReceivedRequest,
     AccountIntelligenceSummary,
     AccountListParams,
+    AccountLlmRecommendationResponse,
     AccountResponse,
     AccountSortField,
     AccountSortOrder,
@@ -50,11 +52,18 @@ def get_account_service(db: AsyncSession = Depends(get_db)) -> AccountService:
     return AccountService.from_session(db)
 
 
+def get_account_llm_recommendation_service(
+    db: AsyncSession = Depends(get_db),
+) -> AccountLlmRecommendationService:
+    return AccountLlmRecommendationService.from_session(db)
+
+
 def get_account_list_params(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     search: str | None = Query(None, max_length=255),
     case_id: uuid.UUID | None = None,
+    client_id: uuid.UUID | None = None,
     bureau: AccountBureau | None = None,
     account_type: AccountType | None = None,
     account_status: AccountStatus | None = None,
@@ -72,6 +81,7 @@ def get_account_list_params(
         page_size=page_size,
         search=search,
         case_id=case_id,
+        client_id=client_id,
         bureau=bureau,
         account_type=account_type,
         account_status=account_status,
@@ -120,6 +130,15 @@ async def get_account(
     service: AccountService = Depends(get_account_service),
 ) -> AccountResponse:
     return await service.get_account(current_user, account_id)
+
+
+@router.post("/{account_id}/llm-recommendation", response_model=AccountLlmRecommendationResponse)
+async def generate_account_llm_recommendation(
+    account_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: AccountLlmRecommendationService = Depends(get_account_llm_recommendation_service),
+) -> AccountLlmRecommendationResponse:
+    return await service.generate_recommendation(current_user, account_id)
 
 
 @router.get("/{account_id}/dispute-draft", response_model=AccountDisputeDraftResponse)
@@ -222,7 +241,9 @@ async def get_account_dispute_letter(
 async def export_account_dispute_letter(
     account_id: uuid.UUID,
     letter_id: uuid.UUID,
-    format: Literal["text", "pdf"] = Query(..., alias="format"),
+    format: Literal[
+        "text", "pdf", "mail-letter", "mail-label", "mail-packet", "report-excerpt"
+    ] = Query(..., alias="format"),
     current_user: User = Depends(get_current_user),
     service: AccountService = Depends(get_account_service),
 ) -> Response:

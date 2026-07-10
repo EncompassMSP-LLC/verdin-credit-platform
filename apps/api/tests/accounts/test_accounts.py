@@ -75,6 +75,65 @@ def test_list_accounts_bureau_filter(
     assert response.json()["total"] >= 1
 
 
+def test_list_accounts_by_client_id(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+) -> None:
+    from tests.helpers.client_payload import sample_client_payload
+
+    client_response = api_client.post(
+        "/api/v1/clients",
+        headers=manager_headers,
+        json=sample_client_payload(display_name="Accounts Client"),
+    )
+    assert client_response.status_code == 201
+    client_id = client_response.json()["id"]
+
+    case_response = api_client.post(
+        "/api/v1/cases",
+        headers=manager_headers,
+        json={"title": "Client Accounts Case", "client_id": client_id},
+    )
+    assert case_response.status_code == 201
+    case_id = case_response.json()["id"]
+
+    other_case_response = api_client.post(
+        "/api/v1/cases",
+        headers=manager_headers,
+        json={"title": "Other Case", "client_name": "Someone Else"},
+    )
+    assert other_case_response.status_code == 201
+    other_case_id = other_case_response.json()["id"]
+
+    api_client.post(
+        "/api/v1/accounts",
+        headers=manager_headers,
+        json=sample_account_payload(case_id),
+    )
+    api_client.post(
+        "/api/v1/accounts",
+        headers=manager_headers,
+        json=sample_account_payload(other_case_id),
+    )
+
+    list_response = api_client.get(
+        f"/api/v1/clients/{client_id}/accounts",
+        headers=manager_headers,
+    )
+    assert list_response.status_code == 200
+    data = list_response.json()
+    assert data["total"] == 1
+    assert data["items"][0]["case_id"] == case_id
+
+    global_response = api_client.get(
+        "/api/v1/accounts",
+        headers=manager_headers,
+        params={"client_id": client_id},
+    )
+    assert global_response.status_code == 200
+    assert global_response.json()["total"] == 1
+
+
 def test_list_accounts_search(
     api_client: TestClient,
     manager_headers: dict[str, str],
@@ -370,6 +429,96 @@ def test_export_account_dispute_letter_pdf(
 
     assert response.status_code == 200
     assert response.headers["content-type"] == "application/pdf"
+    assert response.content.startswith(b"%PDF")
+
+
+def test_export_account_dispute_letter_mail_ready_pdf(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    create = api_client.post(
+        "/api/v1/accounts",
+        headers=manager_headers,
+        json=sample_account_payload(sample_case_id),
+    )
+    account_id = create.json()["id"]
+
+    created = api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-draft/letters",
+        headers=manager_headers,
+    )
+    letter_id = created.json()["id"]
+
+    response = api_client.get(
+        f"/api/v1/accounts/{account_id}/dispute-letters/{letter_id}/export",
+        headers=manager_headers,
+        params={"format": "mail-letter"},
+    )
+
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/pdf"
+    assert "mail-letter" in response.headers["content-disposition"]
+    assert response.content.startswith(b"%PDF")
+
+
+def test_export_account_dispute_letter_mail_label_pdf(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    create = api_client.post(
+        "/api/v1/accounts",
+        headers=manager_headers,
+        json=sample_account_payload(sample_case_id),
+    )
+    account_id = create.json()["id"]
+
+    created = api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-draft/letters",
+        headers=manager_headers,
+    )
+    letter_id = created.json()["id"]
+
+    response = api_client.get(
+        f"/api/v1/accounts/{account_id}/dispute-letters/{letter_id}/export",
+        headers=manager_headers,
+        params={"format": "mail-label"},
+    )
+
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/pdf"
+    assert "mail-label" in response.headers["content-disposition"]
+    assert response.content.startswith(b"%PDF")
+
+
+def test_export_account_dispute_letter_mail_packet_pdf(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    create = api_client.post(
+        "/api/v1/accounts",
+        headers=manager_headers,
+        json=sample_account_payload(sample_case_id),
+    )
+    account_id = create.json()["id"]
+
+    created = api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-draft/letters",
+        headers=manager_headers,
+    )
+    letter_id = created.json()["id"]
+
+    response = api_client.get(
+        f"/api/v1/accounts/{account_id}/dispute-letters/{letter_id}/export",
+        headers=manager_headers,
+        params={"format": "mail-packet"},
+    )
+
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/pdf"
+    assert "mail-packet" in response.headers["content-disposition"]
     assert response.content.startswith(b"%PDF")
 
 

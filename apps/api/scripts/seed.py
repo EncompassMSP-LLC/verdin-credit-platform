@@ -2,11 +2,12 @@
 
 import asyncio
 import uuid
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
 
 from sqlalchemy import select
 
+import api.models  # noqa: F401 — register all ORM mappers
 from api.core.audit import apply_audit_on_create
 from api.core.constants import UserRole
 from api.core.security import hash_password
@@ -20,6 +21,7 @@ from api.modules.accounts.models import (
     PaymentStatus,
 )
 from api.modules.auth.models import Organization, User
+from api.modules.billing.models import OrganizationBillingAccount, SubscriptionStatus
 from api.modules.cases.models import Case, CasePriority, CaseStage, CaseStatus
 from api.modules.tasks.models import Task, TaskPriority, TaskStatus
 
@@ -35,7 +37,7 @@ async def seed() -> None:
 
         org = Organization(
             id=uuid.uuid4(),
-            name="Verdin Demo Organization",
+            name="Ultimate Credit Repair LLC",
             slug="verdin-demo",
             is_active=True,
         )
@@ -126,6 +128,17 @@ async def seed() -> None:
         )
         apply_audit_on_create(task, owner.id)
         session.add(task)
+
+        session.add(
+            OrganizationBillingAccount(
+                organization_id=org.id,
+                stripe_customer_id=f"cus_pilot_{uuid.uuid4().hex[:12]}",
+                stripe_subscription_id=f"sub_pilot_{uuid.uuid4().hex[:12]}",
+                subscription_status=SubscriptionStatus.ACTIVE,
+                price_id="price_pilot_demo_monthly",
+                current_period_end=datetime.now(UTC) + timedelta(days=25),
+            )
+        )
 
         await session.commit()
         print("Seed data created successfully.")

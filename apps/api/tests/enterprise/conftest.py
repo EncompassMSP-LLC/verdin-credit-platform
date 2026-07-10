@@ -272,7 +272,7 @@ def hris_lifecycle_sync_env(
 def enterprise_totp_env(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("ENABLE_ENTERPRISE", "true")
     monkeypatch.setenv("ENTERPRISE_MFA_MODE", "totp")
-    monkeypatch.setenv("ENTERPRISE_MFA_ISSUER", "Verdin Credit Platform")
+    monkeypatch.setenv("ENTERPRISE_MFA_ISSUER", "Ultimate Credit Repair LLC")
     get_feature_flags.cache_clear()
     get_enterprise_identity_settings.cache_clear()
     yield

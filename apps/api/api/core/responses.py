@@ -22,6 +22,11 @@ class HealthResponse(BaseSchema):
     environment: str
 
 
+class ReadinessResponse(BaseSchema):
+    status: str
+    checks: dict[str, str]
+
+
 class VersionResponse(BaseSchema):
     version: str
     name: str

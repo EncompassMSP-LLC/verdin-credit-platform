@@ -6,13 +6,15 @@ from api.modules.compliance.schemas import ComplianceCenterStatusResponse
 _COMPLIANCE_CAPABILITIES = [
     "consent_record_crud",
     "consent_withdrawal",
+    "consent_document_upload",
+    "portal_consent_signing",
+    "consent_enforcement_gates",
     "retention_policy_placeholders",
     "org_scoped_consent_history",
     "retention_enforcement_jobs",
 ]
 
 _DEFERRED_CAPABILITIES = [
-    "legal_sign_off_workflows",
     "automated_bureau_filing",
     "full_audit_export_suite",
 ]

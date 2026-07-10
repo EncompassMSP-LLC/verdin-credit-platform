@@ -19,6 +19,7 @@ from api.modules.accounts.models import (
     PaymentStatus,
 )
 from api.modules.accounts.schemas import AccountSortField, AccountSortOrder
+from api.modules.cases.models import Case
 
 
 @dataclass(frozen=True, slots=True)
@@ -26,6 +27,7 @@ class AccountListFilters:
     organization_id: uuid.UUID
     search: str | None = None
     case_id: uuid.UUID | None = None
+    client_id: uuid.UUID | None = None
     bureau: AccountBureau | None = None
     account_type: AccountType | None = None
     account_status: AccountStatus | None = None
@@ -42,6 +44,11 @@ class AccountListFilters:
 
 
 _SORT_COLUMNS: dict[AccountSortField, InstrumentedAttribute[Any]] = {
+    "creditor_name": Account.creditor_name,
+    "bureau": Account.bureau,
+    "account_type": Account.account_type,
+    "account_status": Account.account_status,
+    "dispute_status": Account.dispute_status,
     "balance": Account.balance,
     "date_reported": Account.date_reported,
     "risk_score": Account.risk_score,
@@ -61,6 +68,11 @@ class AccountRepository:
         )
 
     def _apply_list_filters(self, query: Any, filters: AccountListFilters) -> Any:
+        if filters.client_id is not None:
+            query = query.join(Case, Account.case_id == Case.id).where(
+                Case.client_id == filters.client_id,
+                Case.deleted_at.is_(None),
+            )
         if filters.case_id is not None:
             query = query.where(Account.case_id == filters.case_id)
         if filters.bureau is not None:

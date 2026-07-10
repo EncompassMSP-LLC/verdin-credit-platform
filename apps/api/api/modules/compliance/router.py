@@ -2,7 +2,8 @@
 
 import uuid
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, File, Form, Query, UploadFile, status
+from fastapi.responses import Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.core.pagination import PaginatedResponse
@@ -20,10 +21,14 @@ from api.modules.accounts.fully_autonomous_bureau_api_filing_router import (
 )
 from api.modules.auth.dependencies import get_current_user
 from api.modules.auth.models import User
+from api.modules.compliance.consent_templates.keys import ConsentDocumentTemplateKey
 from api.modules.compliance.dependencies import require_compliance_enforcement_enabled
 from api.modules.compliance.models import ConsentStatus, ConsentType, RetentionScope
 from api.modules.compliance.schemas import (
+    ClientConsentGapsResponse,
     ComplianceCenterStatusResponse,
+    ConsentDocumentTemplateResponse,
+    ConsentDocumentTemplateUpdate,
     ConsentRecordCreate,
     ConsentRecordListParams,
     ConsentRecordResponse,
@@ -113,6 +118,55 @@ async def list_consent_records(
     return await service.list_consents(current_user, params)
 
 
+@router.get("/consents/gaps", response_model=ClientConsentGapsResponse)
+async def get_client_consent_gaps(
+    client_id: uuid.UUID = Query(...),
+    current_user: User = Depends(get_current_user),
+    service: ComplianceService = Depends(get_compliance_service),
+) -> ClientConsentGapsResponse:
+    return await service.get_client_consent_gaps(current_user, client_id)
+
+
+@router.get("/consent-templates", response_model=list[ConsentDocumentTemplateResponse])
+async def list_consent_templates(
+    current_user: User = Depends(get_current_user),
+    service: ComplianceService = Depends(get_compliance_service),
+) -> list[ConsentDocumentTemplateResponse]:
+    return await service.list_consent_templates(current_user)
+
+
+@router.put(
+    "/consent-templates/{template_key}",
+    response_model=ConsentDocumentTemplateResponse,
+)
+async def update_consent_template(
+    template_key: ConsentDocumentTemplateKey,
+    body: ConsentDocumentTemplateUpdate,
+    current_user: User = Depends(get_current_user),
+    service: ComplianceService = Depends(get_compliance_service),
+) -> ConsentDocumentTemplateResponse:
+    return await service.update_consent_template(current_user, template_key, body)
+
+
+@router.get("/consent-templates/{template_key}/preview")
+async def preview_consent_template(
+    template_key: ConsentDocumentTemplateKey,
+    client_id: uuid.UUID = Query(...),
+    current_user: User = Depends(get_current_user),
+    service: ComplianceService = Depends(get_compliance_service),
+) -> Response:
+    pdf_bytes, filename = await service.preview_consent_template_pdf(
+        current_user,
+        template_key=template_key,
+        client_id=client_id,
+    )
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'inline; filename="{filename}"'},
+    )
+
+
 @router.post("/consents", response_model=ConsentRecordResponse, status_code=status.HTTP_201_CREATED)
 async def create_consent_record(
     body: ConsentRecordCreate,
@@ -138,6 +192,34 @@ async def withdraw_consent_record(
     service: ComplianceService = Depends(get_compliance_service),
 ) -> ConsentRecordResponse:
     return await service.withdraw_consent(current_user, consent_id)
+
+
+@router.post(
+    "/consents/upload",
+    response_model=ConsentRecordResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def upload_signed_consent_record(
+    client_id: uuid.UUID = Form(...),
+    case_id: uuid.UUID = Form(...),
+    consent_type: ConsentType = Form(...),
+    file: UploadFile = File(...),
+    signer_name: str | None = Form(None),
+    notes: str | None = Form(None),
+    document_template_key: str | None = Form(None),
+    current_user: User = Depends(get_current_user),
+    service: ComplianceService = Depends(get_compliance_service),
+) -> ConsentRecordResponse:
+    return await service.upload_signed_consent(
+        current_user,
+        client_id=client_id,
+        case_id=case_id,
+        consent_type=consent_type,
+        file=file,
+        signer_name=signer_name,
+        notes=notes,
+        document_template_key=document_template_key,
+    )
 
 
 @router.get("/retention-policies", response_model=PaginatedResponse[RetentionPolicyResponse])

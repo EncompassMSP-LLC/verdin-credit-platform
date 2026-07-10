@@ -60,3 +60,10 @@ class DocumentRepositoryProtocol(Protocol):
         before_document_id: uuid.UUID,
         before_parsed_at: datetime,
     ) -> DocumentParsedCreditReport | None: ...
+
+    async def list_case_parsed_credit_reports(
+        self,
+        *,
+        organization_id: uuid.UUID,
+        case_id: uuid.UUID,
+    ) -> list[DocumentParsedCreditReport]: ...

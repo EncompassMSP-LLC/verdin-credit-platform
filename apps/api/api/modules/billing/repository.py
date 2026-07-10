@@ -43,6 +43,14 @@ class BillingRepository:
         await self._session.refresh(account)
         return account
 
+    async def delete_billing_account(self, organization_id: uuid.UUID) -> bool:
+        account = await self.get_billing_account(organization_id)
+        if account is None:
+            return False
+        await self._session.delete(account)
+        await self._session.flush()
+        return True
+
     async def get_webhook_event(self, stripe_event_id: str) -> BillingWebhookEvent | None:
         result = await self._session.execute(
             select(BillingWebhookEvent).where(

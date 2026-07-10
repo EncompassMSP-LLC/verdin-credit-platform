@@ -29,6 +29,7 @@ from api.modules.billing.invoicing_schemas import (
     BillingInvoicingStatusResponse,
 )
 from api.modules.billing.schemas import (
+    BillingDisconnectResponse,
     BillingSetupResponse,
     BillingStatusResponse,
     BillingSubscribeRequest,
@@ -76,6 +77,16 @@ async def setup_organization_billing(
     service: BillingService = Depends(get_billing_service),
 ) -> BillingSetupResponse:
     return await service.setup_billing(current_user)
+
+
+@router.post("/disconnect-pilot", response_model=BillingDisconnectResponse)
+async def disconnect_pilot_billing(
+    _: None = Depends(require_billing_enabled),
+    __: None = Depends(require_org_admin_enabled),
+    current_user: User = Depends(get_current_user),
+    service: BillingService = Depends(get_billing_service),
+) -> BillingDisconnectResponse:
+    return await service.disconnect_pilot_billing(current_user)
 
 
 @router.post("/subscribe", response_model=BillingSubscribeResponse)

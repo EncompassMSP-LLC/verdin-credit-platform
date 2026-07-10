@@ -92,6 +92,7 @@ export interface ListAccountsParams {
   page_size?: number;
   search?: string;
   case_id?: string;
+  client_id?: string;
   bureau?: AccountBureau;
   account_type?: AccountType;
   account_status?: AccountStatus;
@@ -116,6 +117,16 @@ export interface NextActionItem {
   recommended_action: string;
 }
 
+export interface CrossBureauIntelligenceSummary {
+  available: boolean;
+  reports_compared: string[];
+  actionable_discrepancies: number;
+  dispute_ready_discrepancies: number;
+  investigation_needed: number;
+  consistent_tradelines: number;
+  total_tradelines: number;
+}
+
 export interface AccountIntelligenceSummary {
   total_accounts: number;
   total_balance: string;
@@ -131,6 +142,19 @@ export interface AccountIntelligenceSummary {
   highest_balance_accounts: Account[];
   highest_risk_accounts: Account[];
   next_action_queue: NextActionItem[];
+  scoring_model: 'heuristic' | 'calibrated';
+  cross_bureau: CrossBureauIntelligenceSummary | null;
+}
+
+export interface AccountLlmRecommendation {
+  account_id: string;
+  recommendation: string;
+  provider: string;
+  model: string;
+  prompt_hash: string;
+  pii_scrubbed: boolean;
+  generated_at: string;
+  cross_bureau_informed: boolean;
 }
 
 export interface DisputeReasonSuggestion {
@@ -261,7 +285,8 @@ export async function getAccountDisputeLetter(
   return request<DisputeLetter>(apiPath(`/accounts/${accountId}/dispute-letters/${letterId}`));
 }
 
-export type DisputeLetterExportFormat = 'text' | 'pdf';
+export type DisputeLetterExportFormat =
+  'text' | 'pdf' | 'mail-letter' | 'mail-label' | 'mail-packet' | 'report-excerpt';
 
 function parseContentDispositionFilename(header: string | null, fallback: string): string {
   if (!header) return fallback;
@@ -295,7 +320,16 @@ export async function downloadAccountDisputeLetterExport(
     );
   }
 
-  const fallback = `dispute-letter.${format === 'text' ? 'txt' : 'pdf'}`;
+  const fallback =
+    format === 'text'
+      ? 'dispute-letter.txt'
+      : format === 'mail-packet'
+        ? 'mail-packet.pdf'
+        : format === 'mail-label'
+          ? 'dispute-mail-label.pdf'
+          : format === 'mail-letter'
+            ? 'dispute-mail-letter.pdf'
+            : 'dispute-letter.pdf';
   const filename = parseContentDispositionFilename(
     response.headers.get('Content-Disposition'),
     fallback,
@@ -439,6 +473,15 @@ export async function listCaseAccounts(
   );
 }
 
+export async function listClientAccounts(
+  clientId: string,
+  params: ListAccountsParams = {},
+): Promise<PaginatedResponse<Account>> {
+  return request<PaginatedResponse<Account>>(
+    `${apiPath(`/clients/${clientId}/accounts`)}${buildQuery(params as Record<string, unknown>)}`,
+  );
+}
+
 export async function getAccountIntelligenceSummary(
   caseId?: string,
 ): Promise<AccountIntelligenceSummary> {
@@ -446,4 +489,12 @@ export async function getAccountIntelligenceSummary(
   return request<AccountIntelligenceSummary>(
     `${apiPath('/accounts/intelligence/summary')}${query}`,
   );
+}
+
+export async function generateAccountLlmRecommendation(
+  accountId: string,
+): Promise<AccountLlmRecommendation> {
+  return request<AccountLlmRecommendation>(apiPath(`/accounts/${accountId}/llm-recommendation`), {
+    method: 'POST',
+  });
 }

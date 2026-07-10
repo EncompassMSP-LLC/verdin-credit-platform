@@ -18,6 +18,7 @@ class DocumentType(StrEnum):
     BUREAU_RESPONSE = "bureau_response"
     IDENTITY_DOCUMENT = "identity_document"
     PROOF_OF_ADDRESS = "proof_of_address"
+    SIGNED_CONSENT = "signed_consent"
     BANKRUPTCY = "bankruptcy"
     COURT_RECORD = "court_record"
     MEDICAL_COLLECTION = "medical_collection"

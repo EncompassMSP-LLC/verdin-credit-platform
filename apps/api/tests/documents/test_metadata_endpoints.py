@@ -74,6 +74,23 @@ def test_get_metadata_after_extract(
     assert response.json()["account_number_masked"] == "****1234"
 
 
+def test_get_document_includes_metadata_status_after_extract(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    document_with_ocr: str,
+) -> None:
+    api_client.post(
+        f"/api/v1/documents/{document_with_ocr}/metadata/extract",
+        headers=manager_headers,
+    )
+    response = api_client.get(
+        f"/api/v1/documents/{document_with_ocr}",
+        headers=manager_headers,
+    )
+    assert response.status_code == 200, response.text
+    assert response.json()["metadata_status"] == "extracted"
+
+
 def test_get_parsed_credit_report_not_found(
     api_client: TestClient,
     manager_headers: dict[str, str],

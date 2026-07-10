@@ -21,7 +21,7 @@ class Settings(BaseSettings):
 
     app_env: Literal["development", "staging", "production", "test"] = "development"
     app_version: str = "4.2.0"
-    app_name: str = "Verdin Credit Platform API"
+    app_name: str = "Ultimate Credit Repair LLC API"
     debug: bool = False
 
     secret_key: str = Field(
@@ -55,6 +55,12 @@ class Settings(BaseSettings):
     document_max_upload_bytes: int = 25 * 1024 * 1024
 
     cors_origins: str = "http://localhost:5173,http://localhost:3000"
+    public_app_url: str = "http://localhost:8080"
+
+    dispute_return_name: str = "Ultimate Credit Repair LLC"
+    dispute_return_address_line1: str = ""
+    dispute_return_address_line2: str = ""
+    dispute_return_address_line3: str = ""
 
     @field_validator("cors_origins", mode="before")
     @classmethod

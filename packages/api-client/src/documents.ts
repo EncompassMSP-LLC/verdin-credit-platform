@@ -180,6 +180,25 @@ export interface DocumentParsedCreditReportAccountCandidates {
   candidates: ParsedReportAccountCandidate[];
 }
 
+export interface ImportParsedReportAccountsRequest {
+  source_indices?: number[];
+  skip_existing?: boolean;
+}
+
+export interface ImportedParsedReportAccountItem {
+  source_index: number;
+  account_id: string;
+  created: boolean;
+  creditor_name: string;
+}
+
+export interface ImportParsedReportAccountsResponse {
+  document_id: string;
+  case_id: string;
+  imported: ImportedParsedReportAccountItem[];
+  skipped_indices: number[];
+}
+
 export interface DocumentEntityResolution {
   id: string;
   document_id: string;
@@ -379,6 +398,19 @@ export async function createDocumentParsedCreditReportReviewTask(
   return request<Task>(apiPath(`/documents/${documentId}/parsed-credit-report/review-task`), {
     method: 'POST',
   });
+}
+
+export async function importParsedCreditReportAccounts(
+  documentId: string,
+  body: ImportParsedReportAccountsRequest = {},
+): Promise<ImportParsedReportAccountsResponse> {
+  return request<ImportParsedReportAccountsResponse>(
+    apiPath(`/documents/${documentId}/parsed-credit-report/import-accounts`),
+    {
+      method: 'POST',
+      body: JSON.stringify(body),
+    },
+  );
 }
 
 export async function extractDocumentMetadata(documentId: string): Promise<DocumentMetadata> {

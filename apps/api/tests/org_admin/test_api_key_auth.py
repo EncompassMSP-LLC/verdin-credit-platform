@@ -9,6 +9,7 @@ from api.core.audit import apply_audit_on_create
 from api.modules.auth.models import Organization, User
 from api.modules.org_admin.models import ApiKeyScope, OrganizationApiKey
 from api.modules.org_admin.repository import OrgAdminRepository
+from tests.helpers.client_payload import sample_client_payload
 
 
 @pytest.fixture
@@ -77,7 +78,7 @@ def test_api_key_authenticates_operations_reporting(
     create_client = api_client.post(
         "/api/v1/clients",
         headers=admin_headers,
-        json={"display_name": "API key reporting client"},
+        json=sample_client_payload(display_name="API key reporting client"),
     )
     assert create_client.status_code == 201, create_client.text
 

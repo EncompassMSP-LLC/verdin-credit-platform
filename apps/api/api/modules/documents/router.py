@@ -45,6 +45,8 @@ from api.modules.documents.schemas import (
     DocumentSortOrder,
     DocumentUpdate,
     DocumentVersionResponse,
+    ImportParsedReportAccountsRequest,
+    ImportParsedReportAccountsResponse,
 )
 from api.modules.documents.service import DocumentService
 from api.modules.documents.storage import DocumentStorage, get_document_storage
@@ -253,6 +255,19 @@ async def get_document_parsed_credit_report_account_candidates(
     service: DocumentService = Depends(get_document_service),
 ) -> DocumentParsedCreditReportAccountCandidatesResponse:
     return await service.get_parsed_credit_report_account_candidates(current_user, document_id)
+
+
+@router.post(
+    "/{document_id}/parsed-credit-report/import-accounts",
+    response_model=ImportParsedReportAccountsResponse,
+)
+async def import_document_parsed_credit_report_accounts(
+    document_id: uuid.UUID,
+    body: ImportParsedReportAccountsRequest,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> ImportParsedReportAccountsResponse:
+    return await service.import_parsed_credit_report_accounts(current_user, document_id, body)
 
 
 @router.post(

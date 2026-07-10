@@ -7,6 +7,7 @@ from api.modules.accounts.intelligence import (
     CRITICAL_RISK_THRESHOLD,
     apply_account_intelligence,
     calculate_risk_score,
+    recommend_next_action,
 )
 from api.modules.accounts.models import (
     Account,
@@ -93,3 +94,16 @@ def test_next_eligible_dispute_date_after_last_dispute() -> None:
 
 def test_critical_risk_threshold() -> None:
     assert CRITICAL_RISK_THRESHOLD == 75
+
+
+def test_apply_account_intelligence_refreshes_recommended_action() -> None:
+    import uuid
+
+    account = _make_account(
+        organization_id=uuid.uuid4(),
+        case_id=uuid.uuid4(),
+        dispute_status=DisputeStatus.EVIDENCE_NEEDED,
+        ai_recommended_next_action="Stale recommendation",
+    )
+    apply_account_intelligence(account)
+    assert account.ai_recommended_next_action == recommend_next_action(account)

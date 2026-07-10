@@ -306,3 +306,96 @@ class DocumentParsedCreditReportAccountCandidatesResponse(BaseSchema):
     document_id: uuid.UUID
     bureau: str
     candidates: list[ParsedReportAccountCandidate]
+
+
+class ImportParsedReportAccountsRequest(BaseSchema):
+    source_indices: list[int] | None = None
+    skip_existing: bool = True
+
+
+class ImportedParsedReportAccountItem(BaseSchema):
+    source_index: int
+    account_id: uuid.UUID
+    created: bool
+    creditor_name: str
+
+
+class ImportParsedReportAccountsResponse(BaseSchema):
+    document_id: uuid.UUID
+    case_id: uuid.UUID
+    imported: list[ImportedParsedReportAccountItem]
+    skipped_indices: list[int]
+
+
+class BureauTradelineSnapshotResponse(BaseSchema):
+    bureau: str
+    document_id: uuid.UUID
+    creditor_name: str
+    account_number_masked: str | None = None
+    balance: float | None = None
+    payment_status: str | None = None
+    account_type: str | None = None
+
+
+class CrossBureauPossibleCauseResponse(BaseSchema):
+    label: str
+    likelihood: Literal["most_likely", "possible", "less_likely"]
+
+
+class CrossBureauDiscrepancyResponse(BaseSchema):
+    match_key: str
+    creditor_name: str
+    account_number_masked: str | None = None
+    discrepancy_types: list[str]
+    classification: str
+    classification_label: str
+    confidence_score: int
+    workflow_tier: Literal["none", "investigation", "dispute"]
+    bureaus_reporting: list[str]
+    bureaus_missing: list[str]
+    bureau_snapshots: list[BureauTradelineSnapshotResponse]
+    possible_causes: list[CrossBureauPossibleCauseResponse]
+    recommended_next_step: str
+    recommended_action: str
+    requires_investigation: bool
+    dispute_ready: bool
+    is_actionable: bool
+
+
+class CrossBureauComparisonSummary(BaseSchema):
+    total_tradelines: int
+    actionable: int
+    investigation_needed: int
+    dispute_ready: int
+    consistent: int
+    missing_from_bureau: int
+    balance_mismatch: int
+    status_mismatch: int
+
+
+class CaseCreditReportDiscrepanciesResponse(BaseSchema):
+    case_id: uuid.UUID
+    reports_compared: list[str]
+    document_ids_by_bureau: dict[str, uuid.UUID]
+    summary: CrossBureauComparisonSummary
+    discrepancies: list[CrossBureauDiscrepancyResponse]
+
+
+class PrepareCreditReportDisputesRequest(BaseSchema):
+    match_keys: list[str] | None = None
+    recipient_type: Literal["credit_bureau", "furnisher"] = "credit_bureau"
+
+
+class PreparedCreditReportDisputeItem(BaseSchema):
+    match_key: str
+    account_id: uuid.UUID
+    dispute_letter_id: uuid.UUID | None = None
+    created_account: bool
+    creditor_name: str
+    recommended_action: str
+
+
+class PrepareCreditReportDisputesResponse(BaseSchema):
+    case_id: uuid.UUID
+    prepared: list[PreparedCreditReportDisputeItem]
+    skipped: list[str]

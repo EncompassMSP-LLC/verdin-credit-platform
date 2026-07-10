@@ -3,9 +3,10 @@
 import uuid
 from datetime import datetime
 from enum import StrEnum
+from typing import Any
 
 from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Integer, String, Text
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from api.core.audit import AuditMixin, SoftDeleteMixin, TimestampMixin
@@ -23,6 +24,18 @@ class ConsentType(StrEnum):
 class ConsentStatus(StrEnum):
     GRANTED = "granted"
     WITHDRAWN = "withdrawn"
+
+
+class ConsentSignatureMethod(StrEnum):
+    STAFF_UPLOAD = "staff_upload"
+    PORTAL_ATTESTATION = "portal_attestation"
+    PORTAL_SIGNATURE_IMAGE = "portal_signature_image"
+    PORTAL_GENERATED_DOCUMENT = "portal_generated_document"
+
+
+class ConsentTemplateReviewStatus(StrEnum):
+    DRAFT = "draft"
+    APPROVED = "approved"
 
 
 class RetentionScope(StrEnum):
@@ -60,6 +73,30 @@ class ConsentRecord(Base, TimestampMixin, AuditMixin):
     withdrawn_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     source: Mapped[str] = mapped_column(String(50), nullable=False, default="staff")
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    document_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("documents.id"), nullable=True, index=True
+    )
+    signature_method: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    signed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    signer_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    signature_metadata: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
+    document_template_key: Mapped[str | None] = mapped_column(String(50), nullable=True, index=True)
+
+
+class ConsentDocumentTemplate(Base, TimestampMixin, AuditMixin):
+    __tablename__ = "consent_document_templates"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    organization_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("organizations.id"), nullable=False, index=True
+    )
+    template_key: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    body_text: Mapped[str] = mapped_column(Text, nullable=False)
+    merge_field_defaults: Mapped[dict[str, str] | None] = mapped_column(JSONB, nullable=True)
+    legal_review_status: Mapped[str] = mapped_column(
+        String(20), nullable=False, default=ConsentTemplateReviewStatus.DRAFT.value
+    )
 
 
 class RetentionPolicy(Base, TimestampMixin, SoftDeleteMixin, AuditMixin):
