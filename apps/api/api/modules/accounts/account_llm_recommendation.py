@@ -240,7 +240,7 @@ class AccountLlmRecommendationService:
                 detail=f"LLM provider request failed: {exc}",
             ) from exc
 
-        recommendation = completion.text.strip()
+        recommendation = completion.content.strip()
         account.ai_recommended_next_action = recommendation
         updated = await self._accounts.update(account)
 

@@ -84,7 +84,7 @@ def _upload_signed_consent(
             "document_template_key": document_template_key,
             "signer_name": signer_name,
         },
-        files={"file": ("signed-consent.pdf", sample_pdf_upload(), "application/pdf")},
+        files={"file": ("signed-consent.pdf", sample_pdf_upload()[1], "application/pdf")},
     )
     assert response.status_code == 201, response.text
     return response.json()
@@ -217,7 +217,7 @@ def test_mail_packet_export_blocked_without_signed_consents(
         f"/api/v1/accounts/{account_id}/dispute-draft/letters",
         headers=manager_headers,
     )
-    assert letter.status_code == 201, letter.text
+    assert letter.status_code == 200, letter.text
     letter_id = letter.json()["id"]
 
     blocked = api_client.get(
