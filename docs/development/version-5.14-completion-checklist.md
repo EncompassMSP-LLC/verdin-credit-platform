@@ -21,7 +21,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | 2     | Live unredacted benchmark blob export | Reporting  | ✅     |
 | 3     | Unsupervised autonomous filing loops  | Disputes   | ✅     |
 | 4     | Public OAuth marketplace listings     | Platform   | ✅     |
-| 5     | Native mobile app store distribution  | Identity   | —      |
+| 5     | Native mobile app store distribution  | Identity   | ✅     |
 | 6     | Capability matrix 5.14 sign-off       | Governance | —      |
 
 Slice 2 requires approved unredacted export runs and secure storage config. Slice 3 requires approved fully autonomous bureau API filing runs. Slice 4 requires approved OAuth marketplace publishing runs. Slice 5 requires approved native mobile passkey client runs.

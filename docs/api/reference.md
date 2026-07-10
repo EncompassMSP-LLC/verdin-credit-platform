@@ -576,6 +576,17 @@ SAML passwordless enrollment scaffold requires `ENABLE_SAML_PASSWORDLESS_ENROLLM
 | POST | `/enterprise/federation/native-mobile-passkey-client/readiness-runs/{id}/start` | admin | Start native client scaffold from approved passkey readiness run |
 | POST | `/enterprise/federation/native-mobile-passkey-client/runs/{run_id}/approve` | admin | Approve native mobile passkey client scaffold |
 
+### Native mobile app store distribution audit (v5.14)
+
+| Method | Path                                                                                                    | Role      | Description                                                             |
+| ------ | ------------------------------------------------------------------------------------------------------- | --------- | ----------------------------------------------------------------------- |
+| GET    | `/enterprise/federation/native-mobile-app-store-distribution/status`                                    | read_only | App store distribution readiness and blockers                           |
+| GET    | `/enterprise/federation/native-mobile-app-store-distribution/runs`                                      | read_only | Paginated native mobile app store distribution audit log                |
+| POST   | `/enterprise/federation/native-mobile-app-store-distribution/passkey-client-runs/{client_run_id}/start` | admin     | Start distribution readiness from an approved native passkey client run |
+| POST   | `/enterprise/federation/native-mobile-app-store-distribution/runs/{run_id}/approve`                     | admin     | Approve distribution readiness scaffold (`ready`)                       |
+
+Requires `ENABLE_NATIVE_MOBILE_APP_STORE_DISTRIBUTION=true` (and native mobile passkey client readiness). Audit only — no App Store / Play Store release operations.
+
 Endpoints return `404` when the corresponding feature flag is false.
 
 ## Organization admin

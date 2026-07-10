@@ -110,6 +110,10 @@ from api.modules.enterprise.mobile_passkey_readiness_models import (
     MobilePasskeyReadinessRunStatus,
 )
 from api.modules.enterprise.models import UserSsoEnrollment, UserTotpEnrollment
+from api.modules.enterprise.native_mobile_app_store_distribution_models import (
+    NativeMobileAppStoreDistributionRun,
+    NativeMobileAppStoreDistributionRunStatus,
+)
 from api.modules.enterprise.native_mobile_passkey_client_models import (
     NativeMobilePasskeyClientRun,
     NativeMobilePasskeyClientRunStatus,
@@ -331,6 +335,8 @@ __all__ = [
     "MobilePasskeyReadinessRunStatus",
     "NativeMobilePasskeyClientRun",
     "NativeMobilePasskeyClientRunStatus",
+    "NativeMobileAppStoreDistributionRun",
+    "NativeMobileAppStoreDistributionRunStatus",
     "BulkIdpProvisioningRun",
     "BulkIdpProvisioningRunStatus",
     "SamlCertificateRotationRun",

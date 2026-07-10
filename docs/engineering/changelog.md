@@ -1314,3 +1314,15 @@ org-admin status/list/submit-from-approved-publishing/approve endpoints with ter
 readiness scaffold while deferring unreviewed third-party auto-approve.
 
 **Follow-up work:** Slice 5 — native mobile app store distribution scaffold.
+
+### Decision: Native mobile app store distribution scaffold (Version 5.14 slice 5)
+
+**Decision:** Ship admin-gated native mobile app store distribution readiness audit
+(`native_mobile_app_store_distribution_runs` migration `080_native_mobile_app_store`),
+federation status/list/submit-from-approved-passkey-client/approve endpoints with terminal status
+`ready`, and `@verdin/api-client` support behind `ENABLE_NATIVE_MOBILE_APP_STORE_DISTRIBUTION`.
+
+**Reason:** 5.14 identity epic extends 5.13 native passkey client audit with app store distribution
+readiness while deferring production App Store / Play Store release operations.
+
+**Follow-up work:** Slice 6 — Version 5.14 capability matrix sign-off and `v5.14.0` tag.
