@@ -105,11 +105,20 @@ def run_dispute_letter_lifecycle(
     assert sent["status"] == "sent"
     assert sent["sent_at"] is not None
 
-    account_sent = expect_ok(
-        http.get(f"/api/v1/accounts/{account_id}", headers=headers),
-        label=f"{label}_account_after_send",
-        artifacts=artifacts,
+    # Poll: live ASGI can return the send response before get_db commits.
+    account_sent_response = poll_until(
+        lambda: http.get(f"/api/v1/accounts/{account_id}", headers=headers),
+        lambda response: (
+            response.status_code == 200
+            and response.json().get("dispute_status") == "dispute_sent"
+            and response.json().get("cra_dispute") is True
+        ),
+        description="account dispute_status == dispute_sent after letter send",
+        timeout=15.0,
+        interval=0.25,
     )
+    account_sent = account_sent_response.json()
+    artifacts.record(f"{label}_account_after_send", account_sent)
     assert account_sent["dispute_status"] == "dispute_sent"
     assert account_sent["cra_dispute"] is True
 

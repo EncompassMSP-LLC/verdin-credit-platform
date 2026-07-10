@@ -55,6 +55,7 @@ Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (
 | **5.10**  | Production Automation (gated)   | Released    | Arbitrary execution, bureau re-filing, charge retry, SAML passwordless                    |
 | **5.11**  | Production Execution (gated)    | Released    | Unsupervised re-filing, live charge retry, HRIS passwordless UI, bulk IdP provisioning    |
 | **5.12**  | Expansion Surfaces (gated)      | Released    | Bureau live API scaffold, public OAuth portal, cross-org benchmarks, passkeys (`v5.12.0`) |
+| **5.13**  | Native Mobile Depth (gated)     | Released    | Native passkey client, OAuth marketplace, autonomous API filing, export audit (`v5.13.0`) |
 
 ### Sprint milestones
 
@@ -354,6 +355,21 @@ Scope and checklist: [`docs/governance/version-5.12-scope.md`](../governance/ver
 **Tag:** `v5.12.0`
 
 Release notes: [`docs/release-notes/v5.12.0.md`](../release-notes/v5.12.0.md)
+
+### Version 5.13 — Native Mobile Depth (shipped)
+
+Scope and checklist: [`docs/governance/version-5.13-scope.md`](../governance/version-5.13-scope.md) · [`docs/development/version-5.13-completion-checklist.md`](../development/version-5.13-completion-checklist.md)
+
+| Epic | Theme                                 | 5.13 outcome | Notes                                                          |
+| ---- | ------------------------------------- | ------------ | -------------------------------------------------------------- |
+| 1    | Native mobile passkey client          | Partial ✅   | Operator-gated native passkey client enrollment audit scaffold |
+| 2    | OAuth marketplace publishing          | Partial ✅   | Admin-gated marketplace listing audit from approved OAuth apps |
+| 3    | Fully autonomous bureau API filing    | Partial ✅   | Admin-gated fully autonomous API filing audit scaffold         |
+| 4    | Unredacted cross-org benchmark export | Partial ✅   | Admin-gated export audit (no live blob / raw tenant PII)       |
+
+**Tag:** `v5.13.0`
+
+Release notes: [`docs/release-notes/v5.13.0.md`](../release-notes/v5.13.0.md)
 
 ## Sprint → version mapping
 
