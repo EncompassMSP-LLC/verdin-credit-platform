@@ -122,6 +122,12 @@ class CrossOrgBenchmarkRepository:
             organizations_evaluated=org_count,
         )
 
+    async def get_run_by_id(self, run_id: uuid.UUID) -> CrossOrgBenchmarkRun | None:
+        result = await self._session.execute(
+            select(CrossOrgBenchmarkRun).where(CrossOrgBenchmarkRun.id == run_id)
+        )
+        return result.scalar_one_or_none()
+
     async def create_run(
         self,
         *,

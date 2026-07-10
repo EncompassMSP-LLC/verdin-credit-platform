@@ -28,6 +28,7 @@ class FeatureFlag(StrEnum):
     ENABLE_PUBLIC_OAUTH_DEVELOPER_PORTAL = "ENABLE_PUBLIC_OAUTH_DEVELOPER_PORTAL"
     ENABLE_OAUTH_MARKETPLACE_PUBLISHING = "ENABLE_OAUTH_MARKETPLACE_PUBLISHING"
     ENABLE_CROSS_ORG_BENCHMARK_ANALYTICS = "ENABLE_CROSS_ORG_BENCHMARK_ANALYTICS"
+    ENABLE_UNREDACTED_CROSS_ORG_BENCHMARK_EXPORT = "ENABLE_UNREDACTED_CROSS_ORG_BENCHMARK_EXPORT"
     ENABLE_BATCH_LLM_SUMMARIES = "ENABLE_BATCH_LLM_SUMMARIES"
     ENABLE_BILLING_INVOICING = "ENABLE_BILLING_INVOICING"
     ENABLE_BILLING_INVOICE_COLLECTION = "ENABLE_BILLING_INVOICE_COLLECTION"
@@ -148,6 +149,10 @@ class FeatureFlags(BaseSettings):
     enable_cross_org_benchmark_analytics: bool = Field(
         default=False,
         description="Enable governance-gated cross-org benchmark analytics scaffold",
+    )
+    enable_unredacted_cross_org_benchmark_export: bool = Field(
+        default=False,
+        description="Enable admin-gated unredacted cross-org benchmark export audit scaffold",
     )
     enable_batch_llm_summaries: bool = Field(
         default=False,
@@ -324,6 +329,9 @@ _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
     FeatureFlag.ENABLE_PUBLIC_OAUTH_DEVELOPER_PORTAL: "enable_public_oauth_developer_portal",
     FeatureFlag.ENABLE_OAUTH_MARKETPLACE_PUBLISHING: "enable_oauth_marketplace_publishing",
     FeatureFlag.ENABLE_CROSS_ORG_BENCHMARK_ANALYTICS: "enable_cross_org_benchmark_analytics",
+    FeatureFlag.ENABLE_UNREDACTED_CROSS_ORG_BENCHMARK_EXPORT: (
+        "enable_unredacted_cross_org_benchmark_export"
+    ),
     FeatureFlag.ENABLE_BATCH_LLM_SUMMARIES: "enable_batch_llm_summaries",
     FeatureFlag.ENABLE_BILLING_INVOICING: "enable_billing_invoicing",
     FeatureFlag.ENABLE_BILLING_INVOICE_COLLECTION: "enable_billing_invoice_collection",

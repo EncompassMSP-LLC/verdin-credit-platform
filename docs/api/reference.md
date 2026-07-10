@@ -830,6 +830,17 @@ cross-org benchmark comparisons and refresh benchmark audit runs.
 
 Cross-org benchmark responses remain aggregate-only and do not expose raw tenant exports.
 
+When `ENABLE_UNREDACTED_CROSS_ORG_BENCHMARK_EXPORT=true` (requires cross-org benchmark analytics),
+admins can submit and approve unredacted cross-org benchmark export audit runs. No CSV/JSON/blob
+export is produced; responses record operator intent and approval only.
+
+| Method | Path                                                                          | Min role  | Description                                               |
+| ------ | ----------------------------------------------------------------------------- | --------- | --------------------------------------------------------- |
+| GET    | `/reporting/unredacted-cross-org-benchmark-exports/status`                    | —         | Export readiness and blockers                             |
+| GET    | `/reporting/unredacted-cross-org-benchmark-exports/runs`                      | read_only | Paginated export run audit                                |
+| POST   | `/reporting/unredacted-cross-org-benchmark-exports/benchmark-runs/{id}/start` | admin     | Submit export run from completed benchmark refresh        |
+| POST   | `/reporting/unredacted-cross-org-benchmark-exports/runs/{run_id}/approve`     | admin     | Approve pending export run (owner/admin only for approve) |
+
 Score-improvement trends remain deferred to 5.4+.
 
 ## Dashboard
