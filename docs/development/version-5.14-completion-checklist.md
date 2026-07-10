@@ -6,10 +6,10 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 
 ## Exit criteria for "5.14 done"
 
-- [ ] All four epics below are **✅ or explicitly deferred** with docs updated — see [`version-5.14-scope.md`](../governance/version-5.14-scope.md)
-- [ ] Capability matrix updated for 5.14 slices
-- [ ] Live unredacted blob export, unsupervised filing loops, public marketplace listings, and app store distribution paths verified behind feature flags
-- [ ] `docs/release-notes/v5.14.0.md` + tag `v5.14.0`
+- [x] All four epics below are **✅ or explicitly deferred** with docs updated — see [`version-5.14-scope.md`](../governance/version-5.14-scope.md)
+- [x] Capability matrix updated for 5.14 slices
+- [x] Live unredacted blob export, unsupervised filing loops, public marketplace listings, and app store distribution paths verified behind feature flags
+- [x] `docs/release-notes/v5.14.0.md` + tag `v5.14.0`
 
 ---
 
@@ -22,7 +22,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | 3     | Unsupervised autonomous filing loops  | Disputes   | ✅     |
 | 4     | Public OAuth marketplace listings     | Platform   | ✅     |
 | 5     | Native mobile app store distribution  | Identity   | ✅     |
-| 6     | Capability matrix 5.14 sign-off       | Governance | —      |
+| 6     | Capability matrix 5.14 sign-off       | Governance | ✅     |
 
 Slice 2 requires approved unredacted export runs and secure storage config. Slice 3 requires approved fully autonomous bureau API filing runs. Slice 4 requires approved OAuth marketplace publishing runs. Slice 5 requires approved native mobile passkey client runs.
 

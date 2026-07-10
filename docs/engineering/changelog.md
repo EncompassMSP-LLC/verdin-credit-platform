@@ -1326,3 +1326,15 @@ federation status/list/submit-from-approved-passkey-client/approve endpoints wit
 readiness while deferring production App Store / Play Store release operations.
 
 **Follow-up work:** Slice 6 — Version 5.14 capability matrix sign-off and `v5.14.0` tag.
+
+### Decision: Version 5.14 epic sign-off
+
+**Decision:** Mark all four Version 5.14 epics **Partial ✅** in `version-5.14-scope.md`, update
+capability matrix and roadmap to Released, complete checklist exit criteria, and publish
+`docs/release-notes/v5.14.0.md`.
+
+**Reason:** v5.14.0 completes production distribution depth scaffolds; unrestricted PII dumps,
+fully unsupervised live bureau loops, marketplace auto-approve, and production store release ops
+remain deferred to 5.15+.
+
+**Follow-up work:** Stop at `v5.14.0` tagged — do not start Version 5.15 without explicit kickoff.

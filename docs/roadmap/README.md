@@ -34,29 +34,29 @@ Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (
 
 ## Version milestones
 
-| Version   | Theme                           | Status      | Focus                                                                                     |
-| --------- | ------------------------------- | ----------- | ----------------------------------------------------------------------------------------- |
-| **4.2**   | Platform Foundation             | **Shipped** | Monorepo, auth, RBAC, domain module pattern, worker scaffold, CI/CD                       |
-| **4.3.0** | Operational Core                | **Shipped** | Cases, accounts, documents, OCR, intelligence, timeline, tasks                            |
-| **4.3.1** | Operational Core Completion     | **Shipped** | Mission Control dashboard, governance refinements, release stabilization                  |
-| **4.5**   | Automation                      | **Shipped** | Import wizard, dispute lifecycle, workflow auto-tasks, rules AI (`v4.5.0`)                |
-| **4.8**   | Operations                      | **Shipped** | Client portal, notifications, LLM policy gates, reporting (`v4.8.0`)                      |
-| **5.0**   | Enterprise Edition              | **Shipped** | Compliance, SSO/MFA, LLM summaries, production email, portal expansion (`v5.0.0`)         |
-| **5.0+**  | Product Hardening               | **Shipped** | Pilot-ready staff + portal UI for 5.0 APIs                                                |
-| **5.1**   | Production Hardening            | **Shipped** | API keys, billing, IdP enrollment, enforcement, push, materialized reporting (`v5.1.0`)   |
-| **5.2**   | Deferred Production Surfaces    | **Shipped** | SMS, LLM document summaries, Web Push HTTP, revenue analytics (`v5.2.0`)                  |
-| **5.3**   | Enterprise Depth                | **Shipped** | Usage metering, SCIM, predictive analytics, API developer surfaces (`v5.3.0`)             |
-| **5.4**   | Production Operations           | **Shipped** | Invoicing/dunning, multi-IdP federation, marketing SMS, agent observability (`v5.4.0`)    |
-| **5.5**   | Production Automation           | **Shipped** | Invoice collection, SAML metadata, SMS delivery worker, agent execution scaffold          |
-| **5.6**   | Compliance-Reviewed Depth       | Released    | HRIS sync, SMS deliverability, LLM dispute augment, dispute filing prep                   |
-| **5.7**   | Autonomous Workflows (gated)    | Released    | Bureau submission, agent tool-calling, SAML cert rotation, Stripe invoice PDF             |
-| **5.8**   | Production Integrations (gated) | Released    | Supervised agent loops, bureau live API, Stripe tax, HRIS lifecycle sync (`v5.8.0`)       |
-| **5.9**   | Autonomous Production (gated)   | Released    | Unsupervised agent loops, bureau filing, live Stripe Tax, SAML rotation (`v5.9.0`)        |
-| **5.10**  | Production Automation (gated)   | Released    | Arbitrary execution, bureau re-filing, charge retry, SAML passwordless                    |
-| **5.11**  | Production Execution (gated)    | Released    | Unsupervised re-filing, live charge retry, HRIS passwordless UI, bulk IdP provisioning    |
-| **5.12**  | Expansion Surfaces (gated)      | Released    | Bureau live API scaffold, public OAuth portal, cross-org benchmarks, passkeys (`v5.12.0`) |
-| **5.13**  | Native Mobile Depth (gated)     | Released    | Native passkey client, OAuth marketplace, autonomous API filing, export audit (`v5.13.0`) |
-| **5.14**  | Production Distribution (gated) | Planned     | Live blob export, unsupervised filing loops, public marketplace, app store readiness      |
+| Version   | Theme                           | Status      | Focus                                                                                            |
+| --------- | ------------------------------- | ----------- | ------------------------------------------------------------------------------------------------ |
+| **4.2**   | Platform Foundation             | **Shipped** | Monorepo, auth, RBAC, domain module pattern, worker scaffold, CI/CD                              |
+| **4.3.0** | Operational Core                | **Shipped** | Cases, accounts, documents, OCR, intelligence, timeline, tasks                                   |
+| **4.3.1** | Operational Core Completion     | **Shipped** | Mission Control dashboard, governance refinements, release stabilization                         |
+| **4.5**   | Automation                      | **Shipped** | Import wizard, dispute lifecycle, workflow auto-tasks, rules AI (`v4.5.0`)                       |
+| **4.8**   | Operations                      | **Shipped** | Client portal, notifications, LLM policy gates, reporting (`v4.8.0`)                             |
+| **5.0**   | Enterprise Edition              | **Shipped** | Compliance, SSO/MFA, LLM summaries, production email, portal expansion (`v5.0.0`)                |
+| **5.0+**  | Product Hardening               | **Shipped** | Pilot-ready staff + portal UI for 5.0 APIs                                                       |
+| **5.1**   | Production Hardening            | **Shipped** | API keys, billing, IdP enrollment, enforcement, push, materialized reporting (`v5.1.0`)          |
+| **5.2**   | Deferred Production Surfaces    | **Shipped** | SMS, LLM document summaries, Web Push HTTP, revenue analytics (`v5.2.0`)                         |
+| **5.3**   | Enterprise Depth                | **Shipped** | Usage metering, SCIM, predictive analytics, API developer surfaces (`v5.3.0`)                    |
+| **5.4**   | Production Operations           | **Shipped** | Invoicing/dunning, multi-IdP federation, marketing SMS, agent observability (`v5.4.0`)           |
+| **5.5**   | Production Automation           | **Shipped** | Invoice collection, SAML metadata, SMS delivery worker, agent execution scaffold                 |
+| **5.6**   | Compliance-Reviewed Depth       | Released    | HRIS sync, SMS deliverability, LLM dispute augment, dispute filing prep                          |
+| **5.7**   | Autonomous Workflows (gated)    | Released    | Bureau submission, agent tool-calling, SAML cert rotation, Stripe invoice PDF                    |
+| **5.8**   | Production Integrations (gated) | Released    | Supervised agent loops, bureau live API, Stripe tax, HRIS lifecycle sync (`v5.8.0`)              |
+| **5.9**   | Autonomous Production (gated)   | Released    | Unsupervised agent loops, bureau filing, live Stripe Tax, SAML rotation (`v5.9.0`)               |
+| **5.10**  | Production Automation (gated)   | Released    | Arbitrary execution, bureau re-filing, charge retry, SAML passwordless                           |
+| **5.11**  | Production Execution (gated)    | Released    | Unsupervised re-filing, live charge retry, HRIS passwordless UI, bulk IdP provisioning           |
+| **5.12**  | Expansion Surfaces (gated)      | Released    | Bureau live API scaffold, public OAuth portal, cross-org benchmarks, passkeys (`v5.12.0`)        |
+| **5.13**  | Native Mobile Depth (gated)     | Released    | Native passkey client, OAuth marketplace, autonomous API filing, export audit (`v5.13.0`)        |
+| **5.14**  | Production Distribution (gated) | Released    | Live blob export, unsupervised filing loops, public marketplace, app store readiness (`v5.14.0`) |
 
 ### Sprint milestones
 
@@ -372,16 +372,20 @@ Scope and checklist: [`docs/governance/version-5.13-scope.md`](../governance/ver
 
 Release notes: [`docs/release-notes/v5.13.0.md`](../release-notes/v5.13.0.md)
 
-### Version 5.14 — Production Distribution Depth (planned)
+### Version 5.14 — Production Distribution Depth (Released)
+
+**Tag:** `v5.14.0`
+
+Release notes: [`docs/release-notes/v5.14.0.md`](../release-notes/v5.14.0.md)
 
 Scope and checklist: [`docs/governance/version-5.14-scope.md`](../governance/version-5.14-scope.md) · [`docs/development/version-5.14-completion-checklist.md`](../development/version-5.14-completion-checklist.md)
 
 | Epic | Theme                                 | 5.14 outcome | Notes                                                             |
 | ---- | ------------------------------------- | ------------ | ----------------------------------------------------------------- |
-| 1    | Live unredacted benchmark blob export | Planned      | Secure export pipeline from approved unredacted export audit runs |
-| 2    | Unsupervised autonomous filing loops  | Planned      | Operator-gated unsupervised filing loop audit scaffold            |
-| 3    | Public OAuth marketplace listings     | Planned      | Public listing publish from approved marketplace publishing runs  |
-| 4    | Native mobile app store distribution  | Planned      | App store distribution readiness from native passkey client runs  |
+| 1    | Live unredacted benchmark blob export | Partial ✅   | Secure export pipeline from approved unredacted export audit runs |
+| 2    | Unsupervised autonomous filing loops  | Partial ✅   | Operator-gated unsupervised filing loop audit scaffold            |
+| 3    | Public OAuth marketplace listings     | Partial ✅   | Public listing publish from approved marketplace publishing runs  |
+| 4    | Native mobile app store distribution  | Partial ✅   | App store distribution readiness from native passkey client runs  |
 
 ## Sprint → version mapping
 

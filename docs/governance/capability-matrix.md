@@ -533,9 +533,9 @@ Scope: [version-5.13-scope.md](version-5.13-scope.md) · Release notes: [v5.13.0
 
 ---
 
-## Version 5.14 — Production distribution depth (planned)
+## Version 5.14 — Production distribution depth (shipped — Partial ✅)
 
-Scope: [version-5.14-scope.md](version-5.14-scope.md) · Checklist: [version-5.14-completion-checklist.md](../development/version-5.14-completion-checklist.md)
+Scope: [version-5.14-scope.md](version-5.14-scope.md) · Checklist: [version-5.14-completion-checklist.md](../development/version-5.14-completion-checklist.md) · Release: [v5.14.0.md](../release-notes/v5.14.0.md)
 
 | Capability                            | Version | Status     | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                         |
 | ------------------------------------- | ------- | ---------- | ------- | -------- | --- | --- | ----- | ------------ | ----------------------------------------------------------------------------- |
