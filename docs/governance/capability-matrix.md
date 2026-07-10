@@ -533,6 +533,19 @@ Scope: [version-5.13-scope.md](version-5.13-scope.md) · Release notes: [v5.13.0
 
 ---
 
+## Version 5.14 — Production distribution depth (planned)
+
+Scope: [version-5.14-scope.md](version-5.14-scope.md) · Checklist: [version-5.14-completion-checklist.md](../development/version-5.14-completion-checklist.md)
+
+| Capability                            | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                             |
+| ------------------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ----------------------------------------------------------------- |
+| Live unredacted benchmark blob export | 5.14    | Planned | —       | —        | —   | —   | —     | Reporting    | Secure export pipeline from approved unredacted export audit runs |
+| Unsupervised autonomous filing loops  | 5.14    | Planned | —       | —        | —   | —   | —     | Disputes     | Operator-gated unsupervised filing loop audit scaffold            |
+| Public OAuth marketplace listings     | 5.14    | Planned | —       | —        | —   | —   | —     | Platform     | Public listing publish from approved marketplace publishing runs  |
+| Native mobile app store distribution  | 5.14    | Planned | —       | —        | —   | —   | —     | Identity     | App store distribution readiness from native passkey client runs  |
+
+---
+
 ## Related documents
 
 - [Governance hub](README.md) — lifecycle and build order
