@@ -1289,3 +1289,16 @@ placeholder JSON artifact to object storage, and `@verdin/api-client` support be
 pipeline while deferring unrestricted cross-tenant PII dumps and public download links.
 
 **Follow-up work:** Slice 3 — unsupervised autonomous filing loops scaffold.
+
+### Decision: Unsupervised autonomous filing loops scaffold (Version 5.14 slice 3)
+
+**Decision:** Ship operator-gated unsupervised autonomous filing loop audit
+(`unsupervised_autonomous_filing_loop_runs` migration `078_unsupervised_filing_loops`),
+compliance status/list/submit-from-executed-fully-autonomous-API-filing/approve endpoints with
+timeline event `unsupervised_autonomous_filing_loop`, and `@verdin/api-client` support behind
+`ENABLE_UNSUPERVISED_AUTONOMOUS_FILING_LOOPS`.
+
+**Reason:** 5.14 disputes epic extends 5.13 fully autonomous API filing audit with an unsupervised
+loop readiness scaffold while deferring fully unsupervised live bureau submission without kill-switch.
+
+**Follow-up work:** Slice 4 — public OAuth marketplace listings scaffold.

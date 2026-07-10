@@ -19,6 +19,9 @@ from api.modules.accounts.dispute_filing_prep_router import dispute_filing_prep_
 from api.modules.accounts.fully_autonomous_bureau_api_filing_router import (
     fully_autonomous_bureau_api_filing_router,
 )
+from api.modules.accounts.unsupervised_autonomous_filing_loop_router import (
+    unsupervised_autonomous_filing_loop_router,
+)
 from api.modules.auth.dependencies import get_current_user
 from api.modules.auth.models import User
 from api.modules.compliance.consent_templates.keys import ConsentDocumentTemplateKey
@@ -53,6 +56,7 @@ router.include_router(dispute_bureau_submission_router)
 router.include_router(bureau_live_api_router)
 router.include_router(autonomous_bureau_filing_router)
 router.include_router(fully_autonomous_bureau_api_filing_router)
+router.include_router(unsupervised_autonomous_filing_loop_router)
 router.include_router(bureau_refiling_router)
 router.include_router(bureau_unsupervised_refiling_router)
 

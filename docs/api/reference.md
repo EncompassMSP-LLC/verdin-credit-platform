@@ -745,6 +745,17 @@ Returns `404` when autonomous bureau filing flags are false.
 
 Returns `404` when fully autonomous bureau API filing flags are false.
 
+### Unsupervised autonomous filing loops audit (v5.14)
+
+| Method | Path                                                                                         | Role         | Description                                                              |
+| ------ | -------------------------------------------------------------------------------------------- | ------------ | ------------------------------------------------------------------------ |
+| GET    | `/compliance/unsupervised-autonomous-filing-loops/status`                                    | read_only    | Unsupervised filing loop readiness and blockers                          |
+| GET    | `/compliance/unsupervised-autonomous-filing-loops/runs`                                      | read_only    | Paginated unsupervised autonomous filing loop audit log                  |
+| POST   | `/compliance/unsupervised-autonomous-filing-loops/api-filing-runs/{api_filing_run_id}/start` | case_manager | Start loop audit from an executed fully autonomous bureau API filing run |
+| POST   | `/compliance/unsupervised-autonomous-filing-loops/runs/{run_id}/approve`                     | admin        | Approve and record unsupervised filing loop scaffold                     |
+
+Requires `ENABLE_UNSUPERVISED_AUTONOMOUS_FILING_LOOPS=true` (and fully autonomous bureau API filing readiness). No live bureau HTTP calls — timeline audit only.
+
 ### Bureau re-filing audit (v5.10)
 
 | Method | Path                                                             | Role         | Description                                               |

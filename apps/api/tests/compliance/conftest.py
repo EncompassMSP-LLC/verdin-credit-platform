@@ -217,6 +217,17 @@ def fully_autonomous_bureau_api_filing_env(
 
 
 @pytest.fixture
+def unsupervised_autonomous_filing_loops_env(
+    monkeypatch: pytest.MonkeyPatch,
+    fully_autonomous_bureau_api_filing_env: None,
+) -> None:
+    monkeypatch.setenv("ENABLE_UNSUPERVISED_AUTONOMOUS_FILING_LOOPS", "true")
+    get_feature_flags.cache_clear()
+    yield
+    get_feature_flags.cache_clear()
+
+
+@pytest.fixture
 def bureau_unsupervised_refiling_env(
     monkeypatch: pytest.MonkeyPatch,
     bureau_refiling_env: None,

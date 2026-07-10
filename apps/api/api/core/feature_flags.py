@@ -61,6 +61,7 @@ class FeatureFlag(StrEnum):
     ENABLE_BUREAU_LIVE_API = "ENABLE_BUREAU_LIVE_API"
     ENABLE_AUTONOMOUS_BUREAU_FILING = "ENABLE_AUTONOMOUS_BUREAU_FILING"
     ENABLE_FULLY_AUTONOMOUS_BUREAU_API_FILING = "ENABLE_FULLY_AUTONOMOUS_BUREAU_API_FILING"
+    ENABLE_UNSUPERVISED_AUTONOMOUS_FILING_LOOPS = "ENABLE_UNSUPERVISED_AUTONOMOUS_FILING_LOOPS"
     ENABLE_BUREAU_REFILING = "ENABLE_BUREAU_REFILING"
     ENABLE_BUREAU_UNSUPERVISED_REFILING = "ENABLE_BUREAU_UNSUPERVISED_REFILING"
     ENABLE_STRIPE_TAX_CALCULATION = "ENABLE_STRIPE_TAX_CALCULATION"
@@ -283,6 +284,10 @@ class FeatureFlags(BaseSettings):
         default=False,
         description="Enable admin-gated fully autonomous bureau API filing audit scaffold",
     )
+    enable_unsupervised_autonomous_filing_loops: bool = Field(
+        default=False,
+        description="Enable operator-gated unsupervised autonomous filing loop audit scaffold",
+    )
     enable_bureau_refiling: bool = Field(
         default=False,
         description="Enable operator-gated bureau re-filing audit scaffold",
@@ -372,6 +377,9 @@ _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
     FeatureFlag.ENABLE_AUTONOMOUS_BUREAU_FILING: "enable_autonomous_bureau_filing",
     FeatureFlag.ENABLE_FULLY_AUTONOMOUS_BUREAU_API_FILING: (
         "enable_fully_autonomous_bureau_api_filing"
+    ),
+    FeatureFlag.ENABLE_UNSUPERVISED_AUTONOMOUS_FILING_LOOPS: (
+        "enable_unsupervised_autonomous_filing_loops"
     ),
     FeatureFlag.ENABLE_BUREAU_REFILING: "enable_bureau_refiling",
     FeatureFlag.ENABLE_BUREAU_UNSUPERVISED_REFILING: "enable_bureau_unsupervised_refiling",
