@@ -1,0 +1,48 @@
+# Git and IDE
+.git
+.github
+.cursor
+.vscode
+.idea
+
+# Dependencies (installed inside Docker build)
+**/node_modules
+**/.pnpm-store
+
+# Python
+**/__pycache__
+**/*.py[cod]
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+**/.venv
+**/venv
+
+# Build outputs
+**/dist
+**/build
+**/.turbo
+**/coverage
+**/.coverage
+htmlcov
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+!.env.production.example
+
+# Local data
+postgres_data
+redis_data
+minio_data
+
+# Docs and tests (not needed in runtime images)
+docs
+tests
+**/*.md
+!apps/api/README.md
+
+# Agent / misc
+agent-tools
+terminals

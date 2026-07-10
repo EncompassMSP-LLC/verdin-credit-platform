@@ -1,4 +1,4 @@
-# Contributing to Verdin Credit Platform
+# Contributing to Ultimate Credit Repair LLC
 
 Thank you for contributing. This document defines our Git workflow and commit message standard so changes stay traceable to Sprints and Epics.
 

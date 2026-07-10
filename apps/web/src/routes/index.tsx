@@ -29,6 +29,9 @@ import { ClientEditPage } from '../pages/clients/ClientEditPage';
 import { ComplianceCenterPage } from '../pages/compliance/ComplianceCenterPage';
 import { ReportingCenterPage } from '../pages/reporting/ReportingCenterPage';
 import { OrgAdminPage } from '../pages/org-admin/OrgAdminPage';
+import { DisputeWorkflowGuidePage } from '../pages/guides/DisputeWorkflowGuidePage';
+import { EnrollPage } from '../pages/enrollment/EnrollPage';
+import { EnrollSuccessPage } from '../pages/enrollment/EnrollSuccessPage';
 import { PortalRoutes } from './portal';
 import { featureFlags } from '../lib/feature-flags';
 
@@ -59,6 +62,12 @@ export function AppRoutes() {
         path="/login"
         element={isAuthenticated ? <Navigate to="/" replace /> : <LoginPage />}
       />
+      {featureFlags.enableClientEnrollment ? (
+        <>
+          <Route path="/enroll" element={<EnrollPage />} />
+          <Route path="/enroll/success" element={<EnrollSuccessPage />} />
+        </>
+      ) : null}
       <Route
         element={
           <ProtectedRoute>
@@ -96,6 +105,7 @@ export function AppRoutes() {
             <Route path="org-admin" element={<OrgAdminPage />} />
           </>
         ) : null}
+        <Route path="guides/dispute-workflow" element={<DisputeWorkflowGuidePage />} />
         <Route path="settings" element={<SettingsPage />} />
       </Route>
       {featureFlags.enableClientPortal ? (

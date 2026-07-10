@@ -50,6 +50,13 @@ export function setupOrganizationBilling() {
   });
 }
 
+export function disconnectPilotBilling() {
+  return request<{ organization_id: string; disconnected: boolean }>(
+    apiPath('/billing/disconnect-pilot'),
+    { method: 'POST' },
+  );
+}
+
 export function subscribeOrganizationBilling(input: BillingSubscribeInput = {}) {
   return request<BillingSubscribeResponse>(apiPath('/billing/subscribe'), {
     method: 'POST',

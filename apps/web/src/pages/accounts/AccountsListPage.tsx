@@ -12,6 +12,9 @@ import {
   ScoreDisplay,
 } from '../../components/accounts/AccountBadges';
 import { IntelligenceSummaryCards } from '../../components/accounts/IntelligenceSummaryCards';
+import { SortableTableHeader } from '../../components/accounts/SortableTableHeader';
+
+const NUMERIC_SORT_DEFAULT_DESC = new Set<string>(['balance', 'risk_score', 'readiness_score']);
 
 const defaultFilters: AccountFiltersValue = {
   search: '',
@@ -62,6 +65,20 @@ export function AccountsListPage() {
     queryKey: ['accounts-intelligence'],
     queryFn: () => getAccountIntelligenceSummary(),
   });
+
+  const handleColumnSort = (column: string) => {
+    setFilters((current) => {
+      if (current.sort_by === column) {
+        return {
+          ...current,
+          sort_order: current.sort_order === 'asc' ? 'desc' : 'asc',
+        };
+      }
+      const defaultOrder = NUMERIC_SORT_DEFAULT_DESC.has(column) ? 'desc' : 'asc';
+      return { ...current, sort_by: column, sort_order: defaultOrder };
+    });
+    setPage(1);
+  };
 
   return (
     <div className="p-8">
@@ -133,14 +150,63 @@ export function AccountsListPage() {
             <table className="min-w-full divide-y divide-gray-200 text-sm">
               <thead>
                 <tr className="text-left text-gray-500">
-                  <th className="px-4 py-3 font-medium">Creditor</th>
-                  <th className="px-4 py-3 font-medium">Bureau</th>
-                  <th className="px-4 py-3 font-medium">Type</th>
-                  <th className="px-4 py-3 font-medium">Status</th>
-                  <th className="px-4 py-3 font-medium">Dispute</th>
-                  <th className="px-4 py-3 font-medium">Balance</th>
-                  <th className="px-4 py-3 font-medium">Risk</th>
-                  <th className="px-4 py-3 font-medium">Readiness</th>
+                  <SortableTableHeader
+                    label="Creditor"
+                    column="creditor_name"
+                    activeColumn={filters.sort_by}
+                    sortOrder={filters.sort_order}
+                    onSort={handleColumnSort}
+                  />
+                  <SortableTableHeader
+                    label="Bureau"
+                    column="bureau"
+                    activeColumn={filters.sort_by}
+                    sortOrder={filters.sort_order}
+                    onSort={handleColumnSort}
+                  />
+                  <SortableTableHeader
+                    label="Type"
+                    column="account_type"
+                    activeColumn={filters.sort_by}
+                    sortOrder={filters.sort_order}
+                    onSort={handleColumnSort}
+                  />
+                  <SortableTableHeader
+                    label="Status"
+                    column="account_status"
+                    activeColumn={filters.sort_by}
+                    sortOrder={filters.sort_order}
+                    onSort={handleColumnSort}
+                  />
+                  <SortableTableHeader
+                    label="Dispute"
+                    column="dispute_status"
+                    activeColumn={filters.sort_by}
+                    sortOrder={filters.sort_order}
+                    onSort={handleColumnSort}
+                  />
+                  <SortableTableHeader
+                    label="Balance"
+                    column="balance"
+                    activeColumn={filters.sort_by}
+                    sortOrder={filters.sort_order}
+                    onSort={handleColumnSort}
+                    align="right"
+                  />
+                  <SortableTableHeader
+                    label="Risk"
+                    column="risk_score"
+                    activeColumn={filters.sort_by}
+                    sortOrder={filters.sort_order}
+                    onSort={handleColumnSort}
+                  />
+                  <SortableTableHeader
+                    label="Readiness"
+                    column="readiness_score"
+                    activeColumn={filters.sort_by}
+                    sortOrder={filters.sort_order}
+                    onSort={handleColumnSort}
+                  />
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -166,7 +232,9 @@ export function AccountsListPage() {
                     <td className="px-4 py-3">
                       <DisputeStatusChip status={account.dispute_status} />
                     </td>
-                    <td className="px-4 py-3 text-gray-700">{formatCurrency(account.balance)}</td>
+                    <td className="px-4 py-3 text-right text-gray-700">
+                      {formatCurrency(account.balance)}
+                    </td>
                     <td className="px-4 py-3">
                       <ScoreDisplay label="" score={account.risk_score} variant="risk" />
                     </td>

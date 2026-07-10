@@ -106,3 +106,13 @@ export function usePortalAuth(): PortalAuthContextValue {
   }
   return context;
 }
+
+export async function establishPortalSession(tokens: {
+  access_token: string;
+  refresh_token: string;
+}) {
+  localStorage.setItem(PORTAL_ACCESS_TOKEN_KEY, tokens.access_token);
+  localStorage.setItem(PORTAL_REFRESH_TOKEN_KEY, tokens.refresh_token);
+  setAccessToken(tokens.access_token);
+  return getPortalMe();
+}

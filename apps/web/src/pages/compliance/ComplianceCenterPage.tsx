@@ -4,15 +4,21 @@ import {
   createConsentRecord,
   createRetentionPolicy,
   getComplianceCenterStatus,
+  listCases,
   listClients,
   listConsentRecords,
   listRetentionPolicies,
+  uploadSignedConsentRecord,
   withdrawConsentRecord,
   type ConsentType,
   type RetentionScope,
 } from '@verdin/api-client';
 import { Badge, Button, Card } from '@verdin/ui';
+import { ConsentTemplatesPanel } from '../../components/compliance/ConsentTemplatesPanel';
+import { useAuth } from '../../lib/auth';
 import { featureFlags } from '../../lib/feature-flags';
+import { CONSENT_TEMPLATE_LABELS, TEMPLATE_TO_CONSENT_TYPE } from '../../lib/consent-gaps';
+import type { ConsentDocumentTemplateKey } from '@verdin/api-client';
 
 const inputClass =
   'mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500';
@@ -32,7 +38,7 @@ const RETENTION_SCOPE_LABELS: Record<RetentionScope, string> = {
   client_profiles: 'Client profiles',
 };
 
-type ComplianceTab = 'consents' | 'retention';
+type ComplianceTab = 'consents' | 'templates' | 'retention';
 
 function formatDate(value: string | null) {
   return value ? new Date(value).toLocaleString() : '—';
@@ -74,6 +80,13 @@ export function ComplianceCenterPage() {
         </Button>
         <Button
           type="button"
+          variant={tab === 'templates' ? 'primary' : 'secondary'}
+          onClick={() => setTab('templates')}
+        >
+          Consent templates
+        </Button>
+        <Button
+          type="button"
           variant={tab === 'retention' ? 'primary' : 'secondary'}
           onClick={() => setTab('retention')}
         >
@@ -81,18 +94,28 @@ export function ComplianceCenterPage() {
         </Button>
       </div>
 
-      {tab === 'consents' ? <ConsentRecordsPanel /> : <RetentionPoliciesPanel />}
+      {tab === 'consents' ? (
+        <ConsentRecordsPanel />
+      ) : tab === 'templates' ? (
+        <ConsentTemplatesPanel />
+      ) : (
+        <RetentionPoliciesPanel />
+      )}
     </div>
   );
 }
 
 function ComplianceStatusCard() {
-  const { data, isLoading, isError } = useQuery({
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const authReady = isAuthenticated && !authLoading;
+
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['compliance-status'],
     queryFn: getComplianceCenterStatus,
+    enabled: authReady,
   });
 
-  if (isLoading) {
+  if (authLoading || (authReady && isLoading)) {
     return (
       <Card className="mb-6">
         <p className="text-sm text-gray-500">Loading compliance status…</p>
@@ -104,6 +127,15 @@ function ComplianceStatusCard() {
     return (
       <Card className="mb-6">
         <p className="text-sm text-red-600">Failed to load compliance center status.</p>
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          className="mt-3"
+          onClick={() => void refetch()}
+        >
+          Retry
+        </Button>
       </Card>
     );
   }
@@ -122,6 +154,156 @@ function ComplianceStatusCard() {
           </Badge>
         ))}
       </div>
+    </Card>
+  );
+}
+
+function SignedConsentUploadCard({
+  clients,
+}: {
+  clients: Array<{ id: string; display_name: string }>;
+}) {
+  const queryClient = useQueryClient();
+  const [clientId, setClientId] = useState('');
+  const [caseId, setCaseId] = useState('');
+  const [templateKey, setTemplateKey] = useState<ConsentDocumentTemplateKey>('croa_disclosure');
+  const [signerName, setSignerName] = useState('');
+  const [notes, setNotes] = useState('');
+  const [file, setFile] = useState<File | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const casesQuery = useQuery({
+    queryKey: ['compliance-upload-cases', clientId],
+    queryFn: () => listCases({ client_id: clientId, page_size: 50 }),
+    enabled: Boolean(clientId),
+  });
+
+  const uploadMutation = useMutation({
+    mutationFn: () => {
+      if (!clientId || !caseId || !file) {
+        throw new Error('Client, case, and signed document are required');
+      }
+      return uploadSignedConsentRecord({
+        client_id: clientId,
+        case_id: caseId,
+        consent_type: TEMPLATE_TO_CONSENT_TYPE[templateKey],
+        document_template_key: templateKey,
+        file,
+        signer_name: signerName.trim() || null,
+        notes: notes.trim() || null,
+      });
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['compliance-consents'] });
+      setFile(null);
+      setNotes('');
+      setSignerName('');
+      setError(null);
+    },
+    onError: (err: Error) => setError(err.message),
+  });
+
+  return (
+    <Card title="Upload signed consent">
+      <p className="mb-4 text-sm text-gray-600">
+        Attach a signed CROA disclosure, FCRA authorization, or other consent PDF. Signed uploads
+        satisfy dispute mail and filing prep consent gates.
+      </p>
+      <form
+        className="grid grid-cols-1 gap-4 md:grid-cols-2"
+        onSubmit={(event) => {
+          event.preventDefault();
+          setError(null);
+          uploadMutation.mutate();
+        }}
+      >
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Client</label>
+          <select
+            className={inputClass}
+            value={clientId}
+            onChange={(event) => {
+              setClientId(event.target.value);
+              setCaseId('');
+            }}
+            required
+          >
+            <option value="">Select client</option>
+            {clients.map((client) => (
+              <option key={client.id} value={client.id}>
+                {client.display_name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Case</label>
+          <select
+            className={inputClass}
+            value={caseId}
+            onChange={(event) => setCaseId(event.target.value)}
+            required
+            disabled={!clientId}
+          >
+            <option value="">Select case</option>
+            {(casesQuery.data?.items ?? []).map((caseItem) => (
+              <option key={caseItem.id} value={caseItem.id}>
+                {caseItem.title}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Document</label>
+          <select
+            className={inputClass}
+            value={templateKey}
+            onChange={(event) => setTemplateKey(event.target.value as ConsentDocumentTemplateKey)}
+          >
+            {(Object.keys(CONSENT_TEMPLATE_LABELS) as ConsentDocumentTemplateKey[]).map((key) => (
+              <option key={key} value={key}>
+                {CONSENT_TEMPLATE_LABELS[key]}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Signer name</label>
+          <input
+            className={inputClass}
+            value={signerName}
+            onChange={(event) => setSignerName(event.target.value)}
+            placeholder="Consumer name on signed form"
+          />
+        </div>
+        <div className="md:col-span-2">
+          <label className="block text-sm font-medium text-gray-700">Signed document</label>
+          <input
+            type="file"
+            accept="application/pdf,image/jpeg,image/png,image/tiff"
+            className="mt-2 block w-full text-sm text-gray-700"
+            onChange={(event) => setFile(event.target.files?.[0] ?? null)}
+            required
+          />
+        </div>
+        <div className="md:col-span-2">
+          <label className="block text-sm font-medium text-gray-700">Notes</label>
+          <textarea
+            rows={2}
+            className={inputClass}
+            value={notes}
+            onChange={(event) => setNotes(event.target.value)}
+          />
+        </div>
+        {error ? (
+          <div className="md:col-span-2 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</div>
+        ) : null}
+        <div className="md:col-span-2">
+          <Button type="submit" loading={uploadMutation.isPending}>
+            Upload signed consent
+          </Button>
+        </div>
+      </form>
     </Card>
   );
 }
@@ -178,7 +360,8 @@ function ConsentRecordsPanel() {
 
   return (
     <div className="space-y-6">
-      <Card title="Record consent">
+      <SignedConsentUploadCard clients={clientsQuery.data?.items ?? []} />
+      <Card title="Record consent (manual log)">
         <form
           className="grid grid-cols-1 gap-4 md:grid-cols-2"
           onSubmit={(event) => {
@@ -265,6 +448,7 @@ function ConsentRecordsPanel() {
                 <tr className="border-b text-left text-gray-500">
                   <th className="px-3 py-2 font-medium">Client</th>
                   <th className="px-3 py-2 font-medium">Type</th>
+                  <th className="px-3 py-2 font-medium">Signed</th>
                   <th className="px-3 py-2 font-medium">Status</th>
                   <th className="px-3 py-2 font-medium">Granted</th>
                   <th className="px-3 py-2 font-medium">Actions</th>
@@ -277,6 +461,11 @@ function ConsentRecordsPanel() {
                       {clientNameById.get(record.client_id) ?? record.client_id}
                     </td>
                     <td className="px-3 py-3">{CONSENT_TYPE_LABELS[record.consent_type]}</td>
+                    <td className="px-3 py-3">
+                      <Badge variant={record.is_signed ? 'success' : 'warning'}>
+                        {record.is_signed ? 'Yes' : 'No'}
+                      </Badge>
+                    </td>
                     <td className="px-3 py-3">
                       <Badge variant={record.status === 'granted' ? 'success' : 'warning'}>
                         {record.status}

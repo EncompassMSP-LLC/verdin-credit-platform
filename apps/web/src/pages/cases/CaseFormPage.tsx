@@ -3,7 +3,12 @@ import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
-import { createCase, updateCase } from '@verdin/api-client';
+import {
+  createCase,
+  createClient,
+  updateCase,
+  uploadCaseIdentityDocument,
+} from '@verdin/api-client';
 import { createCaseSchema, type CreateCaseInput, type UpdateCaseInput } from '@verdin/validation';
 import {
   CASE_PRIORITIES,
@@ -25,10 +30,37 @@ interface CaseFormPageProps {
   defaultValues?: CreateCaseInput;
 }
 
+type ClientAssociationMode = 'existing' | 'new' | 'manual';
+
+interface NewClientDraft {
+  display_name: string;
+  email: string;
+  phone: string;
+  mailing_address_line1: string;
+  mailing_address_line2: string;
+  mailing_city: string;
+  mailing_state: string;
+  mailing_postal_code: string;
+}
+
 export function CaseFormPage({ mode, caseId, defaultValues }: CaseFormPageProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
+  const [identityFile, setIdentityFile] = useState<File | null>(null);
+  const [clientMode, setClientMode] = useState<ClientAssociationMode>(
+    defaultValues?.client_id ? 'existing' : 'manual',
+  );
+  const [newClient, setNewClient] = useState<NewClientDraft>({
+    display_name: '',
+    email: '',
+    phone: '',
+    mailing_address_line1: '',
+    mailing_address_line2: '',
+    mailing_city: '',
+    mailing_state: '',
+    mailing_postal_code: '',
+  });
 
   const {
     register,
@@ -53,15 +85,37 @@ export function CaseFormPage({ mode, caseId, defaultValues }: CaseFormPageProps)
   });
 
   const linkedClientId = watch('client_id');
-  const hasLinkedClient = Boolean(linkedClientId);
+  const hasLinkedClient = clientMode === 'existing' && Boolean(linkedClientId);
 
   const mutation = useMutation({
     mutationFn: async (values: CreateCaseInput) => {
+      let linkedClientIdValue = values.client_id || null;
+      let clientNameValue = values.client_name?.trim() || undefined;
+      let clientEmailValue = values.client_email || null;
+
+      if (clientMode === 'new') {
+        const createdClient = await createClient({
+          display_name: newClient.display_name.trim(),
+          email: newClient.email.trim() || null,
+          phone: newClient.phone.trim() || null,
+          mailing_address_line1: newClient.mailing_address_line1.trim(),
+          mailing_address_line2: newClient.mailing_address_line2.trim() || null,
+          mailing_city: newClient.mailing_city.trim(),
+          mailing_state: newClient.mailing_state.trim(),
+          mailing_postal_code: newClient.mailing_postal_code.trim(),
+          status: 'active',
+          notes: null,
+        });
+        linkedClientIdValue = createdClient.id;
+        clientNameValue = createdClient.display_name;
+        clientEmailValue = createdClient.email;
+      }
+
       const payload = {
         ...values,
-        client_id: values.client_id || null,
-        client_name: values.client_name?.trim() || undefined,
-        client_email: values.client_email || null,
+        client_id: linkedClientIdValue,
+        client_name: clientNameValue,
+        client_email: clientEmailValue,
       };
       if (mode === 'create') {
         return createCase(payload);
@@ -69,7 +123,10 @@ export function CaseFormPage({ mode, caseId, defaultValues }: CaseFormPageProps)
       if (!caseId) throw new Error('Case ID is required');
       return updateCase(caseId, payload as UpdateCaseInput);
     },
-    onSuccess: (result) => {
+    onSuccess: async (result) => {
+      if (identityFile) {
+        await uploadCaseIdentityDocument(result.id, identityFile, "Driver's license");
+      }
       queryClient.invalidateQueries({ queryKey: ['cases'] });
       queryClient.invalidateQueries({ queryKey: ['case', result.id] });
       navigate(`/cases/${result.id}`);
@@ -78,6 +135,25 @@ export function CaseFormPage({ mode, caseId, defaultValues }: CaseFormPageProps)
   });
 
   const onSubmit = handleSubmit((values) => {
+    if (clientMode === 'existing' && !values.client_id) {
+      setError('Select an existing client or switch to New client / Manual.');
+      return;
+    }
+    if (clientMode === 'new') {
+      if (
+        !newClient.display_name.trim() ||
+        !newClient.mailing_address_line1.trim() ||
+        !newClient.mailing_city.trim() ||
+        !newClient.mailing_state.trim() ||
+        !newClient.mailing_postal_code.trim()
+      ) {
+        setError('New client requires name and full mailing address.');
+        return;
+      }
+      setValue('client_id', '', { shouldValidate: true });
+      setValue('client_name', newClient.display_name.trim(), { shouldValidate: true });
+      setValue('client_email', newClient.email.trim(), { shouldValidate: true });
+    }
     setError(null);
     mutation.mutate(values);
   });
@@ -108,22 +184,160 @@ export function CaseFormPage({ mode, caseId, defaultValues }: CaseFormPageProps)
             ) : null}
           </div>
 
-          <Controller
-            name="client_id"
-            control={control}
-            render={({ field }) => (
-              <ClientPicker
-                value={field.value ?? ''}
-                onChange={(clientId, client) => {
-                  field.onChange(clientId);
-                  if (client) {
-                    setValue('client_name', client.display_name, { shouldValidate: true });
-                    setValue('client_email', client.email ?? '', { shouldValidate: true });
-                  }
-                }}
+          <div className="space-y-2 rounded-md border border-gray-200 bg-gray-50 p-4">
+            <p className="text-sm font-medium text-gray-700">Client association</p>
+            <div className="flex flex-wrap gap-4 text-sm">
+              <label className="inline-flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="client-mode"
+                  checked={clientMode === 'existing'}
+                  onChange={() => {
+                    setClientMode('existing');
+                  }}
+                />
+                Existing client
+              </label>
+              <label className="inline-flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="client-mode"
+                  checked={clientMode === 'new'}
+                  onChange={() => {
+                    setClientMode('new');
+                    setValue('client_id', '', { shouldValidate: true });
+                  }}
+                />
+                New client
+              </label>
+              <label className="inline-flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="client-mode"
+                  checked={clientMode === 'manual'}
+                  onChange={() => {
+                    setClientMode('manual');
+                    setValue('client_id', '', { shouldValidate: true });
+                  }}
+                />
+                Manual entry
+              </label>
+            </div>
+            {clientMode === 'existing' ? (
+              <Controller
+                name="client_id"
+                control={control}
+                render={({ field }) => (
+                  <ClientPicker
+                    value={field.value ?? ''}
+                    onChange={(clientId, client) => {
+                      field.onChange(clientId);
+                      if (client) {
+                        setValue('client_name', client.display_name, { shouldValidate: true });
+                        setValue('client_email', client.email ?? '', { shouldValidate: true });
+                      }
+                    }}
+                  />
+                )}
               />
-            )}
-          />
+            ) : null}
+            {clientMode === 'new' ? (
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">New client name</label>
+                  <input
+                    className={inputClass}
+                    value={newClient.display_name}
+                    onChange={(event) =>
+                      setNewClient((prev) => ({ ...prev, display_name: event.target.value }))
+                    }
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    New client email
+                  </label>
+                  <input
+                    type="email"
+                    className={inputClass}
+                    value={newClient.email}
+                    onChange={(event) =>
+                      setNewClient((prev) => ({ ...prev, email: event.target.value }))
+                    }
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    New client phone
+                  </label>
+                  <input
+                    className={inputClass}
+                    value={newClient.phone}
+                    onChange={(event) =>
+                      setNewClient((prev) => ({ ...prev, phone: event.target.value }))
+                    }
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Street address</label>
+                  <input
+                    className={inputClass}
+                    value={newClient.mailing_address_line1}
+                    onChange={(event) =>
+                      setNewClient((prev) => ({
+                        ...prev,
+                        mailing_address_line1: event.target.value,
+                      }))
+                    }
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Apartment / suite (optional)
+                  </label>
+                  <input
+                    className={inputClass}
+                    value={newClient.mailing_address_line2}
+                    onChange={(event) =>
+                      setNewClient((prev) => ({
+                        ...prev,
+                        mailing_address_line2: event.target.value,
+                      }))
+                    }
+                  />
+                </div>
+                <div className="grid grid-cols-3 gap-2 md:col-span-2">
+                  <input
+                    className={inputClass}
+                    placeholder="City"
+                    value={newClient.mailing_city}
+                    onChange={(event) =>
+                      setNewClient((prev) => ({ ...prev, mailing_city: event.target.value }))
+                    }
+                  />
+                  <input
+                    className={inputClass}
+                    placeholder="State"
+                    value={newClient.mailing_state}
+                    onChange={(event) =>
+                      setNewClient((prev) => ({ ...prev, mailing_state: event.target.value }))
+                    }
+                  />
+                  <input
+                    className={inputClass}
+                    placeholder="ZIP"
+                    value={newClient.mailing_postal_code}
+                    onChange={(event) =>
+                      setNewClient((prev) => ({
+                        ...prev,
+                        mailing_postal_code: event.target.value,
+                      }))
+                    }
+                  />
+                </div>
+              </div>
+            ) : null}
+          </div>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
@@ -215,6 +429,22 @@ export function CaseFormPage({ mode, caseId, defaultValues }: CaseFormPageProps)
               Notes
             </label>
             <textarea id="notes" rows={4} className={inputClass} {...register('notes')} />
+          </div>
+
+          <div>
+            <label htmlFor="identity_document" className="block text-sm font-medium text-gray-700">
+              Driver&apos;s license copy
+            </label>
+            <p className="mt-1 text-xs text-gray-500">
+              Optional. Attached automatically to dispute mail packets for this case.
+            </p>
+            <input
+              id="identity_document"
+              type="file"
+              accept="application/pdf,image/jpeg,image/png,image/tiff"
+              className="mt-2 block w-full text-sm text-gray-700"
+              onChange={(event) => setIdentityFile(event.target.files?.[0] ?? null)}
+            />
           </div>
 
           {error ? (

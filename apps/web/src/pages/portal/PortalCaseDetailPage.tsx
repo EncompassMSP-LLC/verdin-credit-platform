@@ -2,8 +2,10 @@ import { useQuery } from '@tanstack/react-query';
 import { getPortalCase } from '@verdin/api-client';
 import { Button, Card } from '@verdin/ui';
 import { Link, useParams } from 'react-router-dom';
+import { PortalCaseConsents } from '../../components/portal/PortalCaseConsents';
 import { PortalCaseDocuments } from '../../components/portal/PortalCaseDocuments';
 import { PortalCaseMessages } from '../../components/portal/PortalCaseMessages';
+import { PortalEnrollmentOnboarding } from '../../components/portal/PortalEnrollmentOnboarding';
 import { PortalPushPanel } from '../../components/portal/PortalPushPanel';
 import { usePortalAuth } from '../../lib/portal-auth';
 
@@ -113,6 +115,9 @@ export function PortalCaseDetailPage() {
               </div>
             ) : null}
 
+            <PortalEnrollmentOnboarding annualCreditReportUrl="https://www.annualcreditreport.com/index.action" />
+
+            {caseId ? <PortalCaseConsents caseId={caseId} /> : null}
             {caseId ? <PortalCaseDocuments caseId={caseId} /> : null}
             <PortalPushPanel />
             {caseId ? <PortalCaseMessages caseId={caseId} /> : null}

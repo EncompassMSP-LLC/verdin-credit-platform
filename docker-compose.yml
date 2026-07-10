@@ -52,6 +52,7 @@ services:
     build:
       context: .
       dockerfile: apps/api/Dockerfile
+      target: development
     container_name: verdin-api
     environment:
       APP_ENV: development
@@ -119,9 +120,11 @@ services:
       args:
         VITE_API_BASE_URL: ${VITE_API_BASE_URL:-}
         VITE_ENABLE_AI: ${VITE_ENABLE_AI:-false}
+        VITE_ENABLE_LLM: ${VITE_ENABLE_LLM:-false}
         VITE_ENABLE_IMPORTS: ${VITE_ENABLE_IMPORTS:-true}
         VITE_ENABLE_ENTERPRISE: ${VITE_ENABLE_ENTERPRISE:-false}
         VITE_ENABLE_CLIENT_PORTAL: ${VITE_ENABLE_CLIENT_PORTAL:-false}
+        VITE_ENABLE_PORTAL_PUSH: ${VITE_ENABLE_PORTAL_PUSH:-false}
     container_name: verdin-web
     ports:
       - '3000:80'

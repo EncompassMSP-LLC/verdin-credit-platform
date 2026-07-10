@@ -422,12 +422,15 @@ function RevenueAnalyticsPanel() {
 
   if (isError || !data) {
     const message = error instanceof Error ? error.message : 'Unknown error';
-    const billingDisabled = message.toLowerCase().includes('not found') || message.includes('404');
+    const billingDisabled =
+      message.toLowerCase().includes('billing is not enabled') ||
+      message.toLowerCase().includes('not found') ||
+      message.includes('404');
     return (
       <Card>
         <p className="text-sm text-gray-600">
           {billingDisabled
-            ? 'Revenue analytics requires ENABLE_BILLING=true and Stripe configuration.'
+            ? 'Revenue analytics requires ENABLE_BILLING=true and Stripe configuration in the API environment.'
             : `Failed to load revenue analytics: ${message}`}
         </p>
         {!billingDisabled ? (

@@ -7,6 +7,8 @@ interface ImportMetaEnv {
   readonly VITE_ENABLE_IMPORTS?: string;
   readonly VITE_ENABLE_ENTERPRISE?: string;
   readonly VITE_ENABLE_CLIENT_PORTAL?: string;
+  readonly VITE_ENABLE_CLIENT_ENROLLMENT?: string;
+  readonly VITE_ENABLE_PORTAL_PUSH?: string;
 }
 
 interface ImportMeta {

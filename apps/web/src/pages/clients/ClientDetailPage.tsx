@@ -15,11 +15,35 @@ import {
 } from '@verdin/api-client';
 import { createClientContactSchema, type CreateClientContactInput } from '@verdin/validation';
 import { Button, Card } from '@verdin/ui';
+import { ClientDisputeDocumentsCard } from '../../components/clients/ClientDisputeDocumentsCard';
+import { ClientAccountsPanel } from '../../components/clients/ClientAccountsPanel';
 import { ClientStatusBadge } from '../../components/clients/ClientStatusBadge';
 import { featureFlags } from '../../lib/feature-flags';
 
 const inputClass =
   'mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500';
+
+function formatMailingAddress(client: {
+  mailing_address_line1: string | null;
+  mailing_address_line2: string | null;
+  mailing_city: string | null;
+  mailing_state: string | null;
+  mailing_postal_code: string | null;
+}): string | null {
+  const line1 = client.mailing_address_line1?.trim();
+  if (!line1) return null;
+  const lines = [line1];
+  const line2 = client.mailing_address_line2?.trim();
+  if (line2) lines.push(line2);
+  const city = client.mailing_city?.trim() ?? '';
+  const state = client.mailing_state?.trim() ?? '';
+  const postal = client.mailing_postal_code?.trim() ?? '';
+  const cityState = [city, state].filter(Boolean).join(', ');
+  if (cityState && postal) lines.push(`${cityState} ${postal}`);
+  else if (cityState) lines.push(cityState);
+  else if (postal) lines.push(postal);
+  return lines.join('\n');
+}
 
 export function ClientDetailPage() {
   const { clientId } = useParams<{ clientId: string }>();
@@ -136,6 +160,7 @@ export function ClientDetailPage() {
   }
 
   const client = clientQuery.data;
+  const mailingAddress = formatMailingAddress(client);
 
   return (
     <div className="p-8">
@@ -151,6 +176,13 @@ export function ClientDetailPage() {
           <p className="mt-2 text-sm text-gray-600">
             {client.email ?? 'No email'} · {client.phone ?? 'No phone'}
           </p>
+          {mailingAddress ? (
+            <p className="mt-2 whitespace-pre-line text-sm text-gray-600">{mailingAddress}</p>
+          ) : (
+            <p className="mt-2 text-sm text-amber-700">
+              Mailing address missing — edit client to add address for consent documents.
+            </p>
+          )}
         </div>
         <div className="flex flex-wrap gap-2">
           <Link to={`/clients/${client.id}/edit`}>
@@ -176,7 +208,15 @@ export function ClientDetailPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-8 xl:grid-cols-2">
+      <ClientDisputeDocumentsCard
+        clientId={client.id}
+        identityDocumentId={client.identity_document_id}
+        proofOfAddressDocumentId={client.proof_of_address_document_id}
+      />
+
+      <ClientAccountsPanel clientId={client.id} />
+
+      <div className="mt-8 grid grid-cols-1 gap-8 xl:grid-cols-2">
         <Card className="p-6">
           <h2 className="text-lg font-semibold text-gray-900">Profile</h2>
           {client.notes ? (

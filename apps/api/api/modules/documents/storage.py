@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from io import BytesIO
-from typing import Protocol, cast, runtime_checkable
+from typing import Protocol, runtime_checkable
 
 from minio import Minio
 
@@ -50,7 +50,8 @@ class MinioDocumentStorage:
     def get_object(self, key: str) -> bytes:
         response = self._client.get_object(self._bucket, key)
         try:
-            return cast(bytes, response.read())
+            body: bytes = response.read()
+            return body
         finally:
             response.close()
             response.release_conn()

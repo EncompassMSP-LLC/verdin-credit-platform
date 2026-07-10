@@ -1,7 +1,7 @@
 [project]
 name = "verdin-worker"
 version = "4.2.0"
-description = "Verdin Credit Platform background worker"
+description = "Ultimate Credit Repair LLC background worker"
 requires-python = ">=3.13"
 dependencies = [
     "pydantic>=2.10.3",

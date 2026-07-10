@@ -6,7 +6,22 @@
 - Node.js 20+ and pnpm 9+ (for local development)
 - Python 3.13+ (for local API development)
 
-## Docker Compose (Recommended)
+## Production (single VM / VPS)
+
+For a pilot deployment on a Linux server with Docker Compose, see **[Production Deployment](production.md)**.
+
+## Local Docker (production mode, no VM)
+
+To run a production-mode pilot on **Docker Desktop** at http://localhost:8080, see **[Local Docker Pilot](local-docker-pilot.md)**.
+
+Quick path:
+
+```bash
+cp .env.production.example .env.production
+docker compose -f docker-compose.local-pilot.yml --env-file .env.production up -d --build
+```
+
+## Docker Compose (Development)
 
 ```bash
 # Clone and configure

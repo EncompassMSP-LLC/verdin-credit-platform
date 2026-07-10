@@ -1,4 +1,4 @@
-# Verdin Credit Platform
+# Ultimate Credit Repair LLC
 
 > Version 4.3.1 — Operational Core
 
@@ -38,7 +38,11 @@ docker compose exec api python scripts/seed.py
 | Email             | Password    | Role  |
 | ----------------- | ----------- | ----- |
 | owner@verdin.demo | changeme123 | Owner |
-| admin@verdin.demo | changeme123 | Admin |
+
+### Staff guides
+
+- [Dispute workflow (step-by-step)](docs/guides/dispute-workflow.md) — import reports, cross-bureau compare, prepare letters, mail-ready export
+  | admin@verdin.demo | changeme123 | Admin |
 
 ## Repository Structure
 
