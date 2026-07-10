@@ -912,6 +912,90 @@ export function approveNativeMobilePasskeyClientRun(runId: string) {
   );
 }
 
+export type NativeMobileAppStoreDistributionRunStatus =
+  'pending_approval' | 'ready' | 'rejected' | 'failed';
+
+export interface NativeMobileAppStoreDistributionGateStatus {
+  enabled: boolean;
+  ready: boolean;
+  native_mobile_passkey_client_ready: boolean;
+  blockers: string[];
+}
+
+export interface NativeMobileAppStoreDistributionRun {
+  id: string;
+  organization_id: string;
+  native_mobile_passkey_client_run_id: string;
+  entity_id: string;
+  status: NativeMobileAppStoreDistributionRunStatus;
+  distribution_summary: string;
+  platform: string;
+  store_target: string;
+  requested_by_user_id: string | null;
+  approved_by_user_id: string | null;
+  requested_at: string | null;
+  approved_at: string | null;
+  ready_at: string | null;
+  error_message: string | null;
+}
+
+export interface NativeMobileAppStoreDistributionSubmitInput {
+  distribution_summary: string;
+  store_target: string;
+}
+
+export interface NativeMobileAppStoreDistributionRunResult {
+  completed_at: string;
+  run: NativeMobileAppStoreDistributionRun;
+}
+
+export interface NativeMobileAppStoreDistributionRunList {
+  items: NativeMobileAppStoreDistributionRun[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export function getNativeMobileAppStoreDistributionStatus() {
+  return request<NativeMobileAppStoreDistributionGateStatus>(
+    apiPath('/enterprise/federation/native-mobile-app-store-distribution/status'),
+  );
+}
+
+export function listNativeMobileAppStoreDistributionRuns(page = 1, pageSize = 20) {
+  const params = new URLSearchParams({
+    page: String(page),
+    page_size: String(pageSize),
+  });
+  return request<NativeMobileAppStoreDistributionRunList>(
+    apiPath(`/enterprise/federation/native-mobile-app-store-distribution/runs?${params}`),
+  );
+}
+
+export function startNativeMobileAppStoreDistributionFromPasskeyClientRun(
+  nativeMobilePasskeyClientRunId: string,
+  input: NativeMobileAppStoreDistributionSubmitInput,
+) {
+  return request<NativeMobileAppStoreDistributionRunResult>(
+    apiPath(
+      `/enterprise/federation/native-mobile-app-store-distribution/passkey-client-runs/${nativeMobilePasskeyClientRunId}/start`,
+    ),
+    {
+      method: 'POST',
+      body: JSON.stringify(input),
+    },
+  );
+}
+
+export function approveNativeMobileAppStoreDistributionRun(runId: string) {
+  return request<NativeMobileAppStoreDistributionRunResult>(
+    apiPath(`/enterprise/federation/native-mobile-app-store-distribution/runs/${runId}/approve`),
+    {
+      method: 'POST',
+    },
+  );
+}
+
 export type BulkIdpProvisioningRunStatus =
   'pending_approval' | 'provisioned' | 'rejected' | 'failed';
 
