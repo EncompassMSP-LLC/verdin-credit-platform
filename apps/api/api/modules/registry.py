@@ -176,6 +176,10 @@ from api.modules.org_admin.oauth_marketplace_publishing_models import (
     OAuthMarketplacePublishingRun,
     OAuthMarketplacePublishingRunStatus,
 )
+from api.modules.org_admin.public_oauth_marketplace_listing_models import (
+    PublicOAuthMarketplaceListingRun,
+    PublicOAuthMarketplaceListingRunStatus,
+)
 from api.modules.org_admin.rotation_models import ApiKeyRotationLog
 from api.modules.reporting.cross_org_benchmark_models import (
     CrossOrgBenchmarkRun,
@@ -225,6 +229,8 @@ __all__ = [
     "OAuthDeveloperAppStatus",
     "OAuthMarketplacePublishingRun",
     "OAuthMarketplacePublishingRunStatus",
+    "PublicOAuthMarketplaceListingRun",
+    "PublicOAuthMarketplaceListingRunStatus",
     "BillingInvoiceCollectionRun",
     "BillingInvoiceCollectionRunKind",
     "BillingInvoiceCollectionRunStatus",

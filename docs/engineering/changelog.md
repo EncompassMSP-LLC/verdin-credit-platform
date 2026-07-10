@@ -1302,3 +1302,15 @@ timeline event `unsupervised_autonomous_filing_loop`, and `@verdin/api-client` s
 loop readiness scaffold while deferring fully unsupervised live bureau submission without kill-switch.
 
 **Follow-up work:** Slice 4 — public OAuth marketplace listings scaffold.
+
+### Decision: Public OAuth marketplace listings scaffold (Version 5.14 slice 4)
+
+**Decision:** Ship admin-gated public OAuth marketplace listing audit
+(`public_oauth_marketplace_listing_runs` migration `079_public_oauth_listings`),
+org-admin status/list/submit-from-approved-publishing/approve endpoints with terminal status
+`listed`, and `@verdin/api-client` support behind `ENABLE_PUBLIC_OAUTH_MARKETPLACE_LISTINGS`.
+
+**Reason:** 5.14 platform epic extends 5.13 marketplace publishing audit with a public listing
+readiness scaffold while deferring unreviewed third-party auto-approve.
+
+**Follow-up work:** Slice 5 — native mobile app store distribution scaffold.

@@ -606,6 +606,17 @@ When `ENABLE_API_DEVELOPER_PORTAL=true`, admins can access the internal develope
 | POST   | `/org-admin/developer-portal/oauth-marketplace-publishing/oauth-apps/{id}/start` | admin     | Start marketplace publish from approved OAuth app      |
 | POST   | `/org-admin/developer-portal/oauth-marketplace-publishing/runs/{run_id}/approve` | admin     | Approve OAuth marketplace publishing scaffold          |
 
+### Public OAuth marketplace listings audit (v5.14)
+
+| Method | Path                                                                                                      | Role      | Description                                                      |
+| ------ | --------------------------------------------------------------------------------------------------------- | --------- | ---------------------------------------------------------------- |
+| GET    | `/org-admin/developer-portal/public-oauth-marketplace-listings/status`                                    | read_only | Public marketplace listing readiness and blockers                |
+| GET    | `/org-admin/developer-portal/public-oauth-marketplace-listings/runs`                                      | read_only | Paginated public OAuth marketplace listing audit log             |
+| POST   | `/org-admin/developer-portal/public-oauth-marketplace-listings/publishing-runs/{publishing_run_id}/start` | admin     | Start public listing from an approved marketplace publishing run |
+| POST   | `/org-admin/developer-portal/public-oauth-marketplace-listings/runs/{run_id}/approve`                     | admin     | Approve and record public listing scaffold (`listed`)            |
+
+Requires `ENABLE_PUBLIC_OAUTH_MARKETPLACE_LISTINGS=true` (and OAuth marketplace publishing readiness). Audit only — no unreviewed third-party auto-approve.
+
 Rotation writes an `api_key_rotation_logs` audit record. OAuth app registration writes `oauth_developer_apps` audit rows. Returns `404` when corresponding portal flags are false.
 
 API keys use prefix `vrd_live_` with SHA-256 hashed storage. Scopes: `read`, `write`. SCIM provisioning is available when `ENABLE_SCIM_PROVISIONING=true` (see Enterprise identity). Cross-org roles and key usage analytics are deferred to 5.4+.

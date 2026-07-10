@@ -20,7 +20,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 | 1     | 5.14 scope + completion checklist     | Kickoff    | ✅     |
 | 2     | Live unredacted benchmark blob export | Reporting  | ✅     |
 | 3     | Unsupervised autonomous filing loops  | Disputes   | ✅     |
-| 4     | Public OAuth marketplace listings     | Platform   | —      |
+| 4     | Public OAuth marketplace listings     | Platform   | ✅     |
 | 5     | Native mobile app store distribution  | Identity   | —      |
 | 6     | Capability matrix 5.14 sign-off       | Governance | —      |
 

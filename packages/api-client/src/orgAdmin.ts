@@ -238,3 +238,88 @@ export function approveOAuthMarketplacePublishingRun(runId: string) {
     },
   );
 }
+
+export type PublicOAuthMarketplaceListingRunStatus =
+  'pending_approval' | 'listed' | 'rejected' | 'failed';
+
+export interface PublicOAuthMarketplaceListingGateStatus {
+  enabled: boolean;
+  ready: boolean;
+  oauth_marketplace_publishing_ready: boolean;
+  blockers: string[];
+}
+
+export interface PublicOAuthMarketplaceListingRun {
+  id: string;
+  organization_id: string;
+  oauth_marketplace_publishing_run_id: string;
+  oauth_developer_app_id: string;
+  entity_id: string;
+  status: PublicOAuthMarketplaceListingRunStatus;
+  listing_summary: string;
+  marketplace_listing_slug: string;
+  public_listing_url: string | null;
+  requested_by_user_id: string | null;
+  approved_by_user_id: string | null;
+  requested_at: string | null;
+  approved_at: string | null;
+  listed_at: string | null;
+  error_message: string | null;
+}
+
+export interface PublicOAuthMarketplaceListingSubmitInput {
+  listing_summary: string;
+  public_listing_url?: string | null;
+}
+
+export interface PublicOAuthMarketplaceListingRunResult {
+  completed_at: string;
+  run: PublicOAuthMarketplaceListingRun;
+}
+
+export interface PublicOAuthMarketplaceListingRunList {
+  items: PublicOAuthMarketplaceListingRun[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export function getPublicOAuthMarketplaceListingStatus() {
+  return request<PublicOAuthMarketplaceListingGateStatus>(
+    apiPath('/org-admin/developer-portal/public-oauth-marketplace-listings/status'),
+  );
+}
+
+export function listPublicOAuthMarketplaceListingRuns(page = 1, pageSize = 20) {
+  const params = new URLSearchParams({
+    page: String(page),
+    page_size: String(pageSize),
+  });
+  return request<PublicOAuthMarketplaceListingRunList>(
+    apiPath(`/org-admin/developer-portal/public-oauth-marketplace-listings/runs?${params}`),
+  );
+}
+
+export function startPublicOAuthMarketplaceListingFromPublishingRun(
+  oauthMarketplacePublishingRunId: string,
+  input: PublicOAuthMarketplaceListingSubmitInput,
+) {
+  return request<PublicOAuthMarketplaceListingRunResult>(
+    apiPath(
+      `/org-admin/developer-portal/public-oauth-marketplace-listings/publishing-runs/${oauthMarketplacePublishingRunId}/start`,
+    ),
+    {
+      method: 'POST',
+      body: JSON.stringify(input),
+    },
+  );
+}
+
+export function approvePublicOAuthMarketplaceListingRun(runId: string) {
+  return request<PublicOAuthMarketplaceListingRunResult>(
+    apiPath(`/org-admin/developer-portal/public-oauth-marketplace-listings/runs/${runId}/approve`),
+    {
+      method: 'POST',
+    },
+  );
+}
