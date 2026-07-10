@@ -9,14 +9,14 @@ Formal scope for **Version 5.14 — Production Distribution Depth**. Builds on s
 
 Extend partial 5.13 operator-gated scaffolds (native passkey client, marketplace publishing audit, fully autonomous API filing audit, unredacted export audit) toward controlled distribution and live export surfaces. Each epic ships as a **Partial** capability behind feature flags with tests and documentation.
 
-## Epic outcomes (planned)
+## Epic outcomes (Partial ✅)
 
 | Epic | Theme                                 | 5.14 outcome | Summary                                                                      |
 | ---- | ------------------------------------- | ------------ | ---------------------------------------------------------------------------- |
-| 1    | Live unredacted benchmark blob export | Partial      | Secure export pipeline scaffold from approved unredacted export audit runs   |
-| 2    | Unsupervised autonomous filing loops  | Partial      | Operator-gated unsupervised filing loop audit from fully autonomous API runs |
-| 3    | Public OAuth marketplace listings     | Partial      | Public listing publish scaffold from approved marketplace publishing runs    |
-| 4    | Native mobile app store distribution  | Partial      | App store distribution readiness audit from native passkey client runs       |
+| 1    | Live unredacted benchmark blob export | Partial ✅   | Secure export pipeline scaffold from approved unredacted export audit runs   |
+| 2    | Unsupervised autonomous filing loops  | Partial ✅   | Operator-gated unsupervised filing loop audit from fully autonomous API runs |
+| 3    | Public OAuth marketplace listings     | Partial ✅   | Public listing publish scaffold from approved marketplace publishing runs    |
+| 4    | Native mobile app store distribution  | Partial ✅   | App store distribution readiness audit from native passkey client runs       |
 
 ## Shipped from 5.13 (foundation — do not regress)
 
