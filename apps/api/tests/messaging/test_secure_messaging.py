@@ -5,6 +5,7 @@ import uuid
 from fastapi.testclient import TestClient
 
 from api.core.messaging import get_messaging_center_status
+from tests.helpers.client_payload import sample_client_payload
 
 
 def _create_client(
@@ -14,7 +15,7 @@ def _create_client(
     display_name: str,
     email: str | None = None,
 ) -> str:
-    payload: dict[str, str] = {"display_name": display_name}
+    payload = sample_client_payload(display_name=display_name)
     if email:
         payload["email"] = email
     response = api_client.post("/api/v1/clients", headers=headers, json=payload)

@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from api.core.feature_flags import get_feature_flags
 from api.core.portal_push import get_portal_push_settings
 from api.modules.client_portal.push_models import PortalPushDeliveryLog, PortalPushDeliveryStatus
+from tests.helpers.client_payload import sample_client_payload
 
 
 @pytest.fixture
@@ -38,7 +39,7 @@ def _create_client(api_client: TestClient, headers: dict[str, str]) -> str:
     response = api_client.post(
         "/api/v1/clients",
         headers=headers,
-        json={"display_name": f"Push Client {uuid.uuid4().hex[:6]}"},
+        json=sample_client_payload(display_name=f"Push Client {uuid.uuid4().hex[:6]}"),
     )
     assert response.status_code == 201, response.text
     return response.json()["id"]

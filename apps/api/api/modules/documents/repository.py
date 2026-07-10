@@ -54,13 +54,19 @@ class DocumentRepository:
         *,
         organization_id: uuid.UUID | None = None,
         include_versions: bool = False,
+        include_metadata: bool = True,
     ) -> Document | None:
         uid = uuid.UUID(str(document_id))
         query = select(Document).where(Document.id == uid, Document.deleted_at.is_(None))
         if organization_id is not None:
             query = query.where(Document.organization_id == organization_id)
+        load_options = []
         if include_versions:
-            query = query.options(selectinload(Document.versions))
+            load_options.append(selectinload(Document.versions))
+        if include_metadata:
+            load_options.append(selectinload(Document.extracted_metadata))
+        if load_options:
+            query = query.options(*load_options)
         result = await self._session.execute(query)
         return result.scalar_one_or_none()
 
@@ -211,3 +217,21 @@ class DocumentRepository:
             .limit(1)
         )
         return result.scalar_one_or_none()
+
+    async def list_case_parsed_credit_reports(
+        self,
+        *,
+        organization_id: uuid.UUID,
+        case_id: uuid.UUID,
+    ) -> list[DocumentParsedCreditReport]:
+        result = await self._session.execute(
+            select(DocumentParsedCreditReport)
+            .join(Document, Document.id == DocumentParsedCreditReport.document_id)
+            .where(
+                DocumentParsedCreditReport.organization_id == organization_id,
+                Document.case_id == case_id,
+                Document.deleted_at.is_(None),
+            )
+            .order_by(DocumentParsedCreditReport.parsed_at.desc())
+        )
+        return list(result.scalars().all())

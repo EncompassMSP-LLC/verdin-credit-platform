@@ -61,6 +61,20 @@ _COLLECTION_BALANCE_RE = re.compile(r"^Balance:\s*\$?([\d,]+\.?\d*)$", re.I | re
 _COLLECTION_STATUS_RE = re.compile(r"^Status:\s*(.+)$", re.I | re.M)
 
 _REPORT_DATE_RE = re.compile(r"^Report Date:\s*(\d{1,2}/\d{1,2}/\d{4})$", re.I | re.M)
+_ACR_REPORT_DATE_RE = re.compile(r"Credit Report Date\s*\n(\d{1,2}/\d{1,2}/\d{4})", re.I)
+_DATE_CREATED_RE = re.compile(r"Date Created:\s*\n(\d{1,2}/\d{1,2}/\d{4})", re.I)
+_PREPARED_FOR_RE = re.compile(
+    r"Personal Credit Report for:\s*\n([A-Z][A-Z .'-]{2,80})",
+    re.I | re.M,
+)
+_ACR_NAME_RE = re.compile(r"^Name\s*\n([A-Z][A-Z .'-]{2,80})", re.I | re.M)
+_ACR_ACCOUNT_MARKER = re.compile(r"Account Name\s*\n", re.I)
+_ACR_INFO_MARKER = re.compile(r"Account Information\s*\n", re.I)
+_ACR_BALANCE_RE = re.compile(r"Balance\s+\$?([\d,]+)", re.I)
+_ACR_OPENED_RE = re.compile(r"Date Opened\s+(\d{1,2}/\d{1,2}/\d{4})", re.I)
+_ACR_STATUS_RE = re.compile(r"Pay Status\s+>?([^<\n]+?)<?", re.I)
+_ACR_TYPE_RE = re.compile(r"Account Type\s+(.+?)(?:\s+Loan Type|\n)", re.I)
+_ACR_UPDATED_RE = re.compile(r"Date Updated\s+(\d{1,2}/\d{1,2}/\d{4})", re.I)
 
 
 def _first(pattern: re.Pattern[str], text: str) -> str | None:
@@ -71,7 +85,11 @@ def _first(pattern: re.Pattern[str], text: str) -> str | None:
 
 
 def extract_consumer(section_text: str, full_text: str) -> tuple[ConsumerInfo | None, dict[str, float]]:
-    name = _first(_NAME_RE, section_text)
+    name = (
+        _first(_NAME_RE, section_text)
+        or _first(_ACR_NAME_RE, section_text)
+        or _first(_PREPARED_FOR_RE, full_text)
+    )
     dob = _first(_DOB_RE, section_text)
     ssn_raw = _first(_SSN_RE, section_text)
     ssn_masked = mask_ssn(ssn_raw) if ssn_raw else mask_ssn(full_text)
@@ -103,7 +121,66 @@ def extract_consumer(section_text: str, full_text: str) -> tuple[ConsumerInfo | 
     )
 
 
-def extract_accounts(section_text: str) -> tuple[tuple[TradelineAccount, ...], dict[str, float]]:
+def _parse_tu_acr_header(header_text: str) -> tuple[str | None, str | None]:
+    lines = [line.strip() for line in header_text.splitlines() if line.strip()]
+    if not lines:
+        return None, None
+    if len(lines) >= 2 and re.search(r"[*Xx\d]{4,}$", lines[1]):
+        creditor = lines[0]
+        account_number_raw = lines[1]
+        return creditor, account_number_raw
+    combined = lines[0]
+    account_number_raw = combined.split()[-1] if combined else None
+    creditor = re.sub(r"\s+[A-Z0-9*]{4,}$", "", combined).strip()
+    return creditor or None, account_number_raw
+
+
+def _extract_tu_acr_accounts(text: str) -> list[tuple[str, str, str]]:
+    """Return (creditor, account_number_raw, info_block) tuples from ACR layout."""
+    results: list[tuple[str, str, str]] = []
+    seen: set[tuple[str, str]] = set()
+
+    def _add(creditor: str | None, account_number_raw: str, info_block: str) -> None:
+        if not creditor:
+            return
+        key = (creditor, account_number_raw)
+        if key in seen:
+            return
+        seen.add(key)
+        results.append((creditor, account_number_raw, info_block))
+
+    for match in _ACR_ACCOUNT_MARKER.finditer(text):
+        tail = text[match.end() :]
+        info_match = _ACR_INFO_MARKER.search(tail)
+        if not info_match:
+            continue
+        header_text = tail[: info_match.start()]
+        info_block = tail[info_match.end() : info_match.end() + 2500]
+        creditor, account_number_raw = _parse_tu_acr_header(header_text)
+        _add(creditor, account_number_raw or "", info_block)
+
+    for info_match in _ACR_INFO_MARKER.finditer(text):
+        before = text[max(0, info_match.start() - 400) : info_match.start()]
+        if re.search(r"Account Name\s*\n", before, re.I):
+            continue
+        line_match = re.search(
+            r"(?:^|\n)([A-Z][A-Z0-9 &.'/-]{3,80}?)\s+([A-Z0-9*]{4,})\s*$",
+            before,
+            re.M,
+        )
+        if not line_match:
+            continue
+        info_block = text[info_match.end() : info_match.end() + 2500]
+        _add(line_match.group(1).strip(), line_match.group(2).strip(), info_block)
+
+    return results
+
+
+def extract_accounts(
+    section_text: str,
+    *,
+    full_text: str | None = None,
+) -> tuple[tuple[TradelineAccount, ...], dict[str, float]]:
     accounts: list[TradelineAccount] = []
     field_confidence: dict[str, float] = {}
 
@@ -152,6 +229,54 @@ def extract_accounts(section_text: str) -> tuple[tuple[TradelineAccount, ...], d
                 confidence=max(account_scores) if account_scores else 0.0,
             )
         )
+
+    if not accounts:
+        acr_source = section_text or full_text or ""
+        for index, (creditor, account_number_raw, block) in enumerate(
+            _extract_tu_acr_accounts(acr_source)
+        ):
+            balance = parse_balance(_first(_ACR_BALANCE_RE, block))
+            open_date = _first(_ACR_OPENED_RE, block)
+            payment_status = _first(_ACR_STATUS_RE, block)
+            account_type = _first(_ACR_TYPE_RE, block)
+            date_reported = _first(_ACR_UPDATED_RE, block)
+            account_masked = (
+                mask_account_number(account_number_raw) if account_number_raw else None
+            )
+
+            prefix = f"accounts[{index}]"
+            if creditor:
+                field_confidence[f"{prefix}.creditor_name"] = _FIELD_CONFIDENCE
+            if account_masked:
+                field_confidence[f"{prefix}.account_number_masked"] = _FIELD_CONFIDENCE
+            if account_type:
+                field_confidence[f"{prefix}.account_type"] = _FIELD_CONFIDENCE
+            if balance is not None:
+                field_confidence[f"{prefix}.balance"] = _FIELD_CONFIDENCE
+            if payment_status:
+                field_confidence[f"{prefix}.payment_status"] = _FIELD_CONFIDENCE
+            if open_date:
+                field_confidence[f"{prefix}.open_date"] = _FIELD_CONFIDENCE
+            if date_reported:
+                field_confidence[f"{prefix}.date_reported"] = _FIELD_CONFIDENCE
+
+            account_scores = [
+                field_confidence[key] for key in field_confidence if key.startswith(prefix)
+            ]
+            accounts.append(
+                TradelineAccount(
+                    creditor_name=creditor,
+                    account_number_masked=account_masked,
+                    account_type=account_type,
+                    balance=balance,
+                    credit_limit=None,
+                    payment_status=payment_status,
+                    open_date=open_date,
+                    date_reported=date_reported,
+                    bureau="transunion",
+                    confidence=max(account_scores) if account_scores else 0.0,
+                )
+            )
 
     return tuple(accounts), field_confidence
 
@@ -282,6 +407,8 @@ def build_summary(
 
 def extract_report_date(full_text: str) -> tuple[str | None, dict[str, float]]:
     report_date = _first(_REPORT_DATE_RE, full_text)
+    if not report_date:
+        report_date = _first(_ACR_REPORT_DATE_RE, full_text) or _first(_DATE_CREATED_RE, full_text)
     if not report_date:
         return None, {}
     return report_date, {"report.report_date": _FIELD_CONFIDENCE}

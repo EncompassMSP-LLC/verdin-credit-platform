@@ -1,4 +1,4 @@
-"""Verdin Credit Platform API."""
+"""Ultimate Credit Repair LLC API."""
 
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager

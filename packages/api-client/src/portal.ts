@@ -1,4 +1,12 @@
-import { apiPath, request, uploadRequest } from './http';
+import {
+  ApiClientError,
+  apiPath,
+  getAccessToken,
+  getApiBaseUrl,
+  request,
+  uploadRequest,
+} from './http';
+import type { ConsentRecord, ConsentDocumentTemplateKey, ConsentType } from './compliance';
 
 export interface PortalLoginInput {
   email: string;
@@ -162,6 +170,80 @@ export async function uploadPortalCaseDocument(
   form.append('title', input.title);
   if (input.description) form.append('description', input.description);
   return uploadRequest<PortalDocument>(apiPath(`/portal/cases/${caseId}/documents`), form);
+}
+
+export interface PortalConsentRequirement {
+  template_key: ConsentDocumentTemplateKey;
+  consent_type: ConsentType;
+  label: string;
+  title: string;
+  is_signed: boolean;
+  consent_id: string | null;
+  legal_review_status: string;
+}
+
+export interface PortalCaseConsentsResponse {
+  items: PortalConsentRequirement[];
+  legal_review_notice: string;
+}
+
+export interface SignPortalConsentInput {
+  template_key: ConsentDocumentTemplateKey;
+  signer_name: string;
+  attestation_accepted: boolean;
+  signature_file?: File | null;
+}
+
+export function getPortalConsentPreviewUrl(
+  caseId: string,
+  templateKey: ConsentDocumentTemplateKey,
+): string {
+  return apiPath(`/portal/cases/${caseId}/consents/${templateKey}/preview`);
+}
+
+export async function downloadPortalConsentPreview(
+  caseId: string,
+  templateKey: ConsentDocumentTemplateKey,
+): Promise<{ blob: Blob; filename: string }> {
+  const url = `${getApiBaseUrl()}${getPortalConsentPreviewUrl(caseId, templateKey)}`;
+  const headers: Record<string, string> = {};
+  const token = getAccessToken();
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const response = await fetch(url, { headers });
+  if (!response.ok) {
+    const error = (await response.json().catch(() => ({
+      detail: 'Request failed',
+    }))) as { detail?: string; code?: string };
+    throw new ApiClientError(
+      error.detail || `HTTP ${response.status}`,
+      response.status,
+      error.code,
+    );
+  }
+
+  const disposition = response.headers.get('content-disposition');
+  const match = disposition ? /filename="([^"]+)"/.exec(disposition) : null;
+  const filename = match?.[1] ?? `consent-preview-${templateKey}.pdf`;
+  return { blob: await response.blob(), filename };
+}
+
+export async function listPortalCaseConsents(caseId: string): Promise<PortalCaseConsentsResponse> {
+  return request<PortalCaseConsentsResponse>(apiPath(`/portal/cases/${caseId}/consents`));
+}
+
+export async function signPortalCaseConsent(
+  caseId: string,
+  input: SignPortalConsentInput,
+): Promise<ConsentRecord> {
+  const form = new FormData();
+  form.append('template_key', input.template_key);
+  form.append('signer_name', input.signer_name);
+  form.append('attestation_accepted', String(input.attestation_accepted));
+  if (input.signature_file) form.append('signature_file', input.signature_file);
+  return uploadRequest<ConsentRecord>(apiPath(`/portal/cases/${caseId}/consents/sign`), form);
 }
 
 export async function listPortalCaseMessages(caseId: string): Promise<PortalCaseMessageThread> {

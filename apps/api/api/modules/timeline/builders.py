@@ -198,6 +198,32 @@ def account_dispute_status_changed_event(
     )
 
 
+def account_llm_recommendation_event(
+    account: Account,
+    performed_by: uuid.UUID,
+    *,
+    provider: str,
+    model: str,
+    prompt_hash: str,
+) -> PlatformEvent:
+    return PlatformEvent(
+        event_type="ACCOUNT_LLM_RECOMMENDATION_GENERATED",
+        event_category=EventCategory.ACCOUNT.value,
+        title="LLM account recommendation generated",
+        description=f"An LLM recommendation was generated for '{account.creditor_name}'.",
+        organization_id=account.organization_id,
+        case_id=account.case_id,
+        account_id=account.id,
+        performed_by=performed_by,
+        source_module="accounts",
+        metadata={
+            "provider": provider,
+            "model": model,
+            "prompt_hash": prompt_hash,
+        },
+    )
+
+
 def account_investigation_overdue_event(
     account: Account,
     performed_by: uuid.UUID,

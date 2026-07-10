@@ -1,5 +1,6 @@
-import { apiPath, request } from './http';
+import { apiPath, request, uploadRequest } from './http';
 import type { PaginatedResponse } from '@verdin/shared';
+import type { Document } from './documents';
 
 export type ClientStatus = 'active' | 'inactive';
 
@@ -11,8 +12,15 @@ export interface Client {
   display_name: string;
   email: string | null;
   phone: string | null;
+  mailing_address_line1: string | null;
+  mailing_address_line2: string | null;
+  mailing_city: string | null;
+  mailing_state: string | null;
+  mailing_postal_code: string | null;
   status: ClientStatus;
   notes: string | null;
+  identity_document_id: string | null;
+  proof_of_address_document_id: string | null;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
@@ -41,6 +49,11 @@ export interface CreateClientInput {
   display_name: string;
   email?: string | null;
   phone?: string | null;
+  mailing_address_line1: string;
+  mailing_address_line2?: string | null;
+  mailing_city: string;
+  mailing_state: string;
+  mailing_postal_code: string;
   status?: ClientStatus;
   notes?: string | null;
 }
@@ -49,6 +62,11 @@ export interface UpdateClientInput {
   display_name?: string;
   email?: string | null;
   phone?: string | null;
+  mailing_address_line1?: string | null;
+  mailing_address_line2?: string | null;
+  mailing_city?: string | null;
+  mailing_state?: string | null;
+  mailing_postal_code?: string | null;
   status?: ClientStatus;
   notes?: string | null;
 }
@@ -121,6 +139,32 @@ export async function updateClient(clientId: string, input: UpdateClientInput): 
 
 export async function deleteClient(clientId: string): Promise<void> {
   await request<void>(apiPath(`/clients/${clientId}`), { method: 'DELETE' });
+}
+
+export async function uploadClientIdentityDocument(
+  clientId: string,
+  caseId: string,
+  file: File,
+  title?: string,
+): Promise<Document> {
+  const form = new FormData();
+  form.append('file', file);
+  form.append('case_id', caseId);
+  if (title) form.append('title', title);
+  return uploadRequest<Document>(apiPath(`/clients/${clientId}/identity-document`), form);
+}
+
+export async function uploadClientProofOfAddressDocument(
+  clientId: string,
+  caseId: string,
+  file: File,
+  title?: string,
+): Promise<Document> {
+  const form = new FormData();
+  form.append('file', file);
+  form.append('case_id', caseId);
+  if (title) form.append('title', title);
+  return uploadRequest<Document>(apiPath(`/clients/${clientId}/proof-of-address-document`), form);
 }
 
 export async function createClientContact(

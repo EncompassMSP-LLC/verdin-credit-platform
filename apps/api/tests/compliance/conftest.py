@@ -34,6 +34,10 @@ async def test_client(db_session: AsyncSession, test_org: Organization) -> Clien
         organization_id=test_org.id,
         display_name="Compliance Test Client",
         email="client@compliance.test",
+        mailing_address_line1="456 Oak Ave",
+        mailing_city="Savannah",
+        mailing_state="GA",
+        mailing_postal_code="31401",
         status=ClientStatus.ACTIVE,
     )
     db_session.add(client)

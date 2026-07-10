@@ -2,12 +2,14 @@
 
 import uuid
 from datetime import UTC, date, datetime, timedelta
+from typing import Literal, cast
 
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.core.audit import apply_audit_on_create, apply_audit_on_update
 from api.core.events import publish_platform_event
+from api.core.feature_flags import FeatureFlag, is_feature_enabled
 from api.core.pagination import PaginatedResponse, paginate
 from api.core.permissions import has_permission
 from api.modules.accounts.dispute_drafts import (
@@ -26,9 +28,26 @@ from api.modules.accounts.dispute_letter_export import (
     DisputeLetterExportFormat,
     build_dispute_letter_export,
 )
+from api.modules.accounts.dispute_letter_mail_export import (
+    DisputeMailExportFormat,
+    build_mail_export,
+    build_mail_export_context,
+)
 from api.modules.accounts.dispute_letter_models import DisputeLetter, DisputeLetterStatus
 from api.modules.accounts.dispute_letter_repository import DisputeLetterRepository
+from api.modules.accounts.dispute_mail_addresses import normalize_consumer_address_lines
+from api.modules.accounts.dispute_mail_attachments import (
+    ResolvedMailPacketAttachments,
+    resolve_mail_packet_attachments,
+)
 from api.modules.accounts.intelligence import apply_account_intelligence, recommend_next_action
+from api.modules.accounts.intelligence_calibration import DiscrepancyScoringContext
+from api.modules.accounts.intelligence_context import (
+    build_discrepancy_context_map,
+    compare_case_reports,
+    cross_bureau_summary_payload,
+    discrepancy_context_for_account,
+)
 from api.modules.accounts.models import Account, DisputeStatus, InvestigationStatus
 from api.modules.accounts.permissions import ACCOUNT_DELETE_ROLE, ACCOUNT_WRITE_ROLE
 from api.modules.accounts.repository import AccountListFilters, AccountRepository
@@ -40,13 +59,19 @@ from api.modules.accounts.schemas import (
     AccountListParams,
     AccountResponse,
     AccountUpdate,
+    CrossBureauIntelligenceSummary,
     DisputeLetterResponse,
     DisputeReasonSuggestionResponse,
     MissingEvidenceResponse,
     NextActionItem,
 )
 from api.modules.auth.models import User
+from api.modules.cases.models import Case
 from api.modules.cases.repository import CaseRepository
+from api.modules.compliance.consent_gates import require_signed_consents
+from api.modules.compliance.repository import ConsentRepository
+from api.modules.documents.repository import DocumentRepository
+from api.modules.documents.storage import DocumentStorage, get_document_storage
 from api.modules.tasks.models import Task, TaskPriority
 from api.modules.tasks.repository import TaskRepository
 from api.modules.tasks.schemas import TaskResponse
@@ -91,12 +116,14 @@ class AccountService:
         task_repo: TaskRepository | None = None,
         dispute_letter_repo: DisputeLetterRepository | None = None,
         session: AsyncSession | None = None,
+        storage: DocumentStorage | None = None,
     ) -> None:
         self._accounts = account_repo
         self._cases = case_repo
         self._tasks = task_repo
         self._dispute_letters = dispute_letter_repo
         self._session = session
+        self._storage = storage or get_document_storage()
 
     @classmethod
     def from_session(cls, session: AsyncSession) -> "AccountService":
@@ -130,6 +157,79 @@ class AccountService:
                 detail="Insufficient permissions to delete accounts",
             )
 
+    async def _discrepancy_context_for_account(
+        self,
+        account: Account,
+    ) -> DiscrepancyScoringContext | None:
+        if self._session is None:
+            return None
+
+        document_repo = DocumentRepository(self._session)
+        parsed_reports = await document_repo.list_case_parsed_credit_reports(
+            organization_id=account.organization_id,
+            case_id=account.case_id,
+        )
+        reports_by_bureau: dict[str, tuple[uuid.UUID, dict[str, object]]] = {}
+        for parsed_report in parsed_reports:
+            bureau = str(parsed_report.bureau).lower()
+            if bureau in reports_by_bureau:
+                continue
+            reports_by_bureau[bureau] = (parsed_report.document_id, parsed_report.parsed_report)
+        if len(reports_by_bureau) < 2:
+            return None
+
+        result = compare_case_reports(
+            case_id=account.case_id,
+            reports_by_bureau=reports_by_bureau,
+        )
+        context_map = build_discrepancy_context_map(result.discrepancies)
+        return discrepancy_context_for_account(account, context_map)
+
+    async def _apply_intelligence(self, account: Account) -> None:
+        use_ml = is_feature_enabled(FeatureFlag.ENABLE_ML_SCORING) and is_feature_enabled(
+            FeatureFlag.ENABLE_AI
+        )
+        discrepancy = await self._discrepancy_context_for_account(account) if use_ml else None
+        apply_account_intelligence(
+            account,
+            discrepancy_context=discrepancy,
+            use_ml_calibration=use_ml,
+        )
+
+    async def _cross_bureau_intelligence_summary(
+        self,
+        organization_id: uuid.UUID,
+        case_id: uuid.UUID,
+    ) -> CrossBureauIntelligenceSummary | None:
+        if self._session is None:
+            return None
+
+        document_repo = DocumentRepository(self._session)
+        parsed_reports = await document_repo.list_case_parsed_credit_reports(
+            organization_id=organization_id,
+            case_id=case_id,
+        )
+        reports_by_bureau: dict[str, tuple[uuid.UUID, dict[str, object]]] = {}
+        for parsed_report in parsed_reports:
+            bureau = str(parsed_report.bureau).lower()
+            if bureau in reports_by_bureau:
+                continue
+            reports_by_bureau[bureau] = (parsed_report.document_id, parsed_report.parsed_report)
+        if len(reports_by_bureau) < 2:
+            return CrossBureauIntelligenceSummary(available=False)
+
+        result = compare_case_reports(case_id=case_id, reports_by_bureau=reports_by_bureau)
+        summary = cross_bureau_summary_payload(result.summary)
+        return CrossBureauIntelligenceSummary(
+            available=True,
+            reports_compared=list(result.reports_compared),
+            actionable_discrepancies=summary["actionable_discrepancies"],
+            dispute_ready_discrepancies=summary["dispute_ready_discrepancies"],
+            investigation_needed=summary["investigation_needed"],
+            consistent_tradelines=summary["consistent_tradelines"],
+            total_tradelines=summary["total_tradelines"],
+        )
+
     async def _validate_case(self, case_id: uuid.UUID, organization_id: uuid.UUID) -> None:
         if self._cases is None:
             return
@@ -159,6 +259,7 @@ class AccountService:
             organization_id=organization_id,
             search=params.search,
             case_id=params.case_id,
+            client_id=params.client_id,
             bureau=params.bureau,
             account_type=params.account_type,
             account_status=params.account_status,
@@ -214,7 +315,7 @@ class AccountService:
         if data.dispute_status is not None:
             account.dispute_status = data.dispute_status
 
-        apply_account_intelligence(account)
+        await self._apply_intelligence(account)
         apply_audit_on_create(account, user.id)
         created = await self._accounts.create(account)
         if self._session is not None:
@@ -245,6 +346,15 @@ class AccountService:
         organization_id = self._require_organization(user)
         await self._validate_case(case_id, organization_id)
         scoped = params.model_copy(update={"case_id": case_id})
+        return await self.list_accounts(user, scoped)
+
+    async def list_client_accounts(
+        self,
+        user: User,
+        client_id: uuid.UUID,
+        params: AccountListParams,
+    ) -> PaginatedResponse[AccountResponse]:
+        scoped = params.model_copy(update={"client_id": client_id})
         return await self.list_accounts(user, scoped)
 
     @staticmethod
@@ -443,13 +553,36 @@ class AccountService:
             )
         return DisputeLetterResponse.from_model(dispute_letter)
 
+    async def _get_case_for_account(self, account: Account) -> Case:
+        if self._cases is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Case repository is not configured",
+            )
+        case = await self._cases.get_by_id(account.case_id, organization_id=account.organization_id)
+        if case is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Case not found",
+            )
+        return case
+
+    async def _require_dispute_mail_consents(self, case: Case) -> None:
+        if case.client_id is None or self._session is None:
+            return
+        await require_signed_consents(
+            ConsentRepository(self._session),
+            organization_id=case.organization_id,
+            client_id=case.client_id,
+        )
+
     async def export_dispute_letter(
         self,
         user: User,
         account_id: uuid.UUID,
         letter_id: uuid.UUID,
         *,
-        export_format: DisputeLetterExportFormat,
+        export_format: DisputeLetterExportFormat | DisputeMailExportFormat,
     ) -> tuple[bytes, str, str]:
         account = await self._get_account_for_user(account_id, user)
         if self._dispute_letters is None:
@@ -469,7 +602,313 @@ class AccountService:
                 detail="Dispute letter not found",
             )
 
-        return build_dispute_letter_export(dispute_letter, export_format)
+        if export_format in {"mail-letter", "mail-label", "mail-packet", "report-excerpt"}:
+            case = await self._get_case_for_account(account)
+            await self._require_dispute_mail_consents(case)
+
+        if export_format == "report-excerpt":
+            return await self._export_dispute_report_excerpt(account=account)
+
+        if export_format in {"mail-letter", "mail-label", "mail-packet"}:
+            return await self._build_mail_letter_export(
+                account=account,
+                dispute_letter=dispute_letter,
+                export_format=cast(DisputeMailExportFormat, export_format),
+            )
+
+        if export_format in {"text", "pdf"}:
+            return build_dispute_letter_export(
+                dispute_letter,
+                cast(DisputeLetterExportFormat, export_format),
+            )
+
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Unsupported export format: {export_format}",
+        )
+
+    async def export_case_dispute_mail_packets(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+    ) -> tuple[bytes, str, str]:
+        import zipfile
+        from io import BytesIO
+
+        organization_id = self._require_organization(user)
+        case = await self._get_case_by_id(case_id, organization_id)
+        await self._require_dispute_mail_consents(case)
+        consumer_address_lines = await self._resolve_consumer_address_lines(
+            organization_id=organization_id,
+            case_id=case_id,
+        )
+
+        if self._dispute_letters is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Dispute letter repository is not configured",
+            )
+
+        buffer = BytesIO()
+        packet_count = 0
+        with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as archive:
+            page = 1
+            while True:
+                page_result = await self.list_case_accounts(
+                    user,
+                    case_id,
+                    params=AccountListParams(page=page, page_size=100),
+                )
+                for account_summary in page_result.items:
+                    account = await self._accounts.get_by_id(
+                        account_summary.id,
+                        organization_id=organization_id,
+                    )
+                    if account is None:
+                        continue
+                    letters = await self._dispute_letters.list_for_account(
+                        organization_id=organization_id,
+                        account_id=account.id,
+                    )
+                    if not letters:
+                        continue
+                    dispute_letter = letters[0]
+                    context = build_mail_export_context(
+                        account=account,
+                        case=case,
+                        dispute_letter=dispute_letter,
+                        consumer_address_lines=consumer_address_lines,
+                    )
+                    attachments = await self._resolve_mail_packet_attachments(
+                        organization_id=organization_id,
+                        case=case,
+                        account=account,
+                    )
+                    content, filename, _ = build_mail_export(
+                        dispute_letter,
+                        context,
+                        "mail-packet",
+                        attachments=attachments,
+                    )
+                    archive.writestr(filename, content)
+                    packet_count += 1
+
+                if page >= page_result.pages:
+                    break
+                page += 1
+
+        if packet_count == 0:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No dispute letter drafts found on this case",
+            )
+
+        short_case_id = str(case_id).split("-", 1)[0]
+        return (
+            buffer.getvalue(),
+            f"case-mail-packets-{short_case_id}.zip",
+            "application/zip",
+        )
+
+    async def export_case_dispute_report_excerpts(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+    ) -> tuple[bytes, str, str]:
+        import zipfile
+        from io import BytesIO
+
+        from api.modules.accounts.dispute_mail_attachments import build_account_report_excerpt
+
+        organization_id = self._require_organization(user)
+        case = await self._get_case_by_id(case_id, organization_id)
+        await self._require_dispute_mail_consents(case)
+
+        if self._dispute_letters is None or self._session is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Dispute letter repository is not configured",
+            )
+
+        buffer = BytesIO()
+        excerpt_count = 0
+        with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as archive:
+            page = 1
+            while True:
+                page_result = await self.list_case_accounts(
+                    user,
+                    case_id,
+                    params=AccountListParams(page=page, page_size=100),
+                )
+                for account_summary in page_result.items:
+                    account = await self._accounts.get_by_id(
+                        account_summary.id,
+                        organization_id=organization_id,
+                    )
+                    if account is None:
+                        continue
+                    letters = await self._dispute_letters.list_for_account(
+                        organization_id=organization_id,
+                        account_id=account.id,
+                    )
+                    if not letters:
+                        continue
+
+                    result = await build_account_report_excerpt(
+                        self._session,
+                        self._storage,
+                        organization_id=organization_id,
+                        case_id=case_id,
+                        account=account,
+                    )
+                    if result is None:
+                        continue
+                    content, filename = result
+                    archive.writestr(filename, content)
+                    excerpt_count += 1
+
+                if page >= page_result.pages:
+                    break
+                page += 1
+
+        if excerpt_count == 0:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No dispute letter drafts found on this case",
+            )
+
+        short_case_id = str(case_id).split("-", 1)[0]
+        return (
+            buffer.getvalue(),
+            f"case-report-excerpts-{short_case_id}.zip",
+            "application/zip",
+        )
+
+    async def _build_mail_letter_export(
+        self,
+        *,
+        account: Account,
+        dispute_letter: DisputeLetter,
+        export_format: DisputeMailExportFormat,
+    ) -> tuple[bytes, str, str]:
+        case = await self._get_case_for_account(account)
+        consumer_address_lines = await self._resolve_consumer_address_lines(
+            organization_id=account.organization_id,
+            case_id=account.case_id,
+        )
+        context = build_mail_export_context(
+            account=account,
+            case=case,
+            dispute_letter=dispute_letter,
+            consumer_address_lines=consumer_address_lines,
+        )
+        attachments = None
+        if export_format == "mail-packet":
+            attachments = await self._resolve_mail_packet_attachments(
+                organization_id=account.organization_id,
+                case=case,
+                account=account,
+            )
+        return build_mail_export(
+            dispute_letter,
+            context,
+            export_format,
+            attachments=attachments,
+        )
+
+    async def _resolve_mail_packet_attachments(
+        self,
+        *,
+        organization_id: uuid.UUID,
+        case: Case,
+        account: Account,
+    ) -> ResolvedMailPacketAttachments:
+        if self._session is None:
+            return ResolvedMailPacketAttachments(
+                identity=None,
+                proof_of_address=None,
+                credit_report=None,
+            )
+
+        return await resolve_mail_packet_attachments(
+            self._session,
+            self._storage,
+            organization_id=organization_id,
+            case=case,
+            account=account,
+        )
+
+    async def _export_dispute_report_excerpt(
+        self,
+        *,
+        account: Account,
+    ) -> tuple[bytes, str, str]:
+        from api.modules.accounts.dispute_mail_attachments import build_account_report_excerpt
+
+        if self._session is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Database session is not configured",
+            )
+
+        result = await build_account_report_excerpt(
+            self._session,
+            self._storage,
+            organization_id=account.organization_id,
+            case_id=account.case_id,
+            account=account,
+        )
+        if result is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No credit report found for this account bureau",
+            )
+        content, filename = result
+        return content, filename, "application/pdf"
+
+    async def _get_case_by_id(self, case_id: uuid.UUID, organization_id: uuid.UUID) -> Case:
+        if self._cases is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Case repository is not configured",
+            )
+        case = await self._cases.get_by_id(case_id, organization_id=organization_id)
+        if case is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Case not found",
+            )
+        return case
+
+    async def _resolve_consumer_address_lines(
+        self,
+        *,
+        organization_id: uuid.UUID,
+        case_id: uuid.UUID,
+    ) -> list[str]:
+        if self._session is None:
+            return []
+
+        from sqlalchemy import select
+
+        from api.modules.documents.metadata_models import DocumentMetadata
+        from api.modules.documents.models import Document
+
+        result = await self._session.execute(
+            select(DocumentMetadata.addresses)
+            .join(Document, Document.id == DocumentMetadata.document_id)
+            .where(
+                Document.organization_id == organization_id,
+                Document.case_id == case_id,
+                Document.deleted_at.is_(None),
+            )
+            .order_by(DocumentMetadata.extracted_at.desc())
+            .limit(5)
+        )
+        for addresses in result.scalars():
+            if addresses:
+                return normalize_consumer_address_lines([line for line in addresses if line])
+        return []
 
     async def create_dispute_letter_review_task(
         self,
@@ -645,7 +1084,7 @@ class AccountService:
             else account.investigation_status
         )
         account.investigation_status = InvestigationStatus.OVERDUE
-        apply_account_intelligence(account)
+        await self._apply_intelligence(account)
         account.ai_recommended_next_action = recommend_next_action(account)
         apply_audit_on_update(account, user.id)
         updated = await self._accounts.update(account)
@@ -661,12 +1100,14 @@ class AccountService:
             )
         return updated
 
-    def _apply_dispute_sent_account_state(self, account: Account, *, sent_at: datetime) -> None:
+    async def _apply_dispute_sent_account_state(
+        self, account: Account, *, sent_at: datetime
+    ) -> None:
         account.dispute_status = DisputeStatus.DISPUTE_SENT
         account.last_dispute_date = sent_at.date()
         account.dispute_round += 1
         account.cra_dispute = True
-        apply_account_intelligence(account)
+        await self._apply_intelligence(account)
         account.ai_recommended_next_action = recommend_next_action(account)
 
     async def approve_dispute_letter(
@@ -739,6 +1180,9 @@ class AccountService:
                 detail="Dispute letter not found",
             )
 
+        case = await self._get_case_for_account(account)
+        await self._require_dispute_mail_consents(case)
+
         if dispute_letter.status == DisputeLetterStatus.SENT:
             await self._ensure_dispute_letter_followup_task(user, account, dispute_letter)
             return DisputeLetterResponse.from_model(dispute_letter)
@@ -753,7 +1197,7 @@ class AccountService:
         dispute_letter.status = DisputeLetterStatus.SENT
         dispute_letter.sent_at = now
         apply_audit_on_update(dispute_letter, user.id)
-        self._apply_dispute_sent_account_state(account, sent_at=now)
+        await self._apply_dispute_sent_account_state(account, sent_at=now)
         apply_audit_on_update(account, user.id)
         await self._accounts.update(account)
         if self._session is not None:
@@ -837,7 +1281,7 @@ class AccountService:
         account.dispute_status = DisputeStatus.AWAITING_RESPONSE
         if account.investigation_status == InvestigationStatus.NONE:
             account.investigation_status = InvestigationStatus.PENDING
-        apply_account_intelligence(account)
+        await self._apply_intelligence(account)
         account.ai_recommended_next_action = recommend_next_action(account)
         apply_audit_on_update(account, user.id)
         updated = await self._accounts.update(account)
@@ -879,7 +1323,7 @@ class AccountService:
         account.response_received = True
         account.dispute_status = target_status
         account.investigation_status = InvestigationStatus.COMPLETED
-        apply_account_intelligence(account)
+        await self._apply_intelligence(account)
         account.ai_recommended_next_action = recommend_next_action(account)
         apply_audit_on_update(account, user.id)
         updated = await self._accounts.update(account)
@@ -986,7 +1430,7 @@ class AccountService:
         for field, value in update_data.items():
             setattr(account, field, value)
 
-        apply_account_intelligence(account)
+        await self._apply_intelligence(account)
         if preserved_dispute is not None:
             account.dispute_status = preserved_dispute
         if preserved_action is not None:
@@ -1047,6 +1491,17 @@ class AccountService:
             for account in raw["next_action_queue"]
         ]
 
+        cross_bureau = None
+        if case_id is not None:
+            cross_bureau = await self._cross_bureau_intelligence_summary(organization_id, case_id)
+
+        scoring_model: Literal["heuristic", "calibrated"] = (
+            "calibrated"
+            if is_feature_enabled(FeatureFlag.ENABLE_ML_SCORING)
+            and is_feature_enabled(FeatureFlag.ENABLE_AI)
+            else "heuristic"
+        )
+
         return AccountIntelligenceSummary(
             total_accounts=raw["total_accounts"],
             total_balance=raw["total_balance"],
@@ -1066,4 +1521,6 @@ class AccountService:
                 AccountResponse.from_model(a) for a in raw["highest_risk_accounts"]
             ],
             next_action_queue=next_action_queue,
+            scoring_model=scoring_model,
+            cross_bureau=cross_bureau,
         )

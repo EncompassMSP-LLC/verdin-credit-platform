@@ -1,4 +1,5 @@
 -e ../../packages/job-orchestrator
+-e ../../packages/llm-gateway
 -e ../../packages/report-parsers
 -e ../../packages/document-classification
 -e ../../packages/document-metadata

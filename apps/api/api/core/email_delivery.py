@@ -35,6 +35,7 @@ class EmailDeliverySettings(BaseSettings):
     email_from_address: str | None = None
     email_smtp_host: str | None = None
     email_smtp_port: int = 587
+    email_smtp_use_tls: bool = True
     email_smtp_username: str | None = None
     email_smtp_password: str | None = None
     email_sendgrid_api_key: str | None = None
@@ -86,6 +87,7 @@ class SmtpEmailAdapter:
     def __init__(self, settings: EmailDeliverySettings) -> None:
         self._host = settings.email_smtp_host or ""
         self._port = settings.email_smtp_port
+        self._use_tls = settings.email_smtp_use_tls
         self._username = settings.email_smtp_username
         self._password = settings.email_smtp_password
 
@@ -100,7 +102,8 @@ class SmtpEmailAdapter:
                 msg.add_alternative(message.body_html, subtype="html")
 
             with smtplib.SMTP(self._host, self._port, timeout=30) as smtp:
-                smtp.starttls()
+                if self._use_tls:
+                    smtp.starttls()
                 if self._username and self._password:
                     smtp.login(self._username, self._password)
                 smtp.send_message(msg)

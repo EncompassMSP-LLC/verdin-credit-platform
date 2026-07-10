@@ -1,9 +1,10 @@
 FROM python:3.13-slim AS base
 
 WORKDIR /app
+ENV PYTHONPATH=/app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libpq-dev gcc \
+    libpq-dev gcc postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
 COPY apps/api/requirements.txt .
@@ -21,4 +22,19 @@ COPY apps/api .
 
 EXPOSE 8000
 
+FROM base AS development
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+FROM base AS production
+RUN printf '%s\n' \
+    '#!/bin/sh' \
+    'set -e' \
+    'if [ "${SKIP_DB_MIGRATIONS:-false}" != "true" ]; then' \
+    '  echo "Running database migrations..."' \
+    '  alembic upgrade head' \
+    'fi' \
+    'echo "Starting API server..."' \
+    'exec "$@"' \
+    > /entrypoint.sh && chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]

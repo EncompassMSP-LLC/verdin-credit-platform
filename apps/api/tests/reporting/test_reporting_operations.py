@@ -5,13 +5,14 @@ import uuid
 from fastapi.testclient import TestClient
 
 from api.modules.auth.models import User
+from tests.helpers.client_payload import sample_client_payload
 
 
 def _create_client(api_client: TestClient, headers: dict[str, str]) -> str:
     response = api_client.post(
         "/api/v1/clients",
         headers=headers,
-        json={"display_name": f"Reporting Client {uuid.uuid4().hex[:6]}"},
+        json=sample_client_payload(display_name=f"Reporting Client {uuid.uuid4().hex[:6]}"),
     )
     assert response.status_code == 201, response.text
     return response.json()["id"]

@@ -97,6 +97,8 @@ class CaseResponse(BaseSchema):
     notes: str | None
     opened_at: datetime
     closed_at: datetime | None
+    identity_document_id: uuid.UUID | None
+    proof_of_address_document_id: uuid.UUID | None
     created_at: datetime
     updated_at: datetime
     deleted_at: datetime | None
@@ -121,6 +123,8 @@ class CaseResponse(BaseSchema):
             notes=case.notes,
             opened_at=case.opened_at,
             closed_at=case.closed_at,
+            identity_document_id=case.identity_document_id,
+            proof_of_address_document_id=case.proof_of_address_document_id,
             created_at=case.created_at,
             updated_at=case.updated_at,
             deleted_at=case.deleted_at,

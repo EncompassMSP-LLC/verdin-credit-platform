@@ -21,6 +21,11 @@ class ClientCreate(BaseSchema):
     display_name: str = Field(min_length=1, max_length=255)
     email: EmailStr | None = None
     phone: str | None = Field(default=None, max_length=50)
+    mailing_address_line1: str = Field(min_length=1, max_length=255)
+    mailing_address_line2: str | None = Field(default=None, max_length=255)
+    mailing_city: str = Field(min_length=1, max_length=100)
+    mailing_state: str = Field(min_length=1, max_length=50)
+    mailing_postal_code: str = Field(min_length=1, max_length=20)
     status: ClientStatus = ClientStatus.ACTIVE
     notes: str | None = None
 
@@ -29,6 +34,11 @@ class ClientUpdate(BaseSchema):
     display_name: str | None = Field(default=None, min_length=1, max_length=255)
     email: EmailStr | None = None
     phone: str | None = Field(default=None, max_length=50)
+    mailing_address_line1: str | None = Field(default=None, min_length=1, max_length=255)
+    mailing_address_line2: str | None = Field(default=None, max_length=255)
+    mailing_city: str | None = Field(default=None, min_length=1, max_length=100)
+    mailing_state: str | None = Field(default=None, min_length=1, max_length=50)
+    mailing_postal_code: str | None = Field(default=None, min_length=1, max_length=20)
     status: ClientStatus | None = None
     notes: str | None = None
 
@@ -48,6 +58,13 @@ class ClientResponse(BaseSchema):
     phone: str | None
     status: ClientStatus
     notes: str | None
+    mailing_address_line1: str | None
+    mailing_address_line2: str | None
+    mailing_city: str | None
+    mailing_state: str | None
+    mailing_postal_code: str | None
+    identity_document_id: uuid.UUID | None
+    proof_of_address_document_id: uuid.UUID | None
     created_at: datetime
     updated_at: datetime
     deleted_at: datetime | None
@@ -64,6 +81,13 @@ class ClientResponse(BaseSchema):
             phone=client.phone,
             status=client.status,
             notes=client.notes,
+            mailing_address_line1=client.mailing_address_line1,
+            mailing_address_line2=client.mailing_address_line2,
+            mailing_city=client.mailing_city,
+            mailing_state=client.mailing_state,
+            mailing_postal_code=client.mailing_postal_code,
+            identity_document_id=client.identity_document_id,
+            proof_of_address_document_id=client.proof_of_address_document_id,
             created_at=client.created_at,
             updated_at=client.updated_at,
             deleted_at=client.deleted_at,

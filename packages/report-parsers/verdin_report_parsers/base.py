@@ -29,7 +29,7 @@ class ParsedDocument:
         parts = [self.title, self.file_name]
         if self.ocr_text:
             parts.append(self.ocr_text)
-        return " ".join(parts)
+        return "\n\n".join(parts)
 
 
 @runtime_checkable

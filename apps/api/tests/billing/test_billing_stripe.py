@@ -111,6 +111,22 @@ def test_setup_and_subscribe_flow(
     assert billing["subscription_status"] == "active"
 
 
+def test_disconnect_pilot_billing_record(
+    api_client: TestClient,
+    admin_headers: dict[str, str],
+    billing_env: None,
+    pilot_billing_account: None,
+) -> None:
+    response = api_client.post("/api/v1/billing/disconnect-pilot", headers=admin_headers)
+    assert response.status_code == 200, response.text
+    assert response.json()["disconnected"] is True
+
+    org_summary = api_client.get("/api/v1/org-admin/organization", headers=admin_headers)
+    billing = org_summary.json()["billing"]
+    assert billing is not None
+    assert billing["stripe_customer_id"] is None
+
+
 def test_stripe_webhook_updates_subscription(
     api_client: TestClient,
     admin_headers: dict[str, str],

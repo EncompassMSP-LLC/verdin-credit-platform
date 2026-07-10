@@ -1,4 +1,4 @@
-export const APP_NAME = 'Verdin Credit Platform';
+export const APP_NAME = 'Ultimate Credit Repair LLC';
 export const APP_VERSION = '4.2.0';
 
 export type UserRole = 'owner' | 'admin' | 'case_manager' | 'reviewer' | 'read_only';

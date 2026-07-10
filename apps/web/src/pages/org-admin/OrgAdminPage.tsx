@@ -13,6 +13,8 @@ import {
 } from '@verdin/api-client';
 import { Badge, Button, Card } from '@verdin/ui';
 import { DashboardMetricCard } from '../../components/dashboard/DashboardMetricCard';
+import { BillingSettingsCard } from '../../components/org-admin/BillingSettingsCard';
+import { EmailDeliverySettingsCard } from '../../components/org-admin/EmailDeliverySettingsCard';
 import { featureFlags } from '../../lib/feature-flags';
 
 const inputClass =
@@ -51,6 +53,8 @@ export function OrgAdminPage() {
       </div>
 
       <OrgAdminStatusCard />
+      <BillingSettingsCard />
+      <EmailDeliverySettingsCard />
       <DeveloperPortalCard onKeyRotated={setCreatedKey} />
       <OrganizationSummaryCard />
       <ApiKeysPanel onKeyCreated={setCreatedKey} />

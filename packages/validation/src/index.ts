@@ -176,6 +176,11 @@ export const createClientSchema = z.object({
   display_name: z.string().min(1, 'Display name is required').max(255),
   email: z.string().email('Invalid email').optional().or(z.literal('')),
   phone: z.string().max(50).optional().or(z.literal('')),
+  mailing_address_line1: z.string().min(1, 'Street address is required').max(255),
+  mailing_address_line2: z.string().max(255).optional().or(z.literal('')),
+  mailing_city: z.string().min(1, 'City is required').max(100),
+  mailing_state: z.string().min(1, 'State is required').max(50),
+  mailing_postal_code: z.string().min(1, 'ZIP / postal code is required').max(20),
   status: clientStatusSchema,
   notes: z.string().optional().or(z.literal('')),
 });
@@ -197,3 +202,18 @@ export type CreateClientInput = z.infer<typeof createClientSchema>;
 export type UpdateClientInput = z.infer<typeof updateClientSchema>;
 export type CreateClientContactInput = z.infer<typeof createClientContactSchema>;
 export type UpdateClientContactInput = z.infer<typeof updateClientContactSchema>;
+
+export const clientEnrollmentIntakeSchema = z.object({
+  email: z.string().email('Invalid email'),
+  password: z.string().min(8, 'Password must be at least 8 characters').max(72),
+  first_name: z.string().min(1, 'First name is required').max(100),
+  last_name: z.string().min(1, 'Last name is required').max(100),
+  phone: z.string().max(50).optional().or(z.literal('')),
+  mailing_address_line1: z.string().min(1, 'Street address is required').max(255),
+  mailing_address_line2: z.string().max(255).optional().or(z.literal('')),
+  mailing_city: z.string().min(1, 'City is required').max(100),
+  mailing_state: z.string().min(1, 'State is required').max(50),
+  mailing_postal_code: z.string().min(1, 'ZIP / postal code is required').max(20),
+});
+
+export type ClientEnrollmentIntakeInput = z.infer<typeof clientEnrollmentIntakeSchema>;

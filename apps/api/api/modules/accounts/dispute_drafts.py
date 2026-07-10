@@ -278,7 +278,7 @@ def build_dispute_body(account: Account, case: Case, dispute_reasons: list[str])
         f"Please investigate the following items:\n{reason_lines}\n\n"
         "Please verify this information with the furnisher, provide the method of verification, "
         "and delete or correct any information that cannot be verified as complete and accurate.\n\n"
-        "Sincerely,\nVerdin Credit Platform"
+        "Sincerely,\nUltimate Credit Repair LLC"
     )
 
 
@@ -295,5 +295,5 @@ def build_furnisher_dispute_body(account: Account, case: Case, dispute_reasons: 
         f"{reason_lines}\n\n"
         "Correct or delete any information that cannot be verified as complete and accurate, "
         "and notify all consumer reporting agencies to whom you furnish data.\n\n"
-        "Sincerely,\nVerdin Credit Platform"
+        "Sincerely,\nUltimate Credit Repair LLC"
     )

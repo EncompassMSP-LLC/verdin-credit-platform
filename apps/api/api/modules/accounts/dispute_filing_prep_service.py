@@ -30,6 +30,9 @@ from api.modules.accounts.dispute_filing_prep_schemas import (
 from api.modules.accounts.permissions import ACCOUNT_READ_ROLE, ACCOUNT_WRITE_ROLE
 from api.modules.accounts.repository import AccountRepository
 from api.modules.auth.models import User
+from api.modules.cases.repository import CaseRepository
+from api.modules.compliance.consent_gates import require_signed_consents
+from api.modules.compliance.repository import ConsentRepository
 
 
 class DisputeFilingPrepService:
@@ -134,6 +137,16 @@ class DisputeFilingPrepService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Account not found",
             )
+
+        if self._session is not None:
+            case_repo = CaseRepository(self._session)
+            case = await case_repo.get_by_id(account.case_id, organization_id=organization_id)
+            if case is not None and case.client_id is not None:
+                await require_signed_consents(
+                    ConsentRepository(self._session),
+                    organization_id=organization_id,
+                    client_id=case.client_id,
+                )
 
         bureau_target = resolve_bureau_target(
             account,

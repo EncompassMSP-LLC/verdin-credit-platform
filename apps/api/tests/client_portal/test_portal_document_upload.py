@@ -15,6 +15,7 @@ from api.modules.documents.storage import (
     set_document_storage,
 )
 from tests.documents.conftest import sample_pdf_upload
+from tests.helpers.client_payload import sample_client_payload
 
 
 def _fake_enqueue(job_type: JobType, payload: dict | None = None) -> JobMessage:
@@ -43,7 +44,7 @@ def _create_client(
     display_name: str,
     email: str | None = None,
 ) -> str:
-    payload: dict[str, str] = {"display_name": display_name}
+    payload = sample_client_payload(display_name=display_name)
     if email:
         payload["email"] = email
     response = api_client.post("/api/v1/clients", headers=headers, json=payload)

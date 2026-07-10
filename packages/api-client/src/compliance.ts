@@ -1,11 +1,17 @@
-import type { PaginatedResponse } from '@verdin/shared';
+﻿import type { PaginatedResponse } from '@verdin/shared';
 
-import { apiPath, request } from './http';
+import { apiPath, request, uploadRequest } from './http';
 
 export type ConsentType =
   'croa_services' | 'fcra_dispute' | 'fdcpa_contact' | 'marketing' | 'data_processing';
 
 export type ConsentStatus = 'granted' | 'withdrawn';
+
+export type ConsentSignatureMethod =
+  'staff_upload' | 'portal_attestation' | 'portal_signature_image' | 'portal_generated_document';
+
+export type ConsentDocumentTemplateKey =
+  'croa_disclosure' | 'croa_service_agreement' | 'fcra_authorization';
 
 export type RetentionScope = 'documents' | 'communications' | 'audit_logs' | 'client_profiles';
 
@@ -66,6 +72,12 @@ export interface ConsentRecord {
   withdrawn_at: string | null;
   source: string;
   notes: string | null;
+  document_id: string | null;
+  signature_method: ConsentSignatureMethod | null;
+  signed_at: string | null;
+  signer_name: string | null;
+  document_template_key: string | null;
+  is_signed: boolean;
   created_at: string;
   updated_at: string;
   created_by_id: string | null;
@@ -169,6 +181,82 @@ export async function withdrawConsentRecord(consentId: string): Promise<ConsentR
   return request<ConsentRecord>(apiPath(`/compliance/consents/${consentId}/withdraw`), {
     method: 'POST',
   });
+}
+
+export interface UploadSignedConsentInput {
+  client_id: string;
+  case_id: string;
+  consent_type: ConsentType;
+  file: File;
+  signer_name?: string | null;
+  notes?: string | null;
+  document_template_key?: ConsentDocumentTemplateKey | null;
+}
+
+export interface ClientConsentGaps {
+  missing_template_keys: ConsentDocumentTemplateKey[];
+  missing_template_labels: string[];
+  missing_consent_types: ConsentType[];
+}
+
+export interface ConsentDocumentTemplate {
+  template_key: ConsentDocumentTemplateKey;
+  title: string;
+  body_text: string;
+  merge_field_defaults: Record<string, string> | null;
+  legal_review_status: string;
+  is_customized: boolean;
+  updated_at: string | null;
+}
+
+export interface UpdateConsentDocumentTemplateInput {
+  title: string;
+  body_text: string;
+  merge_field_defaults?: Record<string, string> | null;
+  legal_review_status?: string;
+}
+
+export async function uploadSignedConsentRecord(
+  input: UploadSignedConsentInput,
+): Promise<ConsentRecord> {
+  const form = new FormData();
+  form.append('client_id', input.client_id);
+  form.append('case_id', input.case_id);
+  form.append('consent_type', input.consent_type);
+  form.append('file', input.file);
+  if (input.signer_name) form.append('signer_name', input.signer_name);
+  if (input.notes) form.append('notes', input.notes);
+  if (input.document_template_key) {
+    form.append('document_template_key', input.document_template_key);
+  }
+  return uploadRequest<ConsentRecord>(apiPath('/compliance/consents/upload'), form);
+}
+
+export async function getClientConsentGaps(clientId: string): Promise<ClientConsentGaps> {
+  return request<ClientConsentGaps>(
+    `${apiPath('/compliance/consents/gaps')}?client_id=${encodeURIComponent(clientId)}`,
+  );
+}
+
+export async function listConsentDocumentTemplates(): Promise<ConsentDocumentTemplate[]> {
+  return request<ConsentDocumentTemplate[]>(apiPath('/compliance/consent-templates'));
+}
+
+export async function updateConsentDocumentTemplate(
+  templateKey: ConsentDocumentTemplateKey,
+  input: UpdateConsentDocumentTemplateInput,
+): Promise<ConsentDocumentTemplate> {
+  return request<ConsentDocumentTemplate>(apiPath(`/compliance/consent-templates/${templateKey}`), {
+    method: 'PUT',
+    body: input,
+  });
+}
+
+export function getConsentTemplatePreviewUrl(
+  templateKey: ConsentDocumentTemplateKey,
+  clientId: string,
+): string {
+  return `${apiPath(`/compliance/consent-templates/${templateKey}/preview`)}?client_id=${encodeURIComponent(clientId)}`;
 }
 
 export async function listRetentionPolicies(

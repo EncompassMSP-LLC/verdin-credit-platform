@@ -9,6 +9,7 @@ import { CaseLlmSummaryPanel } from '../../components/cases/CaseLlmSummaryPanel'
 import { CaseMessageThreadPanel } from '../../components/cases/CaseMessageThreadPanel';
 import { CasePriorityBadge, CaseStatusChip } from '../../components/cases/CaseBadges';
 import { CreditReportHistoryPanel } from '../../components/imports/CreditReportHistoryPanel';
+import { CrossBureauDiscrepancyPanel } from '../../components/imports/CrossBureauDiscrepancyPanel';
 import { featureFlags } from '../../lib/feature-flags';
 
 function formatDateTime(value: string | null) {
@@ -77,7 +78,10 @@ export function CaseDetailPage() {
           <h1 className="mt-2 text-2xl font-bold text-gray-900">{data.title}</h1>
           {data.case_number ? <p className="text-sm text-gray-500">{data.case_number}</p> : null}
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          <Link to={`/guides/dispute-workflow?case_id=${caseId}`}>
+            <Button variant="secondary">Dispute guide</Button>
+          </Link>
           <Link to={`/cases/${caseId}/edit`}>
             <Button variant="secondary">Edit</Button>
           </Link>
@@ -176,6 +180,12 @@ export function CaseDetailPage() {
         </Card>
 
         <CreditReportHistoryPanel caseId={caseId} className="lg:col-span-3" />
+
+        <CrossBureauDiscrepancyPanel
+          caseId={caseId}
+          className="lg:col-span-3"
+          id="cross-bureau-discrepancies"
+        />
 
         {featureFlags.enableClientPortal ? <CaseMessageThreadPanel caseId={caseId} /> : null}
 

@@ -67,7 +67,7 @@ class Document(Base, TimestampMixin, SoftDeleteMixin, AuditMixin):
         UUID(as_uuid=True), ForeignKey("users.id"), nullable=True
     )
 
-    case: Mapped["Case"] = relationship(back_populates="documents")
+    case: Mapped["Case"] = relationship(back_populates="documents", foreign_keys=[case_id])
     account: Mapped["Account | None"] = relationship()
     duplicate_of: Mapped["Document | None"] = relationship(remote_side=[id])
     extracted_metadata: Mapped["DocumentMetadata | None"] = relationship(

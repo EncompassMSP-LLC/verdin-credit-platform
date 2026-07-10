@@ -2,11 +2,12 @@
 
 import uuid
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, File, Form, Query, Response, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.core.pagination import PaginatedResponse
 from api.database.session import get_db
+from api.modules.accounts.dispute_letter_export import sanitize_content_disposition_filename
 from api.modules.accounts.schemas import (
     AccountListParams,
     AccountResponse,
@@ -28,6 +29,13 @@ from api.modules.cases.schemas import (
     CaseUpdate,
 )
 from api.modules.cases.service import CaseService
+from api.modules.documents.schemas import (
+    CaseCreditReportDiscrepanciesResponse,
+    DocumentResponse,
+    PrepareCreditReportDisputesRequest,
+    PrepareCreditReportDisputesResponse,
+)
+from api.modules.documents.service import DocumentService
 
 router = APIRouter(prefix="/cases", tags=["Cases"])
 
@@ -42,6 +50,10 @@ def get_case_llm_summary_service(db: AsyncSession = Depends(get_db)) -> CaseLlmS
 
 def get_account_service(db: AsyncSession = Depends(get_db)) -> AccountService:
     return AccountService.from_session(db)
+
+
+def get_document_service(db: AsyncSession = Depends(get_db)) -> DocumentService:
+    return DocumentService.from_session(db)
 
 
 def get_case_account_list_params(
@@ -128,6 +140,87 @@ async def get_case(
     service: CaseService = Depends(get_case_service),
 ) -> CaseResponse:
     return await service.get_case(current_user, case_id)
+
+
+@router.get(
+    "/{case_id}/credit-report-discrepancies",
+    response_model=CaseCreditReportDiscrepanciesResponse,
+)
+async def get_case_credit_report_discrepancies(
+    case_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> CaseCreditReportDiscrepanciesResponse:
+    return await service.get_case_credit_report_discrepancies(current_user, case_id)
+
+
+@router.post(
+    "/{case_id}/credit-report-discrepancies/prepare-disputes",
+    response_model=PrepareCreditReportDisputesResponse,
+)
+async def prepare_case_credit_report_disputes(
+    case_id: uuid.UUID,
+    body: PrepareCreditReportDisputesRequest,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> PrepareCreditReportDisputesResponse:
+    return await service.prepare_case_credit_report_disputes(current_user, case_id, body)
+
+
+@router.post(
+    "/{case_id}/identity-document",
+    response_model=DocumentResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def upload_case_identity_document(
+    case_id: uuid.UUID,
+    file: UploadFile = File(...),
+    title: str | None = Form(None),
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> DocumentResponse:
+    return await service.upload_identity_document(
+        current_user,
+        case_id=case_id,
+        file=file,
+        title=title,
+    )
+
+
+@router.get("/{case_id}/dispute-mail-packets/export")
+async def export_case_dispute_mail_packets(
+    case_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: AccountService = Depends(get_account_service),
+) -> Response:
+    content, file_name, media_type = await service.export_case_dispute_mail_packets(
+        current_user,
+        case_id,
+    )
+    safe_name = sanitize_content_disposition_filename(file_name)
+    return Response(
+        content=content,
+        media_type=media_type,
+        headers={"Content-Disposition": f'attachment; filename="{safe_name}"'},
+    )
+
+
+@router.get("/{case_id}/dispute-report-excerpts/export")
+async def export_case_dispute_report_excerpts(
+    case_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: AccountService = Depends(get_account_service),
+) -> Response:
+    content, file_name, media_type = await service.export_case_dispute_report_excerpts(
+        current_user,
+        case_id,
+    )
+    safe_name = sanitize_content_disposition_filename(file_name)
+    return Response(
+        content=content,
+        media_type=media_type,
+        headers={"Content-Disposition": f'attachment; filename="{safe_name}"'},
+    )
 
 
 @router.patch("/{case_id}", response_model=CaseResponse)

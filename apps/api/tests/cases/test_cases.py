@@ -4,6 +4,8 @@ import uuid
 
 from fastapi.testclient import TestClient
 
+from tests.helpers.client_payload import sample_client_payload
+
 
 def test_create_case(api_client: TestClient, manager_headers: dict[str, str]) -> None:
     response = api_client.post(
@@ -151,7 +153,10 @@ def test_create_case_with_client_id(
     client_response = api_client.post(
         "/api/v1/clients",
         headers=manager_headers,
-        json={"display_name": "Linked Client", "email": "linked@example.com"},
+        json=sample_client_payload(
+            display_name="Linked Client",
+            email="linked@example.com",
+        ),
     )
     assert client_response.status_code == 201
     client_id = client_response.json()["id"]
@@ -193,7 +198,7 @@ def test_list_cases_filter_by_client_id(
     client_response = api_client.post(
         "/api/v1/clients",
         headers=manager_headers,
-        json={"display_name": "Filter Client"},
+        json=sample_client_payload(display_name="Filter Client"),
     )
     assert client_response.status_code == 201
     client_id = client_response.json()["id"]

@@ -60,6 +60,7 @@ from api.modules.billing.models import (
 )
 from api.modules.billing.repository import BillingRepository
 from api.modules.billing.schemas import (
+    BillingDisconnectResponse,
     BillingSetupResponse,
     BillingStatusResponse,
     BillingSubscribeRequest,
@@ -172,6 +173,24 @@ class BillingService:
             stripe_customer_id=customer.customer_id,
             created=True,
         )
+
+    async def disconnect_pilot_billing(self, user: User) -> BillingDisconnectResponse:
+        self._require_write(user)
+        organization_id = self._require_organization(user)
+        account = await self._repo.get_billing_account(organization_id)
+        if account is None:
+            return BillingDisconnectResponse(organization_id=organization_id, disconnected=False)
+
+        if not account.stripe_customer_id.startswith("cus_pilot_"):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Only pilot placeholder billing records can be disconnected in-app",
+            )
+
+        await self._repo.delete_billing_account(organization_id)
+        if self._session is not None:
+            await self._session.commit()
+        return BillingDisconnectResponse(organization_id=organization_id, disconnected=True)
 
     async def subscribe(
         self, user: User, body: BillingSubscribeRequest
@@ -306,6 +325,16 @@ class BillingService:
 
         if event_type.startswith("customer.subscription."):
             return await self._sync_subscription_object(data_object)
+
+        if event_type == "checkout.session.completed":
+            session_id = str(data_object.get("id", ""))
+            if session_id and self._session is not None:
+                from api.modules.enrollment.service import ClientEnrollmentService
+
+                enrollment_service = ClientEnrollmentService.from_session(self._session)
+                handled = await enrollment_service.handle_checkout_session_completed(session_id)
+                if handled:
+                    return None, BillingWebhookEventStatus.PROCESSED, None
 
         return None, BillingWebhookEventStatus.IGNORED, None
 

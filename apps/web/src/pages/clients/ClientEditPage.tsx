@@ -48,6 +48,11 @@ export function ClientEditPage() {
         display_name: data.display_name,
         email: data.email ?? '',
         phone: data.phone ?? '',
+        mailing_address_line1: data.mailing_address_line1 ?? '',
+        mailing_address_line2: data.mailing_address_line2 ?? '',
+        mailing_city: data.mailing_city ?? '',
+        mailing_state: data.mailing_state ?? '',
+        mailing_postal_code: data.mailing_postal_code ?? '',
         status: data.status,
         notes: data.notes ?? '',
       }}

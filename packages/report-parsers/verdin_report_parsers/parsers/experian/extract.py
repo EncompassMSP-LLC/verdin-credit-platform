@@ -61,6 +61,28 @@ _COLLECTION_BALANCE_RE = re.compile(r"^Balance:\s*\$?([\d,]+\.?\d*)$", re.I | re
 _COLLECTION_STATUS_RE = re.compile(r"^Status:\s*(.+)$", re.I | re.M)
 
 _REPORT_DATE_RE = re.compile(r"^Report Date:\s*(\d{1,2}/\d{1,2}/\d{4})$", re.I | re.M)
+_DATE_GENERATED_RE = re.compile(
+    r"Date Generated\s+([A-Za-z]+\s+\d{1,2},\s+\d{4})",
+    re.I,
+)
+_PREPARED_FOR_RE = re.compile(r"Prepared For\s*\n([A-Z][A-Z .'-]{2,80})", re.I | re.M)
+_YEAR_OF_BIRTH_RE = re.compile(r"Year of Birth\s*\n(\d{4})", re.I | re.M)
+_ACR_ACCOUNT_INFO_RE = re.compile(
+    r"Account Info\s*\n"
+    r"Account Name\s+(.+?)\s*\n"
+    r"Account Number\s+(.+?)\s*\n"
+    r"Account Type\s+(.+?)\s*\n"
+    r"(?:.*?\n)*?"
+    r"Date Opened\s+(\d{1,2}/\d{1,2}/\d{4})\s*\n"
+    r"Status\s+(.+?)\s*\n"
+    r"(?:.*?\n)*?"
+    r"Balance\s+\$?([\d,]+)",
+    re.I | re.S,
+)
+_ACR_INQUIRY_RE = re.compile(
+    r"^([A-Z0-9][A-Z0-9 &.'/-]{1,60})\s*\nInquired on\s+(\d{1,2}/\d{1,2}/\d{4})",
+    re.I | re.M,
+)
 
 
 def _first(pattern: re.Pattern[str], text: str) -> str | None:
@@ -70,9 +92,24 @@ def _first(pattern: re.Pattern[str], text: str) -> str | None:
     return match.group(1).strip()
 
 
+def _normalize_long_date(raw: str) -> str:
+    from datetime import datetime
+
+    for fmt in ("%B %d, %Y", "%b %d, %Y"):
+        try:
+            return datetime.strptime(raw.strip(), fmt).strftime("%m/%d/%Y")
+        except ValueError:
+            continue
+    return raw.strip()
+
+
 def extract_consumer(section_text: str, full_text: str) -> tuple[ConsumerInfo | None, dict[str, float]]:
-    name = _first(_NAME_RE, section_text)
+    name = _first(_NAME_RE, section_text) or _first(_PREPARED_FOR_RE, full_text)
     dob = _first(_DOB_RE, section_text)
+    if not dob:
+        year = _first(_YEAR_OF_BIRTH_RE, section_text) or _first(_YEAR_OF_BIRTH_RE, full_text)
+        if year:
+            dob = f"01/01/{year}"
     ssn_raw = _first(_SSN_RE, section_text)
     ssn_masked = mask_ssn(ssn_raw) if ssn_raw else mask_ssn(full_text)
 
@@ -103,7 +140,63 @@ def extract_consumer(section_text: str, full_text: str) -> tuple[ConsumerInfo | 
     )
 
 
-def extract_accounts(section_text: str) -> tuple[tuple[TradelineAccount, ...], dict[str, float]]:
+def _extract_acr_accounts(
+    text: str,
+    *,
+    start_index: int,
+    field_confidence: dict[str, float],
+) -> tuple[list[TradelineAccount], int]:
+    accounts: list[TradelineAccount] = []
+    index = start_index
+
+    for match in _ACR_ACCOUNT_INFO_RE.finditer(text):
+        creditor = match.group(1).strip()
+        account_number_raw = match.group(2).strip()
+        account_type = match.group(3).strip()
+        open_date = match.group(4).strip()
+        payment_status = re.sub(r"\s+", " ", match.group(5).strip())
+        balance = parse_balance(match.group(6))
+
+        account_masked = mask_account_number(account_number_raw)
+        prefix = f"accounts[{index}]"
+        if creditor:
+            field_confidence[f"{prefix}.creditor_name"] = _FIELD_CONFIDENCE
+        if account_masked:
+            field_confidence[f"{prefix}.account_number_masked"] = _FIELD_CONFIDENCE
+        if account_type:
+            field_confidence[f"{prefix}.account_type"] = _FIELD_CONFIDENCE
+        if balance is not None:
+            field_confidence[f"{prefix}.balance"] = _FIELD_CONFIDENCE
+        if payment_status:
+            field_confidence[f"{prefix}.payment_status"] = _FIELD_CONFIDENCE
+        if open_date:
+            field_confidence[f"{prefix}.open_date"] = _FIELD_CONFIDENCE
+
+        account_scores = [field_confidence[key] for key in field_confidence if key.startswith(prefix)]
+        accounts.append(
+            TradelineAccount(
+                creditor_name=creditor,
+                account_number_masked=account_masked,
+                account_type=account_type,
+                balance=balance,
+                credit_limit=None,
+                payment_status=payment_status,
+                open_date=open_date,
+                date_reported=None,
+                bureau="experian",
+                confidence=max(account_scores) if account_scores else 0.0,
+            )
+        )
+        index += 1
+
+    return accounts, index
+
+
+def extract_accounts(
+    section_text: str,
+    *,
+    full_text: str | None = None,
+) -> tuple[tuple[TradelineAccount, ...], dict[str, float]]:
     accounts: list[TradelineAccount] = []
     field_confidence: dict[str, float] = {}
 
@@ -155,6 +248,11 @@ def extract_accounts(section_text: str) -> tuple[tuple[TradelineAccount, ...], d
             )
         )
 
+    if not accounts:
+        acr_source = section_text or full_text or ""
+        acr_accounts, _ = _extract_acr_accounts(acr_source, start_index=0, field_confidence=field_confidence)
+        accounts.extend(acr_accounts)
+
     return tuple(accounts), field_confidence
 
 
@@ -185,6 +283,22 @@ def extract_inquiries(section_text: str) -> tuple[tuple[Inquiry, ...], dict[str,
                 confidence=max(inquiry_scores) if inquiry_scores else 0.0,
             )
         )
+
+    if not inquiries:
+        for index, match in enumerate(_ACR_INQUIRY_RE.finditer(section_text)):
+            creditor = match.group(1).strip()
+            inquiry_date = match.group(2).strip()
+            prefix = f"inquiries[{index}]"
+            field_confidence[f"{prefix}.creditor_name"] = _FIELD_CONFIDENCE
+            field_confidence[f"{prefix}.inquiry_date"] = _FIELD_CONFIDENCE
+            inquiries.append(
+                Inquiry(
+                    creditor_name=creditor,
+                    inquiry_date=inquiry_date,
+                    inquiry_type="Hard",
+                    confidence=_FIELD_CONFIDENCE,
+                )
+            )
 
     return tuple(inquiries), field_confidence
 
@@ -284,6 +398,10 @@ def build_summary(
 
 def extract_report_date(full_text: str) -> tuple[str | None, dict[str, float]]:
     report_date = _first(_REPORT_DATE_RE, full_text)
+    if not report_date:
+        generated = _first(_DATE_GENERATED_RE, full_text)
+        if generated:
+            report_date = _normalize_long_date(generated)
     if not report_date:
         return None, {}
     return report_date, {"report.report_date": _FIELD_CONFIDENCE}

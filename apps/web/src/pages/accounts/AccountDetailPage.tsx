@@ -24,6 +24,7 @@ import {
 import { ACCOUNT_TYPE_LABELS, DISPUTE_STATUS_LABELS, PAYMENT_STATUS_LABELS } from '@verdin/shared';
 import { Button, Card } from '@verdin/ui';
 import { AccountDeleteDialog } from '../../components/accounts/AccountDeleteDialog';
+import { AccountLlmRecommendationPanel } from '../../components/accounts/AccountLlmRecommendationPanel';
 import {
   AccountStatusChip,
   BureauBadge,
@@ -31,6 +32,8 @@ import {
   ScoreDisplay,
 } from '../../components/accounts/AccountBadges';
 import { CreditReportHistoryPanel } from '../../components/imports/CreditReportHistoryPanel';
+import { ClientConsentGapsBanner } from '../../components/compliance/ClientConsentGapsBanner';
+import { useCaseClientConsentGaps } from '../../hooks/useCaseClientConsentGaps';
 
 function formatCurrency(value: string | null) {
   if (!value) return '—';
@@ -52,13 +55,16 @@ function SavedDisputeLetterRow({
   accountId,
   letter,
   onLetterUpdated,
+  consentBlocked,
 }: {
   accountId: string;
   letter: DisputeLetter;
   onLetterUpdated: () => void;
+  consentBlocked: boolean;
 }) {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [exportingFormat, setExportingFormat] = useState<DisputeLetterExportFormat | null>(null);
+  const [exportError, setExportError] = useState<string | null>(null);
 
   const detailQuery = useQuery({
     queryKey: ['account-dispute-letter', accountId, letter.id],
@@ -98,7 +104,12 @@ function SavedDisputeLetterRow({
     letter.status === 'draft' || letter.status === 'review' || letter.status === 'approved';
 
   const handleExport = async (format: DisputeLetterExportFormat) => {
+    if (consentBlocked && (format === 'report-excerpt' || format === 'mail-packet')) {
+      setExportError('Signed client consent is required before exporting mail materials.');
+      return;
+    }
     setExportingFormat(format);
+    setExportError(null);
     try {
       const { blob, filename } = await downloadAccountDisputeLetterExport(
         accountId,
@@ -111,6 +122,8 @@ function SavedDisputeLetterRow({
       anchor.download = filename;
       anchor.click();
       URL.revokeObjectURL(url);
+    } catch (error) {
+      setExportError(error instanceof Error ? error.message : 'Export failed');
     } finally {
       setExportingFormat(null);
     }
@@ -145,11 +158,38 @@ function SavedDisputeLetterRow({
           <Button
             size="sm"
             variant="secondary"
+            onClick={() => handleExport('report-excerpt')}
+            loading={exportingFormat === 'report-excerpt'}
+            disabled={exportingFormat !== null || consentBlocked}
+            title={
+              consentBlocked
+                ? 'Signed CROA and FCRA consents are required before previewing report pages'
+                : undefined
+            }
+          >
+            Preview report page
+          </Button>
+          <Button
+            size="sm"
+            onClick={() => handleExport('mail-packet')}
+            loading={exportingFormat === 'mail-packet'}
+            disabled={exportingFormat !== null || consentBlocked}
+            title={
+              consentBlocked
+                ? 'Signed CROA and FCRA consents are required before downloading mail packets'
+                : undefined
+            }
+          >
+            Download mail packet
+          </Button>
+          <Button
+            size="sm"
+            variant="secondary"
             onClick={() => handleExport('pdf')}
             loading={exportingFormat === 'pdf'}
             disabled={exportingFormat !== null}
           >
-            Download PDF
+            Review PDF
           </Button>
           {letter.status === 'review' ? (
             <Button
@@ -166,7 +206,12 @@ function SavedDisputeLetterRow({
               size="sm"
               onClick={() => sendMutation.mutate()}
               loading={sendMutation.isPending}
-              disabled={sendMutation.isPending}
+              disabled={sendMutation.isPending || consentBlocked}
+              title={
+                consentBlocked
+                  ? 'Signed CROA and FCRA consents are required before marking as sent'
+                  : undefined
+              }
             >
               Mark as sent
             </Button>
@@ -212,6 +257,7 @@ function SavedDisputeLetterRow({
           Failed to create review task for this draft.
         </p>
       ) : null}
+      {exportError ? <p className="mt-2 w-full text-xs text-red-600">{exportError}</p> : null}
       {approveMutation.isError ? (
         <p className="mt-2 w-full text-xs text-red-600">Failed to approve this dispute letter.</p>
       ) : null}
@@ -312,6 +358,9 @@ export function AccountDetailPage() {
     queryFn: () => getAccount(accountId!),
     enabled: Boolean(accountId),
   });
+
+  const consentGaps = useCaseClientConsentGaps(data?.case_id);
+  const consentBlocked = consentGaps.requiresConsent && consentGaps.hasGaps;
 
   const disputeDraftQuery = useQuery({
     queryKey: ['account-dispute-draft', accountId, disputeRecipientType],
@@ -438,6 +487,10 @@ export function AccountDetailPage() {
             </p>
           ) : null}
         </Card>
+
+        <div className="lg:col-span-3">
+          <AccountLlmRecommendationPanel accountId={accountId!} />
+        </div>
 
         <Card title="Financial details" className="lg:col-span-2">
           <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -580,6 +633,15 @@ export function AccountDetailPage() {
         </Card>
 
         <Card title="Dispute draft preview" className="lg:col-span-3">
+          <ClientConsentGapsBanner caseId={data.case_id} className="mb-6" />
+          <div className="mb-4 flex justify-end">
+            <Link
+              to={`/guides/dispute-workflow?case_id=${data.case_id}`}
+              className="text-sm font-medium text-brand-600 hover:underline"
+            >
+              Dispute workflow guide →
+            </Link>
+          </div>
           <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <label
@@ -804,6 +866,7 @@ export function AccountDetailPage() {
                         key={letter.id}
                         accountId={accountId!}
                         letter={letter}
+                        consentBlocked={consentBlocked}
                         onLetterUpdated={() => {
                           queryClient.invalidateQueries({
                             queryKey: ['account-dispute-letters', accountId],

@@ -12,7 +12,7 @@ from verdin_report_parsers.parsers.equifax.extract import (
     extract_public_records,
     extract_report_date,
 )
-from verdin_report_parsers.parsers.equifax.layout import score_layout, split_sections
+from verdin_report_parsers.parsers.equifax.layout import is_acr_layout, score_layout, split_sections
 
 PARSER_VERSION = "1.0.0"
 
@@ -41,7 +41,10 @@ class EquifaxParser:
         )
         field_confidence.update(consumer_confidence)
 
-        accounts, account_confidence = extract_accounts(sections.get("tradelines", ""))
+        accounts, account_confidence = extract_accounts(
+            sections.get("tradelines", ""),
+            full_text=source_text,
+        )
         field_confidence.update(account_confidence)
         if not accounts:
             warnings.append("no_tradelines_extracted")
@@ -68,11 +71,15 @@ class EquifaxParser:
         field_confidence["parser.layout_confidence"] = layout.confidence
 
         required_sections = (
-            "consumer_information",
-            "tradelines",
-            "credit_inquiries",
-            "public_record_information",
-            "collection_accounts",
+            ("consumer_information", "tradelines")
+            if is_acr_layout(source_text)
+            else (
+                "consumer_information",
+                "tradelines",
+                "credit_inquiries",
+                "public_record_information",
+                "collection_accounts",
+            )
         )
         missing_sections = [name for name in required_sections if name not in sections]
         if missing_sections:

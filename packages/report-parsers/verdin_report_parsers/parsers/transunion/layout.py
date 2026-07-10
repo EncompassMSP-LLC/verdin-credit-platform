@@ -5,9 +5,15 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
+from verdin_report_parsers.acr_layout import apply_competitor_penalty, split_sections as _split_sections
+
 _TRANSUNION_BRANDING = re.compile(r"\btrans\s*union\b|\btransunion\b", re.I)
 _REPORT_HEADER = re.compile(
     r"trans\s*union\s+(consumer\s+)?credit\s+(report|disclosure)",
+    re.I,
+)
+_ACR_PORTAL = re.compile(
+    r"annualcreditreport\.transunion\.com|personal credit report for:",
     re.I,
 )
 
@@ -27,16 +33,26 @@ _SECTION_HEADERS: tuple[tuple[str, re.Pattern[str]], ...] = (
     ("public_records", re.compile(r"^PUBLIC RECORDS\s*$", re.I | re.M)),
     ("collections", re.compile(r"^COLLECTIONS\s*$", re.I | re.M)),
     ("credit_summary", re.compile(r"^CREDIT SUMMARY\s*$", re.I | re.M)),
+    # Annual Credit Report portal
+    ("personal_information", re.compile(r"^Personal Information\s*$", re.I | re.M)),
+    ("accounts", re.compile(r"^Accounts\s*$", re.I | re.M)),
+    ("accounts_adverse", re.compile(r"^Accounts with Adverse Information\s*$", re.I | re.M)),
+    ("inquiries", re.compile(r"^Inquiries\s*$", re.I | re.M)),
 )
 
 _BRANDING_WEIGHT = 0.20
 _HEADER_WEIGHT = 0.15
+_ACR_PORTAL_WEIGHT = 0.20
 
 
 @dataclass(frozen=True, slots=True)
 class LayoutScore:
     confidence: float
     signals: dict[str, float]
+
+
+def is_acr_layout(text: str) -> bool:
+    return bool(_ACR_PORTAL.search(text))
 
 
 def score_layout(text: str) -> LayoutScore:
@@ -52,30 +68,19 @@ def score_layout(text: str) -> LayoutScore:
         signals["layout.report_header"] = _HEADER_WEIGHT
         total += _HEADER_WEIGHT
 
+    if _ACR_PORTAL.search(text):
+        signals["layout.acr_portal"] = _ACR_PORTAL_WEIGHT
+        total += _ACR_PORTAL_WEIGHT
+
     for signal_name, pattern, weight in _SECTION_MARKERS:
         if pattern.search(searchable):
             signals[signal_name] = weight
             total += weight
 
-    return LayoutScore(confidence=min(total, 1.0), signals=signals)
+    confidence = apply_competitor_penalty("transunion", min(total, 1.0), text)
+    return LayoutScore(confidence=confidence, signals=signals)
 
 
 def split_sections(text: str) -> dict[str, str]:
     """Split OCR text into TransUnion section bodies keyed by section name."""
-    matches: list[tuple[int, str]] = []
-    for section_name, pattern in _SECTION_HEADERS:
-        for match in pattern.finditer(text):
-            matches.append((match.start(), section_name))
-
-    if not matches:
-        return {}
-
-    matches.sort(key=lambda item: item[0])
-    sections: dict[str, str] = {}
-    for index, (start, section_name) in enumerate(matches):
-        header_end = text.find("\n", start)
-        body_start = start if header_end == -1 else header_end + 1
-        body_end = matches[index + 1][0] if index + 1 < len(matches) else len(text)
-        sections[section_name] = text[body_start:body_end].strip()
-
-    return sections
+    return _split_sections(text, _SECTION_HEADERS)

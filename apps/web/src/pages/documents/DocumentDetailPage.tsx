@@ -8,9 +8,11 @@ import {
   getDocument,
   getDocumentDuplicateGroup,
   getDocumentDownloadUrl,
+  getDocumentMetadata,
   getDocumentOcr,
   getDocumentParsedCreditReport,
   getDocumentParsedCreditReportAccountCandidates,
+  importParsedCreditReportAccounts,
   retryDocumentOcr,
   type DocumentParsedCreditReportAccountCandidates,
   type ParsedReportAccountCandidate,
@@ -77,11 +79,15 @@ function ParsedReportAccountCandidatesPanel({
   reviewTask,
   reviewTaskLoading,
   onCreateReviewTask,
+  onImportAll,
+  importLoading,
 }: {
   accountCandidates?: DocumentParsedCreditReportAccountCandidates;
   reviewTask?: Task;
   reviewTaskLoading: boolean;
   onCreateReviewTask: () => void;
+  onImportAll: () => void;
+  importLoading: boolean;
 }) {
   if (!accountCandidates || accountCandidates.candidates.length === 0) {
     return null;
@@ -114,6 +120,9 @@ function ParsedReportAccountCandidatesPanel({
               Create review task
             </Button>
           )}
+          <Button size="sm" onClick={onImportAll} loading={importLoading}>
+            Import all accounts
+          </Button>
         </div>
       </div>
       <ul className="mt-3 divide-y divide-blue-100">
@@ -166,6 +175,13 @@ export function DocumentDetailPage() {
     },
   });
 
+  const { data: metadataData } = useQuery({
+    queryKey: ['document-metadata', documentId],
+    queryFn: () => getDocumentMetadata(documentId!),
+    enabled: Boolean(documentId) && Boolean(ocrData?.ocr_text),
+    retry: false,
+  });
+
   const { data: parsedReport } = useQuery({
     queryKey: ['document-parsed-credit-report', documentId],
     queryFn: () => getDocumentParsedCreditReport(documentId!),
@@ -191,6 +207,17 @@ export function DocumentDetailPage() {
     mutationFn: () => createDocumentParsedCreditReportReviewTask(documentId!),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    },
+  });
+
+  const importAccountsMutation = useMutation({
+    mutationFn: () => importParsedCreditReportAccounts(documentId!, { skip_existing: true }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['accounts'] });
+      queryClient.invalidateQueries({ queryKey: ['accounts-intelligence'] });
+      queryClient.invalidateQueries({
+        queryKey: ['document-parsed-credit-report-account-candidates', documentId],
+      });
     },
   });
 
@@ -356,7 +383,9 @@ export function DocumentDetailPage() {
 
         <DocumentEntityResolutionPanel
           documentId={documentId}
-          hasMetadata={data.metadata_status === 'extracted'}
+          hasMetadata={
+            data.metadata_status === 'extracted' || metadataData?.metadata_status === 'extracted'
+          }
         />
 
         {data.document_type === 'credit_report' ? (
@@ -395,6 +424,8 @@ export function DocumentDetailPage() {
                   reviewTask={reviewTaskMutation.data}
                   reviewTaskLoading={reviewTaskMutation.isPending}
                   onCreateReviewTask={() => reviewTaskMutation.mutate()}
+                  onImportAll={() => importAccountsMutation.mutate()}
+                  importLoading={importAccountsMutation.isPending}
                 />
                 <ParsedReportTradelines parsedReport={parsedReport} />
               </div>

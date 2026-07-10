@@ -21,7 +21,7 @@ def test_totp_enrollment_flow(
     payload = start.json()
     assert payload["secret"]
     assert payload["otpauth_url"].startswith("otpauth://")
-    assert payload["issuer"] == "Verdin Credit Platform"
+    assert payload["issuer"] == "Ultimate Credit Repair LLC"
 
     code = pyotp.TOTP(payload["secret"]).now()
     confirm = api_client.post(

@@ -5,6 +5,10 @@ from __future__ import annotations
 from datetime import date, timedelta
 from decimal import Decimal
 
+from api.modules.accounts.intelligence_calibration import (
+    DiscrepancyScoringContext,
+    calibrate_scores,
+)
 from api.modules.accounts.models import (
     Account,
     AccountBureau,
@@ -165,10 +169,25 @@ def recommend_next_action(account: Account) -> str:
     return "Review tradeline details and update case notes"
 
 
-def apply_account_intelligence(account: Account) -> None:
+def apply_account_intelligence(
+    account: Account,
+    *,
+    discrepancy_context: DiscrepancyScoringContext | None = None,
+    use_ml_calibration: bool = False,
+) -> None:
     account.next_eligible_dispute_date = calculate_next_eligible_dispute_date(account)
     account.dispute_status = calculate_dispute_status(account)
-    account.risk_score = calculate_risk_score(account)
-    account.readiness_score = calculate_readiness_score(account)
-    if not account.ai_recommended_next_action:
-        account.ai_recommended_next_action = recommend_next_action(account)
+    heuristic_risk = calculate_risk_score(account)
+    heuristic_readiness = calculate_readiness_score(account)
+    if use_ml_calibration:
+        account.risk_score, account.readiness_score = calibrate_scores(
+            heuristic_risk,
+            heuristic_readiness,
+            discrepancy_context,
+        )
+    else:
+        account.risk_score = heuristic_risk
+        account.readiness_score = heuristic_readiness
+    account.ai_recommended_next_action = recommend_next_action(account)
+    if discrepancy_context is not None and discrepancy_context.dispute_ready:
+        account.ai_recommended_next_action = discrepancy_context.recommended_action

@@ -160,6 +160,11 @@ export function AccountFilters({ value, onChange }: AccountFiltersProps) {
           }}
         >
           <option value="created_at:desc">Newest first</option>
+          <option value="creditor_name:asc">Creditor A–Z</option>
+          <option value="bureau:asc">Bureau</option>
+          <option value="account_type:asc">Type</option>
+          <option value="account_status:asc">Status</option>
+          <option value="dispute_status:asc">Dispute status</option>
           <option value="balance:desc">Highest balance</option>
           <option value="risk_score:desc">Highest risk</option>
           <option value="readiness_score:desc">Highest readiness</option>

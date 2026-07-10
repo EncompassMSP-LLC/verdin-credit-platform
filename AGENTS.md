@@ -1,12 +1,12 @@
-# Verdin Credit Platform — Agent Instructions
+# Ultimate Credit Repair LLC — Agent Instructions
 
 > Version 4.2.0 | Sprint 1 Platform Foundation
 
-This document defines roles, responsibilities, coding standards, and architectural rules for AI-assisted development on the Verdin Credit Platform.
+This document defines roles, responsibilities, coding standards, and architectural rules for AI-assisted development on Ultimate Credit Repair LLC.
 
 ## Project Overview
 
-Verdin Credit Platform is an enterprise SaaS application for credit operations: case management, document intelligence, automation, analytics, and AI-assisted workflows.
+Ultimate Credit Repair LLC is an enterprise SaaS application for credit operations: case management, document intelligence, automation, analytics, and AI-assisted workflows.
 
 **Stack:** pnpm monorepo · Turborepo · FastAPI · React · PostgreSQL · Redis · MinIO · Docker
 

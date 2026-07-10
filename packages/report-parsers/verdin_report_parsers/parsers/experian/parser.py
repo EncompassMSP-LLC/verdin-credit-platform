@@ -12,7 +12,7 @@ from verdin_report_parsers.parsers.experian.extract import (
     extract_public_records,
     extract_report_date,
 )
-from verdin_report_parsers.parsers.experian.layout import score_layout, split_sections
+from verdin_report_parsers.parsers.experian.layout import is_acr_layout, score_layout, split_sections
 
 PARSER_VERSION = "1.0.0"
 
@@ -41,12 +41,24 @@ class ExperianParser:
         )
         field_confidence.update(consumer_confidence)
 
-        accounts, account_confidence = extract_accounts(sections.get("accounts", ""))
+        accounts, account_confidence = extract_accounts(
+            sections.get("accounts", ""),
+            full_text=source_text,
+        )
         field_confidence.update(account_confidence)
         if not accounts:
             warnings.append("no_tradelines_extracted")
 
-        inquiries, inquiry_confidence = extract_inquiries(sections.get("inquiries", ""))
+        inquiries_text = "\n\n".join(
+            part
+            for part in (
+                sections.get("inquiries", ""),
+                sections.get("hard_inquiries", ""),
+                sections.get("soft_inquiries", ""),
+            )
+            if part
+        )
+        inquiries, inquiry_confidence = extract_inquiries(inquiries_text)
         field_confidence.update(inquiry_confidence)
 
         public_records, public_record_confidence = extract_public_records(
@@ -68,11 +80,15 @@ class ExperianParser:
         field_confidence["parser.layout_confidence"] = layout.confidence
 
         required_sections = (
-            "personal_information",
-            "accounts",
-            "inquiries",
-            "public_records",
-            "collections",
+            ("personal_information", "accounts")
+            if is_acr_layout(source_text)
+            else (
+                "personal_information",
+                "accounts",
+                "inquiries",
+                "public_records",
+                "collections",
+            )
         )
         missing_sections = [name for name in required_sections if name not in sections]
         if missing_sections:
