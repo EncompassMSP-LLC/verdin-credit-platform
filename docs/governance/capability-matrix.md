@@ -537,12 +537,12 @@ Scope: [version-5.13-scope.md](version-5.13-scope.md) · Release notes: [v5.13.0
 
 Scope: [version-5.14-scope.md](version-5.14-scope.md) · Checklist: [version-5.14-completion-checklist.md](../development/version-5.14-completion-checklist.md)
 
-| Capability                            | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                             |
-| ------------------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ----------------------------------------------------------------- |
-| Live unredacted benchmark blob export | 5.14    | Planned | —       | —        | —   | —   | —     | Reporting    | Secure export pipeline from approved unredacted export audit runs |
-| Unsupervised autonomous filing loops  | 5.14    | Planned | —       | —        | —   | —   | —     | Disputes     | Operator-gated unsupervised filing loop audit scaffold            |
-| Public OAuth marketplace listings     | 5.14    | Planned | —       | —        | —   | —   | —     | Platform     | Public listing publish from approved marketplace publishing runs  |
-| Native mobile app store distribution  | 5.14    | Planned | —       | —        | —   | —   | —     | Identity     | App store distribution readiness from native passkey client runs  |
+| Capability                            | Version | Status     | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                         |
+| ------------------------------------- | ------- | ---------- | ------- | -------- | --- | --- | ----- | ------------ | ----------------------------------------------------------------------------- |
+| Live unredacted benchmark blob export | 5.14    | Partial ✅ | ✅      | —        | ✅  | —   | ✅    | Reporting    | `/reporting/live-unredacted-benchmark-blob-exports` placeholder blob scaffold |
+| Unsupervised autonomous filing loops  | 5.14    | Planned    | —       | —        | —   | —   | —     | Disputes     | Operator-gated unsupervised filing loop audit scaffold                        |
+| Public OAuth marketplace listings     | 5.14    | Planned    | —       | —        | —   | —   | —     | Platform     | Public listing publish from approved marketplace publishing runs              |
+| Native mobile app store distribution  | 5.14    | Planned    | —       | —        | —   | —   | —     | Identity     | App store distribution readiness from native passkey client runs              |
 
 ---
 

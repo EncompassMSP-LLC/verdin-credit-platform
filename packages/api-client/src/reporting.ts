@@ -352,3 +352,81 @@ export function approveUnredactedCrossOrgBenchmarkExportRun(runId: string) {
     },
   );
 }
+
+export interface LiveUnredactedBenchmarkBlobExportStatus {
+  enabled: boolean;
+  ready: boolean;
+  unredacted_export_ready: boolean;
+  blockers: string[];
+}
+
+export interface LiveUnredactedBenchmarkBlobExportRun {
+  id: string;
+  organization_id: string;
+  unredacted_export_run_id: string;
+  status: string;
+  export_summary: string;
+  storage_key: string | null;
+  content_type: string | null;
+  byte_size: number | null;
+  requested_by_user_id: string | null;
+  approved_by_user_id: string | null;
+  requested_at: string | null;
+  exported_at: string | null;
+  error_message: string | null;
+}
+
+export interface LiveUnredactedBenchmarkBlobExportRunResult {
+  completed_at: string;
+  run: LiveUnredactedBenchmarkBlobExportRun;
+}
+
+export interface LiveUnredactedBenchmarkBlobExportSubmitRequest {
+  export_summary: string;
+}
+
+export function getLiveUnredactedBenchmarkBlobExportStatus() {
+  return request<LiveUnredactedBenchmarkBlobExportStatus>(
+    apiPath('/reporting/live-unredacted-benchmark-blob-exports/status'),
+  );
+}
+
+export function listLiveUnredactedBenchmarkBlobExportRuns(params?: {
+  page?: number;
+  page_size?: number;
+}) {
+  const search = new URLSearchParams();
+  if (params?.page) search.set('page', String(params.page));
+  if (params?.page_size) search.set('page_size', String(params.page_size));
+  const query = search.toString();
+  return request<{
+    items: LiveUnredactedBenchmarkBlobExportRun[];
+    total: number;
+    page: number;
+    page_size: number;
+  }>(apiPath(`/reporting/live-unredacted-benchmark-blob-exports/runs${query ? `?${query}` : ''}`));
+}
+
+export function submitLiveUnredactedBenchmarkBlobExport(
+  unredactedExportRunId: string,
+  body: LiveUnredactedBenchmarkBlobExportSubmitRequest,
+) {
+  return request<LiveUnredactedBenchmarkBlobExportRunResult>(
+    apiPath(
+      `/reporting/live-unredacted-benchmark-blob-exports/unredacted-export-runs/${unredactedExportRunId}/start`,
+    ),
+    {
+      method: 'POST',
+      body: JSON.stringify(body),
+    },
+  );
+}
+
+export function approveLiveUnredactedBenchmarkBlobExportRun(runId: string) {
+  return request<LiveUnredactedBenchmarkBlobExportRunResult>(
+    apiPath(`/reporting/live-unredacted-benchmark-blob-exports/runs/${runId}/approve`),
+    {
+      method: 'POST',
+    },
+  );
+}

@@ -1276,3 +1276,16 @@ and native app store distribution readiness — with explicit 5.15+ deferrals.
 need sequenced delivery before v5.14.0 release.
 
 **Follow-up work:** Slice 2 — live unredacted benchmark blob export scaffold.
+
+### Decision: Live unredacted benchmark blob export scaffold (Version 5.14 slice 2)
+
+**Decision:** Ship admin-gated live unredacted benchmark blob export pipeline
+(`live_unredacted_benchmark_blob_export_runs` migration `077_live_benchmark_blob_export`),
+reporting status/list/submit-from-approved-unredacted-export/approve endpoints that write a redacted
+placeholder JSON artifact to object storage, and `@verdin/api-client` support behind
+`ENABLE_LIVE_UNREDACTED_BENCHMARK_BLOB_EXPORT`.
+
+**Reason:** 5.14 reporting epic extends 5.13 unredacted export audit with a secure storage-reference
+pipeline while deferring unrestricted cross-tenant PII dumps and public download links.
+
+**Follow-up work:** Slice 3 — unsupervised autonomous filing loops scaffold.
