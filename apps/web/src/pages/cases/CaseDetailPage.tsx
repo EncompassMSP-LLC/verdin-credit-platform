@@ -14,6 +14,7 @@ import { CaseMetro2FindingsPanel } from '../../components/imports/Metro2Findings
 import { CaseFcraFindingsPanel } from '../../components/imports/FcraFindingsPanel';
 import { CaseTradelineChronologyPanel } from '../../components/imports/TradelineChronologyPanel';
 import { CaseComplianceEvidencePanel } from '../../components/imports/ComplianceEvidencePanel';
+import { CaseLitigationStrengthPanel } from '../../components/imports/LitigationStrengthPanel';
 import { featureFlags } from '../../lib/feature-flags';
 
 function formatDateTime(value: string | null) {
@@ -199,6 +200,12 @@ export function CaseDetailPage() {
           caseId={caseId}
           className="lg:col-span-3"
           id="compliance-evidence-links"
+        />
+
+        <CaseLitigationStrengthPanel
+          caseId={caseId}
+          className="lg:col-span-3"
+          id="litigation-strength"
         />
 
         <CrossBureauDiscrepancyPanel

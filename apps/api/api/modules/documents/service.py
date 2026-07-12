@@ -58,6 +58,7 @@ from api.modules.documents.schemas import (
     CaseComplianceEvidenceLinksResponse,
     CaseCreditReportDiscrepanciesResponse,
     CaseFcraFindingsResponse,
+    CaseLitigationStrengthResponse,
     CaseMetro2FindingsResponse,
     CaseTradelineChronologyResponse,
     ComplianceEvidenceExhibitLink,
@@ -84,6 +85,8 @@ from api.modules.documents.schemas import (
     ImportedParsedReportAccountItem,
     ImportParsedReportAccountsRequest,
     ImportParsedReportAccountsResponse,
+    LitigationStrengthIssue,
+    LitigationStrengthSummary,
     Metro2FindingResponse,
     Metro2FindingSummary,
     ParsedReportAccountCandidate,
@@ -1724,6 +1727,114 @@ class DocumentService:
                     checklist_hints=list(item.checklist_hints),
                 )
                 for item in result.items
+            ],
+        )
+
+    async def get_case_litigation_strength(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+    ) -> CaseLitigationStrengthResponse:
+        from api.modules.documents.litigation_strength import score_case_litigation_strength
+
+        organization_id = self._require_organization(user)
+        await self._validate_case(case_id, organization_id)
+
+        metro2 = await self.get_case_metro2_findings(user, case_id)
+        fcra = await self.get_case_fcra_findings(user, case_id)
+
+        discrepancies: list[dict[str, Any]] = []
+        try:
+            discrepancy_response = await self.get_case_credit_report_discrepancies(user, case_id)
+            discrepancies = [
+                {
+                    "match_key": item.match_key,
+                    "creditor_name": item.creditor_name,
+                    "account_number_masked": item.account_number_masked,
+                    "discrepancy_types": list(item.discrepancy_types),
+                    "classification_label": item.classification_label,
+                    "bureaus_reporting": list(item.bureaus_reporting),
+                }
+                for item in discrepancy_response.discrepancies
+            ]
+        except HTTPException as exc:
+            if exc.status_code != status.HTTP_404_NOT_FOUND:
+                raise
+
+        chronology_events: list[dict[str, Any]] = []
+        try:
+            chronology = await self.get_case_tradeline_chronology(user, case_id)
+            for tradeline in chronology.tradelines:
+                for event in tradeline.events:
+                    chronology_events.append(
+                        {
+                            "event_type": event.event_type,
+                            "severity": event.severity,
+                            "summary": event.summary,
+                            "match_key": tradeline.match_key,
+                            "bureau": tradeline.bureau,
+                            "creditor_name": tradeline.creditor_name,
+                            "account_number_masked": tradeline.account_number_masked,
+                            "to_document_id": event.to_document_id,
+                        }
+                    )
+        except HTTPException as exc:
+            if exc.status_code != status.HTTP_404_NOT_FOUND:
+                raise
+
+        def _document_payload(
+            doc: DocumentMetro2FindingsResponse | DocumentFcraFindingsResponse,
+        ) -> dict[str, Any]:
+            return {
+                "document_id": doc.document_id,
+                "bureau": doc.bureau,
+                "findings": [
+                    {
+                        "rule_id": finding.rule_id,
+                        "severity": finding.severity,
+                        "title": finding.title,
+                        "tradeline_index": finding.tradeline_index,
+                        "creditor_name": finding.creditor_name,
+                        "account_number_masked": finding.account_number_masked,
+                    }
+                    for finding in doc.findings
+                ],
+            }
+
+        result = score_case_litigation_strength(
+            case_id=case_id,
+            metro2_documents=[_document_payload(doc) for doc in metro2.documents],
+            fcra_documents=[_document_payload(doc) for doc in fcra.documents],
+            discrepancies=discrepancies,
+            chronology_events=chronology_events,
+        )
+        return CaseLitigationStrengthResponse(
+            case_id=result.case_id,
+            summary=LitigationStrengthSummary(
+                issues_scored=int(result.summary["issues_scored"]),
+                high_priority=int(result.summary["high_priority"]),
+                medium_priority=int(result.summary["medium_priority"]),
+                low_priority=int(result.summary["low_priority"]),
+                top_score=int(result.summary["top_score"]),
+                average_score=float(result.summary["average_score"]),
+            ),
+            issues=[
+                LitigationStrengthIssue(
+                    source_kind=issue.source_kind,
+                    source_id=issue.source_id,
+                    rule_id=issue.rule_id,
+                    score=issue.score,
+                    rank=issue.rank,
+                    title=issue.title,
+                    rationale=issue.rationale,
+                    severity=issue.severity,
+                    bureau=issue.bureau,
+                    creditor_name=issue.creditor_name,
+                    account_number_masked=issue.account_number_masked,
+                    match_key=issue.match_key,
+                    factors=list(issue.factors),
+                )
+                for issue in result.issues
             ],
         )
 

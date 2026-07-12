@@ -136,7 +136,7 @@ Scope and deferrals: [version-4.5-scope.md](version-4.5-scope.md)
 | Capability                      | Version | Status  | Backend | Frontend | API | AI      | Tests | Dependencies        | Notes                                                           |
 | ------------------------------- | ------- | ------- | ------- | -------- | --- | ------- | ----- | ------------------- | --------------------------------------------------------------- |
 | Workflow Automation             | 4.5     | Partial | 🚧      | 🚧       | 🚧  | —       | ✅    | Timeline, Tasks     | Auto-tasks only; BPM/cron/notifications deferred to 4.8         |
-| Credit Report Import Wizard     | 4.5     | ✅      | ✅      | ✅       | ✅  | —       | ✅    | Documents, OCR      | Wizard, Metro 2/FCRA findings, chronology, evidence links       |
+| Credit Report Import Wizard     | 4.5     | ✅      | ✅      | ✅       | ✅  | —       | ✅    | Documents, OCR      | Wizard, findings, chronology, evidence links, strength ranking  |
 | OCR Pipeline                    | 4.3     | ✅      | ✅      | ✅       | ✅  | ✅      | ✅    | Documents, Worker   | Shipped in 4.3 Operational Core                                 |
 | Document Classification         | 4.3     | Partial | ✅      | —        | ✅  | Partial | ✅    | OCR                 | Rules engine; LLM augmentation deferred to 4.8                  |
 | Entity Extraction               | 4.5     | Partial | ✅      | ✅       | ✅  | Partial | ✅    | OCR, Accounts       | Canonical tradeline schema 1.1 + candidates; LLM NER deferred   |
