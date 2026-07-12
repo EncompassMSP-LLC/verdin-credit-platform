@@ -13,6 +13,7 @@ import { CrossBureauDiscrepancyPanel } from '../../components/imports/CrossBurea
 import { CaseMetro2FindingsPanel } from '../../components/imports/Metro2FindingsPanel';
 import { CaseFcraFindingsPanel } from '../../components/imports/FcraFindingsPanel';
 import { CaseTradelineChronologyPanel } from '../../components/imports/TradelineChronologyPanel';
+import { CaseComplianceEvidencePanel } from '../../components/imports/ComplianceEvidencePanel';
 import { featureFlags } from '../../lib/feature-flags';
 
 function formatDateTime(value: string | null) {
@@ -192,6 +193,12 @@ export function CaseDetailPage() {
           caseId={caseId}
           className="lg:col-span-3"
           id="tradeline-chronology"
+        />
+
+        <CaseComplianceEvidencePanel
+          caseId={caseId}
+          className="lg:col-span-3"
+          id="compliance-evidence-links"
         />
 
         <CrossBureauDiscrepancyPanel

@@ -19,6 +19,46 @@ class RedactedTradelineExcerpt:
     used_full_report_fallback: bool
 
 
+def locate_tradeline_pages(
+    pdf_bytes: bytes,
+    *,
+    target_creditor: str,
+    target_account_masked: str | None = None,
+) -> tuple[int, ...] | None:
+    """Return 1-based PDF page numbers that appear to mention the tradeline.
+
+    Returns None when the file is not a PDF or the page scan cannot run.
+    Returns an empty tuple when the PDF opens but no page matches.
+    """
+    if not pdf_bytes.startswith(b"%PDF"):
+        return None
+
+    target_tokens = _creditor_tokens(target_creditor)
+    if not target_tokens and not target_account_masked:
+        return None
+
+    try:
+        import pdfplumber
+    except ImportError:
+        return None
+
+    try:
+        with pdfplumber.open(BytesIO(pdf_bytes)) as pdf:
+            page_numbers: list[int] = []
+            for index, page in enumerate(pdf.pages):
+                page_text = page.extract_text() or ""
+                if _page_matches_target(
+                    page_text,
+                    target_creditor=target_creditor,
+                    target_tokens=target_tokens,
+                    target_account_masked=target_account_masked,
+                ):
+                    page_numbers.append(index + 1)
+            return tuple(page_numbers)
+    except Exception:
+        return None
+
+
 def build_redacted_tradeline_excerpt(
     pdf_bytes: bytes,
     *,

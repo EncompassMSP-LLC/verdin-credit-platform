@@ -566,3 +566,48 @@ class CaseTradelineChronologyResponse(BaseSchema):
     bureaus: list[str]
     summary: TradelineChronologySummary
     tradelines: list[TradelineChronologyItemResponse]
+
+
+class ComplianceEvidenceSummary(BaseSchema):
+    findings_linked: int
+    with_pages: int
+    missing_pages: int
+    exhibits_available: int
+    report_links: int
+
+
+class ComplianceEvidenceReportLink(BaseSchema):
+    document_id: uuid.UUID
+    bureau: str | None = None
+    download_path: str
+    page_numbers: list[int] | None = None
+    page_confidence: Literal["matched", "unavailable", "deferred"]
+    excerpt_available: bool
+
+
+class ComplianceEvidenceExhibitLink(BaseSchema):
+    document_id: uuid.UUID
+    document_type: str
+    role: Literal["identity", "proof_of_address", "supporting", "suggested"]
+    label: str
+
+
+class ComplianceEvidenceLinkItem(BaseSchema):
+    source_kind: Literal["metro2", "fcra"]
+    source_id: str
+    rule_id: str
+    severity: str
+    title: str
+    bureau: str | None = None
+    tradeline_index: int | None = None
+    creditor_name: str | None = None
+    account_number_masked: str | None = None
+    report_links: list[ComplianceEvidenceReportLink]
+    exhibit_links: list[ComplianceEvidenceExhibitLink]
+    checklist_hints: list[str]
+
+
+class CaseComplianceEvidenceLinksResponse(BaseSchema):
+    case_id: uuid.UUID
+    summary: ComplianceEvidenceSummary
+    items: list[ComplianceEvidenceLinkItem]

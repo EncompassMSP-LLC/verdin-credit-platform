@@ -30,6 +30,7 @@ from api.modules.cases.schemas import (
 )
 from api.modules.cases.service import CaseService
 from api.modules.documents.schemas import (
+    CaseComplianceEvidenceLinksResponse,
     CaseCreditReportDiscrepanciesResponse,
     CaseFcraFindingsResponse,
     CaseMetro2FindingsResponse,
@@ -196,6 +197,18 @@ async def get_case_tradeline_chronology(
         case_id,
         bureau=bureau,
     )
+
+
+@router.get(
+    "/{case_id}/compliance-evidence-links",
+    response_model=CaseComplianceEvidenceLinksResponse,
+)
+async def get_case_compliance_evidence_links(
+    case_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> CaseComplianceEvidenceLinksResponse:
+    return await service.get_case_compliance_evidence_links(current_user, case_id)
 
 
 @router.post(

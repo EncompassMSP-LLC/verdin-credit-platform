@@ -73,17 +73,18 @@ Authorization: Bearer <access_token>
 
 All case endpoints require authentication. Users are scoped to their organization.
 
-| Method | Path                                    | Min role     | Description                                                    |
-| ------ | --------------------------------------- | ------------ | -------------------------------------------------------------- |
-| POST   | `/cases`                                | case_manager | Create a case                                                  |
-| GET    | `/cases`                                | read_only    | List cases                                                     |
-| GET    | `/cases/{case_id}`                      | read_only    | Get case by ID                                                 |
-| PATCH  | `/cases/{case_id}`                      | case_manager | Update a case                                                  |
-| DELETE | `/cases/{case_id}`                      | admin        | Soft-delete a case                                             |
-| GET    | `/cases/{case_id}/metro2-findings`      | read_only    | Aggregate Metro 2 findings across latest bureau reports        |
-| GET    | `/cases/{case_id}/fcra-findings`        | read_only    | Aggregate FCRA checklist findings across latest bureau reports |
-| GET    | `/cases/{case_id}/tradeline-chronology` | read_only    | Multi-report tradeline chronology across stored bureau reports |
-| POST   | `/cases/{case_id}/llm-summary`          | case_manager | Generate LLM case summary                                      |
+| Method | Path                                         | Min role     | Description                                                    |
+| ------ | -------------------------------------------- | ------------ | -------------------------------------------------------------- |
+| POST   | `/cases`                                     | case_manager | Create a case                                                  |
+| GET    | `/cases`                                     | read_only    | List cases                                                     |
+| GET    | `/cases/{case_id}`                           | read_only    | Get case by ID                                                 |
+| PATCH  | `/cases/{case_id}`                           | case_manager | Update a case                                                  |
+| DELETE | `/cases/{case_id}`                           | admin        | Soft-delete a case                                             |
+| GET    | `/cases/{case_id}/metro2-findings`           | read_only    | Aggregate Metro 2 findings across latest bureau reports        |
+| GET    | `/cases/{case_id}/fcra-findings`             | read_only    | Aggregate FCRA checklist findings across latest bureau reports |
+| GET    | `/cases/{case_id}/tradeline-chronology`      | read_only    | Multi-report tradeline chronology across stored bureau reports |
+| GET    | `/cases/{case_id}/compliance-evidence-links` | read_only    | Link Metro 2/FCRA findings to reports and exhibits             |
+| POST   | `/cases/{case_id}/llm-summary`               | case_manager | Generate LLM case summary                                      |
 
 ### List query parameters
 
@@ -321,6 +322,8 @@ Metro 2 consistency findings: `GET /documents/{document_id}/parsed-credit-report
 FCRA checklist findings: `GET /documents/{document_id}/parsed-credit-report/fcra-findings` runs deterministic statutory-oriented checks (for example possible obsolete adverse information under §605, adverse account missing DOFD, collection missing original creditor, past due exceeding balance). Each finding includes referenced FCRA section numbers. Findings are investigator aids, not legal advice. `GET /cases/{case_id}/fcra-findings` aggregates the same rules across the latest parsed report per bureau.
 
 Tradeline reporting chronology: `GET /cases/{case_id}/tradeline-chronology` builds multi-snapshot timelines for matched tradelines across all stored parsed reports for the case (optional `bureau` query filter). Events include balance increases/decreases, status changes, DOFD changes, appearances, and disappearances. Investigator aid for historical pattern review.
+
+Compliance evidence links: `GET /cases/{case_id}/compliance-evidence-links` joins Metro 2 and FCRA findings to source bureau report documents, case identity/proof-of-address exhibits, and suggested supporting documents (collection letters, bureau responses, court records). Includes investigator checklist hints. Exact PDF page numbers remain deferred (`page_confidence=deferred`) until OCR page maps or on-demand page scan is enabled.
 
 Parsed tradeline account candidates: `GET /documents/{document_id}/parsed-credit-report/account-candidates` converts parser tradelines into normalized account-create candidates for staff review, including high balance, credit limit, open/report/DOFD dates when present in the parsed report.
 
