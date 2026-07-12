@@ -132,6 +132,7 @@ def test_strategy_groups_issues_by_match_key() -> None:
 
 def test_select_match_keys_for_cra_stage() -> None:
     from api.modules.documents.dispute_strategy import (
+        select_accounts_for_stage,
         select_match_keys_for_stage,
         stage_recipient_type,
     )
@@ -153,11 +154,24 @@ def test_select_match_keys_for_cra_stage() -> None:
                 "match_key": "capital one:4242",
             },
             {
+                "source_kind": "metro2",
+                "source_id": "metro2:b",
+                "rule_id": "metro2.date_closed_before_open",
+                "score": 95,
+                "rank": 2,
+                "title": "Impossible dates",
+                "severity": "high",
+                "bureau": "experian",
+                "creditor_name": "Metro Auto",
+                "account_number_masked": "****9999",
+                "match_key": None,
+            },
+            {
                 "source_kind": "chronology",
-                "source_id": "chronology:b",
+                "source_id": "chronology:c",
                 "rule_id": "chronology.field_changed",
                 "score": 45,
-                "rank": 2,
+                "rank": 3,
                 "title": "remarks",
                 "severity": "low",
                 "bureau": "experian",
@@ -169,7 +183,7 @@ def test_select_match_keys_for_cra_stage() -> None:
     )
     cra_keys = select_match_keys_for_stage(result.strategies, stage_kind="cra_dispute")
     assert "capital one:4242" in cra_keys
-    assert "retail:1111" in cra_keys  # CRA stage always recommended
+    assert "retail:1111" in cra_keys
     assert stage_recipient_type("cra_dispute") == "credit_bureau"
     assert stage_recipient_type("furnisher_dispute") == "furnisher"
 
@@ -180,3 +194,10 @@ def test_select_match_keys_for_cra_stage() -> None:
     )
     assert "capital one:4242" in furnisher_keys
     assert "retail:1111" not in furnisher_keys
+
+    targets = select_accounts_for_stage(result.strategies, stage_kind="cra_dispute")
+    assert any(target.match_key == "capital one:4242" for target in targets)
+    direct = [target for target in targets if target.match_key is None]
+    assert len(direct) == 1
+    assert direct[0].creditor_name == "Metro Auto"
+    assert direct[0].account_key.startswith("acct:")

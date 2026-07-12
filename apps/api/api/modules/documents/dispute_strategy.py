@@ -321,12 +321,106 @@ def generate_case_dispute_strategy(
 _PREPARABLE_STAGES: frozenset[StageKind] = frozenset({"cra_dispute", "furnisher_dispute"})
 
 
+@dataclass(frozen=True, slots=True)
+class StrategyPrepTarget:
+    account_key: str
+    match_key: str | None
+    creditor_name: str
+    account_number_masked: str | None
+    bureau: str | None
+    primary_rule_ids: tuple[str, ...]
+    summary: str
+
+
 def stage_recipient_type(stage_kind: StageKind) -> Literal["credit_bureau", "furnisher"]:
     if stage_kind == "furnisher_dispute":
         return "furnisher"
     if stage_kind == "cra_dispute":
         return "credit_bureau"
     raise ValueError(f"Stage `{stage_kind}` does not create dispute letters")
+
+
+def _stage_matches(
+    stages: Any,
+    *,
+    stage_kind: StageKind,
+    recommended_only: bool,
+) -> bool:
+    for stage in stages or ():
+        if isinstance(stage, dict):
+            kind = stage.get("stage_kind")
+            recommended = bool(stage.get("recommended"))
+        else:
+            kind = getattr(stage, "stage_kind", None)
+            recommended = bool(getattr(stage, "recommended", False))
+        if kind != stage_kind:
+            continue
+        if recommended_only and not recommended:
+            continue
+        return True
+    return False
+
+
+def select_accounts_for_stage(
+    strategies: Sequence[Any],
+    *,
+    stage_kind: StageKind,
+    account_keys: list[str] | None = None,
+    recommended_only: bool = True,
+) -> tuple[StrategyPrepTarget, ...]:
+    """Return preparable strategy accounts for a CRA/furnisher stage."""
+    if stage_kind not in _PREPARABLE_STAGES:
+        return ()
+
+    selected_keys = set(account_keys) if account_keys else None
+    targets: list[StrategyPrepTarget] = []
+    seen_keys: set[str] = set()
+
+    for item in strategies:
+        if isinstance(item, dict):
+            account_key = item.get("account_key")
+            match_key = item.get("match_key")
+            creditor_name = item.get("creditor_name")
+            account_number_masked = item.get("account_number_masked")
+            bureau = item.get("bureau")
+            primary_rule_ids = item.get("primary_rule_ids") or []
+            summary = item.get("summary") or ""
+            stages = item.get("stages") or []
+        else:
+            account_key = getattr(item, "account_key", None)
+            match_key = getattr(item, "match_key", None)
+            creditor_name = getattr(item, "creditor_name", None)
+            account_number_masked = getattr(item, "account_number_masked", None)
+            bureau = getattr(item, "bureau", None)
+            primary_rule_ids = getattr(item, "primary_rule_ids", ()) or ()
+            summary = getattr(item, "summary", "") or ""
+            stages = getattr(item, "stages", ()) or ()
+
+        if not isinstance(account_key, str) or account_key in seen_keys:
+            continue
+        if selected_keys is not None and account_key not in selected_keys:
+            continue
+        if not isinstance(creditor_name, str) or not creditor_name.strip():
+            continue
+        if not _stage_matches(stages, stage_kind=stage_kind, recommended_only=recommended_only):
+            continue
+
+        seen_keys.add(account_key)
+        targets.append(
+            StrategyPrepTarget(
+                account_key=account_key,
+                match_key=match_key if isinstance(match_key, str) and match_key.strip() else None,
+                creditor_name=creditor_name.strip(),
+                account_number_masked=account_number_masked
+                if isinstance(account_number_masked, str)
+                else None,
+                bureau=bureau if isinstance(bureau, str) else None,
+                primary_rule_ids=tuple(str(rule) for rule in primary_rule_ids),
+                summary=str(summary),
+            )
+        )
+
+    return tuple(targets)
 
 
 def select_match_keys_for_stage(
@@ -337,50 +431,17 @@ def select_match_keys_for_stage(
     recommended_only: bool = True,
 ) -> tuple[str, ...]:
     """Return discrepancy match_keys for accounts that warrant the stage."""
-    if stage_kind not in _PREPARABLE_STAGES:
-        return ()
-
-    selected_keys = set(account_keys) if account_keys else None
+    targets = select_accounts_for_stage(
+        strategies,
+        stage_kind=stage_kind,
+        account_keys=account_keys,
+        recommended_only=recommended_only,
+    )
     match_keys: list[str] = []
     seen: set[str] = set()
-
-    for item in strategies:
-        if isinstance(item, dict):
-            account_key = item.get("account_key")
-            match_key = item.get("match_key")
-            stages = item.get("stages") or []
-        else:
-            account_key = getattr(item, "account_key", None)
-            match_key = getattr(item, "match_key", None)
-            stages = getattr(item, "stages", ()) or ()
-
-        if not isinstance(account_key, str):
+    for target in targets:
+        if target.match_key is None or target.match_key in seen:
             continue
-        if selected_keys is not None and account_key not in selected_keys:
-            continue
-        if not isinstance(match_key, str) or not match_key.strip():
-            continue
-
-        stage_matches = False
-        for stage in stages:
-            if isinstance(stage, dict):
-                kind = stage.get("stage_kind")
-                recommended = bool(stage.get("recommended"))
-            else:
-                kind = getattr(stage, "stage_kind", None)
-                recommended = bool(getattr(stage, "recommended", False))
-            if kind != stage_kind:
-                continue
-            if recommended_only and not recommended:
-                continue
-            stage_matches = True
-            break
-
-        if not stage_matches:
-            continue
-        if match_key in seen:
-            continue
-        seen.add(match_key)
-        match_keys.append(match_key)
-
+        seen.add(target.match_key)
+        match_keys.append(target.match_key)
     return tuple(match_keys)

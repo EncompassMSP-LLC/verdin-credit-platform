@@ -699,6 +699,7 @@ class PrepareDisputeStrategyStageResponse(BaseSchema):
     stage_kind: Literal["cra_dispute", "furnisher_dispute"]
     recipient_type: Literal["credit_bureau", "furnisher"]
     match_keys: list[str]
+    direct_account_keys: list[str] = []
     prepared: list[PreparedCreditReportDisputeItem]
     skipped: list[str]
     note: str | None = None

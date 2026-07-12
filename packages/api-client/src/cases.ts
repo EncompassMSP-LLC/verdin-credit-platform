@@ -254,6 +254,7 @@ export interface PrepareDisputeStrategyStageResult {
   stage_kind: 'cra_dispute' | 'furnisher_dispute';
   recipient_type: 'credit_bureau' | 'furnisher';
   match_keys: string[];
+  direct_account_keys?: string[];
   prepared: PreparedCreditReportDisputeItem[];
   skipped: string[];
   note?: string | null;
