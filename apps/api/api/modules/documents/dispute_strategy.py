@@ -497,3 +497,183 @@ def select_match_keys_for_stage(
         seen.add(target.match_key)
         match_keys.append(target.match_key)
     return tuple(match_keys)
+
+
+_CFPB_DISCLAIMER = (
+    "Investigator CFPB escalation checklist only. Not legal advice. "
+    "Does not file a CFPB complaint or contact regulators automatically."
+)
+
+
+@dataclass(frozen=True, slots=True)
+class CfpbChecklistItem:
+    item_id: str
+    category: Literal["correspondence", "evidence", "chronology", "filing"]
+    title: str
+    detail: str
+    required: bool
+
+
+@dataclass(frozen=True, slots=True)
+class AccountCfpbChecklist:
+    account_key: str
+    creditor_name: str | None
+    account_number_masked: str | None
+    bureau: str | None
+    match_key: str | None
+    top_score: int
+    primary_rule_ids: tuple[str, ...]
+    items: tuple[CfpbChecklistItem, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class CaseCfpbChecklistResult:
+    case_id: uuid.UUID
+    disclaimer: str
+    summary: dict[str, int]
+    accounts: tuple[AccountCfpbChecklist, ...]
+
+
+def _cfpb_items_for_account(
+    *,
+    primary_rule_ids: Sequence[str],
+    top_score: int,
+) -> tuple[CfpbChecklistItem, ...]:
+    rules = ", ".join(primary_rule_ids) or "ranked strategy findings"
+    items: list[CfpbChecklistItem] = [
+        CfpbChecklistItem(
+            item_id="cra_dispute_packet",
+            category="correspondence",
+            title="Preserve CRA dispute letters and delivery proof",
+            detail="Include dated CRA dispute letters, certified-mail / portal receipts, and tracking.",
+            required=True,
+        ),
+        CfpbChecklistItem(
+            item_id="cra_responses",
+            category="correspondence",
+            title="Preserve CRA investigation responses",
+            detail="Keep bureau response letters and any incomplete / unverifiable findings notes.",
+            required=True,
+        ),
+        CfpbChecklistItem(
+            item_id="furnisher_outreach",
+            category="correspondence",
+            title="Preserve furnisher direct-dispute outreach",
+            detail="Include furnisher dispute drafts/sends and responses when that stage was recommended.",
+            required=top_score >= 70,
+        ),
+        CfpbChecklistItem(
+            item_id="report_excerpts",
+            category="evidence",
+            title="Attach report excerpts for disputed tradelines",
+            detail=f"Link bureau PDF excerpts for: {rules}.",
+            required=True,
+        ),
+        CfpbChecklistItem(
+            item_id="identity_exhibits",
+            category="evidence",
+            title="Include identity and proof-of-address exhibits",
+            detail="Government ID and proof of address used with CRA/furnisher disputes.",
+            required=True,
+        ),
+        CfpbChecklistItem(
+            item_id="chronology",
+            category="chronology",
+            title="Export tradeline reporting chronology",
+            detail="Capture balance/status/DOFD changes across stored monthly reports.",
+            required=True,
+        ),
+        CfpbChecklistItem(
+            item_id="strength_ranking",
+            category="filing",
+            title="Export litigation-strength ranking for this account",
+            detail=f"Top heuristic score {top_score}/100; cite strongest rule IDs in the narrative.",
+            required=True,
+        ),
+        CfpbChecklistItem(
+            item_id="cfpb_narrative",
+            category="filing",
+            title="Draft CFPB complaint narrative (staff review)",
+            detail=(
+                "Summarize documented inaccuracies, investigation gaps, and requested relief. "
+                "Staff must review before any submission."
+            ),
+            required=True,
+        ),
+    ]
+    return tuple(items)
+
+
+def build_case_cfpb_checklist(
+    *,
+    case_id: uuid.UUID,
+    strategies: Sequence[Any],
+    account_keys: list[str] | None = None,
+    recommended_only: bool = True,
+) -> CaseCfpbChecklistResult:
+    """Build CFPB escalation checklists for strategy accounts that warrant the stage."""
+    selected_keys = set(account_keys) if account_keys else None
+    accounts: list[AccountCfpbChecklist] = []
+
+    for item in strategies:
+        if isinstance(item, dict):
+            account_key = item.get("account_key")
+            creditor_name = item.get("creditor_name")
+            account_number_masked = item.get("account_number_masked")
+            bureau = item.get("bureau")
+            match_key = item.get("match_key")
+            top_score = item.get("top_score")
+            primary_rule_ids = item.get("primary_rule_ids") or []
+            stages = item.get("stages") or []
+        else:
+            account_key = getattr(item, "account_key", None)
+            creditor_name = getattr(item, "creditor_name", None)
+            account_number_masked = getattr(item, "account_number_masked", None)
+            bureau = getattr(item, "bureau", None)
+            match_key = getattr(item, "match_key", None)
+            top_score = getattr(item, "top_score", 0)
+            primary_rule_ids = getattr(item, "primary_rule_ids", ()) or ()
+            stages = getattr(item, "stages", ()) or ()
+
+        if not isinstance(account_key, str):
+            continue
+        if selected_keys is not None and account_key not in selected_keys:
+            continue
+        if not _stage_matches(
+            stages,
+            stage_kind="cfpb_escalation",
+            recommended_only=recommended_only,
+        ):
+            continue
+
+        score = int(top_score) if isinstance(top_score, int | float) else 0
+        rule_ids = tuple(str(rule) for rule in primary_rule_ids)
+        accounts.append(
+            AccountCfpbChecklist(
+                account_key=account_key,
+                creditor_name=creditor_name if isinstance(creditor_name, str) else None,
+                account_number_masked=account_number_masked
+                if isinstance(account_number_masked, str)
+                else None,
+                bureau=bureau if isinstance(bureau, str) else None,
+                match_key=match_key if isinstance(match_key, str) else None,
+                top_score=score,
+                primary_rule_ids=rule_ids,
+                items=_cfpb_items_for_account(primary_rule_ids=rule_ids, top_score=score),
+            )
+        )
+
+    accounts.sort(key=lambda account: (-account.top_score, account.account_key))
+    required_items = sum(
+        1 for account in accounts for checklist_item in account.items if checklist_item.required
+    )
+    return CaseCfpbChecklistResult(
+        case_id=case_id,
+        disclaimer=_CFPB_DISCLAIMER,
+        summary={
+            "accounts_listed": len(accounts),
+            "required_items": required_items,
+            "optional_items": sum(len(account.items) for account in accounts) - required_items,
+        },
+        accounts=tuple(accounts),
+    )

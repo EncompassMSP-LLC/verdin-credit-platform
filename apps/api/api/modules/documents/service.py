@@ -54,8 +54,10 @@ from api.modules.documents.permissions import (
 )
 from api.modules.documents.repository import DocumentListFilters, DocumentRepository
 from api.modules.documents.schemas import (
+    AccountCfpbChecklistItem,
     AccountDisputeStrategyItem,
     BureauTradelineSnapshotResponse,
+    CaseCfpbChecklistResponse,
     CaseComplianceEvidenceLinksResponse,
     CaseCreditReportDiscrepanciesResponse,
     CaseDisputeStrategyResponse,
@@ -63,6 +65,8 @@ from api.modules.documents.schemas import (
     CaseLitigationStrengthResponse,
     CaseMetro2FindingsResponse,
     CaseTradelineChronologyResponse,
+    CfpbChecklistItem,
+    CfpbChecklistSummary,
     ComplianceEvidenceExhibitLink,
     ComplianceEvidenceLinkItem,
     ComplianceEvidenceReportLink,
@@ -1985,6 +1989,56 @@ class DocumentService:
                     ],
                 )
                 for item in result.strategies
+            ],
+        )
+
+    async def get_case_cfpb_checklist(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+        *,
+        recommended_only: bool = True,
+    ) -> CaseCfpbChecklistResponse:
+        from api.modules.documents.dispute_strategy import build_case_cfpb_checklist
+
+        organization_id = self._require_organization(user)
+        await self._validate_case(case_id, organization_id)
+
+        strategy = await self.get_case_dispute_strategy(user, case_id)
+        result = build_case_cfpb_checklist(
+            case_id=case_id,
+            strategies=strategy.strategies,
+            recommended_only=recommended_only,
+        )
+        return CaseCfpbChecklistResponse(
+            case_id=result.case_id,
+            disclaimer=result.disclaimer,
+            summary=CfpbChecklistSummary(
+                accounts_listed=int(result.summary["accounts_listed"]),
+                required_items=int(result.summary["required_items"]),
+                optional_items=int(result.summary["optional_items"]),
+            ),
+            accounts=[
+                AccountCfpbChecklistItem(
+                    account_key=account.account_key,
+                    creditor_name=account.creditor_name,
+                    account_number_masked=account.account_number_masked,
+                    bureau=account.bureau,
+                    match_key=account.match_key,
+                    top_score=account.top_score,
+                    primary_rule_ids=list(account.primary_rule_ids),
+                    items=[
+                        CfpbChecklistItem(
+                            item_id=item.item_id,
+                            category=item.category,
+                            title=item.title,
+                            detail=item.detail,
+                            required=item.required,
+                        )
+                        for item in account.items
+                    ],
+                )
+                for account in result.accounts
             ],
         )
 

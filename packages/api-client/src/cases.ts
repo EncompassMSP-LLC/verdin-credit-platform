@@ -260,6 +260,40 @@ export interface PrepareDisputeStrategyStageResult {
   note?: string | null;
 }
 
+export interface CfpbChecklistSummary {
+  accounts_listed: number;
+  required_items: number;
+  optional_items: number;
+}
+
+export type CfpbChecklistCategory = 'correspondence' | 'evidence' | 'chronology' | 'filing';
+
+export interface CfpbChecklistItem {
+  item_id: string;
+  category: CfpbChecklistCategory;
+  title: string;
+  detail: string;
+  required: boolean;
+}
+
+export interface AccountCfpbChecklist {
+  account_key: string;
+  creditor_name?: string | null;
+  account_number_masked?: string | null;
+  bureau?: string | null;
+  match_key?: string | null;
+  top_score: number;
+  primary_rule_ids: string[];
+  items: CfpbChecklistItem[];
+}
+
+export interface CaseCfpbChecklist {
+  case_id: string;
+  disclaimer: string;
+  summary: CfpbChecklistSummary;
+  accounts: AccountCfpbChecklist[];
+}
+
 export async function getCaseCreditReportDiscrepancies(
   caseId: string,
 ): Promise<CaseCreditReportDiscrepancies> {
@@ -304,6 +338,20 @@ export async function getCaseLitigationStrength(caseId: string): Promise<CaseLit
 
 export async function getCaseDisputeStrategy(caseId: string): Promise<CaseDisputeStrategy> {
   return request<CaseDisputeStrategy>(apiPath(`/cases/${caseId}/dispute-strategy`));
+}
+
+export async function getCaseCfpbChecklist(
+  caseId: string,
+  params: { recommended_only?: boolean } = {},
+): Promise<CaseCfpbChecklist> {
+  const query = new URLSearchParams();
+  if (params.recommended_only === false) {
+    query.set('recommended_only', 'false');
+  }
+  const suffix = query.toString() ? `?${query.toString()}` : '';
+  return request<CaseCfpbChecklist>(
+    apiPath(`/cases/${caseId}/dispute-strategy/cfpb-checklist${suffix}`),
+  );
 }
 
 export async function prepareCaseDisputeStrategyStage(

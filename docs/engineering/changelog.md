@@ -13,6 +13,18 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — CFPB escalation checklist
+
+**Decision:** Add `GET /cases/{case_id}/dispute-strategy/cfpb-checklist` that lists required/optional packet items for accounts where the strategy CFPB stage is recommended.
+
+**Reason:** CFPB escalation was advisory only; investigators needed a concrete preservation/filing checklist without auto-submission.
+
+**Alternatives considered:** Auto-create CFPB portal drafts; PDF export only.
+
+**Technical debt:** Checklist is heuristic; does not verify which exhibits are already on the case.
+
+**Follow-up work:** Attorney-preserve packet export; mark checklist items complete against case documents.
+
 ## Compliance intelligence — strategy account metadata inference
 
 **Decision:** Infer `account_type` / `account_status` / `payment_status` from strategy `primary_rule_ids` when creating direct (non-discrepancy) accounts during strategy prepare.
@@ -23,7 +35,7 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Technical debt:** Heuristic only; rule text must mention status tokens to map.
 
-**Follow-up work:** CFPB packet checklist export; pull status from parsed tradeline when document_id is known.
+**Follow-up work:** Pull status from parsed tradeline when document_id is known; attorney-preserve packet export.
 
 ## Compliance intelligence — direct strategy account letter prep
 

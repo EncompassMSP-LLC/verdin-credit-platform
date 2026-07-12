@@ -1,8 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ApiClientError,
+  getCaseCfpbChecklist,
   getCaseDisputeStrategy,
   prepareCaseDisputeStrategyStage,
+  type AccountCfpbChecklist,
   type AccountDisputeStrategy,
   type DisputeStrategyStage,
   type DisputeStrategyStageKind,
@@ -20,6 +22,29 @@ function SummaryBadges({ summary }: { summary: DisputeStrategySummary }) {
       <Badge variant="warning">{summary.cfpb_recommended} CFPB</Badge>
       <Badge variant="info">{summary.attorney_recommended} preserve</Badge>
     </div>
+  );
+}
+
+function CfpbAccountChecklist({ account }: { account: AccountCfpbChecklist }) {
+  return (
+    <li className="rounded-md border border-amber-200 bg-amber-50/40 px-3 py-2">
+      <p className="text-sm font-medium text-gray-900">
+        {account.creditor_name ?? 'Unknown creditor'}
+        {account.account_number_masked ? ` · ${account.account_number_masked}` : ''}
+        <span className="ml-2 text-xs font-normal text-gray-500">top {account.top_score}/100</span>
+      </p>
+      <ul className="mt-2 space-y-1">
+        {account.items.map((item) => (
+          <li key={item.item_id} className="text-xs text-gray-700">
+            <span className="font-medium">
+              {item.required ? 'Required' : 'Optional'} · {item.category}:
+            </span>{' '}
+            {item.title}
+            <span className="block text-gray-500">{item.detail}</span>
+          </li>
+        ))}
+      </ul>
+    </li>
   );
 }
 
@@ -91,6 +116,13 @@ export function CaseDisputeStrategyPanel({
   const strategyQuery = useQuery({
     queryKey: ['case-dispute-strategy', caseId],
     queryFn: () => getCaseDisputeStrategy(caseId),
+    retry: false,
+  });
+
+  const cfpbQuery = useQuery({
+    queryKey: ['case-cfpb-checklist', caseId],
+    queryFn: () => getCaseCfpbChecklist(caseId),
+    enabled: (strategyQuery.data?.summary.cfpb_recommended ?? 0) > 0,
     retry: false,
   });
 
@@ -202,6 +234,23 @@ export function CaseDisputeStrategyPanel({
                     ))}
                   </ul>
                 ) : null}
+              </div>
+            ) : null}
+
+            {cfpbQuery.data && cfpbQuery.data.accounts.length > 0 ? (
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-gray-900">CFPB escalation checklist</p>
+                <p className="text-xs text-gray-500">{cfpbQuery.data.disclaimer}</p>
+                <p className="text-xs text-gray-500">
+                  {cfpbQuery.data.summary.accounts_listed} account(s) ·{' '}
+                  {cfpbQuery.data.summary.required_items} required ·{' '}
+                  {cfpbQuery.data.summary.optional_items} optional
+                </p>
+                <ul className="space-y-2">
+                  {cfpbQuery.data.accounts.map((account) => (
+                    <CfpbAccountChecklist key={account.account_key} account={account} />
+                  ))}
+                </ul>
               </div>
             ) : null}
 

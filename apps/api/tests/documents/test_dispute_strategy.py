@@ -219,3 +219,49 @@ def test_infer_account_metadata_from_rules() -> None:
 
     charge_off = infer_account_metadata_from_rules(["metro2.charge_off_zero_past_due"])
     assert charge_off.account_status == "charge_off"
+
+
+def test_build_case_cfpb_checklist_for_high_strength_accounts() -> None:
+    from api.modules.documents.dispute_strategy import build_case_cfpb_checklist
+
+    strategy = generate_case_dispute_strategy(
+        case_id=uuid.uuid4(),
+        scored_issues=[
+            {
+                "source_kind": "cross_bureau",
+                "source_id": "cross_bureau:a",
+                "rule_id": "cross_bureau.dofd_mismatch",
+                "score": 98,
+                "rank": 1,
+                "title": "DOFD mismatch",
+                "severity": "high",
+                "bureau": None,
+                "creditor_name": "Capital One",
+                "account_number_masked": "****4242",
+                "match_key": "capital one:4242",
+            },
+            {
+                "source_kind": "chronology",
+                "source_id": "chronology:b",
+                "rule_id": "chronology.field_changed",
+                "score": 45,
+                "rank": 2,
+                "title": "remarks",
+                "severity": "low",
+                "bureau": "experian",
+                "creditor_name": "Retail",
+                "account_number_masked": "****1111",
+                "match_key": "retail:1111",
+            },
+        ],
+    )
+    checklist = build_case_cfpb_checklist(
+        case_id=strategy.case_id,
+        strategies=strategy.strategies,
+        recommended_only=True,
+    )
+    assert checklist.summary["accounts_listed"] == 1
+    assert checklist.accounts[0].creditor_name == "Capital One"
+    assert checklist.accounts[0].top_score >= 95
+    assert any(item.item_id == "cfpb_narrative" for item in checklist.accounts[0].items)
+    assert checklist.summary["required_items"] >= 1
