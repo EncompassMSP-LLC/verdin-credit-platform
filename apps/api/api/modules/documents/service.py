@@ -54,9 +54,11 @@ from api.modules.documents.permissions import (
 )
 from api.modules.documents.repository import DocumentListFilters, DocumentRepository
 from api.modules.documents.schemas import (
+    AccountDisputeStrategyItem,
     BureauTradelineSnapshotResponse,
     CaseComplianceEvidenceLinksResponse,
     CaseCreditReportDiscrepanciesResponse,
+    CaseDisputeStrategyResponse,
     CaseFcraFindingsResponse,
     CaseLitigationStrengthResponse,
     CaseMetro2FindingsResponse,
@@ -68,6 +70,8 @@ from api.modules.documents.schemas import (
     CrossBureauComparisonSummary,
     CrossBureauDiscrepancyResponse,
     CrossBureauPossibleCauseResponse,
+    DisputeStrategyStage,
+    DisputeStrategySummary,
     DocumentClassificationResponse,
     DocumentDuplicateGroupResponse,
     DocumentFcraFindingsResponse,
@@ -1835,6 +1839,88 @@ class DocumentService:
                     factors=list(issue.factors),
                 )
                 for issue in result.issues
+            ],
+        )
+
+    async def get_case_dispute_strategy(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+    ) -> CaseDisputeStrategyResponse:
+        from api.modules.documents.dispute_strategy import generate_case_dispute_strategy
+
+        organization_id = self._require_organization(user)
+        await self._validate_case(case_id, organization_id)
+
+        strength = await self.get_case_litigation_strength(user, case_id)
+
+        evidence_hints_by_source_id: dict[str, list[str]] = {}
+        try:
+            evidence = await self.get_case_compliance_evidence_links(user, case_id)
+            for item in evidence.items:
+                if item.checklist_hints:
+                    evidence_hints_by_source_id[item.source_id] = list(item.checklist_hints)
+        except HTTPException as exc:
+            if exc.status_code != status.HTTP_404_NOT_FOUND:
+                raise
+
+        scored_issues = [
+            {
+                "source_kind": issue.source_kind,
+                "source_id": issue.source_id,
+                "rule_id": issue.rule_id,
+                "score": issue.score,
+                "rank": issue.rank,
+                "title": issue.title,
+                "severity": issue.severity,
+                "bureau": issue.bureau,
+                "creditor_name": issue.creditor_name,
+                "account_number_masked": issue.account_number_masked,
+                "match_key": issue.match_key,
+            }
+            for issue in strength.issues
+        ]
+        result = generate_case_dispute_strategy(
+            case_id=case_id,
+            scored_issues=scored_issues,
+            evidence_hints_by_source_id=evidence_hints_by_source_id,
+        )
+        return CaseDisputeStrategyResponse(
+            case_id=result.case_id,
+            disclaimer=result.disclaimer,
+            summary=DisputeStrategySummary(
+                accounts_planned=int(result.summary["accounts_planned"]),
+                issues_covered=int(result.summary["issues_covered"]),
+                high_strength_accounts=int(result.summary["high_strength_accounts"]),
+                cfpb_recommended=int(result.summary["cfpb_recommended"]),
+                attorney_recommended=int(result.summary["attorney_recommended"]),
+            ),
+            strategies=[
+                AccountDisputeStrategyItem(
+                    account_key=item.account_key,
+                    creditor_name=item.creditor_name,
+                    account_number_masked=item.account_number_masked,
+                    bureau=item.bureau,
+                    match_key=item.match_key,
+                    top_score=item.top_score,
+                    issue_count=item.issue_count,
+                    primary_rule_ids=list(item.primary_rule_ids),
+                    summary=item.summary,
+                    stages=[
+                        DisputeStrategyStage(
+                            stage_order=stage.stage_order,
+                            stage_kind=stage.stage_kind,
+                            title=stage.title,
+                            objective=stage.objective,
+                            rationale=stage.rationale,
+                            issue_source_ids=list(stage.issue_source_ids),
+                            evidence_hints=list(stage.evidence_hints),
+                            recommended=stage.recommended,
+                        )
+                        for stage in item.stages
+                    ],
+                )
+                for item in result.strategies
             ],
         )
 

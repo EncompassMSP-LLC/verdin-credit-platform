@@ -13,6 +13,18 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — dispute strategy generator
+
+**Decision:** Add `GET /cases/{case_id}/dispute-strategy` that groups litigation-strength ranked issues by account and emits a deterministic four-stage plan (CRA dispute → furnisher → CFPB if warranted → attorney preserve). Reuses evidence checklist hints when available.
+
+**Reason:** Phase 7 of the Consumer Credit Litigation Intelligence stack needs a tailored multi-stage plan, not a single generic letter.
+
+**Alternatives considered:** LLM-generated freeform strategy; auto-creating dispute letter drafts per stage.
+
+**Technical debt:** Stage thresholds are heuristic; CFPB/attorney gates are score-based only.
+
+**Follow-up work:** Optional PDF page maps; persist strategy runs; wire stage actions into dispute letter prep.
+
 ## Sprint 4.3.0 — Operational Core
 
 ### Decision: Mission Control Aggregates Through One Endpoint
