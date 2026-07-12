@@ -30,9 +30,20 @@ _ACCOUNT_NUMBER_RE = re.compile(r"^Account Number:\s*(.+)$", re.I | re.M)
 _ACCOUNT_TYPE_RE = re.compile(r"^Account Type:\s*(.+)$", re.I | re.M)
 _BALANCE_RE = re.compile(r"^Balance:\s*\$?([\d,]+\.?\d*)$", re.I | re.M)
 _CREDIT_LIMIT_RE = re.compile(r"^Credit Limit:\s*\$?([\d,]+\.?\d*)$", re.I | re.M)
+_HIGH_CREDIT_RE = re.compile(r"^High Credit:\s*\$?([\d,]+\.?\d*)$", re.I | re.M)
+_PAST_DUE_RE = re.compile(r"^Past Due(?: Amount)?:\s*\$?([\d,]+\.?\d*)$", re.I | re.M)
+_ACCOUNT_STATUS_RE = re.compile(r"^Account Status:\s*(.+)$", re.I | re.M)
 _PAYMENT_STATUS_RE = re.compile(r"^Payment Status:\s*(.+)$", re.I | re.M)
 _OPEN_DATE_RE = re.compile(r"^Date Opened:\s*(\d{1,2}/\d{1,2}/\d{4})$", re.I | re.M)
+_DATE_CLOSED_RE = re.compile(r"^Date Closed:\s*(\d{1,2}/\d{1,2}/\d{4})$", re.I | re.M)
 _REPORTED_DATE_RE = re.compile(r"^Date Reported:\s*(\d{1,2}/\d{1,2}/\d{4})$", re.I | re.M)
+_DOFD_RE = re.compile(
+    r"^(?:Date of First Delinquency|First Delinquency|DOFD):\s*(\d{1,2}/\d{1,2}/\d{4})$",
+    re.I | re.M,
+)
+_REMARKS_RE = re.compile(r"^Remarks?:\s*(.+)$", re.I | re.M)
+_PAYMENT_HISTORY_RE = re.compile(r"^Payment History:\s*(.+)$", re.I | re.M)
+_ORIGINAL_CREDITOR_ACCOUNT_RE = re.compile(r"^Original Creditor:\s*(.+)$", re.I | re.M)
 
 _INQUIRY_BLOCK_RE = re.compile(
     r"^Inquiry\s+(\d+)\s*\n(.*?)(?=^Inquiry\s+\d+\s*$|\Z)",
@@ -178,6 +189,7 @@ def _extract_acr_accounts(
                 creditor_name=creditor,
                 account_number_masked=account_masked,
                 account_type=account_type,
+                account_status=payment_status,
                 balance=balance,
                 credit_limit=None,
                 payment_status=payment_status,
@@ -207,9 +219,17 @@ def extract_accounts(
         account_type = _first(_ACCOUNT_TYPE_RE, block)
         balance = parse_balance(_first(_BALANCE_RE, block))
         credit_limit = parse_balance(_first(_CREDIT_LIMIT_RE, block))
+        high_credit = parse_balance(_first(_HIGH_CREDIT_RE, block))
+        past_due_amount = parse_balance(_first(_PAST_DUE_RE, block))
+        account_status = _first(_ACCOUNT_STATUS_RE, block)
         payment_status = _first(_PAYMENT_STATUS_RE, block)
         open_date = _first(_OPEN_DATE_RE, block)
+        date_closed = _first(_DATE_CLOSED_RE, block)
         date_reported = _first(_REPORTED_DATE_RE, block)
+        date_first_delinquency = _first(_DOFD_RE, block)
+        remarks = _first(_REMARKS_RE, block)
+        payment_history = _first(_PAYMENT_HISTORY_RE, block)
+        original_creditor = _first(_ORIGINAL_CREDITOR_ACCOUNT_RE, block)
         account_masked = mask_account_number(account_number_raw) if account_number_raw else None
 
         prefix = f"accounts[{index}]"
@@ -223,12 +243,26 @@ def extract_accounts(
             field_confidence[f"{prefix}.balance"] = _FIELD_CONFIDENCE
         if credit_limit is not None:
             field_confidence[f"{prefix}.credit_limit"] = _FIELD_CONFIDENCE
+        if high_credit is not None:
+            field_confidence[f"{prefix}.high_credit"] = _FIELD_CONFIDENCE
+        if past_due_amount is not None:
+            field_confidence[f"{prefix}.past_due_amount"] = _FIELD_CONFIDENCE
+        if account_status:
+            field_confidence[f"{prefix}.account_status"] = _FIELD_CONFIDENCE
         if payment_status:
             field_confidence[f"{prefix}.payment_status"] = _FIELD_CONFIDENCE
         if open_date:
             field_confidence[f"{prefix}.open_date"] = _FIELD_CONFIDENCE
+        if date_closed:
+            field_confidence[f"{prefix}.date_closed"] = _FIELD_CONFIDENCE
         if date_reported:
             field_confidence[f"{prefix}.date_reported"] = _FIELD_CONFIDENCE
+        if date_first_delinquency:
+            field_confidence[f"{prefix}.date_first_delinquency"] = _FIELD_CONFIDENCE
+        if remarks:
+            field_confidence[f"{prefix}.remarks"] = _FIELD_CONFIDENCE
+        if payment_history:
+            field_confidence[f"{prefix}.payment_history"] = _FIELD_CONFIDENCE
 
         account_field_scores = [
             field_confidence[key] for key in field_confidence if key.startswith(prefix)
@@ -238,11 +272,19 @@ def extract_accounts(
                 creditor_name=creditor,
                 account_number_masked=account_masked,
                 account_type=account_type,
+                account_status=account_status or payment_status,
                 balance=balance,
+                past_due_amount=past_due_amount,
+                high_credit=high_credit,
                 credit_limit=credit_limit,
                 payment_status=payment_status,
+                payment_history=payment_history,
+                remarks=remarks,
                 open_date=open_date,
+                date_closed=date_closed,
                 date_reported=date_reported,
+                date_first_delinquency=date_first_delinquency,
+                original_creditor=original_creditor,
                 bureau="experian",
                 confidence=max(account_field_scores) if account_field_scores else 0.0,
             )

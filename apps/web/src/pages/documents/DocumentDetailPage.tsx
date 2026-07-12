@@ -29,6 +29,8 @@ import { DocumentMetadataStatusBadge } from '../../components/documents/Document
 import { DocumentProcessingBadge } from '../../components/documents/DocumentProcessingBadge';
 import { ParsedReportTradelines } from '../../components/imports/ParsedReportTradelines';
 import { ParsedReportComparisonPanel } from '../../components/imports/ParsedReportComparisonPanel';
+import { DocumentMetro2FindingsPanel } from '../../components/imports/Metro2FindingsPanel';
+import { DocumentFcraFindingsPanel } from '../../components/imports/FcraFindingsPanel';
 
 function formatFileSize(bytes: number | null) {
   if (!bytes) return '—';
@@ -419,6 +421,8 @@ export function DocumentDetailPage() {
                       : null
                   }
                 />
+                <DocumentMetro2FindingsPanel documentId={documentId!} />
+                <DocumentFcraFindingsPanel documentId={documentId!} />
                 <ParsedReportAccountCandidatesPanel
                   accountCandidates={accountCandidates}
                   reviewTask={reviewTaskMutation.data}

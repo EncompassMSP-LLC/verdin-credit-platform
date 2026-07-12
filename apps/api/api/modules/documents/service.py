@@ -3,7 +3,7 @@
 import hashlib
 import logging
 import uuid
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from typing import Any, Literal
 
 from fastapi import HTTPException, UploadFile, status
@@ -56,12 +56,17 @@ from api.modules.documents.repository import DocumentListFilters, DocumentReposi
 from api.modules.documents.schemas import (
     BureauTradelineSnapshotResponse,
     CaseCreditReportDiscrepanciesResponse,
+    CaseFcraFindingsResponse,
+    CaseMetro2FindingsResponse,
+    CaseTradelineChronologyResponse,
     CrossBureauComparisonSummary,
     CrossBureauDiscrepancyResponse,
     CrossBureauPossibleCauseResponse,
     DocumentClassificationResponse,
     DocumentDuplicateGroupResponse,
+    DocumentFcraFindingsResponse,
     DocumentListParams,
+    DocumentMetro2FindingsResponse,
     DocumentOcrResponse,
     DocumentParsedCreditReportAccountCandidatesResponse,
     DocumentParsedCreditReportComparisonResponse,
@@ -69,15 +74,24 @@ from api.modules.documents.schemas import (
     DocumentResponse,
     DocumentUpdate,
     DocumentVersionResponse,
+    FcraFindingResponse,
+    FcraFindingSummary,
     ImportedParsedReportAccountItem,
     ImportParsedReportAccountsRequest,
     ImportParsedReportAccountsResponse,
+    Metro2FindingResponse,
+    Metro2FindingSummary,
     ParsedReportAccountCandidate,
     ParsedReportAccountChange,
     ParsedReportComparisonSummary,
+    ParsedReportFieldDiff,
     PrepareCreditReportDisputesRequest,
     PrepareCreditReportDisputesResponse,
     PreparedCreditReportDisputeItem,
+    TradelineChronologyEventResponse,
+    TradelineChronologyItemResponse,
+    TradelineChronologySnapshotResponse,
+    TradelineChronologySummary,
 )
 from api.modules.documents.storage import (
     DocumentStorage,
@@ -111,6 +125,20 @@ ALLOWED_MIME_TYPES = frozenset(
     }
 )
 PARSED_REPORT_REVIEW_TASK_SOURCE = "documents.parsed_credit_report"
+_TRADELINE_COMPARE_FIELDS: tuple[str, ...] = (
+    "balance",
+    "past_due_amount",
+    "payment_status",
+    "account_status",
+    "high_credit",
+    "credit_limit",
+    "open_date",
+    "date_closed",
+    "date_reported",
+    "date_first_delinquency",
+    "remarks",
+    "payment_history",
+)
 
 
 class DocumentService:
@@ -1115,6 +1143,39 @@ class DocumentService:
         return f"{creditor}:row-{fallback_index}"
 
     @classmethod
+    def _field_value_for_diff(
+        cls, account: dict[str, Any] | None, field_name: str
+    ) -> str | float | None:
+        if account is None:
+            return None
+        if field_name in {"balance", "past_due_amount", "high_credit", "credit_limit"}:
+            return cls._float_or_none(account.get(field_name))
+        return cls._string_or_none(account.get(field_name))
+
+    @classmethod
+    def _account_field_diffs(
+        cls,
+        *,
+        previous: dict[str, Any] | None,
+        current: dict[str, Any] | None,
+    ) -> list[ParsedReportFieldDiff]:
+        if previous is None or current is None:
+            return []
+        diffs: list[ParsedReportFieldDiff] = []
+        for field_name in _TRADELINE_COMPARE_FIELDS:
+            previous_value = cls._field_value_for_diff(previous, field_name)
+            current_value = cls._field_value_for_diff(current, field_name)
+            if previous_value != current_value:
+                diffs.append(
+                    ParsedReportFieldDiff(
+                        field=field_name,
+                        previous=previous_value,
+                        current=current_value,
+                    )
+                )
+        return diffs
+
+    @classmethod
     def _account_change(
         cls,
         *,
@@ -1132,13 +1193,14 @@ class DocumentService:
         )
         previous_status = cls._string_or_none(previous.get("payment_status")) if previous else None
         current_status = cls._string_or_none(current.get("payment_status")) if current else None
+        field_diffs = cls._account_field_diffs(previous=previous, current=current)
 
         change_type: Literal["added", "removed", "changed", "unchanged"]
         if previous is None:
             change_type = "added"
         elif current is None:
             change_type = "removed"
-        elif balance_delta != 0 or previous_status != current_status:
+        elif field_diffs:
             change_type = "changed"
         else:
             change_type = "unchanged"
@@ -1153,6 +1215,7 @@ class DocumentService:
             balance_delta=balance_delta,
             previous_payment_status=previous_status,
             current_payment_status=current_status,
+            field_diffs=field_diffs,
         )
 
     @classmethod
@@ -1215,6 +1278,310 @@ class DocumentService:
             previous_parsed_at=previous.parsed_at if previous else None,
             summary=summary,
             account_changes=changes,
+        )
+
+    async def get_metro2_findings(
+        self,
+        user: User,
+        document_id: uuid.UUID,
+    ) -> DocumentMetro2FindingsResponse:
+        document = await self._get_document_for_user(document_id, user)
+        current = await self._documents.get_parsed_credit_report(
+            document.id,
+            organization_id=document.organization_id,
+        )
+        if current is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Parsed credit report not found",
+            )
+        return self._metro2_document_response(
+            document_id=document.id,
+            bureau=current.bureau,
+            schema_version=current.schema_version,
+            parsed_report=current.parsed_report,
+        )
+
+    def _metro2_document_response(
+        self,
+        *,
+        document_id: uuid.UUID,
+        bureau: str,
+        schema_version: str | None,
+        parsed_report: dict[str, Any],
+    ) -> DocumentMetro2FindingsResponse:
+        from api.modules.documents.metro2_rules import evaluate_tradelines
+
+        result = evaluate_tradelines(
+            document_id=document_id,
+            bureau=bureau,
+            parsed_report=parsed_report,
+        )
+        return DocumentMetro2FindingsResponse(
+            document_id=result.document_id,
+            bureau=result.bureau,
+            schema_version=result.schema_version or schema_version,
+            summary=Metro2FindingSummary(**result.summary),
+            findings=[
+                Metro2FindingResponse(
+                    rule_id=finding.rule_id,
+                    severity=finding.severity,
+                    title=finding.title,
+                    description=finding.description,
+                    tradeline_index=finding.tradeline_index,
+                    creditor_name=finding.creditor_name,
+                    account_number_masked=finding.account_number_masked,
+                    fields=list(finding.fields),
+                    observed=finding.observed,
+                )
+                for finding in result.findings
+            ],
+        )
+
+    async def get_case_metro2_findings(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+    ) -> CaseMetro2FindingsResponse:
+        organization_id = self._require_organization(user)
+        await self._validate_case(case_id, organization_id)
+        parsed_reports = await self._documents.list_case_parsed_credit_reports(
+            organization_id=organization_id,
+            case_id=case_id,
+        )
+        reports_by_bureau = self._latest_parsed_reports_by_bureau(parsed_reports)
+        if not reports_by_bureau:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No parsed credit reports found for this case",
+            )
+
+        documents: list[DocumentMetro2FindingsResponse] = []
+        for bureau in sorted(reports_by_bureau):
+            document_id, parsed_report = reports_by_bureau[bureau]
+            schema_version = parsed_report.get("schema_version")
+            documents.append(
+                self._metro2_document_response(
+                    document_id=document_id,
+                    bureau=bureau,
+                    schema_version=schema_version if isinstance(schema_version, str) else None,
+                    parsed_report=parsed_report,
+                )
+            )
+
+        summary = Metro2FindingSummary(
+            total=sum(item.summary.total for item in documents),
+            high=sum(item.summary.high for item in documents),
+            medium=sum(item.summary.medium for item in documents),
+            low=sum(item.summary.low for item in documents),
+            tradelines_evaluated=sum(item.summary.tradelines_evaluated for item in documents),
+        )
+        return CaseMetro2FindingsResponse(
+            case_id=case_id,
+            reports_evaluated=sorted(reports_by_bureau),
+            document_ids_by_bureau={
+                bureau: document_id for bureau, (document_id, _) in reports_by_bureau.items()
+            },
+            summary=summary,
+            documents=documents,
+        )
+
+    async def get_fcra_findings(
+        self,
+        user: User,
+        document_id: uuid.UUID,
+    ) -> DocumentFcraFindingsResponse:
+        document = await self._get_document_for_user(document_id, user)
+        current = await self._documents.get_parsed_credit_report(
+            document.id,
+            organization_id=document.organization_id,
+        )
+        if current is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Parsed credit report not found",
+            )
+        return self._fcra_document_response(
+            document_id=document.id,
+            bureau=current.bureau,
+            schema_version=current.schema_version,
+            parsed_report=current.parsed_report,
+        )
+
+    def _fcra_document_response(
+        self,
+        *,
+        document_id: uuid.UUID,
+        bureau: str,
+        schema_version: str | None,
+        parsed_report: dict[str, Any],
+    ) -> DocumentFcraFindingsResponse:
+        from api.modules.documents.fcra_rules import evaluate_tradelines
+
+        result = evaluate_tradelines(
+            document_id=document_id,
+            bureau=bureau,
+            parsed_report=parsed_report,
+        )
+        return DocumentFcraFindingsResponse(
+            document_id=result.document_id,
+            bureau=result.bureau,
+            schema_version=result.schema_version or schema_version,
+            as_of_date=result.as_of_date,
+            summary=FcraFindingSummary(**result.summary),
+            findings=[
+                FcraFindingResponse(
+                    rule_id=finding.rule_id,
+                    severity=finding.severity,
+                    title=finding.title,
+                    description=finding.description,
+                    fcra_sections=list(finding.fcra_sections),
+                    tradeline_index=finding.tradeline_index,
+                    creditor_name=finding.creditor_name,
+                    account_number_masked=finding.account_number_masked,
+                    fields=list(finding.fields),
+                    observed=finding.observed,
+                )
+                for finding in result.findings
+            ],
+        )
+
+    async def get_case_fcra_findings(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+    ) -> CaseFcraFindingsResponse:
+        organization_id = self._require_organization(user)
+        await self._validate_case(case_id, organization_id)
+        parsed_reports = await self._documents.list_case_parsed_credit_reports(
+            organization_id=organization_id,
+            case_id=case_id,
+        )
+        reports_by_bureau = self._latest_parsed_reports_by_bureau(parsed_reports)
+        if not reports_by_bureau:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No parsed credit reports found for this case",
+            )
+
+        documents: list[DocumentFcraFindingsResponse] = []
+        for bureau in sorted(reports_by_bureau):
+            document_id, parsed_report = reports_by_bureau[bureau]
+            schema_version = parsed_report.get("schema_version")
+            documents.append(
+                self._fcra_document_response(
+                    document_id=document_id,
+                    bureau=bureau,
+                    schema_version=schema_version if isinstance(schema_version, str) else None,
+                    parsed_report=parsed_report,
+                )
+            )
+
+        summary = FcraFindingSummary(
+            total=sum(item.summary.total for item in documents),
+            high=sum(item.summary.high for item in documents),
+            medium=sum(item.summary.medium for item in documents),
+            low=sum(item.summary.low for item in documents),
+            tradelines_evaluated=sum(item.summary.tradelines_evaluated for item in documents),
+        )
+        return CaseFcraFindingsResponse(
+            case_id=case_id,
+            reports_evaluated=sorted(reports_by_bureau),
+            document_ids_by_bureau={
+                bureau: document_id for bureau, (document_id, _) in reports_by_bureau.items()
+            },
+            summary=summary,
+            documents=documents,
+        )
+
+    async def get_case_tradeline_chronology(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+        *,
+        bureau: str | None = None,
+    ) -> CaseTradelineChronologyResponse:
+        from api.modules.documents.tradeline_chronology import (
+            ReportSnapshotInput,
+            build_case_tradeline_chronology,
+        )
+
+        organization_id = self._require_organization(user)
+        await self._validate_case(case_id, organization_id)
+        parsed_reports = await self._documents.list_case_parsed_credit_reports(
+            organization_id=organization_id,
+            case_id=case_id,
+        )
+        if not parsed_reports:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No parsed credit reports found for this case",
+            )
+
+        result = build_case_tradeline_chronology(
+            case_id=case_id,
+            reports=[
+                ReportSnapshotInput(
+                    document_id=item.document_id,
+                    bureau=str(item.bureau),
+                    parsed_at=item.parsed_at,
+                    parsed_report=item.parsed_report,
+                )
+                for item in parsed_reports
+            ],
+            bureau=bureau,
+        )
+        return CaseTradelineChronologyResponse(
+            case_id=result.case_id,
+            reports_evaluated=result.reports_evaluated,
+            bureaus=list(result.bureaus),
+            summary=TradelineChronologySummary(**result.summary),
+            tradelines=[
+                TradelineChronologyItemResponse(
+                    match_key=item.match_key,
+                    bureau=item.bureau,
+                    creditor_name=item.creditor_name,
+                    account_number_masked=item.account_number_masked,
+                    snapshot_count=item.snapshot_count,
+                    event_count=item.event_count,
+                    snapshots=[
+                        TradelineChronologySnapshotResponse(
+                            document_id=snap.document_id,
+                            parsed_at=snap.parsed_at,
+                            as_of_date=snap.as_of_date,
+                            present=snap.present,
+                            creditor_name=snap.creditor_name,
+                            account_number_masked=snap.account_number_masked,
+                            balance=snap.balance,
+                            past_due_amount=snap.past_due_amount,
+                            account_status=snap.account_status,
+                            payment_status=snap.payment_status,
+                            date_first_delinquency=snap.date_first_delinquency,
+                            date_closed=snap.date_closed,
+                            remarks=snap.remarks,
+                            high_credit=snap.high_credit,
+                            credit_limit=snap.credit_limit,
+                        )
+                        for snap in item.snapshots
+                    ],
+                    events=[
+                        TradelineChronologyEventResponse(
+                            event_type=event.event_type,
+                            severity=event.severity,
+                            field=event.field,
+                            from_document_id=event.from_document_id,
+                            to_document_id=event.to_document_id,
+                            from_parsed_at=event.from_parsed_at,
+                            to_parsed_at=event.to_parsed_at,
+                            previous=event.previous,
+                            current=event.current,
+                            summary=event.summary,
+                        )
+                        for event in item.events
+                    ],
+                )
+                for item in result.tradelines
+            ],
         )
 
     @staticmethod
@@ -1316,6 +1683,18 @@ class DocumentService:
             return None
         return f"{normalized:.2f}"
 
+    @staticmethod
+    def _parse_report_date(value: object) -> date | None:
+        if not isinstance(value, str) or not value.strip():
+            return None
+        raw = value.strip()
+        for fmt in ("%m/%d/%Y", "%Y-%m-%d", "%m-%d-%Y", "%m/%d/%y"):
+            try:
+                return datetime.strptime(raw, fmt).date()
+            except ValueError:
+                continue
+        return None
+
     @classmethod
     def _candidate_from_account(
         cls,
@@ -1331,6 +1710,9 @@ class DocumentService:
 
         payment_status = cls._string_or_none(account.get("payment_status"))
         account_status = cls._string_or_none(account.get("account_status")) or payment_status
+        remarks = (
+            cls._string_or_none(account.get("remarks")) or "Imported from parsed credit report"
+        )
         return ParsedReportAccountCandidate(
             source_index=index,
             case_id=case_id,
@@ -1343,7 +1725,14 @@ class DocumentService:
             payment_status=cls._normalize_payment_status(payment_status),
             balance=cls._money_string(account.get("balance")),
             past_due_amount=cls._money_string(account.get("past_due_amount")),
-            remarks="Imported from parsed credit report",
+            high_balance=cls._money_string(account.get("high_credit")),
+            credit_limit=cls._money_string(account.get("credit_limit")),
+            date_opened=cls._string_or_none(account.get("open_date")),
+            date_reported=cls._string_or_none(account.get("date_reported")),
+            date_first_delinquency=cls._string_or_none(account.get("date_first_delinquency")),
+            remarks=remarks,
+            payment_history=cls._string_or_none(account.get("payment_history")),
+            date_closed=cls._string_or_none(account.get("date_closed")),
         )
 
     async def get_parsed_credit_report_account_candidates(
@@ -1473,8 +1862,19 @@ class DocumentService:
                         self._normalize_payment_status(candidate.payment_status)
                     ),
                     balance=Decimal(candidate.balance) if candidate.balance else None,
+                    high_balance=(
+                        Decimal(candidate.high_balance) if candidate.high_balance else None
+                    ),
+                    credit_limit=(
+                        Decimal(candidate.credit_limit) if candidate.credit_limit else None
+                    ),
                     past_due_amount=(
                         Decimal(candidate.past_due_amount) if candidate.past_due_amount else None
+                    ),
+                    date_opened=self._parse_report_date(candidate.date_opened),
+                    date_reported=self._parse_report_date(candidate.date_reported),
+                    date_first_delinquency=self._parse_report_date(
+                        candidate.date_first_delinquency
                     ),
                     remarks=candidate.remarks,
                 ),
@@ -1538,10 +1938,26 @@ class DocumentService:
                             creditor_name=snapshot.creditor_name,
                             account_number_masked=snapshot.account_number_masked,
                             balance=snapshot.balance,
+                            past_due_amount=snapshot.past_due_amount,
                             payment_status=snapshot.payment_status,
+                            account_status=snapshot.account_status,
                             account_type=snapshot.account_type,
+                            high_credit=snapshot.high_credit,
+                            credit_limit=snapshot.credit_limit,
+                            open_date=snapshot.open_date,
+                            date_closed=snapshot.date_closed,
+                            date_first_delinquency=snapshot.date_first_delinquency,
+                            date_reported=snapshot.date_reported,
                         )
                         for snapshot in item.bureau_snapshots
+                    ],
+                    field_diffs=[
+                        ParsedReportFieldDiff(
+                            field=diff.field,
+                            previous=diff.previous,
+                            current=diff.current,
+                        )
+                        for diff in item.field_diffs
                     ],
                     possible_causes=[
                         CrossBureauPossibleCauseResponse(

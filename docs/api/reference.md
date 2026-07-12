@@ -73,14 +73,17 @@ Authorization: Bearer <access_token>
 
 All case endpoints require authentication. Users are scoped to their organization.
 
-| Method | Path                           | Min role     | Description               |
-| ------ | ------------------------------ | ------------ | ------------------------- |
-| POST   | `/cases`                       | case_manager | Create a case             |
-| GET    | `/cases`                       | read_only    | List cases                |
-| GET    | `/cases/{case_id}`             | read_only    | Get case by ID            |
-| PATCH  | `/cases/{case_id}`             | case_manager | Update a case             |
-| DELETE | `/cases/{case_id}`             | admin        | Soft-delete a case        |
-| POST   | `/cases/{case_id}/llm-summary` | case_manager | Generate LLM case summary |
+| Method | Path                                    | Min role     | Description                                                    |
+| ------ | --------------------------------------- | ------------ | -------------------------------------------------------------- |
+| POST   | `/cases`                                | case_manager | Create a case                                                  |
+| GET    | `/cases`                                | read_only    | List cases                                                     |
+| GET    | `/cases/{case_id}`                      | read_only    | Get case by ID                                                 |
+| PATCH  | `/cases/{case_id}`                      | case_manager | Update a case                                                  |
+| DELETE | `/cases/{case_id}`                      | admin        | Soft-delete a case                                             |
+| GET    | `/cases/{case_id}/metro2-findings`      | read_only    | Aggregate Metro 2 findings across latest bureau reports        |
+| GET    | `/cases/{case_id}/fcra-findings`        | read_only    | Aggregate FCRA checklist findings across latest bureau reports |
+| GET    | `/cases/{case_id}/tradeline-chronology` | read_only    | Multi-report tradeline chronology across stored bureau reports |
+| POST   | `/cases/{case_id}/llm-summary`          | case_manager | Generate LLM case summary                                      |
 
 ### List query parameters
 
@@ -278,6 +281,8 @@ Secure document storage with MinIO, SHA-256 hashing, versioning, and duplicate d
 | POST   | `/documents/{document_id}/metadata/extract`                        | case_manager | Extract metadata from OCR text                  |
 | GET    | `/documents/{document_id}/parsed-credit-report/account-candidates` | read_only    | Build account candidates from parsed tradelines |
 | GET    | `/documents/{document_id}/parsed-credit-report/comparison`         | read_only    | Compare against previous report                 |
+| GET    | `/documents/{document_id}/parsed-credit-report/metro2-findings`    | read_only    | Deterministic Metro 2 consistency findings      |
+| GET    | `/documents/{document_id}/parsed-credit-report/fcra-findings`      | read_only    | Deterministic FCRA statutory checklist findings |
 | POST   | `/documents/{document_id}/parsed-credit-report/review-task`        | case_manager | Create or reuse account candidate review task   |
 | GET    | `/documents/{document_id}/resolutions`                             | read_only    | List entity resolution results                  |
 | POST   | `/documents/{document_id}/resolutions/resolve`                     | case_manager | Run entity resolution                           |
@@ -309,9 +314,15 @@ Fields: `file` (required), `title` (required), `case_id` (required), `descriptio
 
 Duplicate detection: uploading a file with the same SHA-256 hash as an existing org document sets `is_duplicate: true` and `duplicate_of_id`. Use `GET /documents/{document_id}/duplicates` to review the canonical document and exact duplicate copies in the same organization.
 
-Parsed credit report comparison: `GET /documents/{document_id}/parsed-credit-report/comparison` compares the selected report to the previous parsed report for the same case and bureau, matching tradelines by creditor plus masked account number.
+Parsed credit report comparison: `GET /documents/{document_id}/parsed-credit-report/comparison` compares the selected report to the previous parsed report for the same case and bureau, matching tradelines by creditor plus masked account number. Schema 1.1 comparisons return per-field `field_diffs` (balance, past due, status, DOFD, dates, remarks, payment history, limits) in addition to balance/status summaries.
 
-Parsed tradeline account candidates: `GET /documents/{document_id}/parsed-credit-report/account-candidates` converts parser tradelines into normalized account-create candidates for staff review.
+Metro 2 consistency findings: `GET /documents/{document_id}/parsed-credit-report/metro2-findings` runs deterministic field-consistency rules against the stored parsed tradelines (for example closed-with-balance, past-due without DOFD, impossible date sequences). Findings are investigator aids, not a full CDIA audit. `GET /cases/{case_id}/metro2-findings` aggregates the same rules across the latest parsed report per bureau.
+
+FCRA checklist findings: `GET /documents/{document_id}/parsed-credit-report/fcra-findings` runs deterministic statutory-oriented checks (for example possible obsolete adverse information under §605, adverse account missing DOFD, collection missing original creditor, past due exceeding balance). Each finding includes referenced FCRA section numbers. Findings are investigator aids, not legal advice. `GET /cases/{case_id}/fcra-findings` aggregates the same rules across the latest parsed report per bureau.
+
+Tradeline reporting chronology: `GET /cases/{case_id}/tradeline-chronology` builds multi-snapshot timelines for matched tradelines across all stored parsed reports for the case (optional `bureau` query filter). Events include balance increases/decreases, status changes, DOFD changes, appearances, and disappearances. Investigator aid for historical pattern review.
+
+Parsed tradeline account candidates: `GET /documents/{document_id}/parsed-credit-report/account-candidates` converts parser tradelines into normalized account-create candidates for staff review, including high balance, credit limit, open/report/DOFD dates when present in the parsed report.
 
 Parsed report review task: `POST /documents/{document_id}/parsed-credit-report/review-task` creates or reuses an active task linked to the document and parsed report, giving staff a workflow item for account candidate review.
 

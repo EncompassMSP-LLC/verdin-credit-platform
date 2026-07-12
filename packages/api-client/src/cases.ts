@@ -8,7 +8,14 @@ import {
   uploadRequest,
   ApiClientError,
 } from './http';
-import type { Document } from './documents';
+import type {
+  CaseFcraFindings,
+  CaseMetro2Findings,
+  CaseTradelineChronology,
+  Document,
+} from './documents';
+
+export type { CaseFcraFindings, CaseMetro2Findings, CaseTradelineChronology } from './documents';
 
 export interface Case {
   id: string;
@@ -141,8 +148,22 @@ export interface BureauTradelineSnapshot {
   creditor_name: string;
   account_number_masked?: string | null;
   balance?: number | null;
+  past_due_amount?: number | null;
   payment_status?: string | null;
+  account_status?: string | null;
   account_type?: string | null;
+  high_credit?: number | null;
+  credit_limit?: number | null;
+  open_date?: string | null;
+  date_closed?: string | null;
+  date_first_delinquency?: string | null;
+  date_reported?: string | null;
+}
+
+export interface CrossBureauFieldDiff {
+  field: string;
+  previous?: string | number | null;
+  current?: string | number | null;
 }
 
 export interface CrossBureauPossibleCause {
@@ -162,6 +183,7 @@ export interface CrossBureauDiscrepancy {
   bureaus_reporting: string[];
   bureaus_missing: string[];
   bureau_snapshots: BureauTradelineSnapshot[];
+  field_diffs?: CrossBureauFieldDiff[];
   possible_causes: CrossBureauPossibleCause[];
   recommended_next_step: string;
   recommended_action: string;
@@ -179,6 +201,8 @@ export interface CrossBureauComparisonSummary {
   missing_from_bureau: number;
   balance_mismatch: number;
   status_mismatch: number;
+  past_due_mismatch?: number;
+  dofd_mismatch?: number;
 }
 
 export interface CaseCreditReportDiscrepancies {
@@ -214,6 +238,28 @@ export async function getCaseCreditReportDiscrepancies(
 ): Promise<CaseCreditReportDiscrepancies> {
   return request<CaseCreditReportDiscrepancies>(
     apiPath(`/cases/${caseId}/credit-report-discrepancies`),
+  );
+}
+
+export async function getCaseMetro2Findings(caseId: string): Promise<CaseMetro2Findings> {
+  return request<CaseMetro2Findings>(apiPath(`/cases/${caseId}/metro2-findings`));
+}
+
+export async function getCaseFcraFindings(caseId: string): Promise<CaseFcraFindings> {
+  return request<CaseFcraFindings>(apiPath(`/cases/${caseId}/fcra-findings`));
+}
+
+export async function getCaseTradelineChronology(
+  caseId: string,
+  params: { bureau?: string } = {},
+): Promise<CaseTradelineChronology> {
+  const query = new URLSearchParams();
+  if (params.bureau) {
+    query.set('bureau', params.bureau);
+  }
+  const suffix = query.toString() ? `?${query.toString()}` : '';
+  return request<CaseTradelineChronology>(
+    apiPath(`/cases/${caseId}/tradeline-chronology${suffix}`),
   );
 }
 

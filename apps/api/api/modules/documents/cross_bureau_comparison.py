@@ -14,6 +14,8 @@ DiscrepancyType = Literal[
     "missing_from_bureau",
     "balance_mismatch",
     "status_mismatch",
+    "past_due_mismatch",
+    "dofd_mismatch",
 ]
 
 Classification = Literal[
@@ -57,8 +59,23 @@ class BureauTradelineSnapshot:
     creditor_name: str
     account_number_masked: str | None
     balance: float | None
+    past_due_amount: float | None
     payment_status: str | None
+    account_status: str | None
     account_type: str | None
+    high_credit: float | None
+    credit_limit: float | None
+    open_date: str | None
+    date_closed: str | None
+    date_first_delinquency: str | None
+    date_reported: str | None
+
+
+@dataclass(frozen=True, slots=True)
+class FieldDiff:
+    field: str
+    previous: str | float | None
+    current: str | float | None
 
 
 @dataclass(frozen=True, slots=True)
@@ -80,6 +97,7 @@ class CrossBureauDiscrepancy:
     bureaus_reporting: tuple[str, ...]
     bureaus_missing: tuple[str, ...]
     bureau_snapshots: tuple[BureauTradelineSnapshot, ...]
+    field_diffs: tuple[FieldDiff, ...]
     possible_causes: tuple[PossibleCause, ...]
     recommended_next_step: str
     recommended_action: str
@@ -150,6 +168,46 @@ def _normalize_status(value: str | None) -> str:
     return re.sub(r"[^a-z0-9 ]", " ", normalized).strip()
 
 
+_CROSS_BUREAU_COMPARE_FIELDS: tuple[str, ...] = (
+    "balance",
+    "past_due_amount",
+    "payment_status",
+    "account_status",
+    "high_credit",
+    "credit_limit",
+    "open_date",
+    "date_closed",
+    "date_first_delinquency",
+    "date_reported",
+)
+
+
+def _cross_bureau_field_diffs(
+    snapshots: tuple[BureauTradelineSnapshot, ...],
+) -> tuple[FieldDiff, ...]:
+    if len(snapshots) < 2:
+        return ()
+    diffs: list[FieldDiff] = []
+    baseline = snapshots[0]
+    for field_name in _CROSS_BUREAU_COMPARE_FIELDS:
+        values = {getattr(snapshot, field_name) for snapshot in snapshots}
+        values.discard(None)
+        values.discard("")
+        if len(values) > 1:
+            for snapshot in snapshots[1:]:
+                previous = getattr(baseline, field_name)
+                current = getattr(snapshot, field_name)
+                if previous != current:
+                    diffs.append(
+                        FieldDiff(
+                            field=f"{field_name}:{baseline.bureau}->{snapshot.bureau}",
+                            previous=previous,
+                            current=current,
+                        )
+                    )
+    return tuple(diffs)
+
+
 def _snapshot_from_account(
     *,
     bureau: str,
@@ -165,8 +223,16 @@ def _snapshot_from_account(
         creditor_name=creditor_name,
         account_number_masked=_string_or_none(account.get("account_number_masked")),
         balance=_float_or_none(account.get("balance")),
+        past_due_amount=_float_or_none(account.get("past_due_amount")),
         payment_status=_string_or_none(account.get("payment_status")),
+        account_status=_string_or_none(account.get("account_status")),
         account_type=_string_or_none(account.get("account_type")),
+        high_credit=_float_or_none(account.get("high_credit")),
+        credit_limit=_float_or_none(account.get("credit_limit")),
+        open_date=_string_or_none(account.get("open_date")),
+        date_closed=_string_or_none(account.get("date_closed")),
+        date_first_delinquency=_string_or_none(account.get("date_first_delinquency")),
+        date_reported=_string_or_none(account.get("date_reported")),
     )
 
 
@@ -183,12 +249,17 @@ def _classify_discrepancy(
     has_missing = "missing_from_bureau" in discrepancy_types
     has_balance = "balance_mismatch" in discrepancy_types
     has_status = "status_mismatch" in discrepancy_types
+    has_past_due = "past_due_mismatch" in discrepancy_types
+    has_dofd = "dofd_mismatch" in discrepancy_types
 
-    if has_balance and has_status:
+    field_mismatch_count = sum(
+        1 for flag in (has_balance, has_status, has_past_due, has_dofd) if flag
+    )
+    if field_mismatch_count >= 2:
         return "reporting_inconsistency", "dispute"
-    if has_balance:
+    if has_balance or has_past_due:
         return "balance_inconsistency", "dispute"
-    if has_status:
+    if has_status or has_dofd:
         return "status_inconsistency", "dispute"
     if has_missing:
         return "cross_bureau_reporting_difference", "investigation"
@@ -231,6 +302,12 @@ def _confidence_score(
 
     if "status_mismatch" in discrepancy_types:
         score += 14
+
+    if "past_due_mismatch" in discrepancy_types:
+        score += 12
+
+    if "dofd_mismatch" in discrepancy_types:
+        score += 16
 
     if "missing_from_bureau" in discrepancy_types:
         if len(missing_bureaus) >= 2:
@@ -419,13 +496,30 @@ def compare_cross_bureau_reports(
             types.append("balance_mismatch")
 
         statuses = {
-            _normalize_status(snapshot.payment_status)
+            _normalize_status(snapshot.payment_status or snapshot.account_status)
             for snapshot in snapshots
-            if snapshot.payment_status
+            if snapshot.payment_status or snapshot.account_status
         }
         statuses.discard("")
         if len(statuses) > 1:
             types.append("status_mismatch")
+
+        past_dues = {
+            snapshot.past_due_amount
+            for snapshot in snapshots
+            if snapshot.past_due_amount is not None
+        }
+        if len(past_dues) > 1:
+            types.append("past_due_mismatch")
+
+        dofds = {
+            (snapshot.date_first_delinquency or "").strip().lower()
+            for snapshot in snapshots
+            if snapshot.date_first_delinquency
+        }
+        dofds.discard("")
+        if len(dofds) > 1:
+            types.append("dofd_mismatch")
 
         if not types:
             types.append("consistent")
@@ -445,6 +539,7 @@ def compare_cross_bureau_reports(
         )
         bureau_snapshots = tuple(sorted(snapshots, key=lambda item: item.bureau))
         bureaus_reporting = tuple(sorted(reporting))
+        field_diffs = _cross_bureau_field_diffs(bureau_snapshots)
 
         confidence_score = _confidence_score(
             classification=classification,
@@ -487,6 +582,7 @@ def compare_cross_bureau_reports(
                 bureaus_reporting=bureaus_reporting,
                 bureaus_missing=missing_bureaus,
                 bureau_snapshots=bureau_snapshots,
+                field_diffs=field_diffs,
                 possible_causes=possible_causes,
                 recommended_next_step=recommended_next_step,
                 recommended_action=recommended_action,
@@ -510,6 +606,12 @@ def compare_cross_bureau_reports(
         ),
         "status_mismatch": sum(
             1 for item in discrepancies if "status_mismatch" in item.discrepancy_types
+        ),
+        "past_due_mismatch": sum(
+            1 for item in discrepancies if "past_due_mismatch" in item.discrepancy_types
+        ),
+        "dofd_mismatch": sum(
+            1 for item in discrepancies if "dofd_mismatch" in item.discrepancy_types
         ),
     }
 

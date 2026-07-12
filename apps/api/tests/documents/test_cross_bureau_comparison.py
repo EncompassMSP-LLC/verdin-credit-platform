@@ -79,6 +79,56 @@ def test_compare_cross_bureau_reports_detects_balance_and_missing_bureaus() -> N
     assert "status_mismatch" in achieve.discrepancy_types
     assert achieve.confidence_score >= 70
     assert result.summary["dispute_ready"] >= 1
+    assert achieve.field_diffs
+    assert any("balance" in diff.field for diff in achieve.field_diffs)
+
+
+def test_compare_cross_bureau_reports_detects_past_due_and_dofd_mismatches() -> None:
+    case_id = uuid.uuid4()
+    result = compare_cross_bureau_reports(
+        case_id=case_id,
+        reports_by_bureau={
+            "experian": (
+                uuid.uuid4(),
+                {
+                    "accounts": [
+                        {
+                            "creditor_name": "Capital One",
+                            "account_number_masked": "****4242",
+                            "balance": 4213.0,
+                            "past_due_amount": 4213.0,
+                            "payment_status": "Charge Off",
+                            "date_first_delinquency": "01/15/2020",
+                        }
+                    ]
+                },
+            ),
+            "equifax": (
+                uuid.uuid4(),
+                {
+                    "accounts": [
+                        {
+                            "creditor_name": "Capital One",
+                            "account_number_masked": "****4242",
+                            "balance": 4213.0,
+                            "past_due_amount": 0.0,
+                            "payment_status": "Charge Off",
+                            "date_first_delinquency": "03/01/2021",
+                        }
+                    ]
+                },
+            ),
+        },
+    )
+
+    capital = next(item for item in result.discrepancies if "Capital One" in item.creditor_name)
+    assert "past_due_mismatch" in capital.discrepancy_types
+    assert "dofd_mismatch" in capital.discrepancy_types
+    assert capital.dispute_ready is True
+    assert result.summary["past_due_mismatch"] == 1
+    assert result.summary["dofd_mismatch"] == 1
+    assert any("past_due_amount" in diff.field for diff in capital.field_diffs)
+    assert any("date_first_delinquency" in diff.field for diff in capital.field_diffs)
 
 
 def test_compare_cross_bureau_reports_marks_selective_reporting_as_investigation() -> None:
