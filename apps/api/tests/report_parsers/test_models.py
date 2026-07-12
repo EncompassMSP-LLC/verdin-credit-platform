@@ -16,7 +16,7 @@ def test_parsed_credit_report_has_versioned_schema() -> None:
         metadata=ParseMetadata.now(parser_name="fallback"),
     )
     assert report.schema_version == PARSED_CREDIT_REPORT_SCHEMA_VERSION
-    assert report.schema_version == "1.0"
+    assert report.schema_version == "1.1"
 
 
 def test_parsed_credit_report_serializes_to_dict() -> None:
@@ -34,7 +34,7 @@ def test_parsed_credit_report_serializes_to_dict() -> None:
         metadata=ParseMetadata.now(parser_name="fallback", is_partial=True),
     )
     payload = report.as_dict()
-    assert payload["schema_version"] == "1.0"
+    assert payload["schema_version"] == "1.1"
     assert payload["bureau"] == "experian"
     assert payload["consumer"]["name"] == "Jane Doe"
     assert payload["accounts"][0]["creditor_name"] == "Example Bank"

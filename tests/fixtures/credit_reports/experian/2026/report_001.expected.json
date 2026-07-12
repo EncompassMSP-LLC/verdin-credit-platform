@@ -2,27 +2,43 @@
   "accounts": [
     {
       "account_number_masked": "****7890",
+      "account_status": "Current",
       "account_type": "Revolving",
       "balance": 3200.0,
       "bureau": "experian",
       "confidence": 0.92,
       "credit_limit": 10000.0,
       "creditor_name": "First Horizon Bank",
+      "date_closed": null,
+      "date_first_delinquency": null,
       "date_reported": "06/01/2026",
+      "high_credit": null,
       "open_date": "08/10/2018",
-      "payment_status": "Current"
+      "original_creditor": null,
+      "past_due_amount": null,
+      "payment_history": null,
+      "payment_status": "Current",
+      "remarks": null
     },
     {
       "account_number_masked": "****3344",
+      "account_status": "Late 30 Days",
       "account_type": "Revolving",
       "balance": 580.25,
       "bureau": "experian",
       "confidence": 0.92,
       "credit_limit": null,
       "creditor_name": "Metro Retail Card",
+      "date_closed": null,
+      "date_first_delinquency": null,
       "date_reported": "06/01/2026",
+      "high_credit": null,
       "open_date": "02/14/2021",
-      "payment_status": "Late 30 Days"
+      "original_creditor": null,
+      "past_due_amount": null,
+      "payment_history": null,
+      "payment_status": "Late 30 Days",
+      "remarks": null
     }
   ],
   "bureau": "experian",
@@ -117,7 +133,7 @@
     }
   ],
   "report_id": "fixture-report_001",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "summary": {
     "confidence": 0.95,
     "total_accounts": 2,

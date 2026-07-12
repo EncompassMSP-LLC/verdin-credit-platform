@@ -2,27 +2,43 @@
   "accounts": [
     {
       "account_number_masked": "****2233",
+      "account_status": "Pays As Agreed",
       "account_type": "Installment",
       "balance": 14250.0,
       "bureau": "equifax",
       "confidence": 0.91,
-      "credit_limit": 18000.0,
+      "credit_limit": null,
       "creditor_name": "Lakeside Credit Union",
+      "date_closed": null,
+      "date_first_delinquency": null,
       "date_reported": "07/01/2026",
+      "high_credit": 18000.0,
       "open_date": "04/12/2020",
-      "payment_status": "Pays As Agreed"
+      "original_creditor": null,
+      "past_due_amount": null,
+      "payment_history": null,
+      "payment_status": "Pays As Agreed",
+      "remarks": null
     },
     {
       "account_number_masked": "****5566",
+      "account_status": "30 Days Past Due",
       "account_type": "Revolving",
       "balance": 210.75,
       "bureau": "equifax",
       "confidence": 0.91,
       "credit_limit": null,
       "creditor_name": "Summit Wireless",
+      "date_closed": null,
+      "date_first_delinquency": null,
       "date_reported": "07/01/2026",
+      "high_credit": null,
       "open_date": "11/03/2022",
-      "payment_status": "30 Days Past Due"
+      "original_creditor": null,
+      "past_due_amount": null,
+      "payment_history": null,
+      "payment_status": "30 Days Past Due",
+      "remarks": null
     }
   ],
   "bureau": "equifax",
@@ -54,14 +70,16 @@
     "classification_type": "credit_report",
     "field_confidence": {
       "accounts[0].account_number_masked": 0.91,
+      "accounts[0].account_status": 0.91,
       "accounts[0].account_type": 0.91,
       "accounts[0].balance": 0.91,
-      "accounts[0].credit_limit": 0.91,
       "accounts[0].creditor_name": 0.91,
       "accounts[0].date_reported": 0.91,
+      "accounts[0].high_credit": 0.91,
       "accounts[0].open_date": 0.91,
       "accounts[0].payment_status": 0.91,
       "accounts[1].account_number_masked": 0.91,
+      "accounts[1].account_status": 0.91,
       "accounts[1].account_type": 0.91,
       "accounts[1].balance": 0.91,
       "accounts[1].creditor_name": 0.91,
@@ -108,7 +126,7 @@
     }
   ],
   "report_id": "fixture-report_001",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "summary": {
     "confidence": 0.94,
     "total_accounts": 2,
