@@ -10,6 +10,7 @@ import {
 } from './http';
 import type {
   CaseComplianceEvidenceLinks,
+  CaseDisputeStrategy,
   CaseFcraFindings,
   CaseLitigationStrength,
   CaseMetro2Findings,
@@ -19,6 +20,7 @@ import type {
 
 export type {
   CaseComplianceEvidenceLinks,
+  CaseDisputeStrategy,
   CaseFcraFindings,
   CaseLitigationStrength,
   CaseMetro2Findings,
@@ -281,6 +283,10 @@ export async function getCaseComplianceEvidenceLinks(
 
 export async function getCaseLitigationStrength(caseId: string): Promise<CaseLitigationStrength> {
   return request<CaseLitigationStrength>(apiPath(`/cases/${caseId}/litigation-strength`));
+}
+
+export async function getCaseDisputeStrategy(caseId: string): Promise<CaseDisputeStrategy> {
+  return request<CaseDisputeStrategy>(apiPath(`/cases/${caseId}/dispute-strategy`));
 }
 
 export async function prepareCaseCreditReportDisputes(

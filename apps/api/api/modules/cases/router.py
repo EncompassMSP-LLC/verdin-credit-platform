@@ -32,6 +32,7 @@ from api.modules.cases.service import CaseService
 from api.modules.documents.schemas import (
     CaseComplianceEvidenceLinksResponse,
     CaseCreditReportDiscrepanciesResponse,
+    CaseDisputeStrategyResponse,
     CaseFcraFindingsResponse,
     CaseLitigationStrengthResponse,
     CaseMetro2FindingsResponse,
@@ -222,6 +223,18 @@ async def get_case_litigation_strength(
     service: DocumentService = Depends(get_document_service),
 ) -> CaseLitigationStrengthResponse:
     return await service.get_case_litigation_strength(current_user, case_id)
+
+
+@router.get(
+    "/{case_id}/dispute-strategy",
+    response_model=CaseDisputeStrategyResponse,
+)
+async def get_case_dispute_strategy(
+    case_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> CaseDisputeStrategyResponse:
+    return await service.get_case_dispute_strategy(current_user, case_id)
 
 
 @router.post(

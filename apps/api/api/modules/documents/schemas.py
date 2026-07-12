@@ -642,3 +642,47 @@ class CaseLitigationStrengthResponse(BaseSchema):
     case_id: uuid.UUID
     summary: LitigationStrengthSummary
     issues: list[LitigationStrengthIssue]
+
+
+class DisputeStrategySummary(BaseSchema):
+    accounts_planned: int
+    issues_covered: int
+    high_strength_accounts: int
+    cfpb_recommended: int
+    attorney_recommended: int
+
+
+class DisputeStrategyStage(BaseSchema):
+    stage_order: int
+    stage_kind: Literal[
+        "cra_dispute",
+        "furnisher_dispute",
+        "cfpb_escalation",
+        "attorney_preserve",
+    ]
+    title: str
+    objective: str
+    rationale: str
+    issue_source_ids: list[str]
+    evidence_hints: list[str]
+    recommended: bool
+
+
+class AccountDisputeStrategyItem(BaseSchema):
+    account_key: str
+    creditor_name: str | None = None
+    account_number_masked: str | None = None
+    bureau: str | None = None
+    match_key: str | None = None
+    top_score: int
+    issue_count: int
+    primary_rule_ids: list[str]
+    summary: str
+    stages: list[DisputeStrategyStage]
+
+
+class CaseDisputeStrategyResponse(BaseSchema):
+    case_id: uuid.UUID
+    disclaimer: str
+    summary: DisputeStrategySummary
+    strategies: list[AccountDisputeStrategyItem]

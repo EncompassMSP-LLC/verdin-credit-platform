@@ -355,6 +355,48 @@ export interface CaseLitigationStrength {
   issues: LitigationStrengthIssue[];
 }
 
+export interface DisputeStrategySummary {
+  accounts_planned: number;
+  issues_covered: number;
+  high_strength_accounts: number;
+  cfpb_recommended: number;
+  attorney_recommended: number;
+}
+
+export type DisputeStrategyStageKind =
+  'cra_dispute' | 'furnisher_dispute' | 'cfpb_escalation' | 'attorney_preserve';
+
+export interface DisputeStrategyStage {
+  stage_order: number;
+  stage_kind: DisputeStrategyStageKind;
+  title: string;
+  objective: string;
+  rationale: string;
+  issue_source_ids: string[];
+  evidence_hints: string[];
+  recommended: boolean;
+}
+
+export interface AccountDisputeStrategy {
+  account_key: string;
+  creditor_name?: string | null;
+  account_number_masked?: string | null;
+  bureau?: string | null;
+  match_key?: string | null;
+  top_score: number;
+  issue_count: number;
+  primary_rule_ids: string[];
+  summary: string;
+  stages: DisputeStrategyStage[];
+}
+
+export interface CaseDisputeStrategy {
+  case_id: string;
+  disclaimer: string;
+  summary: DisputeStrategySummary;
+  strategies: AccountDisputeStrategy[];
+}
+
 export interface ParsedReportAccountChange {
   match_key: string;
   creditor_name: string | null;

@@ -85,6 +85,7 @@ All case endpoints require authentication. Users are scoped to their organizatio
 | GET    | `/cases/{case_id}/tradeline-chronology`      | read_only    | Multi-report tradeline chronology across stored bureau reports |
 | GET    | `/cases/{case_id}/compliance-evidence-links` | read_only    | Link Metro 2/FCRA findings to reports and exhibits             |
 | GET    | `/cases/{case_id}/litigation-strength`       | read_only    | Rank compliance issues by heuristic litigation strength        |
+| GET    | `/cases/{case_id}/dispute-strategy`          | read_only    | Multi-stage dispute plan grounded in ranked findings           |
 | POST   | `/cases/{case_id}/llm-summary`               | case_manager | Generate LLM case summary                                      |
 
 ### List query parameters
@@ -327,6 +328,8 @@ Tradeline reporting chronology: `GET /cases/{case_id}/tradeline-chronology` buil
 Compliance evidence links: `GET /cases/{case_id}/compliance-evidence-links` joins Metro 2 and FCRA findings to source bureau report documents, case identity/proof-of-address exhibits, and suggested supporting documents (collection letters, bureau responses, court records). Includes investigator checklist hints. Exact PDF page numbers remain deferred (`page_confidence=deferred`) until OCR page maps or on-demand page scan is enabled.
 
 Litigation strength ranking: `GET /cases/{case_id}/litigation-strength` scores and ranks Metro 2, FCRA, cross-bureau, and chronology issues using deterministic heuristics (for example DOFD mismatches near 98, impossible date sequences near 95). Investigator prioritization aid only — not legal advice.
+
+Dispute strategy: `GET /cases/{case_id}/dispute-strategy` builds a per-account multi-stage investigator plan from ranked litigation-strength issues (CRA dispute → furnisher follow-up → CFPB if warranted → preserve for attorney consult). Grounded in scored findings and evidence checklist hints. Staff-mediated planning aid only — does not auto-file or give legal advice.
 
 Parsed tradeline account candidates: `GET /documents/{document_id}/parsed-credit-report/account-candidates` converts parser tradelines into normalized account-create candidates for staff review, including high balance, credit limit, open/report/DOFD dates when present in the parsed report.
 
