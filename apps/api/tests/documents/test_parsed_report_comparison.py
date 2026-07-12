@@ -151,6 +151,9 @@ async def test_compare_parsed_credit_report_to_previous_same_case_bureau(
     assert changes["changed"]["previous_balance"] == 100.0
     assert changes["changed"]["current_balance"] == 150.0
     assert changes["changed"]["balance_delta"] == 50.0
+    field_names = {diff["field"] for diff in changes["changed"]["field_diffs"]}
+    assert "balance" in field_names
+    assert "payment_status" in field_names
     assert changes["removed"]["creditor_name"] == "Metro Auto Finance"
     assert changes["added"]["creditor_name"] == "Northstar Recovery"
 

@@ -130,6 +130,155 @@ export interface DocumentParsedCreditReport {
   parsed_at: string;
 }
 
+export interface ParsedReportFieldDiff {
+  field: string;
+  previous?: string | number | null;
+  current?: string | number | null;
+}
+
+export interface Metro2FindingSummary {
+  total: number;
+  high: number;
+  medium: number;
+  low: number;
+  tradelines_evaluated: number;
+}
+
+export interface Metro2Finding {
+  rule_id: string;
+  severity: 'low' | 'medium' | 'high';
+  title: string;
+  description: string;
+  tradeline_index: number;
+  creditor_name?: string | null;
+  account_number_masked?: string | null;
+  fields: string[];
+  observed: Record<string, unknown>;
+}
+
+export interface DocumentMetro2Findings {
+  document_id: string;
+  bureau: string;
+  schema_version?: string | null;
+  summary: Metro2FindingSummary;
+  findings: Metro2Finding[];
+}
+
+export interface CaseMetro2Findings {
+  case_id: string;
+  reports_evaluated: string[];
+  document_ids_by_bureau: Record<string, string>;
+  summary: Metro2FindingSummary;
+  documents: DocumentMetro2Findings[];
+}
+
+export interface FcraFindingSummary {
+  total: number;
+  high: number;
+  medium: number;
+  low: number;
+  tradelines_evaluated: number;
+}
+
+export interface FcraFinding {
+  rule_id: string;
+  severity: 'low' | 'medium' | 'high';
+  title: string;
+  description: string;
+  fcra_sections: string[];
+  tradeline_index: number;
+  creditor_name?: string | null;
+  account_number_masked?: string | null;
+  fields: string[];
+  observed: Record<string, unknown>;
+}
+
+export interface DocumentFcraFindings {
+  document_id: string;
+  bureau: string;
+  schema_version?: string | null;
+  as_of_date?: string | null;
+  summary: FcraFindingSummary;
+  findings: FcraFinding[];
+}
+
+export interface CaseFcraFindings {
+  case_id: string;
+  reports_evaluated: string[];
+  document_ids_by_bureau: Record<string, string>;
+  summary: FcraFindingSummary;
+  documents: DocumentFcraFindings[];
+}
+
+export interface TradelineChronologySummary {
+  tradelines: number;
+  with_changes: number;
+  snapshots: number;
+  events: number;
+  reports_evaluated: number;
+}
+
+export interface TradelineChronologySnapshot {
+  document_id: string;
+  parsed_at: string;
+  as_of_date?: string | null;
+  present: boolean;
+  creditor_name?: string | null;
+  account_number_masked?: string | null;
+  balance?: number | null;
+  past_due_amount?: number | null;
+  account_status?: string | null;
+  payment_status?: string | null;
+  date_first_delinquency?: string | null;
+  date_closed?: string | null;
+  remarks?: string | null;
+  high_credit?: number | null;
+  credit_limit?: number | null;
+}
+
+export type TradelineChronologyEventType =
+  | 'appeared'
+  | 'disappeared'
+  | 'balance_increased'
+  | 'balance_decreased'
+  | 'past_due_changed'
+  | 'status_changed'
+  | 'dofd_changed'
+  | 'date_closed_changed'
+  | 'field_changed';
+
+export interface TradelineChronologyEvent {
+  event_type: TradelineChronologyEventType;
+  severity: 'low' | 'medium' | 'high';
+  field?: string | null;
+  from_document_id?: string | null;
+  to_document_id: string;
+  from_parsed_at?: string | null;
+  to_parsed_at: string;
+  previous?: string | number | null;
+  current?: string | number | null;
+  summary: string;
+}
+
+export interface TradelineChronologyItem {
+  match_key: string;
+  bureau: string;
+  creditor_name?: string | null;
+  account_number_masked?: string | null;
+  snapshot_count: number;
+  event_count: number;
+  snapshots: TradelineChronologySnapshot[];
+  events: TradelineChronologyEvent[];
+}
+
+export interface CaseTradelineChronology {
+  case_id: string;
+  reports_evaluated: number;
+  bureaus: string[];
+  summary: TradelineChronologySummary;
+  tradelines: TradelineChronologyItem[];
+}
+
 export interface ParsedReportAccountChange {
   match_key: string;
   creditor_name: string | null;
@@ -140,6 +289,7 @@ export interface ParsedReportAccountChange {
   balance_delta: number | null;
   previous_payment_status: string | null;
   current_payment_status: string | null;
+  field_diffs?: ParsedReportFieldDiff[];
 }
 
 export interface ParsedReportComparisonSummary {
@@ -171,7 +321,14 @@ export interface ParsedReportAccountCandidate {
   payment_status: string;
   balance: string | null;
   past_due_amount: string | null;
+  high_balance?: string | null;
+  credit_limit?: string | null;
+  date_opened?: string | null;
+  date_reported?: string | null;
+  date_first_delinquency?: string | null;
   remarks: string | null;
+  payment_history?: string | null;
+  date_closed?: string | null;
 }
 
 export interface DocumentParsedCreditReportAccountCandidates {
@@ -381,6 +538,20 @@ export async function compareDocumentParsedCreditReport(
 ): Promise<DocumentParsedCreditReportComparison> {
   return request<DocumentParsedCreditReportComparison>(
     apiPath(`/documents/${documentId}/parsed-credit-report/comparison`),
+  );
+}
+
+export async function getDocumentMetro2Findings(
+  documentId: string,
+): Promise<DocumentMetro2Findings> {
+  return request<DocumentMetro2Findings>(
+    apiPath(`/documents/${documentId}/parsed-credit-report/metro2-findings`),
+  );
+}
+
+export async function getDocumentFcraFindings(documentId: string): Promise<DocumentFcraFindings> {
+  return request<DocumentFcraFindings>(
+    apiPath(`/documents/${documentId}/parsed-credit-report/fcra-findings`),
   );
 }
 

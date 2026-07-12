@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getPortalPushStatus, subscribePortalPush } from '@verdin/api-client';
 import { Button } from '@verdin/ui';
+import { useTranslation } from 'react-i18next';
 import { featureFlags } from '../../lib/feature-flags';
 
 export function PortalPushPanel() {
+  const { t } = useTranslation('portal');
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -25,7 +27,7 @@ export function PortalPushPanel() {
       }),
     onSuccess: () => {
       setError(null);
-      setSuccess('Push subscription registered for this device.');
+      setSuccess(t('push.success'));
       void queryClient.invalidateQueries({ queryKey: ['portal-push-status'] });
     },
     onError: (err: Error) => {
@@ -39,25 +41,23 @@ export function PortalPushPanel() {
   }
 
   if (statusQuery.isLoading) {
-    return <p className="mt-6 text-sm text-gray-500">Checking push notification status…</p>;
+    return <p className="mt-6 text-sm text-gray-500">{t('push.checking')}</p>;
   }
 
   if (statusQuery.isError || !statusQuery.data) {
-    return <p className="mt-6 text-sm text-red-600">Unable to load push notification settings.</p>;
+    return <p className="mt-6 text-sm text-red-600">{t('push.loadError')}</p>;
   }
 
   const status = statusQuery.data;
 
   return (
     <div className="mt-8 rounded-md border border-gray-200 bg-gray-50 p-4">
-      <h2 className="text-sm font-semibold text-gray-900">Message notifications</h2>
-      <p className="mt-1 text-sm text-gray-600">
-        Register this browser for push alerts when your case team sends a secure message.
-      </p>
+      <h2 className="text-sm font-semibold text-gray-900">{t('push.title')}</h2>
+      <p className="mt-1 text-sm text-gray-600">{t('push.subtitle')}</p>
 
       {!status.ready ? (
         <div className="mt-3 rounded-md bg-amber-50 p-3 text-sm text-amber-900">
-          <p className="font-medium">Push delivery is not fully configured.</p>
+          <p className="font-medium">{t('push.notConfigured')}</p>
           {status.blockers.length > 0 ? (
             <ul className="mt-2 list-disc pl-5">
               {status.blockers.map((blocker) => (
@@ -69,7 +69,7 @@ export function PortalPushPanel() {
       ) : null}
 
       <div className="mt-3 text-sm text-gray-600">
-        Active subscriptions: {status.active_subscription_count}
+        {t('push.activeSubscriptions', { count: status.active_subscription_count })}
       </div>
 
       <div className="mt-4">
@@ -79,7 +79,7 @@ export function PortalPushPanel() {
           loading={subscribeMutation.isPending}
           onClick={() => subscribeMutation.mutate()}
         >
-          Register for notifications
+          {t('push.register')}
         </Button>
       </div>
 

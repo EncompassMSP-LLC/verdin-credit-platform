@@ -258,6 +258,12 @@ class DocumentParsedCreditReportResponse(BaseSchema):
         )
 
 
+class ParsedReportFieldDiff(BaseSchema):
+    field: str
+    previous: str | float | None = None
+    current: str | float | None = None
+
+
 class ParsedReportAccountChange(BaseSchema):
     match_key: str
     creditor_name: str | None
@@ -268,6 +274,7 @@ class ParsedReportAccountChange(BaseSchema):
     balance_delta: float | None = None
     previous_payment_status: str | None = None
     current_payment_status: str | None = None
+    field_diffs: list[ParsedReportFieldDiff] = []
 
 
 class ParsedReportComparisonSummary(BaseSchema):
@@ -299,7 +306,14 @@ class ParsedReportAccountCandidate(BaseSchema):
     payment_status: str
     balance: str | None = None
     past_due_amount: str | None = None
+    high_balance: str | None = None
+    credit_limit: str | None = None
+    date_opened: str | None = None
+    date_reported: str | None = None
+    date_first_delinquency: str | None = None
     remarks: str | None = None
+    payment_history: str | None = None
+    date_closed: str | None = None
 
 
 class DocumentParsedCreditReportAccountCandidatesResponse(BaseSchema):
@@ -333,8 +347,16 @@ class BureauTradelineSnapshotResponse(BaseSchema):
     creditor_name: str
     account_number_masked: str | None = None
     balance: float | None = None
+    past_due_amount: float | None = None
     payment_status: str | None = None
+    account_status: str | None = None
     account_type: str | None = None
+    high_credit: float | None = None
+    credit_limit: float | None = None
+    open_date: str | None = None
+    date_closed: str | None = None
+    date_first_delinquency: str | None = None
+    date_reported: str | None = None
 
 
 class CrossBureauPossibleCauseResponse(BaseSchema):
@@ -354,6 +376,7 @@ class CrossBureauDiscrepancyResponse(BaseSchema):
     bureaus_reporting: list[str]
     bureaus_missing: list[str]
     bureau_snapshots: list[BureauTradelineSnapshotResponse]
+    field_diffs: list[ParsedReportFieldDiff] = []
     possible_causes: list[CrossBureauPossibleCauseResponse]
     recommended_next_step: str
     recommended_action: str
@@ -371,6 +394,8 @@ class CrossBureauComparisonSummary(BaseSchema):
     missing_from_bureau: int
     balance_mismatch: int
     status_mismatch: int
+    past_due_mismatch: int = 0
+    dofd_mismatch: int = 0
 
 
 class CaseCreditReportDiscrepanciesResponse(BaseSchema):
@@ -399,3 +424,145 @@ class PrepareCreditReportDisputesResponse(BaseSchema):
     case_id: uuid.UUID
     prepared: list[PreparedCreditReportDisputeItem]
     skipped: list[str]
+
+
+class Metro2FindingSummary(BaseSchema):
+    total: int
+    high: int
+    medium: int
+    low: int
+    tradelines_evaluated: int
+
+
+class Metro2FindingResponse(BaseSchema):
+    rule_id: str
+    severity: Literal["low", "medium", "high"]
+    title: str
+    description: str
+    tradeline_index: int
+    creditor_name: str | None = None
+    account_number_masked: str | None = None
+    fields: list[str]
+    observed: dict[str, object]
+
+
+class DocumentMetro2FindingsResponse(BaseSchema):
+    document_id: uuid.UUID
+    bureau: str
+    schema_version: str | None = None
+    summary: Metro2FindingSummary
+    findings: list[Metro2FindingResponse]
+
+
+class CaseMetro2FindingsResponse(BaseSchema):
+    case_id: uuid.UUID
+    reports_evaluated: list[str]
+    document_ids_by_bureau: dict[str, uuid.UUID]
+    summary: Metro2FindingSummary
+    documents: list[DocumentMetro2FindingsResponse]
+
+
+class FcraFindingSummary(BaseSchema):
+    total: int
+    high: int
+    medium: int
+    low: int
+    tradelines_evaluated: int
+
+
+class FcraFindingResponse(BaseSchema):
+    rule_id: str
+    severity: Literal["low", "medium", "high"]
+    title: str
+    description: str
+    fcra_sections: list[str]
+    tradeline_index: int
+    creditor_name: str | None = None
+    account_number_masked: str | None = None
+    fields: list[str]
+    observed: dict[str, object]
+
+
+class DocumentFcraFindingsResponse(BaseSchema):
+    document_id: uuid.UUID
+    bureau: str
+    schema_version: str | None = None
+    as_of_date: str | None = None
+    summary: FcraFindingSummary
+    findings: list[FcraFindingResponse]
+
+
+class CaseFcraFindingsResponse(BaseSchema):
+    case_id: uuid.UUID
+    reports_evaluated: list[str]
+    document_ids_by_bureau: dict[str, uuid.UUID]
+    summary: FcraFindingSummary
+    documents: list[DocumentFcraFindingsResponse]
+
+
+class TradelineChronologySummary(BaseSchema):
+    tradelines: int
+    with_changes: int
+    snapshots: int
+    events: int
+    reports_evaluated: int
+
+
+class TradelineChronologySnapshotResponse(BaseSchema):
+    document_id: uuid.UUID
+    parsed_at: datetime
+    as_of_date: str | None = None
+    present: bool
+    creditor_name: str | None = None
+    account_number_masked: str | None = None
+    balance: float | None = None
+    past_due_amount: float | None = None
+    account_status: str | None = None
+    payment_status: str | None = None
+    date_first_delinquency: str | None = None
+    date_closed: str | None = None
+    remarks: str | None = None
+    high_credit: float | None = None
+    credit_limit: float | None = None
+
+
+class TradelineChronologyEventResponse(BaseSchema):
+    event_type: Literal[
+        "appeared",
+        "disappeared",
+        "balance_increased",
+        "balance_decreased",
+        "past_due_changed",
+        "status_changed",
+        "dofd_changed",
+        "date_closed_changed",
+        "field_changed",
+    ]
+    severity: Literal["low", "medium", "high"]
+    field: str | None = None
+    from_document_id: uuid.UUID | None = None
+    to_document_id: uuid.UUID
+    from_parsed_at: datetime | None = None
+    to_parsed_at: datetime
+    previous: str | float | None = None
+    current: str | float | None = None
+    summary: str
+
+
+class TradelineChronologyItemResponse(BaseSchema):
+    match_key: str
+    bureau: str
+    creditor_name: str | None = None
+    account_number_masked: str | None = None
+    snapshot_count: int
+    event_count: int
+    snapshots: list[TradelineChronologySnapshotResponse]
+    events: list[TradelineChronologyEventResponse]
+
+
+class CaseTradelineChronologyResponse(BaseSchema):
+    case_id: uuid.UUID
+    reports_evaluated: int
+    bureaus: list[str]
+    summary: TradelineChronologySummary
+    tradelines: list[TradelineChronologyItemResponse]

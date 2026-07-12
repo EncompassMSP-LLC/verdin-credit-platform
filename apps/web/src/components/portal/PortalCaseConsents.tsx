@@ -9,19 +9,11 @@ import {
   type ConsentDocumentTemplateKey,
 } from '@verdin/api-client';
 import { Button, Card } from '@verdin/ui';
+import { useTranslation } from 'react-i18next';
 import { usePortalAuth } from '../../lib/portal-auth';
 
 const inputClass =
   'mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500';
-
-const ATTESTATION_TEXT: Record<ConsentDocumentTemplateKey, string> = {
-  croa_disclosure:
-    'I have read the CROA disclosure statement above and acknowledge my right to cancel within three business days.',
-  croa_service_agreement:
-    'I have read and agree to the credit repair services agreement, including fees, services, and cancellation terms.',
-  fcra_authorization:
-    'I authorize the organization to obtain and dispute information in my consumer credit reports on my behalf.',
-};
 
 function openBlobInNewTab(blob: Blob) {
   const url = URL.createObjectURL(blob);
@@ -34,6 +26,7 @@ interface PortalCaseConsentsProps {
 }
 
 export function PortalCaseConsents({ caseId }: PortalCaseConsentsProps) {
+  const { t } = useTranslation('portal');
   const queryClient = useQueryClient();
   const { isAuthenticated, isLoading: authLoading } = usePortalAuth();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -80,9 +73,9 @@ export function PortalCaseConsents({ caseId }: PortalCaseConsentsProps) {
 
   const signMutation = useMutation({
     mutationFn: async () => {
-      if (!activeKey) throw new Error('Select a document to sign');
-      if (!signerName.trim()) throw new Error('Enter your full legal name');
-      if (!attestationAccepted) throw new Error('Accept the attestation to continue');
+      if (!activeKey) throw new Error(t('consents.errors.selectDocument'));
+      if (!signerName.trim()) throw new Error(t('consents.errors.enterName'));
+      if (!attestationAccepted) throw new Error(t('consents.errors.acceptAttestation'));
 
       let signatureFile: File | null = null;
       const canvas = canvasRef.current;
@@ -104,7 +97,7 @@ export function PortalCaseConsents({ caseId }: PortalCaseConsentsProps) {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['portal-case-consents', caseId] });
-      setSuccess('Document signed successfully. A PDF copy has been saved to your case file.');
+      setSuccess(t('consents.success'));
       setError(null);
       setAttestationAccepted(false);
       setActiveKey(null);
@@ -182,11 +175,9 @@ export function PortalCaseConsents({ caseId }: PortalCaseConsentsProps) {
     <div className="mt-8 border-t border-gray-200 pt-8">
       <div>
         <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
-          Required agreements
+          {t('consents.title')}
         </h2>
-        <p className="mt-1 text-sm text-gray-600">
-          Review and sign each document below before dispute mail can be prepared for your case.
-        </p>
+        <p className="mt-1 text-sm text-gray-600">{t('consents.subtitle')}</p>
         {consentsQuery.data?.legal_review_notice ? (
           <p className="mt-2 rounded-md bg-amber-50 p-3 text-xs text-amber-900">
             {consentsQuery.data.legal_review_notice}
@@ -195,19 +186,19 @@ export function PortalCaseConsents({ caseId }: PortalCaseConsentsProps) {
       </div>
 
       {authLoading || (authReady && consentsQuery.isLoading) ? (
-        <p className="mt-4 text-sm text-gray-500">Loading agreement status…</p>
+        <p className="mt-4 text-sm text-gray-500">{t('consents.loading')}</p>
       ) : null}
 
       {consentsQuery.isError ? (
         <div className="mt-4 space-y-3">
-          <p className="text-sm text-red-600">Failed to load required agreements.</p>
+          <p className="text-sm text-red-600">{t('consents.loadError')}</p>
           <Button
             type="button"
             variant="secondary"
             size="sm"
             onClick={() => void consentsQuery.refetch()}
           >
-            Retry
+            {t('consents.retry')}
           </Button>
         </div>
       ) : null}
@@ -230,7 +221,7 @@ export function PortalCaseConsents({ caseId }: PortalCaseConsentsProps) {
                     : 'rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800'
                 }
               >
-                {item.is_signed ? 'Signed' : 'Required'}
+                {item.is_signed ? t('consents.signed') : t('consents.required')}
               </span>
             </li>
           ))}
@@ -238,14 +229,14 @@ export function PortalCaseConsents({ caseId }: PortalCaseConsentsProps) {
       ) : null}
 
       {allSigned ? (
-        <p className="mt-4 text-sm text-green-700">
-          All required agreements are on file. Your case team can proceed with dispute mail.
-        </p>
+        <p className="mt-4 text-sm text-green-700">{t('consents.allSigned')}</p>
       ) : (
         <Card className="mt-4 p-6">
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Document to sign</label>
+              <label className="block text-sm font-medium text-gray-700">
+                {t('consents.documentToSign')}
+              </label>
               <select
                 className={inputClass}
                 value={activeKey ?? ''}
@@ -255,7 +246,7 @@ export function PortalCaseConsents({ caseId }: PortalCaseConsentsProps) {
                   setError(null);
                 }}
               >
-                <option value="">Select document…</option>
+                <option value="">{t('consents.selectDocument')}</option>
                 {items
                   .filter((item) => !item.is_signed)
                   .map((item) => (
@@ -270,7 +261,7 @@ export function PortalCaseConsents({ caseId }: PortalCaseConsentsProps) {
               <div className="space-y-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="text-sm font-medium text-gray-900">
-                    {activeItem?.title ?? 'Document preview'}
+                    {activeItem?.title ?? t('consents.documentPreview')}
                   </p>
                   <Button
                     type="button"
@@ -283,18 +274,18 @@ export function PortalCaseConsents({ caseId }: PortalCaseConsentsProps) {
                       }
                     }}
                   >
-                    Open full PDF preview
+                    {t('consents.openPdf')}
                   </Button>
                 </div>
                 {previewQuery.isLoading || previewQuery.isFetching ? (
-                  <p className="text-sm text-gray-500">Loading document preview…</p>
+                  <p className="text-sm text-gray-500">{t('consents.loadingPreview')}</p>
                 ) : null}
                 {previewQuery.isError ? (
                   <div className="space-y-2">
                     <p className="text-sm text-red-600">
                       {previewQuery.error instanceof Error
                         ? previewQuery.error.message
-                        : 'Failed to load document preview.'}
+                        : t('consents.previewError')}
                     </p>
                     <Button
                       type="button"
@@ -302,7 +293,7 @@ export function PortalCaseConsents({ caseId }: PortalCaseConsentsProps) {
                       size="sm"
                       onClick={() => void previewQuery.refetch()}
                     >
-                      Retry preview
+                      {t('consents.retryPreview')}
                     </Button>
                   </div>
                 ) : null}
@@ -314,24 +305,26 @@ export function PortalCaseConsents({ caseId }: PortalCaseConsentsProps) {
                   />
                 ) : null}
                 <p className="rounded-md bg-gray-50 p-3 text-sm text-gray-700">
-                  {ATTESTATION_TEXT[activeKey]}
+                  {t(`consents.attestation.${activeKey}`)}
                 </p>
               </div>
             ) : null}
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Full legal name</label>
+              <label className="block text-sm font-medium text-gray-700">
+                {t('consents.fullName')}
+              </label>
               <input
                 className={inputClass}
                 value={signerName}
                 onChange={(event) => setSignerName(event.target.value)}
-                placeholder="Type your name as it appears on your ID"
+                placeholder={t('consents.fullNamePlaceholder')}
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700">
-                Signature (optional)
+                {t('consents.signatureOptional')}
               </label>
               <canvas
                 ref={canvasRef}
@@ -344,7 +337,7 @@ export function PortalCaseConsents({ caseId }: PortalCaseConsentsProps) {
                 onPointerLeave={stopDrawing}
               />
               <Button type="button" variant="secondary" className="mt-2" onClick={clearSignature}>
-                Clear signature
+                {t('consents.clearSignature')}
               </Button>
             </div>
 
@@ -355,10 +348,7 @@ export function PortalCaseConsents({ caseId }: PortalCaseConsentsProps) {
                 onChange={(event) => setAttestationAccepted(event.target.checked)}
                 className="mt-1"
               />
-              <span>
-                I have reviewed the document above and agree to sign electronically. A signed PDF
-                will be generated and stored with my case.
-              </span>
+              <span>{t('consents.checkboxLabel')}</span>
             </label>
 
             {error ? <p className="text-sm text-red-600">{error}</p> : null}
@@ -369,7 +359,7 @@ export function PortalCaseConsents({ caseId }: PortalCaseConsentsProps) {
               disabled={!activeKey || signMutation.isPending}
               onClick={() => signMutation.mutate()}
             >
-              {signMutation.isPending ? 'Signing…' : 'Sign document'}
+              {signMutation.isPending ? t('consents.signing') : t('consents.submitSign')}
             </Button>
           </div>
         </Card>

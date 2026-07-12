@@ -1,0 +1,168 @@
+{
+  "brand": "Client Portal",
+  "login": {
+    "unavailableTitle": "Client portal unavailable",
+    "unavailableBody": "The client portal is not enabled in this environment.",
+    "title": "Client Portal",
+    "subtitle": "View your case progress",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Sign in",
+    "submitting": "Signing in…",
+    "errorFallback": "Login failed",
+    "validation": {
+      "invalidEmail": "Invalid email address",
+      "passwordMin": "Password must be at least 8 characters"
+    }
+  },
+  "cases": {
+    "title": "Your Cases",
+    "welcome": "Welcome, {{name}}. Track progress on your credit repair cases.",
+    "loading": "Loading your cases…",
+    "loadError": "Failed to load cases",
+    "empty": "No cases are linked to your portal account yet.",
+    "caseNumber": "Case {{number}}",
+    "caseInProgress": "Case in progress",
+    "status": "Status",
+    "stage": "Stage",
+    "opened": "Opened {{date}}",
+    "viewProgress": "View progress"
+  },
+  "caseDetail": {
+    "back": "← Back to cases",
+    "loading": "Loading case progress…",
+    "loadError": "Failed to load case",
+    "progressLabel": "Case Progress",
+    "caseNumber": "Case {{number}}",
+    "caseInProgress": "Case in progress",
+    "status": "Status",
+    "stage": "Stage",
+    "opened": "Opened",
+    "closed": "Closed",
+    "accountsTracked": "Accounts tracked",
+    "lastUpdated": "Last updated",
+    "disputeProgress": "Dispute progress"
+  },
+  "status": {
+    "open": "Open",
+    "intake": "Intake",
+    "active": "Active",
+    "on_hold": "On hold",
+    "resolved": "Resolved",
+    "closed": "Closed",
+    "archived": "Archived"
+  },
+  "stage": {
+    "intake": "Intake",
+    "new": "New",
+    "review": "Review",
+    "documents_pending": "Documents pending",
+    "evidence_gathering": "Evidence gathering",
+    "analysis": "Analysis",
+    "dispute_prep": "Dispute prep",
+    "dispute_preparation": "Dispute preparation",
+    "dispute_sent": "Dispute sent",
+    "awaiting_response": "Awaiting response",
+    "follow_up": "Follow up",
+    "completed": "Completed"
+  },
+  "disputeStatus": {
+    "none": "None",
+    "pending": "Pending",
+    "disputed": "Disputed",
+    "resolved": "Resolved",
+    "deleted": "Deleted"
+  },
+  "gettingStarted": {
+    "title": "Getting started",
+    "subtitle": "Follow these steps so we can review your credit reports and start your dispute strategy.",
+    "step1": "Review and e-sign the compliance documents below (CROA disclosure, service agreement, and FCRA authorization).",
+    "step2Before": "Visit",
+    "step2After": "to request your free reports from Experian, Equifax, and TransUnion. You are entitled to one free report from each bureau every 12 months.",
+    "step3Before": "Download each bureau report as a PDF, then upload all three under",
+    "step3Strong": "Your documents",
+    "step3After": "on this page.",
+    "step4": "We will notify you when analysis and dispute preparation begin.",
+    "tipBefore": "Tip: use the official site only (",
+    "tipAfter": "). Avoid look-alike sites that charge unnecessary fees."
+  },
+  "consents": {
+    "title": "Required agreements",
+    "subtitle": "Review and sign each document below before dispute mail can be prepared for your case.",
+    "loading": "Loading agreement status…",
+    "loadError": "Failed to load required agreements.",
+    "retry": "Retry",
+    "signed": "Signed",
+    "required": "Required",
+    "allSigned": "All required agreements are on file. Your case team can proceed with dispute mail.",
+    "documentToSign": "Document to sign",
+    "selectDocument": "Select document…",
+    "documentPreview": "Document preview",
+    "openPdf": "Open full PDF preview",
+    "loadingPreview": "Loading document preview…",
+    "previewError": "Failed to load document preview.",
+    "retryPreview": "Retry preview",
+    "fullName": "Full legal name",
+    "fullNamePlaceholder": "Type your name as it appears on your ID",
+    "signatureOptional": "Signature (optional)",
+    "clearSignature": "Clear signature",
+    "checkboxLabel": "I have reviewed the document above and agree to sign electronically. A signed PDF will be generated and stored with my case.",
+    "submitSign": "Sign document",
+    "signing": "Signing…",
+    "success": "Document signed successfully. A PDF copy has been saved to your case file.",
+    "errors": {
+      "selectDocument": "Select a document to sign",
+      "enterName": "Enter your full legal name",
+      "acceptAttestation": "Accept the attestation to continue"
+    },
+    "attestation": {
+      "croa_disclosure": "I have read the CROA disclosure statement above and acknowledge my right to cancel within three business days.",
+      "croa_service_agreement": "I have read and agree to the credit repair services agreement, including fees, services, and cancellation terms.",
+      "fcra_authorization": "I authorize the organization to obtain and dispute information in my consumer credit reports on my behalf."
+    }
+  },
+  "documents": {
+    "title": "Your documents",
+    "subtitle": "Upload evidence and supporting files for this case.",
+    "upload": "Upload document",
+    "cancelUpload": "Cancel upload",
+    "titleLabel": "Title",
+    "descriptionLabel": "Description",
+    "fileLabel": "File",
+    "fileHint": "PDF, JPG, PNG, TIFF, or TXT up to 25 MB.",
+    "submit": "Submit document",
+    "loading": "Loading documents…",
+    "loadError": "Failed to load documents",
+    "empty": "No documents uploaded yet. Use Upload document to share files with your case team.",
+    "uploaded": "Uploaded {{date}} · {{size}}",
+    "errors": {
+      "titleAndFileRequired": "Title and file are required"
+    }
+  },
+  "messages": {
+    "title": "Secure messages",
+    "subtitle": "Send updates and questions to your case team in a private thread.",
+    "loading": "Loading messages…",
+    "loadError": "Failed to load messages",
+    "empty": "No messages yet. Start the conversation with your case team below.",
+    "threadClosed": "This message thread is closed. Contact your case team if you need further assistance.",
+    "yourMessage": "Your message",
+    "placeholder": "Write your message…",
+    "send": "Send message",
+    "you": "You",
+    "caseTeam": "Case team",
+    "errors": {
+      "empty": "Message cannot be empty"
+    }
+  },
+  "push": {
+    "checking": "Checking push notification status…",
+    "loadError": "Unable to load push notification settings.",
+    "title": "Message notifications",
+    "subtitle": "Register this browser for push alerts when your case team sends a secure message.",
+    "notConfigured": "Push delivery is not fully configured.",
+    "activeSubscriptions": "Active subscriptions: {{count}}",
+    "register": "Register for notifications",
+    "success": "Push subscription registered for this device."
+  }
+}

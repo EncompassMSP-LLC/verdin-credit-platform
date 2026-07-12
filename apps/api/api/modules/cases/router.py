@@ -31,6 +31,9 @@ from api.modules.cases.schemas import (
 from api.modules.cases.service import CaseService
 from api.modules.documents.schemas import (
     CaseCreditReportDiscrepanciesResponse,
+    CaseFcraFindingsResponse,
+    CaseMetro2FindingsResponse,
+    CaseTradelineChronologyResponse,
     DocumentResponse,
     PrepareCreditReportDisputesRequest,
     PrepareCreditReportDisputesResponse,
@@ -152,6 +155,47 @@ async def get_case_credit_report_discrepancies(
     service: DocumentService = Depends(get_document_service),
 ) -> CaseCreditReportDiscrepanciesResponse:
     return await service.get_case_credit_report_discrepancies(current_user, case_id)
+
+
+@router.get(
+    "/{case_id}/metro2-findings",
+    response_model=CaseMetro2FindingsResponse,
+)
+async def get_case_metro2_findings(
+    case_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> CaseMetro2FindingsResponse:
+    return await service.get_case_metro2_findings(current_user, case_id)
+
+
+@router.get(
+    "/{case_id}/fcra-findings",
+    response_model=CaseFcraFindingsResponse,
+)
+async def get_case_fcra_findings(
+    case_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> CaseFcraFindingsResponse:
+    return await service.get_case_fcra_findings(current_user, case_id)
+
+
+@router.get(
+    "/{case_id}/tradeline-chronology",
+    response_model=CaseTradelineChronologyResponse,
+)
+async def get_case_tradeline_chronology(
+    case_id: uuid.UUID,
+    bureau: str | None = Query(None, description="Optional bureau filter"),
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> CaseTradelineChronologyResponse:
+    return await service.get_case_tradeline_chronology(
+        current_user,
+        case_id,
+        bureau=bureau,
+    )
 
 
 @router.post(

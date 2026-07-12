@@ -102,20 +102,25 @@ async def test_get_parsed_credit_report_account_candidates(
     assert len(data["candidates"]) == 2
 
     first, second = data["candidates"]
-    assert first == {
-        "source_index": 0,
-        "case_id": sample_case_id,
-        "bureau": "equifax",
-        "creditor_name": "Summit Retail Bank",
-        "original_creditor": None,
-        "account_number_masked": "****1111",
-        "account_type": "credit_card",
-        "account_status": "open",
-        "payment_status": "late_30",
-        "balance": "150.00",
-        "past_due_amount": None,
-        "remarks": "Imported from parsed credit report",
-    }
+    assert first["source_index"] == 0
+    assert first["case_id"] == sample_case_id
+    assert first["bureau"] == "equifax"
+    assert first["creditor_name"] == "Summit Retail Bank"
+    assert first["original_creditor"] is None
+    assert first["account_number_masked"] == "****1111"
+    assert first["account_type"] == "credit_card"
+    assert first["account_status"] == "open"
+    assert first["payment_status"] == "late_30"
+    assert first["balance"] == "150.00"
+    assert first["past_due_amount"] is None
+    assert first["high_balance"] is None
+    assert first["credit_limit"] is None
+    assert first["date_opened"] is None
+    assert first["date_reported"] is None
+    assert first["date_first_delinquency"] is None
+    assert first["remarks"] == "Imported from parsed credit report"
+    assert first["payment_history"] is None
+    assert first["date_closed"] is None
     assert second["creditor_name"] == "Metro Auto Finance"
     assert second["account_type"] == "auto"
     assert second["payment_status"] == "current"

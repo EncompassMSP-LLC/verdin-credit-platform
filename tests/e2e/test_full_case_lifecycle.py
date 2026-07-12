@@ -198,7 +198,7 @@ def test_full_case_lifecycle(
     )
     assert parsed_report["bureau"] == doc.EXPECTED_BUREAU
     assert parsed_report["parser_name"] == doc.EXPECTED_BUREAU
-    assert parsed_report["schema_version"] == "1.0"
+    assert parsed_report["schema_version"] == "1.1"
     assert parsed_report["is_partial"] is False
     assert parsed_report["parser_confidence"] > 0
     accounts = parsed_report["parsed_report"]["accounts"]

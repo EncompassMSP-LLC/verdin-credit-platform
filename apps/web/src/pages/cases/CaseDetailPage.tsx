@@ -10,6 +10,9 @@ import { CaseMessageThreadPanel } from '../../components/cases/CaseMessageThread
 import { CasePriorityBadge, CaseStatusChip } from '../../components/cases/CaseBadges';
 import { CreditReportHistoryPanel } from '../../components/imports/CreditReportHistoryPanel';
 import { CrossBureauDiscrepancyPanel } from '../../components/imports/CrossBureauDiscrepancyPanel';
+import { CaseMetro2FindingsPanel } from '../../components/imports/Metro2FindingsPanel';
+import { CaseFcraFindingsPanel } from '../../components/imports/FcraFindingsPanel';
+import { CaseTradelineChronologyPanel } from '../../components/imports/TradelineChronologyPanel';
 import { featureFlags } from '../../lib/feature-flags';
 
 function formatDateTime(value: string | null) {
@@ -180,6 +183,16 @@ export function CaseDetailPage() {
         </Card>
 
         <CreditReportHistoryPanel caseId={caseId} className="lg:col-span-3" />
+
+        <CaseMetro2FindingsPanel caseId={caseId} className="lg:col-span-3" id="metro2-findings" />
+
+        <CaseFcraFindingsPanel caseId={caseId} className="lg:col-span-3" id="fcra-findings" />
+
+        <CaseTradelineChronologyPanel
+          caseId={caseId}
+          className="lg:col-span-3"
+          id="tradeline-chronology"
+        />
 
         <CrossBureauDiscrepancyPanel
           caseId={caseId}

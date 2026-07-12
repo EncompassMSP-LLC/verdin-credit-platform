@@ -45,6 +45,39 @@ _PAYMENT_STATUS_RE = re.compile(
     r"(?:payment status|account status|status)[:\s]*([A-Za-z0-9 /_-]{3,40})",
     re.I,
 )
+_PAST_DUE_RE = re.compile(
+    r"(?:past due(?: amount)?|amount past due)[:\s]*\$?([\d,]+\.?\d*)",
+    re.I,
+)
+_HIGH_CREDIT_RE = re.compile(
+    r"(?:high credit|highest balance|high balance)[:\s]*\$?([\d,]+\.?\d*)",
+    re.I,
+)
+_CREDIT_LIMIT_RE = re.compile(
+    r"(?:credit limit|credit line)[:\s]*\$?([\d,]+\.?\d*)",
+    re.I,
+)
+_ACCOUNT_STATUS_RE = re.compile(
+    r"(?:account status)[:\s]*([A-Za-z0-9 /_-]{3,40})",
+    re.I,
+)
+_DATE_CLOSED_RE = re.compile(
+    r"(?:date closed|closed)[:\s]*(\d{1,2}[/-]\d{1,2}[/-]\d{2,4})",
+    re.I,
+)
+_DOFD_RE = re.compile(
+    r"(?:date of first delinquency|first delinquency|dofd)[:\s]*"
+    r"(\d{1,2}[/-]\d{1,2}[/-]\d{2,4})",
+    re.I,
+)
+_REMARKS_RE = re.compile(
+    r"(?:remarks?|comments?)[:\s]*([A-Za-z0-9 ,.'/-]{3,120})",
+    re.I,
+)
+_PAYMENT_HISTORY_RE = re.compile(
+    r"(?:payment history|24[- ]month history)[:\s]*([A-Za-z0-9*C\- ]{6,80})",
+    re.I,
+)
 _INQUIRY_RE = re.compile(
     r"(?:inquiry|inquired by)[:\s]*([A-Za-z0-9 &.'-]{3,80})",
     re.I,
@@ -128,6 +161,46 @@ def extract_balance(text: str) -> tuple[float | None, float]:
 def extract_payment_status(text: str) -> tuple[str | None, float]:
     value = first_match(_PAYMENT_STATUS_RE, text)
     return value, 0.4 if value else 0.0
+
+
+def extract_account_status(text: str) -> tuple[str | None, float]:
+    value = first_match(_ACCOUNT_STATUS_RE, text)
+    return value, 0.4 if value else 0.0
+
+
+def extract_past_due(text: str) -> tuple[float | None, float]:
+    value = parse_balance(first_match(_PAST_DUE_RE, text))
+    return value, 0.4 if value is not None else 0.0
+
+
+def extract_high_credit(text: str) -> tuple[float | None, float]:
+    value = parse_balance(first_match(_HIGH_CREDIT_RE, text))
+    return value, 0.4 if value is not None else 0.0
+
+
+def extract_credit_limit(text: str) -> tuple[float | None, float]:
+    value = parse_balance(first_match(_CREDIT_LIMIT_RE, text))
+    return value, 0.4 if value is not None else 0.0
+
+
+def extract_date_closed(text: str) -> tuple[str | None, float]:
+    value = first_match(_DATE_CLOSED_RE, text)
+    return value, 0.35 if value else 0.0
+
+
+def extract_dofd(text: str) -> tuple[str | None, float]:
+    value = first_match(_DOFD_RE, text)
+    return value, 0.4 if value else 0.0
+
+
+def extract_remarks(text: str) -> tuple[str | None, float]:
+    value = first_match(_REMARKS_RE, text)
+    return value, 0.35 if value else 0.0
+
+
+def extract_payment_history(text: str) -> tuple[str | None, float]:
+    value = first_match(_PAYMENT_HISTORY_RE, text)
+    return value, 0.35 if value else 0.0
 
 
 def extract_open_date(text: str) -> tuple[str | None, float]:

@@ -1,0 +1,12 @@
+{
+  "language": {
+    "label": "Idioma"
+  },
+  "loading": "Cargando…",
+  "unknownError": "Error desconocido",
+  "signOut": "Cerrar sesión",
+  "refresh": "Actualizar",
+  "refreshing": "Actualizando…",
+  "cancel": "Cancelar",
+  "emDash": "—"
+}

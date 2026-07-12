@@ -5,6 +5,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { configureApiClient } from '@verdin/api-client';
 import { AuthProvider } from './lib/auth';
 import { AppRoutes } from './routes';
+import './i18n';
 import './index.css';
 
 configureApiClient({ baseUrl: import.meta.env.VITE_API_BASE_URL });

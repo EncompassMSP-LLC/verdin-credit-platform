@@ -1,0 +1,168 @@
+{
+  "brand": "Portal del cliente",
+  "login": {
+    "unavailableTitle": "Portal del cliente no disponible",
+    "unavailableBody": "El portal del cliente no está habilitado en este entorno.",
+    "title": "Portal del cliente",
+    "subtitle": "Vea el progreso de su caso",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "submit": "Iniciar sesión",
+    "submitting": "Iniciando sesión…",
+    "errorFallback": "No se pudo iniciar sesión",
+    "validation": {
+      "invalidEmail": "Correo electrónico no válido",
+      "passwordMin": "La contraseña debe tener al menos 8 caracteres"
+    }
+  },
+  "cases": {
+    "title": "Sus casos",
+    "welcome": "Bienvenido/a, {{name}}. Siga el progreso de sus casos de reparación de crédito.",
+    "loading": "Cargando sus casos…",
+    "loadError": "No se pudieron cargar los casos",
+    "empty": "Aún no hay casos vinculados a su cuenta del portal.",
+    "caseNumber": "Caso {{number}}",
+    "caseInProgress": "Caso en progreso",
+    "status": "Estado",
+    "stage": "Etapa",
+    "opened": "Abierto {{date}}",
+    "viewProgress": "Ver progreso"
+  },
+  "caseDetail": {
+    "back": "← Volver a los casos",
+    "loading": "Cargando el progreso del caso…",
+    "loadError": "No se pudo cargar el caso",
+    "progressLabel": "Progreso del caso",
+    "caseNumber": "Caso {{number}}",
+    "caseInProgress": "Caso en progreso",
+    "status": "Estado",
+    "stage": "Etapa",
+    "opened": "Abierto",
+    "closed": "Cerrado",
+    "accountsTracked": "Cuentas rastreadas",
+    "lastUpdated": "Última actualización",
+    "disputeProgress": "Progreso de disputas"
+  },
+  "status": {
+    "open": "Abierto",
+    "intake": "Ingreso",
+    "active": "Activo",
+    "on_hold": "En espera",
+    "resolved": "Resuelto",
+    "closed": "Cerrado",
+    "archived": "Archivado"
+  },
+  "stage": {
+    "intake": "Ingreso",
+    "new": "Nuevo",
+    "review": "Revisión",
+    "documents_pending": "Documentos pendientes",
+    "evidence_gathering": "Recolección de evidencia",
+    "analysis": "Análisis",
+    "dispute_prep": "Preparación de disputa",
+    "dispute_preparation": "Preparación de disputa",
+    "dispute_sent": "Disputa enviada",
+    "awaiting_response": "Esperando respuesta",
+    "follow_up": "Seguimiento",
+    "completed": "Completado"
+  },
+  "disputeStatus": {
+    "none": "Ninguno",
+    "pending": "Pendiente",
+    "disputed": "Disputado",
+    "resolved": "Resuelto",
+    "deleted": "Eliminado"
+  },
+  "gettingStarted": {
+    "title": "Primeros pasos",
+    "subtitle": "Siga estos pasos para que podamos revisar sus reportes de crédito y comenzar su estrategia de disputa.",
+    "step1": "Revise y firme electrónicamente los documentos de cumplimiento a continuación (divulgación CROA, acuerdo de servicio y autorización FCRA).",
+    "step2Before": "Visite",
+    "step2After": "para solicitar sus reportes gratuitos de Experian, Equifax y TransUnion. Tiene derecho a un reporte gratuito de cada buró cada 12 meses.",
+    "step3Before": "Descargue cada reporte del buró en PDF y luego suba los tres en",
+    "step3Strong": "Sus documentos",
+    "step3After": "en esta página.",
+    "step4": "Le avisaremos cuando comiencen el análisis y la preparación de disputas.",
+    "tipBefore": "Consejo: use solo el sitio oficial (",
+    "tipAfter": "). Evite sitios similares que cobren tarifas innecesarias."
+  },
+  "consents": {
+    "title": "Acuerdos requeridos",
+    "subtitle": "Revise y firme cada documento antes de que se pueda preparar el correo de disputa para su caso.",
+    "loading": "Cargando estado de los acuerdos…",
+    "loadError": "No se pudieron cargar los acuerdos requeridos.",
+    "retry": "Reintentar",
+    "signed": "Firmado",
+    "required": "Requerido",
+    "allSigned": "Todos los acuerdos requeridos están registrados. Su equipo puede continuar con el correo de disputa.",
+    "documentToSign": "Documento a firmar",
+    "selectDocument": "Seleccione un documento…",
+    "documentPreview": "Vista previa del documento",
+    "openPdf": "Abrir vista previa completa del PDF",
+    "loadingPreview": "Cargando vista previa del documento…",
+    "previewError": "No se pudo cargar la vista previa del documento.",
+    "retryPreview": "Reintentar vista previa",
+    "fullName": "Nombre legal completo",
+    "fullNamePlaceholder": "Escriba su nombre como aparece en su identificación",
+    "signatureOptional": "Firma (opcional)",
+    "clearSignature": "Borrar firma",
+    "checkboxLabel": "He revisado el documento anterior y acepto firmar electrónicamente. Se generará un PDF firmado y se guardará con mi caso.",
+    "submitSign": "Firmar documento",
+    "signing": "Firmando…",
+    "success": "Documento firmado correctamente. Se guardó una copia en PDF en su expediente.",
+    "errors": {
+      "selectDocument": "Seleccione un documento para firmar",
+      "enterName": "Ingrese su nombre legal completo",
+      "acceptAttestation": "Acepte la declaración para continuar"
+    },
+    "attestation": {
+      "croa_disclosure": "He leído la declaración de divulgación CROA anterior y reconozco mi derecho a cancelar dentro de tres días hábiles.",
+      "croa_service_agreement": "He leído y acepto el acuerdo de servicios de reparación de crédito, incluidos honorarios, servicios y términos de cancelación.",
+      "fcra_authorization": "Autorizo a la organización a obtener y disputar información en mis reportes de crédito de consumidor en mi nombre."
+    }
+  },
+  "documents": {
+    "title": "Sus documentos",
+    "subtitle": "Suba evidencia y archivos de apoyo para este caso.",
+    "upload": "Subir documento",
+    "cancelUpload": "Cancelar carga",
+    "titleLabel": "Título",
+    "descriptionLabel": "Descripción",
+    "fileLabel": "Archivo",
+    "fileHint": "PDF, JPG, PNG, TIFF o TXT de hasta 25 MB.",
+    "submit": "Enviar documento",
+    "loading": "Cargando documentos…",
+    "loadError": "No se pudieron cargar los documentos",
+    "empty": "Aún no hay documentos. Use Subir documento para compartir archivos con su equipo.",
+    "uploaded": "Subido {{date}} · {{size}}",
+    "errors": {
+      "titleAndFileRequired": "El título y el archivo son obligatorios"
+    }
+  },
+  "messages": {
+    "title": "Mensajes seguros",
+    "subtitle": "Envíe actualizaciones y preguntas a su equipo en un hilo privado.",
+    "loading": "Cargando mensajes…",
+    "loadError": "No se pudieron cargar los mensajes",
+    "empty": "Aún no hay mensajes. Inicie la conversación con su equipo a continuación.",
+    "threadClosed": "Este hilo de mensajes está cerrado. Contacte a su equipo si necesita más ayuda.",
+    "yourMessage": "Su mensaje",
+    "placeholder": "Escriba su mensaje…",
+    "send": "Enviar mensaje",
+    "you": "Usted",
+    "caseTeam": "Equipo del caso",
+    "errors": {
+      "empty": "El mensaje no puede estar vacío"
+    }
+  },
+  "push": {
+    "checking": "Comprobando el estado de las notificaciones…",
+    "loadError": "No se pudieron cargar la configuración de notificaciones.",
+    "title": "Notificaciones de mensajes",
+    "subtitle": "Registre este navegador para recibir alertas cuando su equipo envíe un mensaje seguro.",
+    "notConfigured": "La entrega de notificaciones no está completamente configurada.",
+    "activeSubscriptions": "Suscripciones activas: {{count}}",
+    "register": "Registrarse para notificaciones",
+    "success": "Suscripción de notificaciones registrada para este dispositivo."
+  }
+}

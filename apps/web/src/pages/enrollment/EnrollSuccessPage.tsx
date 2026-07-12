@@ -3,10 +3,13 @@ import { completeClientEnrollment } from '@verdin/api-client';
 import { Button, Card } from '@verdin/ui';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
+import { LanguageSwitcher } from '../../components/LanguageSwitcher';
 import { establishPortalSession } from '../../lib/portal-auth';
 
 export function EnrollSuccessPage() {
+  const { t } = useTranslation('enrollment');
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get('session_id');
@@ -15,17 +18,17 @@ export function EnrollSuccessPage() {
 
   const validationError = (() => {
     if (!sessionId) {
-      return 'Missing payment session. Return to enrollment and try again.';
+      return t('successMissingSession');
     }
     if (!sessionId.startsWith('cs_')) {
-      return 'Invalid checkout session id.';
+      return t('successInvalidSession');
     }
     return null;
   })();
 
   const completeMutation = useMutation({
     mutationFn: () => {
-      if (!sessionId) throw new Error('Missing checkout session');
+      if (!sessionId) throw new Error(t('successMissingSession'));
       return completeClientEnrollment(sessionId);
     },
     onSuccess: async (result) => {
@@ -50,21 +53,22 @@ export function EnrollSuccessPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
       <Card className="w-full max-w-lg p-8 text-center">
+        <div className="mb-4 flex justify-end">
+          <LanguageSwitcher compact />
+        </div>
         {completeMutation.isPending ? (
           <>
-            <h1 className="text-2xl font-bold text-gray-900">Finalizing your enrollment</h1>
-            <p className="mt-2 text-sm text-gray-600">
-              Confirming payment and creating your client portal account…
-            </p>
+            <h1 className="text-2xl font-bold text-gray-900">{t('successFinalizingTitle')}</h1>
+            <p className="mt-2 text-sm text-gray-600">{t('successFinalizingBody')}</p>
           </>
         ) : null}
 
         {error ? (
           <>
-            <h1 className="text-2xl font-bold text-gray-900">Enrollment could not be completed</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{t('successErrorTitle')}</h1>
             <p className="mt-2 text-sm text-red-600">{error}</p>
             <Link to="/enroll" className="mt-6 inline-block">
-              <Button variant="secondary">Back to enrollment</Button>
+              <Button variant="secondary">{t('successBack')}</Button>
             </Link>
           </>
         ) : null}

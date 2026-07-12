@@ -7,20 +7,21 @@ import {
 } from '@verdin/api-client';
 import type { DocumentProcessingStatus } from '@verdin/shared';
 import { Button, Card } from '@verdin/ui';
+import { useTranslation } from 'react-i18next';
 import { DocumentProcessingBadge } from '../documents/DocumentProcessingBadge';
 
 const inputClass =
   'mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500';
 
-function formatFileSize(bytes: number | null) {
-  if (!bytes) return '—';
+function formatFileSize(bytes: number | null, empty: string) {
+  if (!bytes) return empty;
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-function formatDate(value: string) {
-  return new Date(value).toLocaleDateString();
+function formatDate(value: string, locale: string) {
+  return new Date(value).toLocaleDateString(locale);
 }
 
 function isProcessingStatus(value: string): value is DocumentProcessingStatus {
@@ -32,6 +33,8 @@ interface PortalCaseDocumentsProps {
 }
 
 export function PortalCaseDocuments({ caseId }: PortalCaseDocumentsProps) {
+  const { t, i18n } = useTranslation('portal');
+  const { t: tCommon } = useTranslation('common');
   const queryClient = useQueryClient();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -47,7 +50,7 @@ export function PortalCaseDocuments({ caseId }: PortalCaseDocumentsProps) {
   const uploadMutation = useMutation({
     mutationFn: () => {
       if (!file || !title.trim()) {
-        throw new Error('Title and file are required');
+        throw new Error(t('documents.errors.titleAndFileRequired'));
       }
       return uploadPortalCaseDocument(caseId, {
         file,
@@ -73,11 +76,9 @@ export function PortalCaseDocuments({ caseId }: PortalCaseDocumentsProps) {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
-            Your documents
+            {t('documents.title')}
           </h2>
-          <p className="mt-1 text-sm text-gray-600">
-            Upload evidence and supporting files for this case.
-          </p>
+          <p className="mt-1 text-sm text-gray-600">{t('documents.subtitle')}</p>
         </div>
         <Button
           type="button"
@@ -87,7 +88,7 @@ export function PortalCaseDocuments({ caseId }: PortalCaseDocumentsProps) {
             setError(null);
           }}
         >
-          {showForm ? 'Cancel upload' : 'Upload document'}
+          {showForm ? t('documents.cancelUpload') : t('documents.upload')}
         </Button>
       </div>
 
@@ -103,7 +104,7 @@ export function PortalCaseDocuments({ caseId }: PortalCaseDocumentsProps) {
           >
             <div>
               <label htmlFor="portal-doc-title" className="block text-sm font-medium text-gray-700">
-                Title
+                {t('documents.titleLabel')}
               </label>
               <input
                 id="portal-doc-title"
@@ -119,7 +120,7 @@ export function PortalCaseDocuments({ caseId }: PortalCaseDocumentsProps) {
                 htmlFor="portal-doc-description"
                 className="block text-sm font-medium text-gray-700"
               >
-                Description
+                {t('documents.descriptionLabel')}
               </label>
               <textarea
                 id="portal-doc-description"
@@ -132,7 +133,7 @@ export function PortalCaseDocuments({ caseId }: PortalCaseDocumentsProps) {
 
             <div>
               <label htmlFor="portal-doc-file" className="block text-sm font-medium text-gray-700">
-                File
+                {t('documents.fileLabel')}
               </label>
               <input
                 id="portal-doc-file"
@@ -142,7 +143,7 @@ export function PortalCaseDocuments({ caseId }: PortalCaseDocumentsProps) {
                 onChange={(event) => setFile(event.target.files?.[0] ?? null)}
                 required
               />
-              <p className="mt-1 text-xs text-gray-500">PDF, JPG, PNG, TIFF, or TXT up to 25 MB.</p>
+              <p className="mt-1 text-xs text-gray-500">{t('documents.fileHint')}</p>
             </div>
 
             {error ? (
@@ -150,33 +151,39 @@ export function PortalCaseDocuments({ caseId }: PortalCaseDocumentsProps) {
             ) : null}
 
             <Button type="submit" loading={uploadMutation.isPending}>
-              Submit document
+              {t('documents.submit')}
             </Button>
           </form>
         </Card>
       ) : null}
 
       {documentsQuery.isLoading ? (
-        <p className="mt-4 text-sm text-gray-500">Loading documents…</p>
+        <p className="mt-4 text-sm text-gray-500">{t('documents.loading')}</p>
       ) : null}
 
       {documentsQuery.isError ? (
         <p className="mt-4 text-sm text-red-600">
-          Failed to load documents:{' '}
-          {documentsQuery.error instanceof Error ? documentsQuery.error.message : 'Unknown error'}
+          {t('documents.loadError')}:{' '}
+          {documentsQuery.error instanceof Error
+            ? documentsQuery.error.message
+            : tCommon('unknownError')}
         </p>
       ) : null}
 
       {!documentsQuery.isLoading && !documentsQuery.isError && items.length === 0 ? (
-        <p className="mt-4 text-sm text-gray-500">
-          No documents uploaded yet. Use Upload document to share files with your case team.
-        </p>
+        <p className="mt-4 text-sm text-gray-500">{t('documents.empty')}</p>
       ) : null}
 
       {items.length > 0 ? (
         <ul className="mt-4 space-y-3">
           {items.map((document) => (
-            <PortalDocumentRow key={document.id} document={document} />
+            <PortalDocumentRow
+              key={document.id}
+              document={document}
+              locale={i18n.language}
+              emptySize={tCommon('emDash')}
+              uploadedLabel={(date, size) => t('documents.uploaded', { date, size })}
+            />
           ))}
         </ul>
       ) : null}
@@ -184,7 +191,17 @@ export function PortalCaseDocuments({ caseId }: PortalCaseDocumentsProps) {
   );
 }
 
-function PortalDocumentRow({ document }: { document: PortalDocument }) {
+function PortalDocumentRow({
+  document,
+  locale,
+  emptySize,
+  uploadedLabel,
+}: {
+  document: PortalDocument;
+  locale: string;
+  emptySize: string;
+  uploadedLabel: (date: string, size: string) => string;
+}) {
   return (
     <li className="rounded-md border border-gray-200 px-4 py-3">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
@@ -195,7 +212,10 @@ function PortalDocumentRow({ document }: { document: PortalDocument }) {
             <p className="mt-1 text-sm text-gray-600">{document.description}</p>
           ) : null}
           <p className="mt-2 text-xs text-gray-400">
-            Uploaded {formatDate(document.created_at)} · {formatFileSize(document.file_size)}
+            {uploadedLabel(
+              formatDate(document.created_at, locale),
+              formatFileSize(document.file_size, emptySize),
+            )}
           </p>
         </div>
         {isProcessingStatus(document.processing_status) ? (

@@ -17,14 +17,27 @@ class ConsumerInfo:
 
 @dataclass(frozen=True, slots=True)
 class TradelineAccount:
+    """Canonical normalized tradeline (schema 1.1+).
+
+    Older 1.0 payloads remain readable: missing fields deserialize as None.
+    """
+
     creditor_name: str | None = None
     account_number_masked: str | None = None
     account_type: str | None = None
+    account_status: str | None = None
     balance: float | None = None
+    past_due_amount: float | None = None
+    high_credit: float | None = None
     credit_limit: float | None = None
     payment_status: str | None = None
+    payment_history: str | None = None
+    remarks: str | None = None
     open_date: str | None = None
+    date_closed: str | None = None
     date_reported: str | None = None
+    date_first_delinquency: str | None = None
+    original_creditor: str | None = None
     bureau: str | None = None
     confidence: float = 0.0
 
@@ -142,11 +155,19 @@ class ParsedCreditReport:
                     "creditor_name": account.creditor_name,
                     "account_number_masked": account.account_number_masked,
                     "account_type": account.account_type,
+                    "account_status": account.account_status,
                     "balance": account.balance,
+                    "past_due_amount": account.past_due_amount,
+                    "high_credit": account.high_credit,
                     "credit_limit": account.credit_limit,
                     "payment_status": account.payment_status,
+                    "payment_history": account.payment_history,
+                    "remarks": account.remarks,
                     "open_date": account.open_date,
+                    "date_closed": account.date_closed,
                     "date_reported": account.date_reported,
+                    "date_first_delinquency": account.date_first_delinquency,
+                    "original_creditor": account.original_creditor,
                     "bureau": account.bureau,
                     "confidence": account.confidence,
                 }

@@ -34,8 +34,10 @@ from api.modules.documents.metadata_schemas import (
 from api.modules.documents.schemas import (
     DocumentClassificationResponse,
     DocumentDuplicateGroupResponse,
+    DocumentFcraFindingsResponse,
     DocumentListParams,
     DocumentLlmSummaryResponse,
+    DocumentMetro2FindingsResponse,
     DocumentOcrResponse,
     DocumentParsedCreditReportAccountCandidatesResponse,
     DocumentParsedCreditReportComparisonResponse,
@@ -243,6 +245,30 @@ async def compare_document_parsed_credit_report(
     service: DocumentService = Depends(get_document_service),
 ) -> DocumentParsedCreditReportComparisonResponse:
     return await service.compare_parsed_credit_report(current_user, document_id)
+
+
+@router.get(
+    "/{document_id}/parsed-credit-report/metro2-findings",
+    response_model=DocumentMetro2FindingsResponse,
+)
+async def get_document_metro2_findings(
+    document_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> DocumentMetro2FindingsResponse:
+    return await service.get_metro2_findings(current_user, document_id)
+
+
+@router.get(
+    "/{document_id}/parsed-credit-report/fcra-findings",
+    response_model=DocumentFcraFindingsResponse,
+)
+async def get_document_fcra_findings(
+    document_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> DocumentFcraFindingsResponse:
+    return await service.get_fcra_findings(current_user, document_id)
 
 
 @router.get(
