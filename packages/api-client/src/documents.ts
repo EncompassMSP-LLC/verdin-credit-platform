@@ -279,6 +279,51 @@ export interface CaseTradelineChronology {
   tradelines: TradelineChronologyItem[];
 }
 
+export interface ComplianceEvidenceSummary {
+  findings_linked: number;
+  with_pages: number;
+  missing_pages: number;
+  exhibits_available: number;
+  report_links: number;
+}
+
+export interface ComplianceEvidenceReportLink {
+  document_id: string;
+  bureau?: string | null;
+  download_path: string;
+  page_numbers?: number[] | null;
+  page_confidence: 'matched' | 'unavailable' | 'deferred';
+  excerpt_available: boolean;
+}
+
+export interface ComplianceEvidenceExhibitLink {
+  document_id: string;
+  document_type: string;
+  role: 'identity' | 'proof_of_address' | 'supporting' | 'suggested';
+  label: string;
+}
+
+export interface ComplianceEvidenceLinkItem {
+  source_kind: 'metro2' | 'fcra';
+  source_id: string;
+  rule_id: string;
+  severity: string;
+  title: string;
+  bureau?: string | null;
+  tradeline_index?: number | null;
+  creditor_name?: string | null;
+  account_number_masked?: string | null;
+  report_links: ComplianceEvidenceReportLink[];
+  exhibit_links: ComplianceEvidenceExhibitLink[];
+  checklist_hints: string[];
+}
+
+export interface CaseComplianceEvidenceLinks {
+  case_id: string;
+  summary: ComplianceEvidenceSummary;
+  items: ComplianceEvidenceLinkItem[];
+}
+
 export interface ParsedReportAccountChange {
   match_key: string;
   creditor_name: string | null;

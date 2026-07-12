@@ -55,10 +55,15 @@ from api.modules.documents.permissions import (
 from api.modules.documents.repository import DocumentListFilters, DocumentRepository
 from api.modules.documents.schemas import (
     BureauTradelineSnapshotResponse,
+    CaseComplianceEvidenceLinksResponse,
     CaseCreditReportDiscrepanciesResponse,
     CaseFcraFindingsResponse,
     CaseMetro2FindingsResponse,
     CaseTradelineChronologyResponse,
+    ComplianceEvidenceExhibitLink,
+    ComplianceEvidenceLinkItem,
+    ComplianceEvidenceReportLink,
+    ComplianceEvidenceSummary,
     CrossBureauComparisonSummary,
     CrossBureauDiscrepancyResponse,
     CrossBureauPossibleCauseResponse,
@@ -1581,6 +1586,144 @@ class DocumentService:
                     ],
                 )
                 for item in result.tradelines
+            ],
+        )
+
+    async def get_case_compliance_evidence_links(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+    ) -> CaseComplianceEvidenceLinksResponse:
+        from api.modules.documents.constants import DocumentType
+        from api.modules.documents.evidence_links import (
+            ExhibitInput,
+            build_case_compliance_evidence_links,
+        )
+
+        organization_id = self._require_organization(user)
+        case = await self._cases.get_by_id(case_id, organization_id=organization_id)
+        if case is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Case not found",
+            )
+
+        metro2 = await self.get_case_metro2_findings(user, case_id)
+        fcra = await self.get_case_fcra_findings(user, case_id)
+
+        exhibits: list[ExhibitInput] = []
+        if case.identity_document_id is not None:
+            exhibits.append(
+                ExhibitInput(
+                    document_id=case.identity_document_id,
+                    document_type=DocumentType.IDENTITY_DOCUMENT.value,
+                    role="identity",
+                    label="Government-issued photo ID",
+                )
+            )
+        if case.proof_of_address_document_id is not None:
+            exhibits.append(
+                ExhibitInput(
+                    document_id=case.proof_of_address_document_id,
+                    document_type=DocumentType.PROOF_OF_ADDRESS.value,
+                    role="proof_of_address",
+                    label="Proof of address",
+                )
+            )
+
+        supporting_docs, _total = await self._documents.list_documents(
+            DocumentListFilters(
+                organization_id=organization_id,
+                case_id=case_id,
+                skip=0,
+                limit=50,
+                sort_by="created_at",
+                sort_order="desc",
+            )
+        )
+        for document in supporting_docs:
+            doc_type = str(document.document_type or "")
+            if doc_type in {
+                DocumentType.COLLECTION_LETTER.value,
+                DocumentType.BUREAU_RESPONSE.value,
+                DocumentType.COURT_RECORD.value,
+            }:
+                if any(item.document_id == document.id for item in exhibits):
+                    continue
+                exhibits.append(
+                    ExhibitInput(
+                        document_id=document.id,
+                        document_type=doc_type,
+                        role="suggested",
+                        label=document.title or document.file_name or doc_type,
+                    )
+                )
+
+        def _document_payload(
+            doc: DocumentMetro2FindingsResponse | DocumentFcraFindingsResponse,
+        ) -> dict[str, Any]:
+            return {
+                "document_id": doc.document_id,
+                "bureau": doc.bureau,
+                "findings": [
+                    {
+                        "rule_id": finding.rule_id,
+                        "severity": finding.severity,
+                        "title": finding.title,
+                        "tradeline_index": finding.tradeline_index,
+                        "creditor_name": finding.creditor_name,
+                        "account_number_masked": finding.account_number_masked,
+                    }
+                    for finding in doc.findings
+                ],
+            }
+
+        result = build_case_compliance_evidence_links(
+            case_id=case_id,
+            metro2_documents=[_document_payload(doc) for doc in metro2.documents],
+            fcra_documents=[_document_payload(doc) for doc in fcra.documents],
+            exhibits=exhibits,
+            page_lookup=None,
+        )
+        return CaseComplianceEvidenceLinksResponse(
+            case_id=result.case_id,
+            summary=ComplianceEvidenceSummary(**result.summary),
+            items=[
+                ComplianceEvidenceLinkItem(
+                    source_kind=item.source_kind,
+                    source_id=item.source_id,
+                    rule_id=item.rule_id,
+                    severity=item.severity,
+                    title=item.title,
+                    bureau=item.bureau,
+                    tradeline_index=item.tradeline_index,
+                    creditor_name=item.creditor_name,
+                    account_number_masked=item.account_number_masked,
+                    report_links=[
+                        ComplianceEvidenceReportLink(
+                            document_id=link.document_id,
+                            bureau=link.bureau,
+                            download_path=link.download_path,
+                            page_numbers=list(link.page_numbers)
+                            if link.page_numbers is not None
+                            else None,
+                            page_confidence=link.page_confidence,
+                            excerpt_available=link.excerpt_available,
+                        )
+                        for link in item.report_links
+                    ],
+                    exhibit_links=[
+                        ComplianceEvidenceExhibitLink(
+                            document_id=link.document_id,
+                            document_type=link.document_type,
+                            role=link.role,
+                            label=link.label,
+                        )
+                        for link in item.exhibit_links
+                    ],
+                    checklist_hints=list(item.checklist_hints),
+                )
+                for item in result.items
             ],
         )
 

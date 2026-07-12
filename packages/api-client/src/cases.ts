@@ -9,13 +9,19 @@ import {
   ApiClientError,
 } from './http';
 import type {
+  CaseComplianceEvidenceLinks,
   CaseFcraFindings,
   CaseMetro2Findings,
   CaseTradelineChronology,
   Document,
 } from './documents';
 
-export type { CaseFcraFindings, CaseMetro2Findings, CaseTradelineChronology } from './documents';
+export type {
+  CaseComplianceEvidenceLinks,
+  CaseFcraFindings,
+  CaseMetro2Findings,
+  CaseTradelineChronology,
+} from './documents';
 
 export interface Case {
   id: string;
@@ -260,6 +266,14 @@ export async function getCaseTradelineChronology(
   const suffix = query.toString() ? `?${query.toString()}` : '';
   return request<CaseTradelineChronology>(
     apiPath(`/cases/${caseId}/tradeline-chronology${suffix}`),
+  );
+}
+
+export async function getCaseComplianceEvidenceLinks(
+  caseId: string,
+): Promise<CaseComplianceEvidenceLinks> {
+  return request<CaseComplianceEvidenceLinks>(
+    apiPath(`/cases/${caseId}/compliance-evidence-links`),
   );
 }
 
