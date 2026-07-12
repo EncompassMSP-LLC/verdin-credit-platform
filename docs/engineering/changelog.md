@@ -13,6 +13,18 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — direct strategy account letter prep
+
+**Decision:** Extend `POST /cases/{case_id}/dispute-strategy/prepare` to create accounts and dispute letter drafts for strategy targets that lack cross-bureau `match_keys` (Metro 2/FCRA-only findings), while keeping the discrepancy prepare path for match-keyed accounts.
+
+**Reason:** Investigators were blocked from acting on strong single-bureau findings that never appear in the cross-bureau discrepancy list.
+
+**Alternatives considered:** Require manual account import first; only prepare cross-bureau items.
+
+**Technical debt:** Direct-created accounts use `AccountType.OTHER` / unknown status until richer tradeline metadata is mapped.
+
+**Follow-up work:** Map bureau/status from findings; CFPB packet checklist export.
+
 ## Compliance intelligence — strategy stage letter prep
 
 **Decision:** Add `POST /cases/{case_id}/dispute-strategy/prepare` to create CRA/furnisher dispute letter drafts from recommended strategy accounts that have cross-bureau `match_keys`.

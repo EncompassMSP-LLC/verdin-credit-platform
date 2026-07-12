@@ -169,6 +169,12 @@ export function CaseDisputeStrategyPanel({
                 <p>
                   Prepared {prepareMutation.data.prepared.length} letter(s) for{' '}
                   {prepareMutation.data.stage_kind} ({prepareMutation.data.recipient_type}).
+                  {prepareMutation.data.match_keys.length > 0
+                    ? ` Match keys: ${prepareMutation.data.match_keys.length}.`
+                    : ''}
+                  {(prepareMutation.data.direct_account_keys?.length ?? 0) > 0
+                    ? ` Direct accounts: ${prepareMutation.data.direct_account_keys?.length}.`
+                    : ''}
                   {prepareMutation.data.skipped.length > 0
                     ? ` Skipped ${prepareMutation.data.skipped.length}.`
                     : ''}

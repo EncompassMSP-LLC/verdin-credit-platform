@@ -2525,51 +2525,158 @@ class DocumentService:
         case_id: uuid.UUID,
         request: PrepareDisputeStrategyStageRequest,
     ) -> PrepareDisputeStrategyStageResponse:
+        from api.modules.accounts.models import (
+            AccountBureau,
+            AccountStatus,
+            AccountType,
+            DisputeStatus,
+            PaymentStatus,
+        )
+        from api.modules.accounts.schemas import AccountCreate, AccountListParams
+        from api.modules.accounts.service import AccountService
+        from api.modules.documents.cross_bureau_comparison import tradeline_match_key
         from api.modules.documents.dispute_strategy import (
-            select_match_keys_for_stage,
+            select_accounts_for_stage,
             stage_recipient_type,
         )
 
         self._require_write(user)
         strategy = await self.get_case_dispute_strategy(user, case_id)
         recipient_type = stage_recipient_type(request.stage_kind)
-        match_keys = select_match_keys_for_stage(
+        targets = select_accounts_for_stage(
             strategy.strategies,
             stage_kind=request.stage_kind,
             account_keys=request.account_keys,
             recommended_only=request.recommended_only,
         )
 
-        if not match_keys:
+        if not targets:
             return PrepareDisputeStrategyStageResponse(
                 case_id=case_id,
                 stage_kind=request.stage_kind,
                 recipient_type=recipient_type,
                 match_keys=[],
+                direct_account_keys=[],
                 prepared=[],
                 skipped=[],
-                note=(
-                    "No strategy accounts with match keys are eligible for this stage. "
-                    "Cross-bureau discrepancies with match keys are required to prepare letters."
-                ),
+                note="No strategy accounts are eligible for this stage.",
             )
 
-        prepared_response = await self.prepare_case_credit_report_disputes(
-            user,
-            case_id,
-            PrepareCreditReportDisputesRequest(
-                match_keys=list(match_keys),
-                recipient_type=recipient_type,
-            ),
-        )
+        match_keys = [target.match_key for target in targets if target.match_key]
+        direct_targets = [target for target in targets if target.match_key is None]
+        prepared: list[PreparedCreditReportDisputeItem] = []
+        skipped: list[str] = []
+
+        if match_keys:
+            prepared_response = await self.prepare_case_credit_report_disputes(
+                user,
+                case_id,
+                PrepareCreditReportDisputesRequest(
+                    match_keys=match_keys,
+                    recipient_type=recipient_type,
+                ),
+            )
+            prepared.extend(prepared_response.prepared)
+            skipped.extend(prepared_response.skipped)
+
+        if direct_targets:
+            account_service = AccountService.from_session(self._session)  # type: ignore[arg-type]
+            existing_accounts = []
+            page = 1
+            while True:
+                page_result = await account_service.list_case_accounts(
+                    user,
+                    case_id,
+                    params=AccountListParams(page=page, page_size=100),
+                )
+                existing_accounts.extend(page_result.items)
+                if page >= page_result.pages:
+                    break
+                page += 1
+            existing_by_key = {
+                tradeline_match_key(account.creditor_name, account.account_number_masked): account
+                for account in existing_accounts
+            }
+
+            for target in direct_targets:
+                lookup_key = tradeline_match_key(
+                    target.creditor_name,
+                    target.account_number_masked,
+                )
+                existing = existing_by_key.get(lookup_key)
+                created_account = False
+                if existing is None:
+                    bureau = (
+                        AccountBureau(target.bureau)
+                        if target.bureau
+                        in {"experian", "equifax", "transunion", "innovis", "unknown"}
+                        else AccountBureau.UNKNOWN
+                    )
+                    rules = ", ".join(target.primary_rule_ids) or "strategy findings"
+                    account = await account_service.create_account(
+                        user,
+                        AccountCreate(
+                            case_id=case_id,
+                            bureau=bureau,
+                            creditor_name=target.creditor_name,
+                            account_number_masked=target.account_number_masked,
+                            account_type=AccountType.OTHER,
+                            account_status=AccountStatus.UNKNOWN,
+                            payment_status=PaymentStatus.UNKNOWN,
+                            remarks=(
+                                f"Strategy stage prepare ({request.stage_kind}): {rules}. "
+                                f"{target.summary}"
+                            ),
+                            dispute_status=DisputeStatus.READY_FOR_DISPUTE,
+                        ),
+                    )
+                    account_id = account.id
+                    created_account = True
+                    existing_by_key[lookup_key] = account
+                else:
+                    account_id = existing.id
+
+                dispute_letter = await account_service.create_dispute_letter_draft(
+                    user,
+                    account_id,
+                    recipient_type=recipient_type,
+                )
+                prepared.append(
+                    PreparedCreditReportDisputeItem(
+                        match_key=target.account_key,
+                        account_id=account_id,
+                        dispute_letter_id=dispute_letter.id,
+                        created_account=created_account,
+                        creditor_name=target.creditor_name,
+                        recommended_action=(
+                            f"Prepare {request.stage_kind} letter for strategy findings: "
+                            f"{', '.join(target.primary_rule_ids) or target.summary}"
+                        ),
+                    )
+                )
+
+        note: str | None = None
+        if not prepared and skipped:
+            note = "Eligible strategy accounts were skipped by dispute-ready gates."
+        elif direct_targets and not match_keys:
+            note = (
+                "Prepared letters from Metro 2/FCRA strategy accounts without cross-bureau "
+                "match keys."
+            )
+        elif direct_targets and match_keys:
+            note = (
+                "Prepared letters from both cross-bureau match keys and direct strategy accounts."
+            )
+
         return PrepareDisputeStrategyStageResponse(
             case_id=case_id,
             stage_kind=request.stage_kind,
             recipient_type=recipient_type,
-            match_keys=list(match_keys),
-            prepared=prepared_response.prepared,
-            skipped=prepared_response.skipped,
-            note=None,
+            match_keys=match_keys,
+            direct_account_keys=[target.account_key for target in direct_targets],
+            prepared=prepared,
+            skipped=skipped,
+            note=note,
         )
 
     async def create_parsed_credit_report_review_task(
