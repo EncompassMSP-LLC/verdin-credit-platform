@@ -40,6 +40,8 @@ from api.modules.documents.schemas import (
     DocumentResponse,
     PrepareCreditReportDisputesRequest,
     PrepareCreditReportDisputesResponse,
+    PrepareDisputeStrategyStageRequest,
+    PrepareDisputeStrategyStageResponse,
 )
 from api.modules.documents.service import DocumentService
 
@@ -235,6 +237,19 @@ async def get_case_dispute_strategy(
     service: DocumentService = Depends(get_document_service),
 ) -> CaseDisputeStrategyResponse:
     return await service.get_case_dispute_strategy(current_user, case_id)
+
+
+@router.post(
+    "/{case_id}/dispute-strategy/prepare",
+    response_model=PrepareDisputeStrategyStageResponse,
+)
+async def prepare_case_dispute_strategy_stage(
+    case_id: uuid.UUID,
+    body: PrepareDisputeStrategyStageRequest,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> PrepareDisputeStrategyStageResponse:
+    return await service.prepare_case_dispute_strategy_stage(current_user, case_id, body)
 
 
 @router.post(

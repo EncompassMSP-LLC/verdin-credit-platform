@@ -7,6 +7,7 @@ issues. Staff-mediated aid only — not legal advice or automated filing.
 from __future__ import annotations
 
 import uuid
+from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any, Literal
 
@@ -315,3 +316,71 @@ def generate_case_dispute_strategy(
         summary=case_summary,
         strategies=tuple(strategies),
     )
+
+
+_PREPARABLE_STAGES: frozenset[StageKind] = frozenset({"cra_dispute", "furnisher_dispute"})
+
+
+def stage_recipient_type(stage_kind: StageKind) -> Literal["credit_bureau", "furnisher"]:
+    if stage_kind == "furnisher_dispute":
+        return "furnisher"
+    if stage_kind == "cra_dispute":
+        return "credit_bureau"
+    raise ValueError(f"Stage `{stage_kind}` does not create dispute letters")
+
+
+def select_match_keys_for_stage(
+    strategies: Sequence[Any],
+    *,
+    stage_kind: StageKind,
+    account_keys: list[str] | None = None,
+    recommended_only: bool = True,
+) -> tuple[str, ...]:
+    """Return discrepancy match_keys for accounts that warrant the stage."""
+    if stage_kind not in _PREPARABLE_STAGES:
+        return ()
+
+    selected_keys = set(account_keys) if account_keys else None
+    match_keys: list[str] = []
+    seen: set[str] = set()
+
+    for item in strategies:
+        if isinstance(item, dict):
+            account_key = item.get("account_key")
+            match_key = item.get("match_key")
+            stages = item.get("stages") or []
+        else:
+            account_key = getattr(item, "account_key", None)
+            match_key = getattr(item, "match_key", None)
+            stages = getattr(item, "stages", ()) or ()
+
+        if not isinstance(account_key, str):
+            continue
+        if selected_keys is not None and account_key not in selected_keys:
+            continue
+        if not isinstance(match_key, str) or not match_key.strip():
+            continue
+
+        stage_matches = False
+        for stage in stages:
+            if isinstance(stage, dict):
+                kind = stage.get("stage_kind")
+                recommended = bool(stage.get("recommended"))
+            else:
+                kind = getattr(stage, "stage_kind", None)
+                recommended = bool(getattr(stage, "recommended", False))
+            if kind != stage_kind:
+                continue
+            if recommended_only and not recommended:
+                continue
+            stage_matches = True
+            break
+
+        if not stage_matches:
+            continue
+        if match_key in seen:
+            continue
+        seen.add(match_key)
+        match_keys.append(match_key)
+
+    return tuple(match_keys)

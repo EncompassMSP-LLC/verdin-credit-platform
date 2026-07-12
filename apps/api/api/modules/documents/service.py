@@ -100,6 +100,8 @@ from api.modules.documents.schemas import (
     PrepareCreditReportDisputesRequest,
     PrepareCreditReportDisputesResponse,
     PreparedCreditReportDisputeItem,
+    PrepareDisputeStrategyStageRequest,
+    PrepareDisputeStrategyStageResponse,
     TradelineChronologyEventResponse,
     TradelineChronologyItemResponse,
     TradelineChronologySnapshotResponse,
@@ -2515,6 +2517,59 @@ class DocumentService:
             case_id=case_id,
             prepared=prepared,
             skipped=skipped,
+        )
+
+    async def prepare_case_dispute_strategy_stage(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+        request: PrepareDisputeStrategyStageRequest,
+    ) -> PrepareDisputeStrategyStageResponse:
+        from api.modules.documents.dispute_strategy import (
+            select_match_keys_for_stage,
+            stage_recipient_type,
+        )
+
+        self._require_write(user)
+        strategy = await self.get_case_dispute_strategy(user, case_id)
+        recipient_type = stage_recipient_type(request.stage_kind)
+        match_keys = select_match_keys_for_stage(
+            strategy.strategies,
+            stage_kind=request.stage_kind,
+            account_keys=request.account_keys,
+            recommended_only=request.recommended_only,
+        )
+
+        if not match_keys:
+            return PrepareDisputeStrategyStageResponse(
+                case_id=case_id,
+                stage_kind=request.stage_kind,
+                recipient_type=recipient_type,
+                match_keys=[],
+                prepared=[],
+                skipped=[],
+                note=(
+                    "No strategy accounts with match keys are eligible for this stage. "
+                    "Cross-bureau discrepancies with match keys are required to prepare letters."
+                ),
+            )
+
+        prepared_response = await self.prepare_case_credit_report_disputes(
+            user,
+            case_id,
+            PrepareCreditReportDisputesRequest(
+                match_keys=list(match_keys),
+                recipient_type=recipient_type,
+            ),
+        )
+        return PrepareDisputeStrategyStageResponse(
+            case_id=case_id,
+            stage_kind=request.stage_kind,
+            recipient_type=recipient_type,
+            match_keys=list(match_keys),
+            prepared=prepared_response.prepared,
+            skipped=prepared_response.skipped,
+            note=None,
         )
 
     async def create_parsed_credit_report_review_task(
