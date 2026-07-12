@@ -1600,7 +1600,10 @@ class DocumentService:
         self,
         user: User,
         case_id: uuid.UUID,
+        *,
+        include_page_scan: bool = True,
     ) -> CaseComplianceEvidenceLinksResponse:
+        from api.modules.accounts.dispute_report_redaction import locate_tradeline_pages
         from api.modules.documents.constants import DocumentType
         from api.modules.documents.evidence_links import (
             ExhibitInput,
@@ -1685,12 +1688,67 @@ class DocumentService:
                 ],
             }
 
+        metro2_payloads = [_document_payload(doc) for doc in metro2.documents]
+        fcra_payloads = [_document_payload(doc) for doc in fcra.documents]
+
+        page_lookup = None
+        if include_page_scan:
+            document_ids: set[uuid.UUID] = set()
+            for payload in (*metro2_payloads, *fcra_payloads):
+                document_id = payload.get("document_id")
+                if isinstance(document_id, uuid.UUID):
+                    document_ids.add(document_id)
+
+            pdf_cache: dict[uuid.UUID, bytes | None] = {}
+            for document_id in document_ids:
+                stored_document = await self._documents.get_by_id(
+                    document_id,
+                    organization_id=organization_id,
+                )
+                if stored_document is None or not stored_document.storage_key:
+                    pdf_cache[document_id] = None
+                    continue
+                try:
+                    pdf_cache[document_id] = await async_get(
+                        self._storage,
+                        stored_document.storage_key,
+                    )
+                except Exception:
+                    pdf_cache[document_id] = None
+
+            page_result_cache: dict[
+                tuple[uuid.UUID, str, str | None],
+                tuple[int, ...] | None,
+            ] = {}
+
+            def _page_lookup(
+                document_id: uuid.UUID,
+                creditor_name: str | None,
+                account_number_masked: str | None,
+            ) -> tuple[int, ...] | None:
+                cache_key = (document_id, creditor_name or "", account_number_masked)
+                if cache_key in page_result_cache:
+                    return page_result_cache[cache_key]
+                pdf_bytes = pdf_cache.get(document_id)
+                if not pdf_bytes or not creditor_name:
+                    page_result_cache[cache_key] = None
+                    return None
+                located = locate_tradeline_pages(
+                    pdf_bytes,
+                    target_creditor=creditor_name,
+                    target_account_masked=account_number_masked,
+                )
+                page_result_cache[cache_key] = located
+                return located
+
+            page_lookup = _page_lookup
+
         result = build_case_compliance_evidence_links(
             case_id=case_id,
-            metro2_documents=[_document_payload(doc) for doc in metro2.documents],
-            fcra_documents=[_document_payload(doc) for doc in fcra.documents],
+            metro2_documents=metro2_payloads,
+            fcra_documents=fcra_payloads,
             exhibits=exhibits,
-            page_lookup=None,
+            page_lookup=page_lookup,
         )
         return CaseComplianceEvidenceLinksResponse(
             case_id=result.case_id,
@@ -1856,7 +1914,11 @@ class DocumentService:
 
         evidence_hints_by_source_id: dict[str, list[str]] = {}
         try:
-            evidence = await self.get_case_compliance_evidence_links(user, case_id)
+            evidence = await self.get_case_compliance_evidence_links(
+                user,
+                case_id,
+                include_page_scan=False,
+            )
             for item in evidence.items:
                 if item.checklist_hints:
                     evidence_hints_by_source_id[item.source_id] = list(item.checklist_hints)

@@ -13,6 +13,18 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — evidence PDF page scan
+
+**Decision:** Wire `locate_tradeline_pages()` into `GET /cases/{case_id}/compliance-evidence-links` with per-request PDF and lookup caches. Dispute strategy continues to call evidence links with `include_page_scan=False` so planning stays lightweight.
+
+**Reason:** Phase 5 deferred live page maps; investigators need page pointers on report evidence links.
+
+**Alternatives considered:** Always defer pages; persist OCR page maps; require a separate endpoint.
+
+**Technical debt:** Text-match page scan is heuristic; empty matches mark `unavailable` rather than `deferred`.
+
+**Follow-up work:** Persist page maps; OCR line refs; optional query flag to skip scan on large cases.
+
 ## Compliance intelligence — dispute strategy generator
 
 **Decision:** Add `GET /cases/{case_id}/dispute-strategy` that groups litigation-strength ranked issues by account and emits a deterministic four-stage plan (CRA dispute → furnisher → CFPB if warranted → attorney preserve). Reuses evidence checklist hints when available.

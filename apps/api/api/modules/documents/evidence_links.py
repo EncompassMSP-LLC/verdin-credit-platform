@@ -1,8 +1,8 @@
 """Compliance finding → evidence document linking (Phase 5 scaffold).
 
 Aggregates Metro 2 / FCRA findings with report document pointers and case
-exhibits. Page numbers are best-effort when a page lookup callback is provided;
-exact OCR line maps are deferred.
+exhibits. When a page lookup callback is provided, report links include
+best-effort PDF page numbers from tradeline text matching.
 """
 
 from __future__ import annotations
