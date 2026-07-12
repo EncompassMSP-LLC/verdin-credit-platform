@@ -2536,6 +2536,7 @@ class DocumentService:
         from api.modules.accounts.service import AccountService
         from api.modules.documents.cross_bureau_comparison import tradeline_match_key
         from api.modules.documents.dispute_strategy import (
+            infer_account_metadata_from_rules,
             select_accounts_for_stage,
             stage_recipient_type,
         )
@@ -2612,6 +2613,19 @@ class DocumentService:
                         in {"experian", "equifax", "transunion", "innovis", "unknown"}
                         else AccountBureau.UNKNOWN
                     )
+                    inferred = infer_account_metadata_from_rules(target.primary_rule_ids)
+                    try:
+                        account_type = AccountType(inferred.account_type)
+                    except ValueError:
+                        account_type = AccountType.OTHER
+                    try:
+                        account_status = AccountStatus(inferred.account_status)
+                    except ValueError:
+                        account_status = AccountStatus.UNKNOWN
+                    try:
+                        payment_status = PaymentStatus(inferred.payment_status)
+                    except ValueError:
+                        payment_status = PaymentStatus.UNKNOWN
                     rules = ", ".join(target.primary_rule_ids) or "strategy findings"
                     account = await account_service.create_account(
                         user,
@@ -2620,9 +2634,9 @@ class DocumentService:
                             bureau=bureau,
                             creditor_name=target.creditor_name,
                             account_number_masked=target.account_number_masked,
-                            account_type=AccountType.OTHER,
-                            account_status=AccountStatus.UNKNOWN,
-                            payment_status=PaymentStatus.UNKNOWN,
+                            account_type=account_type,
+                            account_status=account_status,
+                            payment_status=payment_status,
                             remarks=(
                                 f"Strategy stage prepare ({request.stage_kind}): {rules}. "
                                 f"{target.summary}"

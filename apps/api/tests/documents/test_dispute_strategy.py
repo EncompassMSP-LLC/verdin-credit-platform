@@ -201,3 +201,21 @@ def test_select_match_keys_for_cra_stage() -> None:
     assert len(direct) == 1
     assert direct[0].creditor_name == "Metro Auto"
     assert direct[0].account_key.startswith("acct:")
+
+
+def test_infer_account_metadata_from_rules() -> None:
+    from api.modules.documents.dispute_strategy import infer_account_metadata_from_rules
+
+    closed = infer_account_metadata_from_rules(["metro2.date_closed_before_open"])
+    assert closed.account_status == "closed"
+    assert closed.account_type == "other"
+
+    collection = infer_account_metadata_from_rules(["fcra.collection_missing_original_creditor"])
+    assert collection.account_type == "collection"
+    assert collection.account_status == "collection"
+
+    past_due = infer_account_metadata_from_rules(["metro2.past_due_without_dofd"])
+    assert past_due.payment_status == "late_90"
+
+    charge_off = infer_account_metadata_from_rules(["metro2.charge_off_zero_past_due"])
+    assert charge_off.account_status == "charge_off"
