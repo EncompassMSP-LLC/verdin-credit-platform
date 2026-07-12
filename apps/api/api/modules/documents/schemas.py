@@ -703,3 +703,35 @@ class PrepareDisputeStrategyStageResponse(BaseSchema):
     prepared: list[PreparedCreditReportDisputeItem]
     skipped: list[str]
     note: str | None = None
+
+
+class CfpbChecklistSummary(BaseSchema):
+    accounts_listed: int
+    required_items: int
+    optional_items: int
+
+
+class CfpbChecklistItem(BaseSchema):
+    item_id: str
+    category: Literal["correspondence", "evidence", "chronology", "filing"]
+    title: str
+    detail: str
+    required: bool
+
+
+class AccountCfpbChecklistItem(BaseSchema):
+    account_key: str
+    creditor_name: str | None = None
+    account_number_masked: str | None = None
+    bureau: str | None = None
+    match_key: str | None = None
+    top_score: int
+    primary_rule_ids: list[str]
+    items: list[CfpbChecklistItem]
+
+
+class CaseCfpbChecklistResponse(BaseSchema):
+    case_id: uuid.UUID
+    disclaimer: str
+    summary: CfpbChecklistSummary
+    accounts: list[AccountCfpbChecklistItem]
