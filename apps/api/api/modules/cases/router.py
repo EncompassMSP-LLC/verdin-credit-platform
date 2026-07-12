@@ -33,6 +33,7 @@ from api.modules.documents.schemas import (
     CaseComplianceEvidenceLinksResponse,
     CaseCreditReportDiscrepanciesResponse,
     CaseFcraFindingsResponse,
+    CaseLitigationStrengthResponse,
     CaseMetro2FindingsResponse,
     CaseTradelineChronologyResponse,
     DocumentResponse,
@@ -209,6 +210,18 @@ async def get_case_compliance_evidence_links(
     service: DocumentService = Depends(get_document_service),
 ) -> CaseComplianceEvidenceLinksResponse:
     return await service.get_case_compliance_evidence_links(current_user, case_id)
+
+
+@router.get(
+    "/{case_id}/litigation-strength",
+    response_model=CaseLitigationStrengthResponse,
+)
+async def get_case_litigation_strength(
+    case_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> CaseLitigationStrengthResponse:
+    return await service.get_case_litigation_strength(current_user, case_id)
 
 
 @router.post(

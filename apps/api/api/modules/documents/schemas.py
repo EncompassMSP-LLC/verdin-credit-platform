@@ -611,3 +611,34 @@ class CaseComplianceEvidenceLinksResponse(BaseSchema):
     case_id: uuid.UUID
     summary: ComplianceEvidenceSummary
     items: list[ComplianceEvidenceLinkItem]
+
+
+class LitigationStrengthSummary(BaseSchema):
+    issues_scored: int
+    high_priority: int
+    medium_priority: int
+    low_priority: int
+    top_score: int
+    average_score: float
+
+
+class LitigationStrengthIssue(BaseSchema):
+    source_kind: Literal["metro2", "fcra", "cross_bureau", "chronology"]
+    source_id: str
+    rule_id: str
+    score: int
+    rank: int
+    title: str
+    rationale: str
+    severity: str
+    bureau: str | None = None
+    creditor_name: str | None = None
+    account_number_masked: str | None = None
+    match_key: str | None = None
+    factors: list[str]
+
+
+class CaseLitigationStrengthResponse(BaseSchema):
+    case_id: uuid.UUID
+    summary: LitigationStrengthSummary
+    issues: list[LitigationStrengthIssue]

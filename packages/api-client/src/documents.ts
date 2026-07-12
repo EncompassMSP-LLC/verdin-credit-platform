@@ -324,6 +324,37 @@ export interface CaseComplianceEvidenceLinks {
   items: ComplianceEvidenceLinkItem[];
 }
 
+export interface LitigationStrengthSummary {
+  issues_scored: number;
+  high_priority: number;
+  medium_priority: number;
+  low_priority: number;
+  top_score: number;
+  average_score: number;
+}
+
+export interface LitigationStrengthIssue {
+  source_kind: 'metro2' | 'fcra' | 'cross_bureau' | 'chronology';
+  source_id: string;
+  rule_id: string;
+  score: number;
+  rank: number;
+  title: string;
+  rationale: string;
+  severity: string;
+  bureau?: string | null;
+  creditor_name?: string | null;
+  account_number_masked?: string | null;
+  match_key?: string | null;
+  factors: string[];
+}
+
+export interface CaseLitigationStrength {
+  case_id: string;
+  summary: LitigationStrengthSummary;
+  issues: LitigationStrengthIssue[];
+}
+
 export interface ParsedReportAccountChange {
   match_key: string;
   creditor_name: string | null;

@@ -11,6 +11,7 @@ import {
 import type {
   CaseComplianceEvidenceLinks,
   CaseFcraFindings,
+  CaseLitigationStrength,
   CaseMetro2Findings,
   CaseTradelineChronology,
   Document,
@@ -19,6 +20,7 @@ import type {
 export type {
   CaseComplianceEvidenceLinks,
   CaseFcraFindings,
+  CaseLitigationStrength,
   CaseMetro2Findings,
   CaseTradelineChronology,
 } from './documents';
@@ -275,6 +277,10 @@ export async function getCaseComplianceEvidenceLinks(
   return request<CaseComplianceEvidenceLinks>(
     apiPath(`/cases/${caseId}/compliance-evidence-links`),
   );
+}
+
+export async function getCaseLitigationStrength(caseId: string): Promise<CaseLitigationStrength> {
+  return request<CaseLitigationStrength>(apiPath(`/cases/${caseId}/litigation-strength`));
 }
 
 export async function prepareCaseCreditReportDisputes(
