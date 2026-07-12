@@ -121,7 +121,7 @@ export function CaseComplianceEvidencePanel({
       <Card title="Compliance evidence links">
         <p className="text-sm text-gray-500">
           Links Metro 2 and FCRA findings to source bureau reports, case exhibits, and investigator
-          checklist hints. Exact PDF page maps remain best-effort / deferred.
+          checklist hints. PDF page numbers are best-effort via on-demand tradeline text scan.
         </p>
 
         {evidenceQuery.isLoading ? (

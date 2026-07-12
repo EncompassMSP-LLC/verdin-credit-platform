@@ -114,6 +114,45 @@ def test_build_case_compliance_evidence_links_uses_page_lookup() -> None:
     assert result.summary["with_pages"] == 1
 
 
+def test_build_case_compliance_evidence_links_marks_unavailable_when_lookup_misses() -> None:
+    document_id = uuid.uuid4()
+
+    def lookup(
+        _doc_id: uuid.UUID,
+        _creditor: str | None,
+        _masked: str | None,
+    ) -> tuple[int, ...] | None:
+        return None
+
+    result = build_case_compliance_evidence_links(
+        case_id=uuid.uuid4(),
+        metro2_documents=[
+            {
+                "document_id": document_id,
+                "bureau": "transunion",
+                "findings": [
+                    {
+                        "rule_id": "metro2.open_with_date_closed",
+                        "severity": "medium",
+                        "title": "Open with date closed",
+                        "tradeline_index": 0,
+                        "creditor_name": "Retail Co",
+                        "account_number_masked": "****0001",
+                    }
+                ],
+            }
+        ],
+        fcra_documents=[],
+        exhibits=[],
+        page_lookup=lookup,
+    )
+
+    link = result.items[0].report_links[0]
+    assert link.page_confidence == "unavailable"
+    assert link.page_numbers is None
+    assert result.summary["with_pages"] == 0
+
+
 def test_locate_tradeline_pages_returns_none_for_non_pdf() -> None:
     assert (
         locate_tradeline_pages(
