@@ -13,6 +13,18 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — strategy stage letter prep
+
+**Decision:** Add `POST /cases/{case_id}/dispute-strategy/prepare` to create CRA/furnisher dispute letter drafts from recommended strategy accounts that have cross-bureau `match_keys`.
+
+**Reason:** Phase 7 plans needed an actionable handoff into the existing prepare-disputes workflow without auto-filing.
+
+**Alternatives considered:** Always open generic letters; LLM freeform drafting per stage.
+
+**Technical debt:** Metro 2/FCRA-only accounts without match keys cannot prepare via this path yet.
+
+**Follow-up work:** Account creation from non-discrepancy strategy issues; CFPB packet checklist export.
+
 ## Compliance intelligence — evidence PDF page scan
 
 **Decision:** Wire `locate_tradeline_pages()` into `GET /cases/{case_id}/compliance-evidence-links` with per-request PDF and lookup caches. Dispute strategy continues to call evidence links with `include_page_scan=False` so planning stays lightweight.

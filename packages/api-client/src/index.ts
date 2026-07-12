@@ -117,6 +117,7 @@ export {
   getCaseDisputeStrategy,
   listCases,
   prepareCaseCreditReportDisputes,
+  prepareCaseDisputeStrategyStage,
   downloadCaseDisputeMailPackets,
   downloadCaseDisputeReportExcerpts,
   uploadCaseIdentityDocument,
@@ -138,6 +139,8 @@ export {
   type ListCasesParams,
   type PrepareCreditReportDisputesInput,
   type PrepareCreditReportDisputesResult,
+  type PrepareDisputeStrategyStageInput,
+  type PrepareDisputeStrategyStageResult,
   type PreparedCreditReportDisputeItem,
   type UpdateCaseInput,
 } from './cases';

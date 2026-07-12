@@ -128,3 +128,55 @@ def test_strategy_groups_issues_by_match_key() -> None:
     assert result.strategies[0].issue_count == 2
     assert result.strategies[0].top_score == 88
     assert result.strategies[1].issue_count == 1
+
+
+def test_select_match_keys_for_cra_stage() -> None:
+    from api.modules.documents.dispute_strategy import (
+        select_match_keys_for_stage,
+        stage_recipient_type,
+    )
+
+    result = generate_case_dispute_strategy(
+        case_id=uuid.uuid4(),
+        scored_issues=[
+            {
+                "source_kind": "cross_bureau",
+                "source_id": "cross_bureau:a",
+                "rule_id": "cross_bureau.dofd_mismatch",
+                "score": 98,
+                "rank": 1,
+                "title": "DOFD mismatch",
+                "severity": "high",
+                "bureau": None,
+                "creditor_name": "Capital One",
+                "account_number_masked": "****4242",
+                "match_key": "capital one:4242",
+            },
+            {
+                "source_kind": "chronology",
+                "source_id": "chronology:b",
+                "rule_id": "chronology.field_changed",
+                "score": 45,
+                "rank": 2,
+                "title": "remarks",
+                "severity": "low",
+                "bureau": "experian",
+                "creditor_name": "Retail",
+                "account_number_masked": "****1111",
+                "match_key": "retail:1111",
+            },
+        ],
+    )
+    cra_keys = select_match_keys_for_stage(result.strategies, stage_kind="cra_dispute")
+    assert "capital one:4242" in cra_keys
+    assert "retail:1111" in cra_keys  # CRA stage always recommended
+    assert stage_recipient_type("cra_dispute") == "credit_bureau"
+    assert stage_recipient_type("furnisher_dispute") == "furnisher"
+
+    furnisher_keys = select_match_keys_for_stage(
+        result.strategies,
+        stage_kind="furnisher_dispute",
+        recommended_only=True,
+    )
+    assert "capital one:4242" in furnisher_keys
+    assert "retail:1111" not in furnisher_keys

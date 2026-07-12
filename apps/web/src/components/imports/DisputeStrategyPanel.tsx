@@ -1,12 +1,15 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ApiClientError,
   getCaseDisputeStrategy,
+  prepareCaseDisputeStrategyStage,
   type AccountDisputeStrategy,
   type DisputeStrategyStage,
+  type DisputeStrategyStageKind,
   type DisputeStrategySummary,
 } from '@verdin/api-client';
-import { Badge, Card } from '@verdin/ui';
+import { Badge, Button, Card } from '@verdin/ui';
+import { Link } from 'react-router-dom';
 
 function SummaryBadges({ summary }: { summary: DisputeStrategySummary }) {
   return (
@@ -84,10 +87,23 @@ export function CaseDisputeStrategyPanel({
   className?: string;
   id?: string;
 }) {
+  const queryClient = useQueryClient();
   const strategyQuery = useQuery({
     queryKey: ['case-dispute-strategy', caseId],
     queryFn: () => getCaseDisputeStrategy(caseId),
     retry: false,
+  });
+
+  const prepareMutation = useMutation({
+    mutationFn: (
+      stage_kind: Extract<DisputeStrategyStageKind, 'cra_dispute' | 'furnisher_dispute'>,
+    ) => prepareCaseDisputeStrategyStage(caseId, { stage_kind, recommended_only: true }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['case-accounts', caseId] });
+      void queryClient.invalidateQueries({
+        queryKey: ['case-credit-report-discrepancies', caseId],
+      });
+    },
   });
 
   return (
@@ -119,6 +135,69 @@ export function CaseDisputeStrategyPanel({
               <p className="text-sm text-gray-600">{strategyQuery.data.disclaimer}</p>
               <SummaryBadges summary={strategyQuery.data.summary} />
             </div>
+
+            <div className="flex flex-wrap gap-2">
+              <Button
+                size="sm"
+                loading={prepareMutation.isPending && prepareMutation.variables === 'cra_dispute'}
+                onClick={() => prepareMutation.mutate('cra_dispute')}
+              >
+                Prepare CRA stage letters
+              </Button>
+              <Button
+                size="sm"
+                variant="secondary"
+                loading={
+                  prepareMutation.isPending && prepareMutation.variables === 'furnisher_dispute'
+                }
+                onClick={() => prepareMutation.mutate('furnisher_dispute')}
+              >
+                Prepare furnisher stage letters
+              </Button>
+            </div>
+
+            {prepareMutation.isError ? (
+              <p className="text-sm text-red-600">
+                {prepareMutation.error instanceof Error
+                  ? prepareMutation.error.message
+                  : 'Failed to prepare strategy stage letters'}
+              </p>
+            ) : null}
+
+            {prepareMutation.data ? (
+              <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700">
+                <p>
+                  Prepared {prepareMutation.data.prepared.length} letter(s) for{' '}
+                  {prepareMutation.data.stage_kind} ({prepareMutation.data.recipient_type}).
+                  {prepareMutation.data.skipped.length > 0
+                    ? ` Skipped ${prepareMutation.data.skipped.length}.`
+                    : ''}
+                </p>
+                {prepareMutation.data.note ? (
+                  <p className="mt-1 text-xs text-gray-500">{prepareMutation.data.note}</p>
+                ) : null}
+                {prepareMutation.data.prepared.length > 0 ? (
+                  <ul className="mt-2 space-y-1 text-xs">
+                    {prepareMutation.data.prepared.map((item) => (
+                      <li key={item.match_key}>
+                        {item.creditor_name}
+                        {item.dispute_letter_id ? (
+                          <>
+                            {' · '}
+                            <Link
+                              to={`/accounts/${item.account_id}`}
+                              className="text-brand-600 hover:underline"
+                            >
+                              open account
+                            </Link>
+                          </>
+                        ) : null}
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </div>
+            ) : null}
 
             {strategyQuery.data.strategies.length === 0 ? (
               <p className="text-sm text-gray-500">

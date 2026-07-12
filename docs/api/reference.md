@@ -86,6 +86,7 @@ All case endpoints require authentication. Users are scoped to their organizatio
 | GET    | `/cases/{case_id}/compliance-evidence-links` | read_only    | Link Metro 2/FCRA findings to reports and exhibits             |
 | GET    | `/cases/{case_id}/litigation-strength`       | read_only    | Rank compliance issues by heuristic litigation strength        |
 | GET    | `/cases/{case_id}/dispute-strategy`          | read_only    | Multi-stage dispute plan grounded in ranked findings           |
+| POST   | `/cases/{case_id}/dispute-strategy/prepare`  | case_manager | Prepare CRA/furnisher letters from recommended strategy stage  |
 | POST   | `/cases/{case_id}/llm-summary`               | case_manager | Generate LLM case summary                                      |
 
 ### List query parameters
@@ -329,7 +330,7 @@ Compliance evidence links: `GET /cases/{case_id}/compliance-evidence-links` join
 
 Litigation strength ranking: `GET /cases/{case_id}/litigation-strength` scores and ranks Metro 2, FCRA, cross-bureau, and chronology issues using deterministic heuristics (for example DOFD mismatches near 98, impossible date sequences near 95). Investigator prioritization aid only — not legal advice.
 
-Dispute strategy: `GET /cases/{case_id}/dispute-strategy` builds a per-account multi-stage investigator plan from ranked litigation-strength issues (CRA dispute → furnisher follow-up → CFPB if warranted → preserve for attorney consult). Grounded in scored findings and evidence checklist hints. Staff-mediated planning aid only — does not auto-file or give legal advice.
+Dispute strategy: `GET /cases/{case_id}/dispute-strategy` builds a per-account multi-stage investigator plan from ranked litigation-strength issues (CRA dispute → furnisher follow-up → CFPB if warranted → preserve for attorney consult). Grounded in scored findings and evidence checklist hints. Staff-mediated planning aid only — does not auto-file or give legal advice. `POST /cases/{case_id}/dispute-strategy/prepare` prepares dispute letter drafts for recommended CRA or furnisher stages using matching cross-bureau `match_keys` (staff-mediated; CFPB/attorney stages remain advisory).
 
 Parsed tradeline account candidates: `GET /documents/{document_id}/parsed-credit-report/account-candidates` converts parser tradelines into normalized account-create candidates for staff review, including high balance, credit limit, open/report/DOFD dates when present in the parsed report.
 

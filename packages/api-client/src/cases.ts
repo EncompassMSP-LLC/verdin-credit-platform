@@ -243,6 +243,22 @@ export interface PrepareCreditReportDisputesResult {
   skipped: string[];
 }
 
+export interface PrepareDisputeStrategyStageInput {
+  stage_kind: 'cra_dispute' | 'furnisher_dispute';
+  account_keys?: string[];
+  recommended_only?: boolean;
+}
+
+export interface PrepareDisputeStrategyStageResult {
+  case_id: string;
+  stage_kind: 'cra_dispute' | 'furnisher_dispute';
+  recipient_type: 'credit_bureau' | 'furnisher';
+  match_keys: string[];
+  prepared: PreparedCreditReportDisputeItem[];
+  skipped: string[];
+  note?: string | null;
+}
+
 export async function getCaseCreditReportDiscrepancies(
   caseId: string,
 ): Promise<CaseCreditReportDiscrepancies> {
@@ -287,6 +303,16 @@ export async function getCaseLitigationStrength(caseId: string): Promise<CaseLit
 
 export async function getCaseDisputeStrategy(caseId: string): Promise<CaseDisputeStrategy> {
   return request<CaseDisputeStrategy>(apiPath(`/cases/${caseId}/dispute-strategy`));
+}
+
+export async function prepareCaseDisputeStrategyStage(
+  caseId: string,
+  input: PrepareDisputeStrategyStageInput,
+): Promise<PrepareDisputeStrategyStageResult> {
+  return request<PrepareDisputeStrategyStageResult>(
+    apiPath(`/cases/${caseId}/dispute-strategy/prepare`),
+    { method: 'POST', body: input },
+  );
 }
 
 export async function prepareCaseCreditReportDisputes(
