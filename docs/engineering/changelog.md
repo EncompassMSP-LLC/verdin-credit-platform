@@ -13,6 +13,18 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — strategy account metadata inference
+
+**Decision:** Infer `account_type` / `account_status` / `payment_status` from strategy `primary_rule_ids` when creating direct (non-discrepancy) accounts during strategy prepare.
+
+**Reason:** Direct accounts were created as OTHER/UNKNOWN, which weakened dispute draft context.
+
+**Alternatives considered:** Persist full tradeline snapshot on strategy targets; require parsed-candidate import first.
+
+**Technical debt:** Heuristic only; rule text must mention status tokens to map.
+
+**Follow-up work:** CFPB packet checklist export; pull status from parsed tradeline when document_id is known.
+
 ## Compliance intelligence — direct strategy account letter prep
 
 **Decision:** Extend `POST /cases/{case_id}/dispute-strategy/prepare` to create accounts and dispute letter drafts for strategy targets that lack cross-bureau `match_keys` (Metro 2/FCRA-only findings), while keeping the discrepancy prepare path for match-keyed accounts.
@@ -21,7 +33,7 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Alternatives considered:** Require manual account import first; only prepare cross-bureau items.
 
-**Technical debt:** Direct-created accounts use `AccountType.OTHER` / unknown status until richer tradeline metadata is mapped.
+**Technical debt:** Direct-created accounts infer type/status from rule IDs; may still fall back to unknown when rules lack status tokens.
 
 **Follow-up work:** Map bureau/status from findings; CFPB packet checklist export.
 

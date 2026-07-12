@@ -332,6 +332,58 @@ class StrategyPrepTarget:
     summary: str
 
 
+@dataclass(frozen=True, slots=True)
+class StrategyAccountMetadata:
+    account_type: str
+    account_status: str
+    payment_status: str
+
+
+def infer_account_metadata_from_rules(
+    primary_rule_ids: Sequence[str],
+) -> StrategyAccountMetadata:
+    """Heuristic account enums from strategy rule IDs for direct account create."""
+    joined = " ".join(str(rule).lower() for rule in primary_rule_ids)
+
+    account_type = "other"
+    if "collection" in joined or "original_creditor" in joined:
+        account_type = "collection"
+    elif "mortgage" in joined:
+        account_type = "mortgage"
+    elif "auto" in joined:
+        account_type = "auto"
+    elif "student" in joined:
+        account_type = "student_loan"
+    elif "medical" in joined:
+        account_type = "medical"
+
+    account_status = "unknown"
+    if "charge_off" in joined or "charge-off" in joined:
+        account_status = "charge_off"
+    elif "collection" in joined:
+        account_status = "collection"
+    elif "closed" in joined or "date_closed" in joined:
+        account_status = "closed"
+    elif "open_with" in joined or "open_date" in joined:
+        account_status = "open"
+    elif "sold_transferred" in joined or "transferred" in joined:
+        account_status = "transferred"
+
+    payment_status = "unknown"
+    if "past_due" in joined or "past-due" in joined:
+        payment_status = "late_90"
+    elif "current_with_past_due" in joined:
+        payment_status = "late_30"
+    elif "zero_balance" in joined and "past_due" not in joined:
+        payment_status = "current"
+
+    return StrategyAccountMetadata(
+        account_type=account_type,
+        account_status=account_status,
+        payment_status=payment_status,
+    )
+
+
 def stage_recipient_type(stage_kind: StageKind) -> Literal["credit_bureau", "furnisher"]:
     if stage_kind == "furnisher_dispute":
         return "furnisher"
