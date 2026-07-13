@@ -57,6 +57,8 @@ def test_render_cfpb_checklist_markdown_includes_status_and_disclaimer() -> None
                         detail="Government ID and proof of address.",
                         required=True,
                         completion_status="present",
+                        completion_source="staff",
+                        override_note="Verified ID packet on desk",
                     ),
                     CfpbChecklistItem(
                         item_id="cfpb_narrative",
@@ -75,6 +77,8 @@ def test_render_cfpb_checklist_markdown_includes_status_and_disclaimer() -> None
     assert "Investigator CFPB escalation checklist only." in markdown
     assert "Capital One" in markdown
     assert "**present**" in markdown
+    assert "(staff)" in markdown
+    assert "Staff note: Verified ID packet on desk" in markdown
     assert "**unknown**" in markdown
     assert "Staff-mediated export only" in markdown
     assert "Does not file with CFPB" in markdown

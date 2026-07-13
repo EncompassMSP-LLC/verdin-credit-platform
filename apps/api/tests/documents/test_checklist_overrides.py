@@ -6,6 +6,7 @@ import uuid
 
 from api.modules.documents.dispute_strategy import (
     ChecklistEvidenceSnapshot,
+    ChecklistOverrideValue,
     apply_checklist_overrides,
     build_case_cfpb_checklist,
     enrich_case_cfpb_checklist,
@@ -58,10 +59,16 @@ def test_apply_checklist_overrides_marks_staff_source() -> None:
 
     overridden = apply_checklist_overrides(
         checklist,
-        {(account_key, "identity_exhibits"): "present"},
+        {
+            (account_key, "identity_exhibits"): ChecklistOverrideValue(
+                completion_status="present",
+                note="Verified ID packet on desk",
+            )
+        },
     )
     assert overridden.accounts[0].account_key == account_key
     by_id = {item.item_id: item for item in overridden.accounts[0].items}
     assert by_id["identity_exhibits"].completion_status == "present"
     assert by_id["identity_exhibits"].completion_source == "staff"
+    assert by_id["identity_exhibits"].override_note == "Verified ID packet on desk"
     assert overridden.summary["items_present"] >= 1

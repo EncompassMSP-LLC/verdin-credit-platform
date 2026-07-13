@@ -63,7 +63,12 @@ function ChecklistAccount({
   account: AccountCfpbChecklist | AccountAttorneyChecklist;
   accent: 'amber' | 'slate';
   checklistKind: 'cfpb' | 'attorney';
-  onToggle: (accountKey: string, itemId: string, markPresent: boolean) => void;
+  onToggle: (
+    accountKey: string,
+    itemId: string,
+    markPresent: boolean,
+    note?: string | null,
+  ) => void;
   pendingKey: string | null;
 }) {
   const border =
@@ -100,12 +105,35 @@ function ChecklistAccount({
                   size="sm"
                   variant="secondary"
                   loading={pendingKey === key}
-                  onClick={() => onToggle(account.account_key, item.item_id, !isStaff)}
+                  onClick={() => {
+                    if (isStaff) {
+                      onToggle(account.account_key, item.item_id, false);
+                      return;
+                    }
+                    const note = window.prompt(
+                      'Optional staff note for this override (leave blank to skip):',
+                      '',
+                    );
+                    if (note === null) {
+                      return;
+                    }
+                    onToggle(
+                      account.account_key,
+                      item.item_id,
+                      true,
+                      note.trim() ? note.trim() : null,
+                    );
+                  }}
                 >
                   {isStaff ? 'Clear override' : 'Mark complete'}
                 </Button>
               </div>
               <span className="block text-gray-500">{item.detail}</span>
+              {isStaff && item.override_note ? (
+                <span className="mt-0.5 block text-gray-500 italic">
+                  Staff note: {item.override_note}
+                </span>
+              ) : null}
             </li>
           );
         })}
@@ -222,12 +250,14 @@ export function CaseDisputeStrategyPanel({
       account_key: string;
       item_id: string;
       markPresent: boolean;
+      note?: string | null;
     }) =>
       upsertCaseChecklistOverride(caseId, {
         checklist_kind: input.checklist_kind,
         account_key: input.account_key,
         item_id: input.item_id,
         completion_status: input.markPresent ? 'present' : null,
+        note: input.markPresent ? (input.note ?? null) : null,
       }),
     onSuccess: (_data, variables) => {
       const key =
@@ -407,12 +437,13 @@ export function CaseDisputeStrategyPanel({
                       accent="amber"
                       checklistKind="cfpb"
                       pendingKey={pendingOverrideKey}
-                      onToggle={(accountKey, itemId, markPresent) =>
+                      onToggle={(accountKey, itemId, markPresent, note) =>
                         overrideMutation.mutate({
                           checklist_kind: 'cfpb',
                           account_key: accountKey,
                           item_id: itemId,
                           markPresent,
+                          note,
                         })
                       }
                     />
@@ -488,12 +519,13 @@ export function CaseDisputeStrategyPanel({
                       accent="slate"
                       checklistKind="attorney"
                       pendingKey={pendingOverrideKey}
-                      onToggle={(accountKey, itemId, markPresent) =>
+                      onToggle={(accountKey, itemId, markPresent, note) =>
                         overrideMutation.mutate({
                           checklist_kind: 'attorney',
                           account_key: accountKey,
                           item_id: itemId,
                           markPresent,
+                          note,
                         })
                       }
                     />

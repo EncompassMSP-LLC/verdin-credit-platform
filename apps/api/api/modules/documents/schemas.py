@@ -722,6 +722,7 @@ class CfpbChecklistItem(BaseSchema):
     required: bool
     completion_status: Literal["present", "missing", "unknown"] = "unknown"
     completion_source: Literal["computed", "staff"] = "computed"
+    override_note: str | None = None
 
 
 class AccountCfpbChecklistItem(BaseSchema):
@@ -760,6 +761,7 @@ class AttorneyChecklistItem(BaseSchema):
     required: bool
     completion_status: Literal["present", "missing", "unknown"] = "unknown"
     completion_source: Literal["computed", "staff"] = "computed"
+    override_note: str | None = None
 
 
 class AccountAttorneyChecklistItem(BaseSchema):
@@ -786,3 +788,4 @@ class UpsertChecklistOverrideRequest(BaseSchema):
     account_key: str
     item_id: str
     completion_status: Literal["present", "missing", "unknown"] | None = None
+    note: str | None = None

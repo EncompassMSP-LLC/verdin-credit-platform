@@ -2056,6 +2056,7 @@ class DocumentService:
                             required=item.required,
                             completion_status=item.completion_status,
                             completion_source=item.completion_source,
+                            override_note=item.override_note,
                         )
                         for item in account.items
                     ],
@@ -2121,6 +2122,7 @@ class DocumentService:
                             required=item.required,
                             completion_status=item.completion_status,
                             completion_source=item.completion_source,
+                            override_note=item.override_note,
                         )
                         for item in account.items
                     ],
@@ -2352,10 +2354,11 @@ class DocumentService:
         organization_id: uuid.UUID,
         case_id: uuid.UUID,
         checklist_kind: str,
-    ) -> dict[tuple[str, str], Literal["present", "missing", "unknown"]]:
+    ) -> dict[tuple[str, str], Any]:
         if self._session is None:
             return {}
         from api.modules.documents.checklist_override_repository import ChecklistOverrideRepository
+        from api.modules.documents.dispute_strategy import ChecklistOverrideValue
 
         repo = ChecklistOverrideRepository(self._session)
         rows = await repo.list_active_for_case(
@@ -2363,12 +2366,15 @@ class DocumentService:
             case_id=case_id,
             checklist_kind=checklist_kind,
         )
-        overrides: dict[tuple[str, str], Literal["present", "missing", "unknown"]] = {}
+        overrides: dict[tuple[str, str], ChecklistOverrideValue] = {}
         for row in rows:
             status = row.completion_status
             if status not in {"present", "missing", "unknown"}:
                 continue
-            overrides[(row.account_key, row.item_id)] = status  # type: ignore[assignment]
+            overrides[(row.account_key, row.item_id)] = ChecklistOverrideValue(
+                completion_status=status,  # type: ignore[arg-type]
+                note=row.note,
+            )
         return overrides
 
     async def upsert_case_checklist_override(
@@ -2429,6 +2435,7 @@ class DocumentService:
                 account_key=body.account_key,
                 item_id=body.item_id,
                 completion_status=body.completion_status,
+                note=body.note,
                 user_id=user.id,
             )
 

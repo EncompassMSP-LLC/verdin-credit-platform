@@ -61,6 +61,7 @@ class ChecklistOverrideRepository:
         account_key: str,
         item_id: str,
         completion_status: str,
+        note: str | None,
         user_id: uuid.UUID | None,
     ) -> DisputeStrategyChecklistOverride:
         existing = await self.get_including_deleted(
@@ -70,6 +71,7 @@ class ChecklistOverrideRepository:
             account_key=account_key,
             item_id=item_id,
         )
+        cleaned_note = note.strip() if isinstance(note, str) and note.strip() else None
         if existing is None:
             row = DisputeStrategyChecklistOverride(
                 organization_id=organization_id,
@@ -78,6 +80,7 @@ class ChecklistOverrideRepository:
                 account_key=account_key,
                 item_id=item_id,
                 completion_status=completion_status,
+                note=cleaned_note,
             )
             apply_audit_on_create(row, user_id)
             self._session.add(row)
@@ -86,6 +89,7 @@ class ChecklistOverrideRepository:
             return row
 
         existing.completion_status = completion_status
+        existing.note = cleaned_note
         existing.deleted_at = None
         apply_audit_on_update(existing, user_id)
         await self._session.flush()

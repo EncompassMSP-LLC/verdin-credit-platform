@@ -514,6 +514,7 @@ class CfpbChecklistItem:
     required: bool
     completion_status: Literal["present", "missing", "unknown"] = "unknown"
     completion_source: Literal["computed", "staff"] = "computed"
+    override_note: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -696,6 +697,7 @@ class AttorneyChecklistItem:
     required: bool
     completion_status: Literal["present", "missing", "unknown"] = "unknown"
     completion_source: Literal["computed", "staff"] = "computed"
+    override_note: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -906,6 +908,12 @@ CompletionStatus = Literal["present", "missing", "unknown"]
 
 
 @dataclass(frozen=True, slots=True)
+class ChecklistOverrideValue:
+    completion_status: CompletionStatus
+    note: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
 class LetterSignal:
     recipient_type: Literal["credit_bureau", "furnisher"]
     status: str
@@ -1018,6 +1026,7 @@ def _with_status(
     status: CompletionStatus,
     *,
     source: Literal["computed", "staff"] = "computed",
+    override_note: str | None = None,
 ) -> CfpbChecklistItem | AttorneyChecklistItem:
     if isinstance(item, CfpbChecklistItem):
         return CfpbChecklistItem(
@@ -1028,6 +1037,7 @@ def _with_status(
             required=item.required,
             completion_status=status,
             completion_source=source,
+            override_note=override_note if source == "staff" else None,
         )
     return AttorneyChecklistItem(
         item_id=item.item_id,
@@ -1037,6 +1047,7 @@ def _with_status(
         required=item.required,
         completion_status=status,
         completion_source=source,
+        override_note=override_note if source == "staff" else None,
     )
 
 
@@ -1142,7 +1153,7 @@ def enrich_case_attorney_checklist(
 
 def apply_cfpb_checklist_overrides(
     result: CaseCfpbChecklistResult,
-    overrides: dict[tuple[str, str], CompletionStatus],
+    overrides: dict[tuple[str, str], ChecklistOverrideValue],
 ) -> CaseCfpbChecklistResult:
     """Replace completion_status for CFPB items with staff overrides."""
     if not overrides:
@@ -1154,7 +1165,13 @@ def apply_cfpb_checklist_overrides(
         for item in account.items:
             key = (account.account_key, item.item_id)
             if key in overrides:
-                updated = _with_status(item, overrides[key], source="staff")
+                ov = overrides[key]
+                updated = _with_status(
+                    item,
+                    ov.completion_status,
+                    source="staff",
+                    override_note=ov.note,
+                )
                 assert isinstance(updated, CfpbChecklistItem)
                 items.append(updated)
             else:
@@ -1183,7 +1200,7 @@ def apply_cfpb_checklist_overrides(
 
 def apply_attorney_checklist_overrides(
     result: CaseAttorneyChecklistResult,
-    overrides: dict[tuple[str, str], CompletionStatus],
+    overrides: dict[tuple[str, str], ChecklistOverrideValue],
 ) -> CaseAttorneyChecklistResult:
     """Replace completion_status for attorney items with staff overrides."""
     if not overrides:
@@ -1195,7 +1212,13 @@ def apply_attorney_checklist_overrides(
         for item in account.items:
             key = (account.account_key, item.item_id)
             if key in overrides:
-                updated = _with_status(item, overrides[key], source="staff")
+                ov = overrides[key]
+                updated = _with_status(
+                    item,
+                    ov.completion_status,
+                    source="staff",
+                    override_note=ov.note,
+                )
                 assert isinstance(updated, AttorneyChecklistItem)
                 items.append(updated)
             else:
@@ -1226,7 +1249,7 @@ def apply_attorney_checklist_overrides(
 # Backward-compatible alias used by unit tests.
 def apply_checklist_overrides(
     result: CaseCfpbChecklistResult | CaseAttorneyChecklistResult,
-    overrides: dict[tuple[str, str], CompletionStatus],
+    overrides: dict[tuple[str, str], ChecklistOverrideValue],
 ) -> CaseCfpbChecklistResult | CaseAttorneyChecklistResult:
     if isinstance(result, CaseCfpbChecklistResult):
         return apply_cfpb_checklist_overrides(result, overrides)
