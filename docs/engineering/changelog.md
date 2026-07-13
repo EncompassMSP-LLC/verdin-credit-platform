@@ -13,6 +13,18 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — checklist packet dispute-letter text
+
+**Decision:** Include best-effort plain-text dispute letter exports under `exhibits/dispute-letters/` in checklist `packet.zip` when `include_letters=true` (default). Void letters are skipped; mail PDF / consent gates are not used.
+
+**Reason:** Investigators needed correspondence in the handoff archive without inventing counsel transmission or mail-packet merging.
+
+**Alternatives considered:** Always-on PDF letters; require mail consents; separate letters ZIP.
+
+**Technical debt:** Text only (not letterhead PDF); capped at 50 letters per case.
+
+**Follow-up work:** Optional mail-packet PDF merge behind explicit consent.
+
 ## Compliance intelligence — checklist override notes
 
 **Decision:** Add optional `note` on `PUT .../checklist-overrides` (stored on `dispute_strategy_checklist_overrides`) and surface it as `override_note` on checklist items and markdown exports when `completion_source=staff`.
@@ -23,7 +35,7 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Technical debt:** Notes are soft-deleted with the override; no note history.
 
-**Follow-up work:** Optional letter inclusion in packet ZIP.
+**Follow-up work:** Optional letter inclusion in packet ZIP (done).
 
 ## Compliance intelligence — checklist exhibit packet ZIP
 
@@ -35,7 +47,7 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Technical debt:** Exhibit set is typed-document based; missing storage objects are skipped silently.
 
-**Follow-up work:** Optional letter inclusion.
+**Follow-up work:** Optional mail-packet PDF merge behind explicit consent.
 
 ## Compliance intelligence — checklist staff mark-complete overrides
 

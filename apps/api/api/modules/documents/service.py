@@ -2185,12 +2185,14 @@ class DocumentService:
         case_id: uuid.UUID,
         *,
         recommended_only: bool = True,
+        include_letters: bool = True,
     ) -> tuple[bytes, str, str]:
         return await self._export_case_checklist_packet(
             user,
             case_id,
             kind="cfpb",
             recommended_only=recommended_only,
+            include_letters=include_letters,
         )
 
     async def export_case_attorney_checklist_packet(
@@ -2199,12 +2201,14 @@ class DocumentService:
         case_id: uuid.UUID,
         *,
         recommended_only: bool = True,
+        include_letters: bool = True,
     ) -> tuple[bytes, str, str]:
         return await self._export_case_checklist_packet(
             user,
             case_id,
             kind="attorney",
             recommended_only=recommended_only,
+            include_letters=include_letters,
         )
 
     async def _export_case_checklist_packet(
@@ -2214,6 +2218,7 @@ class DocumentService:
         *,
         kind: Literal["cfpb", "attorney"],
         recommended_only: bool,
+        include_letters: bool = True,
     ) -> tuple[bytes, str, str]:
         from api.modules.documents.checklist_export import (
             checklist_export_filename,
@@ -2224,6 +2229,7 @@ class DocumentService:
             build_checklist_packet_zip,
             checklist_packet_filename,
             collect_checklist_exhibits,
+            collect_checklist_letter_exhibits,
         )
 
         organization_id = self._require_organization(user)
@@ -2259,6 +2265,14 @@ class DocumentService:
                 organization_id=organization_id,
                 case=case,
             )
+            if include_letters:
+                exhibits.extend(
+                    await collect_checklist_letter_exhibits(
+                        self._session,
+                        organization_id=organization_id,
+                        case_id=case_id,
+                    )
+                )
 
         packet = build_checklist_packet_zip(
             markdown_name=checklist_export_filename(kind, case_id),
