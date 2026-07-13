@@ -235,3 +235,21 @@ class DocumentRepository:
             .order_by(DocumentParsedCreditReport.parsed_at.desc())
         )
         return list(result.scalars().all())
+
+    async def update_tradeline_page_map(
+        self,
+        document_id: uuid.UUID,
+        *,
+        organization_id: uuid.UUID,
+        page_map: dict[str, object],
+    ) -> DocumentParsedCreditReport | None:
+        parsed = await self.get_parsed_credit_report(
+            document_id,
+            organization_id=organization_id,
+        )
+        if parsed is None:
+            return None
+        parsed.tradeline_page_map = page_map
+        await self._session.flush()
+        await self._session.refresh(parsed)
+        return parsed
