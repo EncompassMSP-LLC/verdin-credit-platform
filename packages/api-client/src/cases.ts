@@ -512,6 +512,7 @@ async function downloadChecklistExport(
     recommended_only?: boolean;
     include_letters?: boolean;
     letter_format?: 'text' | 'pdf';
+    include_mail_packets?: boolean;
   } = {},
 ): Promise<{ blob: Blob; filename: string }> {
   const query = new URLSearchParams();
@@ -523,6 +524,9 @@ async function downloadChecklistExport(
   }
   if (params.letter_format === 'pdf') {
     query.set('letter_format', 'pdf');
+  }
+  if (params.include_mail_packets === true) {
+    query.set('include_mail_packets', 'true');
   }
   const suffix = query.toString() ? `?${query.toString()}` : '';
   const url = `${getApiBaseUrl()}${apiPath(`${path}${suffix}`)}`;
@@ -536,12 +540,12 @@ async function downloadChecklistExport(
   if (!response.ok) {
     const error = (await response.json().catch(() => ({
       detail: 'Request failed',
-    }))) as { detail?: string; code?: string };
-    throw new ApiClientError(
-      error.detail || `HTTP ${response.status}`,
-      response.status,
-      error.code,
-    );
+    }))) as { detail?: string | { message?: string }; code?: string };
+    const detail =
+      typeof error.detail === 'string'
+        ? error.detail
+        : error.detail?.message || `HTTP ${response.status}`;
+    throw new ApiClientError(detail, response.status, error.code);
   }
 
   const filename = parseContentDispositionFilename(
@@ -582,6 +586,7 @@ export async function downloadCaseCfpbChecklistPacket(
     recommended_only?: boolean;
     include_letters?: boolean;
     letter_format?: 'text' | 'pdf';
+    include_mail_packets?: boolean;
   } = {},
 ): Promise<{ blob: Blob; filename: string }> {
   return downloadChecklistExport(
@@ -598,6 +603,7 @@ export async function downloadCaseAttorneyChecklistPacket(
     recommended_only?: boolean;
     include_letters?: boolean;
     letter_format?: 'text' | 'pdf';
+    include_mail_packets?: boolean;
   } = {},
 ): Promise<{ blob: Blob; filename: string }> {
   return downloadChecklistExport(

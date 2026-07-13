@@ -627,17 +627,18 @@ class AccountService:
             detail=f"Unsupported export format: {export_format}",
         )
 
-    async def export_case_dispute_mail_packets(
+    async def collect_case_mail_packet_files(
         self,
         user: User,
         case_id: uuid.UUID,
-    ) -> tuple[bytes, str, str]:
-        import zipfile
-        from io import BytesIO
-
+        *,
+        require_consents: bool = True,
+    ) -> list[tuple[str, bytes]]:
+        """Build per-account mail-packet PDFs for a case (consent-gated when required)."""
         organization_id = self._require_organization(user)
         case = await self._get_case_by_id(case_id, organization_id)
-        await self._require_dispute_mail_consents(case)
+        if require_consents:
+            await self._require_dispute_mail_consents(case)
         consumer_address_lines = await self._resolve_consumer_address_lines(
             organization_id=organization_id,
             case_id=case_id,
@@ -649,59 +650,72 @@ class AccountService:
                 detail="Dispute letter repository is not configured",
             )
 
-        buffer = BytesIO()
-        packet_count = 0
-        with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as archive:
-            page = 1
-            while True:
-                page_result = await self.list_case_accounts(
-                    user,
-                    case_id,
-                    params=AccountListParams(page=page, page_size=100),
+        packets: list[tuple[str, bytes]] = []
+        page = 1
+        while True:
+            page_result = await self.list_case_accounts(
+                user,
+                case_id,
+                params=AccountListParams(page=page, page_size=100),
+            )
+            for account_summary in page_result.items:
+                account = await self._accounts.get_by_id(
+                    account_summary.id,
+                    organization_id=organization_id,
                 )
-                for account_summary in page_result.items:
-                    account = await self._accounts.get_by_id(
-                        account_summary.id,
-                        organization_id=organization_id,
-                    )
-                    if account is None:
-                        continue
-                    letters = await self._dispute_letters.list_for_account(
-                        organization_id=organization_id,
-                        account_id=account.id,
-                    )
-                    if not letters:
-                        continue
-                    dispute_letter = letters[0]
-                    context = build_mail_export_context(
-                        account=account,
-                        case=case,
-                        dispute_letter=dispute_letter,
-                        consumer_address_lines=consumer_address_lines,
-                    )
-                    attachments = await self._resolve_mail_packet_attachments(
-                        organization_id=organization_id,
-                        case=case,
-                        account=account,
-                    )
-                    content, filename, _ = build_mail_export(
-                        dispute_letter,
-                        context,
-                        "mail-packet",
-                        attachments=attachments,
-                    )
-                    archive.writestr(filename, content)
-                    packet_count += 1
+                if account is None:
+                    continue
+                letters = await self._dispute_letters.list_for_account(
+                    organization_id=organization_id,
+                    account_id=account.id,
+                )
+                if not letters:
+                    continue
+                dispute_letter = letters[0]
+                context = build_mail_export_context(
+                    account=account,
+                    case=case,
+                    dispute_letter=dispute_letter,
+                    consumer_address_lines=consumer_address_lines,
+                )
+                attachments = await self._resolve_mail_packet_attachments(
+                    organization_id=organization_id,
+                    case=case,
+                    account=account,
+                )
+                content, filename, _ = build_mail_export(
+                    dispute_letter,
+                    context,
+                    "mail-packet",
+                    attachments=attachments,
+                )
+                packets.append((filename, content))
 
-                if page >= page_result.pages:
-                    break
-                page += 1
+            if page >= page_result.pages:
+                break
+            page += 1
 
-        if packet_count == 0:
+        return packets
+
+    async def export_case_dispute_mail_packets(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+    ) -> tuple[bytes, str, str]:
+        import zipfile
+        from io import BytesIO
+
+        packets = await self.collect_case_mail_packet_files(user, case_id)
+        if not packets:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="No dispute letter drafts found on this case",
             )
+
+        buffer = BytesIO()
+        with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as archive:
+            for filename, content in packets:
+                archive.writestr(filename, content)
 
         short_case_id = str(case_id).split("-", 1)[0]
         return (

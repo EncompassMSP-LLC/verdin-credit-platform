@@ -242,6 +242,13 @@ async def collect_checklist_letter_exhibits(
     return exhibits
 
 
+def mail_packet_exhibit_path(filename: str) -> str:
+    cleaned = _SAFE_NAME.sub("_", filename).strip("._") or "mail-packet.pdf"
+    if not cleaned.lower().endswith(".pdf"):
+        cleaned = f"{cleaned}.pdf"
+    return f"exhibits/mail-packets/{cleaned}"
+
+
 def build_checklist_packet_zip(
     *,
     markdown_name: str,

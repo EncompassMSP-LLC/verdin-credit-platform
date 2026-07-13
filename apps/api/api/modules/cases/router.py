@@ -335,6 +335,7 @@ async def export_case_cfpb_checklist_packet(
     recommended_only: bool = Query(default=True),
     include_letters: bool = Query(default=True),
     letter_format: Literal["text", "pdf"] = Query(default="text"),
+    include_mail_packets: bool = Query(default=False),
     current_user: User = Depends(get_current_user),
     service: DocumentService = Depends(get_document_service),
 ) -> Response:
@@ -344,6 +345,7 @@ async def export_case_cfpb_checklist_packet(
         recommended_only=recommended_only,
         include_letters=include_letters,
         letter_format=letter_format,
+        include_mail_packets=include_mail_packets,
     )
     safe_name = sanitize_content_disposition_filename(file_name)
     return Response(
@@ -359,6 +361,7 @@ async def export_case_attorney_checklist_packet(
     recommended_only: bool = Query(default=True),
     include_letters: bool = Query(default=True),
     letter_format: Literal["text", "pdf"] = Query(default="text"),
+    include_mail_packets: bool = Query(default=False),
     current_user: User = Depends(get_current_user),
     service: DocumentService = Depends(get_document_service),
 ) -> Response:
@@ -368,6 +371,7 @@ async def export_case_attorney_checklist_packet(
         recommended_only=recommended_only,
         include_letters=include_letters,
         letter_format=letter_format,
+        include_mail_packets=include_mail_packets,
     )
     safe_name = sanitize_content_disposition_filename(file_name)
     return Response(
