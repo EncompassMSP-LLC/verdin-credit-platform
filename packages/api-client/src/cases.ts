@@ -499,3 +499,65 @@ export async function downloadCaseDisputeReportExcerpts(
   const blob = await response.blob();
   return { blob, filename };
 }
+
+async function downloadChecklistExport(
+  caseId: string,
+  path: string,
+  fallbackFilename: string,
+  params: { recommended_only?: boolean } = {},
+): Promise<{ blob: Blob; filename: string }> {
+  const query = new URLSearchParams();
+  if (params.recommended_only === false) {
+    query.set('recommended_only', 'false');
+  }
+  const suffix = query.toString() ? `?${query.toString()}` : '';
+  const url = `${getApiBaseUrl()}${apiPath(`${path}${suffix}`)}`;
+  const headers: Record<string, string> = {};
+  const token = getAccessToken();
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const response = await fetch(url, { headers });
+  if (!response.ok) {
+    const error = (await response.json().catch(() => ({
+      detail: 'Request failed',
+    }))) as { detail?: string; code?: string };
+    throw new ApiClientError(
+      error.detail || `HTTP ${response.status}`,
+      response.status,
+      error.code,
+    );
+  }
+
+  const filename = parseContentDispositionFilename(
+    response.headers.get('content-disposition'),
+    fallbackFilename,
+  );
+  const blob = await response.blob();
+  return { blob, filename };
+}
+
+export async function downloadCaseCfpbChecklist(
+  caseId: string,
+  params: { recommended_only?: boolean } = {},
+): Promise<{ blob: Blob; filename: string }> {
+  return downloadChecklistExport(
+    caseId,
+    `/cases/${caseId}/dispute-strategy/cfpb-checklist/export`,
+    `cfpb-checklist-${caseId.slice(0, 8)}.md`,
+    params,
+  );
+}
+
+export async function downloadCaseAttorneyChecklist(
+  caseId: string,
+  params: { recommended_only?: boolean } = {},
+): Promise<{ blob: Blob; filename: string }> {
+  return downloadChecklistExport(
+    caseId,
+    `/cases/${caseId}/dispute-strategy/attorney-checklist/export`,
+    `attorney-checklist-${caseId.slice(0, 8)}.md`,
+    params,
+  );
+}

@@ -13,6 +13,18 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — checklist packet markdown export
+
+**Decision:** Add `GET …/cfpb-checklist/export` and `GET …/attorney-checklist/export` that download staff-mediated markdown packets from the same enriched checklist payloads as the JSON endpoints.
+
+**Reason:** Investigators needed a copy/paste handoff file without inventing PDF layout or bundling exhibits.
+
+**Alternatives considered:** ZIP of exhibits; reportlab PDF; single `?kind=` endpoint.
+
+**Technical debt:** Export is text-only; narratives remain advisory until real artifacts exist.
+
+**Follow-up work:** Staff mark-complete overrides; optional exhibit ZIP composition.
+
 ## Compliance intelligence — checklist completion status
 
 **Decision:** Enrich CFPB and attorney checklist items at read time with `completion_status` (`present` | `missing` | `unknown`) derived from case exhibits, typed documents, parsed reports, and dispute letters. No migration or staff override API.
@@ -23,7 +35,7 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Technical debt:** Heuristic only; narratives and CFPB escalation files stay `unknown` until artifacts exist.
 
-**Follow-up work:** Optional packet PDF export; staff mark-complete overrides.
+**Follow-up work:** Staff mark-complete overrides.
 
 ## Compliance intelligence — attorney-preserve checklist
 
