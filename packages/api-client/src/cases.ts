@@ -294,6 +294,42 @@ export interface CaseCfpbChecklist {
   accounts: AccountCfpbChecklist[];
 }
 
+export interface AttorneyChecklistSummary {
+  accounts_listed: number;
+  required_items: number;
+  optional_items: number;
+  escalation_flagged: number;
+}
+
+export type AttorneyChecklistCategory = 'correspondence' | 'evidence' | 'chronology' | 'filing';
+
+export interface AttorneyChecklistItem {
+  item_id: string;
+  category: AttorneyChecklistCategory;
+  title: string;
+  detail: string;
+  required: boolean;
+}
+
+export interface AccountAttorneyChecklist {
+  account_key: string;
+  creditor_name?: string | null;
+  account_number_masked?: string | null;
+  bureau?: string | null;
+  match_key?: string | null;
+  top_score: number;
+  primary_rule_ids: string[];
+  attorney_escalation: boolean;
+  items: AttorneyChecklistItem[];
+}
+
+export interface CaseAttorneyChecklist {
+  case_id: string;
+  disclaimer: string;
+  summary: AttorneyChecklistSummary;
+  accounts: AccountAttorneyChecklist[];
+}
+
 export async function getCaseCreditReportDiscrepancies(
   caseId: string,
 ): Promise<CaseCreditReportDiscrepancies> {
@@ -351,6 +387,20 @@ export async function getCaseCfpbChecklist(
   const suffix = query.toString() ? `?${query.toString()}` : '';
   return request<CaseCfpbChecklist>(
     apiPath(`/cases/${caseId}/dispute-strategy/cfpb-checklist${suffix}`),
+  );
+}
+
+export async function getCaseAttorneyChecklist(
+  caseId: string,
+  params: { recommended_only?: boolean } = {},
+): Promise<CaseAttorneyChecklist> {
+  const query = new URLSearchParams();
+  if (params.recommended_only === false) {
+    query.set('recommended_only', 'false');
+  }
+  const suffix = query.toString() ? `?${query.toString()}` : '';
+  return request<CaseAttorneyChecklist>(
+    apiPath(`/cases/${caseId}/dispute-strategy/attorney-checklist${suffix}`),
   );
 }
 

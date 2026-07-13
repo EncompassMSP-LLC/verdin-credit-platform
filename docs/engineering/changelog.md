@@ -13,6 +13,18 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — attorney-preserve checklist
+
+**Decision:** Add `GET /cases/{case_id}/dispute-strategy/attorney-checklist` that lists required/optional packet items for strategy accounts (attorney_preserve is always recommended as hygiene). Near-ceiling scores are escalation-flagged.
+
+**Reason:** Attorney-preserve was advisory only; investigators needed a concrete handoff checklist without transmitting materials to counsel automatically.
+
+**Alternatives considered:** PDF packet export only; merge into CFPB checklist endpoint.
+
+**Technical debt:** Checklist is heuristic; does not verify which exhibits are already on the case.
+
+**Follow-up work:** Mark checklist items complete against case documents; optional packet PDF export.
+
 ## Compliance intelligence — CFPB escalation checklist
 
 **Decision:** Add `GET /cases/{case_id}/dispute-strategy/cfpb-checklist` that lists required/optional packet items for accounts where the strategy CFPB stage is recommended.
@@ -23,7 +35,7 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Technical debt:** Checklist is heuristic; does not verify which exhibits are already on the case.
 
-**Follow-up work:** Attorney-preserve packet export; mark checklist items complete against case documents.
+**Follow-up work:** Mark checklist items complete against case documents.
 
 ## Compliance intelligence — strategy account metadata inference
 

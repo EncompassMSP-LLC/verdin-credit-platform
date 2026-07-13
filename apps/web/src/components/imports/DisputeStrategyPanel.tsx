@@ -1,9 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ApiClientError,
+  getCaseAttorneyChecklist,
   getCaseCfpbChecklist,
   getCaseDisputeStrategy,
   prepareCaseDisputeStrategyStage,
+  type AccountAttorneyChecklist,
   type AccountCfpbChecklist,
   type AccountDisputeStrategy,
   type DisputeStrategyStage,
@@ -25,14 +27,31 @@ function SummaryBadges({ summary }: { summary: DisputeStrategySummary }) {
   );
 }
 
-function CfpbAccountChecklist({ account }: { account: AccountCfpbChecklist }) {
+function ChecklistAccount({
+  account,
+  accent,
+}: {
+  account: AccountCfpbChecklist | AccountAttorneyChecklist;
+  accent: 'amber' | 'slate';
+}) {
+  const border =
+    accent === 'amber' ? 'border-amber-200 bg-amber-50/40' : 'border-slate-200 bg-slate-50/40';
+  const escalation =
+    'attorney_escalation' in account && account.attorney_escalation ? (
+      <Badge variant="danger">escalation</Badge>
+    ) : null;
   return (
-    <li className="rounded-md border border-amber-200 bg-amber-50/40 px-3 py-2">
-      <p className="text-sm font-medium text-gray-900">
-        {account.creditor_name ?? 'Unknown creditor'}
-        {account.account_number_masked ? ` · ${account.account_number_masked}` : ''}
-        <span className="ml-2 text-xs font-normal text-gray-500">top {account.top_score}/100</span>
-      </p>
+    <li className={`rounded-md border ${border} px-3 py-2`}>
+      <div className="flex flex-wrap items-center gap-2">
+        <p className="text-sm font-medium text-gray-900">
+          {account.creditor_name ?? 'Unknown creditor'}
+          {account.account_number_masked ? ` · ${account.account_number_masked}` : ''}
+          <span className="ml-2 text-xs font-normal text-gray-500">
+            top {account.top_score}/100
+          </span>
+        </p>
+        {escalation}
+      </div>
       <ul className="mt-2 space-y-1">
         {account.items.map((item) => (
           <li key={item.item_id} className="text-xs text-gray-700">
@@ -123,6 +142,13 @@ export function CaseDisputeStrategyPanel({
     queryKey: ['case-cfpb-checklist', caseId],
     queryFn: () => getCaseCfpbChecklist(caseId),
     enabled: (strategyQuery.data?.summary.cfpb_recommended ?? 0) > 0,
+    retry: false,
+  });
+
+  const attorneyQuery = useQuery({
+    queryKey: ['case-attorney-checklist', caseId],
+    queryFn: () => getCaseAttorneyChecklist(caseId),
+    enabled: (strategyQuery.data?.summary.attorney_recommended ?? 0) > 0,
     retry: false,
   });
 
@@ -248,7 +274,25 @@ export function CaseDisputeStrategyPanel({
                 </p>
                 <ul className="space-y-2">
                   {cfpbQuery.data.accounts.map((account) => (
-                    <CfpbAccountChecklist key={account.account_key} account={account} />
+                    <ChecklistAccount key={account.account_key} account={account} accent="amber" />
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+
+            {attorneyQuery.data && attorneyQuery.data.accounts.length > 0 ? (
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-gray-900">Attorney-preserve checklist</p>
+                <p className="text-xs text-gray-500">{attorneyQuery.data.disclaimer}</p>
+                <p className="text-xs text-gray-500">
+                  {attorneyQuery.data.summary.accounts_listed} account(s) ·{' '}
+                  {attorneyQuery.data.summary.required_items} required ·{' '}
+                  {attorneyQuery.data.summary.optional_items} optional ·{' '}
+                  {attorneyQuery.data.summary.escalation_flagged} escalation-flagged
+                </p>
+                <ul className="space-y-2">
+                  {attorneyQuery.data.accounts.map((account) => (
+                    <ChecklistAccount key={account.account_key} account={account} accent="slate" />
                   ))}
                 </ul>
               </div>
