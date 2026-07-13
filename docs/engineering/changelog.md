@@ -13,6 +13,18 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — checklist packet mail-packet merge
+
+**Decision:** Add opt-in include_mail_packets=true on checklist packet.zip that merges consent-gated mail-packet PDFs under exhibits/mail-packets/ via AccountService.collect_case_mail_packet_files. Missing signed consents return 422.
+
+**Reason:** Investigators needed letterhead mail packets inside the checklist handoff ZIP without making consent a default gate for basic exhibit packets.
+
+**Alternatives considered:** Always merge; soft-skip without consent; nest a second ZIP.
+
+**Technical debt:** One latest letter per account; attachment resolution reused from mail export.
+
+**Follow-up work:** Report-excerpt merge option; counsel transmit workflow.
+
 ## Compliance intelligence — checklist packet letter PDF format
 
 **Decision:** Add letter_format=text|pdf (default ext) to checklist packet.zip letter exhibits. PDF uses the existing dispute-letter export renderer; mail-packet merge and consent gates remain deferred.
@@ -23,7 +35,7 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Technical debt:** Letter PDFs are simple reportlab renders, not letterhead mail packets.
 
-**Follow-up work:** Optional mail-packet PDF merge behind explicit consent.
+**Follow-up work:** Optional mail-packet PDF merge behind explicit consent (done).
 
 ## Compliance intelligence — checklist packet dispute-letter text
 
