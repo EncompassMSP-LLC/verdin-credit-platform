@@ -4,7 +4,7 @@ import hashlib
 import logging
 import uuid
 from datetime import UTC, date, datetime, timedelta
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 from fastapi import HTTPException, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -161,6 +161,9 @@ _TRADELINE_COMPARE_FIELDS: tuple[str, ...] = (
     "remarks",
     "payment_history",
 )
+
+if TYPE_CHECKING:
+    from api.modules.documents.dispute_strategy import ChecklistEvidenceSnapshot
 
 
 class DocumentService:
@@ -2003,7 +2006,10 @@ class DocumentService:
         *,
         recommended_only: bool = True,
     ) -> CaseCfpbChecklistResponse:
-        from api.modules.documents.dispute_strategy import build_case_cfpb_checklist
+        from api.modules.documents.dispute_strategy import (
+            build_case_cfpb_checklist,
+            enrich_case_cfpb_checklist,
+        )
 
         organization_id = self._require_organization(user)
         await self._validate_case(case_id, organization_id)
@@ -2014,6 +2020,8 @@ class DocumentService:
             strategies=strategy.strategies,
             recommended_only=recommended_only,
         )
+        evidence = await self._load_checklist_evidence(organization_id, case_id)
+        result = enrich_case_cfpb_checklist(result, evidence)
         return CaseCfpbChecklistResponse(
             case_id=result.case_id,
             disclaimer=result.disclaimer,
@@ -2021,6 +2029,9 @@ class DocumentService:
                 accounts_listed=int(result.summary["accounts_listed"]),
                 required_items=int(result.summary["required_items"]),
                 optional_items=int(result.summary["optional_items"]),
+                items_present=int(result.summary.get("items_present", 0)),
+                items_missing=int(result.summary.get("items_missing", 0)),
+                items_unknown=int(result.summary.get("items_unknown", 0)),
             ),
             accounts=[
                 AccountCfpbChecklistItem(
@@ -2038,6 +2049,7 @@ class DocumentService:
                             title=item.title,
                             detail=item.detail,
                             required=item.required,
+                            completion_status=item.completion_status,
                         )
                         for item in account.items
                     ],
@@ -2053,7 +2065,10 @@ class DocumentService:
         *,
         recommended_only: bool = True,
     ) -> CaseAttorneyChecklistResponse:
-        from api.modules.documents.dispute_strategy import build_case_attorney_checklist
+        from api.modules.documents.dispute_strategy import (
+            build_case_attorney_checklist,
+            enrich_case_attorney_checklist,
+        )
 
         organization_id = self._require_organization(user)
         await self._validate_case(case_id, organization_id)
@@ -2064,6 +2079,8 @@ class DocumentService:
             strategies=strategy.strategies,
             recommended_only=recommended_only,
         )
+        evidence = await self._load_checklist_evidence(organization_id, case_id)
+        result = enrich_case_attorney_checklist(result, evidence)
         return CaseAttorneyChecklistResponse(
             case_id=result.case_id,
             disclaimer=result.disclaimer,
@@ -2072,6 +2089,9 @@ class DocumentService:
                 required_items=int(result.summary["required_items"]),
                 optional_items=int(result.summary["optional_items"]),
                 escalation_flagged=int(result.summary["escalation_flagged"]),
+                items_present=int(result.summary.get("items_present", 0)),
+                items_missing=int(result.summary.get("items_missing", 0)),
+                items_unknown=int(result.summary.get("items_unknown", 0)),
             ),
             accounts=[
                 AccountAttorneyChecklistItem(
@@ -2090,12 +2110,95 @@ class DocumentService:
                             title=item.title,
                             detail=item.detail,
                             required=item.required,
+                            completion_status=item.completion_status,
                         )
                         for item in account.items
                     ],
                 )
                 for account in result.accounts
             ],
+        )
+
+    async def _load_checklist_evidence(
+        self,
+        organization_id: uuid.UUID,
+        case_id: uuid.UUID,
+    ) -> "ChecklistEvidenceSnapshot":
+        from api.modules.accounts.dispute_letter_repository import DisputeLetterRepository
+        from api.modules.documents.constants import DocumentType
+        from api.modules.documents.cross_bureau_comparison import tradeline_match_key
+        from api.modules.documents.dispute_strategy import (
+            ChecklistEvidenceSnapshot,
+            LetterSignal,
+        )
+
+        case = await self._cases.get_by_id(case_id, organization_id=organization_id)
+        documents = await self.list_documents_for_case(
+            organization_id=organization_id,
+            case_id=case_id,
+        )
+        doc_types = {doc.document_type for doc in documents if doc.document_type}
+        has_identity = bool(
+            (case and case.identity_document_id is not None)
+            or DocumentType.IDENTITY_DOCUMENT.value in doc_types
+        )
+        has_proof = bool(
+            (case and case.proof_of_address_document_id is not None)
+            or DocumentType.PROOF_OF_ADDRESS.value in doc_types
+        )
+        parsed_reports = await self._documents.list_case_parsed_credit_reports(
+            organization_id=organization_id,
+            case_id=case_id,
+        )
+
+        accounts, _total = await self._accounts.list_by_case(
+            case_id,
+            organization_id,
+            skip=0,
+            limit=200,
+        )
+        account_match_keys: dict[uuid.UUID, str] = {}
+        response_received_by_match_key: dict[str, bool] = {}
+        for account in accounts:
+            key = tradeline_match_key(account.creditor_name or "", account.account_number_masked)
+            account_match_keys[account.id] = key
+            if account.response_received:
+                response_received_by_match_key[key] = True
+
+        letters_by_match_key: dict[str, list[LetterSignal]] = {}
+        if self._session is not None:
+            letter_repo = DisputeLetterRepository(self._session)
+            letters = await letter_repo.list_for_case(
+                organization_id=organization_id,
+                case_id=case_id,
+            )
+            for letter in letters:
+                match_key = account_match_keys.get(letter.account_id)
+                if match_key is None:
+                    continue
+                recipient = letter.recipient_type
+                if recipient not in {"credit_bureau", "furnisher"}:
+                    continue
+                status_value = (
+                    letter.status.value if hasattr(letter.status, "value") else str(letter.status)
+                )
+                letters_by_match_key.setdefault(match_key, []).append(
+                    LetterSignal(
+                        recipient_type=recipient,  # type: ignore[arg-type]
+                        status=status_value,
+                    )
+                )
+
+        return ChecklistEvidenceSnapshot(
+            has_identity=has_identity,
+            has_proof_of_address=has_proof,
+            has_credit_report_doc=DocumentType.CREDIT_REPORT.value in doc_types,
+            has_bureau_response_doc=DocumentType.BUREAU_RESPONSE.value in doc_types,
+            has_parsed_credit_report=len(parsed_reports) > 0,
+            letters_by_match_key={
+                key: tuple(signals) for key, signals in letters_by_match_key.items()
+            },
+            response_received_by_match_key=response_received_by_match_key,
         )
 
     @staticmethod

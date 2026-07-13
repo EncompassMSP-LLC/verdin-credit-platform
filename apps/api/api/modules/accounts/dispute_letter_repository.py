@@ -51,3 +51,20 @@ class DisputeLetterRepository:
             .order_by(DisputeLetter.created_at.desc())
         )
         return list(result.scalars().all())
+
+    async def list_for_case(
+        self,
+        *,
+        organization_id: uuid.UUID,
+        case_id: uuid.UUID,
+    ) -> list[DisputeLetter]:
+        result = await self._session.execute(
+            select(DisputeLetter)
+            .where(
+                DisputeLetter.organization_id == organization_id,
+                DisputeLetter.case_id == case_id,
+                DisputeLetter.deleted_at.is_(None),
+            )
+            .order_by(DisputeLetter.created_at.desc())
+        )
+        return list(result.scalars().all())

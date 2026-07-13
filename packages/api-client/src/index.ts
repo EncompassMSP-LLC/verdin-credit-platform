@@ -153,6 +153,7 @@ export {
   type AttorneyChecklistCategory,
   type AttorneyChecklistItem,
   type AccountAttorneyChecklist,
+  type ChecklistCompletionStatus,
   type PreparedCreditReportDisputeItem,
   type UpdateCaseInput,
 } from './cases';

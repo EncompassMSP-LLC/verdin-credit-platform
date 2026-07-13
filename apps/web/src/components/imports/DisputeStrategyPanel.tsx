@@ -27,6 +27,12 @@ function SummaryBadges({ summary }: { summary: DisputeStrategySummary }) {
   );
 }
 
+function completionBadge(status: string | undefined) {
+  if (status === 'present') return <Badge variant="success">present</Badge>;
+  if (status === 'missing') return <Badge variant="warning">missing</Badge>;
+  return <Badge variant="default">unknown</Badge>;
+}
+
 function ChecklistAccount({
   account,
   accent,
@@ -55,10 +61,13 @@ function ChecklistAccount({
       <ul className="mt-2 space-y-1">
         {account.items.map((item) => (
           <li key={item.item_id} className="text-xs text-gray-700">
-            <span className="font-medium">
-              {item.required ? 'Required' : 'Optional'} · {item.category}:
-            </span>{' '}
-            {item.title}
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="font-medium">
+                {item.required ? 'Required' : 'Optional'} · {item.category}:
+              </span>{' '}
+              {item.title}
+              {completionBadge(item.completion_status)}
+            </div>
             <span className="block text-gray-500">{item.detail}</span>
           </li>
         ))}
@@ -270,7 +279,10 @@ export function CaseDisputeStrategyPanel({
                 <p className="text-xs text-gray-500">
                   {cfpbQuery.data.summary.accounts_listed} account(s) ·{' '}
                   {cfpbQuery.data.summary.required_items} required ·{' '}
-                  {cfpbQuery.data.summary.optional_items} optional
+                  {cfpbQuery.data.summary.optional_items} optional ·{' '}
+                  {cfpbQuery.data.summary.items_present ?? 0} present ·{' '}
+                  {cfpbQuery.data.summary.items_missing ?? 0} missing ·{' '}
+                  {cfpbQuery.data.summary.items_unknown ?? 0} unknown
                 </p>
                 <ul className="space-y-2">
                   {cfpbQuery.data.accounts.map((account) => (
@@ -288,7 +300,10 @@ export function CaseDisputeStrategyPanel({
                   {attorneyQuery.data.summary.accounts_listed} account(s) ·{' '}
                   {attorneyQuery.data.summary.required_items} required ·{' '}
                   {attorneyQuery.data.summary.optional_items} optional ·{' '}
-                  {attorneyQuery.data.summary.escalation_flagged} escalation-flagged
+                  {attorneyQuery.data.summary.escalation_flagged} escalation-flagged ·{' '}
+                  {attorneyQuery.data.summary.items_present ?? 0} present ·{' '}
+                  {attorneyQuery.data.summary.items_missing ?? 0} missing ·{' '}
+                  {attorneyQuery.data.summary.items_unknown ?? 0} unknown
                 </p>
                 <ul className="space-y-2">
                   {attorneyQuery.data.accounts.map((account) => (
