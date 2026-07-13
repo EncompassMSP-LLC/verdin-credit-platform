@@ -735,3 +735,37 @@ class CaseCfpbChecklistResponse(BaseSchema):
     disclaimer: str
     summary: CfpbChecklistSummary
     accounts: list[AccountCfpbChecklistItem]
+
+
+class AttorneyChecklistSummary(BaseSchema):
+    accounts_listed: int
+    required_items: int
+    optional_items: int
+    escalation_flagged: int
+
+
+class AttorneyChecklistItem(BaseSchema):
+    item_id: str
+    category: Literal["correspondence", "evidence", "chronology", "filing"]
+    title: str
+    detail: str
+    required: bool
+
+
+class AccountAttorneyChecklistItem(BaseSchema):
+    account_key: str
+    creditor_name: str | None = None
+    account_number_masked: str | None = None
+    bureau: str | None = None
+    match_key: str | None = None
+    top_score: int
+    primary_rule_ids: list[str]
+    attorney_escalation: bool
+    items: list[AttorneyChecklistItem]
+
+
+class CaseAttorneyChecklistResponse(BaseSchema):
+    case_id: uuid.UUID
+    disclaimer: str
+    summary: AttorneyChecklistSummary
+    accounts: list[AccountAttorneyChecklistItem]

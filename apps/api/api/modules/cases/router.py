@@ -30,6 +30,7 @@ from api.modules.cases.schemas import (
 )
 from api.modules.cases.service import CaseService
 from api.modules.documents.schemas import (
+    CaseAttorneyChecklistResponse,
     CaseCfpbChecklistResponse,
     CaseComplianceEvidenceLinksResponse,
     CaseCreditReportDiscrepanciesResponse,
@@ -251,6 +252,23 @@ async def get_case_cfpb_checklist(
     service: DocumentService = Depends(get_document_service),
 ) -> CaseCfpbChecklistResponse:
     return await service.get_case_cfpb_checklist(
+        current_user,
+        case_id,
+        recommended_only=recommended_only,
+    )
+
+
+@router.get(
+    "/{case_id}/dispute-strategy/attorney-checklist",
+    response_model=CaseAttorneyChecklistResponse,
+)
+async def get_case_attorney_checklist(
+    case_id: uuid.UUID,
+    recommended_only: bool = Query(default=True),
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> CaseAttorneyChecklistResponse:
+    return await service.get_case_attorney_checklist(
         current_user,
         case_id,
         recommended_only=recommended_only,

@@ -73,22 +73,23 @@ Authorization: Bearer <access_token>
 
 All case endpoints require authentication. Users are scoped to their organization.
 
-| Method | Path                                               | Min role     | Description                                                    |
-| ------ | -------------------------------------------------- | ------------ | -------------------------------------------------------------- |
-| POST   | `/cases`                                           | case_manager | Create a case                                                  |
-| GET    | `/cases`                                           | read_only    | List cases                                                     |
-| GET    | `/cases/{case_id}`                                 | read_only    | Get case by ID                                                 |
-| PATCH  | `/cases/{case_id}`                                 | case_manager | Update a case                                                  |
-| DELETE | `/cases/{case_id}`                                 | admin        | Soft-delete a case                                             |
-| GET    | `/cases/{case_id}/metro2-findings`                 | read_only    | Aggregate Metro 2 findings across latest bureau reports        |
-| GET    | `/cases/{case_id}/fcra-findings`                   | read_only    | Aggregate FCRA checklist findings across latest bureau reports |
-| GET    | `/cases/{case_id}/tradeline-chronology`            | read_only    | Multi-report tradeline chronology across stored bureau reports |
-| GET    | `/cases/{case_id}/compliance-evidence-links`       | read_only    | Link Metro 2/FCRA findings to reports and exhibits             |
-| GET    | `/cases/{case_id}/litigation-strength`             | read_only    | Rank compliance issues by heuristic litigation strength        |
-| GET    | `/cases/{case_id}/dispute-strategy`                | read_only    | Multi-stage dispute plan grounded in ranked findings           |
-| GET    | `/cases/{case_id}/dispute-strategy/cfpb-checklist` | read_only    | CFPB escalation checklist for recommended strategy accounts    |
-| POST   | `/cases/{case_id}/dispute-strategy/prepare`        | case_manager | Prepare CRA/furnisher letters from recommended strategy stage  |
-| POST   | `/cases/{case_id}/llm-summary`                     | case_manager | Generate LLM case summary                                      |
+| Method | Path                                                   | Min role     | Description                                                    |
+| ------ | ------------------------------------------------------ | ------------ | -------------------------------------------------------------- |
+| POST   | `/cases`                                               | case_manager | Create a case                                                  |
+| GET    | `/cases`                                               | read_only    | List cases                                                     |
+| GET    | `/cases/{case_id}`                                     | read_only    | Get case by ID                                                 |
+| PATCH  | `/cases/{case_id}`                                     | case_manager | Update a case                                                  |
+| DELETE | `/cases/{case_id}`                                     | admin        | Soft-delete a case                                             |
+| GET    | `/cases/{case_id}/metro2-findings`                     | read_only    | Aggregate Metro 2 findings across latest bureau reports        |
+| GET    | `/cases/{case_id}/fcra-findings`                       | read_only    | Aggregate FCRA checklist findings across latest bureau reports |
+| GET    | `/cases/{case_id}/tradeline-chronology`                | read_only    | Multi-report tradeline chronology across stored bureau reports |
+| GET    | `/cases/{case_id}/compliance-evidence-links`           | read_only    | Link Metro 2/FCRA findings to reports and exhibits             |
+| GET    | `/cases/{case_id}/litigation-strength`                 | read_only    | Rank compliance issues by heuristic litigation strength        |
+| GET    | `/cases/{case_id}/dispute-strategy`                    | read_only    | Multi-stage dispute plan grounded in ranked findings           |
+| GET    | `/cases/{case_id}/dispute-strategy/cfpb-checklist`     | read_only    | CFPB escalation checklist for recommended strategy accounts    |
+| GET    | `/cases/{case_id}/dispute-strategy/attorney-checklist` | read_only    | Attorney-preserve packet checklist for strategy accounts       |
+| POST   | `/cases/{case_id}/dispute-strategy/prepare`            | case_manager | Prepare CRA/furnisher letters from recommended strategy stage  |
+| POST   | `/cases/{case_id}/llm-summary`                         | case_manager | Generate LLM case summary                                      |
 
 ### List query parameters
 
@@ -331,7 +332,7 @@ Compliance evidence links: `GET /cases/{case_id}/compliance-evidence-links` join
 
 Litigation strength ranking: `GET /cases/{case_id}/litigation-strength` scores and ranks Metro 2, FCRA, cross-bureau, and chronology issues using deterministic heuristics (for example DOFD mismatches near 98, impossible date sequences near 95). Investigator prioritization aid only — not legal advice.
 
-Dispute strategy: `GET /cases/{case_id}/dispute-strategy` builds a per-account multi-stage investigator plan from ranked litigation-strength issues (CRA dispute → furnisher follow-up → CFPB if warranted → preserve for attorney consult). Grounded in scored findings and evidence checklist hints. Staff-mediated planning aid only — does not auto-file or give legal advice. `GET /cases/{case_id}/dispute-strategy/cfpb-checklist` returns a per-account CFPB escalation packet checklist (correspondence, evidence, chronology, filing narrative) for accounts where the CFPB stage is recommended. `POST /cases/{case_id}/dispute-strategy/prepare` prepares dispute letter drafts for recommended CRA or furnisher stages using cross-bureau `match_keys` when available, and creates accounts directly from Metro 2/FCRA strategy findings when no match key exists (inferring account type/status/payment status from rule IDs). Staff-mediated; CFPB/attorney stages remain advisory.
+Dispute strategy: `GET /cases/{case_id}/dispute-strategy` builds a per-account multi-stage investigator plan from ranked litigation-strength issues (CRA dispute → furnisher follow-up → CFPB if warranted → preserve for attorney consult). Grounded in scored findings and evidence checklist hints. Staff-mediated planning aid only — does not auto-file or give legal advice. `GET /cases/{case_id}/dispute-strategy/cfpb-checklist` returns a per-account CFPB escalation packet checklist (correspondence, evidence, chronology, filing narrative) for accounts where the CFPB stage is recommended. `GET /cases/{case_id}/dispute-strategy/attorney-checklist` returns a per-account attorney-preserve packet checklist (correspondence chain, evidence links, chronology, handoff narrative) for strategy accounts; near-ceiling scores are escalation-flagged. `POST /cases/{case_id}/dispute-strategy/prepare` prepares dispute letter drafts for recommended CRA or furnisher stages using cross-bureau `match_keys` when available, and creates accounts directly from Metro 2/FCRA strategy findings when no match key exists (inferring account type/status/payment status from rule IDs). Staff-mediated; CFPB/attorney stages remain advisory.
 
 Parsed tradeline account candidates: `GET /documents/{document_id}/parsed-credit-report/account-candidates` converts parser tradelines into normalized account-create candidates for staff review, including high balance, credit limit, open/report/DOFD dates when present in the parsed report.
 

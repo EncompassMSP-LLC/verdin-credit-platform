@@ -265,3 +265,51 @@ def test_build_case_cfpb_checklist_for_high_strength_accounts() -> None:
     assert checklist.accounts[0].top_score >= 95
     assert any(item.item_id == "cfpb_narrative" for item in checklist.accounts[0].items)
     assert checklist.summary["required_items"] >= 1
+
+
+def test_build_case_attorney_checklist_for_strategy_accounts() -> None:
+    from api.modules.documents.dispute_strategy import build_case_attorney_checklist
+
+    strategy = generate_case_dispute_strategy(
+        case_id=uuid.uuid4(),
+        scored_issues=[
+            {
+                "source_kind": "cross_bureau",
+                "source_id": "cross_bureau:a",
+                "rule_id": "cross_bureau.dofd_mismatch",
+                "score": 98,
+                "rank": 1,
+                "title": "DOFD mismatch",
+                "severity": "high",
+                "bureau": None,
+                "creditor_name": "Capital One",
+                "account_number_masked": "****4242",
+                "match_key": "capital one:4242",
+            },
+            {
+                "source_kind": "chronology",
+                "source_id": "chronology:b",
+                "rule_id": "chronology.field_changed",
+                "score": 45,
+                "rank": 2,
+                "title": "remarks",
+                "severity": "low",
+                "bureau": "experian",
+                "creditor_name": "Retail",
+                "account_number_masked": "****1111",
+                "match_key": "retail:1111",
+            },
+        ],
+    )
+    checklist = build_case_attorney_checklist(
+        case_id=strategy.case_id,
+        strategies=strategy.strategies,
+        recommended_only=True,
+    )
+    # attorney_preserve is always recommended hygiene → both accounts listed
+    assert checklist.summary["accounts_listed"] == 2
+    assert checklist.accounts[0].creditor_name == "Capital One"
+    assert checklist.accounts[0].attorney_escalation is True
+    assert any(item.item_id == "attorney_handoff_narrative" for item in checklist.accounts[0].items)
+    assert checklist.summary["escalation_flagged"] >= 1
+    assert checklist.summary["required_items"] >= 1

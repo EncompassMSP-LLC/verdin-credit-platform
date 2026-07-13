@@ -677,3 +677,222 @@ def build_case_cfpb_checklist(
         },
         accounts=tuple(accounts),
     )
+
+
+_ATTORNEY_DISCLAIMER = (
+    "Investigator attorney-preserve packet checklist only. Not legal advice. "
+    "Does not transmit materials to counsel or initiate legal action automatically."
+)
+
+
+@dataclass(frozen=True, slots=True)
+class AttorneyChecklistItem:
+    item_id: str
+    category: Literal["correspondence", "evidence", "chronology", "filing"]
+    title: str
+    detail: str
+    required: bool
+
+
+@dataclass(frozen=True, slots=True)
+class AccountAttorneyChecklist:
+    account_key: str
+    creditor_name: str | None
+    account_number_masked: str | None
+    bureau: str | None
+    match_key: str | None
+    top_score: int
+    primary_rule_ids: tuple[str, ...]
+    attorney_escalation: bool
+    items: tuple[AttorneyChecklistItem, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class CaseAttorneyChecklistResult:
+    case_id: uuid.UUID
+    disclaimer: str
+    summary: dict[str, int]
+    accounts: tuple[AccountAttorneyChecklist, ...]
+
+
+def _attorney_items_for_account(
+    *,
+    primary_rule_ids: Sequence[str],
+    top_score: int,
+    attorney_escalation: bool,
+) -> tuple[AttorneyChecklistItem, ...]:
+    rules = ", ".join(primary_rule_ids) or "ranked strategy findings"
+    items: list[AttorneyChecklistItem] = [
+        AttorneyChecklistItem(
+            item_id="dispute_correspondence_chain",
+            category="correspondence",
+            title="Preserve full dispute correspondence chain",
+            detail=(
+                "Include CRA and furnisher dispute letters, certified-mail receipts, "
+                "and portal confirmations."
+            ),
+            required=True,
+        ),
+        AttorneyChecklistItem(
+            item_id="bureau_responses",
+            category="correspondence",
+            title="Preserve CRA investigation responses",
+            detail="Keep bureau response letters and any incomplete / unverifiable findings notes.",
+            required=True,
+        ),
+        AttorneyChecklistItem(
+            item_id="cfpb_escalation_file",
+            category="correspondence",
+            title="Preserve CFPB escalation materials when applicable",
+            detail="Include CFPB complaint drafts, submissions, and regulator responses if used.",
+            required=top_score >= 85,
+        ),
+        AttorneyChecklistItem(
+            item_id="report_excerpts",
+            category="evidence",
+            title="Attach report excerpts for disputed tradelines",
+            detail=f"Link bureau PDF excerpts for: {rules}.",
+            required=True,
+        ),
+        AttorneyChecklistItem(
+            item_id="identity_exhibits",
+            category="evidence",
+            title="Include identity and proof-of-address exhibits",
+            detail="Government ID and proof of address used with disputes.",
+            required=True,
+        ),
+        AttorneyChecklistItem(
+            item_id="evidence_links_export",
+            category="evidence",
+            title="Export compliance evidence link index",
+            detail="Include evidence-link mappings between findings and report pages.",
+            required=True,
+        ),
+        AttorneyChecklistItem(
+            item_id="chronology",
+            category="chronology",
+            title="Export tradeline reporting chronology",
+            detail="Capture balance/status/DOFD changes across stored monthly reports.",
+            required=True,
+        ),
+        AttorneyChecklistItem(
+            item_id="litigation_strength_export",
+            category="filing",
+            title="Export litigation-strength ranking for this account",
+            detail=f"Top heuristic score {top_score}/100; cite strongest rule IDs in the packet.",
+            required=True,
+        ),
+        AttorneyChecklistItem(
+            item_id="dispute_strategy_export",
+            category="filing",
+            title="Export dispute strategy stage summary",
+            detail="Include recommended CRA, furnisher, CFPB, and preserve stages for counsel context.",
+            required=True,
+        ),
+        AttorneyChecklistItem(
+            item_id="attorney_handoff_narrative",
+            category="filing",
+            title="Draft attorney consult handoff narrative (staff review)",
+            detail=(
+                "Summarize documented inaccuracies, dispute history, and open questions. "
+                "Staff must review before sharing with counsel."
+            ),
+            required=True,
+        ),
+        AttorneyChecklistItem(
+            item_id="litigation_escalation_flag",
+            category="filing",
+            title="Flag near-ceiling strength for counsel prioritization",
+            detail=(
+                "Multiple high-strength issues or near-ceiling scores warrant expedited "
+                "attorney consult review."
+            ),
+            required=attorney_escalation,
+        ),
+    ]
+    return tuple(items)
+
+
+def build_case_attorney_checklist(
+    *,
+    case_id: uuid.UUID,
+    strategies: Sequence[Any],
+    account_keys: list[str] | None = None,
+    recommended_only: bool = True,
+) -> CaseAttorneyChecklistResult:
+    """Build attorney-preserve checklists for strategy accounts (always recommended as hygiene)."""
+    selected_keys = set(account_keys) if account_keys else None
+    accounts: list[AccountAttorneyChecklist] = []
+
+    for item in strategies:
+        if isinstance(item, dict):
+            account_key = item.get("account_key")
+            creditor_name = item.get("creditor_name")
+            account_number_masked = item.get("account_number_masked")
+            bureau = item.get("bureau")
+            match_key = item.get("match_key")
+            top_score = item.get("top_score")
+            issue_count = item.get("issue_count", 0)
+            primary_rule_ids = item.get("primary_rule_ids") or []
+            stages = item.get("stages") or []
+        else:
+            account_key = getattr(item, "account_key", None)
+            creditor_name = getattr(item, "creditor_name", None)
+            account_number_masked = getattr(item, "account_number_masked", None)
+            bureau = getattr(item, "bureau", None)
+            match_key = getattr(item, "match_key", None)
+            top_score = getattr(item, "top_score", 0)
+            issue_count = getattr(item, "issue_count", 0)
+            primary_rule_ids = getattr(item, "primary_rule_ids", ()) or ()
+            stages = getattr(item, "stages", ()) or ()
+
+        if not isinstance(account_key, str):
+            continue
+        if selected_keys is not None and account_key not in selected_keys:
+            continue
+        if not _stage_matches(
+            stages,
+            stage_kind="attorney_preserve",
+            recommended_only=recommended_only,
+        ):
+            continue
+
+        score = int(top_score) if isinstance(top_score, int | float) else 0
+        count = int(issue_count) if isinstance(issue_count, int | float) else 0
+        rule_ids = tuple(str(rule) for rule in primary_rule_ids)
+        attorney_escalation = score >= 90 or (score >= 85 and count >= 2)
+        accounts.append(
+            AccountAttorneyChecklist(
+                account_key=account_key,
+                creditor_name=creditor_name if isinstance(creditor_name, str) else None,
+                account_number_masked=account_number_masked
+                if isinstance(account_number_masked, str)
+                else None,
+                bureau=bureau if isinstance(bureau, str) else None,
+                match_key=match_key if isinstance(match_key, str) else None,
+                top_score=score,
+                primary_rule_ids=rule_ids,
+                attorney_escalation=attorney_escalation,
+                items=_attorney_items_for_account(
+                    primary_rule_ids=rule_ids,
+                    top_score=score,
+                    attorney_escalation=attorney_escalation,
+                ),
+            )
+        )
+
+    accounts.sort(key=lambda account: (-account.top_score, account.account_key))
+    required_items = sum(
+        1 for account in accounts for checklist_item in account.items if checklist_item.required
+    )
+    return CaseAttorneyChecklistResult(
+        case_id=case_id,
+        disclaimer=_ATTORNEY_DISCLAIMER,
+        summary={
+            "accounts_listed": len(accounts),
+            "required_items": required_items,
+            "optional_items": sum(len(account.items) for account in accounts) - required_items,
+            "escalation_flagged": sum(1 for account in accounts if account.attorney_escalation),
+        },
+        accounts=tuple(accounts),
+    )
