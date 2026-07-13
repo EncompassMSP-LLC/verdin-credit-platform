@@ -1618,7 +1618,6 @@ class DocumentService:
         *,
         include_page_scan: bool = True,
     ) -> CaseComplianceEvidenceLinksResponse:
-        from api.modules.accounts.dispute_report_redaction import locate_tradeline_pages
         from api.modules.documents.constants import DocumentType
         from api.modules.documents.evidence_links import (
             ExhibitInput,
@@ -1707,20 +1706,46 @@ class DocumentService:
         fcra_payloads = [_document_payload(doc) for doc in fcra.documents]
 
         page_lookup = None
+        dirty_page_maps: dict[uuid.UUID, dict[str, Any]] = {}
         if include_page_scan:
+            from api.modules.accounts.dispute_report_redaction import locate_tradeline_pages
+            from api.modules.documents.tradeline_page_map import (
+                CACHE_MISS,
+                get_cached_pages,
+                merge_page_map_entry,
+                normalize_page_map,
+            )
+
             document_ids: set[uuid.UUID] = set()
             for payload in (*metro2_payloads, *fcra_payloads):
                 document_id = payload.get("document_id")
                 if isinstance(document_id, uuid.UUID):
                     document_ids.add(document_id)
 
+            file_hash_by_doc: dict[uuid.UUID, str] = {}
+            page_maps: dict[uuid.UUID, dict[str, Any] | None] = {}
             pdf_cache: dict[uuid.UUID, bytes | None] = {}
             for document_id in document_ids:
                 stored_document = await self._documents.get_by_id(
                     document_id,
                     organization_id=organization_id,
                 )
-                if stored_document is None or not stored_document.storage_key:
+                if stored_document is None:
+                    pdf_cache[document_id] = None
+                    continue
+                file_hash_by_doc[document_id] = stored_document.file_hash
+                parsed = await self._documents.get_parsed_credit_report(
+                    document_id,
+                    organization_id=organization_id,
+                )
+                page_maps[document_id] = (
+                    normalize_page_map(
+                        parsed.tradeline_page_map, file_hash=stored_document.file_hash
+                    )
+                    if parsed is not None
+                    else None
+                )
+                if not stored_document.storage_key:
                     pdf_cache[document_id] = None
                     continue
                 try:
@@ -1744,16 +1769,46 @@ class DocumentService:
                 cache_key = (document_id, creditor_name or "", account_number_masked)
                 if cache_key in page_result_cache:
                     return page_result_cache[cache_key]
-                pdf_bytes = pdf_cache.get(document_id)
-                if not pdf_bytes or not creditor_name:
+
+                cached = get_cached_pages(
+                    page_maps.get(document_id),
+                    creditor_name=creditor_name,
+                    account_number_masked=account_number_masked,
+                )
+                if cached is not CACHE_MISS:
+                    pages = cached if isinstance(cached, tuple) else None
+                    page_result_cache[cache_key] = pages
+                    return pages
+
+                if not creditor_name:
                     page_result_cache[cache_key] = None
                     return None
+
+                pdf_bytes = pdf_cache.get(document_id)
+                if not pdf_bytes:
+                    page_result_cache[cache_key] = None
+                    return None
+
                 located = locate_tradeline_pages(
                     pdf_bytes,
                     target_creditor=creditor_name,
                     target_account_masked=account_number_masked,
                 )
                 page_result_cache[cache_key] = located
+                if located is None:
+                    return None
+
+                file_hash = file_hash_by_doc.get(document_id)
+                if file_hash:
+                    updated = merge_page_map_entry(
+                        page_maps.get(document_id),
+                        file_hash=file_hash,
+                        creditor_name=creditor_name,
+                        account_number_masked=account_number_masked,
+                        pages=located,
+                    )
+                    page_maps[document_id] = updated
+                    dirty_page_maps[document_id] = updated
                 return located
 
             page_lookup = _page_lookup
@@ -1765,6 +1820,12 @@ class DocumentService:
             exhibits=exhibits,
             page_lookup=page_lookup,
         )
+        for document_id, page_map in dirty_page_maps.items():
+            await self._documents.update_tradeline_page_map(
+                document_id,
+                organization_id=organization_id,
+                page_map=page_map,
+            )
         return CaseComplianceEvidenceLinksResponse(
             case_id=result.case_id,
             summary=ComplianceEvidenceSummary(**result.summary),

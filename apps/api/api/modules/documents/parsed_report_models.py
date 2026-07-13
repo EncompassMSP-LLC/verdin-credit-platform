@@ -38,5 +38,6 @@ class DocumentParsedCreditReport(Base, TimestampMixin):
     is_partial: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     warnings: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list)
     parsed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    tradeline_page_map: Mapped[dict[str, object] | None] = mapped_column(JSONB, nullable=True)
 
     document: Mapped[Document] = relationship(back_populates="parsed_credit_report")

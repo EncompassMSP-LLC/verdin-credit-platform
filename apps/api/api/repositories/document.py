@@ -67,3 +67,11 @@ class DocumentRepositoryProtocol(Protocol):
         organization_id: uuid.UUID,
         case_id: uuid.UUID,
     ) -> list[DocumentParsedCreditReport]: ...
+
+    async def update_tradeline_page_map(
+        self,
+        document_id: uuid.UUID,
+        *,
+        organization_id: uuid.UUID,
+        page_map: dict[str, object],
+    ) -> DocumentParsedCreditReport | None: ...

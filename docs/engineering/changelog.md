@@ -13,6 +13,18 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — persisted tradeline page maps
+
+**Decision:** Persist on-demand tradeline page-scan results in `document_parsed_credit_reports.tradeline_page_map` (JSONB) keyed by document `file_hash`. Write-through cache in `GET /cases/{id}/compliance-evidence-links` when `include_page_scan=true`.
+
+**Reason:** Repeated PDF downloads and text scans dominated evidence-link latency for large cases.
+
+**Alternatives considered:** New page-map table; store on `document_metadata`; worker precompute; serve cache when scan skipped.
+
+**Technical debt:** Map is document-scoped JSON; no per-entry index; excerpt builder still rescans independently.
+
+**Follow-up work:** OCR line refs; share cache with report-excerpt builder.
+
 ## Compliance intelligence — evidence page-scan query flag
 
 **Decision:** Expose `include_page_scan` (default true) on `GET /cases/{case_id}/compliance-evidence-links` so investigators can skip on-demand PDF tradeline scans on large cases. When false, report links keep `page_confidence=deferred`.
@@ -23,7 +35,7 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Technical debt:** UI toggle is per-panel session only; no persisted preference.
 
-**Follow-up work:** Persist page maps; OCR line refs.
+**Follow-up work:** Persist page maps (done); OCR line refs.
 
 ## Compliance intelligence — checklist packet report-excerpt merge
 
