@@ -213,6 +213,8 @@ export function CaseDisputeStrategyPanel({
   const [downloadingAttorneyPacket, setDownloadingAttorneyPacket] = useState(false);
   const [downloadingCfpbMailPacket, setDownloadingCfpbMailPacket] = useState(false);
   const [downloadingAttorneyMailPacket, setDownloadingAttorneyMailPacket] = useState(false);
+  const [downloadingCfpbExcerptPacket, setDownloadingCfpbExcerptPacket] = useState(false);
+  const [downloadingAttorneyExcerptPacket, setDownloadingAttorneyExcerptPacket] = useState(false);
   const [downloadError, setDownloadError] = useState<string | null>(null);
   const strategyQuery = useQuery({
     queryKey: ['case-dispute-strategy', caseId],
@@ -444,6 +446,30 @@ export function CaseDisputeStrategyPanel({
                     >
                       Packet + mail PDFs
                     </Button>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      loading={downloadingCfpbExcerptPacket}
+                      onClick={() => {
+                        setDownloadError(null);
+                        setDownloadingCfpbExcerptPacket(true);
+                        void downloadCaseCfpbChecklistPacket(caseId, {
+                          letter_format: 'pdf',
+                          include_report_excerpts: true,
+                        })
+                          .then(({ blob, filename }) => downloadBlob(blob, filename))
+                          .catch((error: unknown) => {
+                            setDownloadError(
+                              error instanceof Error
+                                ? error.message
+                                : 'Failed to download CFPB packet with report excerpts',
+                            );
+                          })
+                          .finally(() => setDownloadingCfpbExcerptPacket(false));
+                      }}
+                    >
+                      Packet + excerpts
+                    </Button>
                   </div>
                 </div>
                 <p className="text-xs text-gray-500">{cfpbQuery.data.disclaimer}</p>
@@ -550,6 +576,30 @@ export function CaseDisputeStrategyPanel({
                       }}
                     >
                       Packet + mail PDFs
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      loading={downloadingAttorneyExcerptPacket}
+                      onClick={() => {
+                        setDownloadError(null);
+                        setDownloadingAttorneyExcerptPacket(true);
+                        void downloadCaseAttorneyChecklistPacket(caseId, {
+                          letter_format: 'pdf',
+                          include_report_excerpts: true,
+                        })
+                          .then(({ blob, filename }) => downloadBlob(blob, filename))
+                          .catch((error: unknown) => {
+                            setDownloadError(
+                              error instanceof Error
+                                ? error.message
+                                : 'Failed to download attorney packet with report excerpts',
+                            );
+                          })
+                          .finally(() => setDownloadingAttorneyExcerptPacket(false));
+                      }}
+                    >
+                      Packet + excerpts
                     </Button>
                   </div>
                 </div>

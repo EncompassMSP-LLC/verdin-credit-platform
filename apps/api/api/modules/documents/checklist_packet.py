@@ -249,6 +249,13 @@ def mail_packet_exhibit_path(filename: str) -> str:
     return f"exhibits/mail-packets/{cleaned}"
 
 
+def report_excerpt_exhibit_path(filename: str) -> str:
+    cleaned = _SAFE_NAME.sub("_", filename).strip("._") or "report-excerpt.pdf"
+    if not cleaned.lower().endswith(".pdf"):
+        cleaned = f"{cleaned}.pdf"
+    return f"exhibits/report-excerpts/{cleaned}"
+
+
 def build_checklist_packet_zip(
     *,
     markdown_name: str,

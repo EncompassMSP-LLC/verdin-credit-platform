@@ -513,6 +513,7 @@ async function downloadChecklistExport(
     include_letters?: boolean;
     letter_format?: 'text' | 'pdf';
     include_mail_packets?: boolean;
+    include_report_excerpts?: boolean;
   } = {},
 ): Promise<{ blob: Blob; filename: string }> {
   const query = new URLSearchParams();
@@ -527,6 +528,9 @@ async function downloadChecklistExport(
   }
   if (params.include_mail_packets === true) {
     query.set('include_mail_packets', 'true');
+  }
+  if (params.include_report_excerpts === true) {
+    query.set('include_report_excerpts', 'true');
   }
   const suffix = query.toString() ? `?${query.toString()}` : '';
   const url = `${getApiBaseUrl()}${apiPath(`${path}${suffix}`)}`;
@@ -587,6 +591,7 @@ export async function downloadCaseCfpbChecklistPacket(
     include_letters?: boolean;
     letter_format?: 'text' | 'pdf';
     include_mail_packets?: boolean;
+    include_report_excerpts?: boolean;
   } = {},
 ): Promise<{ blob: Blob; filename: string }> {
   return downloadChecklistExport(
@@ -604,6 +609,7 @@ export async function downloadCaseAttorneyChecklistPacket(
     include_letters?: boolean;
     letter_format?: 'text' | 'pdf';
     include_mail_packets?: boolean;
+    include_report_excerpts?: boolean;
   } = {},
 ): Promise<{ blob: Blob; filename: string }> {
   return downloadChecklistExport(

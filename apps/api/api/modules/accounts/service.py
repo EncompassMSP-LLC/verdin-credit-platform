@@ -724,6 +724,67 @@ class AccountService:
             "application/zip",
         )
 
+    async def collect_case_report_excerpt_files(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+        *,
+        require_consents: bool = True,
+    ) -> list[tuple[str, bytes]]:
+        """Build per-account report-excerpt PDFs for a case (consent-gated when required)."""
+        from api.modules.accounts.dispute_mail_attachments import build_account_report_excerpt
+
+        organization_id = self._require_organization(user)
+        case = await self._get_case_by_id(case_id, organization_id)
+        if require_consents:
+            await self._require_dispute_mail_consents(case)
+
+        if self._dispute_letters is None or self._session is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Dispute letter repository is not configured",
+            )
+
+        excerpts: list[tuple[str, bytes]] = []
+        page = 1
+        while True:
+            page_result = await self.list_case_accounts(
+                user,
+                case_id,
+                params=AccountListParams(page=page, page_size=100),
+            )
+            for account_summary in page_result.items:
+                account = await self._accounts.get_by_id(
+                    account_summary.id,
+                    organization_id=organization_id,
+                )
+                if account is None:
+                    continue
+                letters = await self._dispute_letters.list_for_account(
+                    organization_id=organization_id,
+                    account_id=account.id,
+                )
+                if not letters:
+                    continue
+
+                result = await build_account_report_excerpt(
+                    self._session,
+                    self._storage,
+                    organization_id=organization_id,
+                    case_id=case_id,
+                    account=account,
+                )
+                if result is None:
+                    continue
+                content, filename = result
+                excerpts.append((filename, content))
+
+            if page >= page_result.pages:
+                break
+            page += 1
+
+        return excerpts
+
     async def export_case_dispute_report_excerpts(
         self,
         user: User,
@@ -732,64 +793,17 @@ class AccountService:
         import zipfile
         from io import BytesIO
 
-        from api.modules.accounts.dispute_mail_attachments import build_account_report_excerpt
-
-        organization_id = self._require_organization(user)
-        case = await self._get_case_by_id(case_id, organization_id)
-        await self._require_dispute_mail_consents(case)
-
-        if self._dispute_letters is None or self._session is None:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Dispute letter repository is not configured",
-            )
-
-        buffer = BytesIO()
-        excerpt_count = 0
-        with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as archive:
-            page = 1
-            while True:
-                page_result = await self.list_case_accounts(
-                    user,
-                    case_id,
-                    params=AccountListParams(page=page, page_size=100),
-                )
-                for account_summary in page_result.items:
-                    account = await self._accounts.get_by_id(
-                        account_summary.id,
-                        organization_id=organization_id,
-                    )
-                    if account is None:
-                        continue
-                    letters = await self._dispute_letters.list_for_account(
-                        organization_id=organization_id,
-                        account_id=account.id,
-                    )
-                    if not letters:
-                        continue
-
-                    result = await build_account_report_excerpt(
-                        self._session,
-                        self._storage,
-                        organization_id=organization_id,
-                        case_id=case_id,
-                        account=account,
-                    )
-                    if result is None:
-                        continue
-                    content, filename = result
-                    archive.writestr(filename, content)
-                    excerpt_count += 1
-
-                if page >= page_result.pages:
-                    break
-                page += 1
-
-        if excerpt_count == 0:
+        excerpts = await self.collect_case_report_excerpt_files(user, case_id)
+        if not excerpts:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="No dispute letter drafts found on this case",
             )
+
+        buffer = BytesIO()
+        with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as archive:
+            for filename, content in excerpts:
+                archive.writestr(filename, content)
 
         short_case_id = str(case_id).split("-", 1)[0]
         return (

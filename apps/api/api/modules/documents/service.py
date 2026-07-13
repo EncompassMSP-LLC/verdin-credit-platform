@@ -2188,6 +2188,7 @@ class DocumentService:
         include_letters: bool = True,
         letter_format: Literal["text", "pdf"] = "text",
         include_mail_packets: bool = False,
+        include_report_excerpts: bool = False,
     ) -> tuple[bytes, str, str]:
         return await self._export_case_checklist_packet(
             user,
@@ -2197,6 +2198,7 @@ class DocumentService:
             include_letters=include_letters,
             letter_format=letter_format,
             include_mail_packets=include_mail_packets,
+            include_report_excerpts=include_report_excerpts,
         )
 
     async def export_case_attorney_checklist_packet(
@@ -2208,6 +2210,7 @@ class DocumentService:
         include_letters: bool = True,
         letter_format: Literal["text", "pdf"] = "text",
         include_mail_packets: bool = False,
+        include_report_excerpts: bool = False,
     ) -> tuple[bytes, str, str]:
         return await self._export_case_checklist_packet(
             user,
@@ -2217,6 +2220,7 @@ class DocumentService:
             include_letters=include_letters,
             letter_format=letter_format,
             include_mail_packets=include_mail_packets,
+            include_report_excerpts=include_report_excerpts,
         )
 
     async def _export_case_checklist_packet(
@@ -2229,6 +2233,7 @@ class DocumentService:
         include_letters: bool = True,
         letter_format: Literal["text", "pdf"] = "text",
         include_mail_packets: bool = False,
+        include_report_excerpts: bool = False,
     ) -> tuple[bytes, str, str]:
         from api.modules.documents.checklist_export import (
             checklist_export_filename,
@@ -2241,6 +2246,7 @@ class DocumentService:
             collect_checklist_exhibits,
             collect_checklist_letter_exhibits,
             mail_packet_exhibit_path,
+            report_excerpt_exhibit_path,
         )
 
         organization_id = self._require_organization(user)
@@ -2295,6 +2301,16 @@ class DocumentService:
                     require_consents=True,
                 ):
                     exhibits.append((mail_packet_exhibit_path(filename), content))
+            if include_report_excerpts:
+                from api.modules.accounts.service import AccountService
+
+                account_service = AccountService.from_session(self._session)
+                for filename, content in await account_service.collect_case_report_excerpt_files(
+                    user,
+                    case_id,
+                    require_consents=True,
+                ):
+                    exhibits.append((report_excerpt_exhibit_path(filename), content))
 
         packet = build_checklist_packet_zip(
             markdown_name=checklist_export_filename(kind, case_id),
