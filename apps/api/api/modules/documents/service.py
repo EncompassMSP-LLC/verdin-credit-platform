@@ -3,6 +3,7 @@
 import hashlib
 import logging
 import uuid
+from collections.abc import Sequence
 from datetime import UTC, date, datetime, timedelta
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -114,6 +115,7 @@ from api.modules.documents.schemas import (
     TradelineChronologyItemResponse,
     TradelineChronologySnapshotResponse,
     TradelineChronologySummary,
+    UpsertChecklistOverrideRequest,
 )
 from api.modules.documents.storage import (
     DocumentStorage,
@@ -2007,6 +2009,7 @@ class DocumentService:
         recommended_only: bool = True,
     ) -> CaseCfpbChecklistResponse:
         from api.modules.documents.dispute_strategy import (
+            apply_cfpb_checklist_overrides,
             build_case_cfpb_checklist,
             enrich_case_cfpb_checklist,
         )
@@ -2022,6 +2025,8 @@ class DocumentService:
         )
         evidence = await self._load_checklist_evidence(organization_id, case_id)
         result = enrich_case_cfpb_checklist(result, evidence)
+        overrides = await self._load_checklist_overrides(organization_id, case_id, "cfpb")
+        result = apply_cfpb_checklist_overrides(result, overrides)
         return CaseCfpbChecklistResponse(
             case_id=result.case_id,
             disclaimer=result.disclaimer,
@@ -2050,6 +2055,7 @@ class DocumentService:
                             detail=item.detail,
                             required=item.required,
                             completion_status=item.completion_status,
+                            completion_source=item.completion_source,
                         )
                         for item in account.items
                     ],
@@ -2066,6 +2072,7 @@ class DocumentService:
         recommended_only: bool = True,
     ) -> CaseAttorneyChecklistResponse:
         from api.modules.documents.dispute_strategy import (
+            apply_attorney_checklist_overrides,
             build_case_attorney_checklist,
             enrich_case_attorney_checklist,
         )
@@ -2081,6 +2088,8 @@ class DocumentService:
         )
         evidence = await self._load_checklist_evidence(organization_id, case_id)
         result = enrich_case_attorney_checklist(result, evidence)
+        overrides = await self._load_checklist_overrides(organization_id, case_id, "attorney")
+        result = apply_attorney_checklist_overrides(result, overrides)
         return CaseAttorneyChecklistResponse(
             case_id=result.case_id,
             disclaimer=result.disclaimer,
@@ -2111,6 +2120,7 @@ class DocumentService:
                             detail=item.detail,
                             required=item.required,
                             completion_status=item.completion_status,
+                            completion_source=item.completion_source,
                         )
                         for item in account.items
                     ],
@@ -2248,6 +2258,95 @@ class DocumentService:
             },
             response_received_by_match_key=response_received_by_match_key,
         )
+
+    async def _load_checklist_overrides(
+        self,
+        organization_id: uuid.UUID,
+        case_id: uuid.UUID,
+        checklist_kind: str,
+    ) -> dict[tuple[str, str], Literal["present", "missing", "unknown"]]:
+        if self._session is None:
+            return {}
+        from api.modules.documents.checklist_override_repository import ChecklistOverrideRepository
+
+        repo = ChecklistOverrideRepository(self._session)
+        rows = await repo.list_active_for_case(
+            organization_id=organization_id,
+            case_id=case_id,
+            checklist_kind=checklist_kind,
+        )
+        overrides: dict[tuple[str, str], Literal["present", "missing", "unknown"]] = {}
+        for row in rows:
+            status = row.completion_status
+            if status not in {"present", "missing", "unknown"}:
+                continue
+            overrides[(row.account_key, row.item_id)] = status  # type: ignore[assignment]
+        return overrides
+
+    async def upsert_case_checklist_override(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+        body: UpsertChecklistOverrideRequest,
+    ) -> CaseCfpbChecklistResponse | CaseAttorneyChecklistResponse:
+        self._require_write(user)
+        organization_id = self._require_organization(user)
+        await self._validate_case(case_id, organization_id)
+        if self._session is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Database session unavailable",
+            )
+
+        from api.modules.documents.checklist_override_repository import ChecklistOverrideRepository
+
+        checklist_kind = body.checklist_kind
+        if checklist_kind == "cfpb":
+            account_rows: Sequence[AccountCfpbChecklistItem | AccountAttorneyChecklistItem] = (
+                await self.get_case_cfpb_checklist(user, case_id)
+            ).accounts
+        else:
+            account_rows = (await self.get_case_attorney_checklist(user, case_id)).accounts
+
+        account = next(
+            (item for item in account_rows if item.account_key == body.account_key),
+            None,
+        )
+        if account is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Checklist account not found for override",
+            )
+        if not any(item.item_id == body.item_id for item in account.items):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Checklist item not found for override",
+            )
+
+        repo = ChecklistOverrideRepository(self._session)
+        if body.completion_status is None:
+            await repo.clear(
+                organization_id=organization_id,
+                case_id=case_id,
+                checklist_kind=checklist_kind,
+                account_key=body.account_key,
+                item_id=body.item_id,
+                user_id=user.id,
+            )
+        else:
+            await repo.upsert(
+                organization_id=organization_id,
+                case_id=case_id,
+                checklist_kind=checklist_kind,
+                account_key=body.account_key,
+                item_id=body.item_id,
+                completion_status=body.completion_status,
+                user_id=user.id,
+            )
+
+        if checklist_kind == "cfpb":
+            return await self.get_case_cfpb_checklist(user, case_id)
+        return await self.get_case_attorney_checklist(user, case_id)
 
     @staticmethod
     def _normalize_choice(value: str | None) -> str:

@@ -24,9 +24,11 @@ def checklist_export_filename(kind: Literal["cfpb", "attorney"], case_id: uuid.U
 def _item_line(item: Any) -> str:
     required = "required" if bool(getattr(item, "required", False)) else "optional"
     status = getattr(item, "completion_status", None) or "unknown"
+    source = getattr(item, "completion_source", None) or "computed"
+    staff_suffix = " (staff)" if source == "staff" else ""
     title = getattr(item, "title", "") or ""
     detail = getattr(item, "detail", "") or ""
-    lines = [f"- [{required}] **{status}** — {title}"]
+    lines = [f"- [{required}] **{status}**{staff_suffix} — {title}"]
     if detail:
         lines.append(f"  - {detail}")
     return "\n".join(lines)

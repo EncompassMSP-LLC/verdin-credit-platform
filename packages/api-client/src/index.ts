@@ -124,6 +124,7 @@ export {
   downloadCaseDisputeReportExcerpts,
   downloadCaseCfpbChecklist,
   downloadCaseAttorneyChecklist,
+  upsertCaseChecklistOverride,
   uploadCaseIdentityDocument,
   updateCase,
   type BureauTradelineSnapshot,
@@ -156,6 +157,7 @@ export {
   type AttorneyChecklistItem,
   type AccountAttorneyChecklist,
   type ChecklistCompletionStatus,
+  type UpsertChecklistOverrideInput,
   type PreparedCreditReportDisputeItem,
   type UpdateCaseInput,
 } from './cases';
