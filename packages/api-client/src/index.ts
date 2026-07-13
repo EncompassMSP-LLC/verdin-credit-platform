@@ -124,6 +124,8 @@ export {
   downloadCaseDisputeReportExcerpts,
   downloadCaseCfpbChecklist,
   downloadCaseAttorneyChecklist,
+  downloadCaseCfpbChecklistPacket,
+  downloadCaseAttorneyChecklistPacket,
   upsertCaseChecklistOverride,
   uploadCaseIdentityDocument,
   updateCase,

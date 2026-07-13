@@ -564,6 +564,30 @@ export async function downloadCaseAttorneyChecklist(
   );
 }
 
+export async function downloadCaseCfpbChecklistPacket(
+  caseId: string,
+  params: { recommended_only?: boolean } = {},
+): Promise<{ blob: Blob; filename: string }> {
+  return downloadChecklistExport(
+    caseId,
+    `/cases/${caseId}/dispute-strategy/cfpb-checklist/packet.zip`,
+    `cfpb-checklist-packet-${caseId.slice(0, 8)}.zip`,
+    params,
+  );
+}
+
+export async function downloadCaseAttorneyChecklistPacket(
+  caseId: string,
+  params: { recommended_only?: boolean } = {},
+): Promise<{ blob: Blob; filename: string }> {
+  return downloadChecklistExport(
+    caseId,
+    `/cases/${caseId}/dispute-strategy/attorney-checklist/packet.zip`,
+    `attorney-checklist-packet-${caseId.slice(0, 8)}.zip`,
+    params,
+  );
+}
+
 export interface UpsertChecklistOverrideInput {
   checklist_kind: 'cfpb' | 'attorney';
   account_key: string;

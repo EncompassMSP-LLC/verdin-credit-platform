@@ -9,8 +9,9 @@ from typing import Any, Literal
 
 _FOOTER = (
     "---\n"
-    "Staff-mediated export only. Does not file with CFPB, transmit to counsel, "
-    "or attach exhibits. Use mail-packet / report-excerpt downloads for evidence.\n"
+    "Staff-mediated export only. Does not file with CFPB or transmit to counsel. "
+    "Use checklist packet.zip for best-effort exhibit bundling, or mail-packet / "
+    "report-excerpt downloads for dispute correspondence.\n"
 )
 
 _CATEGORY_ORDER: tuple[str, ...] = ("correspondence", "evidence", "chronology", "filing")

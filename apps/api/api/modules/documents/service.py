@@ -2177,6 +2177,94 @@ class DocumentService:
             "text/markdown; charset=utf-8",
         )
 
+    async def export_case_cfpb_checklist_packet(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+        *,
+        recommended_only: bool = True,
+    ) -> tuple[bytes, str, str]:
+        return await self._export_case_checklist_packet(
+            user,
+            case_id,
+            kind="cfpb",
+            recommended_only=recommended_only,
+        )
+
+    async def export_case_attorney_checklist_packet(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+        *,
+        recommended_only: bool = True,
+    ) -> tuple[bytes, str, str]:
+        return await self._export_case_checklist_packet(
+            user,
+            case_id,
+            kind="attorney",
+            recommended_only=recommended_only,
+        )
+
+    async def _export_case_checklist_packet(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+        *,
+        kind: Literal["cfpb", "attorney"],
+        recommended_only: bool,
+    ) -> tuple[bytes, str, str]:
+        from api.modules.documents.checklist_export import (
+            checklist_export_filename,
+            render_attorney_checklist_markdown,
+            render_cfpb_checklist_markdown,
+        )
+        from api.modules.documents.checklist_packet import (
+            build_checklist_packet_zip,
+            checklist_packet_filename,
+            collect_checklist_exhibits,
+        )
+
+        organization_id = self._require_organization(user)
+        await self._validate_case(case_id, organization_id)
+        case = await self._cases.get_by_id(case_id, organization_id=organization_id)
+        if case is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Case not found",
+            )
+        if kind == "cfpb":
+            markdown = render_cfpb_checklist_markdown(
+                await self.get_case_cfpb_checklist(
+                    user,
+                    case_id,
+                    recommended_only=recommended_only,
+                )
+            ).encode("utf-8")
+        else:
+            markdown = render_attorney_checklist_markdown(
+                await self.get_case_attorney_checklist(
+                    user,
+                    case_id,
+                    recommended_only=recommended_only,
+                )
+            ).encode("utf-8")
+
+        exhibits: list[tuple[str, bytes]] = []
+        if self._session is not None:
+            exhibits = await collect_checklist_exhibits(
+                self._session,
+                self._storage,
+                organization_id=organization_id,
+                case=case,
+            )
+
+        packet = build_checklist_packet_zip(
+            markdown_name=checklist_export_filename(kind, case_id),
+            markdown_bytes=markdown,
+            exhibits=exhibits,
+        )
+        return packet, checklist_packet_filename(kind, case_id), "application/zip"
+
     async def _load_checklist_evidence(
         self,
         organization_id: uuid.UUID,
