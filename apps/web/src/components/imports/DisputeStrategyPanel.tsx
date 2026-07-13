@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ApiClientError,
+  downloadCaseAttorneyChecklist,
+  downloadCaseCfpbChecklist,
   getCaseAttorneyChecklist,
   getCaseCfpbChecklist,
   getCaseDisputeStrategy,
@@ -13,7 +15,17 @@ import {
   type DisputeStrategySummary,
 } from '@verdin/api-client';
 import { Badge, Button, Card } from '@verdin/ui';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
+
+function downloadBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = filename;
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
 
 function SummaryBadges({ summary }: { summary: DisputeStrategySummary }) {
   return (
@@ -141,6 +153,9 @@ export function CaseDisputeStrategyPanel({
   id?: string;
 }) {
   const queryClient = useQueryClient();
+  const [downloadingCfpb, setDownloadingCfpb] = useState(false);
+  const [downloadingAttorney, setDownloadingAttorney] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
   const strategyQuery = useQuery({
     queryKey: ['case-dispute-strategy', caseId],
     queryFn: () => getCaseDisputeStrategy(caseId),
@@ -274,7 +289,30 @@ export function CaseDisputeStrategyPanel({
 
             {cfpbQuery.data && cfpbQuery.data.accounts.length > 0 ? (
               <div className="space-y-2">
-                <p className="text-sm font-medium text-gray-900">CFPB escalation checklist</p>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-sm font-medium text-gray-900">CFPB escalation checklist</p>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    loading={downloadingCfpb}
+                    onClick={() => {
+                      setDownloadError(null);
+                      setDownloadingCfpb(true);
+                      void downloadCaseCfpbChecklist(caseId)
+                        .then(({ blob, filename }) => downloadBlob(blob, filename))
+                        .catch((error: unknown) => {
+                          setDownloadError(
+                            error instanceof Error
+                              ? error.message
+                              : 'Failed to download CFPB checklist',
+                          );
+                        })
+                        .finally(() => setDownloadingCfpb(false));
+                    }}
+                  >
+                    Download checklist (.md)
+                  </Button>
+                </div>
                 <p className="text-xs text-gray-500">{cfpbQuery.data.disclaimer}</p>
                 <p className="text-xs text-gray-500">
                   {cfpbQuery.data.summary.accounts_listed} account(s) ·{' '}
@@ -294,7 +332,30 @@ export function CaseDisputeStrategyPanel({
 
             {attorneyQuery.data && attorneyQuery.data.accounts.length > 0 ? (
               <div className="space-y-2">
-                <p className="text-sm font-medium text-gray-900">Attorney-preserve checklist</p>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-sm font-medium text-gray-900">Attorney-preserve checklist</p>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    loading={downloadingAttorney}
+                    onClick={() => {
+                      setDownloadError(null);
+                      setDownloadingAttorney(true);
+                      void downloadCaseAttorneyChecklist(caseId)
+                        .then(({ blob, filename }) => downloadBlob(blob, filename))
+                        .catch((error: unknown) => {
+                          setDownloadError(
+                            error instanceof Error
+                              ? error.message
+                              : 'Failed to download attorney checklist',
+                          );
+                        })
+                        .finally(() => setDownloadingAttorney(false));
+                    }}
+                  >
+                    Download checklist (.md)
+                  </Button>
+                </div>
                 <p className="text-xs text-gray-500">{attorneyQuery.data.disclaimer}</p>
                 <p className="text-xs text-gray-500">
                   {attorneyQuery.data.summary.accounts_listed} account(s) ·{' '}
@@ -312,6 +373,8 @@ export function CaseDisputeStrategyPanel({
                 </ul>
               </div>
             ) : null}
+
+            {downloadError ? <p className="text-sm text-red-600">{downloadError}</p> : null}
 
             {strategyQuery.data.strategies.length === 0 ? (
               <p className="text-sm text-gray-500">

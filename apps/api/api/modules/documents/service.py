@@ -2119,6 +2119,54 @@ class DocumentService:
             ],
         )
 
+    async def export_case_cfpb_checklist(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+        *,
+        recommended_only: bool = True,
+    ) -> tuple[bytes, str, str]:
+        from api.modules.documents.checklist_export import (
+            checklist_export_filename,
+            render_cfpb_checklist_markdown,
+        )
+
+        checklist = await self.get_case_cfpb_checklist(
+            user,
+            case_id,
+            recommended_only=recommended_only,
+        )
+        body = render_cfpb_checklist_markdown(checklist).encode("utf-8")
+        return (
+            body,
+            checklist_export_filename("cfpb", case_id),
+            "text/markdown; charset=utf-8",
+        )
+
+    async def export_case_attorney_checklist(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+        *,
+        recommended_only: bool = True,
+    ) -> tuple[bytes, str, str]:
+        from api.modules.documents.checklist_export import (
+            checklist_export_filename,
+            render_attorney_checklist_markdown,
+        )
+
+        checklist = await self.get_case_attorney_checklist(
+            user,
+            case_id,
+            recommended_only=recommended_only,
+        )
+        body = render_attorney_checklist_markdown(checklist).encode("utf-8")
+        return (
+            body,
+            checklist_export_filename("attorney", case_id),
+            "text/markdown; charset=utf-8",
+        )
+
     async def _load_checklist_evidence(
         self,
         organization_id: uuid.UUID,

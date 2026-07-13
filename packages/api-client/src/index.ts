@@ -122,6 +122,8 @@ export {
   prepareCaseDisputeStrategyStage,
   downloadCaseDisputeMailPackets,
   downloadCaseDisputeReportExcerpts,
+  downloadCaseCfpbChecklist,
+  downloadCaseAttorneyChecklist,
   uploadCaseIdentityDocument,
   updateCase,
   type BureauTradelineSnapshot,
