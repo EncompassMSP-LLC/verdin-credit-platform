@@ -1,6 +1,6 @@
 """Staff overrides for dispute-strategy checklist completion.
 
-Revision ID: 081_dispute_strategy_checklist_overrides
+Revision ID: 081_checklist_overrides
 Revises: 080_native_mobile_app_store
 Create Date: 2026-07-13
 """
@@ -12,7 +12,7 @@ from sqlalchemy.dialects import postgresql
 
 from alembic import op
 
-revision: str = "081_dispute_strategy_checklist_overrides"
+revision: str = "081_checklist_overrides"
 down_revision: str | None = "080_native_mobile_app_store"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
