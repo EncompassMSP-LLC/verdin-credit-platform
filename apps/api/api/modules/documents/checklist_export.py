@@ -29,9 +29,12 @@ def _item_line(item: Any) -> str:
     staff_suffix = " (staff)" if source == "staff" else ""
     title = getattr(item, "title", "") or ""
     detail = getattr(item, "detail", "") or ""
+    note = getattr(item, "override_note", None) if source == "staff" else None
     lines = [f"- [{required}] **{status}**{staff_suffix} — {title}"]
     if detail:
         lines.append(f"  - {detail}")
+    if note:
+        lines.append(f"  - Staff note: {note}")
     return "\n".join(lines)
 
 

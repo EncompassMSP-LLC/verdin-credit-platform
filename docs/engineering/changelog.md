@@ -13,6 +13,18 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — checklist override notes
+
+**Decision:** Add optional `note` on `PUT .../checklist-overrides` (stored on `dispute_strategy_checklist_overrides`) and surface it as `override_note` on checklist items and markdown exports when `completion_source=staff`.
+
+**Reason:** Investigators needed a short reason when marking items complete outside evidence heuristics.
+
+**Alternatives considered:** Separate notes API; mandatory notes; free-form item comments.
+
+**Technical debt:** Notes are soft-deleted with the override; no note history.
+
+**Follow-up work:** Optional letter inclusion in packet ZIP.
+
 ## Compliance intelligence — checklist exhibit packet ZIP
 
 **Decision:** Add `GET …/cfpb-checklist/packet.zip` and `GET …/attorney-checklist/packet.zip` that ZIP the enriched markdown checklist plus best-effort exhibits (identity, proof of address, credit reports, bureau responses).
@@ -23,7 +35,7 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Technical debt:** Exhibit set is typed-document based; missing storage objects are skipped silently.
 
-**Follow-up work:** Override notes; optional letter inclusion.
+**Follow-up work:** Optional letter inclusion.
 
 ## Compliance intelligence — checklist staff mark-complete overrides
 
@@ -35,7 +47,7 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Technical debt:** Overrides keyed by strategy `account_key`/`item_id` strings; orphaned if catalog changes.
 
-**Follow-up work:** Override notes.
+**Follow-up work:** Override notes (done).
 
 ## Compliance intelligence — checklist packet markdown export
 

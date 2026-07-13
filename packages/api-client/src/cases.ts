@@ -281,6 +281,7 @@ export interface CfpbChecklistItem {
   required: boolean;
   completion_status?: ChecklistCompletionStatus;
   completion_source?: 'computed' | 'staff';
+  override_note?: string | null;
 }
 
 export interface AccountCfpbChecklist {
@@ -321,6 +322,7 @@ export interface AttorneyChecklistItem {
   required: boolean;
   completion_status?: ChecklistCompletionStatus;
   completion_source?: 'computed' | 'staff';
+  override_note?: string | null;
 }
 
 export interface AccountAttorneyChecklist {
@@ -593,6 +595,7 @@ export interface UpsertChecklistOverrideInput {
   account_key: string;
   item_id: string;
   completion_status?: ChecklistCompletionStatus | null;
+  note?: string | null;
 }
 
 export async function upsertCaseChecklistOverride(

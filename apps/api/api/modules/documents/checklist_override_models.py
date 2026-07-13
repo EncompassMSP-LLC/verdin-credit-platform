@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import uuid
 
-from sqlalchemy import ForeignKey, String, UniqueConstraint
+from sqlalchemy import ForeignKey, String, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -36,3 +36,4 @@ class DisputeStrategyChecklistOverride(Base, TimestampMixin, SoftDeleteMixin, Au
     account_key: Mapped[str] = mapped_column(String(255), nullable=False)
     item_id: Mapped[str] = mapped_column(String(100), nullable=False)
     completion_status: Mapped[str] = mapped_column(String(20), nullable=False)
+    note: Mapped[str | None] = mapped_column(Text, nullable=True)
