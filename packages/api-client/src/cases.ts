@@ -376,9 +376,15 @@ export async function getCaseTradelineChronology(
 
 export async function getCaseComplianceEvidenceLinks(
   caseId: string,
+  params: { include_page_scan?: boolean } = {},
 ): Promise<CaseComplianceEvidenceLinks> {
+  const query = new URLSearchParams();
+  if (params.include_page_scan === false) {
+    query.set('include_page_scan', 'false');
+  }
+  const suffix = query.toString() ? `?${query.toString()}` : '';
   return request<CaseComplianceEvidenceLinks>(
-    apiPath(`/cases/${caseId}/compliance-evidence-links`),
+    apiPath(`/cases/${caseId}/compliance-evidence-links${suffix}`),
   );
 }
 

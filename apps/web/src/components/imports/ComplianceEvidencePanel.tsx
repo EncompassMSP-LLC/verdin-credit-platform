@@ -5,7 +5,8 @@ import {
   type ComplianceEvidenceLinkItem,
   type ComplianceEvidenceSummary,
 } from '@verdin/api-client';
-import { Badge, Card } from '@verdin/ui';
+import { Badge, Button, Card } from '@verdin/ui';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 function SummaryBadges({ summary }: { summary: ComplianceEvidenceSummary }) {
@@ -110,9 +111,10 @@ export function CaseComplianceEvidencePanel({
   className?: string;
   id?: string;
 }) {
+  const [includePageScan, setIncludePageScan] = useState(true);
   const evidenceQuery = useQuery({
-    queryKey: ['case-compliance-evidence-links', caseId],
-    queryFn: () => getCaseComplianceEvidenceLinks(caseId),
+    queryKey: ['case-compliance-evidence-links', caseId, includePageScan],
+    queryFn: () => getCaseComplianceEvidenceLinks(caseId, { include_page_scan: includePageScan }),
     retry: false,
   });
 
@@ -123,6 +125,22 @@ export function CaseComplianceEvidencePanel({
           Links Metro 2 and FCRA findings to source bureau reports, case exhibits, and investigator
           checklist hints. PDF page numbers are best-effort via on-demand tradeline text scan.
         </p>
+        <div className="mt-3">
+          <Button
+            size="sm"
+            variant="secondary"
+            loading={evidenceQuery.isFetching}
+            onClick={() => setIncludePageScan((value) => !value)}
+          >
+            {includePageScan ? 'Skip page scan' : 'Enable page scan'}
+          </Button>
+          {!includePageScan ? (
+            <p className="mt-2 text-xs text-gray-500">
+              Page scan skipped — report links keep <code>page_confidence=deferred</code> for faster
+              loads on large cases.
+            </p>
+          ) : null}
+        </div>
 
         {evidenceQuery.isLoading ? (
           <p className="mt-3 text-sm text-gray-500">Loading evidence links…</p>
