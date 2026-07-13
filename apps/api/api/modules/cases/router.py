@@ -213,10 +213,15 @@ async def get_case_tradeline_chronology(
 )
 async def get_case_compliance_evidence_links(
     case_id: uuid.UUID,
+    include_page_scan: bool = Query(default=True),
     current_user: User = Depends(get_current_user),
     service: DocumentService = Depends(get_document_service),
 ) -> CaseComplianceEvidenceLinksResponse:
-    return await service.get_case_compliance_evidence_links(current_user, case_id)
+    return await service.get_case_compliance_evidence_links(
+        current_user,
+        case_id,
+        include_page_scan=include_page_scan,
+    )
 
 
 @router.get(

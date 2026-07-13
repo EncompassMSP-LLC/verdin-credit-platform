@@ -13,6 +13,18 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — evidence page-scan query flag
+
+**Decision:** Expose `include_page_scan` (default true) on `GET /cases/{case_id}/compliance-evidence-links` so investigators can skip on-demand PDF tradeline scans on large cases. When false, report links keep `page_confidence=deferred`.
+
+**Reason:** Page scan was already optional inside the service (dispute strategy uses false) but the public endpoint always scanned.
+
+**Alternatives considered:** Auto-skip above N findings; separate lightweight endpoint.
+
+**Technical debt:** UI toggle is per-panel session only; no persisted preference.
+
+**Follow-up work:** Persist page maps; OCR line refs.
+
 ## Compliance intelligence — checklist packet report-excerpt merge
 
 **Decision:** Add opt-in include_report_excerpts=true on checklist packet.zip that merges consent-gated report-excerpt PDFs under exhibits/report-excerpts/ via AccountService.collect_case_report_excerpt_files. Missing signed consents return 422.
@@ -191,7 +203,7 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Technical debt:** Text-match page scan is heuristic; empty matches mark `unavailable` rather than `deferred`.
 
-**Follow-up work:** Persist page maps; OCR line refs; optional query flag to skip scan on large cases.
+**Follow-up work:** Persist page maps; OCR line refs; optional query flag to skip scan on large cases (done).
 
 ## Compliance intelligence — dispute strategy generator
 

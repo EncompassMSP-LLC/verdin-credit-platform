@@ -83,7 +83,7 @@ All case endpoints require authentication. Users are scoped to their organizatio
 | GET    | `/cases/{case_id}/metro2-findings`                                | read_only    | Aggregate Metro 2 findings across latest bureau reports                                 |
 | GET    | `/cases/{case_id}/fcra-findings`                                  | read_only    | Aggregate FCRA checklist findings across latest bureau reports                          |
 | GET    | `/cases/{case_id}/tradeline-chronology`                           | read_only    | Multi-report tradeline chronology across stored bureau reports                          |
-| GET    | `/cases/{case_id}/compliance-evidence-links`                      | read_only    | Link Metro 2/FCRA findings to reports and exhibits                                      |
+| GET    | `/cases/{case_id}/compliance-evidence-links`                      | read_only    | Link Metro 2/FCRA findings to reports and exhibits (optional page scan)                 |
 | GET    | `/cases/{case_id}/litigation-strength`                            | read_only    | Rank compliance issues by heuristic litigation strength                                 |
 | GET    | `/cases/{case_id}/dispute-strategy`                               | read_only    | Multi-stage dispute plan grounded in ranked findings                                    |
 | GET    | `/cases/{case_id}/dispute-strategy/cfpb-checklist`                | read_only    | CFPB escalation checklist for recommended strategy accounts                             |
@@ -333,7 +333,7 @@ FCRA checklist findings: `GET /documents/{document_id}/parsed-credit-report/fcra
 
 Tradeline reporting chronology: `GET /cases/{case_id}/tradeline-chronology` builds multi-snapshot timelines for matched tradelines across all stored parsed reports for the case (optional `bureau` query filter). Events include balance increases/decreases, status changes, DOFD changes, appearances, and disappearances. Investigator aid for historical pattern review.
 
-Compliance evidence links: `GET /cases/{case_id}/compliance-evidence-links` joins Metro 2 and FCRA findings to source bureau report documents, case identity/proof-of-address exhibits, and suggested supporting documents (collection letters, bureau responses, court records). Includes investigator checklist hints. Best-effort PDF page numbers are resolved via on-demand tradeline text scan (`page_confidence=matched|unavailable`). Exact OCR line maps remain deferred.
+Compliance evidence links: `GET /cases/{case_id}/compliance-evidence-links` joins Metro 2 and FCRA findings to source bureau report documents, case identity/proof-of-address exhibits, and suggested supporting documents (collection letters, bureau responses, court records). Includes investigator checklist hints. Best-effort PDF page numbers are resolved via on-demand tradeline text scan (`page_confidence=matched|unavailable`); pass `include_page_scan=false` to skip scanning on large cases (`page_confidence=deferred`). Exact OCR line maps remain deferred.
 
 Litigation strength ranking: `GET /cases/{case_id}/litigation-strength` scores and ranks Metro 2, FCRA, cross-bureau, and chronology issues using deterministic heuristics (for example DOFD mismatches near 98, impossible date sequences near 95). Investigator prioritization aid only — not legal advice.
 
