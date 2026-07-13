@@ -13,6 +13,18 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — checklist completion status
+
+**Decision:** Enrich CFPB and attorney checklist items at read time with `completion_status` (`present` | `missing` | `unknown`) derived from case exhibits, typed documents, parsed reports, and dispute letters. No migration or staff override API.
+
+**Reason:** Investigators needed to see which packet items already exist on the case without inventing a checkbox store.
+
+**Alternatives considered:** Persisted checklist_completions table; PDF packet export only.
+
+**Technical debt:** Heuristic only; narratives and CFPB escalation files stay `unknown` until artifacts exist.
+
+**Follow-up work:** Optional packet PDF export; staff mark-complete overrides.
+
 ## Compliance intelligence — attorney-preserve checklist
 
 **Decision:** Add `GET /cases/{case_id}/dispute-strategy/attorney-checklist` that lists required/optional packet items for strategy accounts (attorney_preserve is always recommended as hygiene). Near-ceiling scores are escalation-flagged.

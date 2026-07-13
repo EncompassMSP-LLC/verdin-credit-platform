@@ -313,3 +313,72 @@ def test_build_case_attorney_checklist_for_strategy_accounts() -> None:
     assert any(item.item_id == "attorney_handoff_narrative" for item in checklist.accounts[0].items)
     assert checklist.summary["escalation_flagged"] >= 1
     assert checklist.summary["required_items"] >= 1
+
+
+def test_enrich_checklist_completion_against_evidence_snapshot() -> None:
+    from api.modules.documents.dispute_strategy import (
+        ChecklistEvidenceSnapshot,
+        LetterSignal,
+        build_case_attorney_checklist,
+        build_case_cfpb_checklist,
+        enrich_case_attorney_checklist,
+        enrich_case_cfpb_checklist,
+    )
+
+    strategy = generate_case_dispute_strategy(
+        case_id=uuid.uuid4(),
+        scored_issues=[
+            {
+                "source_kind": "cross_bureau",
+                "source_id": "cross_bureau:a",
+                "rule_id": "cross_bureau.dofd_mismatch",
+                "score": 98,
+                "rank": 1,
+                "title": "DOFD mismatch",
+                "severity": "high",
+                "bureau": None,
+                "creditor_name": "Capital One",
+                "account_number_masked": "****4242",
+                "match_key": "capital one:4242",
+            },
+        ],
+    )
+    evidence = ChecklistEvidenceSnapshot(
+        has_identity=True,
+        has_proof_of_address=True,
+        has_credit_report_doc=True,
+        has_bureau_response_doc=False,
+        has_parsed_credit_report=True,
+        letters_by_match_key={
+            "capital one:4242": (LetterSignal(recipient_type="credit_bureau", status="draft"),),
+        },
+        response_received_by_match_key={},
+    )
+    cfpb = enrich_case_cfpb_checklist(
+        build_case_cfpb_checklist(
+            case_id=strategy.case_id,
+            strategies=strategy.strategies,
+            recommended_only=True,
+        ),
+        evidence,
+    )
+    by_id = {item.item_id: item.completion_status for item in cfpb.accounts[0].items}
+    assert by_id["identity_exhibits"] == "present"
+    assert by_id["report_excerpts"] == "present"
+    assert by_id["cra_dispute_packet"] == "present"
+    assert by_id["cra_responses"] == "missing"
+    assert by_id["cfpb_narrative"] == "unknown"
+    assert cfpb.summary["items_present"] >= 1
+
+    attorney = enrich_case_attorney_checklist(
+        build_case_attorney_checklist(
+            case_id=strategy.case_id,
+            strategies=strategy.strategies,
+            recommended_only=True,
+        ),
+        evidence,
+    )
+    attorney_by_id = {item.item_id: item.completion_status for item in attorney.accounts[0].items}
+    assert attorney_by_id["dispute_correspondence_chain"] == "present"
+    assert attorney_by_id["attorney_handoff_narrative"] == "unknown"
+    assert attorney_by_id["litigation_escalation_flag"] == "present"

@@ -264,7 +264,12 @@ export interface CfpbChecklistSummary {
   accounts_listed: number;
   required_items: number;
   optional_items: number;
+  items_present?: number;
+  items_missing?: number;
+  items_unknown?: number;
 }
+
+export type ChecklistCompletionStatus = 'present' | 'missing' | 'unknown';
 
 export type CfpbChecklistCategory = 'correspondence' | 'evidence' | 'chronology' | 'filing';
 
@@ -274,6 +279,7 @@ export interface CfpbChecklistItem {
   title: string;
   detail: string;
   required: boolean;
+  completion_status?: ChecklistCompletionStatus;
 }
 
 export interface AccountCfpbChecklist {
@@ -299,6 +305,9 @@ export interface AttorneyChecklistSummary {
   required_items: number;
   optional_items: number;
   escalation_flagged: number;
+  items_present?: number;
+  items_missing?: number;
+  items_unknown?: number;
 }
 
 export type AttorneyChecklistCategory = 'correspondence' | 'evidence' | 'chronology' | 'filing';
@@ -309,6 +318,7 @@ export interface AttorneyChecklistItem {
   title: string;
   detail: string;
   required: boolean;
+  completion_status?: ChecklistCompletionStatus;
 }
 
 export interface AccountAttorneyChecklist {

@@ -512,6 +512,7 @@ class CfpbChecklistItem:
     title: str
     detail: str
     required: bool
+    completion_status: Literal["present", "missing", "unknown"] = "unknown"
 
 
 @dataclass(frozen=True, slots=True)
@@ -692,6 +693,7 @@ class AttorneyChecklistItem:
     title: str
     detail: str
     required: bool
+    completion_status: Literal["present", "missing", "unknown"] = "unknown"
 
 
 @dataclass(frozen=True, slots=True)
@@ -894,5 +896,239 @@ def build_case_attorney_checklist(
             "optional_items": sum(len(account.items) for account in accounts) - required_items,
             "escalation_flagged": sum(1 for account in accounts if account.attorney_escalation),
         },
+        accounts=tuple(accounts),
+    )
+
+
+CompletionStatus = Literal["present", "missing", "unknown"]
+
+
+@dataclass(frozen=True, slots=True)
+class LetterSignal:
+    recipient_type: Literal["credit_bureau", "furnisher"]
+    status: str
+
+
+@dataclass(frozen=True, slots=True)
+class ChecklistEvidenceSnapshot:
+    has_identity: bool
+    has_proof_of_address: bool
+    has_credit_report_doc: bool
+    has_bureau_response_doc: bool
+    has_parsed_credit_report: bool
+    letters_by_match_key: dict[str, tuple[LetterSignal, ...]]
+    response_received_by_match_key: dict[str, bool]
+
+
+_ALWAYS_UNKNOWN_ITEMS = frozenset(
+    {
+        "cfpb_narrative",
+        "attorney_handoff_narrative",
+        "cfpb_escalation_file",
+    }
+)
+
+
+def _active_letters(letters: tuple[LetterSignal, ...]) -> tuple[LetterSignal, ...]:
+    return tuple(letter for letter in letters if letter.status != "void")
+
+
+def _has_recipient(
+    letters: tuple[LetterSignal, ...],
+    recipient_type: Literal["credit_bureau", "furnisher"],
+) -> bool:
+    return any(letter.recipient_type == recipient_type for letter in _active_letters(letters))
+
+
+def _completion_for_item(
+    item_id: str,
+    *,
+    match_key: str | None,
+    attorney_escalation: bool,
+    evidence: ChecklistEvidenceSnapshot,
+) -> CompletionStatus:
+    if item_id in _ALWAYS_UNKNOWN_ITEMS:
+        return "unknown"
+
+    matched_letters = evidence.letters_by_match_key.get(match_key, ()) if match_key else ()
+
+    if item_id == "identity_exhibits":
+        if evidence.has_identity and evidence.has_proof_of_address:
+            return "present"
+        return "missing"
+
+    if item_id == "report_excerpts":
+        if evidence.has_credit_report_doc or evidence.has_parsed_credit_report:
+            return "present"
+        return "missing"
+
+    if item_id in {"cra_responses", "bureau_responses"}:
+        response_flag = bool(
+            match_key and evidence.response_received_by_match_key.get(match_key, False)
+        )
+        if evidence.has_bureau_response_doc or response_flag:
+            return "present"
+        return "missing"
+
+    if item_id == "chronology":
+        return "present" if evidence.has_parsed_credit_report else "missing"
+
+    if item_id == "evidence_links_export":
+        if (
+            evidence.has_parsed_credit_report
+            or evidence.has_identity
+            or evidence.has_proof_of_address
+        ):
+            return "present"
+        return "missing"
+
+    if item_id in {
+        "strength_ranking",
+        "litigation_strength_export",
+        "dispute_strategy_export",
+    }:
+        return "present"
+
+    if item_id == "litigation_escalation_flag":
+        return "present" if attorney_escalation else "missing"
+
+    if item_id == "cra_dispute_packet":
+        if not match_key:
+            return "unknown"
+        return "present" if _has_recipient(matched_letters, "credit_bureau") else "missing"
+
+    if item_id == "furnisher_outreach":
+        if not match_key:
+            return "unknown"
+        return "present" if _has_recipient(matched_letters, "furnisher") else "missing"
+
+    if item_id == "dispute_correspondence_chain":
+        if not match_key:
+            return "unknown"
+        active = _active_letters(matched_letters)
+        return "present" if active else "missing"
+
+    return "unknown"
+
+
+def _with_status(
+    item: CfpbChecklistItem | AttorneyChecklistItem,
+    status: CompletionStatus,
+) -> CfpbChecklistItem | AttorneyChecklistItem:
+    if isinstance(item, CfpbChecklistItem):
+        return CfpbChecklistItem(
+            item_id=item.item_id,
+            category=item.category,
+            title=item.title,
+            detail=item.detail,
+            required=item.required,
+            completion_status=status,
+        )
+    return AttorneyChecklistItem(
+        item_id=item.item_id,
+        category=item.category,
+        title=item.title,
+        detail=item.detail,
+        required=item.required,
+        completion_status=status,
+    )
+
+
+def _completion_counts(
+    accounts: Sequence[AccountCfpbChecklist | AccountAttorneyChecklist],
+) -> dict[str, int]:
+    present = missing = unknown = 0
+    for account in accounts:
+        for item in account.items:
+            if item.completion_status == "present":
+                present += 1
+            elif item.completion_status == "missing":
+                missing += 1
+            else:
+                unknown += 1
+    return {
+        "items_present": present,
+        "items_missing": missing,
+        "items_unknown": unknown,
+    }
+
+
+def enrich_case_cfpb_checklist(
+    result: CaseCfpbChecklistResult,
+    evidence: ChecklistEvidenceSnapshot,
+) -> CaseCfpbChecklistResult:
+    accounts: list[AccountCfpbChecklist] = []
+    for account in result.accounts:
+        items = tuple(
+            _with_status(
+                item,
+                _completion_for_item(
+                    item.item_id,
+                    match_key=account.match_key,
+                    attorney_escalation=False,
+                    evidence=evidence,
+                ),
+            )
+            for item in account.items
+        )
+        accounts.append(
+            AccountCfpbChecklist(
+                account_key=account.account_key,
+                creditor_name=account.creditor_name,
+                account_number_masked=account.account_number_masked,
+                bureau=account.bureau,
+                match_key=account.match_key,
+                top_score=account.top_score,
+                primary_rule_ids=account.primary_rule_ids,
+                items=items,  # type: ignore[arg-type]
+            )
+        )
+    summary = dict(result.summary)
+    summary.update(_completion_counts(accounts))
+    return CaseCfpbChecklistResult(
+        case_id=result.case_id,
+        disclaimer=result.disclaimer,
+        summary=summary,
+        accounts=tuple(accounts),
+    )
+
+
+def enrich_case_attorney_checklist(
+    result: CaseAttorneyChecklistResult,
+    evidence: ChecklistEvidenceSnapshot,
+) -> CaseAttorneyChecklistResult:
+    accounts: list[AccountAttorneyChecklist] = []
+    for account in result.accounts:
+        items = tuple(
+            _with_status(
+                item,
+                _completion_for_item(
+                    item.item_id,
+                    match_key=account.match_key,
+                    attorney_escalation=account.attorney_escalation,
+                    evidence=evidence,
+                ),
+            )
+            for item in account.items
+        )
+        accounts.append(
+            AccountAttorneyChecklist(
+                account_key=account.account_key,
+                creditor_name=account.creditor_name,
+                account_number_masked=account.account_number_masked,
+                bureau=account.bureau,
+                match_key=account.match_key,
+                top_score=account.top_score,
+                primary_rule_ids=account.primary_rule_ids,
+                attorney_escalation=account.attorney_escalation,
+                items=items,  # type: ignore[arg-type]
+            )
+        )
+    summary = dict(result.summary)
+    summary.update(_completion_counts(accounts))
+    return CaseAttorneyChecklistResult(
+        case_id=result.case_id,
+        disclaimer=result.disclaimer,
+        summary=summary,
         accounts=tuple(accounts),
     )

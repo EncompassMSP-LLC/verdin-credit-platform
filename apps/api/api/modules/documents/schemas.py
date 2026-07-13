@@ -709,6 +709,9 @@ class CfpbChecklistSummary(BaseSchema):
     accounts_listed: int
     required_items: int
     optional_items: int
+    items_present: int = 0
+    items_missing: int = 0
+    items_unknown: int = 0
 
 
 class CfpbChecklistItem(BaseSchema):
@@ -717,6 +720,7 @@ class CfpbChecklistItem(BaseSchema):
     title: str
     detail: str
     required: bool
+    completion_status: Literal["present", "missing", "unknown"] = "unknown"
 
 
 class AccountCfpbChecklistItem(BaseSchema):
@@ -742,6 +746,9 @@ class AttorneyChecklistSummary(BaseSchema):
     required_items: int
     optional_items: int
     escalation_flagged: int
+    items_present: int = 0
+    items_missing: int = 0
+    items_unknown: int = 0
 
 
 class AttorneyChecklistItem(BaseSchema):
@@ -750,6 +757,7 @@ class AttorneyChecklistItem(BaseSchema):
     title: str
     detail: str
     required: bool
+    completion_status: Literal["present", "missing", "unknown"] = "unknown"
 
 
 class AccountAttorneyChecklistItem(BaseSchema):
