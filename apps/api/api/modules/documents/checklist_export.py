@@ -11,7 +11,8 @@ _FOOTER = (
     "---\n"
     "Staff-mediated export only. Does not file with CFPB or transmit to counsel. "
     "Use checklist packet.zip for best-effort exhibit bundling (identity, proof of "
-    "address, credit reports, bureau responses, and optional dispute-letter text), "
+    "address, credit reports, bureau responses, and optional dispute letters as text "
+    "or PDF via letter_format), "
     "or mail-packet / report-excerpt downloads for dispute correspondence.\n"
 )
 
