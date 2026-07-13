@@ -13,6 +13,18 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — checklist exhibit packet ZIP
+
+**Decision:** Add `GET …/cfpb-checklist/packet.zip` and `GET …/attorney-checklist/packet.zip` that ZIP the enriched markdown checklist plus best-effort exhibits (identity, proof of address, credit reports, bureau responses).
+
+**Reason:** Investigators needed a single handoff archive without inventing letter PDF rendering or auto-send.
+
+**Alternatives considered:** Replace `.md` export; include dispute letters; single `?kind=` route.
+
+**Technical debt:** Exhibit set is typed-document based; missing storage objects are skipped silently.
+
+**Follow-up work:** Override notes; optional letter inclusion.
+
 ## Compliance intelligence — checklist staff mark-complete overrides
 
 **Decision:** Persist staff overrides in `dispute_strategy_checklist_overrides` and merge them into CFPB/attorney checklist GETs/exports via `completion_source=staff`. `PUT /cases/{case_id}/dispute-strategy/checklist-overrides` upserts or clears.
@@ -23,7 +35,7 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Technical debt:** Overrides keyed by strategy `account_key`/`item_id` strings; orphaned if catalog changes.
 
-**Follow-up work:** Optional exhibit ZIP composition; override notes.
+**Follow-up work:** Override notes.
 
 ## Compliance intelligence — checklist packet markdown export
 
@@ -35,7 +47,7 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Technical debt:** Export is text-only; narratives remain advisory until real artifacts exist.
 
-**Follow-up work:** Optional exhibit ZIP composition.
+**Follow-up work:** Override notes.
 
 ## Compliance intelligence — checklist completion status
 

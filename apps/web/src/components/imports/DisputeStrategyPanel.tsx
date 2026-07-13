@@ -2,7 +2,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ApiClientError,
   downloadCaseAttorneyChecklist,
+  downloadCaseAttorneyChecklistPacket,
   downloadCaseCfpbChecklist,
+  downloadCaseCfpbChecklistPacket,
   getCaseAttorneyChecklist,
   getCaseCfpbChecklist,
   getCaseDisputeStrategy,
@@ -179,6 +181,8 @@ export function CaseDisputeStrategyPanel({
   const queryClient = useQueryClient();
   const [downloadingCfpb, setDownloadingCfpb] = useState(false);
   const [downloadingAttorney, setDownloadingAttorney] = useState(false);
+  const [downloadingCfpbPacket, setDownloadingCfpbPacket] = useState(false);
+  const [downloadingAttorneyPacket, setDownloadingAttorneyPacket] = useState(false);
   const [downloadError, setDownloadError] = useState<string | null>(null);
   const strategyQuery = useQuery({
     queryKey: ['case-dispute-strategy', caseId],
@@ -341,27 +345,50 @@ export function CaseDisputeStrategyPanel({
               <div className="space-y-2">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="text-sm font-medium text-gray-900">CFPB escalation checklist</p>
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    loading={downloadingCfpb}
-                    onClick={() => {
-                      setDownloadError(null);
-                      setDownloadingCfpb(true);
-                      void downloadCaseCfpbChecklist(caseId)
-                        .then(({ blob, filename }) => downloadBlob(blob, filename))
-                        .catch((error: unknown) => {
-                          setDownloadError(
-                            error instanceof Error
-                              ? error.message
-                              : 'Failed to download CFPB checklist',
-                          );
-                        })
-                        .finally(() => setDownloadingCfpb(false));
-                    }}
-                  >
-                    Download checklist (.md)
-                  </Button>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      loading={downloadingCfpb}
+                      onClick={() => {
+                        setDownloadError(null);
+                        setDownloadingCfpb(true);
+                        void downloadCaseCfpbChecklist(caseId)
+                          .then(({ blob, filename }) => downloadBlob(blob, filename))
+                          .catch((error: unknown) => {
+                            setDownloadError(
+                              error instanceof Error
+                                ? error.message
+                                : 'Failed to download CFPB checklist',
+                            );
+                          })
+                          .finally(() => setDownloadingCfpb(false));
+                      }}
+                    >
+                      Download checklist (.md)
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      loading={downloadingCfpbPacket}
+                      onClick={() => {
+                        setDownloadError(null);
+                        setDownloadingCfpbPacket(true);
+                        void downloadCaseCfpbChecklistPacket(caseId)
+                          .then(({ blob, filename }) => downloadBlob(blob, filename))
+                          .catch((error: unknown) => {
+                            setDownloadError(
+                              error instanceof Error
+                                ? error.message
+                                : 'Failed to download CFPB packet',
+                            );
+                          })
+                          .finally(() => setDownloadingCfpbPacket(false));
+                      }}
+                    >
+                      Download packet (.zip)
+                    </Button>
+                  </div>
                 </div>
                 <p className="text-xs text-gray-500">{cfpbQuery.data.disclaimer}</p>
                 <p className="text-xs text-gray-500">
@@ -398,27 +425,50 @@ export function CaseDisputeStrategyPanel({
               <div className="space-y-2">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="text-sm font-medium text-gray-900">Attorney-preserve checklist</p>
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    loading={downloadingAttorney}
-                    onClick={() => {
-                      setDownloadError(null);
-                      setDownloadingAttorney(true);
-                      void downloadCaseAttorneyChecklist(caseId)
-                        .then(({ blob, filename }) => downloadBlob(blob, filename))
-                        .catch((error: unknown) => {
-                          setDownloadError(
-                            error instanceof Error
-                              ? error.message
-                              : 'Failed to download attorney checklist',
-                          );
-                        })
-                        .finally(() => setDownloadingAttorney(false));
-                    }}
-                  >
-                    Download checklist (.md)
-                  </Button>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      loading={downloadingAttorney}
+                      onClick={() => {
+                        setDownloadError(null);
+                        setDownloadingAttorney(true);
+                        void downloadCaseAttorneyChecklist(caseId)
+                          .then(({ blob, filename }) => downloadBlob(blob, filename))
+                          .catch((error: unknown) => {
+                            setDownloadError(
+                              error instanceof Error
+                                ? error.message
+                                : 'Failed to download attorney checklist',
+                            );
+                          })
+                          .finally(() => setDownloadingAttorney(false));
+                      }}
+                    >
+                      Download checklist (.md)
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      loading={downloadingAttorneyPacket}
+                      onClick={() => {
+                        setDownloadError(null);
+                        setDownloadingAttorneyPacket(true);
+                        void downloadCaseAttorneyChecklistPacket(caseId)
+                          .then(({ blob, filename }) => downloadBlob(blob, filename))
+                          .catch((error: unknown) => {
+                            setDownloadError(
+                              error instanceof Error
+                                ? error.message
+                                : 'Failed to download attorney packet',
+                            );
+                          })
+                          .finally(() => setDownloadingAttorneyPacket(false));
+                      }}
+                    >
+                      Download packet (.zip)
+                    </Button>
+                  </div>
                 </div>
                 <p className="text-xs text-gray-500">{attorneyQuery.data.disclaimer}</p>
                 <p className="text-xs text-gray-500">

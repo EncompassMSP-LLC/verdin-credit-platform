@@ -328,6 +328,46 @@ async def export_case_attorney_checklist(
     )
 
 
+@router.get("/{case_id}/dispute-strategy/cfpb-checklist/packet.zip")
+async def export_case_cfpb_checklist_packet(
+    case_id: uuid.UUID,
+    recommended_only: bool = Query(default=True),
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> Response:
+    content, file_name, media_type = await service.export_case_cfpb_checklist_packet(
+        current_user,
+        case_id,
+        recommended_only=recommended_only,
+    )
+    safe_name = sanitize_content_disposition_filename(file_name)
+    return Response(
+        content=content,
+        media_type=media_type,
+        headers={"Content-Disposition": f'attachment; filename="{safe_name}"'},
+    )
+
+
+@router.get("/{case_id}/dispute-strategy/attorney-checklist/packet.zip")
+async def export_case_attorney_checklist_packet(
+    case_id: uuid.UUID,
+    recommended_only: bool = Query(default=True),
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> Response:
+    content, file_name, media_type = await service.export_case_attorney_checklist_packet(
+        current_user,
+        case_id,
+        recommended_only=recommended_only,
+    )
+    safe_name = sanitize_content_disposition_filename(file_name)
+    return Response(
+        content=content,
+        media_type=media_type,
+        headers={"Content-Disposition": f'attachment; filename="{safe_name}"'},
+    )
+
+
 @router.post(
     "/{case_id}/dispute-strategy/prepare",
     response_model=PrepareDisputeStrategyStageResponse,
