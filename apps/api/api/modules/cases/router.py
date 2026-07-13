@@ -1,6 +1,7 @@
 """Case management endpoints."""
 
 import uuid
+from typing import Literal
 
 from fastapi import APIRouter, Depends, File, Form, Query, Response, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -333,6 +334,7 @@ async def export_case_cfpb_checklist_packet(
     case_id: uuid.UUID,
     recommended_only: bool = Query(default=True),
     include_letters: bool = Query(default=True),
+    letter_format: Literal["text", "pdf"] = Query(default="text"),
     current_user: User = Depends(get_current_user),
     service: DocumentService = Depends(get_document_service),
 ) -> Response:
@@ -341,6 +343,7 @@ async def export_case_cfpb_checklist_packet(
         case_id,
         recommended_only=recommended_only,
         include_letters=include_letters,
+        letter_format=letter_format,
     )
     safe_name = sanitize_content_disposition_filename(file_name)
     return Response(
@@ -355,6 +358,7 @@ async def export_case_attorney_checklist_packet(
     case_id: uuid.UUID,
     recommended_only: bool = Query(default=True),
     include_letters: bool = Query(default=True),
+    letter_format: Literal["text", "pdf"] = Query(default="text"),
     current_user: User = Depends(get_current_user),
     service: DocumentService = Depends(get_document_service),
 ) -> Response:
@@ -363,6 +367,7 @@ async def export_case_attorney_checklist_packet(
         case_id,
         recommended_only=recommended_only,
         include_letters=include_letters,
+        letter_format=letter_format,
     )
     safe_name = sanitize_content_disposition_filename(file_name)
     return Response(

@@ -2186,6 +2186,7 @@ class DocumentService:
         *,
         recommended_only: bool = True,
         include_letters: bool = True,
+        letter_format: Literal["text", "pdf"] = "text",
     ) -> tuple[bytes, str, str]:
         return await self._export_case_checklist_packet(
             user,
@@ -2193,6 +2194,7 @@ class DocumentService:
             kind="cfpb",
             recommended_only=recommended_only,
             include_letters=include_letters,
+            letter_format=letter_format,
         )
 
     async def export_case_attorney_checklist_packet(
@@ -2202,6 +2204,7 @@ class DocumentService:
         *,
         recommended_only: bool = True,
         include_letters: bool = True,
+        letter_format: Literal["text", "pdf"] = "text",
     ) -> tuple[bytes, str, str]:
         return await self._export_case_checklist_packet(
             user,
@@ -2209,6 +2212,7 @@ class DocumentService:
             kind="attorney",
             recommended_only=recommended_only,
             include_letters=include_letters,
+            letter_format=letter_format,
         )
 
     async def _export_case_checklist_packet(
@@ -2219,6 +2223,7 @@ class DocumentService:
         kind: Literal["cfpb", "attorney"],
         recommended_only: bool,
         include_letters: bool = True,
+        letter_format: Literal["text", "pdf"] = "text",
     ) -> tuple[bytes, str, str]:
         from api.modules.documents.checklist_export import (
             checklist_export_filename,
@@ -2271,6 +2276,7 @@ class DocumentService:
                         self._session,
                         organization_id=organization_id,
                         case_id=case_id,
+                        letter_format=letter_format,
                     )
                 )
 

@@ -189,15 +189,18 @@ async def collect_checklist_exhibits(
     return exhibits
 
 
-def dispute_letter_exhibit_path(*, status: str, recipient_type: str, letter_id: uuid.UUID) -> str:
+def dispute_letter_exhibit_path(
+    *,
+    status: str,
+    recipient_type: str,
+    letter_id: uuid.UUID,
+    letter_format: Literal["text", "pdf"] = "text",
+) -> str:
     short = letter_id.hex[:8]
     status_slug = _SAFE_NAME.sub("_", status).strip("_") or "letter"
     recipient_slug = _SAFE_NAME.sub("_", recipient_type).strip("_") or "recipient"
-    return f"exhibits/dispute-letters/{status_slug}_{recipient_slug}__{short}.txt"
-
-
-def dispute_letter_exhibit_bytes(body_text: str) -> bytes:
-    return body_text.encode("utf-8")
+    extension = "txt" if letter_format == "text" else "pdf"
+    return f"exhibits/dispute-letters/{status_slug}_{recipient_slug}__{short}.{extension}"
 
 
 async def collect_checklist_letter_exhibits(
@@ -205,9 +208,10 @@ async def collect_checklist_letter_exhibits(
     *,
     organization_id: uuid.UUID,
     case_id: uuid.UUID,
+    letter_format: Literal["text", "pdf"] = "text",
 ) -> list[tuple[str, bytes]]:
-    """Best-effort plain-text dispute letter exports (no mail PDF / consent gate)."""
-    from api.modules.accounts.dispute_letter_export import build_dispute_letter_plain_text
+    """Best-effort dispute letter exports (text or PDF; no mail consent gate)."""
+    from api.modules.accounts.dispute_letter_export import build_dispute_letter_export
     from api.modules.accounts.dispute_letter_models import DisputeLetter
 
     result = await session.execute(
@@ -227,14 +231,14 @@ async def collect_checklist_letter_exhibits(
         )
         if status_value not in _LETTER_STATUSES_INCLUDED:
             continue
+        content, _filename, _media = build_dispute_letter_export(letter, letter_format)
         path = dispute_letter_exhibit_path(
             status=status_value,
             recipient_type=letter.recipient_type,
             letter_id=letter.id,
+            letter_format=letter_format,
         )
-        exhibits.append(
-            (path, dispute_letter_exhibit_bytes(build_dispute_letter_plain_text(letter)))
-        )
+        exhibits.append((path, content))
     return exhibits
 
 

@@ -13,6 +13,18 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — checklist packet letter PDF format
+
+**Decision:** Add letter_format=text|pdf (default ext) to checklist packet.zip letter exhibits. PDF uses the existing dispute-letter export renderer; mail-packet merge and consent gates remain deferred.
+
+**Reason:** Investigators sometimes need printable letter PDFs in the handoff ZIP without opting into mail-packet consent flows.
+
+**Alternatives considered:** Always PDF; mail-packet merge; separate download button only.
+
+**Technical debt:** Letter PDFs are simple reportlab renders, not letterhead mail packets.
+
+**Follow-up work:** Optional mail-packet PDF merge behind explicit consent.
+
 ## Compliance intelligence — checklist packet dispute-letter text
 
 **Decision:** Include best-effort plain-text dispute letter exports under `exhibits/dispute-letters/` in checklist `packet.zip` when `include_letters=true` (default). Void letters are skipped; mail PDF / consent gates are not used.

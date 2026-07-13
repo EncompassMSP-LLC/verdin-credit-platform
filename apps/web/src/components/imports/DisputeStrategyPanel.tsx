@@ -404,7 +404,7 @@ export function CaseDisputeStrategyPanel({
                       onClick={() => {
                         setDownloadError(null);
                         setDownloadingCfpbPacket(true);
-                        void downloadCaseCfpbChecklistPacket(caseId)
+                        void downloadCaseCfpbChecklistPacket(caseId, { letter_format: 'pdf' })
                           .then(({ blob, filename }) => downloadBlob(blob, filename))
                           .catch((error: unknown) => {
                             setDownloadError(
@@ -485,7 +485,9 @@ export function CaseDisputeStrategyPanel({
                       onClick={() => {
                         setDownloadError(null);
                         setDownloadingAttorneyPacket(true);
-                        void downloadCaseAttorneyChecklistPacket(caseId)
+                        void downloadCaseAttorneyChecklistPacket(caseId, {
+                          letter_format: 'pdf',
+                        })
                           .then(({ blob, filename }) => downloadBlob(blob, filename))
                           .catch((error: unknown) => {
                             setDownloadError(
