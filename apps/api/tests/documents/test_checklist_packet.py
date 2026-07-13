@@ -90,6 +90,31 @@ def test_build_checklist_packet_zip_includes_mail_packet_exhibits() -> None:
         assert archive.read("exhibits/mail-packets/mail-packet-example.pdf").startswith(b"%PDF")
 
 
+def test_report_excerpt_exhibit_path() -> None:
+    from api.modules.documents.checklist_packet import report_excerpt_exhibit_path
+
+    assert (
+        report_excerpt_exhibit_path("report-excerpt-capital-one-abcd1234.pdf")
+        == "exhibits/report-excerpts/report-excerpt-capital-one-abcd1234.pdf"
+    )
+    assert report_excerpt_exhibit_path("odd name").endswith(".pdf")
+
+
+def test_build_checklist_packet_zip_includes_report_excerpt_exhibits() -> None:
+    packet = build_checklist_packet_zip(
+        markdown_name="cfpb-checklist-12345678.md",
+        markdown_bytes=b"# CFPB checklist\n",
+        exhibits=[
+            ("exhibits/report-excerpts/report-excerpt-example.pdf", b"%PDF-excerpt"),
+        ],
+    )
+    with zipfile.ZipFile(BytesIO(packet), "r") as archive:
+        assert "exhibits/report-excerpts/report-excerpt-example.pdf" in archive.namelist()
+        assert archive.read("exhibits/report-excerpts/report-excerpt-example.pdf").startswith(
+            b"%PDF"
+        )
+
+
 def test_build_checklist_packet_zip_includes_letter_text_exhibits() -> None:
     packet = build_checklist_packet_zip(
         markdown_name="cfpb-checklist-12345678.md",

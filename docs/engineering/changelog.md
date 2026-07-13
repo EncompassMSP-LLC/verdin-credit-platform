@@ -13,6 +13,18 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — checklist packet report-excerpt merge
+
+**Decision:** Add opt-in include_report_excerpts=true on checklist packet.zip that merges consent-gated report-excerpt PDFs under exhibits/report-excerpts/ via AccountService.collect_case_report_excerpt_files. Missing signed consents return 422.
+
+**Reason:** Investigators needed tradeline report excerpts alongside checklist handoff materials without defaulting consent gates onto basic exhibit packets.
+
+**Alternatives considered:** Always merge; nest case-report-excerpts.zip; combine with mail-packet flag.
+
+**Technical debt:** Requires a dispute letter on the account (same gate as standalone excerpt export).
+
+**Follow-up work:** Counsel transmit workflow (deferred).
+
 ## Compliance intelligence — checklist packet mail-packet merge
 
 **Decision:** Add opt-in include_mail_packets=true on checklist packet.zip that merges consent-gated mail-packet PDFs under exhibits/mail-packets/ via AccountService.collect_case_mail_packet_files. Missing signed consents return 422.
