@@ -508,11 +508,14 @@ async function downloadChecklistExport(
   caseId: string,
   path: string,
   fallbackFilename: string,
-  params: { recommended_only?: boolean } = {},
+  params: { recommended_only?: boolean; include_letters?: boolean } = {},
 ): Promise<{ blob: Blob; filename: string }> {
   const query = new URLSearchParams();
   if (params.recommended_only === false) {
     query.set('recommended_only', 'false');
+  }
+  if (params.include_letters === false) {
+    query.set('include_letters', 'false');
   }
   const suffix = query.toString() ? `?${query.toString()}` : '';
   const url = `${getApiBaseUrl()}${apiPath(`${path}${suffix}`)}`;
@@ -568,7 +571,7 @@ export async function downloadCaseAttorneyChecklist(
 
 export async function downloadCaseCfpbChecklistPacket(
   caseId: string,
-  params: { recommended_only?: boolean } = {},
+  params: { recommended_only?: boolean; include_letters?: boolean } = {},
 ): Promise<{ blob: Blob; filename: string }> {
   return downloadChecklistExport(
     caseId,
@@ -580,7 +583,7 @@ export async function downloadCaseCfpbChecklistPacket(
 
 export async function downloadCaseAttorneyChecklistPacket(
   caseId: string,
-  params: { recommended_only?: boolean } = {},
+  params: { recommended_only?: boolean; include_letters?: boolean } = {},
 ): Promise<{ blob: Blob; filename: string }> {
   return downloadChecklistExport(
     caseId,

@@ -45,3 +45,34 @@ def test_build_checklist_packet_zip_without_exhibits_still_has_markdown() -> Non
     )
     with zipfile.ZipFile(BytesIO(packet), "r") as archive:
         assert archive.namelist() == ["attorney-checklist-12345678.md"]
+
+
+def test_dispute_letter_exhibit_path_and_bytes() -> None:
+    from api.modules.documents.checklist_packet import (
+        dispute_letter_exhibit_bytes,
+        dispute_letter_exhibit_path,
+    )
+
+    letter_id = uuid.UUID("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee")
+    path = dispute_letter_exhibit_path(
+        status="approved",
+        recipient_type="credit_bureau",
+        letter_id=letter_id,
+    )
+    assert path == "exhibits/dispute-letters/approved_credit_bureau__aaaaaaaa.txt"
+    assert dispute_letter_exhibit_bytes("Subject line\n\nBody\n").startswith(b"Subject")
+
+
+def test_build_checklist_packet_zip_includes_letter_text_exhibits() -> None:
+    packet = build_checklist_packet_zip(
+        markdown_name="cfpb-checklist-12345678.md",
+        markdown_bytes=b"# CFPB checklist\n",
+        exhibits=[
+            ("exhibits/dispute-letters/draft_credit_bureau__abcd1234.txt", b"Letter body\n"),
+        ],
+    )
+    with zipfile.ZipFile(BytesIO(packet), "r") as archive:
+        assert "exhibits/dispute-letters/draft_credit_bureau__abcd1234.txt" in archive.namelist()
+        assert archive.read(
+            "exhibits/dispute-letters/draft_credit_bureau__abcd1234.txt"
+        ).startswith(b"Letter")

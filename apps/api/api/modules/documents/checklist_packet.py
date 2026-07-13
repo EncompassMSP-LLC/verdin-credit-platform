@@ -18,6 +18,7 @@ from api.modules.documents.models import Document
 from api.modules.documents.storage import DocumentStorage, async_get
 
 _SAFE_NAME = re.compile(r"[^A-Za-z0-9._-]+")
+_LETTER_STATUSES_INCLUDED = frozenset({"draft", "review", "approved", "sent"})
 
 
 def checklist_packet_filename(kind: Literal["cfpb", "attorney"], case_id: uuid.UUID) -> str:
@@ -185,6 +186,55 @@ async def collect_checklist_exhibits(
         name = _safe_filename(document.file_name or "bureau-response", document_id=document.id)
         exhibits.append((f"exhibits/bureau-responses/{name}", content))
 
+    return exhibits
+
+
+def dispute_letter_exhibit_path(*, status: str, recipient_type: str, letter_id: uuid.UUID) -> str:
+    short = letter_id.hex[:8]
+    status_slug = _SAFE_NAME.sub("_", status).strip("_") or "letter"
+    recipient_slug = _SAFE_NAME.sub("_", recipient_type).strip("_") or "recipient"
+    return f"exhibits/dispute-letters/{status_slug}_{recipient_slug}__{short}.txt"
+
+
+def dispute_letter_exhibit_bytes(body_text: str) -> bytes:
+    return body_text.encode("utf-8")
+
+
+async def collect_checklist_letter_exhibits(
+    session: AsyncSession,
+    *,
+    organization_id: uuid.UUID,
+    case_id: uuid.UUID,
+) -> list[tuple[str, bytes]]:
+    """Best-effort plain-text dispute letter exports (no mail PDF / consent gate)."""
+    from api.modules.accounts.dispute_letter_export import build_dispute_letter_plain_text
+    from api.modules.accounts.dispute_letter_models import DisputeLetter
+
+    result = await session.execute(
+        select(DisputeLetter)
+        .where(
+            DisputeLetter.organization_id == organization_id,
+            DisputeLetter.case_id == case_id,
+            DisputeLetter.deleted_at.is_(None),
+        )
+        .order_by(DisputeLetter.created_at.desc())
+        .limit(50)
+    )
+    exhibits: list[tuple[str, bytes]] = []
+    for letter in result.scalars().all():
+        status_value = (
+            letter.status.value if hasattr(letter.status, "value") else str(letter.status)
+        )
+        if status_value not in _LETTER_STATUSES_INCLUDED:
+            continue
+        path = dispute_letter_exhibit_path(
+            status=status_value,
+            recipient_type=letter.recipient_type,
+            letter_id=letter.id,
+        )
+        exhibits.append(
+            (path, dispute_letter_exhibit_bytes(build_dispute_letter_plain_text(letter)))
+        )
     return exhibits
 
 
