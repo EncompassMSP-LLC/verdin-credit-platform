@@ -13,6 +13,18 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — checklist staff mark-complete overrides
+
+**Decision:** Persist staff overrides in `dispute_strategy_checklist_overrides` and merge them into CFPB/attorney checklist GETs/exports via `completion_source=staff`. `PUT /cases/{case_id}/dispute-strategy/checklist-overrides` upserts or clears.
+
+**Reason:** Investigators needed to mark items complete when evidence heuristics miss artifacts, without inventing a full checkbox workflow.
+
+**Alternatives considered:** Two tables; free-text notes; bulk mark-all.
+
+**Technical debt:** Overrides keyed by strategy `account_key`/`item_id` strings; orphaned if catalog changes.
+
+**Follow-up work:** Optional exhibit ZIP composition; override notes.
+
 ## Compliance intelligence — checklist packet markdown export
 
 **Decision:** Add `GET …/cfpb-checklist/export` and `GET …/attorney-checklist/export` that download staff-mediated markdown packets from the same enriched checklist payloads as the JSON endpoints.
@@ -23,7 +35,7 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Technical debt:** Export is text-only; narratives remain advisory until real artifacts exist.
 
-**Follow-up work:** Staff mark-complete overrides; optional exhibit ZIP composition.
+**Follow-up work:** Optional exhibit ZIP composition.
 
 ## Compliance intelligence — checklist completion status
 
@@ -35,7 +47,7 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Technical debt:** Heuristic only; narratives and CFPB escalation files stay `unknown` until artifacts exist.
 
-**Follow-up work:** Staff mark-complete overrides.
+**Follow-up work:** Optional exhibit ZIP composition.
 
 ## Compliance intelligence — attorney-preserve checklist
 

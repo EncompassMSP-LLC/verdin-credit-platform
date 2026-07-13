@@ -280,6 +280,7 @@ export interface CfpbChecklistItem {
   detail: string;
   required: boolean;
   completion_status?: ChecklistCompletionStatus;
+  completion_source?: 'computed' | 'staff';
 }
 
 export interface AccountCfpbChecklist {
@@ -319,6 +320,7 @@ export interface AttorneyChecklistItem {
   detail: string;
   required: boolean;
   completion_status?: ChecklistCompletionStatus;
+  completion_source?: 'computed' | 'staff';
 }
 
 export interface AccountAttorneyChecklist {
@@ -559,5 +561,22 @@ export async function downloadCaseAttorneyChecklist(
     `/cases/${caseId}/dispute-strategy/attorney-checklist/export`,
     `attorney-checklist-${caseId.slice(0, 8)}.md`,
     params,
+  );
+}
+
+export interface UpsertChecklistOverrideInput {
+  checklist_kind: 'cfpb' | 'attorney';
+  account_key: string;
+  item_id: string;
+  completion_status?: ChecklistCompletionStatus | null;
+}
+
+export async function upsertCaseChecklistOverride(
+  caseId: string,
+  input: UpsertChecklistOverrideInput,
+): Promise<CaseCfpbChecklist | CaseAttorneyChecklist> {
+  return request<CaseCfpbChecklist | CaseAttorneyChecklist>(
+    apiPath(`/cases/${caseId}/dispute-strategy/checklist-overrides`),
+    { method: 'PUT', body: input },
   );
 }

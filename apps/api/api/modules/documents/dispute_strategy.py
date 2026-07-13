@@ -513,6 +513,7 @@ class CfpbChecklistItem:
     detail: str
     required: bool
     completion_status: Literal["present", "missing", "unknown"] = "unknown"
+    completion_source: Literal["computed", "staff"] = "computed"
 
 
 @dataclass(frozen=True, slots=True)
@@ -694,6 +695,7 @@ class AttorneyChecklistItem:
     detail: str
     required: bool
     completion_status: Literal["present", "missing", "unknown"] = "unknown"
+    completion_source: Literal["computed", "staff"] = "computed"
 
 
 @dataclass(frozen=True, slots=True)
@@ -1014,6 +1016,8 @@ def _completion_for_item(
 def _with_status(
     item: CfpbChecklistItem | AttorneyChecklistItem,
     status: CompletionStatus,
+    *,
+    source: Literal["computed", "staff"] = "computed",
 ) -> CfpbChecklistItem | AttorneyChecklistItem:
     if isinstance(item, CfpbChecklistItem):
         return CfpbChecklistItem(
@@ -1023,6 +1027,7 @@ def _with_status(
             detail=item.detail,
             required=item.required,
             completion_status=status,
+            completion_source=source,
         )
     return AttorneyChecklistItem(
         item_id=item.item_id,
@@ -1031,6 +1036,7 @@ def _with_status(
         detail=item.detail,
         required=item.required,
         completion_status=status,
+        completion_source=source,
     )
 
 
@@ -1132,3 +1138,96 @@ def enrich_case_attorney_checklist(
         summary=summary,
         accounts=tuple(accounts),
     )
+
+
+def apply_cfpb_checklist_overrides(
+    result: CaseCfpbChecklistResult,
+    overrides: dict[tuple[str, str], CompletionStatus],
+) -> CaseCfpbChecklistResult:
+    """Replace completion_status for CFPB items with staff overrides."""
+    if not overrides:
+        return result
+
+    accounts: list[AccountCfpbChecklist] = []
+    for account in result.accounts:
+        items: list[CfpbChecklistItem] = []
+        for item in account.items:
+            key = (account.account_key, item.item_id)
+            if key in overrides:
+                updated = _with_status(item, overrides[key], source="staff")
+                assert isinstance(updated, CfpbChecklistItem)
+                items.append(updated)
+            else:
+                items.append(item)
+        accounts.append(
+            AccountCfpbChecklist(
+                account_key=account.account_key,
+                creditor_name=account.creditor_name,
+                account_number_masked=account.account_number_masked,
+                bureau=account.bureau,
+                match_key=account.match_key,
+                top_score=account.top_score,
+                primary_rule_ids=account.primary_rule_ids,
+                items=tuple(items),
+            )
+        )
+    summary = dict(result.summary)
+    summary.update(_completion_counts(accounts))
+    return CaseCfpbChecklistResult(
+        case_id=result.case_id,
+        disclaimer=result.disclaimer,
+        summary=summary,
+        accounts=tuple(accounts),
+    )
+
+
+def apply_attorney_checklist_overrides(
+    result: CaseAttorneyChecklistResult,
+    overrides: dict[tuple[str, str], CompletionStatus],
+) -> CaseAttorneyChecklistResult:
+    """Replace completion_status for attorney items with staff overrides."""
+    if not overrides:
+        return result
+
+    accounts: list[AccountAttorneyChecklist] = []
+    for account in result.accounts:
+        items: list[AttorneyChecklistItem] = []
+        for item in account.items:
+            key = (account.account_key, item.item_id)
+            if key in overrides:
+                updated = _with_status(item, overrides[key], source="staff")
+                assert isinstance(updated, AttorneyChecklistItem)
+                items.append(updated)
+            else:
+                items.append(item)
+        accounts.append(
+            AccountAttorneyChecklist(
+                account_key=account.account_key,
+                creditor_name=account.creditor_name,
+                account_number_masked=account.account_number_masked,
+                bureau=account.bureau,
+                match_key=account.match_key,
+                top_score=account.top_score,
+                primary_rule_ids=account.primary_rule_ids,
+                attorney_escalation=account.attorney_escalation,
+                items=tuple(items),
+            )
+        )
+    summary = dict(result.summary)
+    summary.update(_completion_counts(accounts))
+    return CaseAttorneyChecklistResult(
+        case_id=result.case_id,
+        disclaimer=result.disclaimer,
+        summary=summary,
+        accounts=tuple(accounts),
+    )
+
+
+# Backward-compatible alias used by unit tests.
+def apply_checklist_overrides(
+    result: CaseCfpbChecklistResult | CaseAttorneyChecklistResult,
+    overrides: dict[tuple[str, str], CompletionStatus],
+) -> CaseCfpbChecklistResult | CaseAttorneyChecklistResult:
+    if isinstance(result, CaseCfpbChecklistResult):
+        return apply_cfpb_checklist_overrides(result, overrides)
+    return apply_attorney_checklist_overrides(result, overrides)

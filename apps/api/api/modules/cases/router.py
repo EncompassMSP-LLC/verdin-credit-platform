@@ -44,6 +44,7 @@ from api.modules.documents.schemas import (
     PrepareCreditReportDisputesResponse,
     PrepareDisputeStrategyStageRequest,
     PrepareDisputeStrategyStageResponse,
+    UpsertChecklistOverrideRequest,
 )
 from api.modules.documents.service import DocumentService
 
@@ -273,6 +274,18 @@ async def get_case_attorney_checklist(
         case_id,
         recommended_only=recommended_only,
     )
+
+
+@router.put(
+    "/{case_id}/dispute-strategy/checklist-overrides",
+)
+async def upsert_case_checklist_override(
+    case_id: uuid.UUID,
+    body: UpsertChecklistOverrideRequest,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> CaseCfpbChecklistResponse | CaseAttorneyChecklistResponse:
+    return await service.upsert_case_checklist_override(current_user, case_id, body)
 
 
 @router.get("/{case_id}/dispute-strategy/cfpb-checklist/export")

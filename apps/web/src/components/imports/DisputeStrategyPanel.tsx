@@ -7,6 +7,7 @@ import {
   getCaseCfpbChecklist,
   getCaseDisputeStrategy,
   prepareCaseDisputeStrategyStage,
+  upsertCaseChecklistOverride,
   type AccountAttorneyChecklist,
   type AccountCfpbChecklist,
   type AccountDisputeStrategy,
@@ -39,18 +40,29 @@ function SummaryBadges({ summary }: { summary: DisputeStrategySummary }) {
   );
 }
 
-function completionBadge(status: string | undefined) {
-  if (status === 'present') return <Badge variant="success">present</Badge>;
-  if (status === 'missing') return <Badge variant="warning">missing</Badge>;
-  return <Badge variant="default">unknown</Badge>;
+function completionBadge(status: string | undefined, source?: string) {
+  const label = status === 'present' ? 'present' : status === 'missing' ? 'missing' : 'unknown';
+  const variant = status === 'present' ? 'success' : status === 'missing' ? 'warning' : 'default';
+  return (
+    <Badge variant={variant}>
+      {label}
+      {source === 'staff' ? ' · staff' : ''}
+    </Badge>
+  );
 }
 
 function ChecklistAccount({
   account,
   accent,
+  checklistKind,
+  onToggle,
+  pendingKey,
 }: {
   account: AccountCfpbChecklist | AccountAttorneyChecklist;
   accent: 'amber' | 'slate';
+  checklistKind: 'cfpb' | 'attorney';
+  onToggle: (accountKey: string, itemId: string, markPresent: boolean) => void;
+  pendingKey: string | null;
 }) {
   const border =
     accent === 'amber' ? 'border-amber-200 bg-amber-50/40' : 'border-slate-200 bg-slate-50/40';
@@ -71,18 +83,30 @@ function ChecklistAccount({
         {escalation}
       </div>
       <ul className="mt-2 space-y-1">
-        {account.items.map((item) => (
-          <li key={item.item_id} className="text-xs text-gray-700">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="font-medium">
-                {item.required ? 'Required' : 'Optional'} · {item.category}:
-              </span>{' '}
-              {item.title}
-              {completionBadge(item.completion_status)}
-            </div>
-            <span className="block text-gray-500">{item.detail}</span>
-          </li>
-        ))}
+        {account.items.map((item) => {
+          const key = `${checklistKind}:${account.account_key}:${item.item_id}`;
+          const isStaff = item.completion_source === 'staff';
+          return (
+            <li key={item.item_id} className="text-xs text-gray-700">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="font-medium">
+                  {item.required ? 'Required' : 'Optional'} · {item.category}:
+                </span>{' '}
+                {item.title}
+                {completionBadge(item.completion_status, item.completion_source)}
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  loading={pendingKey === key}
+                  onClick={() => onToggle(account.account_key, item.item_id, !isStaff)}
+                >
+                  {isStaff ? 'Clear override' : 'Mark complete'}
+                </Button>
+              </div>
+              <span className="block text-gray-500">{item.detail}</span>
+            </li>
+          );
+        })}
       </ul>
     </li>
   );
@@ -187,6 +211,32 @@ export function CaseDisputeStrategyPanel({
       });
     },
   });
+
+  const overrideMutation = useMutation({
+    mutationFn: (input: {
+      checklist_kind: 'cfpb' | 'attorney';
+      account_key: string;
+      item_id: string;
+      markPresent: boolean;
+    }) =>
+      upsertCaseChecklistOverride(caseId, {
+        checklist_kind: input.checklist_kind,
+        account_key: input.account_key,
+        item_id: input.item_id,
+        completion_status: input.markPresent ? 'present' : null,
+      }),
+    onSuccess: (_data, variables) => {
+      const key =
+        variables.checklist_kind === 'cfpb'
+          ? ['case-cfpb-checklist', caseId]
+          : ['case-attorney-checklist', caseId];
+      void queryClient.invalidateQueries({ queryKey: key });
+    },
+  });
+
+  const pendingOverrideKey = overrideMutation.isPending
+    ? `${overrideMutation.variables?.checklist_kind}:${overrideMutation.variables?.account_key}:${overrideMutation.variables?.item_id}`
+    : null;
 
   return (
     <div id={id} className={className}>
@@ -324,7 +374,21 @@ export function CaseDisputeStrategyPanel({
                 </p>
                 <ul className="space-y-2">
                   {cfpbQuery.data.accounts.map((account) => (
-                    <ChecklistAccount key={account.account_key} account={account} accent="amber" />
+                    <ChecklistAccount
+                      key={account.account_key}
+                      account={account}
+                      accent="amber"
+                      checklistKind="cfpb"
+                      pendingKey={pendingOverrideKey}
+                      onToggle={(accountKey, itemId, markPresent) =>
+                        overrideMutation.mutate({
+                          checklist_kind: 'cfpb',
+                          account_key: accountKey,
+                          item_id: itemId,
+                          markPresent,
+                        })
+                      }
+                    />
                   ))}
                 </ul>
               </div>
@@ -368,13 +432,35 @@ export function CaseDisputeStrategyPanel({
                 </p>
                 <ul className="space-y-2">
                   {attorneyQuery.data.accounts.map((account) => (
-                    <ChecklistAccount key={account.account_key} account={account} accent="slate" />
+                    <ChecklistAccount
+                      key={account.account_key}
+                      account={account}
+                      accent="slate"
+                      checklistKind="attorney"
+                      pendingKey={pendingOverrideKey}
+                      onToggle={(accountKey, itemId, markPresent) =>
+                        overrideMutation.mutate({
+                          checklist_kind: 'attorney',
+                          account_key: accountKey,
+                          item_id: itemId,
+                          markPresent,
+                        })
+                      }
+                    />
                   ))}
                 </ul>
               </div>
             ) : null}
 
             {downloadError ? <p className="text-sm text-red-600">{downloadError}</p> : null}
+
+            {overrideMutation.isError ? (
+              <p className="text-sm text-red-600">
+                {overrideMutation.error instanceof Error
+                  ? overrideMutation.error.message
+                  : 'Failed to update checklist override'}
+              </p>
+            ) : null}
 
             {strategyQuery.data.strategies.length === 0 ? (
               <p className="text-sm text-gray-500">
