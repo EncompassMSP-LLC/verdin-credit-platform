@@ -85,6 +85,7 @@ from api.modules.documents.batch_summary_models import (
     BatchSummaryTriggerSource,
 )
 from api.modules.documents.models import Document
+from api.modules.documents.strategy_run_models import DisputeStrategyRun
 from api.modules.enterprise.bulk_idp_provisioning_models import (
     BulkIdpProvisioningRun,
     BulkIdpProvisioningRunStatus,
@@ -287,6 +288,7 @@ __all__ = [
     "DisputeFilingPrepStatus",
     "DisputeBureauSubmissionRun",
     "DisputeBureauSubmissionStatus",
+    "DisputeStrategyRun",
     "EmailDeliveryLog",
     "EnforcementRunStatus",
     "EnforcementTriggerSource",

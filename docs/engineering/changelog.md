@@ -323,7 +323,31 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Technical debt:** Stage thresholds are heuristic; CFPB/attorney gates are score-based only.
 
-**Follow-up work:** Optional PDF page maps; persist strategy runs; wire stage actions into dispute letter prep.
+**Follow-up work:** Wire stage actions into dispute letter prep.
+
+## Compliance intelligence — dispute strategy run audit
+
+**Decision:** Persist each `GET /cases/{case_id}/dispute-strategy` response in `dispute_strategy_runs` (JSONB payload, org/case scoping, generator user, counts). Expose `GET /cases/{case_id}/dispute-strategy/runs/latest` for investigator audit replay.
+
+**Reason:** Changelog follow-up from the dispute strategy generator slice; investigators need a durable record of what plan was generated and when.
+
+**Alternatives considered:** Persist only on explicit POST; store only summary counts without full payload.
+
+**Technical debt:** Checklist/prepare paths regenerate strategy without persisting additional runs; no run history pagination yet.
+
+**Follow-up work:** Run history list endpoint.
+
+## Compliance intelligence — dispute strategy run UI audit
+
+**Decision:** Show persisted `generated_at` and short `run_id` in the case dispute strategy panel when the API returns audit fields.
+
+**Reason:** Changelog follow-up from strategy run persistence; investigators need visible proof of when the plan was generated.
+
+**Alternatives considered:** Full run history table in UI (deferred); separate audit page.
+
+**Technical debt:** UI shows latest load only, not historical runs.
+
+**Follow-up work:** Run history list endpoint; replay prior run in panel.
 
 ## Sprint 4.3.0 — Operational Core
 
