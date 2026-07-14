@@ -172,14 +172,18 @@ Requires `ENABLE_CLIENT_PORTAL=true`. Portal JWTs use `realm=portal` and include
 
 Read-only case progress for portal users. Cases match when `client_id` is set to the portal client, with email/name heuristics as fallback for unlinked cases.
 
-| Method | Path                           | Auth       | Description                                                                           |
-| ------ | ------------------------------ | ---------- | ------------------------------------------------------------------------------------- |
-| GET    | `/portal/cases`                | portal JWT | List cases linked to portal client                                                    |
-| GET    | `/portal/cases/{id}`           | portal JWT | Read-only case progress and disputes                                                  |
-| GET    | `/portal/cases/{id}/documents` | portal JWT | List documents on a linked case                                                       |
-| POST   | `/portal/cases/{id}/documents` | portal JWT | Upload document to a linked case (multipart: `file`, `title`, optional `description`) |
+| Method | Path                                                | Auth       | Description                                                                            |
+| ------ | --------------------------------------------------- | ---------- | -------------------------------------------------------------------------------------- |
+| GET    | `/portal/cases`                                     | portal JWT | List cases linked to portal client                                                     |
+| GET    | `/portal/cases/{id}`                                | portal JWT | Read-only case progress and disputes                                                   |
+| GET    | `/portal/cases/{id}/documents`                      | portal JWT | List documents on a linked case                                                        |
+| POST   | `/portal/cases/{id}/documents`                      | portal JWT | Upload document to a linked case (multipart: `file`, `title`, optional `description`)  |
+| GET    | `/portal/cases/{id}/identity-theft-center`          | portal JWT | Identity Theft Case Center (findings, reviews, attestation text)                       |
+| POST   | `/portal/cases/{id}/identity-theft/account-reviews` | portal JWT | Consumer confirmation of a flagged tradeline (attestation required for identity_theft) |
 
 Portal uploads use the same MIME and size limits as staff `POST /documents`. Documents appear in staff document views and emit `PORTAL_DOCUMENT_UPLOADED` timeline events. Account-scoped uploads and portal document download are not included in this slice.
+
+Portal identity-theft confirmation reuses the Phase 8 case center and confirmation engine under portal JWT scoping. Choosing `identity_theft` requires attestation and opens the §605B incident path; other confirmations unlock or keep ordinary disputes paused per confirmation choice. Staff-only incident/protection writes stay on `/cases/{id}/identity-theft/*`.
 
 Secure messaging uses one thread per case (`message_threads` + `thread_messages`). Portal users can read and post on linked cases; staff reply via the case message-thread endpoints.
 

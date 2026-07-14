@@ -327,7 +327,7 @@ async def build_case_center(
 async def confirm_account_review(
     *,
     repo: IdentityTheftRepository,
-    user: User,
+    actor_id: uuid.UUID | None,
     organization_id: uuid.UUID,
     case_id: uuid.UUID,
     request: ConfirmIdentityTheftAccountRequest,
@@ -394,7 +394,7 @@ async def confirm_account_review(
                 consumer_attestation_at=now,
                 consumer_attestation_text=CONSUMER_ATTESTATION_TEXT,
             )
-            apply_audit_on_create(incident, user.id)
+            apply_audit_on_create(incident, actor_id)
             incident = await repo.create_incident(incident)
         readiness = _605b_from_incident(incident)
         packet_readiness = readiness.packet_readiness
@@ -433,7 +433,7 @@ async def confirm_account_review(
             missing_evidence=missing_evidence,
             attestation_accepted=request.attestation_accepted,
         )
-        apply_audit_on_create(review, user.id)
+        apply_audit_on_create(review, actor_id)
         review = await repo.add_account_review(review)
     else:
         existing.incident_id = incident.id if incident else existing.incident_id
@@ -461,7 +461,7 @@ async def confirm_account_review(
         existing.packet_readiness = packet_readiness
         existing.missing_evidence = missing_evidence
         existing.attestation_accepted = request.attestation_accepted
-        apply_audit_on_update(existing, user.id)
+        apply_audit_on_update(existing, actor_id)
         review = existing
 
     return _review_response(review)

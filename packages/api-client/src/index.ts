@@ -878,6 +878,8 @@ export {
   getPortalPushStatus,
   listPortalCaseDocuments,
   listPortalCaseConsents,
+  getPortalIdentityTheftCenter,
+  confirmPortalIdentityTheftAccount,
   listPortalCaseMessages,
   listPortalCases,
   portalLogin,

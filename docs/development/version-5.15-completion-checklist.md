@@ -22,7 +22,7 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md) when published.
 | ----- | ---------------------------------------------------- | ----------------------- | ------ |
 | 1     | 5.15 scope + completion checklist                    | Kickoff                 | ✅     |
 | 2     | Identity Theft Detection & Recovery Engine (Phase 8) | Compliance Intelligence | ✅     |
-| 3     | Portal consumer confirmation / attestation           | Client Experience       | —      |
+| 3     | Portal consumer confirmation / attestation           | Client Experience       | ✅     |
 | 4     | §605B packet export / bureau block letters           | Disputes                | —      |
 | 5     | Capability matrix 5.15 sign-off                      | Governance              | —      |
 

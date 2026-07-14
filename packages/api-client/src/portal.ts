@@ -7,6 +7,11 @@ import {
   uploadRequest,
 } from './http';
 import type { ConsentRecord, ConsentDocumentTemplateKey, ConsentType } from './compliance';
+import type {
+  ConfirmIdentityTheftAccountRequest,
+  IdentityTheftAccountReview,
+  IdentityTheftCaseCenter,
+} from './documents';
 
 export interface PortalLoginInput {
   email: string;
@@ -232,6 +237,22 @@ export async function downloadPortalConsentPreview(
 
 export async function listPortalCaseConsents(caseId: string): Promise<PortalCaseConsentsResponse> {
   return request<PortalCaseConsentsResponse>(apiPath(`/portal/cases/${caseId}/consents`));
+}
+
+export async function getPortalIdentityTheftCenter(
+  caseId: string,
+): Promise<IdentityTheftCaseCenter> {
+  return request<IdentityTheftCaseCenter>(apiPath(`/portal/cases/${caseId}/identity-theft-center`));
+}
+
+export async function confirmPortalIdentityTheftAccount(
+  caseId: string,
+  body: ConfirmIdentityTheftAccountRequest,
+): Promise<IdentityTheftAccountReview> {
+  return request<IdentityTheftAccountReview>(
+    apiPath(`/portal/cases/${caseId}/identity-theft/account-reviews`),
+    { method: 'POST', body },
+  );
 }
 
 export async function signPortalCaseConsent(

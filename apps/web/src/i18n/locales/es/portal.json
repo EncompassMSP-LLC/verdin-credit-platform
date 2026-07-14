@@ -121,6 +121,39 @@
       "fcra_authorization": "Autorizo a la organización a obtener y disputar información en mis reportes de crédito de consumidor en mi nombre."
     }
   },
+  "identityTheft": {
+    "title": "Revisión de robo de identidad",
+    "subtitle": "Revise las cuentas marcadas y confirme si alguna resultó de robo de identidad. Las disputas ordinarias permanecen en pausa hasta que elija una teoría veraz.",
+    "bannerTitle": "Indicador de protección contra robo de identidad detectado",
+    "bannerBody": "Este informe contiene una alerta de fraude, congelación, declaración de víctima o bloqueo por robo de identidad. Revise estas cuentas antes de continuar con disputas ordinarias.",
+    "loading": "Cargando revisión de robo de identidad…",
+    "loadError": "No se pudo cargar la revisión de robo de identidad",
+    "unknownCreditor": "Acreedor desconocido",
+    "reviewNeeded": "Revisión necesaria",
+    "reviewAccount": "Revisar esta cuenta",
+    "confirmTitle": "Confirmar esta cuenta",
+    "confirmationLabel": "Su confirmación",
+    "attestationFallback": "Afirmo que no abrí, autoricé, usé ni me beneficié de esta cuenta, y que la información proporcionada es veraz según mi leal saber y entender.",
+    "saveConfirmation": "Guardar confirmación",
+    "saving": "Guardando…",
+    "cancel": "Cancelar",
+    "success": "Su confirmación se guardó. Su equipo del caso puede continuar el flujo correspondiente.",
+    "priorReviews": "Sus confirmaciones anteriores",
+    "options": {
+      "recognize": "Reconozco esta cuenta",
+      "need_more_info": "No la reconozco, pero necesito más información",
+      "inaccurate_reporting": "Es mi cuenta, pero la información reportada es inexacta",
+      "identity_theft": "Creo que esta cuenta resultó de un robo de identidad",
+      "mixed_file": "Esta cuenta pertenece a otra persona con información similar",
+      "authorized_user": "Solo soy usuario autorizado",
+      "unsure": "No estoy seguro/a — soliciten documentación primero"
+    },
+    "errors": {
+      "selectAccount": "Seleccione una cuenta para confirmar",
+      "acceptAttestation": "Acepte la declaración antes de confirmar robo de identidad",
+      "submitFailed": "La confirmación falló"
+    }
+  },
   "documents": {
     "title": "Sus documentos",
     "subtitle": "Suba evidencia y archivos de apoyo para este caso.",

@@ -121,6 +121,39 @@
       "fcra_authorization": "I authorize the organization to obtain and dispute information in my consumer credit reports on my behalf."
     }
   },
+  "identityTheft": {
+    "title": "Identity theft review",
+    "subtitle": "Review flagged accounts and confirm whether any resulted from identity theft. Ordinary disputes stay paused until you choose a truthful theory.",
+    "bannerTitle": "Identity-Theft Protection Indicator Detected",
+    "bannerBody": "This report contains a fraud alert, freeze, victim statement, or identity-theft block. Review these accounts before ordinary credit disputes proceed.",
+    "loading": "Loading identity-theft review…",
+    "loadError": "Failed to load identity-theft review",
+    "unknownCreditor": "Unknown creditor",
+    "reviewNeeded": "Review needed",
+    "reviewAccount": "Review this account",
+    "confirmTitle": "Confirm this account",
+    "confirmationLabel": "Your confirmation",
+    "attestationFallback": "I affirm that I did not open, authorize, use, or benefit from this account, and that the information I provided is truthful to the best of my knowledge.",
+    "saveConfirmation": "Save confirmation",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "success": "Your confirmation was saved. Your case team can continue the appropriate workflow.",
+    "priorReviews": "Your previous confirmations",
+    "options": {
+      "recognize": "I recognize this account",
+      "need_more_info": "I do not recognize it, but I need more information",
+      "inaccurate_reporting": "This is my account, but the reporting is inaccurate",
+      "identity_theft": "I believe this account resulted from identity theft",
+      "mixed_file": "This account belongs to another person with similar identifying information",
+      "authorized_user": "I am an authorized user only",
+      "unsure": "Unsure — request documentation first"
+    },
+    "errors": {
+      "selectAccount": "Select an account to confirm",
+      "acceptAttestation": "Accept the attestation before confirming identity theft",
+      "submitFailed": "Confirmation failed"
+    }
+  },
   "documents": {
     "title": "Your documents",
     "subtitle": "Upload evidence and supporting files for this case.",
