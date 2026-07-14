@@ -25,6 +25,51 @@ def test_checklist_export_filename() -> None:
     case_id = uuid.UUID("12345678-1234-5678-1234-567812345678")
     assert checklist_export_filename("cfpb", case_id) == "cfpb-checklist-12345678.md"
     assert checklist_export_filename("attorney", case_id) == "attorney-checklist-12345678.md"
+    assert (
+        checklist_export_filename("cfpb", case_id, export_format="pdf")
+        == "cfpb-checklist-12345678.pdf"
+    )
+
+
+def test_render_cfpb_checklist_pdf_starts_with_pdf_header() -> None:
+    from api.modules.documents.checklist_export import render_cfpb_checklist_pdf
+
+    checklist = CaseCfpbChecklistResponse(
+        case_id=uuid.uuid4(),
+        disclaimer="Investigator aid only.",
+        summary=CfpbChecklistSummary(
+            accounts_listed=1,
+            required_items=1,
+            optional_items=0,
+            items_present=1,
+            items_missing=0,
+            items_unknown=0,
+        ),
+        accounts=[
+            AccountCfpbChecklistItem(
+                account_key="acct:1",
+                creditor_name="Metro Auto",
+                account_number_masked="****4242",
+                bureau="experian",
+                match_key=None,
+                top_score=80,
+                primary_rule_ids=["metro2.past_due_without_dofd"],
+                items=[
+                    CfpbChecklistItem(
+                        item_id="identity_exhibits",
+                        category="evidence",
+                        title="Identity exhibits",
+                        detail="Include ID",
+                        required=True,
+                        completion_status="present",
+                        completion_source="computed",
+                    )
+                ],
+            )
+        ],
+    )
+    pdf_bytes = render_cfpb_checklist_pdf(checklist)
+    assert pdf_bytes.startswith(b"%PDF")
 
 
 def test_render_cfpb_checklist_markdown_includes_status_and_disclaimer() -> None:

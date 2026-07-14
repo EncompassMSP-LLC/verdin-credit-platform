@@ -404,6 +404,27 @@ export function CaseDisputeStrategyPanel({
                     <Button
                       size="sm"
                       variant="secondary"
+                      loading={downloadingCfpb}
+                      onClick={() => {
+                        setDownloadError(null);
+                        setDownloadingCfpb(true);
+                        void downloadCaseCfpbChecklist(caseId, { format: 'pdf' })
+                          .then(({ blob, filename }) => downloadBlob(blob, filename))
+                          .catch((error: unknown) => {
+                            setDownloadError(
+                              error instanceof Error
+                                ? error.message
+                                : 'Failed to download CFPB checklist PDF',
+                            );
+                          })
+                          .finally(() => setDownloadingCfpb(false));
+                      }}
+                    >
+                      Download checklist (.pdf)
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="secondary"
                       loading={downloadingCfpbPacket}
                       onClick={() => {
                         setDownloadError(null);
@@ -529,6 +550,27 @@ export function CaseDisputeStrategyPanel({
                       }}
                     >
                       Download checklist (.md)
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      loading={downloadingAttorney}
+                      onClick={() => {
+                        setDownloadError(null);
+                        setDownloadingAttorney(true);
+                        void downloadCaseAttorneyChecklist(caseId, { format: 'pdf' })
+                          .then(({ blob, filename }) => downloadBlob(blob, filename))
+                          .catch((error: unknown) => {
+                            setDownloadError(
+                              error instanceof Error
+                                ? error.message
+                                : 'Failed to download attorney checklist PDF',
+                            );
+                          })
+                          .finally(() => setDownloadingAttorney(false));
+                      }}
+                    >
+                      Download checklist (.pdf)
                     </Button>
                     <Button
                       size="sm"

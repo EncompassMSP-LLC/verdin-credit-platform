@@ -2169,10 +2169,12 @@ class DocumentService:
         case_id: uuid.UUID,
         *,
         recommended_only: bool = True,
+        export_format: Literal["md", "pdf"] = "md",
     ) -> tuple[bytes, str, str]:
         from api.modules.documents.checklist_export import (
             checklist_export_filename,
             render_cfpb_checklist_markdown,
+            render_cfpb_checklist_pdf,
         )
 
         checklist = await self.get_case_cfpb_checklist(
@@ -2180,11 +2182,16 @@ class DocumentService:
             case_id,
             recommended_only=recommended_only,
         )
-        body = render_cfpb_checklist_markdown(checklist).encode("utf-8")
+        if export_format == "pdf":
+            body = render_cfpb_checklist_pdf(checklist)
+            media_type = "application/pdf"
+        else:
+            body = render_cfpb_checklist_markdown(checklist).encode("utf-8")
+            media_type = "text/markdown; charset=utf-8"
         return (
             body,
-            checklist_export_filename("cfpb", case_id),
-            "text/markdown; charset=utf-8",
+            checklist_export_filename("cfpb", case_id, export_format=export_format),
+            media_type,
         )
 
     async def export_case_attorney_checklist(
@@ -2193,10 +2200,12 @@ class DocumentService:
         case_id: uuid.UUID,
         *,
         recommended_only: bool = True,
+        export_format: Literal["md", "pdf"] = "md",
     ) -> tuple[bytes, str, str]:
         from api.modules.documents.checklist_export import (
             checklist_export_filename,
             render_attorney_checklist_markdown,
+            render_attorney_checklist_pdf,
         )
 
         checklist = await self.get_case_attorney_checklist(
@@ -2204,11 +2213,16 @@ class DocumentService:
             case_id,
             recommended_only=recommended_only,
         )
-        body = render_attorney_checklist_markdown(checklist).encode("utf-8")
+        if export_format == "pdf":
+            body = render_attorney_checklist_pdf(checklist)
+            media_type = "application/pdf"
+        else:
+            body = render_attorney_checklist_markdown(checklist).encode("utf-8")
+            media_type = "text/markdown; charset=utf-8"
         return (
             body,
-            checklist_export_filename("attorney", case_id),
-            "text/markdown; charset=utf-8",
+            checklist_export_filename("attorney", case_id, export_format=export_format),
+            media_type,
         )
 
     async def export_case_cfpb_checklist_packet(

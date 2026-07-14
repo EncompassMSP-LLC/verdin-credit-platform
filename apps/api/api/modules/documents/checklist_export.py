@@ -19,9 +19,15 @@ _FOOTER = (
 _CATEGORY_ORDER: tuple[str, ...] = ("correspondence", "evidence", "chronology", "filing")
 
 
-def checklist_export_filename(kind: Literal["cfpb", "attorney"], case_id: uuid.UUID) -> str:
+def checklist_export_filename(
+    kind: Literal["cfpb", "attorney"],
+    case_id: uuid.UUID,
+    *,
+    export_format: Literal["md", "pdf"] = "md",
+) -> str:
     short = str(case_id).replace("-", "")[:8]
-    return f"{kind}-checklist-{short}.md"
+    extension = "pdf" if export_format == "pdf" else "md"
+    return f"{kind}-checklist-{short}.{extension}"
 
 
 def _item_line(item: Any) -> str:
@@ -136,3 +142,132 @@ def render_attorney_checklist_markdown(checklist: Any) -> str:
             lines.append(_render_account_section(account, include_escalation=True))
     lines.append(_FOOTER)
     return "\n".join(lines)
+
+
+def _wrap_pdf_line(text: str, *, max_chars: int = 95) -> list[str]:
+    cleaned = " ".join(text.split())
+    if not cleaned:
+        return [""]
+    if len(cleaned) <= max_chars:
+        return [cleaned]
+    words = cleaned.split(" ")
+    lines: list[str] = []
+    current = ""
+    for word in words:
+        candidate = f"{current} {word}".strip()
+        if len(candidate) <= max_chars:
+            current = candidate
+            continue
+        if current:
+            lines.append(current)
+        current = word
+    if current:
+        lines.append(current)
+    return lines or [""]
+
+
+def _build_checklist_pdf_lines(
+    checklist: Any,
+    *,
+    title: str,
+    include_escalation: bool,
+    empty_message: str,
+) -> list[str]:
+    generated = datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    lines = [
+        title,
+        f"Case ID: {getattr(checklist, 'case_id', '')}",
+        f"Generated: {generated}",
+        "",
+        str(getattr(checklist, "disclaimer", "") or ""),
+        "",
+    ]
+    summary = getattr(checklist, "summary", None)
+    lines.extend(
+        line.lstrip("# ").lstrip("- ")
+        for line in _render_summary(summary, include_escalation=include_escalation)
+        if line != ""
+    )
+    lines.append("")
+    accounts = list(getattr(checklist, "accounts", []) or [])
+    if not accounts:
+        lines.append(empty_message)
+    else:
+        for account in accounts:
+            section = _render_account_section(account, include_escalation=include_escalation)
+            for raw in section.splitlines():
+                cleaned = raw.replace("**", "").replace("`", "").lstrip("# ").replace("- [", "[")
+                lines.append(cleaned)
+            lines.append("")
+    lines.append("Staff-mediated export only. Does not file with CFPB or transmit to counsel.")
+    return lines
+
+
+def render_checklist_pdf(
+    checklist: Any,
+    *,
+    title: str,
+    include_escalation: bool,
+    empty_message: str,
+) -> bytes:
+    from io import BytesIO
+
+    from reportlab.lib.pagesizes import letter as letter_page_size
+    from reportlab.pdfgen import canvas
+
+    buffer = BytesIO()
+    pdf = canvas.Canvas(buffer, pagesize=letter_page_size)
+    page_width, page_height = letter_page_size
+    margin = 54
+    line_height = 13
+    y = page_height - margin
+    pdf.setTitle(title)
+
+    def new_page() -> None:
+        nonlocal y
+        pdf.showPage()
+        y = page_height - margin
+
+    for raw_line in _build_checklist_pdf_lines(
+        checklist,
+        title=title,
+        include_escalation=include_escalation,
+        empty_message=empty_message,
+    ):
+        font_name = (
+            "Helvetica-Bold"
+            if raw_line in {title} or raw_line.startswith("Account:")
+            else "Helvetica"
+        )
+        font_size = 14 if raw_line == title else 10
+        pdf.setFont(font_name, font_size)
+        for segment in _wrap_pdf_line(raw_line, max_chars=100):
+            if y < margin:
+                new_page()
+                pdf.setFont(font_name, font_size)
+            if not segment:
+                y -= line_height
+                continue
+            pdf.drawString(margin, y, segment[:120])
+            y -= line_height
+
+    pdf.save()
+    return buffer.getvalue()
+
+
+def render_cfpb_checklist_pdf(checklist: Any) -> bytes:
+    return render_checklist_pdf(
+        checklist,
+        title="CFPB escalation checklist",
+        include_escalation=False,
+        empty_message="No accounts listed for CFPB escalation.",
+    )
+
+
+def render_attorney_checklist_pdf(checklist: Any) -> bytes:
+    return render_checklist_pdf(
+        checklist,
+        title="Attorney-preserve checklist",
+        include_escalation=True,
+        empty_message="No accounts listed for attorney preserve.",
+    )
