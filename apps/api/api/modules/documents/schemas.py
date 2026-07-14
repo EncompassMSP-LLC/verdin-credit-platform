@@ -2,7 +2,7 @@
 
 import uuid
 from datetime import datetime
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 from pydantic import Field
 from sqlalchemy import inspect as sa_inspect
@@ -18,6 +18,9 @@ from api.modules.documents.constants import (
 )
 from api.modules.documents.models import Document, DocumentVersion
 from api.modules.documents.parsed_report_models import DocumentParsedCreditReport
+
+if TYPE_CHECKING:
+    from api.modules.documents.strategy_run_models import DisputeStrategyRun
 
 DocumentSortField = Literal["created_at", "title", "file_name", "file_size"]
 DocumentSortOrder = Literal["asc", "desc"]
@@ -686,6 +689,35 @@ class CaseDisputeStrategyResponse(BaseSchema):
     disclaimer: str
     summary: DisputeStrategySummary
     strategies: list[AccountDisputeStrategyItem]
+    run_id: uuid.UUID | None = None
+    generated_at: datetime | None = None
+
+
+class DisputeStrategyRunResponse(BaseSchema):
+    id: uuid.UUID
+    case_id: uuid.UUID
+    generated_at: datetime
+    generated_by_id: uuid.UUID | None = None
+    disclaimer: str
+    summary: DisputeStrategySummary
+    strategies: list[AccountDisputeStrategyItem]
+    accounts_planned: int
+    issues_covered: int
+
+    @classmethod
+    def from_model(cls, run: "DisputeStrategyRun") -> "DisputeStrategyRunResponse":
+        payload = run.payload
+        return cls(
+            id=run.id,
+            case_id=run.case_id,
+            generated_at=run.generated_at,
+            generated_by_id=run.generated_by_id,
+            disclaimer=str(payload["disclaimer"]),
+            summary=DisputeStrategySummary(**payload["summary"]),
+            strategies=[AccountDisputeStrategyItem(**item) for item in payload["strategies"]],
+            accounts_planned=run.accounts_planned,
+            issues_covered=run.issues_covered,
+        )
 
 
 class PrepareDisputeStrategyStageRequest(BaseSchema):

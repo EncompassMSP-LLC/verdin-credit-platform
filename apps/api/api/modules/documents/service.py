@@ -79,6 +79,7 @@ from api.modules.documents.schemas import (
     CrossBureauComparisonSummary,
     CrossBureauDiscrepancyResponse,
     CrossBureauPossibleCauseResponse,
+    DisputeStrategyRunResponse,
     DisputeStrategyStage,
     DisputeStrategySummary,
     DocumentClassificationResponse,
@@ -165,7 +166,10 @@ _TRADELINE_COMPARE_FIELDS: tuple[str, ...] = (
 )
 
 if TYPE_CHECKING:
-    from api.modules.documents.dispute_strategy import ChecklistEvidenceSnapshot
+    from api.modules.documents.dispute_strategy import (
+        CaseDisputeStrategyResult,
+        ChecklistEvidenceSnapshot,
+    )
 
 
 class DocumentService:
@@ -1947,7 +1951,50 @@ class DocumentService:
             ],
         )
 
-    async def get_case_dispute_strategy(
+    @staticmethod
+    def _case_dispute_strategy_response_from_result(
+        result: "CaseDisputeStrategyResult",
+    ) -> CaseDisputeStrategyResponse:
+        return CaseDisputeStrategyResponse(
+            case_id=result.case_id,
+            disclaimer=result.disclaimer,
+            summary=DisputeStrategySummary(
+                accounts_planned=int(result.summary["accounts_planned"]),
+                issues_covered=int(result.summary["issues_covered"]),
+                high_strength_accounts=int(result.summary["high_strength_accounts"]),
+                cfpb_recommended=int(result.summary["cfpb_recommended"]),
+                attorney_recommended=int(result.summary["attorney_recommended"]),
+            ),
+            strategies=[
+                AccountDisputeStrategyItem(
+                    account_key=item.account_key,
+                    creditor_name=item.creditor_name,
+                    account_number_masked=item.account_number_masked,
+                    bureau=item.bureau,
+                    match_key=item.match_key,
+                    top_score=item.top_score,
+                    issue_count=item.issue_count,
+                    primary_rule_ids=list(item.primary_rule_ids),
+                    summary=item.summary,
+                    stages=[
+                        DisputeStrategyStage(
+                            stage_order=stage.stage_order,
+                            stage_kind=stage.stage_kind,
+                            title=stage.title,
+                            objective=stage.objective,
+                            rationale=stage.rationale,
+                            issue_source_ids=list(stage.issue_source_ids),
+                            evidence_hints=list(stage.evidence_hints),
+                            recommended=stage.recommended,
+                        )
+                        for stage in item.stages
+                    ],
+                )
+                for item in result.strategies
+            ],
+        )
+
+    async def _build_case_dispute_strategy_response(
         self,
         user: User,
         case_id: uuid.UUID,
@@ -1994,44 +2041,61 @@ class DocumentService:
             scored_issues=scored_issues,
             evidence_hints_by_source_id=evidence_hints_by_source_id,
         )
-        return CaseDisputeStrategyResponse(
-            case_id=result.case_id,
-            disclaimer=result.disclaimer,
-            summary=DisputeStrategySummary(
-                accounts_planned=int(result.summary["accounts_planned"]),
-                issues_covered=int(result.summary["issues_covered"]),
-                high_strength_accounts=int(result.summary["high_strength_accounts"]),
-                cfpb_recommended=int(result.summary["cfpb_recommended"]),
-                attorney_recommended=int(result.summary["attorney_recommended"]),
-            ),
-            strategies=[
-                AccountDisputeStrategyItem(
-                    account_key=item.account_key,
-                    creditor_name=item.creditor_name,
-                    account_number_masked=item.account_number_masked,
-                    bureau=item.bureau,
-                    match_key=item.match_key,
-                    top_score=item.top_score,
-                    issue_count=item.issue_count,
-                    primary_rule_ids=list(item.primary_rule_ids),
-                    summary=item.summary,
-                    stages=[
-                        DisputeStrategyStage(
-                            stage_order=stage.stage_order,
-                            stage_kind=stage.stage_kind,
-                            title=stage.title,
-                            objective=stage.objective,
-                            rationale=stage.rationale,
-                            issue_source_ids=list(stage.issue_source_ids),
-                            evidence_hints=list(stage.evidence_hints),
-                            recommended=stage.recommended,
-                        )
-                        for stage in item.stages
-                    ],
-                )
-                for item in result.strategies
-            ],
+        return self._case_dispute_strategy_response_from_result(result)
+
+    async def get_case_dispute_strategy(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+        *,
+        persist_run: bool = False,
+    ) -> CaseDisputeStrategyResponse:
+        organization_id = self._require_organization(user)
+        response = await self._build_case_dispute_strategy_response(user, case_id)
+
+        if not persist_run or self._session is None:
+            return response
+
+        from api.modules.documents.strategy_run_repository import StrategyRunRepository
+
+        repo = StrategyRunRepository(self._session)
+        run = await repo.create(
+            organization_id=organization_id,
+            case_id=case_id,
+            generated_by_id=user.id,
+            accounts_planned=response.summary.accounts_planned,
+            issues_covered=response.summary.issues_covered,
+            payload=response.model_dump(mode="json"),
         )
+        await self._session.commit()
+        return response.model_copy(update={"run_id": run.id, "generated_at": run.generated_at})
+
+    async def get_latest_case_dispute_strategy_run(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+    ) -> DisputeStrategyRunResponse:
+        organization_id = self._require_organization(user)
+        await self._validate_case(case_id, organization_id)
+        if self._session is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Database session unavailable",
+            )
+
+        from api.modules.documents.strategy_run_repository import StrategyRunRepository
+
+        repo = StrategyRunRepository(self._session)
+        run = await repo.get_latest_for_case(
+            organization_id=organization_id,
+            case_id=case_id,
+        )
+        if run is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No dispute strategy run found for this case",
+            )
+        return DisputeStrategyRunResponse.from_model(run)
 
     async def get_case_cfpb_checklist(
         self,

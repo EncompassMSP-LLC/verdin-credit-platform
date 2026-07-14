@@ -395,6 +395,20 @@ export interface CaseDisputeStrategy {
   disclaimer: string;
   summary: DisputeStrategySummary;
   strategies: AccountDisputeStrategy[];
+  run_id?: string | null;
+  generated_at?: string | null;
+}
+
+export interface DisputeStrategyRun {
+  id: string;
+  case_id: string;
+  generated_at: string;
+  generated_by_id?: string | null;
+  disclaimer: string;
+  summary: DisputeStrategySummary;
+  strategies: AccountDisputeStrategy[];
+  accounts_planned: number;
+  issues_covered: number;
 }
 
 export interface ParsedReportAccountChange {

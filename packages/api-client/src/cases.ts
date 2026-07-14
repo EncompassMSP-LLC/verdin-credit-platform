@@ -15,6 +15,7 @@ import type {
   CaseLitigationStrength,
   CaseMetro2Findings,
   CaseTradelineChronology,
+  DisputeStrategyRun,
   Document,
 } from './documents';
 
@@ -25,6 +26,7 @@ export type {
   CaseLitigationStrength,
   CaseMetro2Findings,
   CaseTradelineChronology,
+  DisputeStrategyRun,
 } from './documents';
 
 export interface Case {
@@ -394,6 +396,10 @@ export async function getCaseLitigationStrength(caseId: string): Promise<CaseLit
 
 export async function getCaseDisputeStrategy(caseId: string): Promise<CaseDisputeStrategy> {
   return request<CaseDisputeStrategy>(apiPath(`/cases/${caseId}/dispute-strategy`));
+}
+
+export async function getLatestCaseDisputeStrategyRun(caseId: string): Promise<DisputeStrategyRun> {
+  return request<DisputeStrategyRun>(apiPath(`/cases/${caseId}/dispute-strategy/runs/latest`));
 }
 
 export async function getCaseCfpbChecklist(
