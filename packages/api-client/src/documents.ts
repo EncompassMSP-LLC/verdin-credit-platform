@@ -411,6 +411,18 @@ export interface DisputeStrategyRun {
   issues_covered: number;
 }
 
+export interface DisputeStrategyRunSummary {
+  id: string;
+  case_id: string;
+  generated_at: string;
+  generated_by_id?: string | null;
+  accounts_planned: number;
+  issues_covered: number;
+  high_strength_accounts: number;
+  cfpb_recommended: number;
+  attorney_recommended: number;
+}
+
 export interface ParsedReportAccountChange {
   match_key: string;
   creditor_name: string | null;

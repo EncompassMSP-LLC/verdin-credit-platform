@@ -8,6 +8,8 @@ import {
   getCaseAttorneyChecklist,
   getCaseCfpbChecklist,
   getCaseDisputeStrategy,
+  listCaseDisputeStrategyRuns,
+  type DisputeStrategyRunSummary,
   prepareCaseDisputeStrategyStage,
   upsertCaseChecklistOverride,
   type AccountAttorneyChecklist,
@@ -59,6 +61,29 @@ function StrategyRunAudit({
         </>
       ) : null}
     </p>
+  );
+}
+
+function StrategyRunHistory({ runs }: { runs: DisputeStrategyRunSummary[] }) {
+  if (runs.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="rounded-md border border-gray-100 bg-gray-50 px-3 py-2">
+      <p className="text-xs font-medium text-gray-700">Recent strategy runs</p>
+      <ul className="mt-2 space-y-1">
+        {runs.map((run) => (
+          <li key={run.id} className="flex flex-wrap items-center gap-2 text-xs text-gray-600">
+            <span>{formatGeneratedAt(run.generated_at)}</span>
+            <span className="font-mono text-gray-400">{run.id.slice(0, 8)}</span>
+            <span>
+              {run.accounts_planned} acct · {run.issues_covered} issues
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
@@ -254,6 +279,13 @@ export function CaseDisputeStrategyPanel({
     retry: false,
   });
 
+  const runHistoryQuery = useQuery({
+    queryKey: ['case-dispute-strategy-runs', caseId],
+    queryFn: () => listCaseDisputeStrategyRuns(caseId, { page: 1, page_size: 5 }),
+    enabled: strategyQuery.isSuccess,
+    retry: false,
+  });
+
   const cfpbQuery = useQuery({
     queryKey: ['case-cfpb-checklist', caseId],
     queryFn: () => getCaseCfpbChecklist(caseId),
@@ -343,6 +375,8 @@ export function CaseDisputeStrategyPanel({
               </div>
               <SummaryBadges summary={strategyQuery.data.summary} />
             </div>
+
+            {runHistoryQuery.data ? <StrategyRunHistory runs={runHistoryQuery.data.items} /> : null}
 
             <div className="flex flex-wrap gap-2">
               <Button
