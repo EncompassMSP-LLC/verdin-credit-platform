@@ -298,6 +298,7 @@ async def upsert_case_checklist_override(
 async def export_case_cfpb_checklist(
     case_id: uuid.UUID,
     recommended_only: bool = Query(default=True),
+    format: Literal["md", "pdf"] = Query(default="md"),
     current_user: User = Depends(get_current_user),
     service: DocumentService = Depends(get_document_service),
 ) -> Response:
@@ -305,6 +306,7 @@ async def export_case_cfpb_checklist(
         current_user,
         case_id,
         recommended_only=recommended_only,
+        export_format=format,
     )
     safe_name = sanitize_content_disposition_filename(file_name)
     return Response(
@@ -318,6 +320,7 @@ async def export_case_cfpb_checklist(
 async def export_case_attorney_checklist(
     case_id: uuid.UUID,
     recommended_only: bool = Query(default=True),
+    format: Literal["md", "pdf"] = Query(default="md"),
     current_user: User = Depends(get_current_user),
     service: DocumentService = Depends(get_document_service),
 ) -> Response:
@@ -325,6 +328,7 @@ async def export_case_attorney_checklist(
         current_user,
         case_id,
         recommended_only=recommended_only,
+        export_format=format,
     )
     safe_name = sanitize_content_disposition_filename(file_name)
     return Response(

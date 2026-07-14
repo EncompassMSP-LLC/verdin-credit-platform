@@ -13,6 +13,18 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — checklist PDF export
+
+**Decision:** Add ormat=md|pdf (default md) on CFPB/attorney checklist /export endpoints, with reportlab PDF rendering and UI download buttons alongside markdown.
+
+**Reason:** Investigators needed printable checklist PDFs without downloading the full exhibit packet ZIP.
+
+**Alternatives considered:** Always PDF; nest checklist PDF only inside packet.zip; print-from-browser CSS.
+
+**Technical debt:** PDF is plain wrapped text, not a typeset layout; packet ZIP still embeds markdown checklist only.
+
+**Follow-up work:** Optional checklist.pdf inside packet.zip; OCR line refs; counsel transmit (deferred).
+
 ## Compliance intelligence — prepare tradeline via finding source refs
 
 **Decision:** Carry source_document_id / radeline_index on strategy prep targets by parsing finding source_id refs (kind:bureau:rule#index@{document_id}), and prefer indexed tradeline lookup before creditor/masked matching when creating direct accounts.
@@ -227,7 +239,7 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Technical debt:** Checklist is heuristic; does not verify which exhibits are already on the case.
 
-**Follow-up work:** Mark checklist items complete against case documents; optional packet PDF export.
+**Follow-up work:** Mark checklist items complete against case documents; optional packet PDF export (done).
 
 ## Compliance intelligence — CFPB escalation checklist
 

@@ -520,6 +520,7 @@ async function downloadChecklistExport(
     letter_format?: 'text' | 'pdf';
     include_mail_packets?: boolean;
     include_report_excerpts?: boolean;
+    format?: 'md' | 'pdf';
   } = {},
 ): Promise<{ blob: Blob; filename: string }> {
   const query = new URLSearchParams();
@@ -537,6 +538,9 @@ async function downloadChecklistExport(
   }
   if (params.include_report_excerpts === true) {
     query.set('include_report_excerpts', 'true');
+  }
+  if (params.format === 'pdf') {
+    query.set('format', 'pdf');
   }
   const suffix = query.toString() ? `?${query.toString()}` : '';
   const url = `${getApiBaseUrl()}${apiPath(`${path}${suffix}`)}`;
@@ -568,24 +572,26 @@ async function downloadChecklistExport(
 
 export async function downloadCaseCfpbChecklist(
   caseId: string,
-  params: { recommended_only?: boolean } = {},
+  params: { recommended_only?: boolean; format?: 'md' | 'pdf' } = {},
 ): Promise<{ blob: Blob; filename: string }> {
+  const extension = params.format === 'pdf' ? 'pdf' : 'md';
   return downloadChecklistExport(
     caseId,
     `/cases/${caseId}/dispute-strategy/cfpb-checklist/export`,
-    `cfpb-checklist-${caseId.slice(0, 8)}.md`,
+    `cfpb-checklist-${caseId.slice(0, 8)}.${extension}`,
     params,
   );
 }
 
 export async function downloadCaseAttorneyChecklist(
   caseId: string,
-  params: { recommended_only?: boolean } = {},
+  params: { recommended_only?: boolean; format?: 'md' | 'pdf' } = {},
 ): Promise<{ blob: Blob; filename: string }> {
+  const extension = params.format === 'pdf' ? 'pdf' : 'md';
   return downloadChecklistExport(
     caseId,
     `/cases/${caseId}/dispute-strategy/attorney-checklist/export`,
-    `attorney-checklist-${caseId.slice(0, 8)}.md`,
+    `attorney-checklist-${caseId.slice(0, 8)}.${extension}`,
     params,
   );
 }
