@@ -19,57 +19,48 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
-    identity_theft_incident_status = sa.Enum(
-        "open",
-        "in_recovery",
-        "closed",
-        name="identity_theft_incident_status",
+    op.execute(
+        "CREATE TYPE identity_theft_incident_status AS ENUM ('open', 'in_recovery', 'closed')"
     )
-    identity_theft_issue_type = sa.Enum(
-        "IDENTITY_THEFT_INDICATOR",
-        "CONFIRMED_IDENTITY_THEFT_CLAIM",
-        name="identity_theft_issue_type",
+    op.execute(
+        "CREATE TYPE identity_theft_issue_type AS ENUM ("
+        "'IDENTITY_THEFT_INDICATOR', 'CONFIRMED_IDENTITY_THEFT_CLAIM'"
+        ")"
     )
-    identity_theft_confirmation = sa.Enum(
-        "recognize",
-        "need_more_info",
-        "inaccurate_reporting",
-        "identity_theft",
-        "mixed_file",
-        "authorized_user",
-        "unsure",
-        name="identity_theft_confirmation",
+    op.execute(
+        "CREATE TYPE identity_theft_confirmation AS ENUM ("
+        "'recognize', 'need_more_info', 'inaccurate_reporting', 'identity_theft', "
+        "'mixed_file', 'authorized_user', 'unsure'"
+        ")"
     )
-    identity_theft_protection_type = sa.Enum(
-        "initial_fraud_alert",
-        "extended_fraud_alert",
-        "active_duty_alert",
-        "equifax_freeze",
-        "experian_freeze",
-        "transunion_freeze",
-        name="identity_theft_protection_type",
+    op.execute(
+        "CREATE TYPE identity_theft_protection_type AS ENUM ("
+        "'initial_fraud_alert', 'extended_fraud_alert', 'active_duty_alert', "
+        "'equifax_freeze', 'experian_freeze', 'transunion_freeze'"
+        ")"
     )
-    identity_theft_protection_status = sa.Enum(
-        "active",
-        "inactive",
-        "frozen",
-        "unfrozen",
-        "unknown",
-        name="identity_theft_protection_status",
+    op.execute(
+        "CREATE TYPE identity_theft_protection_status AS ENUM ("
+        "'active', 'inactive', 'frozen', 'unfrozen', 'unknown'"
+        ")"
     )
-
-    identity_theft_incident_status.create(op.get_bind(), checkfirst=True)
-    identity_theft_issue_type.create(op.get_bind(), checkfirst=True)
-    identity_theft_confirmation.create(op.get_bind(), checkfirst=True)
-    identity_theft_protection_type.create(op.get_bind(), checkfirst=True)
-    identity_theft_protection_status.create(op.get_bind(), checkfirst=True)
 
     op.create_table(
         "identity_theft_incidents",
         sa.Column("id", postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column("organization_id", postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column("case_id", postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("status", identity_theft_incident_status, nullable=False),
+        sa.Column(
+            "status",
+            postgresql.ENUM(
+                "open",
+                "in_recovery",
+                "closed",
+                name="identity_theft_incident_status",
+                create_type=False,
+            ),
+            nullable=False,
+        ),
         sa.Column("discovered_at", sa.Date(), nullable=True),
         sa.Column("suspected_theft_period_start", sa.Date(), nullable=True),
         sa.Column("suspected_theft_period_end", sa.Date(), nullable=True),
@@ -148,8 +139,31 @@ def upgrade() -> None:
         sa.Column("detection_source", sa.String(length=64), nullable=False),
         sa.Column("rule_id", sa.String(length=128), nullable=True),
         sa.Column("confidence", sa.Float(), nullable=False),
-        sa.Column("issue_type", identity_theft_issue_type, nullable=False),
-        sa.Column("consumer_confirmation", identity_theft_confirmation, nullable=True),
+        sa.Column(
+            "issue_type",
+            postgresql.ENUM(
+                "IDENTITY_THEFT_INDICATOR",
+                "CONFIRMED_IDENTITY_THEFT_CLAIM",
+                name="identity_theft_issue_type",
+                create_type=False,
+            ),
+            nullable=False,
+        ),
+        sa.Column(
+            "consumer_confirmation",
+            postgresql.ENUM(
+                "recognize",
+                "need_more_info",
+                "inaccurate_reporting",
+                "identity_theft",
+                "mixed_file",
+                "authorized_user",
+                "unsure",
+                name="identity_theft_confirmation",
+                create_type=False,
+            ),
+            nullable=True,
+        ),
         sa.Column("consumer_confirmed_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("ordinary_dispute_locked", sa.Boolean(), nullable=False),
         sa.Column("legal_path", sa.String(length=64), nullable=True),
@@ -217,8 +231,33 @@ def upgrade() -> None:
         sa.Column("id", postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column("organization_id", postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column("case_id", postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("protection_type", identity_theft_protection_type, nullable=False),
-        sa.Column("status", identity_theft_protection_status, nullable=False),
+        sa.Column(
+            "protection_type",
+            postgresql.ENUM(
+                "initial_fraud_alert",
+                "extended_fraud_alert",
+                "active_duty_alert",
+                "equifax_freeze",
+                "experian_freeze",
+                "transunion_freeze",
+                name="identity_theft_protection_type",
+                create_type=False,
+            ),
+            nullable=False,
+        ),
+        sa.Column(
+            "status",
+            postgresql.ENUM(
+                "active",
+                "inactive",
+                "frozen",
+                "unfrozen",
+                "unknown",
+                name="identity_theft_protection_status",
+                create_type=False,
+            ),
+            nullable=False,
+        ),
         sa.Column("placed_at", sa.Date(), nullable=True),
         sa.Column("expires_at", sa.Date(), nullable=True),
         sa.Column("source", sa.String(length=64), nullable=False),
@@ -310,8 +349,8 @@ def downgrade() -> None:
     )
     op.drop_table("identity_theft_incidents")
 
-    sa.Enum(name="identity_theft_protection_status").drop(op.get_bind(), checkfirst=True)
-    sa.Enum(name="identity_theft_protection_type").drop(op.get_bind(), checkfirst=True)
-    sa.Enum(name="identity_theft_confirmation").drop(op.get_bind(), checkfirst=True)
-    sa.Enum(name="identity_theft_issue_type").drop(op.get_bind(), checkfirst=True)
-    sa.Enum(name="identity_theft_incident_status").drop(op.get_bind(), checkfirst=True)
+    op.execute("DROP TYPE IF EXISTS identity_theft_protection_status")
+    op.execute("DROP TYPE IF EXISTS identity_theft_protection_type")
+    op.execute("DROP TYPE IF EXISTS identity_theft_confirmation")
+    op.execute("DROP TYPE IF EXISTS identity_theft_issue_type")
+    op.execute("DROP TYPE IF EXISTS identity_theft_incident_status")
