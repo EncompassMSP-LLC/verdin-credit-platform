@@ -82,6 +82,11 @@ All case endpoints require authentication. Users are scoped to their organizatio
 | DELETE | `/cases/{case_id}`                                                | admin        | Soft-delete a case                                                                                               |
 | GET    | `/cases/{case_id}/metro2-findings`                                | read_only    | Aggregate Metro 2 findings across latest bureau reports                                                          |
 | GET    | `/cases/{case_id}/fcra-findings`                                  | read_only    | Aggregate FCRA checklist findings across latest bureau reports                                                   |
+| GET    | `/cases/{case_id}/identity-theft-findings`                        | read_only    | Aggregate identity-theft indicators (Phase 8) across latest bureau reports                                       |
+| GET    | `/cases/{case_id}/identity-theft-center`                          | read_only    | Identity Theft Case Center — findings, incident, protections, §605B readiness                                    |
+| POST   | `/cases/{case_id}/identity-theft/account-reviews`                 | case_manager | Consumer confirmation gate (attestation required for identity_theft)                                             |
+| PUT    | `/cases/{case_id}/identity-theft/protections`                     | case_manager | Upsert fraud-alert / freeze tracking row                                                                         |
+| PATCH  | `/cases/{case_id}/identity-theft/incident`                        | case_manager | Update identity-theft incident profile                                                                           |
 | GET    | `/cases/{case_id}/tradeline-chronology`                           | read_only    | Multi-report tradeline chronology across stored bureau reports                                                   |
 | GET    | `/cases/{case_id}/compliance-evidence-links`                      | read_only    | Link Metro 2/FCRA findings to reports and exhibits (optional page scan)                                          |
 | GET    | `/cases/{case_id}/litigation-strength`                            | read_only    | Rank compliance issues by heuristic litigation strength                                                          |
@@ -278,31 +283,33 @@ Accounts automatically compute `risk_score`, `readiness_score`, `next_eligible_d
 
 Secure document storage with MinIO, SHA-256 hashing, versioning, and duplicate detection. See [`docs/epics/document-intelligence-platform.md`](../epics/document-intelligence-platform.md).
 
-| Method | Path                                                               | Min role     | Description                                     |
-| ------ | ------------------------------------------------------------------ | ------------ | ----------------------------------------------- |
-| POST   | `/documents`                                                       | case_manager | Upload document (multipart)                     |
-| GET    | `/documents`                                                       | read_only    | List documents                                  |
-| GET    | `/documents/{document_id}`                                         | read_only    | Get document with versions                      |
-| GET    | `/documents/{document_id}/duplicates`                              | read_only    | Get exact-hash duplicate group                  |
-| PATCH  | `/documents/{document_id}`                                         | case_manager | Update metadata                                 |
-| DELETE | `/documents/{document_id}`                                         | admin        | Soft-delete document                            |
-| GET    | `/documents/{document_id}/ocr`                                     | read_only    | OCR status and extracted text                   |
-| POST   | `/documents/{document_id}/ocr/retry`                               | case_manager | Re-queue OCR for failed document                |
-| GET    | `/documents/{document_id}/download`                                | read_only    | Download file (optional `version`)              |
-| POST   | `/documents/{document_id}/versions`                                | case_manager | Upload new version                              |
-| GET    | `/documents/{document_id}/versions`                                | read_only    | List version history                            |
-| GET    | `/documents/{document_id}/metadata`                                | read_only    | Get extracted metadata                          |
-| POST   | `/documents/{document_id}/metadata/extract`                        | case_manager | Extract metadata from OCR text                  |
-| GET    | `/documents/{document_id}/parsed-credit-report/account-candidates` | read_only    | Build account candidates from parsed tradelines |
-| GET    | `/documents/{document_id}/parsed-credit-report/comparison`         | read_only    | Compare against previous report                 |
-| GET    | `/documents/{document_id}/parsed-credit-report/metro2-findings`    | read_only    | Deterministic Metro 2 consistency findings      |
-| GET    | `/documents/{document_id}/parsed-credit-report/fcra-findings`      | read_only    | Deterministic FCRA statutory checklist findings |
-| POST   | `/documents/{document_id}/parsed-credit-report/review-task`        | case_manager | Create or reuse account candidate review task   |
-| GET    | `/documents/{document_id}/resolutions`                             | read_only    | List entity resolution results                  |
-| POST   | `/documents/{document_id}/resolutions/resolve`                     | case_manager | Run entity resolution                           |
-| POST   | `/documents/{document_id}/resolutions/{resolution_id}/confirm`     | case_manager | Confirm or manually select match                |
-| POST   | `/documents/{document_id}/resolutions/{resolution_id}/reject`      | case_manager | Reject proposed match                           |
-| POST   | `/documents/{document_id}/llm-summary`                             | case_manager | Generate scrubbed document summary              |
+| Method | Path                                                                    | Min role     | Description                                     |
+| ------ | ----------------------------------------------------------------------- | ------------ | ----------------------------------------------- |
+| POST   | `/documents`                                                            | case_manager | Upload document (multipart)                     |
+| GET    | `/documents`                                                            | read_only    | List documents                                  |
+| GET    | `/documents/{document_id}`                                              | read_only    | Get document with versions                      |
+| GET    | `/documents/{document_id}/duplicates`                                   | read_only    | Get exact-hash duplicate group                  |
+| PATCH  | `/documents/{document_id}`                                              | case_manager | Update metadata                                 |
+| DELETE | `/documents/{document_id}`                                              | admin        | Soft-delete document                            |
+| GET    | `/documents/{document_id}/ocr`                                          | read_only    | OCR status and extracted text                   |
+| POST   | `/documents/{document_id}/ocr/retry`                                    | case_manager | Re-queue OCR for failed document                |
+| GET    | `/documents/{document_id}/download`                                     | read_only    | Download file (optional `version`)              |
+| POST   | `/documents/{document_id}/versions`                                     | case_manager | Upload new version                              |
+| GET    | `/documents/{document_id}/versions`                                     | read_only    | List version history                            |
+| GET    | `/documents/{document_id}/metadata`                                     | read_only    | Get extracted metadata                          |
+| POST   | `/documents/{document_id}/metadata/extract`                             | case_manager | Extract metadata from OCR text                  |
+| GET    | `/documents/{document_id}/parsed-credit-report/account-candidates`      | read_only    | Build account candidates from parsed tradelines |
+| GET    | `/documents/{document_id}/parsed-credit-report/comparison`              | read_only    | Compare against previous report                 |
+| GET    | `/documents/{document_id}/parsed-credit-report/metro2-findings`         | read_only    | Deterministic Metro 2 consistency findings      |
+| GET    | `/documents/{document_id}/parsed-credit-report/fcra-findings`           | read_only    | Deterministic FCRA statutory checklist findings |
+| GET    | `/documents/{document_id}/parsed-credit-report/identity-theft-findings` | read_only    | Identity Theft Detection findings (Phase 8)     |
+| GET    | `/documents/{document_id}/parsed-credit-report/account-candidates`      | read_only    | Parsed tradelines as import candidates          |
+| POST   | `/documents/{document_id}/parsed-credit-report/review-task`             | case_manager | Create or reuse account candidate review task   |
+| GET    | `/documents/{document_id}/resolutions`                                  | read_only    | List entity resolution results                  |
+| POST   | `/documents/{document_id}/resolutions/resolve`                          | case_manager | Run entity resolution                           |
+| POST   | `/documents/{document_id}/resolutions/{resolution_id}/confirm`          | case_manager | Confirm or manually select match                |
+| POST   | `/documents/{document_id}/resolutions/{resolution_id}/reject`           | case_manager | Reject proposed match                           |
+| POST   | `/documents/{document_id}/llm-summary`                                  | case_manager | Generate scrubbed document summary              |
 
 **List query parameters:** `metadata_status` (`pending`, `extracted`, `failed`), `resolution_status` (`matched`, `ambiguous`, `unmatched`, `confirmed`, `rejected`).
 
@@ -333,6 +340,8 @@ Parsed credit report comparison: `GET /documents/{document_id}/parsed-credit-rep
 Metro 2 consistency findings: `GET /documents/{document_id}/parsed-credit-report/metro2-findings` runs deterministic field-consistency rules against the stored parsed tradelines (for example closed-with-balance, past-due without DOFD, impossible date sequences). Findings are investigator aids, not a full CDIA audit. `GET /cases/{case_id}/metro2-findings` aggregates the same rules across the latest parsed report per bureau.
 
 FCRA checklist findings: `GET /documents/{document_id}/parsed-credit-report/fcra-findings` runs deterministic statutory-oriented checks (for example possible obsolete adverse information under §605, adverse account missing DOFD, collection missing original creditor, past due exceeding balance). Each finding includes referenced FCRA section numbers. Findings are investigator aids, not legal advice. `GET /cases/{case_id}/fcra-findings` aggregates the same rules across the latest parsed report per bureau.
+
+Identity Theft Detection & Recovery (Phase 8): `GET /documents/{document_id}/parsed-credit-report/identity-theft-findings` and `GET /cases/{case_id}/identity-theft-findings` flag report-level fraud alerts/freezes/victim statements and tradeline warning signs. Findings classify as `IDENTITY_THEFT_INDICATOR` with `ordinaryDisputeLocked` until consumer confirmation. The platform never auto-labels an account as identity theft or generates a sworn claim without attestation. `GET /cases/{case_id}/identity-theft-center` surfaces the Case Center (incident profile, evidence checklist, recovery steps, fraud-alert/freeze tracking, FCRA §605B readiness). `POST /cases/{case_id}/identity-theft/account-reviews` records consumer confirmation; choosing `identity_theft` requires attestation and opens an incident on the §605B path (separate from ordinary §611 disputes). Ordinary dispute letter drafts return `409` while an indicator or confirmed claim locks the account.
 
 Tradeline reporting chronology: `GET /cases/{case_id}/tradeline-chronology` builds multi-snapshot timelines for matched tradelines across all stored parsed reports for the case (optional `bureau` query filter). Events include balance increases/decreases, status changes, DOFD changes, appearances, and disappearances. Investigator aid for historical pattern review.
 

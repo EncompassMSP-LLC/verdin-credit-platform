@@ -13,6 +13,18 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — Identity Theft Detection & Recovery (Phase 8)
+
+**Decision:** Add Phase 8 as a first-class Compliance Intelligence Engine component with report/tradeline detection, consumer confirmation + attestation gates, Identity Theft Case Center persistence, FCRA §605B readiness (separate from §611), fraud-alert/freeze tracking, and ordinary dispute-letter pause (`409`) while indicators or confirmed claims lock an account.
+
+**Reason:** Identity theft changes legal workflow, evidence, letter types, and remedy; mixing “not mine” with ordinary accuracy disputes is unsafe. Indicators must never auto-label accounts or generate sworn claims without consumer confirmation.
+
+**Alternatives considered:** Fold into Metro 2 severity; portal-only confirmation later; defer Case Center persistence.
+
+**Technical debt:** Some tradeline heuristics remain soft signals; bureau-specific freeze detection still relies on staff upsert + report phrases; portal consumer self-service confirmation deferred.
+
+**Follow-up work:** Portal attestation UI; richer personal-info variation / mixed-file rules; §605B packet export; wire prepare-disputes skip for locked match keys.
+
 ## Compliance intelligence — nest checklist PDF in packet ZIP
 
 **Decision:** Always include the printable checklist PDF alongside the markdown root file in CFPB/attorney packet.zip exports (same checklist_export_filename(..., export_format="pdf") bytes as standalone /export?format=pdf).

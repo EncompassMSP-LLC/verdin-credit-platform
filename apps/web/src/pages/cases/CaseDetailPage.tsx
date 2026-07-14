@@ -12,6 +12,7 @@ import { CreditReportHistoryPanel } from '../../components/imports/CreditReportH
 import { CrossBureauDiscrepancyPanel } from '../../components/imports/CrossBureauDiscrepancyPanel';
 import { CaseMetro2FindingsPanel } from '../../components/imports/Metro2FindingsPanel';
 import { CaseFcraFindingsPanel } from '../../components/imports/FcraFindingsPanel';
+import { CaseIdentityTheftPanel } from '../../components/imports/IdentityTheftPanel';
 import { CaseTradelineChronologyPanel } from '../../components/imports/TradelineChronologyPanel';
 import { CaseComplianceEvidencePanel } from '../../components/imports/ComplianceEvidencePanel';
 import { CaseLitigationStrengthPanel } from '../../components/imports/LitigationStrengthPanel';
@@ -190,6 +191,12 @@ export function CaseDetailPage() {
         <CaseMetro2FindingsPanel caseId={caseId} className="lg:col-span-3" id="metro2-findings" />
 
         <CaseFcraFindingsPanel caseId={caseId} className="lg:col-span-3" id="fcra-findings" />
+
+        <CaseIdentityTheftPanel
+          caseId={caseId}
+          className="lg:col-span-3"
+          id="identity-theft-center"
+        />
 
         <CaseTradelineChronologyPanel
           caseId={caseId}

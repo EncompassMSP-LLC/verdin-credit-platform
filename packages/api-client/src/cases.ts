@@ -12,23 +12,35 @@ import type {
   CaseComplianceEvidenceLinks,
   CaseDisputeStrategy,
   CaseFcraFindings,
+  CaseIdentityTheftFindings,
   CaseLitigationStrength,
   CaseMetro2Findings,
   CaseTradelineChronology,
+  ConfirmIdentityTheftAccountRequest,
   DisputeStrategyRun,
   DisputeStrategyRunSummary,
   Document,
+  IdentityTheftAccountReview,
+  IdentityTheftCaseCenter,
+  IdentityTheftProtection,
+  UpsertIdentityTheftProtectionRequest,
 } from './documents';
 
 export type {
   CaseComplianceEvidenceLinks,
   CaseDisputeStrategy,
   CaseFcraFindings,
+  CaseIdentityTheftFindings,
   CaseLitigationStrength,
   CaseMetro2Findings,
   CaseTradelineChronology,
+  ConfirmIdentityTheftAccountRequest,
   DisputeStrategyRun,
   DisputeStrategyRunSummary,
+  IdentityTheftAccountReview,
+  IdentityTheftCaseCenter,
+  IdentityTheftProtection,
+  UpsertIdentityTheftProtectionRequest,
 } from './documents';
 
 export interface Case {
@@ -362,6 +374,36 @@ export async function getCaseMetro2Findings(caseId: string): Promise<CaseMetro2F
 
 export async function getCaseFcraFindings(caseId: string): Promise<CaseFcraFindings> {
   return request<CaseFcraFindings>(apiPath(`/cases/${caseId}/fcra-findings`));
+}
+
+export async function getCaseIdentityTheftFindings(
+  caseId: string,
+): Promise<CaseIdentityTheftFindings> {
+  return request<CaseIdentityTheftFindings>(apiPath(`/cases/${caseId}/identity-theft-findings`));
+}
+
+export async function getCaseIdentityTheftCenter(caseId: string): Promise<IdentityTheftCaseCenter> {
+  return request<IdentityTheftCaseCenter>(apiPath(`/cases/${caseId}/identity-theft-center`));
+}
+
+export async function confirmIdentityTheftAccount(
+  caseId: string,
+  body: ConfirmIdentityTheftAccountRequest,
+): Promise<IdentityTheftAccountReview> {
+  return request<IdentityTheftAccountReview>(
+    apiPath(`/cases/${caseId}/identity-theft/account-reviews`),
+    { method: 'POST', body },
+  );
+}
+
+export async function upsertIdentityTheftProtection(
+  caseId: string,
+  body: UpsertIdentityTheftProtectionRequest,
+): Promise<IdentityTheftProtection> {
+  return request<IdentityTheftProtection>(apiPath(`/cases/${caseId}/identity-theft/protections`), {
+    method: 'PUT',
+    body,
+  });
 }
 
 export async function getCaseTradelineChronology(

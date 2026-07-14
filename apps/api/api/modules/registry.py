@@ -84,6 +84,16 @@ from api.modules.documents.batch_summary_models import (
     BatchSummaryRunStatus,
     BatchSummaryTriggerSource,
 )
+from api.modules.documents.identity_theft_models import (
+    IdentityTheftAccountReview,
+    IdentityTheftConfirmation,
+    IdentityTheftIncident,
+    IdentityTheftIncidentStatus,
+    IdentityTheftIssueType,
+    IdentityTheftProtection,
+    IdentityTheftProtectionStatusValue,
+    IdentityTheftProtectionType,
+)
 from api.modules.documents.models import Document
 from api.modules.documents.strategy_run_models import DisputeStrategyRun
 from api.modules.enterprise.bulk_idp_provisioning_models import (
@@ -289,6 +299,14 @@ __all__ = [
     "DisputeBureauSubmissionRun",
     "DisputeBureauSubmissionStatus",
     "DisputeStrategyRun",
+    "IdentityTheftAccountReview",
+    "IdentityTheftConfirmation",
+    "IdentityTheftIncident",
+    "IdentityTheftIncidentStatus",
+    "IdentityTheftIssueType",
+    "IdentityTheftProtection",
+    "IdentityTheftProtectionStatusValue",
+    "IdentityTheftProtectionType",
     "EmailDeliveryLog",
     "EnforcementRunStatus",
     "EnforcementTriggerSource",

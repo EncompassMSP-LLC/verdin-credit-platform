@@ -37,18 +37,26 @@ from api.modules.documents.schemas import (
     CaseCreditReportDiscrepanciesResponse,
     CaseDisputeStrategyResponse,
     CaseFcraFindingsResponse,
+    CaseIdentityTheftFindingsResponse,
     CaseLitigationStrengthResponse,
     CaseMetro2FindingsResponse,
     CaseTradelineChronologyResponse,
+    ConfirmIdentityTheftAccountRequest,
     DisputeStrategyRunListParams,
     DisputeStrategyRunResponse,
     DisputeStrategyRunSummaryResponse,
     DocumentResponse,
+    IdentityTheftAccountReviewResponse,
+    IdentityTheftCaseCenterResponse,
+    IdentityTheftIncidentResponse,
+    IdentityTheftProtectionResponse,
     PrepareCreditReportDisputesRequest,
     PrepareCreditReportDisputesResponse,
     PrepareDisputeStrategyStageRequest,
     PrepareDisputeStrategyStageResponse,
+    UpdateIdentityTheftIncidentRequest,
     UpsertChecklistOverrideRequest,
+    UpsertIdentityTheftProtectionRequest,
 )
 from api.modules.documents.service import DocumentService
 
@@ -191,6 +199,70 @@ async def get_case_fcra_findings(
     service: DocumentService = Depends(get_document_service),
 ) -> CaseFcraFindingsResponse:
     return await service.get_case_fcra_findings(current_user, case_id)
+
+
+@router.get(
+    "/{case_id}/identity-theft-findings",
+    response_model=CaseIdentityTheftFindingsResponse,
+)
+async def get_case_identity_theft_findings(
+    case_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> CaseIdentityTheftFindingsResponse:
+    return await service.get_case_identity_theft_findings(current_user, case_id)
+
+
+@router.get(
+    "/{case_id}/identity-theft-center",
+    response_model=IdentityTheftCaseCenterResponse,
+)
+async def get_case_identity_theft_center(
+    case_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> IdentityTheftCaseCenterResponse:
+    return await service.get_case_identity_theft_center(current_user, case_id)
+
+
+@router.post(
+    "/{case_id}/identity-theft/account-reviews",
+    response_model=IdentityTheftAccountReviewResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def confirm_identity_theft_account(
+    case_id: uuid.UUID,
+    body: ConfirmIdentityTheftAccountRequest,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> IdentityTheftAccountReviewResponse:
+    return await service.confirm_identity_theft_account(current_user, case_id, body)
+
+
+@router.put(
+    "/{case_id}/identity-theft/protections",
+    response_model=IdentityTheftProtectionResponse,
+)
+async def upsert_identity_theft_protection(
+    case_id: uuid.UUID,
+    body: UpsertIdentityTheftProtectionRequest,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> IdentityTheftProtectionResponse:
+    return await service.upsert_identity_theft_protection(current_user, case_id, body)
+
+
+@router.patch(
+    "/{case_id}/identity-theft/incident",
+    response_model=IdentityTheftIncidentResponse,
+)
+async def update_identity_theft_incident(
+    case_id: uuid.UUID,
+    body: UpdateIdentityTheftIncidentRequest,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> IdentityTheftIncidentResponse:
+    return await service.update_identity_theft_incident(current_user, case_id, body)
 
 
 @router.get(

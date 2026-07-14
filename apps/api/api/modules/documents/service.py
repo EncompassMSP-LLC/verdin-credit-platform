@@ -67,6 +67,7 @@ from api.modules.documents.schemas import (
     CaseCreditReportDiscrepanciesResponse,
     CaseDisputeStrategyResponse,
     CaseFcraFindingsResponse,
+    CaseIdentityTheftFindingsResponse,
     CaseLitigationStrengthResponse,
     CaseMetro2FindingsResponse,
     CaseTradelineChronologyResponse,
@@ -76,6 +77,7 @@ from api.modules.documents.schemas import (
     ComplianceEvidenceLinkItem,
     ComplianceEvidenceReportLink,
     ComplianceEvidenceSummary,
+    ConfirmIdentityTheftAccountRequest,
     CrossBureauComparisonSummary,
     CrossBureauDiscrepancyResponse,
     CrossBureauPossibleCauseResponse,
@@ -87,6 +89,7 @@ from api.modules.documents.schemas import (
     DocumentClassificationResponse,
     DocumentDuplicateGroupResponse,
     DocumentFcraFindingsResponse,
+    DocumentIdentityTheftFindingsResponse,
     DocumentListParams,
     DocumentMetro2FindingsResponse,
     DocumentOcrResponse,
@@ -98,6 +101,10 @@ from api.modules.documents.schemas import (
     DocumentVersionResponse,
     FcraFindingResponse,
     FcraFindingSummary,
+    IdentityTheftAccountReviewResponse,
+    IdentityTheftCaseCenterResponse,
+    IdentityTheftIncidentResponse,
+    IdentityTheftProtectionResponse,
     ImportedParsedReportAccountItem,
     ImportParsedReportAccountsRequest,
     ImportParsedReportAccountsResponse,
@@ -118,7 +125,9 @@ from api.modules.documents.schemas import (
     TradelineChronologyItemResponse,
     TradelineChronologySnapshotResponse,
     TradelineChronologySummary,
+    UpdateIdentityTheftIncidentRequest,
     UpsertChecklistOverrideRequest,
+    UpsertIdentityTheftProtectionRequest,
 )
 from api.modules.documents.storage import (
     DocumentStorage,
@@ -1527,6 +1536,223 @@ class DocumentService:
             documents=documents,
         )
 
+    async def get_identity_theft_findings(
+        self,
+        user: User,
+        document_id: uuid.UUID,
+    ) -> DocumentIdentityTheftFindingsResponse:
+        from api.modules.documents.identity_theft_service import identity_theft_document_response
+
+        document = await self._get_document_for_user(document_id, user)
+        current = await self._documents.get_parsed_credit_report(
+            document.id,
+            organization_id=document.organization_id,
+        )
+        if current is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Parsed credit report not found",
+            )
+        return identity_theft_document_response(
+            document_id=document.id,
+            bureau=current.bureau,
+            schema_version=current.schema_version,
+            parsed_report=current.parsed_report,
+        )
+
+    async def get_case_identity_theft_findings(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+    ) -> CaseIdentityTheftFindingsResponse:
+        from api.modules.documents.identity_theft_service import (
+            aggregate_case_identity_theft_findings,
+        )
+
+        organization_id = self._require_organization(user)
+        await self._validate_case(case_id, organization_id)
+        parsed_reports = await self._documents.list_case_parsed_credit_reports(
+            organization_id=organization_id,
+            case_id=case_id,
+        )
+        reports_by_bureau = self._latest_parsed_reports_by_bureau(parsed_reports)
+        if not reports_by_bureau:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No parsed credit reports found for this case",
+            )
+        return aggregate_case_identity_theft_findings(
+            case_id=case_id,
+            reports_by_bureau=reports_by_bureau,
+        )
+
+    async def get_case_identity_theft_center(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+    ) -> IdentityTheftCaseCenterResponse:
+        from api.modules.documents.identity_theft_repository import IdentityTheftRepository
+        from api.modules.documents.identity_theft_service import build_case_center
+
+        if self._session is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Database session is not configured",
+            )
+        organization_id = self._require_organization(user)
+        await self._validate_case(case_id, organization_id)
+        findings: CaseIdentityTheftFindingsResponse | None = None
+        try:
+            findings = await self.get_case_identity_theft_findings(user, case_id)
+        except HTTPException as exc:
+            if exc.status_code != status.HTTP_404_NOT_FOUND:
+                raise
+        repo = IdentityTheftRepository(self._session)
+        return await build_case_center(
+            repo=repo,
+            organization_id=organization_id,
+            case_id=case_id,
+            findings=findings,
+        )
+
+    async def confirm_identity_theft_account(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+        request: ConfirmIdentityTheftAccountRequest,
+    ) -> IdentityTheftAccountReviewResponse:
+        from api.modules.documents.identity_theft_repository import IdentityTheftRepository
+        from api.modules.documents.identity_theft_service import confirm_account_review
+
+        if self._session is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Database session is not configured",
+            )
+        self._require_write(user)
+        organization_id = self._require_organization(user)
+        await self._validate_case(case_id, organization_id)
+        if request.account_id is not None:
+            await self._validate_account(request.account_id, organization_id, case_id)
+        repo = IdentityTheftRepository(self._session)
+        return await confirm_account_review(
+            repo=repo,
+            user=user,
+            organization_id=organization_id,
+            case_id=case_id,
+            request=request,
+        )
+
+    async def upsert_identity_theft_protection(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+        request: UpsertIdentityTheftProtectionRequest,
+    ) -> IdentityTheftProtectionResponse:
+        from api.modules.documents.identity_theft_repository import IdentityTheftRepository
+        from api.modules.documents.identity_theft_service import upsert_protection
+
+        if self._session is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Database session is not configured",
+            )
+        self._require_write(user)
+        organization_id = self._require_organization(user)
+        await self._validate_case(case_id, organization_id)
+        repo = IdentityTheftRepository(self._session)
+        return await upsert_protection(
+            repo=repo,
+            user=user,
+            organization_id=organization_id,
+            case_id=case_id,
+            request=request,
+        )
+
+    async def update_identity_theft_incident(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+        request: UpdateIdentityTheftIncidentRequest,
+    ) -> IdentityTheftIncidentResponse:
+        from api.modules.documents.identity_theft_repository import IdentityTheftRepository
+        from api.modules.documents.identity_theft_service import update_incident
+
+        if self._session is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Database session is not configured",
+            )
+        self._require_write(user)
+        organization_id = self._require_organization(user)
+        await self._validate_case(case_id, organization_id)
+        repo = IdentityTheftRepository(self._session)
+        return await update_incident(
+            repo=repo,
+            user=user,
+            organization_id=organization_id,
+            case_id=case_id,
+            request=request,
+        )
+
+    async def assert_ordinary_dispute_allowed_for_account(
+        self,
+        user: User,
+        *,
+        case_id: uuid.UUID,
+        account_id: uuid.UUID,
+        creditor_name: str | None = None,
+        account_number_masked: str | None = None,
+    ) -> None:
+        """Block ordinary dispute letter drafts when identity theft is suspected/confirmed."""
+        from api.modules.documents.cross_bureau_comparison import tradeline_match_key
+        from api.modules.documents.identity_theft_repository import IdentityTheftRepository
+
+        if self._session is None:
+            return
+        organization_id = self._require_organization(user)
+        repo = IdentityTheftRepository(self._session)
+        match_key = tradeline_match_key(creditor_name or "", account_number_masked)
+        locked = await repo.account_has_identity_theft_lock(
+            organization_id=organization_id,
+            case_id=case_id,
+            account_id=account_id,
+            match_key=match_key,
+        )
+        if locked:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=(
+                    "Ordinary dispute letter generation is paused for this account because "
+                    "an identity-theft indicator is pending consumer confirmation or a "
+                    "confirmed identity-theft claim is open. Use the Identity Theft Case "
+                    "Center (§605B) instead of mixing identity-theft and accuracy theories."
+                ),
+            )
+        try:
+            findings = await self.get_case_identity_theft_findings(user, case_id)
+        except HTTPException as exc:
+            if exc.status_code == status.HTTP_404_NOT_FOUND:
+                return
+            raise
+        for document in findings.documents:
+            for finding in document.findings:
+                if finding.tradeline_index is None or not finding.ordinary_dispute_locked:
+                    continue
+                finding_key = tradeline_match_key(
+                    finding.creditor_name or "",
+                    finding.account_number_masked,
+                )
+                if finding_key and match_key and finding_key == match_key:
+                    raise HTTPException(
+                        status_code=status.HTTP_409_CONFLICT,
+                        detail=(
+                            "Ordinary dispute letter generation is paused: this tradeline "
+                            "has an unconfirmed identity-theft indicator. Confirm the "
+                            "consumer’s position in the Identity Theft Case Center first."
+                        ),
+                    )
+
     async def get_case_tradeline_chronology(
         self,
         user: User,
@@ -1857,6 +2083,31 @@ class DocumentService:
 
         metro2 = await self.get_case_metro2_findings(user, case_id)
         fcra = await self.get_case_fcra_findings(user, case_id)
+        identity_theft_docs: list[dict[str, Any]] = []
+        try:
+            identity_theft = await self.get_case_identity_theft_findings(user, case_id)
+            identity_theft_docs = [
+                {
+                    "document_id": doc.document_id,
+                    "bureau": doc.bureau,
+                    "findings": [
+                        {
+                            "rule_id": finding.rule_id,
+                            "severity": finding.severity,
+                            "title": finding.title,
+                            "tradeline_index": finding.tradeline_index,
+                            "creditor_name": finding.creditor_name,
+                            "account_number_masked": finding.account_number_masked,
+                            "ordinary_dispute_locked": finding.ordinary_dispute_locked,
+                        }
+                        for finding in doc.findings
+                    ],
+                }
+                for doc in identity_theft.documents
+            ]
+        except HTTPException as exc:
+            if exc.status_code != status.HTTP_404_NOT_FOUND:
+                raise
 
         discrepancies: list[dict[str, Any]] = []
         try:
@@ -1922,6 +2173,7 @@ class DocumentService:
             fcra_documents=[_document_payload(doc) for doc in fcra.documents],
             discrepancies=discrepancies,
             chronology_events=chronology_events,
+            identity_theft_documents=identity_theft_docs,
         )
         return CaseLitigationStrengthResponse(
             case_id=result.case_id,
