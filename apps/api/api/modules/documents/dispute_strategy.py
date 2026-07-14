@@ -330,6 +330,14 @@ class StrategyPrepTarget:
     bureau: str | None
     primary_rule_ids: tuple[str, ...]
     summary: str
+    source_document_id: uuid.UUID | None = None
+    tradeline_index: int | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class FindingSourceRef:
+    document_id: uuid.UUID
+    tradeline_index: int
 
 
 @dataclass(frozen=True, slots=True)
@@ -551,6 +559,66 @@ def find_matching_tradeline(
     return _scan(prefer_bureau=False)
 
 
+def parse_finding_source_ref(source_id: str) -> FindingSourceRef | None:
+    """Parse ``kind:bureau:rule#index@{document_id}`` finding source refs."""
+    if "@" not in source_id or "#" not in source_id:
+        return None
+    body, _, document_part = source_id.rpartition("@")
+    try:
+        document_id = uuid.UUID(document_part)
+    except ValueError:
+        return None
+    _, _, index_part = body.rpartition("#")
+    try:
+        tradeline_index = int(index_part)
+    except ValueError:
+        return None
+    if tradeline_index < 0:
+        return None
+    return FindingSourceRef(document_id=document_id, tradeline_index=tradeline_index)
+
+
+def first_finding_source_ref(source_ids: Sequence[str]) -> FindingSourceRef | None:
+    for source_id in source_ids:
+        parsed = parse_finding_source_ref(source_id)
+        if parsed is not None:
+            return parsed
+    return None
+
+
+def find_tradeline_by_source_ref(
+    reports_by_document_id: dict[uuid.UUID, dict[str, Any]],
+    *,
+    document_id: uuid.UUID,
+    tradeline_index: int,
+) -> dict[str, Any] | None:
+    """Return the account at ``tradeline_index`` for a source document id."""
+    parsed_report = reports_by_document_id.get(document_id)
+    if parsed_report is None:
+        return None
+    accounts = parsed_report.get("accounts")
+    if not isinstance(accounts, list):
+        return None
+    if tradeline_index < 0 or tradeline_index >= len(accounts):
+        return None
+    account = accounts[tradeline_index]
+    return account if isinstance(account, dict) else None
+
+
+def _stage_issue_source_ids(stages: Any, *, stage_kind: StageKind) -> tuple[str, ...]:
+    for stage in stages or ():
+        if isinstance(stage, dict):
+            kind = stage.get("stage_kind")
+            source_ids = stage.get("issue_source_ids") or []
+        else:
+            kind = getattr(stage, "stage_kind", None)
+            source_ids = getattr(stage, "issue_source_ids", ()) or ()
+        if kind != stage_kind:
+            continue
+        return tuple(str(source_id) for source_id in source_ids if source_id)
+    return ()
+
+
 def stage_recipient_type(stage_kind: StageKind) -> Literal["credit_bureau", "furnisher"]:
     if stage_kind == "furnisher_dispute":
         return "furnisher"
@@ -625,6 +693,9 @@ def select_accounts_for_stage(
             continue
 
         seen_keys.add(account_key)
+        source_ref = first_finding_source_ref(
+            _stage_issue_source_ids(stages, stage_kind=stage_kind)
+        )
         targets.append(
             StrategyPrepTarget(
                 account_key=account_key,
@@ -636,6 +707,8 @@ def select_accounts_for_stage(
                 bureau=bureau if isinstance(bureau, str) else None,
                 primary_rule_ids=tuple(str(rule) for rule in primary_rule_ids),
                 summary=str(summary),
+                source_document_id=source_ref.document_id if source_ref else None,
+                tradeline_index=source_ref.tradeline_index if source_ref else None,
             )
         )
 
