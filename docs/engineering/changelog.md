@@ -13,6 +13,18 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — prepare metadata from parsed tradelines
+
+**Decision:** When strategy stage prepare creates direct (non-match-key) accounts, resolve ccount_type / ccount_status / payment_status from a matching parsed tradeline when available, falling back to rule-ID heuristics for unknown fields.
+
+**Reason:** Rule-only inference left many direct accounts as OTHER/UNKNOWN even when the case already had parsed report fields.
+
+**Alternatives considered:** Require account-candidate import first; persist tradeline snapshot on strategy targets; document_id-only lookup without creditor match.
+
+**Technical debt:** Match is creditor+masked (+bureau prefer); does not use finding radeline_index yet.
+
+**Follow-up work:** Prefer document_id/tradeline_index from finding source refs; OCR line refs.
+
 ## Compliance intelligence — shared page-map lookup helper
 
 **Decision:** Lift cache/locate/write-through into radeline_page_map.lookup_or_locate_tradeline_pages (plus lookup_cached_tradeline_pages / page_map_update_from_scan) and use it from compliance evidence links; excerpt path keeps cache-only + single-pass redact.
@@ -227,7 +239,7 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Technical debt:** Heuristic only; rule text must mention status tokens to map.
 
-**Follow-up work:** Pull status from parsed tradeline when document_id is known; attorney-preserve packet export.
+**Follow-up work:** Pull status from parsed tradeline when document_id is known (done via creditor match); attorney-preserve packet export.
 
 ## Compliance intelligence — direct strategy account letter prep
 

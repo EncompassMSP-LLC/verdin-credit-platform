@@ -221,6 +221,61 @@ def test_infer_account_metadata_from_rules() -> None:
     assert charge_off.account_status == "charge_off"
 
 
+def test_resolve_strategy_account_metadata_prefers_tradeline() -> None:
+    from api.modules.documents.dispute_strategy import (
+        find_matching_tradeline,
+        resolve_strategy_account_metadata,
+    )
+
+    tradeline = {
+        "creditor_name": "Metro Auto",
+        "account_number_masked": "****4242",
+        "account_type": "Auto Loan",
+        "account_status": "Open",
+        "payment_status": "30 days late",
+    }
+    resolved = resolve_strategy_account_metadata(
+        ["metro2.date_closed_before_open"],
+        tradeline=tradeline,
+    )
+    assert resolved.account_type == "auto"
+    assert resolved.account_status == "open"
+    assert resolved.payment_status == "late_30"
+
+    matched = find_matching_tradeline(
+        [
+            (
+                "experian",
+                {
+                    "accounts": [
+                        {
+                            "creditor_name": "Other Bank",
+                            "account_number_masked": "****0000",
+                            "account_type": "Credit Card",
+                        },
+                        tradeline,
+                    ]
+                },
+            )
+        ],
+        creditor_name="Metro Auto",
+        account_number_masked="****4242",
+        bureau="experian",
+    )
+    assert matched is tradeline
+
+
+def test_resolve_strategy_account_metadata_falls_back_to_rules() -> None:
+    from api.modules.documents.dispute_strategy import resolve_strategy_account_metadata
+
+    resolved = resolve_strategy_account_metadata(
+        ["fcra.collection_missing_original_creditor"],
+        tradeline={"creditor_name": "Acme", "account_type": None},
+    )
+    assert resolved.account_type == "collection"
+    assert resolved.account_status == "collection"
+
+
 def test_build_case_cfpb_checklist_for_high_strength_accounts() -> None:
     from api.modules.documents.dispute_strategy import build_case_cfpb_checklist
 
