@@ -8,6 +8,7 @@ import { PortalCaseConsents } from '../../components/portal/PortalCaseConsents';
 import { PortalCaseDocuments } from '../../components/portal/PortalCaseDocuments';
 import { PortalCaseMessages } from '../../components/portal/PortalCaseMessages';
 import { PortalEnrollmentOnboarding } from '../../components/portal/PortalEnrollmentOnboarding';
+import { PortalIdentityTheftConfirmation } from '../../components/portal/PortalIdentityTheftConfirmation';
 import { PortalPushPanel } from '../../components/portal/PortalPushPanel';
 import { translatePortalKey } from '../../i18n/portalLabels';
 import { usePortalAuth } from '../../lib/portal-auth';
@@ -131,6 +132,7 @@ export function PortalCaseDetailPage() {
             <PortalEnrollmentOnboarding annualCreditReportUrl="https://www.annualcreditreport.com/index.action" />
 
             {caseId ? <PortalCaseConsents caseId={caseId} /> : null}
+            {caseId ? <PortalIdentityTheftConfirmation caseId={caseId} /> : null}
             {caseId ? <PortalCaseDocuments caseId={caseId} /> : null}
             <PortalPushPanel />
             {caseId ? <PortalCaseMessages caseId={caseId} /> : null}

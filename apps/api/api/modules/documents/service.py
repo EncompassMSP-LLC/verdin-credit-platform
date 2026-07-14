@@ -1637,7 +1637,7 @@ class DocumentService:
         repo = IdentityTheftRepository(self._session)
         return await confirm_account_review(
             repo=repo,
-            user=user,
+            actor_id=user.id,
             organization_id=organization_id,
             case_id=case_id,
             request=request,

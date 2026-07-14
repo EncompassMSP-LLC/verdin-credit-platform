@@ -25,6 +25,18 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Follow-up work:** Portal attestation UI; richer personal-info variation / mixed-file rules; §605B packet export; wire prepare-disputes skip for locked match keys.
 
+## Portal — identity-theft consumer confirmation
+
+**Decision:** Expose read + confirm-only portal endpoints (`GET/POST /portal/cases/{id}/identity-theft-*`) that reuse the Phase 8 confirmation engine with portal case scoping and portal-user audit ids. Do not expose staff protection/incident write APIs to the portal.
+
+**Reason:** Consumers must attest before confirmed identity-theft claims; staff-only Case Center remains for investigators.
+
+**Alternatives considered:** Reuse staff `/cases` JWT endpoints from portal; defer portal entirely until §605B packet export.
+
+**Technical debt:** Portal UI surfaces tradeline findings only (report-level banner still shown).
+
+**Follow-up work:** §605B packet/letter export (checklist slice 4).
+
 ## Compliance intelligence — nest checklist PDF in packet ZIP
 
 **Decision:** Always include the printable checklist PDF alongside the markdown root file in CFPB/attorney packet.zip exports (same checklist_export_filename(..., export_format="pdf") bytes as standalone /export?format=pdf).
