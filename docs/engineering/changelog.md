@@ -49,6 +49,18 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Follow-up work:** Optional evidence exhibit bundling; live §605B filing deferred to 5.16+.
 
+## Governance — Version 5.15 capability matrix sign-off
+
+**Decision:** Mark v5.15.0 complete with scope doc, release notes, capability-matrix rows, checklist exit criteria, and roadmap release entry. §605B packet remains **Partial** (no live bureau calls).
+
+**Reason:** Phase 8 product gates and docs must be discoverable as a shipped milestone after portal + packet slices.
+
+**Alternatives considered:** Hold release notes until 5.16 live filing; fold §605B into dispute-letter lifecycle.
+
+**Technical debt:** None new.
+
+**Follow-up work:** 5.16 kickoff for deferred live §605B submission / evidence bundling when legal sign-off allows.
+
 ## Compliance intelligence — nest checklist PDF in packet ZIP
 
 **Decision:** Always include the printable checklist PDF alongside the markdown root file in CFPB/attorney packet.zip exports (same checklist_export_filename(..., export_format="pdf") bytes as standalone /export?format=pdf).

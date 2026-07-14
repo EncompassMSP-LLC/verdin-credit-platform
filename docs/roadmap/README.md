@@ -57,6 +57,7 @@ Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (
 | **5.12**  | Expansion Surfaces (gated)      | Released    | Bureau live API scaffold, public OAuth portal, cross-org benchmarks, passkeys (`v5.12.0`)        |
 | **5.13**  | Native Mobile Depth (gated)     | Released    | Native passkey client, OAuth marketplace, autonomous API filing, export audit (`v5.13.0`)        |
 | **5.14**  | Production Distribution (gated) | Released    | Live blob export, unsupervised filing loops, public marketplace, app store readiness (`v5.14.0`) |
+| **5.15**  | Identity Theft Detection        | Released    | Phase 8 Case Center, portal attestation, §605B packet export (`v5.15.0`)                         |
 
 ### Sprint milestones
 
@@ -386,6 +387,21 @@ Scope and checklist: [`docs/governance/version-5.14-scope.md`](../governance/ver
 | 2    | Unsupervised autonomous filing loops  | Partial ✅   | Operator-gated unsupervised filing loop audit scaffold            |
 | 3    | Public OAuth marketplace listings     | Partial ✅   | Public listing publish from approved marketplace publishing runs  |
 | 4    | Native mobile app store distribution  | Partial ✅   | App store distribution readiness from native passkey client runs  |
+
+### Version 5.15 — Identity Theft Detection & Recovery (Released)
+
+**Tag:** `v5.15.0`
+
+Release notes: [`docs/release-notes/v5.15.0.md`](../release-notes/v5.15.0.md)
+
+Scope and checklist: [`docs/governance/version-5.15-scope.md`](../governance/version-5.15-scope.md) · [`docs/development/version-5.15-completion-checklist.md`](../development/version-5.15-completion-checklist.md)
+
+| Epic | Theme                                      | 5.15 outcome | Notes                                                 |
+| ---- | ------------------------------------------ | ------------ | ----------------------------------------------------- |
+| 1    | Identity Theft Detection & Recovery Engine | ✅           | Phase 8 Case Center, attestation gates, dispute pause |
+| 2    | Portal consumer confirmation / attestation | ✅           | Portal-scoped confirm + attestation                   |
+| 3    | §605B packet export / bureau block letters | Partial ✅   | Staff-mediated ZIP letters; no live bureau submission |
+| 4    | Capability matrix / governance sign-off    | ✅           | Scope, checklist, matrix, release notes               |
 
 ## Sprint → version mapping
 
