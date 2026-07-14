@@ -8,7 +8,9 @@ import {
   getCaseAttorneyChecklist,
   getCaseCfpbChecklist,
   getCaseDisputeStrategy,
+  getCaseDisputeStrategyRun,
   listCaseDisputeStrategyRuns,
+  type DisputeStrategyRun,
   type DisputeStrategyRunSummary,
   prepareCaseDisputeStrategyStage,
   upsertCaseChecklistOverride,
@@ -64,7 +66,17 @@ function StrategyRunAudit({
   );
 }
 
-function StrategyRunHistory({ runs }: { runs: DisputeStrategyRunSummary[] }) {
+function StrategyRunHistory({
+  runs,
+  activeRunId,
+  replayingRunId,
+  onReplay,
+}: {
+  runs: DisputeStrategyRunSummary[];
+  activeRunId?: string | null;
+  replayingRunId: string | null;
+  onReplay: (runId: string) => void;
+}) {
   if (runs.length === 0) {
     return null;
   }
@@ -80,6 +92,15 @@ function StrategyRunHistory({ runs }: { runs: DisputeStrategyRunSummary[] }) {
             <span>
               {run.accounts_planned} acct · {run.issues_covered} issues
             </span>
+            {activeRunId === run.id ? <Badge variant="info">viewing</Badge> : null}
+            <Button
+              size="sm"
+              variant="secondary"
+              loading={replayingRunId === run.id}
+              onClick={() => onReplay(run.id)}
+            >
+              Replay
+            </Button>
           </li>
         ))}
       </ul>
@@ -273,6 +294,8 @@ export function CaseDisputeStrategyPanel({
   const [downloadingCfpbExcerptPacket, setDownloadingCfpbExcerptPacket] = useState(false);
   const [downloadingAttorneyExcerptPacket, setDownloadingAttorneyExcerptPacket] = useState(false);
   const [downloadError, setDownloadError] = useState<string | null>(null);
+  const [replayedRun, setReplayedRun] = useState<DisputeStrategyRun | null>(null);
+  const [replayError, setReplayError] = useState<string | null>(null);
   const strategyQuery = useQuery({
     queryKey: ['case-dispute-strategy', caseId],
     queryFn: () => getCaseDisputeStrategy(caseId),
@@ -285,6 +308,28 @@ export function CaseDisputeStrategyPanel({
     enabled: strategyQuery.isSuccess,
     retry: false,
   });
+
+  const replayMutation = useMutation({
+    mutationFn: (runId: string) => getCaseDisputeStrategyRun(caseId, runId),
+    onSuccess: (run) => {
+      setReplayError(null);
+      setReplayedRun(run);
+    },
+    onError: (error: unknown) => {
+      setReplayError(error instanceof Error ? error.message : 'Failed to replay strategy run');
+    },
+  });
+
+  const displayedStrategy = replayedRun
+    ? {
+        case_id: replayedRun.case_id,
+        disclaimer: replayedRun.disclaimer,
+        summary: replayedRun.summary,
+        strategies: replayedRun.strategies,
+        run_id: replayedRun.id,
+        generated_at: replayedRun.generated_at,
+      }
+    : strategyQuery.data;
 
   const cfpbQuery = useQuery({
     queryKey: ['case-cfpb-checklist', caseId],
@@ -363,20 +408,39 @@ export function CaseDisputeStrategyPanel({
           </p>
         ) : null}
 
-        {strategyQuery.data ? (
+        {strategyQuery.data && displayedStrategy ? (
           <div className="mt-4 space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="space-y-1">
-                <p className="text-sm text-gray-600">{strategyQuery.data.disclaimer}</p>
+                <p className="text-sm text-gray-600">{displayedStrategy.disclaimer}</p>
                 <StrategyRunAudit
-                  runId={strategyQuery.data.run_id}
-                  generatedAt={strategyQuery.data.generated_at}
+                  runId={displayedStrategy.run_id}
+                  generatedAt={displayedStrategy.generated_at}
                 />
+                {replayedRun ? (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge variant="warning">Replaying stored run</Badge>
+                    <Button size="sm" variant="secondary" onClick={() => setReplayedRun(null)}>
+                      Show live plan
+                    </Button>
+                  </div>
+                ) : null}
               </div>
-              <SummaryBadges summary={strategyQuery.data.summary} />
+              <SummaryBadges summary={displayedStrategy.summary} />
             </div>
 
-            {runHistoryQuery.data ? <StrategyRunHistory runs={runHistoryQuery.data.items} /> : null}
+            {runHistoryQuery.data ? (
+              <StrategyRunHistory
+                runs={runHistoryQuery.data.items}
+                activeRunId={displayedStrategy.run_id}
+                replayingRunId={
+                  replayMutation.isPending ? (replayMutation.variables ?? null) : null
+                }
+                onReplay={(runId) => replayMutation.mutate(runId)}
+              />
+            ) : null}
+
+            {replayError ? <p className="text-sm text-red-600">{replayError}</p> : null}
 
             <div className="flex flex-wrap gap-2">
               <Button
@@ -760,13 +824,13 @@ export function CaseDisputeStrategyPanel({
               </p>
             ) : null}
 
-            {strategyQuery.data.strategies.length === 0 ? (
+            {displayedStrategy.strategies.length === 0 ? (
               <p className="text-sm text-gray-500">
                 No ranked issues available to plan against yet.
               </p>
             ) : (
               <ul className="space-y-3">
-                {strategyQuery.data.strategies.map((strategy) => (
+                {displayedStrategy.strategies.map((strategy) => (
                   <AccountStrategyCard key={strategy.account_key} strategy={strategy} />
                 ))}
               </ul>

@@ -2099,6 +2099,35 @@ class DocumentService:
             )
         return DisputeStrategyRunResponse.from_model(run)
 
+    async def get_case_dispute_strategy_run(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+        run_id: uuid.UUID,
+    ) -> DisputeStrategyRunResponse:
+        organization_id = self._require_organization(user)
+        await self._validate_case(case_id, organization_id)
+        if self._session is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Database session unavailable",
+            )
+
+        from api.modules.documents.strategy_run_repository import StrategyRunRepository
+
+        repo = StrategyRunRepository(self._session)
+        run = await repo.get_for_case(
+            organization_id=organization_id,
+            case_id=case_id,
+            run_id=run_id,
+        )
+        if run is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Dispute strategy run not found for this case",
+            )
+        return DisputeStrategyRunResponse.from_model(run)
+
     async def list_case_dispute_strategy_runs(
         self,
         user: User,

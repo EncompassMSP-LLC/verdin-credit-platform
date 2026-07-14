@@ -73,6 +73,22 @@ class StrategyRunRepository:
         )
         return result.scalar_one_or_none()
 
+    async def get_for_case(
+        self,
+        *,
+        organization_id: uuid.UUID,
+        case_id: uuid.UUID,
+        run_id: uuid.UUID,
+    ) -> DisputeStrategyRun | None:
+        result = await self._session.execute(
+            select(DisputeStrategyRun).where(
+                DisputeStrategyRun.organization_id == organization_id,
+                DisputeStrategyRun.case_id == case_id,
+                DisputeStrategyRun.id == run_id,
+            )
+        )
+        return result.scalar_one_or_none()
+
     async def list_for_case(
         self,
         filters: StrategyRunListFilters,

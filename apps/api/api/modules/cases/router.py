@@ -279,6 +279,19 @@ async def get_latest_case_dispute_strategy_run(
 
 
 @router.get(
+    "/{case_id}/dispute-strategy/runs/{run_id}",
+    response_model=DisputeStrategyRunResponse,
+)
+async def get_case_dispute_strategy_run(
+    case_id: uuid.UUID,
+    run_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> DisputeStrategyRunResponse:
+    return await service.get_case_dispute_strategy_run(current_user, case_id, run_id)
+
+
+@router.get(
     "/{case_id}/dispute-strategy/cfpb-checklist",
     response_model=CaseCfpbChecklistResponse,
 )
