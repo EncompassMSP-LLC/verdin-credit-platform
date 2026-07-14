@@ -210,6 +210,199 @@ export interface CaseFcraFindings {
   documents: DocumentFcraFindings[];
 }
 
+export type IdentityTheftConfirmation =
+  | 'recognize'
+  | 'need_more_info'
+  | 'inaccurate_reporting'
+  | 'identity_theft'
+  | 'mixed_file'
+  | 'authorized_user'
+  | 'unsure';
+
+export interface IdentityTheftFindingSummary {
+  total: number;
+  high: number;
+  medium: number;
+  low: number;
+  tradelines_evaluated: number;
+  report_level_indicators: number;
+  tradeline_indicators: number;
+  ordinary_dispute_locked_count: number;
+}
+
+export interface IdentityTheftFinding {
+  rule_id: string;
+  severity: 'low' | 'medium' | 'high';
+  title: string;
+  description: string;
+  detection_source: 'REPORT_TEXT' | 'TRADELINE_HEURISTIC' | 'CONSUMER_CONFIRMATION';
+  issue_type: 'IDENTITY_THEFT_INDICATOR' | 'CONFIRMED_IDENTITY_THEFT_CLAIM';
+  confidence: number;
+  consumer_confirmed: boolean;
+  legal_path?: 'FCRA_605B' | null;
+  ordinary_dispute_locked: boolean;
+  required_action:
+    'CONSUMER_REVIEW' | 'OPEN_IDENTITY_THEFT_CASE' | 'PREPARE_605B' | 'CONTINUE_ORDINARY_DISPUTE';
+  classification: Record<string, unknown>;
+  tradeline_index?: number | null;
+  creditor_name?: string | null;
+  account_number_masked?: string | null;
+  fields: string[];
+  observed: Record<string, unknown>;
+}
+
+export interface DocumentIdentityTheftFindings {
+  document_id: string;
+  bureau: string;
+  schema_version?: string | null;
+  as_of_date?: string | null;
+  banner_active: boolean;
+  banner_title?: string | null;
+  banner_body?: string | null;
+  ordinary_dispute_locked: boolean;
+  summary: IdentityTheftFindingSummary;
+  findings: IdentityTheftFinding[];
+  protections_detected: Record<string, unknown>[];
+}
+
+export interface CaseIdentityTheftFindings {
+  case_id: string;
+  reports_evaluated: string[];
+  document_ids_by_bureau: Record<string, string>;
+  banner_active: boolean;
+  banner_title?: string | null;
+  banner_body?: string | null;
+  ordinary_dispute_locked: boolean;
+  summary: IdentityTheftFindingSummary;
+  documents: DocumentIdentityTheftFindings[];
+}
+
+export interface Fcra605bItem {
+  item_id: string;
+  label: string;
+  required: boolean;
+  status: 'present' | 'missing' | 'unknown';
+}
+
+export interface Fcra605bReadiness {
+  remedy_type: string;
+  not_ordinary_dispute: boolean;
+  packet_readiness: number;
+  items: Fcra605bItem[];
+  missing_evidence: string[];
+}
+
+export interface IdentityTheftIncident {
+  id: string;
+  case_id: string;
+  status: 'open' | 'in_recovery' | 'closed';
+  discovered_at?: string | null;
+  suspected_theft_period_start?: string | null;
+  suspected_theft_period_end?: string | null;
+  unrecognized_addresses: unknown[];
+  unrecognized_aliases: unknown[];
+  companies_contacted: unknown[];
+  police_report_number?: string | null;
+  police_report_agency?: string | null;
+  police_report_filed_at?: string | null;
+  ftc_report_status: string;
+  ftc_report_reference?: string | null;
+  evidence_checklist: unknown[];
+  recovery_step: number;
+  consumer_attestation_at?: string | null;
+  consumer_attestation_text?: string | null;
+  notes?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface IdentityTheftAccountReview {
+  id: string;
+  case_id: string;
+  incident_id?: string | null;
+  account_id?: string | null;
+  document_id?: string | null;
+  bureau?: string | null;
+  tradeline_index?: number | null;
+  match_key?: string | null;
+  creditor_name?: string | null;
+  account_number_masked?: string | null;
+  detection_source: string;
+  rule_id?: string | null;
+  confidence: number;
+  issue_type: 'IDENTITY_THEFT_INDICATOR' | 'CONFIRMED_IDENTITY_THEFT_CLAIM';
+  consumer_confirmation?: IdentityTheftConfirmation | null;
+  consumer_confirmed_at?: string | null;
+  ordinary_dispute_locked: boolean;
+  legal_path?: string | null;
+  packet_readiness?: number | null;
+  missing_evidence: unknown[];
+  attestation_accepted: boolean;
+  classification: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface IdentityTheftProtection {
+  id: string;
+  case_id: string;
+  protection_type:
+    | 'initial_fraud_alert'
+    | 'extended_fraud_alert'
+    | 'active_duty_alert'
+    | 'equifax_freeze'
+    | 'experian_freeze'
+    | 'transunion_freeze';
+  status: 'active' | 'inactive' | 'frozen' | 'unfrozen' | 'unknown';
+  placed_at?: string | null;
+  expires_at?: string | null;
+  source: string;
+  notes?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface IdentityTheftCaseCenter {
+  case_id: string;
+  disclaimer: string;
+  confirmation_options: string[];
+  attestation_text: string;
+  recovery_workflow_steps: { step: string; title: string }[];
+  default_evidence_checklist: { item_id: string; label: string }[];
+  banner_active: boolean;
+  banner_title?: string | null;
+  banner_body?: string | null;
+  findings?: CaseIdentityTheftFindings | null;
+  incident?: IdentityTheftIncident | null;
+  account_reviews: IdentityTheftAccountReview[];
+  protections: IdentityTheftProtection[];
+  fcra_605b?: Fcra605bReadiness | null;
+}
+
+export interface ConfirmIdentityTheftAccountRequest {
+  confirmation: IdentityTheftConfirmation;
+  attestation_accepted?: boolean;
+  account_id?: string | null;
+  document_id?: string | null;
+  bureau?: string | null;
+  tradeline_index?: number | null;
+  match_key?: string | null;
+  creditor_name?: string | null;
+  account_number_masked?: string | null;
+  detection_source?: 'REPORT_TEXT' | 'TRADELINE_HEURISTIC' | 'CONSUMER_CONFIRMATION';
+  rule_id?: string | null;
+  confidence?: number;
+  discovered_at?: string | null;
+}
+
+export interface UpsertIdentityTheftProtectionRequest {
+  protection_type: IdentityTheftProtection['protection_type'];
+  status: IdentityTheftProtection['status'];
+  placed_at?: string | null;
+  expires_at?: string | null;
+  notes?: string | null;
+}
+
 export interface TradelineChronologySummary {
   tradelines: number;
   with_changes: number;
@@ -334,7 +527,7 @@ export interface LitigationStrengthSummary {
 }
 
 export interface LitigationStrengthIssue {
-  source_kind: 'metro2' | 'fcra' | 'cross_bureau' | 'chronology';
+  source_kind: 'metro2' | 'fcra' | 'cross_bureau' | 'chronology' | 'identity_theft';
   source_id: string;
   rule_id: string;
   score: number;
@@ -696,6 +889,14 @@ export async function getDocumentMetro2Findings(
 export async function getDocumentFcraFindings(documentId: string): Promise<DocumentFcraFindings> {
   return request<DocumentFcraFindings>(
     apiPath(`/documents/${documentId}/parsed-credit-report/fcra-findings`),
+  );
+}
+
+export async function getDocumentIdentityTheftFindings(
+  documentId: string,
+): Promise<DocumentIdentityTheftFindings> {
+  return request<DocumentIdentityTheftFindings>(
+    apiPath(`/documents/${documentId}/parsed-credit-report/identity-theft-findings`),
   );
 }
 

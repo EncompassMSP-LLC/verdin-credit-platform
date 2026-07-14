@@ -475,6 +475,18 @@ class AccountService:
     ) -> DisputeLetterResponse:
         self._require_write(user)
         account = await self._get_account_for_user(account_id, user)
+        # Pause ordinary dispute generation when identity theft is suspected/confirmed.
+        from api.modules.documents.service import DocumentService as _DocService
+
+        if self._session is not None:
+            doc_service = _DocService.from_session(self._session)
+            await doc_service.assert_ordinary_dispute_allowed_for_account(
+                user,
+                case_id=account.case_id,
+                account_id=account.id,
+                creditor_name=account.creditor_name,
+                account_number_masked=account.account_number_masked,
+            )
         if self._dispute_letters is None:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

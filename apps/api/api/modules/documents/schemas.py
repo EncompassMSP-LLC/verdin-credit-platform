@@ -1,7 +1,7 @@
 """Documents domain schemas."""
 
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 from typing import TYPE_CHECKING, Any, Literal
 
 from pydantic import Field
@@ -626,7 +626,7 @@ class LitigationStrengthSummary(BaseSchema):
 
 
 class LitigationStrengthIssue(BaseSchema):
-    source_kind: Literal["metro2", "fcra", "cross_bureau", "chronology"]
+    source_kind: Literal["metro2", "fcra", "cross_bureau", "chronology", "identity_theft"]
     source_id: str
     rule_id: str
     score: int
@@ -852,3 +852,232 @@ class UpsertChecklistOverrideRequest(BaseSchema):
     item_id: str
     completion_status: Literal["present", "missing", "unknown"] | None = None
     note: str | None = None
+
+
+# --- Identity Theft Detection & Recovery (Phase 8) ---
+
+IdentityTheftConfirmationChoice = Literal[
+    "recognize",
+    "need_more_info",
+    "inaccurate_reporting",
+    "identity_theft",
+    "mixed_file",
+    "authorized_user",
+    "unsure",
+]
+
+
+class IdentityTheftFindingSummary(BaseSchema):
+    total: int
+    high: int
+    medium: int
+    low: int
+    tradelines_evaluated: int
+    report_level_indicators: int = 0
+    tradeline_indicators: int = 0
+    ordinary_dispute_locked_count: int = 0
+
+
+class IdentityTheftFindingResponse(BaseSchema):
+    rule_id: str
+    severity: Literal["low", "medium", "high"]
+    title: str
+    description: str
+    detection_source: Literal["REPORT_TEXT", "TRADELINE_HEURISTIC", "CONSUMER_CONFIRMATION"]
+    issue_type: Literal["IDENTITY_THEFT_INDICATOR", "CONFIRMED_IDENTITY_THEFT_CLAIM"]
+    confidence: float
+    consumer_confirmed: bool
+    legal_path: Literal["FCRA_605B"] | None = None
+    ordinary_dispute_locked: bool
+    required_action: Literal[
+        "CONSUMER_REVIEW",
+        "OPEN_IDENTITY_THEFT_CASE",
+        "PREPARE_605B",
+        "CONTINUE_ORDINARY_DISPUTE",
+    ]
+    classification: dict[str, object]
+    tradeline_index: int | None = None
+    creditor_name: str | None = None
+    account_number_masked: str | None = None
+    fields: list[str]
+    observed: dict[str, object]
+
+
+class DocumentIdentityTheftFindingsResponse(BaseSchema):
+    document_id: uuid.UUID
+    bureau: str
+    schema_version: str | None = None
+    as_of_date: str | None = None
+    banner_active: bool
+    banner_title: str | None = None
+    banner_body: str | None = None
+    ordinary_dispute_locked: bool
+    summary: IdentityTheftFindingSummary
+    findings: list[IdentityTheftFindingResponse]
+    protections_detected: list[dict[str, object]]
+
+
+class CaseIdentityTheftFindingsResponse(BaseSchema):
+    case_id: uuid.UUID
+    reports_evaluated: list[str]
+    document_ids_by_bureau: dict[str, uuid.UUID]
+    banner_active: bool
+    banner_title: str | None = None
+    banner_body: str | None = None
+    ordinary_dispute_locked: bool
+    summary: IdentityTheftFindingSummary
+    documents: list[DocumentIdentityTheftFindingsResponse]
+
+
+class Fcra605bItemResponse(BaseSchema):
+    item_id: str
+    label: str
+    required: bool
+    status: Literal["present", "missing", "unknown"]
+
+
+class Fcra605bReadinessResponse(BaseSchema):
+    remedy_type: str
+    not_ordinary_dispute: bool
+    packet_readiness: int
+    items: list[Fcra605bItemResponse]
+    missing_evidence: list[str]
+
+
+class IdentityTheftIncidentResponse(BaseSchema):
+    id: uuid.UUID
+    case_id: uuid.UUID
+    status: Literal["open", "in_recovery", "closed"]
+    discovered_at: date | None = None
+    suspected_theft_period_start: date | None = None
+    suspected_theft_period_end: date | None = None
+    unrecognized_addresses: list[object] = Field(default_factory=list)
+    unrecognized_aliases: list[object] = Field(default_factory=list)
+    companies_contacted: list[object] = Field(default_factory=list)
+    police_report_number: str | None = None
+    police_report_agency: str | None = None
+    police_report_filed_at: date | None = None
+    ftc_report_status: str
+    ftc_report_reference: str | None = None
+    evidence_checklist: list[object] = Field(default_factory=list)
+    recovery_step: int
+    consumer_attestation_at: datetime | None = None
+    consumer_attestation_text: str | None = None
+    notes: str | None = None
+    created_at: datetime
+    updated_at: datetime
+
+
+class IdentityTheftAccountReviewResponse(BaseSchema):
+    id: uuid.UUID
+    case_id: uuid.UUID
+    incident_id: uuid.UUID | None = None
+    account_id: uuid.UUID | None = None
+    document_id: uuid.UUID | None = None
+    bureau: str | None = None
+    tradeline_index: int | None = None
+    match_key: str | None = None
+    creditor_name: str | None = None
+    account_number_masked: str | None = None
+    detection_source: str
+    rule_id: str | None = None
+    confidence: float
+    issue_type: Literal["IDENTITY_THEFT_INDICATOR", "CONFIRMED_IDENTITY_THEFT_CLAIM"]
+    consumer_confirmation: IdentityTheftConfirmationChoice | None = None
+    consumer_confirmed_at: datetime | None = None
+    ordinary_dispute_locked: bool
+    legal_path: str | None = None
+    packet_readiness: int | None = None
+    missing_evidence: list[object] = Field(default_factory=list)
+    attestation_accepted: bool
+    classification: dict[str, object]
+    created_at: datetime
+    updated_at: datetime
+
+
+class IdentityTheftProtectionResponse(BaseSchema):
+    id: uuid.UUID
+    case_id: uuid.UUID
+    protection_type: Literal[
+        "initial_fraud_alert",
+        "extended_fraud_alert",
+        "active_duty_alert",
+        "equifax_freeze",
+        "experian_freeze",
+        "transunion_freeze",
+    ]
+    status: Literal["active", "inactive", "frozen", "unfrozen", "unknown"]
+    placed_at: date | None = None
+    expires_at: date | None = None
+    source: str
+    notes: str | None = None
+    created_at: datetime
+    updated_at: datetime
+
+
+class IdentityTheftCaseCenterResponse(BaseSchema):
+    case_id: uuid.UUID
+    disclaimer: str
+    confirmation_options: list[str]
+    attestation_text: str
+    recovery_workflow_steps: list[dict[str, str]]
+    default_evidence_checklist: list[dict[str, str]]
+    banner_active: bool
+    banner_title: str | None = None
+    banner_body: str | None = None
+    findings: CaseIdentityTheftFindingsResponse | None = None
+    incident: IdentityTheftIncidentResponse | None = None
+    account_reviews: list[IdentityTheftAccountReviewResponse]
+    protections: list[IdentityTheftProtectionResponse]
+    fcra_605b: Fcra605bReadinessResponse | None = None
+
+
+class ConfirmIdentityTheftAccountRequest(BaseSchema):
+    confirmation: IdentityTheftConfirmationChoice
+    attestation_accepted: bool = False
+    account_id: uuid.UUID | None = None
+    document_id: uuid.UUID | None = None
+    bureau: str | None = None
+    tradeline_index: int | None = None
+    match_key: str | None = None
+    creditor_name: str | None = None
+    account_number_masked: str | None = None
+    detection_source: Literal["REPORT_TEXT", "TRADELINE_HEURISTIC", "CONSUMER_CONFIRMATION"] = (
+        "CONSUMER_CONFIRMATION"
+    )
+    rule_id: str | None = None
+    confidence: float = Field(default=1.0, ge=0.0, le=1.0)
+    discovered_at: date | None = None
+
+
+class UpsertIdentityTheftProtectionRequest(BaseSchema):
+    protection_type: Literal[
+        "initial_fraud_alert",
+        "extended_fraud_alert",
+        "active_duty_alert",
+        "equifax_freeze",
+        "experian_freeze",
+        "transunion_freeze",
+    ]
+    status: Literal["active", "inactive", "frozen", "unfrozen", "unknown"]
+    placed_at: date | None = None
+    expires_at: date | None = None
+    notes: str | None = None
+
+
+class UpdateIdentityTheftIncidentRequest(BaseSchema):
+    status: Literal["open", "in_recovery", "closed"] | None = None
+    discovered_at: date | None = None
+    suspected_theft_period_start: date | None = None
+    suspected_theft_period_end: date | None = None
+    unrecognized_addresses: list[object] | None = None
+    unrecognized_aliases: list[object] | None = None
+    companies_contacted: list[object] | None = None
+    police_report_number: str | None = None
+    police_report_agency: str | None = None
+    police_report_filed_at: date | None = None
+    ftc_report_status: str | None = None
+    ftc_report_reference: str | None = None
+    evidence_checklist: list[object] | None = None
+    recovery_step: int | None = Field(default=None, ge=1, le=9)
+    notes: str | None = None

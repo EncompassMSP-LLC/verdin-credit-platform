@@ -35,6 +35,7 @@ from api.modules.documents.schemas import (
     DocumentClassificationResponse,
     DocumentDuplicateGroupResponse,
     DocumentFcraFindingsResponse,
+    DocumentIdentityTheftFindingsResponse,
     DocumentListParams,
     DocumentLlmSummaryResponse,
     DocumentMetro2FindingsResponse,
@@ -269,6 +270,18 @@ async def get_document_fcra_findings(
     service: DocumentService = Depends(get_document_service),
 ) -> DocumentFcraFindingsResponse:
     return await service.get_fcra_findings(current_user, document_id)
+
+
+@router.get(
+    "/{document_id}/parsed-credit-report/identity-theft-findings",
+    response_model=DocumentIdentityTheftFindingsResponse,
+)
+async def get_document_identity_theft_findings(
+    document_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> DocumentIdentityTheftFindingsResponse:
+    return await service.get_identity_theft_findings(current_user, document_id)
 
 
 @router.get(

@@ -10,7 +10,7 @@ import uuid
 from dataclasses import dataclass
 from typing import Any, Literal
 
-SourceKind = Literal["metro2", "fcra", "cross_bureau", "chronology"]
+SourceKind = Literal["metro2", "fcra", "cross_bureau", "chronology", "identity_theft"]
 
 # Base scores aligned to the product vision examples.
 _RULE_BASE_SCORES: dict[str, int] = {
@@ -50,9 +50,29 @@ _RULE_BASE_SCORES: dict[str, int] = {
     "chronology.date_closed_changed": 72,
     "chronology.balance_decreased": 55,
     "chronology.field_changed": 45,
+    # Identity theft indicators (separate from Metro 2 severity)
+    "identity_theft.report.fraud_alert": 40,
+    "identity_theft.report.extended_fraud_alert": 45,
+    "identity_theft.report.security_freeze": 40,
+    "identity_theft.report.file_blocked": 55,
+    "identity_theft.report.victim_statement": 60,
+    "identity_theft.tradeline.consumer_denies_account": 70,
+    "identity_theft.tradeline.open_before_plausible_age": 75,
+    "identity_theft.tradeline.history_before_open": 72,
+    "identity_theft.tradeline.unfamiliar_collection": 50,
 }
 
 _DEFAULT_SCORE = 50
+
+
+def _identity_theft_prefix_score(rule_id: str) -> int | None:
+    if rule_id.startswith("identity_theft.report."):
+        return 42
+    if rule_id.startswith("identity_theft.tradeline."):
+        return 65
+    if rule_id.startswith("identity_theft."):
+        return 50
+    return None
 
 
 @dataclass(frozen=True, slots=True)
@@ -86,6 +106,9 @@ def _clamp_score(value: int) -> int:
 def _base_score(rule_id: str) -> int:
     if rule_id in _RULE_BASE_SCORES:
         return _RULE_BASE_SCORES[rule_id]
+    identity = _identity_theft_prefix_score(rule_id)
+    if identity is not None:
+        return identity
     # Prefix heuristics for unknown rules
     lowered = rule_id.lower()
     if "dofd" in lowered or "impossible" in lowered or "before_open" in lowered:
@@ -123,10 +146,15 @@ def score_case_litigation_strength(
     fcra_documents: list[dict[str, Any]],
     discrepancies: list[dict[str, Any]],
     chronology_events: list[dict[str, Any]],
+    identity_theft_documents: list[dict[str, Any]] | None = None,
 ) -> CaseLitigationStrengthResult:
     raw: list[tuple[int, ScoredIssue]] = []
 
-    for source_kind, documents in (("metro2", metro2_documents), ("fcra", fcra_documents)):
+    for source_kind, documents in (
+        ("metro2", metro2_documents),
+        ("fcra", fcra_documents),
+        ("identity_theft", identity_theft_documents or []),
+    ):
         for document in documents:
             bureau = document.get("bureau") if isinstance(document.get("bureau"), str) else None
             document_id = document.get("document_id")
@@ -143,6 +171,10 @@ def score_case_litigation_strength(
                 creditor = finding.get("creditor_name")
                 masked = finding.get("account_number_masked")
                 factors = [f"severity:{severity}", f"source:{source_kind}"]
+                if source_kind == "identity_theft":
+                    factors.append("not_ordinary_metro2")
+                    if finding.get("ordinary_dispute_locked"):
+                        factors.append("ordinary_dispute_locked")
                 score = _clamp_score(_base_score(rule_id) + _severity_bonus(severity))
                 source_id = f"{source_kind}:{bureau or 'unknown'}:{rule_id}#{index}"
                 if isinstance(document_id, uuid.UUID):
