@@ -261,10 +261,14 @@ def build_checklist_packet_zip(
     markdown_name: str,
     markdown_bytes: bytes,
     exhibits: list[tuple[str, bytes]],
+    pdf_name: str | None = None,
+    pdf_bytes: bytes | None = None,
 ) -> bytes:
     buffer = BytesIO()
     with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as archive:
         archive.writestr(markdown_name, markdown_bytes)
+        if pdf_name and pdf_bytes is not None:
+            archive.writestr(pdf_name, pdf_bytes)
         for path, content in exhibits:
             archive.writestr(path, content)
     return buffer.getvalue()

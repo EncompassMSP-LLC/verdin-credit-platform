@@ -2284,7 +2284,9 @@ class DocumentService:
         from api.modules.documents.checklist_export import (
             checklist_export_filename,
             render_attorney_checklist_markdown,
+            render_attorney_checklist_pdf,
             render_cfpb_checklist_markdown,
+            render_cfpb_checklist_pdf,
         )
         from api.modules.documents.checklist_packet import (
             build_checklist_packet_zip,
@@ -2304,21 +2306,21 @@ class DocumentService:
                 detail="Case not found",
             )
         if kind == "cfpb":
-            markdown = render_cfpb_checklist_markdown(
-                await self.get_case_cfpb_checklist(
-                    user,
-                    case_id,
-                    recommended_only=recommended_only,
-                )
-            ).encode("utf-8")
+            checklist = await self.get_case_cfpb_checklist(
+                user,
+                case_id,
+                recommended_only=recommended_only,
+            )
+            markdown = render_cfpb_checklist_markdown(checklist).encode("utf-8")
+            checklist_pdf = render_cfpb_checklist_pdf(checklist)
         else:
-            markdown = render_attorney_checklist_markdown(
-                await self.get_case_attorney_checklist(
-                    user,
-                    case_id,
-                    recommended_only=recommended_only,
-                )
-            ).encode("utf-8")
+            attorney_checklist = await self.get_case_attorney_checklist(
+                user,
+                case_id,
+                recommended_only=recommended_only,
+            )
+            markdown = render_attorney_checklist_markdown(attorney_checklist).encode("utf-8")
+            checklist_pdf = render_attorney_checklist_pdf(attorney_checklist)
 
         exhibits: list[tuple[str, bytes]] = []
         if self._session is not None:
@@ -2361,6 +2363,8 @@ class DocumentService:
         packet = build_checklist_packet_zip(
             markdown_name=checklist_export_filename(kind, case_id),
             markdown_bytes=markdown,
+            pdf_name=checklist_export_filename(kind, case_id, export_format="pdf"),
+            pdf_bytes=checklist_pdf,
             exhibits=exhibits,
         )
         return packet, checklist_packet_filename(kind, case_id), "application/zip"

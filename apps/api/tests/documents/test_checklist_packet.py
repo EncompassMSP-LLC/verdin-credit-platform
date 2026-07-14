@@ -37,6 +37,21 @@ def test_build_checklist_packet_zip_includes_markdown_and_exhibits() -> None:
         assert archive.read("cfpb-checklist-12345678.md").startswith(b"# CFPB")
 
 
+def test_build_checklist_packet_zip_includes_root_checklist_pdf() -> None:
+    packet = build_checklist_packet_zip(
+        markdown_name="cfpb-checklist-12345678.md",
+        markdown_bytes=b"# CFPB checklist\n",
+        pdf_name="cfpb-checklist-12345678.pdf",
+        pdf_bytes=b"%PDF-checklist",
+        exhibits=[],
+    )
+    with zipfile.ZipFile(BytesIO(packet), "r") as archive:
+        names = set(archive.namelist())
+        assert "cfpb-checklist-12345678.md" in names
+        assert "cfpb-checklist-12345678.pdf" in names
+        assert archive.read("cfpb-checklist-12345678.pdf").startswith(b"%PDF")
+
+
 def test_build_checklist_packet_zip_without_exhibits_still_has_markdown() -> None:
     packet = build_checklist_packet_zip(
         markdown_name="attorney-checklist-12345678.md",
