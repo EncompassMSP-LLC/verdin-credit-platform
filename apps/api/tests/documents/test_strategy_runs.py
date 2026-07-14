@@ -171,6 +171,27 @@ def test_get_case_dispute_strategy_persists_run(
     assert listed_data["total"] >= 1
     assert any(item["id"] == data["run_id"] for item in listed_data["items"])
 
+    by_id = api_client.get(
+        f"/api/v1/cases/{sample_case_id}/dispute-strategy/runs/{data['run_id']}",
+        headers=manager_headers,
+    )
+    assert by_id.status_code == 200, by_id.text
+    by_id_data = by_id.json()
+    assert by_id_data["id"] == data["run_id"]
+    assert by_id_data["disclaimer"] == strategy_response.disclaimer
+
+
+def test_get_dispute_strategy_run_not_found(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    response = api_client.get(
+        f"/api/v1/cases/{sample_case_id}/dispute-strategy/runs/{uuid.uuid4()}",
+        headers=manager_headers,
+    )
+    assert response.status_code == 404
+
 
 def test_get_latest_dispute_strategy_run_not_found(
     api_client: TestClient,

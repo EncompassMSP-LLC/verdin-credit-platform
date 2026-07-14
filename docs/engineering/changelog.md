@@ -335,7 +335,7 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Technical debt:** Checklist/prepare paths regenerate strategy without persisting additional runs.
 
-**Follow-up work:** `GET .../runs/{run_id}` replay; panel replay action.
+**Follow-up work:** Wire stage actions into dispute letter prep.
 
 ## Compliance intelligence — dispute strategy run UI audit
 
@@ -347,7 +347,7 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Technical debt:** UI shows latest load only, not historical runs.
 
-**Follow-up work:** Replay prior run in panel.
+**Follow-up work:** Replay prior run in panel (done via run history Replay).
 
 ## Compliance intelligence — dispute strategy run history
 
@@ -357,9 +357,21 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Alternatives considered:** Full payload in list; unbounded array on latest endpoint.
 
-**Technical debt:** No per-run GET by id yet; UI shows summaries only.
+**Technical debt:** UI list shows summaries only until Replay fetches full payload.
 
-**Follow-up work:** `GET .../runs/{run_id}` replay; panel replay action.
+**Follow-up work:** Wire stage actions into dispute letter prep.
+
+## Compliance intelligence — dispute strategy run replay
+
+**Decision:** Add `GET /cases/{case_id}/dispute-strategy/runs/{run_id}` for org/case-scoped full-run replay, and wire a staff Replay action in the case strategy panel that overlays the stored plan without creating a new audit row.
+
+**Reason:** Changelog follow-up from run history; investigators need to inspect prior plans without regenerating and re-persisting.
+
+**Alternatives considered:** Replay only via latest; duplicate payload into browser cache.
+
+**Technical debt:** Prepare/checklist actions still use live generation while replaying.
+
+**Follow-up work:** Wire stage actions into dispute letter prep.
 
 ## Sprint 4.3.0 — Operational Core
 

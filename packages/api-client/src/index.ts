@@ -117,6 +117,7 @@ export {
   getCaseDisputeStrategy,
   getLatestCaseDisputeStrategyRun,
   listCaseDisputeStrategyRuns,
+  getCaseDisputeStrategyRun,
   getCaseCfpbChecklist,
   getCaseAttorneyChecklist,
   listCases,

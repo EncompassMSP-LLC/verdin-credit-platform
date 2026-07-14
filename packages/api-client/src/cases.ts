@@ -421,6 +421,13 @@ export async function listCaseDisputeStrategyRuns(
   );
 }
 
+export async function getCaseDisputeStrategyRun(
+  caseId: string,
+  runId: string,
+): Promise<DisputeStrategyRun> {
+  return request<DisputeStrategyRun>(apiPath(`/cases/${caseId}/dispute-strategy/runs/${runId}`));
+}
+
 export async function getCaseCfpbChecklist(
   caseId: string,
   params: { recommended_only?: boolean } = {},
