@@ -17,6 +17,7 @@ class RedactedTradelineExcerpt:
     page_numbers: tuple[int, ...]
     redacted_creditor_count: int
     used_full_report_fallback: bool
+    scanned_page_numbers: tuple[int, ...] | None = None
 
 
 def locate_tradeline_pages(
@@ -88,6 +89,7 @@ def build_redacted_tradeline_excerpt(
     try:
         with pdfplumber.open(BytesIO(pdf_bytes)) as pdf:
             matching_pages: list[tuple[int, Any]] = []
+            scanned_page_numbers: tuple[int, ...] | None = None
             if known_page_numbers is not None:
                 if not known_page_numbers:
                     return _fallback_full_report(pdf_bytes)
@@ -105,9 +107,13 @@ def build_redacted_tradeline_excerpt(
                         target_account_masked=target_account_masked,
                     ):
                         matching_pages.append((index, page))
+                scanned_page_numbers = tuple(index + 1 for index, _ in matching_pages)
 
             if not matching_pages:
-                return _fallback_full_report(pdf_bytes)
+                return _fallback_full_report(
+                    pdf_bytes,
+                    scanned_page_numbers=scanned_page_numbers,
+                )
 
             writer_buffer = BytesIO()
             from pypdf import PdfReader, PdfWriter
@@ -144,12 +150,17 @@ def build_redacted_tradeline_excerpt(
                 page_numbers=tuple(page_numbers),
                 redacted_creditor_count=redacted_creditor_count,
                 used_full_report_fallback=False,
+                scanned_page_numbers=scanned_page_numbers,
             )
     except Exception:
         return _fallback_full_report(pdf_bytes)
 
 
-def _fallback_full_report(pdf_bytes: bytes) -> RedactedTradelineExcerpt:
+def _fallback_full_report(
+    pdf_bytes: bytes,
+    *,
+    scanned_page_numbers: tuple[int, ...] | None = None,
+) -> RedactedTradelineExcerpt:
     from pypdf import PdfReader
 
     reader = PdfReader(BytesIO(pdf_bytes))
@@ -158,6 +169,7 @@ def _fallback_full_report(pdf_bytes: bytes) -> RedactedTradelineExcerpt:
         page_numbers=tuple(range(1, len(reader.pages) + 1)),
         redacted_creditor_count=0,
         used_full_report_fallback=True,
+        scanned_page_numbers=scanned_page_numbers,
     )
 
 

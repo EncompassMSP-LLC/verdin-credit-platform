@@ -54,6 +54,19 @@ def test_build_redacted_tradeline_excerpt_falls_back_when_target_missing() -> No
     )
     assert excerpt is not None
     assert excerpt.used_full_report_fallback is True
+    assert excerpt.scanned_page_numbers == ()
+
+
+def test_build_redacted_tradeline_excerpt_records_scanned_pages() -> None:
+    excerpt = build_redacted_tradeline_excerpt(
+        _sample_report_pdf(),
+        target_creditor="ACHIEVE PERSONAL LOANS",
+        target_account_masked="****1081",
+        other_creditors=("CAPITAL ONE",),
+    )
+    assert excerpt is not None
+    assert excerpt.used_full_report_fallback is False
+    assert excerpt.scanned_page_numbers == (1,)
 
 
 def test_build_redacted_tradeline_excerpt_uses_known_page_numbers() -> None:
@@ -67,6 +80,7 @@ def test_build_redacted_tradeline_excerpt_uses_known_page_numbers() -> None:
     assert excerpt is not None
     assert excerpt.used_full_report_fallback is False
     assert excerpt.page_numbers == (1,)
+    assert excerpt.scanned_page_numbers is None
 
 
 def test_build_redacted_tradeline_excerpt_known_empty_pages_falls_back() -> None:
@@ -79,3 +93,4 @@ def test_build_redacted_tradeline_excerpt_known_empty_pages_falls_back() -> None
     )
     assert excerpt is not None
     assert excerpt.used_full_report_fallback is True
+    assert excerpt.scanned_page_numbers is None
