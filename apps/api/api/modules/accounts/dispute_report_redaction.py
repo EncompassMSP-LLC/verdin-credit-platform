@@ -65,6 +65,7 @@ def build_redacted_tradeline_excerpt(
     target_creditor: str,
     target_account_masked: str | None,
     other_creditors: tuple[str, ...],
+    known_page_numbers: tuple[int, ...] | None = None,
 ) -> RedactedTradelineExcerpt | None:
     if not pdf_bytes.startswith(b"%PDF"):
         return None
@@ -87,15 +88,23 @@ def build_redacted_tradeline_excerpt(
     try:
         with pdfplumber.open(BytesIO(pdf_bytes)) as pdf:
             matching_pages: list[tuple[int, Any]] = []
-            for index, page in enumerate(pdf.pages):
-                page_text = page.extract_text() or ""
-                if _page_matches_target(
-                    page_text,
-                    target_creditor=target_creditor,
-                    target_tokens=target_tokens,
-                    target_account_masked=target_account_masked,
-                ):
-                    matching_pages.append((index, page))
+            if known_page_numbers is not None:
+                if not known_page_numbers:
+                    return _fallback_full_report(pdf_bytes)
+                for page_number in known_page_numbers:
+                    index = page_number - 1
+                    if 0 <= index < len(pdf.pages):
+                        matching_pages.append((index, pdf.pages[index]))
+            else:
+                for index, page in enumerate(pdf.pages):
+                    page_text = page.extract_text() or ""
+                    if _page_matches_target(
+                        page_text,
+                        target_creditor=target_creditor,
+                        target_tokens=target_tokens,
+                        target_account_masked=target_account_masked,
+                    ):
+                        matching_pages.append((index, page))
 
             if not matching_pages:
                 return _fallback_full_report(pdf_bytes)

@@ -13,6 +13,18 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — excerpt builder page-map reuse
+
+**Decision:** Pass cached `tradeline_page_map` page numbers into `build_redacted_tradeline_excerpt` via optional `known_page_numbers`, skipping rediscovery scans when evidence-link page maps already exist for the document hash.
+
+**Reason:** Report-excerpt / mail-packet attachments were re-scanning PDFs independently of the persisted page map.
+
+**Alternatives considered:** Always re-scan; duplicate locate helpers; write-through from excerpt builder.
+
+**Technical debt:** Excerpt path still opens pdfplumber for redaction geometry on known pages; empty cached maps force full-report fallback.
+
+**Follow-up work:** OCR line refs; write-through from excerpt scans on cache miss.
+
 ## Compliance intelligence — persisted tradeline page maps
 
 **Decision:** Persist on-demand tradeline page-scan results in `document_parsed_credit_reports.tradeline_page_map` (JSONB) keyed by document `file_hash`. Write-through cache in `GET /cases/{id}/compliance-evidence-links` when `include_page_scan=true`.
@@ -21,9 +33,9 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Alternatives considered:** New page-map table; store on `document_metadata`; worker precompute; serve cache when scan skipped.
 
-**Technical debt:** Map is document-scoped JSON; no per-entry index; excerpt builder still rescans independently.
+**Technical debt:** Map is document-scoped JSON; no per-entry index.
 
-**Follow-up work:** OCR line refs; share cache with report-excerpt builder.
+**Follow-up work:** OCR line refs; share cache with report-excerpt builder (done).
 
 ## Compliance intelligence — evidence page-scan query flag
 
