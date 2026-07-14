@@ -13,6 +13,18 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — single-pass excerpt scan+redact
+
+**Decision:** On page-map cache miss, uild_redacted_tradeline_excerpt discovers pages and redacts in one pdfplumber open, exposing scanned_page_numbers for write-through via page_map_update_from_scan. Cache hits still skip discovery.
+
+**Reason:** Miss path previously called locate_tradeline_pages then opened pdfplumber again inside the excerpt builder.
+
+**Alternatives considered:** Keep dual open; return page objects across helpers; merge evidence-link locate into excerpt API.
+
+**Technical debt:** Evidence-link path still uses separate locate_tradeline_pages opens.
+
+**Follow-up work:** OCR line refs; share single-pass helper with evidence links.
+
 ## Compliance intelligence — excerpt page-map write-through
 
 **Decision:** On report-excerpt / mail-packet cache miss, call locate_tradeline_pages once, persist via merge_page_map_entry onto document_parsed_credit_reports.tradeline_page_map, and pass the located pages into uild_redacted_tradeline_excerpt as known_page_numbers.
@@ -23,7 +35,7 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Technical debt:** Locate + redaction still open pdfplumber separately; no write when parsed credit report row is absent.
 
-**Follow-up work:** OCR line refs; coalesce locate/redact into one pdfplumber pass.
+**Follow-up work:** OCR line refs; coalesce locate/redact into one pdfplumber pass (done).
 
 ## Compliance intelligence — excerpt builder page-map reuse
 

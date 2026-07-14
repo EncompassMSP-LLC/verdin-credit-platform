@@ -151,7 +151,7 @@ def _sample_report_pdf() -> bytes:
     return buffer.getvalue()
 
 
-def test_resolve_known_tradeline_pages_writes_through_on_cache_miss() -> None:
+def test_resolve_known_tradeline_pages_cache_miss_skips_locate() -> None:
     from api.modules.accounts.dispute_mail_attachments import resolve_known_tradeline_pages
 
     pages, updated = resolve_known_tradeline_pages(
@@ -161,8 +161,20 @@ def test_resolve_known_tradeline_pages_writes_through_on_cache_miss() -> None:
         account_number_masked="****1081",
         pdf_bytes=_sample_report_pdf(),
     )
-    assert pages == (1,)
-    assert updated is not None
+    assert pages is None
+    assert updated is None
+
+
+def test_page_map_update_from_scan_writes_matched_pages() -> None:
+    from api.modules.accounts.dispute_mail_attachments import page_map_update_from_scan
+
+    updated = page_map_update_from_scan(
+        page_map_raw=None,
+        file_hash="hash-a",
+        creditor_name="ACHIEVE PERSONAL LOANS",
+        account_number_masked="****1081",
+        scanned_pages=(1,),
+    )
     assert updated["file_hash"] == "hash-a"
     assert updated["entries"][0]["page_numbers"] == [1]
     assert updated["entries"][0]["confidence"] == "matched"
@@ -195,17 +207,15 @@ def test_resolve_known_tradeline_pages_reuses_cache_without_write() -> None:
     assert updated is None
 
 
-def test_resolve_known_tradeline_pages_writes_unavailable_on_miss() -> None:
-    from api.modules.accounts.dispute_mail_attachments import resolve_known_tradeline_pages
+def test_page_map_update_from_scan_writes_unavailable() -> None:
+    from api.modules.accounts.dispute_mail_attachments import page_map_update_from_scan
 
-    pages, updated = resolve_known_tradeline_pages(
+    updated = page_map_update_from_scan(
         page_map_raw=None,
         file_hash="hash-b",
         creditor_name="UNKNOWN LENDER",
         account_number_masked=None,
-        pdf_bytes=_sample_report_pdf(),
+        scanned_pages=(),
     )
-    assert pages == ()
-    assert updated is not None
     assert updated["entries"][0]["confidence"] == "unavailable"
     assert updated["entries"][0]["page_numbers"] == []

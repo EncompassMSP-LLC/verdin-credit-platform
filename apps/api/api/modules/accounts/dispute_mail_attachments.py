@@ -31,18 +31,20 @@ def resolve_known_tradeline_pages(
     file_hash: str,
     creditor_name: str,
     account_number_masked: str | None,
-    pdf_bytes: bytes,
+    pdf_bytes: bytes | None = None,
 ) -> tuple[tuple[int, ...] | None, dict[str, object] | None]:
-    """Resolve page numbers from cache or locate+write-through on miss.
+    """Return cached page numbers when present.
 
-    Returns ``(known_page_numbers, updated_page_map)``. ``updated_page_map`` is
-    set only when a cache miss was located and should be persisted.
+    On cache miss returns ``(None, None)``. Callers should build the excerpt with
+    a single discovery+redaction pass, then persist via
+    :func:`page_map_update_from_scan` using ``excerpt.scanned_page_numbers``.
+
+    ``pdf_bytes`` is accepted for call-site compatibility and unused.
     """
-    from api.modules.accounts.dispute_report_redaction import locate_tradeline_pages
+    del pdf_bytes
     from api.modules.documents.tradeline_page_map import (
         CACHE_MISS,
         get_cached_pages,
-        merge_page_map_entry,
         normalize_page_map,
     )
 
@@ -54,23 +56,31 @@ def resolve_known_tradeline_pages(
     )
     if cached is not CACHE_MISS and isinstance(cached, tuple):
         return cached, None
+    return None, None
 
-    located = locate_tradeline_pages(
-        pdf_bytes,
-        target_creditor=creditor_name,
-        target_account_masked=account_number_masked,
+
+def page_map_update_from_scan(
+    *,
+    page_map_raw: object,
+    file_hash: str,
+    creditor_name: str,
+    account_number_masked: str | None,
+    scanned_pages: tuple[int, ...],
+) -> dict[str, object]:
+    """Merge a single-pass excerpt scan result into the tradeline page map."""
+    from api.modules.documents.tradeline_page_map import (
+        merge_page_map_entry,
+        normalize_page_map,
     )
-    if located is None:
-        return None, None
 
-    updated = merge_page_map_entry(
+    page_map = normalize_page_map(page_map_raw, file_hash=file_hash)
+    return merge_page_map_entry(
         page_map,
         file_hash=file_hash,
         creditor_name=creditor_name,
         account_number_masked=account_number_masked,
-        pages=located,
+        pages=scanned_pages,
     )
-    return located, updated
 
 
 @dataclass(frozen=True, slots=True)
@@ -315,16 +325,13 @@ async def _load_credit_report_attachment(
     creditor_names = parsed_creditor_names(parsed_report)
     known_page_numbers: tuple[int, ...] | None = None
     if parsed_report_row is not None:
-        known_page_numbers, updated_page_map = resolve_known_tradeline_pages(
+        known_page_numbers, _ = resolve_known_tradeline_pages(
             page_map_raw=parsed_report_row.tradeline_page_map,
             file_hash=document.file_hash,
             creditor_name=account.creditor_name,
             account_number_masked=account.account_number_masked,
             pdf_bytes=content,
         )
-        if updated_page_map is not None:
-            parsed_report_row.tradeline_page_map = updated_page_map
-            await session.flush()
     excerpt = build_redacted_tradeline_excerpt(
         content,
         target_creditor=account.creditor_name,
@@ -332,6 +339,20 @@ async def _load_credit_report_attachment(
         other_creditors=creditor_names,
         known_page_numbers=known_page_numbers,
     )
+    if (
+        parsed_report_row is not None
+        and known_page_numbers is None
+        and excerpt is not None
+        and excerpt.scanned_page_numbers is not None
+    ):
+        parsed_report_row.tradeline_page_map = page_map_update_from_scan(
+            page_map_raw=parsed_report_row.tradeline_page_map,
+            file_hash=document.file_hash,
+            creditor_name=account.creditor_name,
+            account_number_masked=account.account_number_masked,
+            scanned_pages=excerpt.scanned_page_numbers,
+        )
+        await session.flush()
     if excerpt is None:
         return MailPacketAttachment(
             label=f"{bureau_label} credit report",
