@@ -13,6 +13,18 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — nest checklist PDF in packet ZIP
+
+**Decision:** Always include the printable checklist PDF alongside the markdown root file in CFPB/attorney packet.zip exports (same checklist_export_filename(..., export_format="pdf") bytes as standalone /export?format=pdf).
+
+**Reason:** Investigators downloading exhibit packets still needed a printable checklist without a second /export call.
+
+**Alternatives considered:** Opt-in query flag; PDF-only packets; nest PDF under exhibits/.
+
+**Technical debt:** Packet builds both markdown and PDF every time (small cost).
+
+**Follow-up work:** OCR line refs; counsel transmit (deferred).
+
 ## Compliance intelligence — checklist PDF export
 
 **Decision:** Add ormat=md|pdf (default md) on CFPB/attorney checklist /export endpoints, with reportlab PDF rendering and UI download buttons alongside markdown.
@@ -23,7 +35,7 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Technical debt:** PDF is plain wrapped text, not a typeset layout; packet ZIP still embeds markdown checklist only.
 
-**Follow-up work:** Optional checklist.pdf inside packet.zip; OCR line refs; counsel transmit (deferred).
+**Follow-up work:** Optional checklist.pdf inside packet.zip (done); OCR line refs; counsel transmit (deferred).
 
 ## Compliance intelligence — prepare tradeline via finding source refs
 
