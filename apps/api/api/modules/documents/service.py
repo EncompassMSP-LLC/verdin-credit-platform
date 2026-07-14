@@ -3075,12 +3075,14 @@ class DocumentService:
         from api.modules.accounts.service import AccountService
         from api.modules.documents.cross_bureau_comparison import tradeline_match_key
         from api.modules.documents.dispute_strategy import (
-            infer_account_metadata_from_rules,
+            find_matching_tradeline,
+            resolve_strategy_account_metadata,
             select_accounts_for_stage,
             stage_recipient_type,
         )
 
         self._require_write(user)
+        organization_id = self._require_organization(user)
         strategy = await self.get_case_dispute_strategy(user, case_id)
         recipient_type = stage_recipient_type(request.stage_kind)
         targets = select_accounts_for_stage(
@@ -3137,6 +3139,15 @@ class DocumentService:
                 tradeline_match_key(account.creditor_name, account.account_number_masked): account
                 for account in existing_accounts
             }
+            parsed_reports = await self._documents.list_case_parsed_credit_reports(
+                organization_id=organization_id,
+                case_id=case_id,
+            )
+            report_payloads: list[tuple[str | None, dict[str, Any]]] = []
+            for parsed in parsed_reports:
+                report = parsed.parsed_report
+                if isinstance(report, dict):
+                    report_payloads.append((parsed.bureau, report))
 
             for target in direct_targets:
                 lookup_key = tradeline_match_key(
@@ -3152,7 +3163,16 @@ class DocumentService:
                         in {"experian", "equifax", "transunion", "innovis", "unknown"}
                         else AccountBureau.UNKNOWN
                     )
-                    inferred = infer_account_metadata_from_rules(target.primary_rule_ids)
+                    tradeline = find_matching_tradeline(
+                        report_payloads,
+                        creditor_name=target.creditor_name,
+                        account_number_masked=target.account_number_masked,
+                        bureau=target.bureau,
+                    )
+                    inferred = resolve_strategy_account_metadata(
+                        target.primary_rule_ids,
+                        tradeline=tradeline,
+                    )
                     try:
                         account_type = AccountType(inferred.account_type)
                     except ValueError:

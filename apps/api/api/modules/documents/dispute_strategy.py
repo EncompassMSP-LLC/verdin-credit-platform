@@ -384,6 +384,173 @@ def infer_account_metadata_from_rules(
     )
 
 
+def _normalize_token(value: object) -> str:
+    if not isinstance(value, str) or not value.strip():
+        return ""
+    return value.strip().lower().replace("-", " ").replace("_", " ")
+
+
+def infer_account_metadata_from_tradeline(
+    tradeline: dict[str, Any],
+) -> StrategyAccountMetadata:
+    """Map parsed-tradeline fields to account enums (investigator create path)."""
+    type_raw = _normalize_token(tradeline.get("account_type"))
+    account_type = "other"
+    if "mortgage" in type_raw:
+        account_type = "mortgage"
+    elif "auto" in type_raw:
+        account_type = "auto"
+    elif "credit card" in type_raw or "revolving" in type_raw:
+        account_type = "credit_card"
+    elif "collection" in type_raw:
+        account_type = "collection"
+    elif "student" in type_raw:
+        account_type = "student_loan"
+    elif "medical" in type_raw:
+        account_type = "medical"
+    elif "utility" in type_raw:
+        account_type = "utility"
+    elif "telecom" in type_raw or "wireless" in type_raw:
+        account_type = "telecom"
+    elif "installment" in type_raw or "personal" in type_raw:
+        account_type = "personal_loan"
+
+    status_raw = _normalize_token(tradeline.get("account_status")) or _normalize_token(
+        tradeline.get("payment_status")
+    )
+    account_status = "unknown"
+    if status_raw:
+        if "charge" in status_raw and "off" in status_raw:
+            account_status = "charge_off"
+        elif "repossession" in status_raw:
+            account_status = "repossession"
+        elif "foreclosure" in status_raw:
+            account_status = "foreclosure"
+        elif "transfer" in status_raw:
+            account_status = "transferred"
+        elif "settled" in status_raw:
+            account_status = "settled"
+        elif "deleted" in status_raw:
+            account_status = "deleted"
+        elif "collection" in status_raw:
+            account_status = "collection"
+        elif "paid" in status_raw:
+            account_status = "paid"
+        elif "closed" in status_raw:
+            account_status = "closed"
+        elif (
+            "current" in status_raw
+            or "open" in status_raw
+            or "late" in status_raw
+            or "pays as agreed" in status_raw
+        ):
+            account_status = "open"
+
+    pay_raw = _normalize_token(tradeline.get("payment_status"))
+    payment_status = "unknown"
+    if pay_raw:
+        if "120" in pay_raw:
+            payment_status = "late_120"
+        elif "90" in pay_raw:
+            payment_status = "late_90"
+        elif "60" in pay_raw:
+            payment_status = "late_60"
+        elif "30" in pay_raw:
+            payment_status = "late_30"
+        elif "charge" in pay_raw and "off" in pay_raw:
+            payment_status = "charge_off"
+        elif "collection" in pay_raw:
+            payment_status = "collection"
+        elif "repossession" in pay_raw:
+            payment_status = "repossession"
+        elif "foreclosure" in pay_raw:
+            payment_status = "foreclosure"
+        elif "current" in pay_raw or "pays as agreed" in pay_raw:
+            payment_status = "current"
+
+    return StrategyAccountMetadata(
+        account_type=account_type,
+        account_status=account_status,
+        payment_status=payment_status,
+    )
+
+
+def resolve_strategy_account_metadata(
+    primary_rule_ids: Sequence[str],
+    *,
+    tradeline: dict[str, Any] | None = None,
+) -> StrategyAccountMetadata:
+    """Prefer parsed-tradeline enums; fall back to rule heuristics for unknown fields."""
+    fallback = infer_account_metadata_from_rules(primary_rule_ids)
+    if tradeline is None:
+        return fallback
+    from_tradeline = infer_account_metadata_from_tradeline(tradeline)
+    return StrategyAccountMetadata(
+        account_type=(
+            from_tradeline.account_type
+            if from_tradeline.account_type != "other"
+            else fallback.account_type
+        ),
+        account_status=(
+            from_tradeline.account_status
+            if from_tradeline.account_status != "unknown"
+            else fallback.account_status
+        ),
+        payment_status=(
+            from_tradeline.payment_status
+            if from_tradeline.payment_status != "unknown"
+            else fallback.payment_status
+        ),
+    )
+
+
+def find_matching_tradeline(
+    report_payloads: Sequence[tuple[str | None, dict[str, Any]]],
+    *,
+    creditor_name: str,
+    account_number_masked: str | None,
+    bureau: str | None = None,
+) -> dict[str, Any] | None:
+    """Return the first parsed tradeline matching creditor/masked number.
+
+    When ``bureau`` is provided, same-bureau reports are preferred before others.
+    """
+    from api.modules.documents.cross_bureau_comparison import tradeline_match_key
+
+    target_key = tradeline_match_key(creditor_name, account_number_masked)
+    preferred_bureau = (bureau or "").strip().lower() or None
+
+    def _scan(prefer_bureau: bool) -> dict[str, Any] | None:
+        for report_bureau, parsed_report in report_payloads:
+            if prefer_bureau:
+                if preferred_bureau is None:
+                    continue
+                if (report_bureau or "").strip().lower() != preferred_bureau:
+                    continue
+            elif preferred_bureau and (report_bureau or "").strip().lower() == preferred_bureau:
+                continue
+            accounts = parsed_report.get("accounts")
+            if not isinstance(accounts, list):
+                continue
+            for account in accounts:
+                if not isinstance(account, dict):
+                    continue
+                creditor = account.get("creditor_name")
+                if not isinstance(creditor, str) or not creditor.strip():
+                    continue
+                masked = account.get("account_number_masked")
+                masked_str = masked if isinstance(masked, str) else None
+                if tradeline_match_key(creditor, masked_str) == target_key:
+                    return account
+        return None
+
+    if preferred_bureau:
+        matched = _scan(prefer_bureau=True)
+        if matched is not None:
+            return matched
+    return _scan(prefer_bureau=False)
+
+
 def stage_recipient_type(stage_kind: StageKind) -> Literal["credit_bureau", "furnisher"]:
     if stage_kind == "furnisher_dispute":
         return "furnisher"

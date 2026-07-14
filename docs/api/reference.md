@@ -73,28 +73,28 @@ Authorization: Bearer <access_token>
 
 All case endpoints require authentication. Users are scoped to their organization.
 
-| Method | Path                                                              | Min role     | Description                                                                             |
-| ------ | ----------------------------------------------------------------- | ------------ | --------------------------------------------------------------------------------------- |
-| POST   | `/cases`                                                          | case_manager | Create a case                                                                           |
-| GET    | `/cases`                                                          | read_only    | List cases                                                                              |
-| GET    | `/cases/{case_id}`                                                | read_only    | Get case by ID                                                                          |
-| PATCH  | `/cases/{case_id}`                                                | case_manager | Update a case                                                                           |
-| DELETE | `/cases/{case_id}`                                                | admin        | Soft-delete a case                                                                      |
-| GET    | `/cases/{case_id}/metro2-findings`                                | read_only    | Aggregate Metro 2 findings across latest bureau reports                                 |
-| GET    | `/cases/{case_id}/fcra-findings`                                  | read_only    | Aggregate FCRA checklist findings across latest bureau reports                          |
-| GET    | `/cases/{case_id}/tradeline-chronology`                           | read_only    | Multi-report tradeline chronology across stored bureau reports                          |
-| GET    | `/cases/{case_id}/compliance-evidence-links`                      | read_only    | Link Metro 2/FCRA findings to reports and exhibits (optional page scan)                 |
-| GET    | `/cases/{case_id}/litigation-strength`                            | read_only    | Rank compliance issues by heuristic litigation strength                                 |
-| GET    | `/cases/{case_id}/dispute-strategy`                               | read_only    | Multi-stage dispute plan grounded in ranked findings                                    |
-| GET    | `/cases/{case_id}/dispute-strategy/cfpb-checklist`                | read_only    | CFPB escalation checklist for recommended strategy accounts                             |
-| GET    | `/cases/{case_id}/dispute-strategy/cfpb-checklist/export`         | read_only    | Download CFPB checklist as staff-mediated markdown                                      |
-| GET    | `/cases/{case_id}/dispute-strategy/cfpb-checklist/packet.zip`     | read_only    | Download CFPB checklist markdown + best-effort exhibits ZIP (optional letters)          |
-| GET    | `/cases/{case_id}/dispute-strategy/attorney-checklist`            | read_only    | Attorney-preserve packet checklist for strategy accounts                                |
-| GET    | `/cases/{case_id}/dispute-strategy/attorney-checklist/export`     | read_only    | Download attorney-preserve checklist as staff-mediated markdown                         |
-| GET    | `/cases/{case_id}/dispute-strategy/attorney-checklist/packet.zip` | read_only    | Download attorney checklist markdown + best-effort exhibits ZIP (optional letters/mail) |
-| PUT    | `/cases/{case_id}/dispute-strategy/checklist-overrides`           | case_manager | Upsert or clear staff checklist completion override (optional note)                     |
-| POST   | `/cases/{case_id}/dispute-strategy/prepare`                       | case_manager | Prepare CRA/furnisher letters from recommended strategy stage                           |
-| POST   | `/cases/{case_id}/llm-summary`                                    | case_manager | Generate LLM case summary                                                               |
+| Method | Path                                                              | Min role     | Description                                                                                                      |
+| ------ | ----------------------------------------------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------------- |
+| POST   | `/cases`                                                          | case_manager | Create a case                                                                                                    |
+| GET    | `/cases`                                                          | read_only    | List cases                                                                                                       |
+| GET    | `/cases/{case_id}`                                                | read_only    | Get case by ID                                                                                                   |
+| PATCH  | `/cases/{case_id}`                                                | case_manager | Update a case                                                                                                    |
+| DELETE | `/cases/{case_id}`                                                | admin        | Soft-delete a case                                                                                               |
+| GET    | `/cases/{case_id}/metro2-findings`                                | read_only    | Aggregate Metro 2 findings across latest bureau reports                                                          |
+| GET    | `/cases/{case_id}/fcra-findings`                                  | read_only    | Aggregate FCRA checklist findings across latest bureau reports                                                   |
+| GET    | `/cases/{case_id}/tradeline-chronology`                           | read_only    | Multi-report tradeline chronology across stored bureau reports                                                   |
+| GET    | `/cases/{case_id}/compliance-evidence-links`                      | read_only    | Link Metro 2/FCRA findings to reports and exhibits (optional page scan)                                          |
+| GET    | `/cases/{case_id}/litigation-strength`                            | read_only    | Rank compliance issues by heuristic litigation strength                                                          |
+| GET    | `/cases/{case_id}/dispute-strategy`                               | read_only    | Multi-stage dispute plan grounded in ranked findings                                                             |
+| GET    | `/cases/{case_id}/dispute-strategy/cfpb-checklist`                | read_only    | CFPB escalation checklist for recommended strategy accounts                                                      |
+| GET    | `/cases/{case_id}/dispute-strategy/cfpb-checklist/export`         | read_only    | Download CFPB checklist as staff-mediated markdown                                                               |
+| GET    | `/cases/{case_id}/dispute-strategy/cfpb-checklist/packet.zip`     | read_only    | Download CFPB checklist markdown + best-effort exhibits ZIP (optional letters)                                   |
+| GET    | `/cases/{case_id}/dispute-strategy/attorney-checklist`            | read_only    | Attorney-preserve packet checklist for strategy accounts                                                         |
+| GET    | `/cases/{case_id}/dispute-strategy/attorney-checklist/export`     | read_only    | Download attorney-preserve checklist as staff-mediated markdown                                                  |
+| GET    | `/cases/{case_id}/dispute-strategy/attorney-checklist/packet.zip` | read_only    | Download attorney checklist markdown + best-effort exhibits ZIP (optional letters/mail)                          |
+| PUT    | `/cases/{case_id}/dispute-strategy/checklist-overrides`           | case_manager | Upsert or clear staff checklist completion override (optional note)                                              |
+| POST   | `/cases/{case_id}/dispute-strategy/prepare`                       | case_manager | Prepare CRA/furnisher letters from recommended strategy stage (direct accounts prefer parsed-tradeline metadata) |
+| POST   | `/cases/{case_id}/llm-summary`                                    | case_manager | Generate LLM case summary                                                                                        |
 
 ### List query parameters
 
