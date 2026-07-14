@@ -132,3 +132,80 @@ def test_build_mail_packet_marks_attached_items_on_checklist() -> None:
 
     reader = PdfReader(BytesIO(content))
     assert len(reader.pages) >= 5
+
+
+def _sample_report_pdf() -> bytes:
+    from io import BytesIO
+
+    from reportlab.lib.pagesizes import letter as letter_page_size
+    from reportlab.pdfgen import canvas
+
+    buffer = BytesIO()
+    pdf = canvas.Canvas(buffer, pagesize=letter_page_size)
+    pdf.setFont("Helvetica", 12)
+    pdf.drawString(72, 720, "Experian Credit Report")
+    pdf.drawString(72, 680, "ACHIEVE PERSONAL LOANS")
+    pdf.drawString(72, 660, "Account ****1081 Balance $18,764")
+    pdf.drawString(72, 600, "CAPITAL ONE")
+    pdf.save()
+    return buffer.getvalue()
+
+
+def test_resolve_known_tradeline_pages_writes_through_on_cache_miss() -> None:
+    from api.modules.accounts.dispute_mail_attachments import resolve_known_tradeline_pages
+
+    pages, updated = resolve_known_tradeline_pages(
+        page_map_raw=None,
+        file_hash="hash-a",
+        creditor_name="ACHIEVE PERSONAL LOANS",
+        account_number_masked="****1081",
+        pdf_bytes=_sample_report_pdf(),
+    )
+    assert pages == (1,)
+    assert updated is not None
+    assert updated["file_hash"] == "hash-a"
+    assert updated["entries"][0]["page_numbers"] == [1]
+    assert updated["entries"][0]["confidence"] == "matched"
+
+
+def test_resolve_known_tradeline_pages_reuses_cache_without_write() -> None:
+    from api.modules.accounts.dispute_mail_attachments import resolve_known_tradeline_pages
+
+    cached_map = {
+        "scanner_version": 1,
+        "file_hash": "hash-a",
+        "scanned_at": "2026-07-14T00:00:00Z",
+        "entries": [
+            {
+                "creditor_name": "ACHIEVE PERSONAL LOANS",
+                "account_number_masked": "****1081",
+                "page_numbers": [1],
+                "confidence": "matched",
+            }
+        ],
+    }
+    pages, updated = resolve_known_tradeline_pages(
+        page_map_raw=cached_map,
+        file_hash="hash-a",
+        creditor_name="ACHIEVE PERSONAL LOANS",
+        account_number_masked="****1081",
+        pdf_bytes=_sample_report_pdf(),
+    )
+    assert pages == (1,)
+    assert updated is None
+
+
+def test_resolve_known_tradeline_pages_writes_unavailable_on_miss() -> None:
+    from api.modules.accounts.dispute_mail_attachments import resolve_known_tradeline_pages
+
+    pages, updated = resolve_known_tradeline_pages(
+        page_map_raw=None,
+        file_hash="hash-b",
+        creditor_name="UNKNOWN LENDER",
+        account_number_masked=None,
+        pdf_bytes=_sample_report_pdf(),
+    )
+    assert pages == ()
+    assert updated is not None
+    assert updated["entries"][0]["confidence"] == "unavailable"
+    assert updated["entries"][0]["page_numbers"] == []

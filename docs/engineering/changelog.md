@@ -13,6 +13,18 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — excerpt page-map write-through
+
+**Decision:** On report-excerpt / mail-packet cache miss, call locate_tradeline_pages once, persist via merge_page_map_entry onto document_parsed_credit_reports.tradeline_page_map, and pass the located pages into uild_redacted_tradeline_excerpt as known_page_numbers.
+
+**Reason:** Excerpt builders previously only read the page map; cache misses re-scanned without contributing back to the shared cache used by evidence links.
+
+**Alternatives considered:** Write only on successful matches; keep dual scan inside excerpt builder; no-op when parsed-report row missing.
+
+**Technical debt:** Locate + redaction still open pdfplumber separately; no write when parsed credit report row is absent.
+
+**Follow-up work:** OCR line refs; coalesce locate/redact into one pdfplumber pass.
+
 ## Compliance intelligence — excerpt builder page-map reuse
 
 **Decision:** Pass cached `tradeline_page_map` page numbers into `build_redacted_tradeline_excerpt` via optional `known_page_numbers`, skipping rediscovery scans when evidence-link page maps already exist for the document hash.
@@ -23,7 +35,7 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Technical debt:** Excerpt path still opens pdfplumber for redaction geometry on known pages; empty cached maps force full-report fallback.
 
-**Follow-up work:** OCR line refs; write-through from excerpt scans on cache miss.
+**Follow-up work:** OCR line refs; write-through from excerpt scans on cache miss (done).
 
 ## Compliance intelligence — persisted tradeline page maps
 
