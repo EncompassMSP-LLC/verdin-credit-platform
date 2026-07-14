@@ -16,6 +16,7 @@ import type {
   CaseMetro2Findings,
   CaseTradelineChronology,
   DisputeStrategyRun,
+  DisputeStrategyRunSummary,
   Document,
 } from './documents';
 
@@ -27,6 +28,7 @@ export type {
   CaseMetro2Findings,
   CaseTradelineChronology,
   DisputeStrategyRun,
+  DisputeStrategyRunSummary,
 } from './documents';
 
 export interface Case {
@@ -400,6 +402,23 @@ export async function getCaseDisputeStrategy(caseId: string): Promise<CaseDisput
 
 export async function getLatestCaseDisputeStrategyRun(caseId: string): Promise<DisputeStrategyRun> {
   return request<DisputeStrategyRun>(apiPath(`/cases/${caseId}/dispute-strategy/runs/latest`));
+}
+
+export async function listCaseDisputeStrategyRuns(
+  caseId: string,
+  params: { page?: number; page_size?: number } = {},
+): Promise<PaginatedResponse<DisputeStrategyRunSummary>> {
+  const query = new URLSearchParams();
+  if (params.page !== undefined) {
+    query.set('page', String(params.page));
+  }
+  if (params.page_size !== undefined) {
+    query.set('page_size', String(params.page_size));
+  }
+  const suffix = query.toString() ? `?${query.toString()}` : '';
+  return request<PaginatedResponse<DisputeStrategyRunSummary>>(
+    apiPath(`/cases/${caseId}/dispute-strategy/runs${suffix}`),
+  );
 }
 
 export async function getCaseCfpbChecklist(

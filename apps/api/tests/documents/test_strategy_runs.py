@@ -35,6 +35,50 @@ async def sample_case(
     return case
 
 
+async def test_strategy_run_repository_list_for_case(
+    db_session: AsyncSession,
+    test_org: Organization,
+    case_manager_user: User,
+    sample_case: Case,
+) -> None:
+    repo = StrategyRunRepository(db_session)
+    payload = {
+        "case_id": str(sample_case.id),
+        "disclaimer": "Staff-mediated planning aid only.",
+        "summary": {
+            "accounts_planned": 1,
+            "issues_covered": 1,
+            "high_strength_accounts": 0,
+            "cfpb_recommended": 0,
+            "attorney_recommended": 0,
+        },
+        "strategies": [],
+    }
+    for issues_covered in (1, 2):
+        await repo.create(
+            organization_id=test_org.id,
+            case_id=sample_case.id,
+            generated_by_id=case_manager_user.id,
+            accounts_planned=1,
+            issues_covered=issues_covered,
+            payload=payload,
+        )
+    await db_session.commit()
+
+    from api.modules.documents.strategy_run_repository import StrategyRunListFilters
+
+    runs, total = await repo.list_for_case(
+        StrategyRunListFilters(
+            organization_id=test_org.id,
+            case_id=sample_case.id,
+            skip=0,
+            limit=10,
+        )
+    )
+    assert total == 2
+    assert len(runs) == 2
+
+
 async def test_strategy_run_repository_create_and_get_latest(
     db_session: AsyncSession,
     test_org: Organization,
@@ -117,6 +161,15 @@ def test_get_case_dispute_strategy_persists_run(
     assert latest_data["case_id"] == sample_case_id
     assert latest_data["accounts_planned"] == data["summary"]["accounts_planned"]
     assert latest_data["issues_covered"] == data["summary"]["issues_covered"]
+
+    listed = api_client.get(
+        f"/api/v1/cases/{sample_case_id}/dispute-strategy/runs",
+        headers=manager_headers,
+    )
+    assert listed.status_code == 200, listed.text
+    listed_data = listed.json()
+    assert listed_data["total"] >= 1
+    assert any(item["id"] == data["run_id"] for item in listed_data["items"])
 
 
 def test_get_latest_dispute_strategy_run_not_found(

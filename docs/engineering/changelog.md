@@ -333,9 +333,9 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Alternatives considered:** Persist only on explicit POST; store only summary counts without full payload.
 
-**Technical debt:** Checklist/prepare paths regenerate strategy without persisting additional runs; no run history pagination yet.
+**Technical debt:** Checklist/prepare paths regenerate strategy without persisting additional runs.
 
-**Follow-up work:** Run history list endpoint.
+**Follow-up work:** `GET .../runs/{run_id}` replay; panel replay action.
 
 ## Compliance intelligence — dispute strategy run UI audit
 
@@ -347,7 +347,19 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Technical debt:** UI shows latest load only, not historical runs.
 
-**Follow-up work:** Run history list endpoint; replay prior run in panel.
+**Follow-up work:** Replay prior run in panel.
+
+## Compliance intelligence — dispute strategy run history
+
+**Decision:** Add paginated `GET /cases/{case_id}/dispute-strategy/runs` returning summary rows (counts, generator, timestamps) without full strategy payloads.
+
+**Reason:** Changelog follow-up from strategy run audit; investigators need to see prior generations without replaying full JSONB payloads.
+
+**Alternatives considered:** Full payload in list; unbounded array on latest endpoint.
+
+**Technical debt:** No per-run GET by id yet; UI shows summaries only.
+
+**Follow-up work:** `GET .../runs/{run_id}` replay; panel replay action.
 
 ## Sprint 4.3.0 — Operational Core
 

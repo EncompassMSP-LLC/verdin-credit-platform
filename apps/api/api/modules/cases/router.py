@@ -40,7 +40,9 @@ from api.modules.documents.schemas import (
     CaseLitigationStrengthResponse,
     CaseMetro2FindingsResponse,
     CaseTradelineChronologyResponse,
+    DisputeStrategyRunListParams,
     DisputeStrategyRunResponse,
+    DisputeStrategyRunSummaryResponse,
     DocumentResponse,
     PrepareCreditReportDisputesRequest,
     PrepareCreditReportDisputesResponse,
@@ -247,6 +249,21 @@ async def get_case_dispute_strategy(
     service: DocumentService = Depends(get_document_service),
 ) -> CaseDisputeStrategyResponse:
     return await service.get_case_dispute_strategy(current_user, case_id, persist_run=True)
+
+
+@router.get(
+    "/{case_id}/dispute-strategy/runs",
+    response_model=PaginatedResponse[DisputeStrategyRunSummaryResponse],
+)
+async def list_case_dispute_strategy_runs(
+    case_id: uuid.UUID,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> PaginatedResponse[DisputeStrategyRunSummaryResponse]:
+    params = DisputeStrategyRunListParams(page=page, page_size=page_size)
+    return await service.list_case_dispute_strategy_runs(current_user, case_id, params)
 
 
 @router.get(

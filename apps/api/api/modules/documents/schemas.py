@@ -693,6 +693,37 @@ class CaseDisputeStrategyResponse(BaseSchema):
     generated_at: datetime | None = None
 
 
+class DisputeStrategyRunSummaryResponse(BaseSchema):
+    id: uuid.UUID
+    case_id: uuid.UUID
+    generated_at: datetime
+    generated_by_id: uuid.UUID | None = None
+    accounts_planned: int
+    issues_covered: int
+    high_strength_accounts: int
+    cfpb_recommended: int
+    attorney_recommended: int
+
+    @classmethod
+    def from_model(cls, run: "DisputeStrategyRun") -> "DisputeStrategyRunSummaryResponse":
+        summary = run.payload.get("summary", {})
+        return cls(
+            id=run.id,
+            case_id=run.case_id,
+            generated_at=run.generated_at,
+            generated_by_id=run.generated_by_id,
+            accounts_planned=run.accounts_planned,
+            issues_covered=run.issues_covered,
+            high_strength_accounts=int(summary.get("high_strength_accounts", 0)),
+            cfpb_recommended=int(summary.get("cfpb_recommended", 0)),
+            attorney_recommended=int(summary.get("attorney_recommended", 0)),
+        )
+
+
+class DisputeStrategyRunListParams(PaginationParams):
+    pass
+
+
 class DisputeStrategyRunResponse(BaseSchema):
     id: uuid.UUID
     case_id: uuid.UUID
