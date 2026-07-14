@@ -246,6 +246,11 @@ async def _load_credit_report_attachment(
         build_redacted_tradeline_excerpt,
         parsed_creditor_names,
     )
+    from api.modules.documents.tradeline_page_map import (
+        CACHE_MISS,
+        get_cached_pages,
+        normalize_page_map,
+    )
 
     content = await async_get(storage, document.storage_key)
     mime_type = document.mime_type or "application/octet-stream"
@@ -265,11 +270,25 @@ async def _load_credit_report_attachment(
     parsed_report_row = parsed_result.scalar_one_or_none()
     parsed_report = parsed_report_row.parsed_report if parsed_report_row is not None else None
     creditor_names = parsed_creditor_names(parsed_report)
+    known_page_numbers: tuple[int, ...] | None = None
+    if parsed_report_row is not None:
+        page_map = normalize_page_map(
+            parsed_report_row.tradeline_page_map,
+            file_hash=document.file_hash,
+        )
+        cached = get_cached_pages(
+            page_map,
+            creditor_name=account.creditor_name,
+            account_number_masked=account.account_number_masked,
+        )
+        if cached is not CACHE_MISS and isinstance(cached, tuple):
+            known_page_numbers = cached
     excerpt = build_redacted_tradeline_excerpt(
         content,
         target_creditor=account.creditor_name,
         target_account_masked=account.account_number_masked,
         other_creditors=creditor_names,
+        known_page_numbers=known_page_numbers,
     )
     if excerpt is None:
         return MailPacketAttachment(
