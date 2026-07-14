@@ -1710,9 +1710,7 @@ class DocumentService:
         if include_page_scan:
             from api.modules.accounts.dispute_report_redaction import locate_tradeline_pages
             from api.modules.documents.tradeline_page_map import (
-                CACHE_MISS,
-                get_cached_pages,
-                merge_page_map_entry,
+                lookup_or_locate_tradeline_pages,
                 normalize_page_map,
             )
 
@@ -1770,43 +1768,16 @@ class DocumentService:
                 if cache_key in page_result_cache:
                     return page_result_cache[cache_key]
 
-                cached = get_cached_pages(
+                located, updated = lookup_or_locate_tradeline_pages(
                     page_maps.get(document_id),
+                    file_hash=file_hash_by_doc.get(document_id),
                     creditor_name=creditor_name,
                     account_number_masked=account_number_masked,
-                )
-                if cached is not CACHE_MISS:
-                    pages = cached if isinstance(cached, tuple) else None
-                    page_result_cache[cache_key] = pages
-                    return pages
-
-                if not creditor_name:
-                    page_result_cache[cache_key] = None
-                    return None
-
-                pdf_bytes = pdf_cache.get(document_id)
-                if not pdf_bytes:
-                    page_result_cache[cache_key] = None
-                    return None
-
-                located = locate_tradeline_pages(
-                    pdf_bytes,
-                    target_creditor=creditor_name,
-                    target_account_masked=account_number_masked,
+                    pdf_bytes=pdf_cache.get(document_id),
+                    locate=locate_tradeline_pages,
                 )
                 page_result_cache[cache_key] = located
-                if located is None:
-                    return None
-
-                file_hash = file_hash_by_doc.get(document_id)
-                if file_hash:
-                    updated = merge_page_map_entry(
-                        page_maps.get(document_id),
-                        file_hash=file_hash,
-                        creditor_name=creditor_name,
-                        account_number_masked=account_number_masked,
-                        pages=located,
-                    )
+                if updated is not None:
                     page_maps[document_id] = updated
                     dirty_page_maps[document_id] = updated
                 return located
