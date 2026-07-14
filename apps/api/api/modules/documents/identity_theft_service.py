@@ -282,6 +282,13 @@ def _605b_from_incident(incident: IdentityTheftIncident | None) -> Fcra605bReadi
     )
 
 
+def fcra_605b_readiness_for_incident(
+    incident: IdentityTheftIncident | None,
+) -> Fcra605bReadinessResponse:
+    """Public wrapper used by §605B packet export."""
+    return _605b_from_incident(incident)
+
+
 async def build_case_center(
     *,
     repo: IdentityTheftRepository,

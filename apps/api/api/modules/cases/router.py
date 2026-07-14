@@ -265,6 +265,26 @@ async def update_identity_theft_incident(
     return await service.update_identity_theft_incident(current_user, case_id, body)
 
 
+@router.get("/{case_id}/identity-theft/605b-packet.zip")
+async def export_case_identity_theft_605b_packet(
+    case_id: uuid.UUID,
+    letter_format: Literal["text", "pdf"] = Query(default="pdf"),
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> Response:
+    content, file_name, media_type = await service.export_case_identity_theft_605b_packet(
+        current_user,
+        case_id,
+        letter_format=letter_format,
+    )
+    safe_name = sanitize_content_disposition_filename(file_name)
+    return Response(
+        content=content,
+        media_type=media_type,
+        headers={"Content-Disposition": f'attachment; filename="{safe_name}"'},
+    )
+
+
 @router.get(
     "/{case_id}/tradeline-chronology",
     response_model=CaseTradelineChronologyResponse,

@@ -1643,6 +1643,126 @@ class DocumentService:
             request=request,
         )
 
+    async def export_case_identity_theft_605b_packet(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+        *,
+        letter_format: Literal["text", "pdf"] = "pdf",
+    ) -> tuple[bytes, str, str]:
+        """Build a staff-mediated FCRA §605B block packet (letters + readiness manifest).
+
+        Requires at least one consumer-confirmed identity-theft account review with
+        attestation. Does not call external bureau APIs.
+        """
+        from datetime import UTC, datetime
+
+        from api.modules.documents.identity_theft_605b_packet import (
+            BlockTradeline,
+            build_605b_packet_manifest,
+            build_605b_packet_zip,
+            build_block_letter_context,
+            export_block_letter,
+            fcra_605b_packet_filename,
+        )
+        from api.modules.documents.identity_theft_models import (
+            IdentityTheftConfirmation,
+            IdentityTheftIssueType,
+        )
+        from api.modules.documents.identity_theft_repository import IdentityTheftRepository
+        from api.modules.documents.identity_theft_service import fcra_605b_readiness_for_incident
+
+        if self._session is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Database session is not configured",
+            )
+        organization_id = self._require_organization(user)
+        await self._validate_case(case_id, organization_id)
+        case = await self._cases.get_by_id(case_id, organization_id=organization_id)
+        if case is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Case not found",
+            )
+
+        repo = IdentityTheftRepository(self._session)
+        reviews = await repo.list_account_reviews(
+            organization_id=organization_id,
+            case_id=case_id,
+        )
+        confirmed = [
+            review
+            for review in reviews
+            if review.consumer_confirmation == IdentityTheftConfirmation.IDENTITY_THEFT
+            and review.attestation_accepted
+            and review.issue_type == IdentityTheftIssueType.CONFIRMED_IDENTITY_THEFT_CLAIM
+        ]
+        if not confirmed:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=(
+                    "Consumer-confirmed identity-theft accounts with attestation are "
+                    "required before exporting a FCRA §605B block packet."
+                ),
+            )
+
+        incident = await repo.get_incident_for_case(
+            organization_id=organization_id,
+            case_id=case_id,
+        )
+        readiness = fcra_605b_readiness_for_incident(incident) if incident else None
+        packet_readiness = readiness.packet_readiness if readiness else None
+        missing_evidence = list(readiness.missing_evidence) if readiness else []
+        evidence_checklist = list(incident.evidence_checklist or []) if incident else []
+
+        by_bureau: dict[str, list[BlockTradeline]] = {}
+        for review in confirmed:
+            bureau_key = (review.bureau or "unknown").strip().lower() or "unknown"
+            by_bureau.setdefault(bureau_key, []).append(
+                BlockTradeline(
+                    creditor_name=review.creditor_name or "Unknown creditor",
+                    account_number_masked=review.account_number_masked,
+                    match_key=review.match_key,
+                    bureau=review.bureau,
+                    review_id=review.id,
+                )
+            )
+
+        letter_date = datetime.now(UTC).date()
+        letter_files: list[tuple[str, bytes]] = []
+        bureau_labels: list[str] = []
+        for bureau_key, tradelines in sorted(by_bureau.items()):
+            context = build_block_letter_context(
+                letter_date=letter_date,
+                consumer_name=case.client_name,
+                consumer_address_lines=None,
+                organization_name=None,
+                bureau=tradelines[0].bureau or bureau_key,
+                tradelines=tradelines,
+                attestation_recorded=True,
+                packet_readiness=packet_readiness,
+                missing_evidence=missing_evidence,
+            )
+            content, path = export_block_letter(context, letter_format)
+            letter_files.append((path, content))
+            bureau_labels.append(context.bureau_label)
+
+        manifest = build_605b_packet_manifest(
+            case_id=case_id,
+            consumer_name=case.client_name,
+            confirmed_count=len(confirmed),
+            bureau_labels=bureau_labels,
+            packet_readiness=packet_readiness,
+            missing_evidence=missing_evidence,
+            evidence_checklist=evidence_checklist,
+        )
+        packet = build_605b_packet_zip(
+            manifest_markdown=manifest,
+            letter_files=letter_files,
+        )
+        return packet, fcra_605b_packet_filename(case_id), "application/zip"
+
     async def upsert_identity_theft_protection(
         self,
         user: User,
