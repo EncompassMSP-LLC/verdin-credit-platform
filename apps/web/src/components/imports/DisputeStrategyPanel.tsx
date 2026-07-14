@@ -30,6 +30,38 @@ function downloadBlob(blob: Blob, filename: string) {
   URL.revokeObjectURL(url);
 }
 
+function formatGeneratedAt(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+  return date.toLocaleString();
+}
+
+function StrategyRunAudit({
+  runId,
+  generatedAt,
+}: {
+  runId?: string | null;
+  generatedAt?: string | null;
+}) {
+  if (!runId && !generatedAt) {
+    return null;
+  }
+
+  return (
+    <p className="text-xs text-gray-500">
+      {generatedAt ? <>Generated {formatGeneratedAt(generatedAt)}</> : null}
+      {runId ? (
+        <>
+          {generatedAt ? ' · ' : null}
+          Run <span className="font-mono">{runId.slice(0, 8)}</span>
+        </>
+      ) : null}
+    </p>
+  );
+}
+
 function SummaryBadges({ summary }: { summary: DisputeStrategySummary }) {
   return (
     <div className="flex flex-wrap gap-2 text-xs">
@@ -302,7 +334,13 @@ export function CaseDisputeStrategyPanel({
         {strategyQuery.data ? (
           <div className="mt-4 space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <p className="text-sm text-gray-600">{strategyQuery.data.disclaimer}</p>
+              <div className="space-y-1">
+                <p className="text-sm text-gray-600">{strategyQuery.data.disclaimer}</p>
+                <StrategyRunAudit
+                  runId={strategyQuery.data.run_id}
+                  generatedAt={strategyQuery.data.generated_at}
+                />
+              </div>
               <SummaryBadges summary={strategyQuery.data.summary} />
             </div>
 
