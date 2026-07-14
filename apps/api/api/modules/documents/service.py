@@ -3076,6 +3076,7 @@ class DocumentService:
         from api.modules.documents.cross_bureau_comparison import tradeline_match_key
         from api.modules.documents.dispute_strategy import (
             find_matching_tradeline,
+            find_tradeline_by_source_ref,
             resolve_strategy_account_metadata,
             select_accounts_for_stage,
             stage_recipient_type,
@@ -3144,10 +3145,12 @@ class DocumentService:
                 case_id=case_id,
             )
             report_payloads: list[tuple[str | None, dict[str, Any]]] = []
+            reports_by_document_id: dict[uuid.UUID, dict[str, Any]] = {}
             for parsed in parsed_reports:
                 report = parsed.parsed_report
                 if isinstance(report, dict):
                     report_payloads.append((parsed.bureau, report))
+                    reports_by_document_id[parsed.document_id] = report
 
             for target in direct_targets:
                 lookup_key = tradeline_match_key(
@@ -3163,12 +3166,20 @@ class DocumentService:
                         in {"experian", "equifax", "transunion", "innovis", "unknown"}
                         else AccountBureau.UNKNOWN
                     )
-                    tradeline = find_matching_tradeline(
-                        report_payloads,
-                        creditor_name=target.creditor_name,
-                        account_number_masked=target.account_number_masked,
-                        bureau=target.bureau,
-                    )
+                    tradeline = None
+                    if target.source_document_id is not None and target.tradeline_index is not None:
+                        tradeline = find_tradeline_by_source_ref(
+                            reports_by_document_id,
+                            document_id=target.source_document_id,
+                            tradeline_index=target.tradeline_index,
+                        )
+                    if tradeline is None:
+                        tradeline = find_matching_tradeline(
+                            report_payloads,
+                            creditor_name=target.creditor_name,
+                            account_number_masked=target.account_number_masked,
+                            bureau=target.bureau,
+                        )
                     inferred = resolve_strategy_account_metadata(
                         target.primary_rule_ids,
                         tradeline=tradeline,

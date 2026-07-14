@@ -13,6 +13,18 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — prepare tradeline via finding source refs
+
+**Decision:** Carry source_document_id / radeline_index on strategy prep targets by parsing finding source_id refs (kind:bureau:rule#index@{document_id}), and prefer indexed tradeline lookup before creditor/masked matching when creating direct accounts.
+
+**Reason:** Creditor match alone can collide when multiple similar tradelines exist; Metro 2/FCRA findings already encode the exact report index.
+
+**Alternatives considered:** Creditor match only; require account-candidate import; store full tradeline snapshot on strategy rows.
+
+**Technical debt:** Cross-bureau source ids still lack document refs; falls back to creditor matching.
+
+**Follow-up work:** OCR line refs; counsel transmit (deferred).
+
 ## Compliance intelligence — prepare metadata from parsed tradelines
 
 **Decision:** When strategy stage prepare creates direct (non-match-key) accounts, resolve ccount_type / ccount_status / payment_status from a matching parsed tradeline when available, falling back to rule-ID heuristics for unknown fields.
@@ -23,7 +35,7 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Technical debt:** Match is creditor+masked (+bureau prefer); does not use finding radeline_index yet.
 
-**Follow-up work:** Prefer document_id/tradeline_index from finding source refs; OCR line refs.
+**Follow-up work:** Prefer document_id/tradeline_index from finding source refs (done); OCR line refs.
 
 ## Compliance intelligence — shared page-map lookup helper
 

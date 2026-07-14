@@ -276,6 +276,71 @@ def test_resolve_strategy_account_metadata_falls_back_to_rules() -> None:
     assert resolved.account_status == "collection"
 
 
+def test_parse_finding_source_ref_and_indexed_tradeline() -> None:
+    from api.modules.documents.dispute_strategy import (
+        find_tradeline_by_source_ref,
+        parse_finding_source_ref,
+        select_accounts_for_stage,
+    )
+
+    document_id = uuid.uuid4()
+    parsed = parse_finding_source_ref(
+        f"metro2:experian:metro2.past_due_without_dofd#1@{document_id}"
+    )
+    assert parsed is not None
+    assert parsed.document_id == document_id
+    assert parsed.tradeline_index == 1
+
+    tradeline = {
+        "creditor_name": "Metro Auto",
+        "account_number_masked": "****4242",
+        "account_type": "Auto Loan",
+        "account_status": "Open",
+        "payment_status": "Current",
+    }
+    matched = find_tradeline_by_source_ref(
+        {
+            document_id: {
+                "accounts": [
+                    {"creditor_name": "Other", "account_type": "Credit Card"},
+                    tradeline,
+                ]
+            }
+        },
+        document_id=document_id,
+        tradeline_index=1,
+    )
+    assert matched is tradeline
+
+    case_id = uuid.uuid4()
+    strategy = generate_case_dispute_strategy(
+        case_id=case_id,
+        scored_issues=[
+            {
+                "source_kind": "metro2",
+                "source_id": f"metro2:experian:metro2.past_due_without_dofd#1@{document_id}",
+                "rule_id": "metro2.past_due_without_dofd",
+                "score": 80,
+                "rank": 1,
+                "title": "Past due",
+                "severity": "medium",
+                "bureau": "experian",
+                "creditor_name": "Metro Auto",
+                "account_number_masked": "****4242",
+                "match_key": None,
+            }
+        ],
+    )
+    targets = select_accounts_for_stage(
+        strategy.strategies,
+        stage_kind="cra_dispute",
+        recommended_only=True,
+    )
+    assert len(targets) == 1
+    assert targets[0].source_document_id == document_id
+    assert targets[0].tradeline_index == 1
+
+
 def test_build_case_cfpb_checklist_for_high_strength_accounts() -> None:
     from api.modules.documents.dispute_strategy import build_case_cfpb_checklist
 
