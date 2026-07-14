@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from copy import deepcopy
 from datetime import UTC, datetime
 from typing import Any
@@ -104,3 +105,87 @@ def merge_page_map_entry(
         entries.append(entry)
     base["entries"] = entries
     return base
+
+
+def lookup_cached_tradeline_pages(
+    page_map_raw: object,
+    *,
+    file_hash: str,
+    creditor_name: str | None,
+    account_number_masked: str | None,
+) -> tuple[int, ...] | None:
+    """Return cached pages, ``()`` if unavailable, or ``None`` on cache miss."""
+    page_map = normalize_page_map(page_map_raw, file_hash=file_hash)
+    cached = get_cached_pages(
+        page_map,
+        creditor_name=creditor_name,
+        account_number_masked=account_number_masked,
+    )
+    if cached is CACHE_MISS:
+        return None
+    return cached if isinstance(cached, tuple) else None
+
+
+def page_map_update_from_scan(
+    *,
+    page_map_raw: object,
+    file_hash: str,
+    creditor_name: str,
+    account_number_masked: str | None,
+    scanned_pages: tuple[int, ...],
+) -> dict[str, Any]:
+    """Merge a scan result into the tradeline page map (raw or normalized)."""
+    page_map = normalize_page_map(page_map_raw, file_hash=file_hash)
+    return merge_page_map_entry(
+        page_map,
+        file_hash=file_hash,
+        creditor_name=creditor_name,
+        account_number_masked=account_number_masked,
+        pages=scanned_pages,
+    )
+
+
+def lookup_or_locate_tradeline_pages(
+    page_map: dict[str, Any] | None,
+    *,
+    file_hash: str | None,
+    creditor_name: str | None,
+    account_number_masked: str | None,
+    pdf_bytes: bytes | None,
+    locate: Callable[..., tuple[int, ...] | None],
+) -> tuple[tuple[int, ...] | None, dict[str, Any] | None]:
+    """Resolve pages from cache or locate+write-through on miss.
+
+    Returns ``(pages, updated_page_map)``. ``updated_page_map`` is set only when
+    a locate ran successfully and ``file_hash`` is available for persistence.
+    """
+    cached = get_cached_pages(
+        page_map,
+        creditor_name=creditor_name,
+        account_number_masked=account_number_masked,
+    )
+    if cached is not CACHE_MISS:
+        return (cached if isinstance(cached, tuple) else None), None
+
+    if not creditor_name or not pdf_bytes:
+        return None, None
+
+    located = locate(
+        pdf_bytes,
+        target_creditor=creditor_name,
+        target_account_masked=account_number_masked,
+    )
+    if located is None:
+        return None, None
+
+    if not file_hash:
+        return located, None
+
+    updated = merge_page_map_entry(
+        page_map,
+        file_hash=file_hash,
+        creditor_name=creditor_name,
+        account_number_masked=account_number_masked,
+        pages=located,
+    )
+    return located, updated

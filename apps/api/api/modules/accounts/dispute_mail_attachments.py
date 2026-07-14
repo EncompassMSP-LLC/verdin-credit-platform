@@ -42,21 +42,17 @@ def resolve_known_tradeline_pages(
     ``pdf_bytes`` is accepted for call-site compatibility and unused.
     """
     del pdf_bytes
-    from api.modules.documents.tradeline_page_map import (
-        CACHE_MISS,
-        get_cached_pages,
-        normalize_page_map,
-    )
+    from api.modules.documents.tradeline_page_map import lookup_cached_tradeline_pages
 
-    page_map = normalize_page_map(page_map_raw, file_hash=file_hash)
-    cached = get_cached_pages(
-        page_map,
-        creditor_name=creditor_name,
-        account_number_masked=account_number_masked,
+    return (
+        lookup_cached_tradeline_pages(
+            page_map_raw,
+            file_hash=file_hash,
+            creditor_name=creditor_name,
+            account_number_masked=account_number_masked,
+        ),
+        None,
     )
-    if cached is not CACHE_MISS and isinstance(cached, tuple):
-        return cached, None
-    return None, None
 
 
 def page_map_update_from_scan(
@@ -69,17 +65,15 @@ def page_map_update_from_scan(
 ) -> dict[str, object]:
     """Merge a single-pass excerpt scan result into the tradeline page map."""
     from api.modules.documents.tradeline_page_map import (
-        merge_page_map_entry,
-        normalize_page_map,
+        page_map_update_from_scan as _page_map_update_from_scan,
     )
 
-    page_map = normalize_page_map(page_map_raw, file_hash=file_hash)
-    return merge_page_map_entry(
-        page_map,
+    return _page_map_update_from_scan(
+        page_map_raw=page_map_raw,
         file_hash=file_hash,
         creditor_name=creditor_name,
         account_number_masked=account_number_masked,
-        pages=scanned_pages,
+        scanned_pages=scanned_pages,
     )
 
 

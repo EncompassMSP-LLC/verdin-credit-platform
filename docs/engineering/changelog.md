@@ -13,6 +13,18 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — shared page-map lookup helper
+
+**Decision:** Lift cache/locate/write-through into radeline_page_map.lookup_or_locate_tradeline_pages (plus lookup_cached_tradeline_pages / page_map_update_from_scan) and use it from compliance evidence links; excerpt path keeps cache-only + single-pass redact.
+
+**Reason:** Evidence-link and excerpt builders duplicated page-map cache/merge logic.
+
+**Alternatives considered:** Keep dual implementations; force evidence links through excerpt builder.
+
+**Technical debt:** Evidence links still call locate_tradeline_pages separately from excerpt redaction.
+
+**Follow-up work:** OCR line refs.
+
 ## Compliance intelligence — single-pass excerpt scan+redact
 
 **Decision:** On page-map cache miss, uild_redacted_tradeline_excerpt discovers pages and redacts in one pdfplumber open, exposing scanned_page_numbers for write-through via page_map_update_from_scan. Cache hits still skip discovery.
@@ -23,7 +35,7 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Technical debt:** Evidence-link path still uses separate locate_tradeline_pages opens.
 
-**Follow-up work:** OCR line refs; share single-pass helper with evidence links.
+**Follow-up work:** OCR line refs; share single-pass helper with evidence links (done).
 
 ## Compliance intelligence — excerpt page-map write-through
 
