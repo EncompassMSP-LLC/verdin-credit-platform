@@ -25,6 +25,54 @@ _IMAGE_MIME_TYPES = frozenset({"image/jpeg", "image/png", "image/tiff"})
 _PDF_MIME_TYPE = "application/pdf"
 
 
+def resolve_known_tradeline_pages(
+    *,
+    page_map_raw: object,
+    file_hash: str,
+    creditor_name: str,
+    account_number_masked: str | None,
+    pdf_bytes: bytes,
+) -> tuple[tuple[int, ...] | None, dict[str, object] | None]:
+    """Resolve page numbers from cache or locate+write-through on miss.
+
+    Returns ``(known_page_numbers, updated_page_map)``. ``updated_page_map`` is
+    set only when a cache miss was located and should be persisted.
+    """
+    from api.modules.accounts.dispute_report_redaction import locate_tradeline_pages
+    from api.modules.documents.tradeline_page_map import (
+        CACHE_MISS,
+        get_cached_pages,
+        merge_page_map_entry,
+        normalize_page_map,
+    )
+
+    page_map = normalize_page_map(page_map_raw, file_hash=file_hash)
+    cached = get_cached_pages(
+        page_map,
+        creditor_name=creditor_name,
+        account_number_masked=account_number_masked,
+    )
+    if cached is not CACHE_MISS and isinstance(cached, tuple):
+        return cached, None
+
+    located = locate_tradeline_pages(
+        pdf_bytes,
+        target_creditor=creditor_name,
+        target_account_masked=account_number_masked,
+    )
+    if located is None:
+        return None, None
+
+    updated = merge_page_map_entry(
+        page_map,
+        file_hash=file_hash,
+        creditor_name=creditor_name,
+        account_number_masked=account_number_masked,
+        pages=located,
+    )
+    return located, updated
+
+
 @dataclass(frozen=True, slots=True)
 class MailPacketAttachment:
     label: str
@@ -242,15 +290,10 @@ async def _load_credit_report_attachment(
     if document is None:
         return None
 
-    from api.modules.accounts.dispute_report_redaction import (
-        build_redacted_tradeline_excerpt,
-        parsed_creditor_names,
-    )
-    from api.modules.documents.tradeline_page_map import (
-        CACHE_MISS,
-        get_cached_pages,
-        normalize_page_map,
-    )
+        from api.modules.accounts.dispute_report_redaction import (
+            build_redacted_tradeline_excerpt,
+            parsed_creditor_names,
+        )
 
     content = await async_get(storage, document.storage_key)
     mime_type = document.mime_type or "application/octet-stream"
@@ -272,17 +315,16 @@ async def _load_credit_report_attachment(
     creditor_names = parsed_creditor_names(parsed_report)
     known_page_numbers: tuple[int, ...] | None = None
     if parsed_report_row is not None:
-        page_map = normalize_page_map(
-            parsed_report_row.tradeline_page_map,
+        known_page_numbers, updated_page_map = resolve_known_tradeline_pages(
+            page_map_raw=parsed_report_row.tradeline_page_map,
             file_hash=document.file_hash,
-        )
-        cached = get_cached_pages(
-            page_map,
             creditor_name=account.creditor_name,
             account_number_masked=account.account_number_masked,
+            pdf_bytes=content,
         )
-        if cached is not CACHE_MISS and isinstance(cached, tuple):
-            known_page_numbers = cached
+        if updated_page_map is not None:
+            parsed_report_row.tradeline_page_map = updated_page_map
+            await session.flush()
     excerpt = build_redacted_tradeline_excerpt(
         content,
         target_creditor=account.creditor_name,
