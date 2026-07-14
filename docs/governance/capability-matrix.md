@@ -2,7 +2,7 @@
 
 **Executive view** of Verdin platform capabilities — what exists, what version introduced it, readiness by layer, and dependencies.
 
-**Last updated:** 2026-07-10  
+**Last updated:** 2026-07-14  
 **Maintainers:** Update this document in every epic PR that ships or materially advances a capability.
 
 **Version 4.5 sign-off:** [version-4.5-scope.md](version-4.5-scope.md) · Release notes: [v4.5.0.md](../release-notes/v4.5.0.md)  
@@ -20,6 +20,8 @@
 **Version 5.11 sign-off:** [version-5.11-scope.md](version-5.11-scope.md) · Release notes: [v5.11.0.md](../release-notes/v5.11.0.md)
 **Version 5.12 sign-off:** [version-5.12-scope.md](version-5.12-scope.md) · Release notes: [v5.12.0.md](../release-notes/v5.12.0.md)
 **Version 5.13 sign-off:** [version-5.13-scope.md](version-5.13-scope.md) · Release notes: [v5.13.0.md](../release-notes/v5.13.0.md)
+**Version 5.14 sign-off:** [version-5.14-scope.md](version-5.14-scope.md) · Release notes: [v5.14.0.md](../release-notes/v5.14.0.md)
+**Version 5.15 sign-off:** [version-5.15-scope.md](version-5.15-scope.md) · Release notes: [v5.15.0.md](../release-notes/v5.15.0.md)
 
 ## Status legend
 
@@ -543,6 +545,18 @@ Scope: [version-5.14-scope.md](version-5.14-scope.md) · Checklist: [version-5.1
 | Unsupervised autonomous filing loops  | 5.14    | Partial ✅ | ✅      | —        | ✅  | —   | ✅    | Disputes     | `/compliance/unsupervised-autonomous-filing-loops` operator-gated audit       |
 | Public OAuth marketplace listings     | 5.14    | Partial ✅ | ✅      | —        | ✅  | —   | ✅    | Platform     | `/org-admin/developer-portal/public-oauth-marketplace-listings` audit         |
 | Native mobile app store distribution  | 5.14    | Partial ✅ | ✅      | —        | ✅  | —   | ✅    | Identity     | `/enterprise/federation/native-mobile-app-store-distribution` readiness       |
+
+---
+
+## Version 5.15 — Identity Theft Detection & Recovery (shipped — Partial ✅)
+
+Scope: [version-5.15-scope.md](version-5.15-scope.md) · Checklist: [version-5.15-completion-checklist.md](../development/version-5.15-completion-checklist.md) · Release: [v5.15.0.md](../release-notes/v5.15.0.md)
+
+| Capability                          | Version | Status     | Backend | Frontend | API | AI  | Tests | Dependencies  | Notes                                                                  |
+| ----------------------------------- | ------- | ---------- | ------- | -------- | --- | --- | ----- | ------------- | ---------------------------------------------------------------------- |
+| Identity Theft Detection & Recovery | 5.15    | ✅         | ✅      | ✅       | ✅  | —   | ✅    | Documents     | Phase 8 Case Center; attestation gates; ordinary dispute pause (`409`) |
+| Portal identity-theft confirmation  | 5.15    | ✅         | ✅      | ✅       | ✅  | —   | ✅    | Client Portal | `/portal/cases/{id}/identity-theft-*` confirm + attestation            |
+| FCRA §605B block packet export      | 5.15    | Partial ✅ | ✅      | ✅       | ✅  | —   | ✅    | Disputes      | Staff ZIP letters + readiness; no live bureau submission               |
 
 ---
 
