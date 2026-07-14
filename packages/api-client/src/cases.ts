@@ -706,6 +706,18 @@ export async function downloadCaseAttorneyChecklistPacket(
   );
 }
 
+export async function downloadCaseIdentityTheft605bPacket(
+  caseId: string,
+  params: { letter_format?: 'text' | 'pdf' } = {},
+): Promise<{ blob: Blob; filename: string }> {
+  return downloadChecklistExport(
+    caseId,
+    `/cases/${caseId}/identity-theft/605b-packet.zip`,
+    `fcra-605b-block-packet-${caseId.slice(0, 8)}.zip`,
+    { letter_format: params.letter_format ?? 'pdf' },
+  );
+}
+
 export interface UpsertChecklistOverrideInput {
   checklist_kind: 'cfpb' | 'attorney';
   account_key: string;

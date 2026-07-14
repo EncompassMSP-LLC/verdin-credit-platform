@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ApiClientError,
   confirmIdentityTheftAccount,
+  downloadCaseIdentityTheft605bPacket,
   getCaseIdentityTheftCenter,
   type IdentityTheftConfirmation,
   type IdentityTheftFinding,
@@ -10,6 +11,15 @@ import {
 import { Badge, Card } from '@verdin/ui';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
+
+function downloadBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = filename;
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
 
 function severityVariant(
   severity: IdentityTheftFinding['severity'],
@@ -122,7 +132,17 @@ export function CaseIdentityTheftPanel({
     },
   });
 
+  const packetMutation = useMutation({
+    mutationFn: () => downloadCaseIdentityTheft605bPacket(caseId, { letter_format: 'pdf' }),
+    onSuccess: ({ blob, filename }) => downloadBlob(blob, filename),
+  });
+
   const data = centerQuery.data;
+  const hasConfirmedTheft = Boolean(
+    data?.account_reviews.some(
+      (review) => review.consumer_confirmation === 'identity_theft' && review.attestation_accepted,
+    ),
+  );
 
   return (
     <div id={id} className={className}>
@@ -312,6 +332,28 @@ export function CaseIdentityTheftPanel({
                     </li>
                   ))}
                 </ul>
+                <div className="mt-3">
+                  <button
+                    type="button"
+                    className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-800 hover:bg-gray-50 disabled:opacity-50"
+                    disabled={!hasConfirmedTheft || packetMutation.isPending}
+                    onClick={() => packetMutation.mutate()}
+                  >
+                    {packetMutation.isPending
+                      ? 'Building §605B packet…'
+                      : 'Download §605B block packet'}
+                  </button>
+                  <p className="mt-1 text-xs text-gray-500">
+                    Staff-mediated ZIP with bureau block letters. Does not submit to bureaus.
+                  </p>
+                  {packetMutation.isError ? (
+                    <p className="mt-1 text-xs text-red-600">
+                      {packetMutation.error instanceof ApiClientError
+                        ? packetMutation.error.message
+                        : 'Packet export failed'}
+                    </p>
+                  ) : null}
+                </div>
               </div>
             ) : null}
           </div>

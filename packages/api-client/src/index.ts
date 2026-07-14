@@ -133,6 +133,7 @@ export {
   downloadCaseAttorneyChecklist,
   downloadCaseCfpbChecklistPacket,
   downloadCaseAttorneyChecklistPacket,
+  downloadCaseIdentityTheft605bPacket,
   upsertCaseChecklistOverride,
   uploadCaseIdentityDocument,
   updateCase,

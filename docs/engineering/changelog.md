@@ -23,7 +23,7 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Technical debt:** Some tradeline heuristics remain soft signals; bureau-specific freeze detection still relies on staff upsert + report phrases; portal consumer self-service confirmation deferred.
 
-**Follow-up work:** Portal attestation UI; richer personal-info variation / mixed-file rules; §605B packet export; wire prepare-disputes skip for locked match keys.
+**Follow-up work:** Richer personal-info variation / mixed-file rules; wire prepare-disputes skip for locked match keys; optional §605B evidence exhibit bundling.
 
 ## Portal — identity-theft consumer confirmation
 
@@ -35,7 +35,19 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Technical debt:** Portal UI surfaces tradeline findings only (report-level banner still shown).
 
-**Follow-up work:** §605B packet/letter export (checklist slice 4).
+**Follow-up work:** Capability matrix 5.15 sign-off (checklist slice 5).
+
+## Disputes — FCRA §605B block packet export
+
+**Decision:** Add staff-mediated `GET /cases/{id}/identity-theft/605b-packet.zip` that emits a ZIP with README readiness manifest and per-bureau §605B block letters after consumer-confirmed identity theft (+ attestation). Returns `409` when no confirmed claims exist. Does not call bureau APIs.
+
+**Reason:** Investigators need mail-ready block letters distinct from §611 dispute packets once theft is confirmed.
+
+**Alternatives considered:** Reuse §611 mail-packet builder; auto-create dispute letter rows; live bureau submission.
+
+**Technical debt:** Evidence documents are checklist-tracked, not yet auto-bundled as ZIP exhibits.
+
+**Follow-up work:** Optional evidence exhibit bundling; live §605B filing deferred to 5.16+.
 
 ## Compliance intelligence — nest checklist PDF in packet ZIP
 
