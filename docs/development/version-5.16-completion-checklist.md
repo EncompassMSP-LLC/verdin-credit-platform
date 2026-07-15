@@ -14,9 +14,9 @@ Scope: [`docs/governance/version-5.16-scope.md`](../governance/version-5.16-scop
 - [x] Mixed-file / personal-info variation signals surface as advisory Case Center findings (never auto-label)
 - [x] §605B submission readiness is auditable behind an operator gate (no live bureau submission)
 - [x] Ordinary dispute preparation is lock-aware for confirmed identity-theft accounts
-- [ ] Capability matrix + API reference updated
-- [ ] Deferred items explicitly documented
-- [ ] `docs/release-notes/v5.16.0.md` + tag `v5.16.0`
+- [x] Capability matrix + API reference updated
+- [x] Deferred items explicitly documented
+- [x] `docs/release-notes/v5.16.0.md` (tag `v5.16.0` cut on merge to `main`)
 
 ---
 
@@ -29,7 +29,7 @@ Scope: [`docs/governance/version-5.16-scope.md`](../governance/version-5.16-scop
 | 3     | Mixed-file / personal-info variation detection | Compliance Intelligence | ✅     |
 | 4     | §605B submission-readiness audit               | Disputes                | ✅     |
 | 5     | Lock-aware dispute preparation                 | Disputes                | ✅     |
-| 6     | Capability matrix 5.16 sign-off                | Governance              | ⬜     |
+| 6     | Capability matrix 5.16 sign-off                | Governance              | ✅     |
 
 Slice 2 requires confirmed identity-theft + staff-selected case evidence documents. Slice 3 surfaces advisory signals only. Slice 4 requires confirmed theft, attestation, and a complete packet before recording a readiness run. Slice 5 reuses the Phase 8 account-lock state.
 

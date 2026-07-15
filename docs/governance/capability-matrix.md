@@ -22,7 +22,7 @@
 **Version 5.13 sign-off:** [version-5.13-scope.md](version-5.13-scope.md) · Release notes: [v5.13.0.md](../release-notes/v5.13.0.md)
 **Version 5.14 sign-off:** [version-5.14-scope.md](version-5.14-scope.md) · Release notes: [v5.14.0.md](../release-notes/v5.14.0.md)
 **Version 5.15 sign-off:** [version-5.15-scope.md](version-5.15-scope.md) · Release notes: [v5.15.0.md](../release-notes/v5.15.0.md)
-**Version 5.16 scope (in progress):** [version-5.16-scope.md](version-5.16-scope.md) · Checklist: [version-5.16-completion-checklist.md](../development/version-5.16-completion-checklist.md)
+**Version 5.16 sign-off:** [version-5.16-scope.md](version-5.16-scope.md) · Release notes: [v5.16.0.md](../release-notes/v5.16.0.md)
 
 ## Status legend
 
@@ -558,6 +558,20 @@ Scope: [version-5.15-scope.md](version-5.15-scope.md) · Checklist: [version-5.1
 | Identity Theft Detection & Recovery | 5.15    | ✅         | ✅      | ✅       | ✅  | —   | ✅    | Documents     | Phase 8 Case Center; attestation gates; ordinary dispute pause (`409`) |
 | Portal identity-theft confirmation  | 5.15    | ✅         | ✅      | ✅       | ✅  | —   | ✅    | Client Portal | `/portal/cases/{id}/identity-theft-*` confirm + attestation            |
 | FCRA §605B block packet export      | 5.15    | Partial ✅ | ✅      | ✅       | ✅  | —   | ✅    | Disputes      | Staff ZIP letters + readiness; no live bureau submission               |
+
+---
+
+## Version 5.16 — Identity-Theft Recovery Depth & §605B Evidence Bundling (shipped — Partial ✅)
+
+Scope: [version-5.16-scope.md](version-5.16-scope.md) · Checklist: [version-5.16-completion-checklist.md](../development/version-5.16-completion-checklist.md) · Release: [v5.16.0.md](../release-notes/v5.16.0.md)
+
+| Capability                            | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                                    |
+| ------------------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ---------------------------------------------------------------------------------------- |
+| §605B evidence exhibit bundling       | 5.16    | ✅      | ✅      | ✅       | ✅  | —   | ✅    | Disputes     | Staff-selected `document_id` exhibits bundled into packet; type/size gated; no auto-send |
+| Mixed-file / personal-info variations | 5.16    | ✅      | ✅      | ✅       | ✅  | —   | ✅    | Documents    | Advisory `PERSONAL_INFO` signals (multiple SSN/DOB/name/address); never auto-labels      |
+| §605B submission-readiness audit      | 5.16    | ✅      | ✅      | ✅       | ✅  | —   | ✅    | Disputes     | Operator-gated readiness run persisted to audit table; no live bureau submission         |
+| Lock-aware dispute preparation        | 5.16    | ✅      | ✅      | ✅       | ✅  | —   | ✅    | Disputes     | Bulk prepare skips identity-theft-locked tradelines into `locked` (no batch `409`)       |
+| Live unsupervised §605B bureau filing | 5.17+   | Planned | —       | —        | —   | —   | —     | Compliance   | Deferred — legal/compliance sign-off + kill-switch required                              |
 
 ---
 
