@@ -610,7 +610,7 @@ Scope: [version-5.19-scope.md](version-5.19-scope.md) · Checklist: [version-5.1
 | Capability                                 | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                                  |
 | ------------------------------------------ | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | -------------------------------------------------------------------------------------- |
 | Reinvestigation analytics slicing          | 5.19    | ✅      | ✅      | ✅       | ✅  | —   | ✅    | Reporting    | Date-range + per-bureau filters on the per-org outcome analytics; no cross-tenant data |
-| Per-recipient reinvestigation clock splits | 5.19    | Planned | —       | —        | —   | —   | —     | Disputes     | §611 clock start / round counts split by recipient (credit bureau vs furnisher)        |
+| Per-recipient reinvestigation clock splits | 5.19    | ✅      | ✅      | ✅       | ✅  | —   | ✅    | Disputes     | §611 clock start / round counts split by recipient (credit bureau vs furnisher)        |
 | Litigation packet cross-bureau evidence    | 5.19    | Planned | —       | —        | —   | —   | —     | Disputes     | Cross-bureau discrepancy signals added as willful-noncompliance indicators             |
 | Operator-gated litigation evidence export  | 5.19    | Planned | —       | —        | —   | —   | —     | Disputes     | Downloadable evidence document (text) for attorney handoff; never auto-transmitted     |
 

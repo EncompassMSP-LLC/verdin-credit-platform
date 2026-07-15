@@ -3,6 +3,7 @@ import {
   ApiClientError,
   getCaseReinvestigationClock,
   type AccountReinvestigationClock,
+  type AccountReinvestigationRecipientClock,
   type CaseReinvestigationClockSummary,
   type ReinvestigationClockState,
 } from '@verdin/api-client';
@@ -15,6 +16,15 @@ const STATE_LABELS: Record<ReinvestigationClockState, string> = {
   overdue: 'Overdue',
   responded: 'Responded',
 };
+
+const RECIPIENT_LABELS: Record<string, string> = {
+  credit_bureau: 'Credit bureau',
+  furnisher: 'Furnisher',
+};
+
+function recipientLabel(recipientType: string): string {
+  return RECIPIENT_LABELS[recipientType] ?? recipientType;
+}
 
 function stateBadgeVariant(
   state: ReinvestigationClockState,
@@ -48,33 +58,63 @@ function SummaryBadges({ summary }: { summary: CaseReinvestigationClockSummary }
   );
 }
 
-function ClockRow({ entry }: { entry: AccountReinvestigationClock }) {
+function RecipientClockLine({ recipient }: { recipient: AccountReinvestigationRecipientClock }) {
   return (
-    <li className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-gray-200 px-4 py-2.5">
-      <div>
-        <p className="text-sm font-medium text-gray-900">{entry.creditor_name}</p>
-        <p className="mt-0.5 text-xs text-gray-500">
-          {entry.deadline
-            ? `Deadline ${new Date(entry.deadline).toLocaleDateString()}`
-            : 'No dispute mailed'}
-          {entry.days_remaining !== null && entry.state !== 'responded'
-            ? entry.days_remaining < 0
-              ? ` · ${Math.abs(entry.days_remaining)}d overdue`
-              : ` · ${entry.days_remaining}d left`
-            : ''}
-          {entry.dispute_round_count > 0 ? ` · round ${entry.dispute_round_count}` : ''}
-          {entry.extended ? ' · 45-day window' : ''}
-          {entry.response_count > 0 ? ` · ${entry.response_count} response(s) recorded` : ''}
-        </p>
+    <li className="flex items-center justify-between gap-2 text-xs">
+      <span className="text-gray-600">
+        {recipientLabel(recipient.recipient_type)}
+        {recipient.deadline
+          ? ` · deadline ${new Date(recipient.deadline).toLocaleDateString()}`
+          : ''}
+        {recipient.days_remaining !== null && recipient.state !== 'responded'
+          ? recipient.days_remaining < 0
+            ? ` · ${Math.abs(recipient.days_remaining)}d overdue`
+            : ` · ${recipient.days_remaining}d left`
+          : ''}
+        {recipient.dispute_round_count > 0 ? ` · round ${recipient.dispute_round_count}` : ''}
+      </span>
+      <Badge variant={stateBadgeVariant(recipient.state)}>{STATE_LABELS[recipient.state]}</Badge>
+    </li>
+  );
+}
+
+function ClockRow({ entry }: { entry: AccountReinvestigationClock }) {
+  const showRecipientSplit = entry.recipients.length > 1;
+  return (
+    <li className="rounded-md border border-gray-200 px-4 py-2.5">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <p className="text-sm font-medium text-gray-900">{entry.creditor_name}</p>
+          <p className="mt-0.5 text-xs text-gray-500">
+            {entry.deadline
+              ? `Deadline ${new Date(entry.deadline).toLocaleDateString()}`
+              : 'No dispute mailed'}
+            {entry.days_remaining !== null && entry.state !== 'responded'
+              ? entry.days_remaining < 0
+                ? ` · ${Math.abs(entry.days_remaining)}d overdue`
+                : ` · ${entry.days_remaining}d left`
+              : ''}
+            {entry.dispute_round_count > 0 ? ` · round ${entry.dispute_round_count}` : ''}
+            {entry.extended ? ' · 45-day window' : ''}
+            {entry.response_count > 0 ? ` · ${entry.response_count} response(s) recorded` : ''}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          {entry.extended ? (
+            <span title="§611(a)(1)(B) 45-day extension">
+              <Badge variant="info">§611(a)(1)(B)</Badge>
+            </span>
+          ) : null}
+          <Badge variant={stateBadgeVariant(entry.state)}>{STATE_LABELS[entry.state]}</Badge>
+        </div>
       </div>
-      <div className="flex items-center gap-2">
-        {entry.extended ? (
-          <span title="§611(a)(1)(B) 45-day extension">
-            <Badge variant="info">§611(a)(1)(B)</Badge>
-          </span>
-        ) : null}
-        <Badge variant={stateBadgeVariant(entry.state)}>{STATE_LABELS[entry.state]}</Badge>
-      </div>
+      {showRecipientSplit ? (
+        <ul className="mt-2 space-y-1 border-t border-gray-100 pt-2">
+          {entry.recipients.map((recipient) => (
+            <RecipientClockLine key={recipient.recipient_type} recipient={recipient} />
+          ))}
+        </ul>
+      ) : null}
     </li>
   );
 }

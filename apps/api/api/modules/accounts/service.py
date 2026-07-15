@@ -75,6 +75,7 @@ from api.modules.accounts.schemas import (
     AccountLitigationPacket,
     AccountRedisputeReadiness,
     AccountReinvestigationClock,
+    AccountReinvestigationRecipientClock,
     AccountResponse,
     AccountUpdate,
     CaseRedisputeReadinessResponse,
@@ -1554,6 +1555,9 @@ class AccountService:
         rounds_by_account = await self._sent_letter_rounds_by_account(
             organization_id=organization_id, case_id=case_id
         )
+        recipient_rounds, letter_recipient = await self._recipient_rounds_by_account(
+            organization_id=organization_id, case_id=case_id
+        )
         doc_dates_by_account, case_level_doc_dates = await self._case_document_dates(
             organization_id=organization_id, case_id=case_id
         )
@@ -1579,6 +1583,13 @@ class AccountService:
                 response_recorded=has_real_response,
                 extended=extended,
             )
+            recipients = self._build_recipient_clocks(
+                recipient_rounds=recipient_rounds.get(account.id, {}),
+                account_responses=account_responses,
+                letter_recipient=letter_recipient,
+                extended=extended,
+                today=today,
+            )
             entries.append(
                 AccountReinvestigationClock(
                     account_id=account.id,
@@ -1593,6 +1604,7 @@ class AccountService:
                     extended=clock.extended,
                     response_received=account.response_received,
                     response_count=len(account_responses),
+                    recipients=recipients,
                 )
             )
             setattr(summary, clock.state, getattr(summary, clock.state) + 1)
@@ -1915,6 +1927,93 @@ class AccountService:
             )
             rounds[letter.account_id] = (new_latest, count + 1)
         return rounds
+
+    async def _recipient_rounds_by_account(
+        self,
+        *,
+        organization_id: uuid.UUID,
+        case_id: uuid.UUID,
+    ) -> tuple[dict[uuid.UUID, dict[str, tuple[date | None, int]]], dict[uuid.UUID, str]]:
+        """Per-account, per-recipient sent-round data + a letter→recipient map.
+
+        Returns ``(rounds_by_recipient, letter_recipient)`` where
+        ``rounds_by_recipient[account_id][recipient_type]`` is the
+        ``(latest sent date, sent-round count)`` for that recipient (credit
+        bureau vs furnisher), and ``letter_recipient[letter_id]`` maps a sent
+        letter to its recipient (used to attribute recorded responses).
+        """
+        rounds: dict[uuid.UUID, dict[str, tuple[date | None, int]]] = {}
+        letter_recipient: dict[uuid.UUID, str] = {}
+        if self._session is None:
+            return rounds, letter_recipient
+        letters = await DisputeLetterRepository(self._session).list_for_case(
+            organization_id=organization_id,
+            case_id=case_id,
+        )
+        for letter in letters:
+            if letter.status != DisputeLetterStatus.SENT or letter.sent_at is None:
+                continue
+            recipient = getattr(letter.recipient_type, "value", letter.recipient_type)
+            letter_recipient[letter.id] = recipient
+            sent_date = letter.sent_at.date()
+            per_recipient = rounds.setdefault(letter.account_id, {})
+            latest_date, count = per_recipient.get(recipient, (None, 0))
+            new_latest = (
+                sent_date if latest_date is None or sent_date > latest_date else latest_date
+            )
+            per_recipient[recipient] = (new_latest, count + 1)
+        return rounds, letter_recipient
+
+    @staticmethod
+    def _build_recipient_clocks(
+        *,
+        recipient_rounds: dict[str, tuple[date | None, int]],
+        account_responses: list[object],
+        letter_recipient: dict[uuid.UUID, str],
+        extended: bool,
+        today: date,
+    ) -> list[AccountReinvestigationRecipientClock]:
+        """Compute independent §611 sub-clocks per recipient for one tradeline.
+
+        A tradeline disputed with both a credit bureau and a furnisher carries
+        two deadlines. Responses are attributed to a recipient via the recorded
+        response's ``dispute_letter_id`` (which maps to that letter's recipient);
+        unlinked responses do not resolve a recipient's clock.
+        """
+        recipient_clocks: list[AccountReinvestigationRecipientClock] = []
+        # Stable, readable ordering: bureau first, then furnisher, then the rest.
+        order = {"credit_bureau": 0, "furnisher": 1}
+        for recipient in sorted(recipient_rounds, key=lambda r: (order.get(r, 9), r)):
+            start_date, count = recipient_rounds[recipient]
+            attributed = [
+                response
+                for response in account_responses
+                if (letter_id := getattr(response, "dispute_letter_id", None)) is not None
+                and letter_recipient.get(letter_id) == recipient
+            ]
+            responded = any(
+                getattr(response, "outcome", None) != DisputeResponseOutcome.NO_RESPONSE
+                for response in attributed
+            )
+            clock = compute_reinvestigation_clock(
+                last_dispute_date=start_date,
+                today=today,
+                response_recorded=responded,
+                extended=extended,
+            )
+            recipient_clocks.append(
+                AccountReinvestigationRecipientClock(
+                    recipient_type=recipient,
+                    clock_start_date=start_date,
+                    dispute_round_count=count,
+                    deadline=clock.deadline,
+                    days_remaining=clock.days_remaining,
+                    state=clock.state,
+                    extended=clock.extended,
+                    response_count=len(attributed),
+                )
+            )
+        return recipient_clocks
 
     async def _case_document_dates(
         self,

@@ -450,6 +450,17 @@ export async function listAccountDisputeResponses(
 export type ReinvestigationClockState =
   'not_sent' | 'awaiting' | 'due_soon' | 'overdue' | 'responded';
 
+export interface AccountReinvestigationRecipientClock {
+  recipient_type: string;
+  clock_start_date: string | null;
+  dispute_round_count: number;
+  deadline: string | null;
+  days_remaining: number | null;
+  state: ReinvestigationClockState;
+  extended: boolean;
+  response_count: number;
+}
+
 export interface AccountReinvestigationClock {
   account_id: string;
   creditor_name: string;
@@ -463,6 +474,7 @@ export interface AccountReinvestigationClock {
   extended: boolean;
   response_received: boolean;
   response_count: number;
+  recipients: AccountReinvestigationRecipientClock[];
 }
 
 export interface CaseReinvestigationClockSummary {

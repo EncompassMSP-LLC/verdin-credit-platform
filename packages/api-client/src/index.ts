@@ -725,6 +725,7 @@ export {
   type Account,
   type AccountDisputeDraft,
   type AccountReinvestigationClock,
+  type AccountReinvestigationRecipientClock,
   type AccountRedisputeReadiness,
   type CaseReinvestigationClock,
   type CaseReinvestigationClockSummary,
