@@ -24,6 +24,7 @@
 **Version 5.15 sign-off:** [version-5.15-scope.md](version-5.15-scope.md) · Release notes: [v5.15.0.md](../release-notes/v5.15.0.md)
 **Version 5.16 sign-off:** [version-5.16-scope.md](version-5.16-scope.md) · Release notes: [v5.16.0.md](../release-notes/v5.16.0.md)
 **Version 5.17 sign-off:** [version-5.17-scope.md](version-5.17-scope.md) · Release notes: [v5.17.0.md](../release-notes/v5.17.0.md)
+**Version 5.18 scope (in progress):** [version-5.18-scope.md](version-5.18-scope.md) · Checklist: [version-5.18-completion-checklist.md](../development/version-5.18-completion-checklist.md)
 
 ## Status legend
 
@@ -587,6 +588,18 @@ Scope: [version-5.17-scope.md](version-5.17-scope.md) · Checklist: [version-5.1
 | Re-dispute / escalation readiness     | 5.17    | ✅      | ✅      | ✅       | ✅  | —   | ✅    | Disputes     | Advisory re-dispute / CFPB / attorney signals; never auto-files                              |
 | Case reinvestigation dashboard        | 5.17    | ✅      | ✅      | ✅       | ✅  | —   | ✅    | Disputes     | Per-case reinvestigation read model + surface                                                |
 | Live bureau response ingestion        | 5.18+   | Planned | —       | —        | —   | —   | —     | Compliance   | Deferred — live bureau API access + legal/compliance sign-off                                |
+
+## Version 5.18 — Reinvestigation Depth & Litigation Readiness (in progress — 🚧)
+
+Scope: [version-5.18-scope.md](version-5.18-scope.md) · Checklist: [version-5.18-completion-checklist.md](../development/version-5.18-completion-checklist.md)
+
+| Capability                                   | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                                     |
+| -------------------------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ----------------------------------------------------------------------------------------- |
+| Per-letter multi-round reinvestigation clock | 5.18    | Planned | —       | —        | —   | —   | —     | Disputes     | Each sent round on its own `sent_at`-keyed §611 deadline; retains prior-round history     |
+| Extended 45-day reinvestigation window       | 5.18    | Planned | —       | —        | —   | —   | —     | Disputes     | §611 45-day extension modeled when documents added mid-window                             |
+| Reinvestigation outcome analytics            | 5.18    | Planned | —       | —        | —   | —   | —     | Reporting    | Per-org deletion/verify/correction rates + time-to-resolution; no cross-tenant benchmarks |
+| Litigation-readiness evidence packet         | 5.18    | Planned | —       | —        | —   | —   | —     | Disputes     | Operator-gated §611/§623 evidence bundle for attorney handoff; never auto-files           |
+| Automated litigation filing                  | Never   | Planned | —       | —        | —   | —   | —     | Compliance   | Out of scope — the packet is a human handoff; the platform never files                    |
 
 ---
 

@@ -60,6 +60,7 @@ Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (
 | **5.15**  | Identity Theft Detection           | Released    | Phase 8 Case Center, portal attestation, §605B packet export (`v5.15.0`)                                       |
 | **5.16**  | Identity-Theft Recovery Depth      | Released    | Phase 9 §605B evidence bundling, mixed-file detection, submission readiness, lock-aware prepare (`v5.16.0`)    |
 | **5.17**  | Dispute Response & Reinvestigation | Released    | Phase 10 dispute response intake, §611 reinvestigation clock, re-dispute readiness, case dashboard (`v5.17.0`) |
+| **5.18**  | Reinvestigation Depth & Litigation | Planned     | Phase 11 per-letter multi-round clock, 45-day extended window, outcome analytics, litigation-readiness packet  |
 
 ### Sprint milestones
 
@@ -434,6 +435,19 @@ Compliance Intelligence Phase 10 closes the dispute loop: staff-entered bureau/f
 | 2    | §611 reinvestigation clock & no-response       | Released    | 30-day deadline from dispute mail date; overdue / awaiting detection |
 | 3    | Reinvestigation outcome & re-dispute readiness | Released    | Advisory re-dispute / CFPB / attorney escalation signals             |
 | 4    | Case reinvestigation summary read model + UI   | Released    | Per-case reinvestigation dashboard surface                           |
+
+### Version 5.18 — Reinvestigation Depth & Litigation Readiness (planned)
+
+Scope and checklist: [`docs/governance/version-5.18-scope.md`](../governance/version-5.18-scope.md) · [`docs/development/version-5.18-completion-checklist.md`](../development/version-5.18-completion-checklist.md)
+
+Compliance Intelligence Phase 11 deepens the 5.17 reinvestigation lifecycle: per-letter multi-round §611 clocks (keyed off `sent_at`), the extended 45-day reinvestigation window, per-org outcome trend analytics, and an operator-gated litigation-readiness evidence packet for attorney handoff. Live bureau response ingestion, automated re-dispute filing, unsupervised escalation, automated litigation filing, and cross-tenant benchmarks remain deferred (5.19+ or never) pending legal/compliance sign-off.
+
+| Epic | Theme                                        | 5.18 target | Notes                                                         |
+| ---- | -------------------------------------------- | ----------- | ------------------------------------------------------------- |
+| 1    | Per-letter multi-round reinvestigation clock | Planned     | Each sent round on its own `sent_at`-keyed §611 deadline      |
+| 2    | Extended 45-day reinvestigation window       | Planned     | §611 45-day extension when documents added mid-window         |
+| 3    | Reinvestigation outcome analytics read model | Planned     | Per-org deletion/verify/correction rates + time-to-resolution |
+| 4    | Litigation-readiness evidence packet         | Planned     | Operator-gated §611/§623 evidence bundle for attorney handoff |
 
 ## Sprint → version mapping
 
