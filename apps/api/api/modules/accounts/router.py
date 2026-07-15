@@ -33,6 +33,7 @@ from api.modules.accounts.schemas import (
     AccountDisputeResponseReceivedRequest,
     AccountIntelligenceSummary,
     AccountListParams,
+    AccountLitigationPacket,
     AccountLlmRecommendationResponse,
     AccountResponse,
     AccountSortField,
@@ -388,6 +389,18 @@ async def list_account_dispute_responses(
     service: AccountService = Depends(get_account_service),
 ) -> list[DisputeResponseRecordResponse]:
     return await service.list_account_dispute_responses(current_user, account_id)
+
+
+@router.get(
+    "/{account_id}/litigation-packet",
+    response_model=AccountLitigationPacket,
+)
+async def get_account_litigation_packet(
+    account_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: AccountService = Depends(get_account_service),
+) -> AccountLitigationPacket:
+    return await service.get_account_litigation_packet(current_user, account_id)
 
 
 @router.post("/{account_id}/dispute-investigation-overdue", response_model=AccountResponse)

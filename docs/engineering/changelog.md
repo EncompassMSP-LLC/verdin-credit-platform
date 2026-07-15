@@ -13,6 +13,20 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — litigation-readiness evidence packet (Phase 11)
+
+**Decision:** Add an operator-gated litigation-readiness evidence packet at `GET /accounts/{account_id}/litigation-packet`. A pure `build_litigation_readiness(inputs)` helper (in `accounts/litigation_packet.py`) grades willful-noncompliance evidence into an advisory `{ eligible, strength, score, indicators, summary }` assessment. `AccountService.get_account_litigation_packet(...)` assembles the tradeline's reinvestigation trail — all dispute `letters` and recorded `responses` — with the current §611 clock state (reusing the slice 2–3 `sent_at`-keyed start and 45-day extension logic), the latest outcome, and the advisory re-dispute recommendation. Shipped with `@verdin/api-client` types and an on-demand "Litigation-readiness packet" panel on the account detail page.
+
+**Reason:** The 5.17 readiness engine already surfaces an `escalate_attorney` signal, but operators had no consolidated evidence view to hand an attorney. Scoring the reinvestigation record (missed deadlines, verification of well-documented disputes, repeated rounds) turns that signal into a reviewable bundle while keeping the math pure and unit-testable like the other reinvestigation helpers.
+
+**Guardrails:** Operator-gated — requires `case_manager`+ write permission (`ACCOUNT_WRITE_ROLE`), so read-only users get `403`. Read-only computation over stored data; no writes, no bureau contact. The packet always carries a `disclaimer`: the platform never drafts pleadings, files suit, e-files, or transmits to a court/attorney — a licensed attorney independently decides whether to litigate. A recorded response stops the §611 clock, so a resolved (deleted/corrected) tradeline grades `not_ready` and a lone verified round only reaches `weak`.
+
+**Alternatives considered:** Persisting packet snapshots (rejected — the assessment is a live derivation over evidence that keeps changing; a stored snapshot would drift and implies a filing artifact we explicitly do not produce); auto-generating the packet on the case dashboard (rejected — it is account-scoped and write-gated, and fetching on demand avoids surfacing a litigation grade to read-only viewers); folding the grade into the existing readiness endpoint (rejected — readiness is a per-case advisory queue; the packet is a per-account evidence bundle with a distinct permission gate).
+
+**Technical debt:** The score weights are heuristic (no calibration data yet) and do not yet incorporate cross-bureau discrepancy evidence or per-recipient (bureau vs furnisher) letter splits. Indicators are English-only.
+
+**Follow-up work:** Capability-matrix / governance sign-off + release notes (slice 6). Deferred: automated litigation filing / e-filing stays permanently out of scope.
+
 ## Compliance intelligence — reinvestigation outcome analytics (Phase 11)
 
 **Decision:** Add a per-org reinvestigation outcome analytics read model. A pure `compute_reinvestigation_outcome_analytics(rows)` helper (in `accounts/reinvestigation_analytics.py`) rolls recorded `dispute_responses` into per-outcome counts, derived rates (deletion / verification / correction / favorable / no-response), and time-to-response stats (avg / median). `OperationsReportingRepository.get_reinvestigation_outcomes(org)` supplies the rows — a left join over `dispute_responses → dispute_letters` (for `sent_at`) and `→ accounts` (for `last_dispute_date`), computing elapsed days from the clock start to the response date. Exposed at `GET /reporting/reinvestigation-outcomes` with `@verdin/api-client` types and a "Reinvestigation outcomes" tab on the Reporting Center.
