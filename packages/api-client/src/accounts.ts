@@ -447,6 +447,44 @@ export async function listAccountDisputeResponses(
   return request<DisputeResponseRecord[]>(apiPath(`/accounts/${accountId}/dispute-responses`));
 }
 
+export type ReinvestigationClockState =
+  'not_sent' | 'awaiting' | 'due_soon' | 'overdue' | 'responded';
+
+export interface AccountReinvestigationClock {
+  account_id: string;
+  creditor_name: string;
+  dispute_status: DisputeStatus;
+  last_dispute_date: string | null;
+  deadline: string | null;
+  days_remaining: number | null;
+  state: ReinvestigationClockState;
+  response_received: boolean;
+  response_count: number;
+}
+
+export interface CaseReinvestigationClockSummary {
+  not_sent: number;
+  awaiting: number;
+  due_soon: number;
+  overdue: number;
+  responded: number;
+}
+
+export interface CaseReinvestigationClock {
+  case_id: string;
+  generated_at: string;
+  summary: CaseReinvestigationClockSummary;
+  accounts: AccountReinvestigationClock[];
+}
+
+export async function getCaseReinvestigationClock(
+  caseId: string,
+): Promise<CaseReinvestigationClock> {
+  return request<CaseReinvestigationClock>(
+    apiPath(`/accounts/reinvestigation-clock${buildQuery({ case_id: caseId })}`),
+  );
+}
+
 export type LlmDisputeDraftAugmentStatusValue = 'completed' | 'failed';
 
 export interface LlmDisputeDraftAugment {

@@ -38,6 +38,7 @@ from api.modules.accounts.schemas import (
     AccountSortField,
     AccountSortOrder,
     AccountUpdate,
+    CaseReinvestigationClockResponse,
     DisputeLetterResponse,
     DisputeResponseRecordResponse,
     RecordDisputeResponseRequest,
@@ -114,6 +115,15 @@ async def get_account_intelligence_summary(
     service: AccountService = Depends(get_account_service),
 ) -> AccountIntelligenceSummary:
     return await service.get_intelligence_summary(current_user, case_id=case_id)
+
+
+@router.get("/reinvestigation-clock", response_model=CaseReinvestigationClockResponse)
+async def get_case_reinvestigation_clock(
+    case_id: uuid.UUID = Query(...),
+    current_user: User = Depends(get_current_user),
+    service: AccountService = Depends(get_account_service),
+) -> CaseReinvestigationClockResponse:
+    return await service.get_case_reinvestigation_clock(current_user, case_id)
 
 
 @router.get("", response_model=PaginatedResponse[AccountResponse])

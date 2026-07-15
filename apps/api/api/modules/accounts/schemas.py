@@ -20,6 +20,7 @@ from api.modules.accounts.models import (
     InvestigationStatus,
     PaymentStatus,
 )
+from api.modules.accounts.reinvestigation import ReinvestigationClockState
 
 AccountSortField = Literal[
     "creditor_name",
@@ -402,3 +403,32 @@ class DisputeResponseRecordResponse(BaseSchema):
             updated_at=response.updated_at,
             created_by_id=response.created_by_id,
         )
+
+
+class AccountReinvestigationClock(BaseSchema):
+    """Per-account §611 reinvestigation clock entry."""
+
+    account_id: uuid.UUID
+    creditor_name: str
+    dispute_status: DisputeStatus
+    last_dispute_date: date | None
+    deadline: date | None
+    days_remaining: int | None
+    state: ReinvestigationClockState
+    response_received: bool
+    response_count: int
+
+
+class CaseReinvestigationClockSummary(BaseSchema):
+    not_sent: int = 0
+    awaiting: int = 0
+    due_soon: int = 0
+    overdue: int = 0
+    responded: int = 0
+
+
+class CaseReinvestigationClockResponse(BaseSchema):
+    case_id: uuid.UUID
+    generated_at: datetime
+    summary: CaseReinvestigationClockSummary
+    accounts: list[AccountReinvestigationClock]
