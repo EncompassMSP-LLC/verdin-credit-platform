@@ -40,6 +40,7 @@ from api.modules.accounts.schemas import (
     AccountUpdate,
     CaseRedisputeReadinessResponse,
     CaseReinvestigationClockResponse,
+    CaseReinvestigationSummary,
     DisputeLetterResponse,
     DisputeResponseRecordResponse,
     RecordDisputeResponseRequest,
@@ -116,6 +117,15 @@ async def get_account_intelligence_summary(
     service: AccountService = Depends(get_account_service),
 ) -> AccountIntelligenceSummary:
     return await service.get_intelligence_summary(current_user, case_id=case_id)
+
+
+@router.get("/reinvestigation-summary", response_model=CaseReinvestigationSummary)
+async def get_case_reinvestigation_summary(
+    case_id: uuid.UUID = Query(...),
+    current_user: User = Depends(get_current_user),
+    service: AccountService = Depends(get_account_service),
+) -> CaseReinvestigationSummary:
+    return await service.get_case_reinvestigation_summary(current_user, case_id)
 
 
 @router.get("/redispute-readiness", response_model=CaseRedisputeReadinessResponse)

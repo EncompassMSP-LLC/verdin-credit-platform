@@ -465,3 +465,25 @@ class CaseRedisputeReadinessResponse(BaseSchema):
     generated_at: datetime
     summary: CaseRedisputeReadinessSummary
     accounts: list[AccountRedisputeReadiness]
+
+
+class CaseReinvestigationSummary(BaseSchema):
+    """Aggregated per-case reinvestigation dashboard read model (Phase 10 slice 5).
+
+    Rolls up the §611 clock (slice 3), advisory readiness (slice 4), and recorded
+    responses (slice 2) into a single triage surface. Read-only — no live bureau
+    contact and no writes.
+    """
+
+    case_id: uuid.UUID
+    generated_at: datetime
+    total_accounts: int
+    disputed_accounts: int
+    total_responses: int
+    clock: CaseReinvestigationClockSummary
+    readiness: CaseRedisputeReadinessSummary
+    next_deadline: date | None
+    next_deadline_account_id: uuid.UUID | None
+    next_deadline_creditor: str | None
+    most_overdue_days: int | None
+    action_items: list[AccountRedisputeReadiness]

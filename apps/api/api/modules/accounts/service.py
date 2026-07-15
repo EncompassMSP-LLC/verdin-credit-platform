@@ -72,6 +72,7 @@ from api.modules.accounts.schemas import (
     CaseRedisputeReadinessSummary,
     CaseReinvestigationClockResponse,
     CaseReinvestigationClockSummary,
+    CaseReinvestigationSummary,
     CrossBureauIntelligenceSummary,
     DisputeLetterResponse,
     DisputeReasonSuggestionResponse,
@@ -1650,6 +1651,61 @@ class AccountService:
             generated_at=datetime.now(UTC),
             summary=summary,
             accounts=entries,
+        )
+
+    async def get_case_reinvestigation_summary(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+    ) -> CaseReinvestigationSummary:
+        """Aggregate the §611 clock, advisory readiness, and recorded responses.
+
+        A single per-case dashboard read model over slices 2–4. Read-only: no
+        live bureau contact and no writes.
+        """
+        clock = await self.get_case_reinvestigation_clock(user, case_id)
+        readiness = await self.get_case_redispute_readiness(user, case_id)
+
+        total_accounts = len(clock.accounts)
+        disputed_accounts = sum(
+            1 for entry in clock.accounts if entry.last_dispute_date is not None
+        )
+        total_responses = sum(entry.response_count for entry in clock.accounts)
+
+        # Earliest still-open deadline (awaiting / due-soon) for the "next up" hint.
+        upcoming = [
+            entry
+            for entry in clock.accounts
+            if entry.deadline is not None
+            and entry.state in ("awaiting", "due_soon")
+            and entry.days_remaining is not None
+            and entry.days_remaining >= 0
+        ]
+        upcoming.sort(key=lambda entry: entry.deadline or date.max)
+        next_entry = upcoming[0] if upcoming else None
+
+        # Most overdue tradeline (largest elapsed days past the deadline).
+        overdue_days: list[int] = []
+        for entry in clock.accounts:
+            if entry.state == "overdue" and entry.days_remaining is not None:
+                overdue_days.append(entry.days_remaining)
+        most_overdue_days = abs(min(overdue_days)) if overdue_days else None
+
+        action_items = [entry for entry in readiness.accounts if entry.priority == "high"]
+
+        return CaseReinvestigationSummary(
+            case_id=case_id,
+            generated_at=datetime.now(UTC),
+            total_accounts=total_accounts,
+            disputed_accounts=disputed_accounts,
+            total_responses=total_responses,
+            clock=clock.summary,
+            readiness=readiness.summary,
+            next_deadline=next_entry.deadline if next_entry else None,
+            next_deadline_account_id=next_entry.account_id if next_entry else None,
+            next_deadline_creditor=next_entry.creditor_name if next_entry else None,
+            most_overdue_days=most_overdue_days,
+            action_items=action_items,
         )
 
     @staticmethod

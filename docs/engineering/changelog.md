@@ -13,6 +13,20 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — per-case reinvestigation summary (Phase 10)
+
+**Decision:** Add an aggregated per-case reinvestigation dashboard read model. `GET /accounts/reinvestigation-summary?case_id=` (service `get_case_reinvestigation_summary`) rolls up the §611 clock (slice 3), advisory readiness (slice 4), and recorded responses (slice 2) into one payload: totals (`total_accounts`, `disputed_accounts`, `total_responses`), the per-state `clock` summary, the per-action `readiness` summary, the earliest still-open `next_deadline` (+ account/creditor), `most_overdue_days`, and the high-priority `action_items`. Shipped `@verdin/api-client` types/helper and a `CaseReinvestigationSummaryCard` at the top of the case reinvestigation section.
+
+**Reason:** After slices 2–4 the case detail page had three separate panels (responses, clock, readiness) but no single glance-able triage header. Operators needed one card answering "how many overdue, what's due next, what needs action" without scanning each panel. Aggregating the existing computations keeps a single source of truth.
+
+**Guardrails:** Pure aggregation over the slice 3/4 read models — no new writes, no bureau contact. It reuses the same `AccountService` methods, so classification stays consistent with the detail panels.
+
+**Alternatives considered:** A brand-new query that recomputes clock + readiness inline (rejected — duplicates slice 3/4 logic and risks drift); a materialized/persisted summary table (rejected — derivable and small, avoids a migration + staleness); putting the endpoint under `/cases/{id}` (rejected — the computation lives in `AccountService` alongside slices 3–4, so a `/accounts` query param keeps cohesion).
+
+**Technical debt:** The summary calls `get_case_reinvestigation_clock` and `get_case_redispute_readiness` sequentially, so accounts + responses are queried twice per request; acceptable for typical case sizes but could be folded into a single pass if it becomes hot. `action_items` includes all high-priority entries with no cap.
+
+**Follow-up work:** Version 5.17 governance sign-off + release notes + tag (slice 6). Live bureau response ingestion and automated re-dispute filing remain deferred to 5.18+.
+
 ## Compliance intelligence — re-dispute / escalation readiness (Phase 10)
 
 **Decision:** Add an advisory re-dispute / escalation readiness read model. A pure `compute_redispute_readiness(...)` helper (in `accounts/redispute_readiness.py`) maps the §611 clock state, the latest recorded response outcome, the dispute round, and the account `risk_score` to a recommended `action` (`wait | prepare_initial | redispute | escalate_cfpb | escalate_attorney | resolved`) with a `priority` and human-readable `reason`. `GET /accounts/redispute-readiness?case_id=` returns a per-account list (high-priority first) plus a per-action `summary`. Shipped `@verdin/api-client` types/helper and a `CaseRedisputeReadinessPanel` on the case detail page.

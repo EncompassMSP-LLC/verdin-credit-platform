@@ -526,6 +526,29 @@ export async function getCaseRedisputeReadiness(caseId: string): Promise<CaseRed
   );
 }
 
+export interface CaseReinvestigationSummary {
+  case_id: string;
+  generated_at: string;
+  total_accounts: number;
+  disputed_accounts: number;
+  total_responses: number;
+  clock: CaseReinvestigationClockSummary;
+  readiness: CaseRedisputeReadinessSummary;
+  next_deadline: string | null;
+  next_deadline_account_id: string | null;
+  next_deadline_creditor: string | null;
+  most_overdue_days: number | null;
+  action_items: AccountRedisputeReadiness[];
+}
+
+export async function getCaseReinvestigationSummary(
+  caseId: string,
+): Promise<CaseReinvestigationSummary> {
+  return request<CaseReinvestigationSummary>(
+    apiPath(`/accounts/reinvestigation-summary${buildQuery({ case_id: caseId })}`),
+  );
+}
+
 export type LlmDisputeDraftAugmentStatusValue = 'completed' | 'failed';
 
 export interface LlmDisputeDraftAugment {
