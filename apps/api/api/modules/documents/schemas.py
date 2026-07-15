@@ -423,10 +423,19 @@ class PreparedCreditReportDisputeItem(BaseSchema):
     recommended_action: str
 
 
+class LockedDisputePreparationItem(BaseSchema):
+    """A tradeline skipped during bulk preparation because of an identity-theft lock."""
+
+    match_key: str
+    creditor_name: str | None = None
+    reason: str
+
+
 class PrepareCreditReportDisputesResponse(BaseSchema):
     case_id: uuid.UUID
     prepared: list[PreparedCreditReportDisputeItem]
     skipped: list[str]
+    locked: list[LockedDisputePreparationItem] = []
 
 
 class Metro2FindingSummary(BaseSchema):
@@ -765,6 +774,7 @@ class PrepareDisputeStrategyStageResponse(BaseSchema):
     direct_account_keys: list[str] = []
     prepared: list[PreparedCreditReportDisputeItem]
     skipped: list[str]
+    locked: list[LockedDisputePreparationItem] = []
     note: str | None = None
 
 

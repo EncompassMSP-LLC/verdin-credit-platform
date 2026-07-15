@@ -255,10 +255,17 @@ export interface PreparedCreditReportDisputeItem {
   recommended_action: string;
 }
 
+export interface LockedDisputePreparationItem {
+  match_key: string;
+  creditor_name?: string | null;
+  reason: string;
+}
+
 export interface PrepareCreditReportDisputesResult {
   case_id: string;
   prepared: PreparedCreditReportDisputeItem[];
   skipped: string[];
+  locked?: LockedDisputePreparationItem[];
 }
 
 export interface PrepareDisputeStrategyStageInput {
@@ -275,6 +282,7 @@ export interface PrepareDisputeStrategyStageResult {
   direct_account_keys?: string[];
   prepared: PreparedCreditReportDisputeItem[];
   skipped: string[];
+  locked?: LockedDisputePreparationItem[];
   note?: string | null;
 }
 

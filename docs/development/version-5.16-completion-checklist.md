@@ -13,7 +13,7 @@ Scope: [`docs/governance/version-5.16-scope.md`](../governance/version-5.16-scop
 - [x] §605B evidence exhibits bundle into the staff-mediated packet (no unreviewed auto-attach)
 - [x] Mixed-file / personal-info variation signals surface as advisory Case Center findings (never auto-label)
 - [x] §605B submission readiness is auditable behind an operator gate (no live bureau submission)
-- [ ] Ordinary dispute preparation is lock-aware for confirmed identity-theft accounts
+- [x] Ordinary dispute preparation is lock-aware for confirmed identity-theft accounts
 - [ ] Capability matrix + API reference updated
 - [ ] Deferred items explicitly documented
 - [ ] `docs/release-notes/v5.16.0.md` + tag `v5.16.0`
@@ -28,7 +28,7 @@ Scope: [`docs/governance/version-5.16-scope.md`](../governance/version-5.16-scop
 | 2     | §605B evidence exhibit bundling                | Disputes                | ✅     |
 | 3     | Mixed-file / personal-info variation detection | Compliance Intelligence | ✅     |
 | 4     | §605B submission-readiness audit               | Disputes                | ✅     |
-| 5     | Lock-aware dispute preparation                 | Disputes                | ⬜     |
+| 5     | Lock-aware dispute preparation                 | Disputes                | ✅     |
 | 6     | Capability matrix 5.16 sign-off                | Governance              | ⬜     |
 
 Slice 2 requires confirmed identity-theft + staff-selected case evidence documents. Slice 3 surfaces advisory signals only. Slice 4 requires confirmed theft, attestation, and a complete packet before recording a readiness run. Slice 5 reuses the Phase 8 account-lock state.

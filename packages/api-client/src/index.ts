@@ -179,6 +179,7 @@ export {
   type ChecklistCompletionStatus,
   type UpsertChecklistOverrideInput,
   type PreparedCreditReportDisputeItem,
+  type LockedDisputePreparationItem,
   type UpdateCaseInput,
 } from './cases';
 

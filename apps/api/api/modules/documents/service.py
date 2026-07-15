@@ -111,6 +111,7 @@ from api.modules.documents.schemas import (
     ImportParsedReportAccountsResponse,
     LitigationStrengthIssue,
     LitigationStrengthSummary,
+    LockedDisputePreparationItem,
     Metro2FindingResponse,
     Metro2FindingSummary,
     ParsedReportAccountCandidate,
@@ -2085,21 +2086,26 @@ class DocumentService:
             request=request,
         )
 
-    async def assert_ordinary_dispute_allowed_for_account(
+    async def identity_theft_lock_reason(
         self,
         user: User,
         *,
         case_id: uuid.UUID,
-        account_id: uuid.UUID,
+        account_id: uuid.UUID | None = None,
         creditor_name: str | None = None,
         account_number_masked: str | None = None,
-    ) -> None:
-        """Block ordinary dispute letter drafts when identity theft is suspected/confirmed."""
+    ) -> str | None:
+        """Return why ordinary disputes are paused for a tradeline, or None if allowed.
+
+        Non-raising counterpart to ``assert_ordinary_dispute_allowed_for_account`` so
+        bulk preparation flows can *skip* identity-theft-locked tradelines instead of
+        aborting the whole batch with a 409.
+        """
         from api.modules.documents.cross_bureau_comparison import tradeline_match_key
         from api.modules.documents.identity_theft_repository import IdentityTheftRepository
 
         if self._session is None:
-            return
+            return None
         organization_id = self._require_organization(user)
         repo = IdentityTheftRepository(self._session)
         match_key = tradeline_match_key(creditor_name or "", account_number_masked)
@@ -2110,20 +2116,17 @@ class DocumentService:
             match_key=match_key,
         )
         if locked:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail=(
-                    "Ordinary dispute letter generation is paused for this account because "
-                    "an identity-theft indicator is pending consumer confirmation or a "
-                    "confirmed identity-theft claim is open. Use the Identity Theft Case "
-                    "Center (§605B) instead of mixing identity-theft and accuracy theories."
-                ),
+            return (
+                "Ordinary dispute letter generation is paused for this account because "
+                "an identity-theft indicator is pending consumer confirmation or a "
+                "confirmed identity-theft claim is open. Use the Identity Theft Case "
+                "Center (§605B) instead of mixing identity-theft and accuracy theories."
             )
         try:
             findings = await self.get_case_identity_theft_findings(user, case_id)
         except HTTPException as exc:
             if exc.status_code == status.HTTP_404_NOT_FOUND:
-                return
+                return None
             raise
         for document in findings.documents:
             for finding in document.findings:
@@ -2134,14 +2137,32 @@ class DocumentService:
                     finding.account_number_masked,
                 )
                 if finding_key and match_key and finding_key == match_key:
-                    raise HTTPException(
-                        status_code=status.HTTP_409_CONFLICT,
-                        detail=(
-                            "Ordinary dispute letter generation is paused: this tradeline "
-                            "has an unconfirmed identity-theft indicator. Confirm the "
-                            "consumer’s position in the Identity Theft Case Center first."
-                        ),
+                    return (
+                        "Ordinary dispute letter generation is paused: this tradeline "
+                        "has an unconfirmed identity-theft indicator. Confirm the "
+                        "consumer’s position in the Identity Theft Case Center first."
                     )
+        return None
+
+    async def assert_ordinary_dispute_allowed_for_account(
+        self,
+        user: User,
+        *,
+        case_id: uuid.UUID,
+        account_id: uuid.UUID,
+        creditor_name: str | None = None,
+        account_number_masked: str | None = None,
+    ) -> None:
+        """Block ordinary dispute letter drafts when identity theft is suspected/confirmed."""
+        reason = await self.identity_theft_lock_reason(
+            user,
+            case_id=case_id,
+            account_id=account_id,
+            creditor_name=creditor_name,
+            account_number_masked=account_number_masked,
+        )
+        if reason is not None:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=reason)
 
     async def get_case_tradeline_chronology(
         self,
@@ -3772,6 +3793,7 @@ class DocumentService:
 
         prepared: list[PreparedCreditReportDisputeItem] = []
         skipped: list[str] = []
+        locked: list[LockedDisputePreparationItem] = []
 
         for discrepancy in discrepancies.discrepancies:
             if not discrepancy.dispute_ready:
@@ -3781,6 +3803,24 @@ class DocumentService:
                 continue
 
             existing = existing_by_key.get(discrepancy.match_key)
+            # Lock-aware: skip tradelines paused by an identity-theft indicator or
+            # confirmed §605B claim instead of aborting the whole batch with a 409.
+            lock_reason = await self.identity_theft_lock_reason(
+                user,
+                case_id=case_id,
+                account_id=existing.id if existing is not None else None,
+                creditor_name=discrepancy.creditor_name,
+                account_number_masked=discrepancy.account_number_masked,
+            )
+            if lock_reason is not None:
+                locked.append(
+                    LockedDisputePreparationItem(
+                        match_key=discrepancy.match_key,
+                        creditor_name=discrepancy.creditor_name,
+                        reason=lock_reason,
+                    )
+                )
+                continue
             created_account = False
             if existing is None:
                 primary = max(
@@ -3842,6 +3882,7 @@ class DocumentService:
             case_id=case_id,
             prepared=prepared,
             skipped=skipped,
+            locked=locked,
         )
 
     async def prepare_case_dispute_strategy_stage(
@@ -3895,6 +3936,7 @@ class DocumentService:
         direct_targets = [target for target in targets if target.match_key is None]
         prepared: list[PreparedCreditReportDisputeItem] = []
         skipped: list[str] = []
+        locked: list[LockedDisputePreparationItem] = []
 
         if match_keys:
             prepared_response = await self.prepare_case_credit_report_disputes(
@@ -3907,6 +3949,7 @@ class DocumentService:
             )
             prepared.extend(prepared_response.prepared)
             skipped.extend(prepared_response.skipped)
+            locked.extend(prepared_response.locked)
 
         if direct_targets:
             account_service = AccountService.from_session(self._session)  # type: ignore[arg-type]
@@ -3944,6 +3987,23 @@ class DocumentService:
                     target.account_number_masked,
                 )
                 existing = existing_by_key.get(lookup_key)
+                # Lock-aware: skip identity-theft-locked strategy accounts instead of 409.
+                lock_reason = await self.identity_theft_lock_reason(
+                    user,
+                    case_id=case_id,
+                    account_id=existing.id if existing is not None else None,
+                    creditor_name=target.creditor_name,
+                    account_number_masked=target.account_number_masked,
+                )
+                if lock_reason is not None:
+                    locked.append(
+                        LockedDisputePreparationItem(
+                            match_key=target.account_key,
+                            creditor_name=target.creditor_name,
+                            reason=lock_reason,
+                        )
+                    )
+                    continue
                 created_account = False
                 if existing is None:
                     bureau = (
@@ -4026,7 +4086,12 @@ class DocumentService:
                 )
 
         note: str | None = None
-        if not prepared and skipped:
+        if not prepared and locked and not skipped:
+            note = (
+                "All eligible strategy accounts are paused by identity-theft locks; "
+                "use the Identity Theft Case Center (§605B) instead."
+            )
+        elif not prepared and skipped:
             note = "Eligible strategy accounts were skipped by dispute-ready gates."
         elif direct_targets and not match_keys:
             note = (
@@ -4037,6 +4102,10 @@ class DocumentService:
             note = (
                 "Prepared letters from both cross-bureau match keys and direct strategy accounts."
             )
+        if locked and prepared:
+            note = (note + " " if note else "") + (
+                f"{len(locked)} identity-theft-locked account(s) were skipped."
+            )
 
         return PrepareDisputeStrategyStageResponse(
             case_id=case_id,
@@ -4046,6 +4115,7 @@ class DocumentService:
             direct_account_keys=[target.account_key for target in direct_targets],
             prepared=prepared,
             skipped=skipped,
+            locked=locked,
             note=note,
         )
 

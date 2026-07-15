@@ -13,6 +13,20 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — lock-aware dispute preparation (Phase 9)
+
+**Decision:** Make bulk dispute preparation identity-theft-lock-aware. `prepare_case_credit_report_disputes` and `prepare_case_dispute_strategy_stage` now consult a new non-raising `DocumentService.identity_theft_lock_reason(...)` helper and _skip_ tradelines paused by an identity-theft indicator or a confirmed §605B claim, recording them in a `locked` array (`match_key`, `creditor_name`, `reason`) on `PrepareCreditReportDisputesResponse` / `PrepareDisputeStrategyStageResponse`. `assert_ordinary_dispute_allowed_for_account` was refactored to delegate to the same helper so the single-draft path keeps its `409`.
+
+**Reason:** `create_dispute_letter_draft` already raised `409` for locked accounts, but the bulk prepare paths created an account first and then aborted the _entire_ batch on the first locked tradeline — leaving orphaned READY_FOR_DISPUTE accounts and blocking preparation of the remaining valid tradelines. Skipping locked tradelines (and surfacing them for §605B handling) keeps ordinary §611 accuracy disputes flowing while preventing identity-theft accounts from being mixed into the accuracy path.
+
+**Guardrails:** Locked tradelines are never prepared as ordinary disputes; the response steers operators to the Identity Theft Case Center (§605B). No account is created for a locked tradeline. Behavior is advisory-surfacing only — it does not confirm or auto-label identity theft.
+
+**Alternatives considered:** Keeping the batch-wide `409` (rejected — one locked account should not block unrelated disputes); silently dropping locked tradelines (rejected — operators need to see why); checking the lock only after account creation (rejected — leaves orphaned accounts).
+
+**Technical debt:** The lock check runs per tradeline (one `list_account_reviews` read each) rather than batching a single lookup for the whole prepare call.
+
+**Follow-up work:** Batch the lock lookup; capability-matrix 5.16 sign-off (checklist slice 6).
+
 ## Compliance intelligence — §605B submission-readiness audit (Phase 9)
 
 **Decision:** Add an operator-gated §605B submission-readiness audit. `POST /cases/{case_id}/identity-theft/605b-readiness-runs` assesses the packet (confirmed-theft account count, attestation recorded, per-bureau coverage, and outstanding evidence-checklist items), persists the outcome to a new `identity_theft_605b_readiness_runs` table (`is_ready`, `packet_readiness`, `confirmed_count`, `attestation_recorded`, plus a JSONB `payload` snapshot with `bureaus`, `missing_evidence`, and `blocking_reasons`), and returns it; `GET .../605b-readiness-runs/latest` returns the most recent run (`404` if none). The Case Center surfaces a "Run §605B submission-readiness audit" action with a ready/not-ready badge and blocking-reason list.
