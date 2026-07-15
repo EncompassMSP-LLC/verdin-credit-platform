@@ -32,6 +32,26 @@ class OperationsReportingResponse(BaseSchema):
     operations: OperationsReporting
 
 
+class ReinvestigationOutcomeAnalytics(BaseSchema):
+    """Per-org reinvestigation outcome trends over recorded dispute responses."""
+
+    total_responses: int
+    counts: dict[str, int]
+    deletion_rate: float
+    verification_rate: float
+    correction_rate: float
+    favorable_rate: float
+    no_response_rate: float
+    avg_days_to_response: float | None
+    median_days_to_response: float | None
+    measured_response_count: int
+
+
+class ReinvestigationOutcomeAnalyticsResponse(BaseSchema):
+    generated_at: datetime
+    analytics: ReinvestigationOutcomeAnalytics
+
+
 class BureauPerformanceItem(BaseSchema):
     bureau: str
     total_accounts: int

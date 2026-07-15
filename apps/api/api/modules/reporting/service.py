@@ -15,6 +15,10 @@ from api.core.permissions import has_permission
 from api.core.predictive_analytics import build_predictive_outcomes, get_predictive_analytics_status
 from api.core.revenue_analytics import build_revenue_analytics
 from api.core.stripe_billing import get_billing_status
+from api.modules.accounts.reinvestigation_analytics import (
+    ReinvestigationOutcomeRow,
+    compute_reinvestigation_outcome_analytics,
+)
 from api.modules.auth.models import User
 from api.modules.billing.repository import BillingRepository
 from api.modules.reporting.cross_org_benchmark_repository import CrossOrgBenchmarkRepository
@@ -55,6 +59,8 @@ from api.modules.reporting.schemas import (
     PredictiveOutcomeRefreshRunResponse,
     PredictiveOutcomes,
     PredictiveOutcomesReportingResponse,
+    ReinvestigationOutcomeAnalytics,
+    ReinvestigationOutcomeAnalyticsResponse,
     ReportingMvRefreshResultResponse,
     ReportingMvRefreshRunListParams,
     ReportingMvRefreshRunResponse,
@@ -156,6 +162,43 @@ class ReportingService:
             bureau_performance=BureauPerformanceReporting(
                 bureaus=[BureauPerformanceItem(**item) for item in raw["bureaus"]],
                 total_accounts=raw["total_accounts"],
+            ),
+        )
+
+    async def get_reinvestigation_outcomes(
+        self, user: User
+    ) -> ReinvestigationOutcomeAnalyticsResponse:
+        """Per-org reinvestigation outcome analytics over recorded responses.
+
+        Read-only aggregate (deletion / verification / correction / favorable
+        rates + time-to-response) scoped to the caller's organization — no
+        cross-tenant benchmarks and no live bureau contact.
+        """
+        self._require_read(user)
+        organization_id = self._require_organization(user)
+        raw = await self._reporting.get_reinvestigation_outcomes(organization_id)
+        result = compute_reinvestigation_outcome_analytics(
+            [
+                ReinvestigationOutcomeRow(
+                    outcome=row["outcome"],
+                    days_to_response=row["days_to_response"],
+                )
+                for row in raw
+            ]
+        )
+        return ReinvestigationOutcomeAnalyticsResponse(
+            generated_at=datetime.now(UTC),
+            analytics=ReinvestigationOutcomeAnalytics(
+                total_responses=result.total_responses,
+                counts=result.counts,
+                deletion_rate=result.deletion_rate,
+                verification_rate=result.verification_rate,
+                correction_rate=result.correction_rate,
+                favorable_rate=result.favorable_rate,
+                no_response_rate=result.no_response_rate,
+                avg_days_to_response=result.avg_days_to_response,
+                median_days_to_response=result.median_days_to_response,
+                measured_response_count=result.measured_response_count,
             ),
         )
 

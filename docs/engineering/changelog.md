@@ -13,6 +13,20 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — reinvestigation outcome analytics (Phase 11)
+
+**Decision:** Add a per-org reinvestigation outcome analytics read model. A pure `compute_reinvestigation_outcome_analytics(rows)` helper (in `accounts/reinvestigation_analytics.py`) rolls recorded `dispute_responses` into per-outcome counts, derived rates (deletion / verification / correction / favorable / no-response), and time-to-response stats (avg / median). `OperationsReportingRepository.get_reinvestigation_outcomes(org)` supplies the rows — a left join over `dispute_responses → dispute_letters` (for `sent_at`) and `→ accounts` (for `last_dispute_date`), computing elapsed days from the clock start to the response date. Exposed at `GET /reporting/reinvestigation-outcomes` with `@verdin/api-client` types and a "Reinvestigation outcomes" tab on the Reporting Center.
+
+**Reason:** The clock (slice 2–3) and readiness (5.17) surfaces are per-case. Operators need an org-level view of how disputes actually resolve — deletion vs. verification rates and how long bureaus take — to steer strategy. Keeping the math in a pure helper mirrors the existing reinvestigation helpers and keeps it unit-testable.
+
+**Guardrails:** Org-scoped only — no cross-tenant benchmarks (those stay deferred behind the enterprise `cross-org-benchmarks` gate). Read-only aggregate; no writes, no live bureau contact. Time-to-response ignores `no_response` rows (no meaningful elapsed time) and negative elapsed values (data-entry guard). `_require_read` (READ_ONLY) gates the endpoint.
+
+**Alternatives considered:** A materialized view like bureau/team reporting (deferred — recorded-response volume is low, a live aggregate is simpler and always fresh; can promote to an MV later if needed); computing rates in SQL (rejected — a pure Python helper is far easier to unit-test and reuse); measuring time-to-response from `recorded_at` only (rejected — the linked letter `sent_at` is the statutory clock start, with `last_dispute_date` as a fallback).
+
+**Technical debt:** No date-range filter yet (analytics cover all recorded responses for the org). Favorable = deleted + corrected; `updated` is treated as partial and excluded from the favorable rate.
+
+**Follow-up work:** Litigation-readiness evidence packet (slice 5); optional date-range / per-bureau slicing.
+
 ## Compliance intelligence — extended 45-day reinvestigation window (Phase 11)
 
 **Decision:** Model the FCRA §611(a)(1)(B) 45-day reinvestigation window. `compute_reinvestigation_clock(...)` gains an `extended` flag that swaps the base 30-day window for 45 days (and carries the flag onto the returned `ReinvestigationClock`). A new pure `document_extends_window(clock_start_date, document_dates)` helper flags the extension when a case/account document was uploaded strictly after the clock start and on or before the initial 30-day deadline. `AccountService._case_document_dates(...)` projects `(account_id, created_at)` per case via a new lightweight `DocumentRepository.list_case_document_dates(...)`, and both the clock and readiness endpoints pass `extended` through. `AccountReinvestigationClock` gains `extended: bool`; the clock summary gains `extended_windows`.
