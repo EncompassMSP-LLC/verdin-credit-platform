@@ -485,6 +485,47 @@ export async function getCaseReinvestigationClock(
   );
 }
 
+export type RedisputeAction =
+  'wait' | 'prepare_initial' | 'redispute' | 'escalate_cfpb' | 'escalate_attorney' | 'resolved';
+
+export type RedisputePriority = 'high' | 'medium' | 'low';
+
+export interface AccountRedisputeReadiness {
+  account_id: string;
+  creditor_name: string;
+  dispute_status: DisputeStatus;
+  clock_state: ReinvestigationClockState;
+  latest_outcome: DisputeResponseRecordOutcome | null;
+  dispute_round: number;
+  risk_score: number | null;
+  action: RedisputeAction;
+  priority: RedisputePriority;
+  reason: string;
+}
+
+export interface CaseRedisputeReadinessSummary {
+  wait: number;
+  prepare_initial: number;
+  redispute: number;
+  escalate_cfpb: number;
+  escalate_attorney: number;
+  resolved: number;
+  high_priority: number;
+}
+
+export interface CaseRedisputeReadiness {
+  case_id: string;
+  generated_at: string;
+  summary: CaseRedisputeReadinessSummary;
+  accounts: AccountRedisputeReadiness[];
+}
+
+export async function getCaseRedisputeReadiness(caseId: string): Promise<CaseRedisputeReadiness> {
+  return request<CaseRedisputeReadiness>(
+    apiPath(`/accounts/redispute-readiness${buildQuery({ case_id: caseId })}`),
+  );
+}
+
 export type LlmDisputeDraftAugmentStatusValue = 'completed' | 'failed';
 
 export interface LlmDisputeDraftAugment {

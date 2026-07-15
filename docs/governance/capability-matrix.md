@@ -584,7 +584,7 @@ Scope: [version-5.17-scope.md](version-5.17-scope.md) · Checklist: [version-5.1
 | ------------------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | -------------------------------------------------------------------------------------------- |
 | Dispute response intake + persistence | 5.17    | ✅      | ✅      | ✅       | ✅  | —   | ✅    | Disputes     | Auditable `dispute_responses` records (outcome/method/date/notes); staff-entered, no polling |
 | §611 reinvestigation clock            | 5.17    | ✅      | ✅      | ✅       | ✅  | —   | ✅    | Disputes     | Computed per-case clock (awaiting/due-soon/overdue/responded); read model, no polling        |
-| Re-dispute / escalation readiness     | 5.17    | Planned | —       | —        | —   | —   | —     | Disputes     | Advisory re-dispute / CFPB / attorney signals; never auto-files                              |
+| Re-dispute / escalation readiness     | 5.17    | ✅      | ✅      | ✅       | ✅  | —   | ✅    | Disputes     | Advisory re-dispute / CFPB / attorney signals; never auto-files                              |
 | Case reinvestigation dashboard        | 5.17    | Planned | —       | —        | —   | —   | —     | Disputes     | Per-case reinvestigation read model + surface                                                |
 | Live bureau response ingestion        | 5.18+   | Planned | —       | —        | —   | —   | —     | Compliance   | Deferred — live bureau API access + legal/compliance sign-off                                |
 
