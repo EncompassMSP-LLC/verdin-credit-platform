@@ -20,6 +20,9 @@ from api.modules.accounts.dispute_draft_augment_schemas import (
 )
 from api.modules.accounts.dispute_draft_augment_service import LlmDisputeDraftAugmentService
 from api.modules.accounts.dispute_letter_export import sanitize_content_disposition_filename
+from api.modules.accounts.litigation_packet_export import (
+    sanitize_content_disposition_filename as sanitize_litigation_packet_filename,
+)
 from api.modules.accounts.models import (
     AccountBureau,
     AccountStatus,
@@ -401,6 +404,27 @@ async def get_account_litigation_packet(
     service: AccountService = Depends(get_account_service),
 ) -> AccountLitigationPacket:
     return await service.get_account_litigation_packet(current_user, account_id)
+
+
+@router.get("/{account_id}/litigation-packet/export")
+async def export_account_litigation_packet(
+    account_id: uuid.UUID,
+    format: Literal["text"] = Query("text", alias="format"),
+    current_user: User = Depends(get_current_user),
+    service: AccountService = Depends(get_account_service),
+) -> Response:
+    """Operator-gated litigation-packet export (text) for attorney handoff."""
+    content, file_name, media_type = await service.export_litigation_packet(
+        current_user,
+        account_id,
+        export_format=format,
+    )
+    safe_name = sanitize_litigation_packet_filename(file_name)
+    return Response(
+        content=content,
+        media_type=media_type,
+        headers={"Content-Disposition": f'attachment; filename="{safe_name}"'},
+    )
 
 
 @router.post("/{account_id}/dispute-investigation-overdue", response_model=AccountResponse)

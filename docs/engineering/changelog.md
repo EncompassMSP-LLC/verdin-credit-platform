@@ -13,6 +13,20 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — operator-gated litigation evidence export (Phase 12)
+
+**Decision:** Add `GET /accounts/{account_id}/litigation-packet/export?format=text`, returning the assembled litigation packet as a downloadable `text/plain` attachment. A new pure formatter `litigation_packet_export.py` (`build_litigation_packet_text(packet)`) renders the packet; `AccountService.export_litigation_packet` calls the existing `get_account_litigation_packet` (reusing its `case_manager`+ write-permission gate) then formats it. The web packet panel gains a "Download evidence (.txt)" button that fetches the blob and triggers a browser download, reusing the case dispute-export download pattern.
+
+**Reason:** The 5.18/5.19 packet was screen-only. Attorneys work from documents; operators need a portable evidence artifact to forward for review. Text keeps the slice small and the artifact diff-friendly/greppable.
+
+**Guardrails:** The export is a **manual** attorney handoff — the platform assembles and hands the operator a file; it never transmits it to a court, bureau, or attorney, and never files or drafts pleadings. Read-only, operator-gated (inherits the packet's write-permission check — read-only roles get `403`). The disclaimer is reproduced at the top of every export. `format` accepts only `text` (else `422`).
+
+**Alternatives considered:** PDF export (deferred — reportlab is already a dependency for dispute letters, but text ships the capability now and a PDF renderer can layer on later); a server-side "send to attorney" transmission (explicitly rejected — transmission stays a human action, consistent with the never-auto-file posture).
+
+**Technical debt:** Text-only for now (no PDF/branding). The formatter reflects only fields already on `AccountLitigationPacket`; richer narrative (e.g. per-round timeline prose) is future work.
+
+**Follow-up work:** Capability matrix 5.19 sign-off + release notes + `v5.19.0` tag (slice 6).
+
 ## Compliance intelligence — litigation packet cross-bureau evidence (Phase 12)
 
 **Decision:** Fold cross-bureau discrepancy evidence into the litigation-readiness packet. A new pure module `cross_bureau.py` (`detect_cross_bureau_discrepancies(target, siblings)`) compares a tradeline to the same creditor's copies at _other_ bureaus in the case, returning typed `CrossBureauDiscrepancy` findings (`outcome_conflict`, `dispute_status_conflict`, `account_status_conflict`, `payment_status_conflict`, `balance_conflict`). `AccountService._build_cross_bureau_evidence` loads the case tradelines + recorded responses, matches siblings on normalized creditor name (plus masked account number when both present) and a different bureau, reduces each to its latest outcome/status/balance, and runs the detector. The packet gains a `cross_bureau` block, and `LitigationReadinessInputs` gains `cross_bureau_conflicts` / `cross_bureau_outcome_conflict` so `build_litigation_readiness` scores the signal (+25 for an outcome conflict, +10 for lesser divergences).

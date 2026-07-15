@@ -632,6 +632,38 @@ export async function getAccountLitigationPacket(
   return request<AccountLitigationPacket>(apiPath(`/accounts/${accountId}/litigation-packet`));
 }
 
+export async function downloadAccountLitigationPacket(
+  accountId: string,
+): Promise<{ blob: Blob; filename: string }> {
+  const url = `${getApiBaseUrl()}${apiPath(
+    `/accounts/${accountId}/litigation-packet/export?format=text`,
+  )}`;
+  const headers: Record<string, string> = {};
+  const token = getAccessToken();
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const response = await fetch(url, { headers });
+  if (!response.ok) {
+    const error = (await response.json().catch(() => ({
+      detail: 'Request failed',
+    }))) as { detail?: string; code?: string };
+    throw new ApiClientError(
+      error.detail || `HTTP ${response.status}`,
+      response.status,
+      error.code,
+    );
+  }
+
+  const filename = parseContentDispositionFilename(
+    response.headers.get('content-disposition'),
+    `litigation-packet-${accountId.slice(0, 8)}.txt`,
+  );
+  const blob = await response.blob();
+  return { blob, filename };
+}
+
 export type LlmDisputeDraftAugmentStatusValue = 'completed' | 'failed';
 
 export interface LlmDisputeDraftAugment {

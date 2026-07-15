@@ -13,7 +13,7 @@ Scope: [`docs/governance/version-5.19-scope.md`](../governance/version-5.19-scop
 - [x] Reinvestigation outcome analytics support date-range + per-bureau slicing
 - [x] §611 clock start / round counts split by recipient (bureau vs furnisher)
 - [x] Litigation-readiness assessment folds in cross-bureau discrepancy evidence
-- [ ] Operator-gated litigation evidence export (text) for attorney handoff (never auto-transmits)
+- [x] Operator-gated litigation evidence export (text) for attorney handoff (never auto-transmits)
 - [ ] Capability matrix + API reference updated
 - [ ] Deferred items explicitly documented
 - [ ] `docs/release-notes/v5.19.0.md` + tag `v5.19.0`
@@ -28,7 +28,7 @@ Scope: [`docs/governance/version-5.19-scope.md`](../governance/version-5.19-scop
 | 2     | Reinvestigation analytics date-range + bureau slicing | Reporting  | ✅     |
 | 3     | Per-recipient reinvestigation clock splits            | Disputes   | ✅     |
 | 4     | Litigation packet cross-bureau evidence               | Disputes   | ✅     |
-| 5     | Operator-gated litigation evidence export             | Disputes   | ⬜     |
+| 5     | Operator-gated litigation evidence export             | Disputes   | ✅     |
 | 6     | Capability matrix 5.19 sign-off                       | Governance | ⬜     |
 
 Slice 2 adds optional `start`/`end`/`bureau` filters to the 5.18 outcome analytics (addresses the documented no-date-range tech debt). Slice 3 splits the clock by recipient (addresses the `dispute_round_count` recipient-agnostic tech debt). Slice 4 enriches the litigation assessment with cross-bureau discrepancy indicators. Slice 5 adds a downloadable evidence document, reusing the dispute-letter export pattern.

@@ -717,6 +717,7 @@ export {
   getCaseRedisputeReadiness,
   getCaseReinvestigationSummary,
   getAccountLitigationPacket,
+  downloadAccountLitigationPacket,
   escalateAccountOverdueInvestigation,
   listAccounts,
   listCaseAccounts,
