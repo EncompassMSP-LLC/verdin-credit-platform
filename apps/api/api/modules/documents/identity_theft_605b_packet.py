@@ -28,6 +28,62 @@ _SAFE_NAME = re.compile(r"[^A-Za-z0-9._-]+")
 
 LetterFormat = Literal["text", "pdf"]
 
+# Staff-mediated evidence bundling gates. Exhibits are operator-selected case
+# documents; nothing is auto-attached and nothing is sent to a bureau.
+MAX_EXHIBIT_BYTES = 15 * 1024 * 1024
+MAX_TOTAL_EXHIBIT_BYTES = 40 * 1024 * 1024
+ALLOWED_EXHIBIT_MIME_TYPES = frozenset(
+    {
+        "application/pdf",
+        "image/png",
+        "image/jpeg",
+        "image/jpg",
+        "image/gif",
+        "image/tiff",
+        "image/webp",
+        "text/plain",
+    }
+)
+
+ExhibitStatus = Literal[
+    "attached",
+    "skipped_type",
+    "skipped_too_large",
+    "skipped_total_limit",
+    "missing",
+]
+
+
+@dataclass(frozen=True, slots=True)
+class PacketExhibit:
+    document_id: uuid.UUID
+    title: str
+    file_name: str
+    mime_type: str | None
+    size_bytes: int | None
+    status: ExhibitStatus
+    path: str | None = None
+    skip_reason: str | None = None
+
+
+def _normalize_mime(mime_type: str | None) -> str | None:
+    if not mime_type:
+        return None
+    return mime_type.split(";")[0].strip().lower() or None
+
+
+def exhibit_type_skip_reason(mime_type: str | None) -> str | None:
+    """Return a skip reason when a document MIME type is not bundle-eligible."""
+    normalized = _normalize_mime(mime_type)
+    if normalized is None or normalized not in ALLOWED_EXHIBIT_MIME_TYPES:
+        return f"unsupported content type ({mime_type or 'unknown'})"
+    return None
+
+
+def exhibit_archive_path(index: int, file_name: str) -> str:
+    slug = _slugify(file_name)
+    return f"exhibits/{index:02d}-{slug}"
+
 
 @dataclass(frozen=True, slots=True)
 class BlockTradeline:
@@ -230,6 +286,25 @@ def build_605b_block_letter_pdf(context: Fcra605bBlockLetterContext) -> bytes:
     return buffer.getvalue()
 
 
+def _format_exhibit_lines(exhibits: list[PacketExhibit]) -> tuple[str, str]:
+    attached = [item for item in exhibits if item.status == "attached"]
+    skipped = [item for item in exhibits if item.status != "attached"]
+    if attached:
+        attached_lines = "\n".join(
+            f"- `{item.path}` — {item.title} ({item.file_name})" for item in attached
+        )
+    else:
+        attached_lines = "- (no evidence exhibits selected)"
+    if skipped:
+        skipped_lines = "\n".join(
+            f"- {item.title} ({item.file_name}) — {item.skip_reason or item.status}"
+            for item in skipped
+        )
+    else:
+        skipped_lines = "- (none)"
+    return attached_lines, skipped_lines
+
+
 def build_605b_packet_manifest(
     *,
     case_id: uuid.UUID,
@@ -239,6 +314,7 @@ def build_605b_packet_manifest(
     packet_readiness: int | None,
     missing_evidence: list[str],
     evidence_checklist: list[dict[str, Any]],
+    exhibits: list[PacketExhibit] | None = None,
 ) -> str:
     readiness = f"{packet_readiness}%" if packet_readiness is not None else "not assessed"
     bureaus = ", ".join(bureau_labels) if bureau_labels else "(none)"
@@ -253,6 +329,15 @@ def build_605b_packet_manifest(
         checklist_lines.append(f"- [{status_value}] {label} (`{item_id}`)")
     if not checklist_lines:
         checklist_lines.append("- (no incident checklist)")
+    exhibits = exhibits or []
+    attached_exhibits = [item for item in exhibits if item.status == "attached"]
+    attached_lines, skipped_lines = _format_exhibit_lines(exhibits)
+    contents_lines = [
+        "- `README.md` — this manifest",
+        "- `letters/` — per-bureau §605B block request letters",
+    ]
+    if attached_exhibits:
+        contents_lines.append("- `exhibits/` — staff-selected supporting evidence documents")
     return (
         f"# FCRA §605B identity-theft block packet\n\n"
         f"- Case ID: `{case_id}`\n"
@@ -260,19 +345,25 @@ def build_605b_packet_manifest(
         f"- Confirmed fraudulent tradelines: {confirmed_count}\n"
         f"- Bureaus in this packet: {bureaus}\n"
         f"- Packet readiness: {readiness}\n"
+        f"- Evidence exhibits attached: {len(attached_exhibits)}\n"
         f"- Legal citation: {FCRA_605B_CITATION}\n\n"
         "## Operator notice\n\n"
         "This ZIP is a **staff-mediated preparation packet**. It does **not** submit "
         "anything to the credit bureaus. Live unsupervised §605B filing remains deferred.\n\n"
         "Ordinary FCRA §611 dispute letters must not be used for consumer-confirmed "
         "identity-theft claims.\n\n"
+        "Evidence exhibits are operator-selected case documents. Nothing is auto-attached; "
+        "review each exhibit before mailing.\n\n"
         "## Missing evidence (required items)\n\n"
         f"{missing_lines}\n\n"
         "## Evidence checklist\n\n"
         f"{chr(10).join(checklist_lines)}\n\n"
+        "## Evidence exhibits (attached)\n\n"
+        f"{attached_lines}\n\n"
+        "## Evidence exhibits (skipped)\n\n"
+        f"{skipped_lines}\n\n"
         "## Packet contents\n\n"
-        "- `README.md` — this manifest\n"
-        "- `letters/` — per-bureau §605B block request letters\n"
+        f"{chr(10).join(contents_lines)}\n"
     )
 
 
@@ -280,11 +371,14 @@ def build_605b_packet_zip(
     *,
     manifest_markdown: str,
     letter_files: list[tuple[str, bytes]],
+    exhibit_files: list[tuple[str, bytes]] | None = None,
 ) -> bytes:
     buffer = BytesIO()
     with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as archive:
         archive.writestr("README.md", manifest_markdown.encode("utf-8"))
         for path, content in letter_files:
+            archive.writestr(path, content)
+        for path, content in exhibit_files or []:
             archive.writestr(path, content)
     return buffer.getvalue()
 

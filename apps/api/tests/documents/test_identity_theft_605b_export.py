@@ -41,6 +41,50 @@ def _create_case(
     return response.json()["id"]
 
 
+def _upload_document(
+    api_client: TestClient,
+    headers: dict[str, str],
+    *,
+    case_id: str,
+    title: str,
+    file_name: str,
+    body: bytes,
+    content_type: str,
+) -> str:
+    response = api_client.post(
+        "/api/v1/documents",
+        headers=headers,
+        data={"title": title, "case_id": case_id},
+        files={"file": (file_name, body, content_type)},
+    )
+    assert response.status_code == 201, response.text
+    return response.json()["id"]
+
+
+def _confirm_identity_theft(
+    api_client: TestClient,
+    headers: dict[str, str],
+    *,
+    case_id: str,
+) -> None:
+    confirm = api_client.post(
+        f"/api/v1/cases/{case_id}/identity-theft/account-reviews",
+        headers=headers,
+        json={
+            "confirmation": "identity_theft",
+            "attestation_accepted": True,
+            "bureau": "experian",
+            "tradeline_index": 0,
+            "match_key": f"fakebank|{uuid.uuid4().hex[:6]}",
+            "creditor_name": "Fake Bank",
+            "account_number_masked": "****9999",
+            "detection_source": "TRADELINE_HEURISTIC",
+            "confidence": 0.9,
+        },
+    )
+    assert confirm.status_code == 201, confirm.text
+
+
 def test_605b_packet_requires_confirmed_identity_theft(
     api_client: TestClient,
     manager_headers: dict[str, str],
@@ -110,3 +154,52 @@ def test_605b_packet_export_after_confirmation(
         assert "1681c-2" in letter or "605B" in letter
         readme = archive.read("README.md").decode("utf-8")
         assert "does **not** submit" in readme or "staff-mediated" in readme.lower()
+
+
+def test_605b_packet_bundles_selected_evidence_exhibits(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+) -> None:
+    email = f"605b-exhibit-{uuid.uuid4().hex[:8]}@test.example"
+    display_name = f"605B Exhibit {uuid.uuid4().hex[:6]}"
+    client_id = _create_client(api_client, manager_headers, email=email)
+    case_id = _create_case(
+        api_client,
+        manager_headers,
+        client_id=client_id,
+        client_name=display_name,
+    )
+    _confirm_identity_theft(api_client, manager_headers, case_id=case_id)
+
+    pdf_document_id = _upload_document(
+        api_client,
+        manager_headers,
+        case_id=case_id,
+        title="Police Report",
+        file_name="police-report.pdf",
+        body=b"%PDF-1.4 police report evidence",
+        content_type="application/pdf",
+    )
+    # A non-existent document id should be reported as missing, not fail the export.
+    missing_document_id = str(uuid.uuid4())
+
+    response = api_client.get(
+        f"/api/v1/cases/{case_id}/identity-theft/605b-packet.zip",
+        headers=manager_headers,
+        params={
+            "letter_format": "text",
+            "document_id": [pdf_document_id, missing_document_id],
+        },
+    )
+    assert response.status_code == 200, response.text
+
+    with zipfile.ZipFile(io.BytesIO(response.content)) as archive:
+        names = archive.namelist()
+        exhibit_paths = [name for name in names if name.startswith("exhibits/")]
+        assert len(exhibit_paths) == 1
+        assert exhibit_paths[0].endswith(".pdf")
+        assert archive.read(exhibit_paths[0]) == b"%PDF-1.4 police report evidence"
+        readme = archive.read("README.md").decode("utf-8")
+        assert "Evidence exhibits attached: 1" in readme
+        assert "Police Report" in readme
+        assert "document not found for this case" in readme

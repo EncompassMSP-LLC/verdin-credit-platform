@@ -269,6 +269,10 @@ async def update_identity_theft_incident(
 async def export_case_identity_theft_605b_packet(
     case_id: uuid.UUID,
     letter_format: Literal["text", "pdf"] = Query(default="pdf"),
+    document_id: list[uuid.UUID] = Query(
+        default=[],
+        description="Optional staff-selected case document IDs to bundle as evidence exhibits",
+    ),
     current_user: User = Depends(get_current_user),
     service: DocumentService = Depends(get_document_service),
 ) -> Response:
@@ -276,6 +280,7 @@ async def export_case_identity_theft_605b_packet(
         current_user,
         case_id,
         letter_format=letter_format,
+        document_ids=document_id,
     )
     safe_name = sanitize_content_disposition_filename(file_name)
     return Response(
