@@ -371,7 +371,19 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Technical debt:** Stage thresholds are heuristic; CFPB/attorney gates are score-based only.
 
-**Follow-up work:** Wire stage actions into dispute letter prep.
+**Follow-up work:** OCR line refs; counsel transmit (deferred).
+
+## Compliance intelligence — per-account strategy stage prepare
+
+**Decision:** Wire recommended CRA/furnisher stage rows to `POST /cases/{case_id}/dispute-strategy/prepare` with `account_keys` so investigators can prepare a single account’s letter from the plan card. Bulk CRA/furnisher buttons remain for all recommended accounts.
+
+**Reason:** Changelog follow-up from the dispute strategy generator; stage actions should land in dispute letter prep without requiring a separate screen.
+
+**Alternatives considered:** Only bulk prepare; auto-create letters without staff click.
+
+**Technical debt:** CFPB/attorney stages stay advisory (checklist/packet flows only). Per-account prepare disabled while replaying a stored run.
+
+**Follow-up work:** OCR line refs; counsel transmit (deferred).
 
 ## Compliance intelligence — dispute strategy run audit
 
@@ -383,7 +395,7 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Technical debt:** Checklist/prepare paths regenerate strategy without persisting additional runs.
 
-**Follow-up work:** Wire stage actions into dispute letter prep.
+**Follow-up work:** OCR line refs; counsel transmit (deferred).
 
 ## Compliance intelligence — dispute strategy run UI audit
 
@@ -407,7 +419,7 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Technical debt:** UI list shows summaries only until Replay fetches full payload.
 
-**Follow-up work:** Wire stage actions into dispute letter prep.
+**Follow-up work:** OCR line refs; counsel transmit (deferred).
 
 ## Compliance intelligence — dispute strategy run replay
 
@@ -419,7 +431,7 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Technical debt:** Prepare/checklist actions still use live generation while replaying.
 
-**Follow-up work:** Wire stage actions into dispute letter prep.
+**Follow-up work:** OCR line refs; counsel transmit (deferred).
 
 ## Sprint 4.3.0 — Operational Core
 

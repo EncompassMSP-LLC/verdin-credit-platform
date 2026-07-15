@@ -220,16 +220,54 @@ function ChecklistAccount({
   );
 }
 
-function StageRow({ stage }: { stage: DisputeStrategyStage }) {
+function StageRow({
+  stage,
+  accountKey,
+  prepareDisabled,
+  preparePending,
+  onPrepare,
+}: {
+  stage: DisputeStrategyStage;
+  accountKey: string;
+  prepareDisabled?: boolean;
+  preparePending?: boolean;
+  onPrepare?: (
+    stageKind: Extract<DisputeStrategyStageKind, 'cra_dispute' | 'furnisher_dispute'>,
+    accountKey: string,
+  ) => void;
+}) {
+  const preparable = stage.stage_kind === 'cra_dispute' || stage.stage_kind === 'furnisher_dispute';
+
   return (
     <li className="rounded-md border border-gray-100 bg-gray-50 px-3 py-2">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <p className="text-sm font-medium text-gray-900">
           Stage {stage.stage_order}: {stage.title}
         </p>
-        <Badge variant={stage.recommended ? 'success' : 'default'}>
-          {stage.recommended ? 'Recommended' : 'Optional'}
-        </Badge>
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge variant={stage.recommended ? 'success' : 'default'}>
+            {stage.recommended ? 'Recommended' : 'Optional'}
+          </Badge>
+          {preparable && onPrepare ? (
+            <Button
+              size="sm"
+              variant="secondary"
+              disabled={prepareDisabled || !stage.recommended}
+              loading={preparePending}
+              onClick={() =>
+                onPrepare(
+                  stage.stage_kind as Extract<
+                    DisputeStrategyStageKind,
+                    'cra_dispute' | 'furnisher_dispute'
+                  >,
+                  accountKey,
+                )
+              }
+            >
+              Prepare letter
+            </Button>
+          ) : null}
+        </div>
       </div>
       <p className="mt-1 text-sm text-gray-700">{stage.objective}</p>
       <p className="mt-1 text-xs text-gray-500">{stage.rationale}</p>
@@ -240,7 +278,20 @@ function StageRow({ stage }: { stage: DisputeStrategyStage }) {
   );
 }
 
-function AccountStrategyCard({ strategy }: { strategy: AccountDisputeStrategy }) {
+function AccountStrategyCard({
+  strategy,
+  prepareDisabled,
+  pendingPrepareKey,
+  onPrepareStage,
+}: {
+  strategy: AccountDisputeStrategy;
+  prepareDisabled?: boolean;
+  pendingPrepareKey: string | null;
+  onPrepareStage: (
+    stageKind: Extract<DisputeStrategyStageKind, 'cra_dispute' | 'furnisher_dispute'>,
+    accountKey: string,
+  ) => void;
+}) {
   return (
     <li className="rounded-md border border-gray-200 px-4 py-3">
       <div className="flex flex-wrap items-start justify-between gap-2">
@@ -268,7 +319,14 @@ function AccountStrategyCard({ strategy }: { strategy: AccountDisputeStrategy })
       <p className="mt-2 text-xs text-gray-500">{strategy.summary}</p>
       <ul className="mt-3 space-y-2">
         {strategy.stages.map((stage) => (
-          <StageRow key={stage.stage_kind} stage={stage} />
+          <StageRow
+            key={stage.stage_kind}
+            stage={stage}
+            accountKey={strategy.account_key}
+            prepareDisabled={prepareDisabled}
+            preparePending={pendingPrepareKey === `${stage.stage_kind}:${strategy.account_key}`}
+            onPrepare={onPrepareStage}
+          />
         ))}
       </ul>
     </li>
@@ -346,9 +404,15 @@ export function CaseDisputeStrategyPanel({
   });
 
   const prepareMutation = useMutation({
-    mutationFn: (
-      stage_kind: Extract<DisputeStrategyStageKind, 'cra_dispute' | 'furnisher_dispute'>,
-    ) => prepareCaseDisputeStrategyStage(caseId, { stage_kind, recommended_only: true }),
+    mutationFn: (input: {
+      stage_kind: Extract<DisputeStrategyStageKind, 'cra_dispute' | 'furnisher_dispute'>;
+      account_keys?: string[];
+    }) =>
+      prepareCaseDisputeStrategyStage(caseId, {
+        stage_kind: input.stage_kind,
+        account_keys: input.account_keys,
+        recommended_only: input.account_keys ? false : true,
+      }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['case-accounts', caseId] });
       void queryClient.invalidateQueries({
@@ -356,6 +420,11 @@ export function CaseDisputeStrategyPanel({
       });
     },
   });
+
+  const pendingPrepareKey =
+    prepareMutation.isPending && prepareMutation.variables
+      ? `${prepareMutation.variables.stage_kind}:${prepareMutation.variables.account_keys?.[0] ?? '*'}`
+      : null;
 
   const overrideMutation = useMutation({
     mutationFn: (input: {
@@ -445,8 +514,12 @@ export function CaseDisputeStrategyPanel({
             <div className="flex flex-wrap gap-2">
               <Button
                 size="sm"
-                loading={prepareMutation.isPending && prepareMutation.variables === 'cra_dispute'}
-                onClick={() => prepareMutation.mutate('cra_dispute')}
+                loading={
+                  prepareMutation.isPending &&
+                  prepareMutation.variables?.stage_kind === 'cra_dispute' &&
+                  !prepareMutation.variables.account_keys
+                }
+                onClick={() => prepareMutation.mutate({ stage_kind: 'cra_dispute' })}
               >
                 Prepare CRA stage letters
               </Button>
@@ -454,9 +527,11 @@ export function CaseDisputeStrategyPanel({
                 size="sm"
                 variant="secondary"
                 loading={
-                  prepareMutation.isPending && prepareMutation.variables === 'furnisher_dispute'
+                  prepareMutation.isPending &&
+                  prepareMutation.variables?.stage_kind === 'furnisher_dispute' &&
+                  !prepareMutation.variables.account_keys
                 }
-                onClick={() => prepareMutation.mutate('furnisher_dispute')}
+                onClick={() => prepareMutation.mutate({ stage_kind: 'furnisher_dispute' })}
               >
                 Prepare furnisher stage letters
               </Button>
@@ -831,7 +906,18 @@ export function CaseDisputeStrategyPanel({
             ) : (
               <ul className="space-y-3">
                 {displayedStrategy.strategies.map((strategy) => (
-                  <AccountStrategyCard key={strategy.account_key} strategy={strategy} />
+                  <AccountStrategyCard
+                    key={strategy.account_key}
+                    strategy={strategy}
+                    prepareDisabled={Boolean(replayedRun)}
+                    pendingPrepareKey={pendingPrepareKey}
+                    onPrepareStage={(stageKind, accountKey) =>
+                      prepareMutation.mutate({
+                        stage_kind: stageKind,
+                        account_keys: [accountKey],
+                      })
+                    }
+                  />
                 ))}
               </ul>
             )}
