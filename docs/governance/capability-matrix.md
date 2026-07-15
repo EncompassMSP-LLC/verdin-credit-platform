@@ -23,7 +23,7 @@
 **Version 5.14 sign-off:** [version-5.14-scope.md](version-5.14-scope.md) · Release notes: [v5.14.0.md](../release-notes/v5.14.0.md)
 **Version 5.15 sign-off:** [version-5.15-scope.md](version-5.15-scope.md) · Release notes: [v5.15.0.md](../release-notes/v5.15.0.md)
 **Version 5.16 sign-off:** [version-5.16-scope.md](version-5.16-scope.md) · Release notes: [v5.16.0.md](../release-notes/v5.16.0.md)
-**Version 5.17 scope (in progress):** [version-5.17-scope.md](version-5.17-scope.md) · Checklist: [version-5.17-completion-checklist.md](../development/version-5.17-completion-checklist.md)
+**Version 5.17 sign-off:** [version-5.17-scope.md](version-5.17-scope.md) · Release notes: [v5.17.0.md](../release-notes/v5.17.0.md)
 
 ## Status legend
 
@@ -576,7 +576,7 @@ Scope: [version-5.16-scope.md](version-5.16-scope.md) · Checklist: [version-5.1
 
 ---
 
-## Version 5.17 — Dispute Response & Reinvestigation Tracking (in progress — 🚧)
+## Version 5.17 — Dispute Response & Reinvestigation Tracking (shipped — ✅)
 
 Scope: [version-5.17-scope.md](version-5.17-scope.md) · Checklist: [version-5.17-completion-checklist.md](../development/version-5.17-completion-checklist.md)
 
