@@ -41,6 +41,7 @@ from api.modules.accounts.dispute_mail_attachments import (
     resolve_mail_packet_attachments,
 )
 from api.modules.accounts.dispute_response_models import (
+    DisputeResponse,
     DisputeResponseMethod,
     DisputeResponseOutcome,
 )
@@ -52,6 +53,10 @@ from api.modules.accounts.intelligence_context import (
     compare_case_reports,
     cross_bureau_summary_payload,
     discrepancy_context_for_account,
+)
+from api.modules.accounts.litigation_packet import (
+    LitigationReadinessInputs,
+    build_litigation_readiness,
 )
 from api.modules.accounts.models import Account, DisputeStatus, InvestigationStatus
 from api.modules.accounts.permissions import ACCOUNT_DELETE_ROLE, ACCOUNT_WRITE_ROLE
@@ -67,6 +72,7 @@ from api.modules.accounts.schemas import (
     AccountDisputeResponseReceivedRequest,
     AccountIntelligenceSummary,
     AccountListParams,
+    AccountLitigationPacket,
     AccountRedisputeReadiness,
     AccountReinvestigationClock,
     AccountResponse,
@@ -81,6 +87,9 @@ from api.modules.accounts.schemas import (
     DisputeReasonSuggestionResponse,
     DisputeResponseRecordOutcome,
     DisputeResponseRecordResponse,
+    LitigationPacketLetter,
+    LitigationPacketResponse,
+    LitigationReadinessAssessment,
     MissingEvidenceResponse,
     NextActionItem,
     RecordDisputeResponseRequest,
@@ -1742,6 +1751,139 @@ class AccountService:
             next_deadline_creditor=next_entry.creditor_name if next_entry else None,
             most_overdue_days=most_overdue_days,
             action_items=action_items,
+        )
+
+    async def get_account_litigation_packet(
+        self,
+        user: User,
+        account_id: uuid.UUID,
+    ) -> AccountLitigationPacket:
+        """Assemble an operator-gated litigation-readiness evidence packet.
+
+        Bundles the tradeline's reinvestigation evidence trail (sent letters,
+        recorded responses, §611 clock state) with an advisory willful-noncompliance
+        grade for a human attorney to review. Read-only — never drafts pleadings,
+        never files, and never transmits to a court, bureau, or attorney.
+        """
+        if not has_permission(user.role, ACCOUNT_WRITE_ROLE):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Insufficient permissions to assemble a litigation-readiness packet",
+            )
+        account = await self._get_account_for_user(account_id, user)
+        organization_id = account.organization_id
+
+        letters: list[DisputeLetter] = []
+        responses: list[DisputeResponse] = []
+        if self._session is not None:
+            letters = await DisputeLetterRepository(self._session).list_for_account(
+                organization_id=organization_id,
+                account_id=account_id,
+            )
+            responses = await DisputeResponseRepository(self._session).list_for_account(
+                organization_id=organization_id,
+                account_id=account_id,
+            )
+
+        sent_letters = [
+            letter
+            for letter in letters
+            if letter.status == DisputeLetterStatus.SENT and letter.sent_at is not None
+        ]
+        sent_count = len(sent_letters)
+        latest_sent_date = max(
+            (letter.sent_at.date() for letter in sent_letters if letter.sent_at is not None),
+            default=None,
+        )
+        clock_start_date = latest_sent_date or account.last_dispute_date
+
+        doc_dates_by_account, case_level_doc_dates = await self._case_document_dates(
+            organization_id=organization_id, case_id=account.case_id
+        )
+        extended = document_extends_window(
+            clock_start_date=clock_start_date,
+            document_dates=doc_dates_by_account.get(account.id, []) + case_level_doc_dates,
+        )
+        has_real_response = account.response_received or any(
+            getattr(response, "outcome", None) != DisputeResponseOutcome.NO_RESPONSE
+            for response in responses
+        )
+        clock = compute_reinvestigation_clock(
+            last_dispute_date=clock_start_date,
+            today=date.today(),
+            response_recorded=has_real_response,
+            extended=extended,
+        )
+
+        latest_outcome = self._latest_response_outcome(account, cast("list[object]", responses))
+        effective_round = max(sent_count, account.dispute_round)
+        recommendation = compute_redispute_readiness(
+            clock_state=clock.state,
+            latest_outcome=latest_outcome,
+            dispute_round=effective_round,
+            risk_score=account.risk_score,
+        )
+        readiness = build_litigation_readiness(
+            LitigationReadinessInputs(
+                clock_state=clock.state,
+                latest_outcome=latest_outcome,
+                dispute_round=effective_round,
+                risk_score=account.risk_score,
+                sent_letter_count=sent_count,
+                response_count=len(responses),
+            )
+        )
+
+        return AccountLitigationPacket(
+            account_id=account.id,
+            case_id=account.case_id,
+            creditor_name=account.creditor_name,
+            bureau=account.bureau,
+            dispute_status=account.dispute_status,
+            dispute_round=effective_round,
+            risk_score=account.risk_score,
+            generated_at=datetime.now(UTC),
+            clock_state=clock.state,
+            clock_deadline=clock.deadline,
+            clock_extended=clock.extended,
+            latest_outcome=latest_outcome,
+            recommended_action=recommendation.action,
+            assessment=LitigationReadinessAssessment(
+                eligible=readiness.eligible,
+                strength=readiness.strength,
+                score=readiness.score,
+                indicators=readiness.indicators,
+                summary=readiness.summary,
+            ),
+            letters=[
+                LitigationPacketLetter(
+                    id=letter.id,
+                    recipient_type=getattr(letter.recipient_type, "value", letter.recipient_type),
+                    status=letter.status,
+                    subject=letter.subject,
+                    disputed_items=list(letter.disputed_items or []),
+                    generated_at=letter.generated_at,
+                    sent_at=letter.sent_at,
+                )
+                for letter in letters
+            ],
+            responses=[
+                LitigationPacketResponse(
+                    id=response.id,
+                    outcome=response.outcome.value,
+                    response_method=response.response_method.value,
+                    response_date=response.response_date,
+                    recorded_at=response.recorded_at,
+                    notes=response.notes,
+                )
+                for response in responses
+            ],
+            disclaimer=(
+                "Advisory evidence bundle for attorney review only. This platform does not "
+                "provide legal advice, draft pleadings, file suit, or transmit anything to a "
+                "court, bureau, or attorney. A licensed attorney must independently review the "
+                "evidence and decide whether to litigate."
+            ),
         )
 
     async def _sent_letter_rounds_by_account(

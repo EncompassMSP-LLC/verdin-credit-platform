@@ -553,6 +553,61 @@ export async function getCaseReinvestigationSummary(
   );
 }
 
+export type LitigationStrength = 'strong' | 'moderate' | 'weak' | 'not_ready';
+
+export interface LitigationPacketLetter {
+  id: string;
+  recipient_type: string;
+  status: DisputeLetterStatus;
+  subject: string;
+  disputed_items: string[];
+  generated_at: string;
+  sent_at: string | null;
+}
+
+export interface LitigationPacketResponse {
+  id: string;
+  outcome: DisputeResponseRecordOutcome;
+  response_method: string;
+  response_date: string | null;
+  recorded_at: string;
+  notes: string | null;
+}
+
+export interface LitigationReadinessAssessment {
+  eligible: boolean;
+  strength: LitigationStrength;
+  score: number;
+  indicators: string[];
+  summary: string;
+}
+
+export interface AccountLitigationPacket {
+  account_id: string;
+  case_id: string;
+  creditor_name: string;
+  bureau: AccountBureau;
+  dispute_status: DisputeStatus;
+  dispute_round: number;
+  risk_score: number | null;
+  generated_at: string;
+  clock_state: ReinvestigationClockState;
+  clock_deadline: string | null;
+  clock_extended: boolean;
+  latest_outcome: DisputeResponseRecordOutcome | null;
+  recommended_action: RedisputeAction;
+  assessment: LitigationReadinessAssessment;
+  letters: LitigationPacketLetter[];
+  responses: LitigationPacketResponse[];
+  disclaimer: string;
+}
+
+export async function getAccountLitigationPacket(
+  accountId: string,
+): Promise<AccountLitigationPacket> {
+  return request<AccountLitigationPacket>(apiPath(`/accounts/${accountId}/litigation-packet`));
+}
+
 export type LlmDisputeDraftAugmentStatusValue = 'completed' | 'failed';
 
 export interface LlmDisputeDraftAugment {

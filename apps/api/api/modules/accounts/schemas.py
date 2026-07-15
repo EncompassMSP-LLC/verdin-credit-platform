@@ -11,6 +11,7 @@ from api.core.pagination import PaginationParams
 from api.core.responses import BaseSchema
 from api.modules.accounts.dispute_letter_models import DisputeLetter, DisputeLetterStatus
 from api.modules.accounts.dispute_response_models import DisputeResponse
+from api.modules.accounts.litigation_packet import LitigationStrength
 from api.modules.accounts.models import (
     Account,
     AccountBureau,
@@ -491,3 +492,64 @@ class CaseReinvestigationSummary(BaseSchema):
     next_deadline_creditor: str | None
     most_overdue_days: int | None
     action_items: list[AccountRedisputeReadiness]
+
+
+class LitigationPacketLetter(BaseSchema):
+    """A sent/prepared dispute round in the litigation evidence trail."""
+
+    id: uuid.UUID
+    recipient_type: str
+    status: DisputeLetterStatus
+    subject: str
+    disputed_items: list[str]
+    generated_at: datetime
+    sent_at: datetime | None
+
+
+class LitigationPacketResponse(BaseSchema):
+    """A recorded bureau/furnisher response in the litigation evidence trail."""
+
+    id: uuid.UUID
+    outcome: DisputeResponseRecordOutcome
+    response_method: str
+    response_date: date | None
+    recorded_at: datetime
+    notes: str | None
+
+
+class LitigationReadinessAssessment(BaseSchema):
+    """Advisory §611/§623 willful-noncompliance readiness grade."""
+
+    eligible: bool
+    strength: LitigationStrength
+    score: int
+    indicators: list[str]
+    summary: str
+
+
+class AccountLitigationPacket(BaseSchema):
+    """Operator-gated litigation-readiness evidence bundle for attorney handoff.
+
+    Assembles the reinvestigation evidence trail (sent letters, recorded
+    responses, §611 clock state) and an advisory willful-noncompliance grade for
+    a human attorney to review. Read-only — never drafts pleadings, never files,
+    and never transmits to a court, bureau, or attorney.
+    """
+
+    account_id: uuid.UUID
+    case_id: uuid.UUID
+    creditor_name: str
+    bureau: AccountBureau
+    dispute_status: DisputeStatus
+    dispute_round: int
+    risk_score: int | None
+    generated_at: datetime
+    clock_state: ReinvestigationClockState
+    clock_deadline: date | None
+    clock_extended: bool
+    latest_outcome: DisputeResponseRecordOutcome | None
+    recommended_action: RedisputeAction
+    assessment: LitigationReadinessAssessment
+    letters: list[LitigationPacketLetter]
+    responses: list[LitigationPacketResponse]
+    disclaimer: str
