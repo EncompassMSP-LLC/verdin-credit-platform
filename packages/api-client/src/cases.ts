@@ -20,6 +20,7 @@ import type {
   DisputeStrategyRun,
   DisputeStrategyRunSummary,
   Document,
+  Fcra605bReadinessRun,
   IdentityTheftAccountReview,
   IdentityTheftCaseCenter,
   IdentityTheftProtection,
@@ -37,6 +38,7 @@ export type {
   ConfirmIdentityTheftAccountRequest,
   DisputeStrategyRun,
   DisputeStrategyRunSummary,
+  Fcra605bReadinessRun,
   IdentityTheftAccountReview,
   IdentityTheftCaseCenter,
   IdentityTheftProtection,
@@ -719,6 +721,23 @@ export async function downloadCaseIdentityTheft605bPacket(
     `/cases/${caseId}/identity-theft/605b-packet.zip`,
     `fcra-605b-block-packet-${caseId.slice(0, 8)}.zip`,
     { letter_format: params.letter_format ?? 'pdf', document_ids: params.document_ids },
+  );
+}
+
+export async function runCaseIdentityTheft605bReadinessAudit(
+  caseId: string,
+): Promise<Fcra605bReadinessRun> {
+  return request<Fcra605bReadinessRun>(
+    apiPath(`/cases/${caseId}/identity-theft/605b-readiness-runs`),
+    { method: 'POST' },
+  );
+}
+
+export async function getLatestCaseIdentityTheft605bReadinessRun(
+  caseId: string,
+): Promise<Fcra605bReadinessRun> {
+  return request<Fcra605bReadinessRun>(
+    apiPath(`/cases/${caseId}/identity-theft/605b-readiness-runs/latest`),
   );
 }
 

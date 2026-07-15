@@ -4,7 +4,9 @@ import {
   confirmIdentityTheftAccount,
   downloadCaseIdentityTheft605bPacket,
   getCaseIdentityTheftCenter,
+  getLatestCaseIdentityTheft605bReadinessRun,
   listDocuments,
+  runCaseIdentityTheft605bReadinessAudit,
   type IdentityTheftConfirmation,
   type IdentityTheftFinding,
   type IdentityTheftFindingSummary,
@@ -162,6 +164,25 @@ export function CaseIdentityTheftPanel({
       }),
     onSuccess: ({ blob, filename }) => downloadBlob(blob, filename),
   });
+
+  const readinessRunQuery = useQuery({
+    queryKey: ['case-605b-readiness-run', caseId],
+    queryFn: () => getLatestCaseIdentityTheft605bReadinessRun(caseId),
+    retry: false,
+  });
+
+  const readinessRunMutation = useMutation({
+    mutationFn: () => runCaseIdentityTheft605bReadinessAudit(caseId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['case-605b-readiness-run', caseId] });
+    },
+  });
+
+  const latestReadinessRun =
+    readinessRunMutation.data ??
+    (readinessRunQuery.data && !(readinessRunQuery.error instanceof ApiClientError)
+      ? readinessRunQuery.data
+      : undefined);
 
   const data = centerQuery.data;
   const hasConfirmedTheft = Boolean(
@@ -426,6 +447,58 @@ export function CaseIdentityTheftPanel({
                         : 'Packet export failed'}
                     </p>
                   ) : null}
+
+                  <div className="mt-4 border-t border-gray-200 pt-3">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-800 hover:bg-gray-50 disabled:opacity-50"
+                        disabled={readinessRunMutation.isPending}
+                        onClick={() => readinessRunMutation.mutate()}
+                      >
+                        {readinessRunMutation.isPending
+                          ? 'Running readiness audit…'
+                          : 'Run §605B submission-readiness audit'}
+                      </button>
+                      {latestReadinessRun ? (
+                        <Badge variant={latestReadinessRun.is_ready ? 'success' : 'warning'}>
+                          {latestReadinessRun.is_ready ? 'Ready' : 'Not ready'}
+                        </Badge>
+                      ) : null}
+                    </div>
+                    <p className="mt-1 text-xs text-gray-500">
+                      Operator-gated completeness check. Records an audit run; never submits to a
+                      bureau.
+                    </p>
+                    {latestReadinessRun ? (
+                      <div className="mt-2 text-xs text-gray-600">
+                        <p>
+                          Last run {new Date(latestReadinessRun.generated_at).toLocaleString()} ·
+                          readiness{' '}
+                          {latestReadinessRun.packet_readiness == null
+                            ? 'n/a'
+                            : `${latestReadinessRun.packet_readiness}%`}{' '}
+                          · {latestReadinessRun.confirmed_count} confirmed
+                        </p>
+                        {latestReadinessRun.blocking_reasons.length > 0 ? (
+                          <ul className="mt-1 list-disc space-y-0.5 pl-5">
+                            {latestReadinessRun.blocking_reasons.map((reason) => (
+                              <li key={reason}>{reason}</li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="mt-1 text-green-700">No blocking issues detected.</p>
+                        )}
+                      </div>
+                    ) : null}
+                    {readinessRunMutation.isError ? (
+                      <p className="mt-1 text-xs text-red-600">
+                        {readinessRunMutation.error instanceof ApiClientError
+                          ? readinessRunMutation.error.message
+                          : 'Readiness audit failed'}
+                      </p>
+                    ) : null}
+                  </div>
                 </div>
               </div>
             ) : null}

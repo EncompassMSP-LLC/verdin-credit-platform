@@ -99,6 +99,7 @@ from api.modules.documents.schemas import (
     DocumentResponse,
     DocumentUpdate,
     DocumentVersionResponse,
+    Fcra605bReadinessRunResponse,
     FcraFindingResponse,
     FcraFindingSummary,
     IdentityTheftAccountReviewResponse,
@@ -1869,6 +1870,168 @@ class DocumentService:
             exhibit_files=exhibit_files,
         )
         return packet, fcra_605b_packet_filename(case_id), "application/zip"
+
+    async def _assess_case_605b_readiness(
+        self,
+        *,
+        organization_id: uuid.UUID,
+        case_id: uuid.UUID,
+    ) -> dict[str, Any]:
+        """Compute §605B submission-readiness inputs for a case (no side effects)."""
+        from api.modules.documents.identity_theft_models import (
+            IdentityTheftConfirmation,
+            IdentityTheftIssueType,
+        )
+        from api.modules.documents.identity_theft_repository import IdentityTheftRepository
+        from api.modules.documents.identity_theft_service import (
+            fcra_605b_readiness_for_incident,
+        )
+
+        if self._session is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Database session is not configured",
+            )
+        repo = IdentityTheftRepository(self._session)
+        reviews = await repo.list_account_reviews(
+            organization_id=organization_id,
+            case_id=case_id,
+        )
+        confirmed = [
+            review
+            for review in reviews
+            if review.consumer_confirmation == IdentityTheftConfirmation.IDENTITY_THEFT
+            and review.attestation_accepted
+            and review.issue_type == IdentityTheftIssueType.CONFIRMED_IDENTITY_THEFT_CLAIM
+        ]
+        incident = await repo.get_incident_for_case(
+            organization_id=organization_id,
+            case_id=case_id,
+        )
+        readiness = fcra_605b_readiness_for_incident(incident) if incident else None
+        packet_readiness = readiness.packet_readiness if readiness else None
+        missing_evidence = list(readiness.missing_evidence) if readiness else []
+        attestation_recorded = bool(
+            (incident and incident.consumer_attestation_at)
+            or any(r.attestation_accepted for r in confirmed)
+        )
+        bureaus = sorted(
+            {(review.bureau or "unknown").strip().lower() or "unknown" for review in confirmed}
+        )
+
+        blocking_reasons: list[str] = []
+        if not confirmed:
+            blocking_reasons.append("No consumer-confirmed identity-theft account with attestation")
+        if not attestation_recorded:
+            blocking_reasons.append("Consumer attestation not recorded")
+        if missing_evidence:
+            blocking_reasons.append("Missing required evidence: " + ", ".join(missing_evidence))
+        if packet_readiness is not None and packet_readiness < 100:
+            blocking_reasons.append(f"Evidence checklist incomplete ({packet_readiness}%)")
+
+        is_ready = bool(confirmed) and attestation_recorded and not missing_evidence
+        return {
+            "is_ready": is_ready,
+            "packet_readiness": packet_readiness,
+            "confirmed_count": len(confirmed),
+            "attestation_recorded": attestation_recorded,
+            "bureaus": bureaus,
+            "missing_evidence": missing_evidence,
+            "blocking_reasons": blocking_reasons,
+        }
+
+    async def run_case_identity_theft_605b_readiness_audit(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+    ) -> Fcra605bReadinessRunResponse:
+        """Operator-gated §605B submission-readiness audit. Records an audit row.
+
+        This never submits to a bureau — it validates confirmed theft, attestation,
+        and packet completeness and persists the outcome for the audit trail.
+        """
+        from api.modules.documents.identity_theft_readiness_run_repository import (
+            IdentityTheft605bReadinessRunRepository,
+        )
+
+        self._require_write(user)
+        if self._session is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Database session is not configured",
+            )
+        organization_id = self._require_organization(user)
+        await self._validate_case(case_id, organization_id)
+
+        assessment = await self._assess_case_605b_readiness(
+            organization_id=organization_id,
+            case_id=case_id,
+        )
+        repo = IdentityTheft605bReadinessRunRepository(self._session)
+        row = await repo.create(
+            organization_id=organization_id,
+            case_id=case_id,
+            generated_by_id=user.id,
+            is_ready=assessment["is_ready"],
+            packet_readiness=assessment["packet_readiness"],
+            confirmed_count=assessment["confirmed_count"],
+            attestation_recorded=assessment["attestation_recorded"],
+            payload=assessment,
+        )
+        return Fcra605bReadinessRunResponse(
+            id=row.id,
+            case_id=row.case_id,
+            generated_at=row.generated_at,
+            generated_by_id=row.generated_by_id,
+            is_ready=row.is_ready,
+            packet_readiness=row.packet_readiness,
+            confirmed_count=row.confirmed_count,
+            attestation_recorded=row.attestation_recorded,
+            bureaus=list(assessment["bureaus"]),
+            missing_evidence=list(assessment["missing_evidence"]),
+            blocking_reasons=list(assessment["blocking_reasons"]),
+        )
+
+    async def get_latest_case_identity_theft_605b_readiness_run(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+    ) -> Fcra605bReadinessRunResponse:
+        from api.modules.documents.identity_theft_readiness_run_repository import (
+            IdentityTheft605bReadinessRunRepository,
+        )
+
+        if self._session is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Database session is not configured",
+            )
+        organization_id = self._require_organization(user)
+        await self._validate_case(case_id, organization_id)
+        repo = IdentityTheft605bReadinessRunRepository(self._session)
+        row = await repo.get_latest_for_case(
+            organization_id=organization_id,
+            case_id=case_id,
+        )
+        if row is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No §605B readiness run recorded for this case",
+            )
+        payload = row.payload if isinstance(row.payload, dict) else {}
+        return Fcra605bReadinessRunResponse(
+            id=row.id,
+            case_id=row.case_id,
+            generated_at=row.generated_at,
+            generated_by_id=row.generated_by_id,
+            is_ready=row.is_ready,
+            packet_readiness=row.packet_readiness,
+            confirmed_count=row.confirmed_count,
+            attestation_recorded=row.attestation_recorded,
+            bureaus=list(payload.get("bureaus", [])),
+            missing_evidence=list(payload.get("missing_evidence", [])),
+            blocking_reasons=list(payload.get("blocking_reasons", [])),
+        )
 
     async def upsert_identity_theft_protection(
         self,

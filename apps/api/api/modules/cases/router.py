@@ -46,6 +46,7 @@ from api.modules.documents.schemas import (
     DisputeStrategyRunResponse,
     DisputeStrategyRunSummaryResponse,
     DocumentResponse,
+    Fcra605bReadinessRunResponse,
     IdentityTheftAccountReviewResponse,
     IdentityTheftCaseCenterResponse,
     IdentityTheftIncidentResponse,
@@ -288,6 +289,31 @@ async def export_case_identity_theft_605b_packet(
         media_type=media_type,
         headers={"Content-Disposition": f'attachment; filename="{safe_name}"'},
     )
+
+
+@router.post(
+    "/{case_id}/identity-theft/605b-readiness-runs",
+    response_model=Fcra605bReadinessRunResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def run_case_identity_theft_605b_readiness_audit(
+    case_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> Fcra605bReadinessRunResponse:
+    return await service.run_case_identity_theft_605b_readiness_audit(current_user, case_id)
+
+
+@router.get(
+    "/{case_id}/identity-theft/605b-readiness-runs/latest",
+    response_model=Fcra605bReadinessRunResponse,
+)
+async def get_latest_case_identity_theft_605b_readiness_run(
+    case_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> Fcra605bReadinessRunResponse:
+    return await service.get_latest_case_identity_theft_605b_readiness_run(current_user, case_id)
 
 
 @router.get(
