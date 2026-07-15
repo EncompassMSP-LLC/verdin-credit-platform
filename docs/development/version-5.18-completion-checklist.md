@@ -14,9 +14,9 @@ Scope: [`docs/governance/version-5.18-scope.md`](../governance/version-5.18-scop
 - [x] Extended 45-day reinvestigation window modeled when documents are added mid-window
 - [x] Per-org reinvestigation outcome analytics read model + staff surface
 - [x] Operator-gated litigation-readiness evidence packet for attorney handoff (never auto-files)
-- [ ] Capability matrix + API reference updated
-- [ ] Deferred items explicitly documented
-- [ ] `docs/release-notes/v5.18.0.md` + tag `v5.18.0`
+- [x] Capability matrix + API reference updated
+- [x] Deferred items explicitly documented
+- [x] `docs/release-notes/v5.18.0.md` + tag `v5.18.0`
 
 ---
 
@@ -29,7 +29,7 @@ Scope: [`docs/governance/version-5.18-scope.md`](../governance/version-5.18-scop
 | 3     | Extended 45-day reinvestigation window       | Compliance Intelligence | ✅     |
 | 4     | Reinvestigation outcome analytics read model | Reporting               | ✅     |
 | 5     | Litigation-readiness evidence packet         | Disputes                | ✅     |
-| 6     | Capability matrix 5.18 sign-off              | Governance              | ⬜     |
+| 6     | Capability matrix 5.18 sign-off              | Governance              | ✅     |
 
 Slice 2 keys the clock off each `dispute_letters.sent_at` (addresses the 5.17 slice-3 single-round limitation). Slice 3 models the §611 45-day extension on top. Slice 4 aggregates recorded outcomes into per-org trends. Slice 5 bundles the evidence trail for attorney handoff, building on the 5.17 `escalate_attorney` readiness signal.
 

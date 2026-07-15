@@ -34,33 +34,33 @@ Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (
 
 ## Version milestones
 
-| Version   | Theme                              | Status      | Focus                                                                                                          |
-| --------- | ---------------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------- |
-| **4.2**   | Platform Foundation                | **Shipped** | Monorepo, auth, RBAC, domain module pattern, worker scaffold, CI/CD                                            |
-| **4.3.0** | Operational Core                   | **Shipped** | Cases, accounts, documents, OCR, intelligence, timeline, tasks                                                 |
-| **4.3.1** | Operational Core Completion        | **Shipped** | Mission Control dashboard, governance refinements, release stabilization                                       |
-| **4.5**   | Automation                         | **Shipped** | Import wizard, dispute lifecycle, workflow auto-tasks, rules AI (`v4.5.0`)                                     |
-| **4.8**   | Operations                         | **Shipped** | Client portal, notifications, LLM policy gates, reporting (`v4.8.0`)                                           |
-| **5.0**   | Enterprise Edition                 | **Shipped** | Compliance, SSO/MFA, LLM summaries, production email, portal expansion (`v5.0.0`)                              |
-| **5.0+**  | Product Hardening                  | **Shipped** | Pilot-ready staff + portal UI for 5.0 APIs                                                                     |
-| **5.1**   | Production Hardening               | **Shipped** | API keys, billing, IdP enrollment, enforcement, push, materialized reporting (`v5.1.0`)                        |
-| **5.2**   | Deferred Production Surfaces       | **Shipped** | SMS, LLM document summaries, Web Push HTTP, revenue analytics (`v5.2.0`)                                       |
-| **5.3**   | Enterprise Depth                   | **Shipped** | Usage metering, SCIM, predictive analytics, API developer surfaces (`v5.3.0`)                                  |
-| **5.4**   | Production Operations              | **Shipped** | Invoicing/dunning, multi-IdP federation, marketing SMS, agent observability (`v5.4.0`)                         |
-| **5.5**   | Production Automation              | **Shipped** | Invoice collection, SAML metadata, SMS delivery worker, agent execution scaffold                               |
-| **5.6**   | Compliance-Reviewed Depth          | Released    | HRIS sync, SMS deliverability, LLM dispute augment, dispute filing prep                                        |
-| **5.7**   | Autonomous Workflows (gated)       | Released    | Bureau submission, agent tool-calling, SAML cert rotation, Stripe invoice PDF                                  |
-| **5.8**   | Production Integrations (gated)    | Released    | Supervised agent loops, bureau live API, Stripe tax, HRIS lifecycle sync (`v5.8.0`)                            |
-| **5.9**   | Autonomous Production (gated)      | Released    | Unsupervised agent loops, bureau filing, live Stripe Tax, SAML rotation (`v5.9.0`)                             |
-| **5.10**  | Production Automation (gated)      | Released    | Arbitrary execution, bureau re-filing, charge retry, SAML passwordless                                         |
-| **5.11**  | Production Execution (gated)       | Released    | Unsupervised re-filing, live charge retry, HRIS passwordless UI, bulk IdP provisioning                         |
-| **5.12**  | Expansion Surfaces (gated)         | Released    | Bureau live API scaffold, public OAuth portal, cross-org benchmarks, passkeys (`v5.12.0`)                      |
-| **5.13**  | Native Mobile Depth (gated)        | Released    | Native passkey client, OAuth marketplace, autonomous API filing, export audit (`v5.13.0`)                      |
-| **5.14**  | Production Distribution (gated)    | Released    | Live blob export, unsupervised filing loops, public marketplace, app store readiness (`v5.14.0`)               |
-| **5.15**  | Identity Theft Detection           | Released    | Phase 8 Case Center, portal attestation, §605B packet export (`v5.15.0`)                                       |
-| **5.16**  | Identity-Theft Recovery Depth      | Released    | Phase 9 §605B evidence bundling, mixed-file detection, submission readiness, lock-aware prepare (`v5.16.0`)    |
-| **5.17**  | Dispute Response & Reinvestigation | Released    | Phase 10 dispute response intake, §611 reinvestigation clock, re-dispute readiness, case dashboard (`v5.17.0`) |
-| **5.18**  | Reinvestigation Depth & Litigation | Planned     | Phase 11 per-letter multi-round clock, 45-day extended window, outcome analytics, litigation-readiness packet  |
+| Version   | Theme                              | Status      | Focus                                                                                                                     |
+| --------- | ---------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------- |
+| **4.2**   | Platform Foundation                | **Shipped** | Monorepo, auth, RBAC, domain module pattern, worker scaffold, CI/CD                                                       |
+| **4.3.0** | Operational Core                   | **Shipped** | Cases, accounts, documents, OCR, intelligence, timeline, tasks                                                            |
+| **4.3.1** | Operational Core Completion        | **Shipped** | Mission Control dashboard, governance refinements, release stabilization                                                  |
+| **4.5**   | Automation                         | **Shipped** | Import wizard, dispute lifecycle, workflow auto-tasks, rules AI (`v4.5.0`)                                                |
+| **4.8**   | Operations                         | **Shipped** | Client portal, notifications, LLM policy gates, reporting (`v4.8.0`)                                                      |
+| **5.0**   | Enterprise Edition                 | **Shipped** | Compliance, SSO/MFA, LLM summaries, production email, portal expansion (`v5.0.0`)                                         |
+| **5.0+**  | Product Hardening                  | **Shipped** | Pilot-ready staff + portal UI for 5.0 APIs                                                                                |
+| **5.1**   | Production Hardening               | **Shipped** | API keys, billing, IdP enrollment, enforcement, push, materialized reporting (`v5.1.0`)                                   |
+| **5.2**   | Deferred Production Surfaces       | **Shipped** | SMS, LLM document summaries, Web Push HTTP, revenue analytics (`v5.2.0`)                                                  |
+| **5.3**   | Enterprise Depth                   | **Shipped** | Usage metering, SCIM, predictive analytics, API developer surfaces (`v5.3.0`)                                             |
+| **5.4**   | Production Operations              | **Shipped** | Invoicing/dunning, multi-IdP federation, marketing SMS, agent observability (`v5.4.0`)                                    |
+| **5.5**   | Production Automation              | **Shipped** | Invoice collection, SAML metadata, SMS delivery worker, agent execution scaffold                                          |
+| **5.6**   | Compliance-Reviewed Depth          | Released    | HRIS sync, SMS deliverability, LLM dispute augment, dispute filing prep                                                   |
+| **5.7**   | Autonomous Workflows (gated)       | Released    | Bureau submission, agent tool-calling, SAML cert rotation, Stripe invoice PDF                                             |
+| **5.8**   | Production Integrations (gated)    | Released    | Supervised agent loops, bureau live API, Stripe tax, HRIS lifecycle sync (`v5.8.0`)                                       |
+| **5.9**   | Autonomous Production (gated)      | Released    | Unsupervised agent loops, bureau filing, live Stripe Tax, SAML rotation (`v5.9.0`)                                        |
+| **5.10**  | Production Automation (gated)      | Released    | Arbitrary execution, bureau re-filing, charge retry, SAML passwordless                                                    |
+| **5.11**  | Production Execution (gated)       | Released    | Unsupervised re-filing, live charge retry, HRIS passwordless UI, bulk IdP provisioning                                    |
+| **5.12**  | Expansion Surfaces (gated)         | Released    | Bureau live API scaffold, public OAuth portal, cross-org benchmarks, passkeys (`v5.12.0`)                                 |
+| **5.13**  | Native Mobile Depth (gated)        | Released    | Native passkey client, OAuth marketplace, autonomous API filing, export audit (`v5.13.0`)                                 |
+| **5.14**  | Production Distribution (gated)    | Released    | Live blob export, unsupervised filing loops, public marketplace, app store readiness (`v5.14.0`)                          |
+| **5.15**  | Identity Theft Detection           | Released    | Phase 8 Case Center, portal attestation, §605B packet export (`v5.15.0`)                                                  |
+| **5.16**  | Identity-Theft Recovery Depth      | Released    | Phase 9 §605B evidence bundling, mixed-file detection, submission readiness, lock-aware prepare (`v5.16.0`)               |
+| **5.17**  | Dispute Response & Reinvestigation | Released    | Phase 10 dispute response intake, §611 reinvestigation clock, re-dispute readiness, case dashboard (`v5.17.0`)            |
+| **5.18**  | Reinvestigation Depth & Litigation | Released    | Phase 11 per-letter multi-round clock, 45-day extended window, outcome analytics, litigation-readiness packet (`v5.18.0`) |
 
 ### Sprint milestones
 
@@ -436,18 +436,18 @@ Compliance Intelligence Phase 10 closes the dispute loop: staff-entered bureau/f
 | 3    | Reinvestigation outcome & re-dispute readiness | Released    | Advisory re-dispute / CFPB / attorney escalation signals             |
 | 4    | Case reinvestigation summary read model + UI   | Released    | Per-case reinvestigation dashboard surface                           |
 
-### Version 5.18 — Reinvestigation Depth & Litigation Readiness (planned)
+### Version 5.18 — Reinvestigation Depth & Litigation Readiness (released — `v5.18.0`)
 
-Scope and checklist: [`docs/governance/version-5.18-scope.md`](../governance/version-5.18-scope.md) · [`docs/development/version-5.18-completion-checklist.md`](../development/version-5.18-completion-checklist.md)
+Scope and checklist: [`docs/governance/version-5.18-scope.md`](../governance/version-5.18-scope.md) · [`docs/development/version-5.18-completion-checklist.md`](../development/version-5.18-completion-checklist.md) · Release notes: [`docs/release-notes/v5.18.0.md`](../release-notes/v5.18.0.md)
 
 Compliance Intelligence Phase 11 deepens the 5.17 reinvestigation lifecycle: per-letter multi-round §611 clocks (keyed off `sent_at`), the extended 45-day reinvestigation window, per-org outcome trend analytics, and an operator-gated litigation-readiness evidence packet for attorney handoff. Live bureau response ingestion, automated re-dispute filing, unsupervised escalation, automated litigation filing, and cross-tenant benchmarks remain deferred (5.19+ or never) pending legal/compliance sign-off.
 
 | Epic | Theme                                        | 5.18 target | Notes                                                         |
 | ---- | -------------------------------------------- | ----------- | ------------------------------------------------------------- |
-| 1    | Per-letter multi-round reinvestigation clock | Planned     | Each sent round on its own `sent_at`-keyed §611 deadline      |
-| 2    | Extended 45-day reinvestigation window       | Planned     | §611 45-day extension when documents added mid-window         |
-| 3    | Reinvestigation outcome analytics read model | Planned     | Per-org deletion/verify/correction rates + time-to-resolution |
-| 4    | Litigation-readiness evidence packet         | Planned     | Operator-gated §611/§623 evidence bundle for attorney handoff |
+| 1    | Per-letter multi-round reinvestigation clock | Released    | Each sent round on its own `sent_at`-keyed §611 deadline      |
+| 2    | Extended 45-day reinvestigation window       | Released    | §611 45-day extension when documents added mid-window         |
+| 3    | Reinvestigation outcome analytics read model | Released    | Per-org deletion/verify/correction rates + time-to-resolution |
+| 4    | Litigation-readiness evidence packet         | Released    | Operator-gated §611/§623 evidence bundle for attorney handoff |
 
 ## Sprint → version mapping
 
