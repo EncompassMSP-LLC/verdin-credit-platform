@@ -1,5 +1,10 @@
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getAccountLitigationPacket, type LitigationStrength } from '@verdin/api-client';
+import {
+  downloadAccountLitigationPacket,
+  getAccountLitigationPacket,
+  type LitigationStrength,
+} from '@verdin/api-client';
 
 const STRENGTH_LABELS: Record<LitigationStrength, string> = {
   strong: 'Strong',
@@ -32,19 +37,51 @@ export function AccountLitigationPacketPanel({ accountId }: AccountLitigationPac
   });
 
   const packet = packetQuery.data;
+  const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
+
+  const handleDownload = async () => {
+    setDownloading(true);
+    setDownloadError(null);
+    try {
+      const { blob, filename } = await downloadAccountLitigationPacket(accountId);
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = filename;
+      anchor.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      setDownloadError(error instanceof Error ? error.message : 'Download failed');
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   return (
     <div className="mt-6 border-t border-gray-100 pt-4">
       <div className="flex items-center justify-between gap-3">
         <h3 className="text-sm font-semibold text-gray-900">Litigation-readiness packet</h3>
-        <button
-          type="button"
-          className="rounded-md border border-brand-600 px-3 py-1.5 text-xs font-medium text-brand-700 hover:bg-brand-50 disabled:opacity-50"
-          onClick={() => packetQuery.refetch()}
-          disabled={packetQuery.isFetching}
-        >
-          {packetQuery.isFetching ? 'Assembling…' : packet ? 'Refresh packet' : 'Assemble packet'}
-        </button>
+        <div className="flex items-center gap-2">
+          {packet ? (
+            <button
+              type="button"
+              className="rounded-md border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+              onClick={handleDownload}
+              disabled={downloading}
+            >
+              {downloading ? 'Preparing…' : 'Download evidence (.txt)'}
+            </button>
+          ) : null}
+          <button
+            type="button"
+            className="rounded-md border border-brand-600 px-3 py-1.5 text-xs font-medium text-brand-700 hover:bg-brand-50 disabled:opacity-50"
+            onClick={() => packetQuery.refetch()}
+            disabled={packetQuery.isFetching}
+          >
+            {packetQuery.isFetching ? 'Assembling…' : packet ? 'Refresh packet' : 'Assemble packet'}
+          </button>
+        </div>
       </div>
       <p className="mt-1 text-xs text-gray-500">
         Bundles the reinvestigation evidence trail and an advisory §611/§623 willful-noncompliance
@@ -57,6 +94,8 @@ export function AccountLitigationPacketPanel({ accountId }: AccountLitigationPac
           Could not assemble the packet (write permission required).
         </p>
       ) : null}
+
+      {downloadError ? <p className="mt-3 text-xs text-red-600">{downloadError}</p> : null}
 
       {packet ? (
         <div className="mt-4 space-y-4">
