@@ -39,6 +39,8 @@ from api.modules.accounts.schemas import (
     AccountSortOrder,
     AccountUpdate,
     DisputeLetterResponse,
+    DisputeResponseRecordResponse,
+    RecordDisputeResponseRequest,
 )
 from api.modules.accounts.service import AccountService
 from api.modules.auth.dependencies import get_current_user
@@ -330,6 +332,32 @@ async def record_account_dispute_response_received(
     service: AccountService = Depends(get_account_service),
 ) -> AccountResponse:
     return await service.record_dispute_response_received(current_user, account_id, body)
+
+
+@router.post(
+    "/{account_id}/dispute-responses",
+    response_model=DisputeResponseRecordResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def record_account_dispute_response(
+    account_id: uuid.UUID,
+    body: RecordDisputeResponseRequest,
+    current_user: User = Depends(get_current_user),
+    service: AccountService = Depends(get_account_service),
+) -> DisputeResponseRecordResponse:
+    return await service.record_dispute_response(current_user, account_id, body)
+
+
+@router.get(
+    "/{account_id}/dispute-responses",
+    response_model=list[DisputeResponseRecordResponse],
+)
+async def list_account_dispute_responses(
+    account_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: AccountService = Depends(get_account_service),
+) -> list[DisputeResponseRecordResponse]:
+    return await service.list_account_dispute_responses(current_user, account_id)
 
 
 @router.post("/{account_id}/dispute-investigation-overdue", response_model=AccountResponse)

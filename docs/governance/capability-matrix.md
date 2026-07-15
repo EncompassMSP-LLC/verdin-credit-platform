@@ -576,6 +576,20 @@ Scope: [version-5.16-scope.md](version-5.16-scope.md) · Checklist: [version-5.1
 
 ---
 
+## Version 5.17 — Dispute Response & Reinvestigation Tracking (in progress — 🚧)
+
+Scope: [version-5.17-scope.md](version-5.17-scope.md) · Checklist: [version-5.17-completion-checklist.md](../development/version-5.17-completion-checklist.md)
+
+| Capability                            | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                                        |
+| ------------------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | -------------------------------------------------------------------------------------------- |
+| Dispute response intake + persistence | 5.17    | ✅      | ✅      | ✅       | ✅  | —   | ✅    | Disputes     | Auditable `dispute_responses` records (outcome/method/date/notes); staff-entered, no polling |
+| §611 reinvestigation clock            | 5.17    | Planned | —       | —        | —   | —   | —     | Disputes     | 30-day deadline from `sent_at`; no-response / overdue detection                              |
+| Re-dispute / escalation readiness     | 5.17    | Planned | —       | —        | —   | —   | —     | Disputes     | Advisory re-dispute / CFPB / attorney signals; never auto-files                              |
+| Case reinvestigation dashboard        | 5.17    | Planned | —       | —        | —   | —   | —     | Disputes     | Per-case reinvestigation read model + surface                                                |
+| Live bureau response ingestion        | 5.18+   | Planned | —       | —        | —   | —   | —     | Compliance   | Deferred — live bureau API access + legal/compliance sign-off                                |
+
+---
+
 ## Related documents
 
 - [Governance hub](README.md) — lifecycle and build order

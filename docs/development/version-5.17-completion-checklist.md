@@ -25,7 +25,7 @@ Scope: [`docs/governance/version-5.17-scope.md`](../governance/version-5.17-scop
 | Order | Slice                                          | Epic                    | Status |
 | ----- | ---------------------------------------------- | ----------------------- | ------ |
 | 1     | 5.17 scope + completion checklist              | Kickoff                 | ✅     |
-| 2     | Dispute response intake + persistence          | Disputes                | ⬜     |
+| 2     | Dispute response intake + persistence          | Disputes                | ✅     |
 | 3     | §611 reinvestigation clock & no-response       | Compliance Intelligence | ⬜     |
 | 4     | Reinvestigation outcome & re-dispute readiness | Disputes                | ⬜     |
 | 5     | Case reinvestigation summary read model + UI   | Compliance Intelligence | ⬜     |

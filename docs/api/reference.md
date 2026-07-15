@@ -217,29 +217,31 @@ Staff replies require the case to be linked to a client (`client_id`). Real-time
 
 Credit tradeline accounts with intelligence scoring. All endpoints require authentication and organization scoping.
 
-| Method | Path                                                             | Min role     | Description                                           |
-| ------ | ---------------------------------------------------------------- | ------------ | ----------------------------------------------------- |
-| POST   | `/accounts`                                                      | case_manager | Create a credit account                               |
-| GET    | `/accounts`                                                      | read_only    | List accounts                                         |
-| GET    | `/accounts/intelligence/summary`                                 | read_only    | Organization intelligence                             |
-| GET    | `/accounts/{account_id}`                                         | read_only    | Get account by ID                                     |
-| GET    | `/accounts/{account_id}/dispute-draft`                           | read_only    | Preview rule-based dispute draft                      |
-|        | Query: `recipient_type` (`credit_bureau`, `furnisher`)           |              |                                                       |
-| GET    | `/accounts/{account_id}/dispute-letters`                         | read_only    | List saved dispute letter drafts                      |
-| GET    | `/accounts/{account_id}/dispute-letters/{letter_id}`             | read_only    | Get saved dispute letter details                      |
-| GET    | `/accounts/{account_id}/dispute-letters/{letter_id}/export`      | read_only    | Download letter artifact (`format=text` or `pdf`)     |
-| POST   | `/accounts/{account_id}/dispute-draft/letters`                   | case_manager | Save generated dispute draft                          |
-|        | Query: `recipient_type` (`credit_bureau`, `furnisher`)           |              |                                                       |
-| POST   | `/accounts/{account_id}/dispute-draft/review-task`               | case_manager | Create or reuse dispute draft review task             |
-| POST   | `/accounts/{account_id}/dispute-letters/{letter_id}/review-task` | case_manager | Create or reuse saved letter review task              |
-| POST   | `/accounts/{account_id}/dispute-letters/{letter_id}/approve`     | case_manager | Approve a saved letter in review                      |
-| POST   | `/accounts/{account_id}/dispute-letters/{letter_id}/send`        | case_manager | Mark an approved letter as sent                       |
-| POST   | `/accounts/{account_id}/dispute-letters/{letter_id}/void`        | case_manager | Void an in-flight letter                              |
-| POST   | `/accounts/{account_id}/dispute-awaiting-response`               | case_manager | Mark account awaiting CRA response                    |
-| POST   | `/accounts/{account_id}/dispute-response-received`               | case_manager | Record CRA outcome (`verified`/`corrected`/`deleted`) |
-| POST   | `/accounts/{account_id}/dispute-investigation-overdue`           | case_manager | Mark investigation overdue + escalation task          |
-| PATCH  | `/accounts/{account_id}`                                         | case_manager | Update an account                                     |
-| DELETE | `/accounts/{account_id}`                                         | admin        | Soft-delete an account                                |
+| Method | Path                                                             | Min role     | Description                                                                   |
+| ------ | ---------------------------------------------------------------- | ------------ | ----------------------------------------------------------------------------- |
+| POST   | `/accounts`                                                      | case_manager | Create a credit account                                                       |
+| GET    | `/accounts`                                                      | read_only    | List accounts                                                                 |
+| GET    | `/accounts/intelligence/summary`                                 | read_only    | Organization intelligence                                                     |
+| GET    | `/accounts/{account_id}`                                         | read_only    | Get account by ID                                                             |
+| GET    | `/accounts/{account_id}/dispute-draft`                           | read_only    | Preview rule-based dispute draft                                              |
+|        | Query: `recipient_type` (`credit_bureau`, `furnisher`)           |              |                                                                               |
+| GET    | `/accounts/{account_id}/dispute-letters`                         | read_only    | List saved dispute letter drafts                                              |
+| GET    | `/accounts/{account_id}/dispute-letters/{letter_id}`             | read_only    | Get saved dispute letter details                                              |
+| GET    | `/accounts/{account_id}/dispute-letters/{letter_id}/export`      | read_only    | Download letter artifact (`format=text` or `pdf`)                             |
+| POST   | `/accounts/{account_id}/dispute-draft/letters`                   | case_manager | Save generated dispute draft                                                  |
+|        | Query: `recipient_type` (`credit_bureau`, `furnisher`)           |              |                                                                               |
+| POST   | `/accounts/{account_id}/dispute-draft/review-task`               | case_manager | Create or reuse dispute draft review task                                     |
+| POST   | `/accounts/{account_id}/dispute-letters/{letter_id}/review-task` | case_manager | Create or reuse saved letter review task                                      |
+| POST   | `/accounts/{account_id}/dispute-letters/{letter_id}/approve`     | case_manager | Approve a saved letter in review                                              |
+| POST   | `/accounts/{account_id}/dispute-letters/{letter_id}/send`        | case_manager | Mark an approved letter as sent                                               |
+| POST   | `/accounts/{account_id}/dispute-letters/{letter_id}/void`        | case_manager | Void an in-flight letter                                                      |
+| POST   | `/accounts/{account_id}/dispute-awaiting-response`               | case_manager | Mark account awaiting CRA response                                            |
+| POST   | `/accounts/{account_id}/dispute-response-received`               | case_manager | Record CRA outcome (`verified`/`corrected`/`deleted`)                         |
+| POST   | `/accounts/{account_id}/dispute-responses`                       | case_manager | Persist an auditable dispute response record (staff-entered; no live polling) |
+| GET    | `/accounts/{account_id}/dispute-responses`                       | read_only    | List persisted dispute response records (newest first)                        |
+| POST   | `/accounts/{account_id}/dispute-investigation-overdue`           | case_manager | Mark investigation overdue + escalation task                                  |
+| PATCH  | `/accounts/{account_id}`                                         | case_manager | Update an account                                                             |
+| DELETE | `/accounts/{account_id}`                                         | admin        | Soft-delete an account                                                        |
 
 ### List query parameters
 
@@ -283,6 +285,8 @@ Accounts automatically compute `risk_score`, `readiness_score`, `next_eligible_d
 `POST /accounts/{account_id}/dispute-awaiting-response` transitions an account from `dispute_sent` to `awaiting_response`, sets `investigation_status` to `pending` when unset, and emits a timeline event. Already `awaiting_response` accounts are idempotent; other statuses return `422`.
 
 `POST /accounts/{account_id}/dispute-response-received` records a CRA investigation outcome for accounts in `awaiting_response`. Body: `{ "outcome": "verified" | "corrected" | "deleted" }`. Sets `response_received=true`, updates `dispute_status`, marks `investigation_status` as `completed`, refreshes intelligence, and emits a timeline event. Idempotent when the same outcome is already recorded; other statuses return `422`.
+
+`POST /accounts/{account_id}/dispute-responses` (Phase 10) persists an **auditable dispute response record** entered by staff — the platform never polls a bureau. Body: `{ "outcome", "response_method", "dispute_letter_id?", "document_id?", "response_date?", "notes?" }` where `outcome` is `deleted | verified | updated | corrected | no_response | rejected` and `response_method` is `mail | portal | phone | email | other` (default `mail`). Rows are stored in `dispute_responses` (linked to the account/case and, optionally, a sent dispute letter and a case document). Terminal outcomes (`deleted`/`verified`/`corrected`/`updated`) also sync the account `dispute_status`, set `response_received=true`, mark the investigation `completed`, and emit a timeline event; `no_response` does not mark the account as received. An unknown `dispute_letter_id` or a `document_id` outside the case returns `404`. `GET /accounts/{account_id}/dispute-responses` lists persisted records newest-first.
 
 `POST /accounts/{account_id}/dispute-investigation-overdue` marks a pending CRA investigation as `overdue` when the statutory response window (`last_dispute_date` + 30 days) has passed without a recorded outcome. Auto-creates a high-priority escalation task (`accounts.dispute_investigation_overdue`), refreshes intelligence, and emits a timeline event. Idempotent when already overdue (ensures the escalation task exists). The worker job `overdue_investigation_scan` performs the same scan across all organizations on a schedule; `GET /accounts/{account_id}` no longer auto-escalates. Accounts not in `awaiting_response`, investigations not `pending`, or deadlines not yet passed return `422`.
 
