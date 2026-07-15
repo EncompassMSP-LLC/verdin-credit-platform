@@ -589,7 +589,7 @@ Scope: [version-5.17-scope.md](version-5.17-scope.md) · Checklist: [version-5.1
 | Case reinvestigation dashboard        | 5.17    | ✅      | ✅      | ✅       | ✅  | —   | ✅    | Disputes     | Per-case reinvestigation read model + surface                                                |
 | Live bureau response ingestion        | 5.18+   | Planned | —       | —        | —   | —   | —     | Compliance   | Deferred — live bureau API access + legal/compliance sign-off                                |
 
-## Version 5.18 — Reinvestigation Depth & Litigation Readiness (in progress — 🚧)
+## Version 5.18 — Reinvestigation Depth & Litigation Readiness (shipped — ✅)
 
 Scope: [version-5.18-scope.md](version-5.18-scope.md) · Checklist: [version-5.18-completion-checklist.md](../development/version-5.18-completion-checklist.md)
 
