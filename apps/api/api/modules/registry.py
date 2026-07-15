@@ -21,6 +21,11 @@ from api.modules.accounts.dispute_filing_prep_models import (
     DisputeFilingPrepStatus,
 )
 from api.modules.accounts.dispute_letter_models import DisputeLetter, DisputeLetterStatus
+from api.modules.accounts.dispute_response_models import (
+    DisputeResponse,
+    DisputeResponseMethod,
+    DisputeResponseOutcome,
+)
 from api.modules.accounts.fully_autonomous_bureau_api_filing_models import (
     FullyAutonomousBureauApiFilingRun,
     FullyAutonomousBureauApiFilingRunStatus,
@@ -297,6 +302,9 @@ __all__ = [
     "Document",
     "DisputeLetter",
     "DisputeLetterStatus",
+    "DisputeResponse",
+    "DisputeResponseMethod",
+    "DisputeResponseOutcome",
     "DisputeFilingPrepRun",
     "DisputeFilingPrepStatus",
     "DisputeBureauSubmissionRun",

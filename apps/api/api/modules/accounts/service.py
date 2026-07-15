@@ -40,6 +40,11 @@ from api.modules.accounts.dispute_mail_attachments import (
     ResolvedMailPacketAttachments,
     resolve_mail_packet_attachments,
 )
+from api.modules.accounts.dispute_response_models import (
+    DisputeResponseMethod,
+    DisputeResponseOutcome,
+)
+from api.modules.accounts.dispute_response_repository import DisputeResponseRepository
 from api.modules.accounts.intelligence import apply_account_intelligence, recommend_next_action
 from api.modules.accounts.intelligence_calibration import DiscrepancyScoringContext
 from api.modules.accounts.intelligence_context import (
@@ -62,8 +67,10 @@ from api.modules.accounts.schemas import (
     CrossBureauIntelligenceSummary,
     DisputeLetterResponse,
     DisputeReasonSuggestionResponse,
+    DisputeResponseRecordResponse,
     MissingEvidenceResponse,
     NextActionItem,
+    RecordDisputeResponseRequest,
 )
 from api.modules.auth.models import User
 from api.modules.cases.models import Case
@@ -1377,6 +1384,127 @@ class AccountService:
                 ),
             )
         return AccountResponse.from_model(updated)
+
+    async def record_dispute_response(
+        self,
+        user: User,
+        account_id: uuid.UUID,
+        data: RecordDisputeResponseRequest,
+    ) -> DisputeResponseRecordResponse:
+        """Persist an auditable bureau/furnisher response record for a sent dispute.
+
+        Staff-entered (mail/portal/phone/email) — the platform never polls a bureau.
+        Layered over the ``response_received`` flag: terminal outcomes also sync the
+        account dispute status so the reinvestigation lifecycle stays consistent.
+        """
+        self._require_write(user)
+        account = await self._get_account_for_user(account_id, user)
+        if self._session is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Database session unavailable",
+            )
+        organization_id = account.organization_id
+
+        dispute_letter_id: uuid.UUID | None = None
+        if data.dispute_letter_id is not None:
+            letter = await DisputeLetterRepository(self._session).get_for_account(
+                organization_id=organization_id,
+                account_id=account.id,
+                letter_id=data.dispute_letter_id,
+            )
+            if letter is None:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Dispute letter not found for this account",
+                )
+            dispute_letter_id = letter.id
+
+        document_id: uuid.UUID | None = None
+        if data.document_id is not None:
+            document = await DocumentRepository(self._session).get_by_id(
+                data.document_id,
+                organization_id=organization_id,
+            )
+            if document is None or getattr(document, "case_id", None) != account.case_id:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Linked document not found for this case",
+                )
+            document_id = document.id
+
+        outcome = DisputeResponseOutcome(data.outcome)
+        method = DisputeResponseMethod(data.response_method)
+        record = await DisputeResponseRepository(self._session).create(
+            organization_id=organization_id,
+            case_id=account.case_id,
+            account_id=account.id,
+            outcome=outcome,
+            response_method=method,
+            dispute_letter_id=dispute_letter_id,
+            document_id=document_id,
+            response_date=data.response_date,
+            notes=data.notes,
+            recorded_by_id=user.id,
+        )
+
+        previous_dispute_status = (
+            account.dispute_status.value
+            if hasattr(account.dispute_status, "value")
+            else account.dispute_status
+        )
+        self._sync_account_after_dispute_response(account, outcome)
+        await self._apply_intelligence(account)
+        account.ai_recommended_next_action = recommend_next_action(account)
+        apply_audit_on_update(account, user.id)
+        updated = await self._accounts.update(account)
+        current_dispute_status = (
+            updated.dispute_status.value
+            if hasattr(updated.dispute_status, "value")
+            else updated.dispute_status
+        )
+        if current_dispute_status != previous_dispute_status:
+            await publish_platform_event(
+                self._session,
+                account_dispute_status_changed_event(
+                    updated,
+                    user.id,
+                    previous_dispute_status=previous_dispute_status,
+                ),
+            )
+        return DisputeResponseRecordResponse.from_model(record)
+
+    def _sync_account_after_dispute_response(
+        self,
+        account: Account,
+        outcome: DisputeResponseOutcome,
+    ) -> None:
+        terminal = {
+            DisputeResponseOutcome.DELETED: DisputeStatus.DELETED,
+            DisputeResponseOutcome.VERIFIED: DisputeStatus.VERIFIED,
+            DisputeResponseOutcome.CORRECTED: DisputeStatus.CORRECTED,
+            DisputeResponseOutcome.UPDATED: DisputeStatus.CORRECTED,
+        }
+        if outcome in terminal:
+            account.response_received = True
+            account.dispute_status = terminal[outcome]
+            account.investigation_status = InvestigationStatus.COMPLETED
+        elif outcome == DisputeResponseOutcome.REJECTED:
+            account.response_received = True
+
+    async def list_account_dispute_responses(
+        self,
+        user: User,
+        account_id: uuid.UUID,
+    ) -> list[DisputeResponseRecordResponse]:
+        account = await self._get_account_for_user(account_id, user)
+        if self._session is None:
+            return []
+        rows = await DisputeResponseRepository(self._session).list_for_account(
+            organization_id=account.organization_id,
+            account_id=account.id,
+        )
+        return [DisputeResponseRecordResponse.from_model(row) for row in rows]
 
     async def escalate_overdue_investigation(
         self,

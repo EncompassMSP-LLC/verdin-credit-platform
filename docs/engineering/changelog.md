@@ -13,6 +13,20 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — dispute response intake & persistence (Phase 10)
+
+**Decision:** Add an auditable dispute response record. `POST /accounts/{id}/dispute-responses` persists a row in a new `dispute_responses` table (migration `087_dispute_responses`) capturing `outcome` (`deleted | verified | updated | corrected | no_response | rejected`), `response_method` (`mail | portal | phone | email | other`), `response_date`, free-text `notes`, and optional links to a sent `dispute_letters` row and a case `documents` row. Terminal outcomes sync the account (`dispute_status`, `response_received`, `investigation_status`) and emit the existing `account_dispute_status_changed` timeline event; `GET /accounts/{id}/dispute-responses` lists records newest-first. Shipped `@verdin/api-client` types/helpers and an `AccountDisputeResponsesPanel` on the account detail page.
+
+**Reason:** Before Phase 10 a dispute response was only a boolean `response_received` + a single `dispute_status` on the account, with the strict `AWAITING_RESPONSE → terminal` transition on `dispute-response-received`. That erased history (no per-letter record, no method/date/notes) and could not express `no_response` or `rejected`. A dedicated audit table gives the reinvestigation lifecycle (Phase 10 slices 3–5: §611 clock, re-dispute readiness, case dashboard) a durable, queryable foundation.
+
+**Guardrails (staff-mediated):** Every record is entered by an operator; nothing is polled from a bureau. The new intake is additive — the legacy `dispute-response-received` transition is untouched. `no_response` never flips `response_received`.
+
+**Alternatives considered:** Extending the account row with more response columns (rejected — no history, no per-letter granularity); reusing `dispute-response-received` with a wider enum (rejected — its strict `AWAITING_RESPONSE` precondition and idempotency semantics do not fit a free-form audit log); a JSONB blob on the account (rejected — not queryable for the upcoming §611 clock/read models).
+
+**Technical debt:** The account-state sync maps `updated` to `CORRECTED` (no distinct tradeline-updated status yet). The intake path does not yet enforce that a linked letter is actually `sent`. Slice 3 will add the §611 reinvestigation-deadline computation on top of these records.
+
+**Follow-up work:** §611 reinvestigation clock & no-response detection (slice 3); re-dispute / escalation readiness (slice 4); per-case reinvestigation dashboard (slice 5).
+
 ## Compliance intelligence — lock-aware dispute preparation (Phase 9)
 
 **Decision:** Make bulk dispute preparation identity-theft-lock-aware. `prepare_case_credit_report_disputes` and `prepare_case_dispute_strategy_stage` now consult a new non-raising `DocumentService.identity_theft_lock_reason(...)` helper and _skip_ tradelines paused by an identity-theft indicator or a confirmed §605B claim, recording them in a `locked` array (`match_key`, `creditor_name`, `reason`) on `PrepareCreditReportDisputesResponse` / `PrepareDisputeStrategyStageResponse`. `assert_ordinary_dispute_allowed_for_account` was refactored to delegate to the same helper so the single-draft path keeps its `409`.

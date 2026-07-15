@@ -10,6 +10,7 @@ from pydantic import Field
 from api.core.pagination import PaginationParams
 from api.core.responses import BaseSchema
 from api.modules.accounts.dispute_letter_models import DisputeLetter, DisputeLetterStatus
+from api.modules.accounts.dispute_response_models import DisputeResponse
 from api.modules.accounts.models import (
     Account,
     AccountBureau,
@@ -347,4 +348,57 @@ class DisputeLetterResponse(BaseSchema):
             deleted_at=dispute_letter.deleted_at,
             created_by_id=dispute_letter.created_by_id,
             updated_by_id=dispute_letter.updated_by_id,
+        )
+
+
+DisputeResponseRecordOutcome = Literal[
+    "deleted", "verified", "updated", "corrected", "no_response", "rejected"
+]
+DisputeResponseMethodLiteral = Literal["mail", "portal", "phone", "email", "other"]
+
+
+class RecordDisputeResponseRequest(BaseSchema):
+    """Staff-entered record of a bureau/furnisher response to a sent dispute."""
+
+    outcome: DisputeResponseRecordOutcome
+    response_method: DisputeResponseMethodLiteral = "mail"
+    dispute_letter_id: uuid.UUID | None = None
+    document_id: uuid.UUID | None = None
+    response_date: date | None = None
+    notes: str | None = Field(default=None, max_length=4000)
+
+
+class DisputeResponseRecordResponse(BaseSchema):
+    id: uuid.UUID
+    organization_id: uuid.UUID
+    case_id: uuid.UUID
+    account_id: uuid.UUID
+    dispute_letter_id: uuid.UUID | None
+    document_id: uuid.UUID | None
+    outcome: DisputeResponseRecordOutcome
+    response_method: DisputeResponseMethodLiteral
+    response_date: date | None
+    recorded_at: datetime
+    notes: str | None
+    created_at: datetime
+    updated_at: datetime
+    created_by_id: uuid.UUID | None
+
+    @classmethod
+    def from_model(cls, response: DisputeResponse) -> "DisputeResponseRecordResponse":
+        return cls(
+            id=response.id,
+            organization_id=response.organization_id,
+            case_id=response.case_id,
+            account_id=response.account_id,
+            dispute_letter_id=response.dispute_letter_id,
+            document_id=response.document_id,
+            outcome=response.outcome.value,
+            response_method=response.response_method.value,
+            response_date=response.response_date,
+            recorded_at=response.recorded_at,
+            notes=response.notes,
+            created_at=response.created_at,
+            updated_at=response.updated_at,
+            created_by_id=response.created_by_id,
         )

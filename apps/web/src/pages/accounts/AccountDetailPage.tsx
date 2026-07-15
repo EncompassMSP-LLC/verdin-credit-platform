@@ -24,6 +24,7 @@ import {
 import { ACCOUNT_TYPE_LABELS, DISPUTE_STATUS_LABELS, PAYMENT_STATUS_LABELS } from '@verdin/shared';
 import { Button, Card } from '@verdin/ui';
 import { AccountDeleteDialog } from '../../components/accounts/AccountDeleteDialog';
+import { AccountDisputeResponsesPanel } from '../../components/accounts/AccountDisputeResponsesPanel';
 import { AccountLlmRecommendationPanel } from '../../components/accounts/AccountLlmRecommendationPanel';
 import {
   AccountStatusChip,
@@ -625,6 +626,7 @@ export function AccountDetailPage() {
               ) : null}
             </div>
           ) : null}
+          <AccountDisputeResponsesPanel accountId={data.id} />
           <div className="mt-4">
             <Link to={`/cases/${data.case_id}`} className="text-sm text-brand-600 hover:underline">
               View linked case →

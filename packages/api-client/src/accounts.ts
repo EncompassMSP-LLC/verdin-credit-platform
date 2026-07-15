@@ -400,6 +400,53 @@ export async function escalateAccountOverdueInvestigation(accountId: string): Pr
   });
 }
 
+export type DisputeResponseRecordOutcome =
+  'deleted' | 'verified' | 'updated' | 'corrected' | 'no_response' | 'rejected';
+
+export type DisputeResponseMethod = 'mail' | 'portal' | 'phone' | 'email' | 'other';
+
+export interface DisputeResponseRecord {
+  id: string;
+  organization_id: string;
+  case_id: string;
+  account_id: string;
+  dispute_letter_id: string | null;
+  document_id: string | null;
+  outcome: DisputeResponseRecordOutcome;
+  response_method: DisputeResponseMethod;
+  response_date: string | null;
+  recorded_at: string;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+  created_by_id: string | null;
+}
+
+export interface RecordDisputeResponseInput {
+  outcome: DisputeResponseRecordOutcome;
+  response_method?: DisputeResponseMethod;
+  dispute_letter_id?: string | null;
+  document_id?: string | null;
+  response_date?: string | null;
+  notes?: string | null;
+}
+
+export async function recordAccountDisputeResponse(
+  accountId: string,
+  input: RecordDisputeResponseInput,
+): Promise<DisputeResponseRecord> {
+  return request<DisputeResponseRecord>(apiPath(`/accounts/${accountId}/dispute-responses`), {
+    method: 'POST',
+    body: input,
+  });
+}
+
+export async function listAccountDisputeResponses(
+  accountId: string,
+): Promise<DisputeResponseRecord[]> {
+  return request<DisputeResponseRecord[]>(apiPath(`/accounts/${accountId}/dispute-responses`));
+}
+
 export type LlmDisputeDraftAugmentStatusValue = 'completed' | 'failed';
 
 export interface LlmDisputeDraftAugment {
