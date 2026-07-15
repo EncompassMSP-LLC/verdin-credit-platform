@@ -947,6 +947,27 @@ class Fcra605bReadinessResponse(BaseSchema):
     missing_evidence: list[str]
 
 
+class Fcra605bReadinessRunResponse(BaseSchema):
+    id: uuid.UUID
+    case_id: uuid.UUID
+    generated_at: datetime
+    generated_by_id: uuid.UUID | None = None
+    is_ready: bool
+    packet_readiness: int | None = None
+    confirmed_count: int
+    attestation_recorded: bool
+    bureaus: list[str] = []
+    missing_evidence: list[str] = []
+    blocking_reasons: list[str] = []
+
+
+class Fcra605bReadinessRunListResponse(BaseSchema):
+    items: list[Fcra605bReadinessRunResponse]
+    total: int
+    skip: int
+    limit: int
+
+
 class IdentityTheftIncidentResponse(BaseSchema):
     id: uuid.UUID
     case_id: uuid.UUID

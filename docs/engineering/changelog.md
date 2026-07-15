@@ -13,6 +13,20 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — §605B submission-readiness audit (Phase 9)
+
+**Decision:** Add an operator-gated §605B submission-readiness audit. `POST /cases/{case_id}/identity-theft/605b-readiness-runs` assesses the packet (confirmed-theft account count, attestation recorded, per-bureau coverage, and outstanding evidence-checklist items), persists the outcome to a new `identity_theft_605b_readiness_runs` table (`is_ready`, `packet_readiness`, `confirmed_count`, `attestation_recorded`, plus a JSONB `payload` snapshot with `bureaus`, `missing_evidence`, and `blocking_reasons`), and returns it; `GET .../605b-readiness-runs/latest` returns the most recent run (`404` if none). The Case Center surfaces a "Run §605B submission-readiness audit" action with a ready/not-ready badge and blocking-reason list.
+
+**Reason:** Slice 2 lets operators bundle evidence and the Phase 8 manifest already computed a readiness percentage, but nothing recorded _when_ an investigator judged a packet submission-ready or _why_ it was not. An audit trail behind an explicit operator action gives compliance a reviewable record without ever contacting a bureau.
+
+**Guardrails (audit only):** The run reuses the same completeness heuristics as the packet manifest and never submits to a bureau, never files, and never auto-classifies an account. It only records a staff-triggered assessment; live bureau submission remains deferred (5.17+).
+
+**Alternatives considered:** Computing readiness inline on the packet download only (rejected — no persisted audit trail); a scheduled/unsupervised readiness sweep (rejected — must stay operator-gated); storing readiness on the incident row (rejected — a dedicated run table preserves history and matches the dispute-strategy-run pattern).
+
+**Technical debt:** Blocking-reason strings are English and not yet localized. The run does not snapshot the exact exhibit selection (exhibit selection is still stateless per download).
+
+**Follow-up work:** Lock-aware dispute preparation (checklist slice 5); optional readiness-run history list endpoint (schema `Fcra605bReadinessRunListResponse` already defined); capability-matrix 5.16 sign-off.
+
 ## Compliance intelligence — mixed-file / personal-info variation detection (Phase 9)
 
 **Decision:** Add advisory mixed-file / personal-info variation detection to the identity-theft engine. `evaluate_identity_theft` now inspects `personal_information`, `consumer`, and `addresses` for multiple unmasked SSNs, multiple dates of birth, distinct surname variations, and a high number of address variations, emitting findings with a new `PERSONAL_INFO` detection source (rule IDs `identity_theft.personal_info.*`). A `summary.personal_info_indicators` counter surfaces the count in the Case Center.

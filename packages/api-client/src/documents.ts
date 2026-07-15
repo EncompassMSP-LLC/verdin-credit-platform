@@ -294,6 +294,20 @@ export interface Fcra605bReadiness {
   missing_evidence: string[];
 }
 
+export interface Fcra605bReadinessRun {
+  id: string;
+  case_id: string;
+  generated_at: string;
+  generated_by_id?: string | null;
+  is_ready: boolean;
+  packet_readiness?: number | null;
+  confirmed_count: number;
+  attestation_recorded: boolean;
+  bureaus: string[];
+  missing_evidence: string[];
+  blocking_reasons: string[];
+}
+
 export interface IdentityTheftIncident {
   id: string;
   case_id: string;
