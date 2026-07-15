@@ -55,6 +55,7 @@ from api.modules.accounts.intelligence_context import (
 )
 from api.modules.accounts.models import Account, DisputeStatus, InvestigationStatus
 from api.modules.accounts.permissions import ACCOUNT_DELETE_ROLE, ACCOUNT_WRITE_ROLE
+from api.modules.accounts.redispute_readiness import compute_redispute_readiness
 from api.modules.accounts.reinvestigation import compute_reinvestigation_clock
 from api.modules.accounts.repository import AccountListFilters, AccountRepository
 from api.modules.accounts.schemas import (
@@ -63,14 +64,18 @@ from api.modules.accounts.schemas import (
     AccountDisputeResponseReceivedRequest,
     AccountIntelligenceSummary,
     AccountListParams,
+    AccountRedisputeReadiness,
     AccountReinvestigationClock,
     AccountResponse,
     AccountUpdate,
+    CaseRedisputeReadinessResponse,
+    CaseRedisputeReadinessSummary,
     CaseReinvestigationClockResponse,
     CaseReinvestigationClockSummary,
     CrossBureauIntelligenceSummary,
     DisputeLetterResponse,
     DisputeReasonSuggestionResponse,
+    DisputeResponseRecordOutcome,
     DisputeResponseRecordResponse,
     MissingEvidenceResponse,
     NextActionItem,
@@ -1575,6 +1580,102 @@ class AccountService:
             summary=summary,
             accounts=entries,
         )
+
+    async def get_case_redispute_readiness(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+    ) -> CaseRedisputeReadinessResponse:
+        """Compute advisory re-dispute / escalation readiness for a case.
+
+        Layered on the §611 clock (slice 3) and recorded responses (slice 2):
+        classifies each tradeline's recommended next step (wait / prepare / re-dispute /
+        escalate / resolved). Advisory only — never files a dispute or escalation.
+        """
+        organization_id = self._require_organization(user)
+        accounts, _ = await self._accounts.list_by_case(case_id, organization_id, limit=500)
+
+        responses_by_account: dict[uuid.UUID, list[object]] = {}
+        if self._session is not None:
+            rows = await DisputeResponseRepository(self._session).list_for_case(
+                organization_id=organization_id,
+                case_id=case_id,
+            )
+            for row in rows:
+                responses_by_account.setdefault(row.account_id, []).append(row)
+
+        today = date.today()
+        entries: list[AccountRedisputeReadiness] = []
+        summary = CaseRedisputeReadinessSummary()
+        for account in accounts:
+            account_responses = responses_by_account.get(account.id, [])
+            latest_outcome = self._latest_response_outcome(account, account_responses)
+            has_real_response = account.response_received or any(
+                getattr(response, "outcome", None) != DisputeResponseOutcome.NO_RESPONSE
+                for response in account_responses
+            )
+            clock = compute_reinvestigation_clock(
+                last_dispute_date=account.last_dispute_date,
+                today=today,
+                response_recorded=has_real_response,
+            )
+            recommendation = compute_redispute_readiness(
+                clock_state=clock.state,
+                latest_outcome=latest_outcome,
+                dispute_round=account.dispute_round,
+                risk_score=account.risk_score,
+            )
+            entries.append(
+                AccountRedisputeReadiness(
+                    account_id=account.id,
+                    creditor_name=account.creditor_name,
+                    dispute_status=account.dispute_status,
+                    clock_state=clock.state,
+                    latest_outcome=latest_outcome,
+                    dispute_round=account.dispute_round,
+                    risk_score=account.risk_score,
+                    action=recommendation.action,
+                    priority=recommendation.priority,
+                    reason=recommendation.reason,
+                )
+            )
+            setattr(summary, recommendation.action, getattr(summary, recommendation.action) + 1)
+            if recommendation.priority == "high":
+                summary.high_priority += 1
+
+        priority_order = {"high": 0, "medium": 1, "low": 2}
+        entries.sort(key=lambda entry: priority_order.get(entry.priority, 9))
+        return CaseRedisputeReadinessResponse(
+            case_id=case_id,
+            generated_at=datetime.now(UTC),
+            summary=summary,
+            accounts=entries,
+        )
+
+    @staticmethod
+    def _latest_response_outcome(
+        account: Account,
+        responses: list[object],
+    ) -> DisputeResponseRecordOutcome | None:
+        """Most recent recorded response outcome, else inferred from dispute status.
+
+        ``responses`` arrive newest-first from the repository. Falls back to the
+        account's terminal ``dispute_status`` so accounts recorded via the legacy
+        ``dispute-response-received`` path still yield a readiness signal.
+        """
+        outcome_value: str | None = None
+        if responses:
+            outcome = getattr(responses[0], "outcome", None)
+            if outcome is not None:
+                outcome_value = outcome.value if hasattr(outcome, "value") else str(outcome)
+        if outcome_value is None:
+            status_map = {
+                DisputeStatus.VERIFIED: "verified",
+                DisputeStatus.CORRECTED: "corrected",
+                DisputeStatus.DELETED: "deleted",
+            }
+            outcome_value = status_map.get(account.dispute_status)
+        return cast("DisputeResponseRecordOutcome | None", outcome_value)
 
     async def escalate_overdue_investigation(
         self,

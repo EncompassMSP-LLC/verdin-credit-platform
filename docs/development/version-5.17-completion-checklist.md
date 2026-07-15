@@ -12,7 +12,7 @@ Scope: [`docs/governance/version-5.17-scope.md`](../governance/version-5.17-scop
 
 - [ ] Bureau/furnisher dispute responses persist as auditable per-letter records (staff-entered; no live polling)
 - [ ] FCRA §611 reinvestigation clock computes deadlines and surfaces no-response / overdue states
-- [ ] Reinvestigation outcomes classify and drive advisory re-dispute / escalation readiness (never auto-files)
+- [x] Reinvestigation outcomes classify and drive advisory re-dispute / escalation readiness (never auto-files)
 - [ ] Per-case reinvestigation summary read model + Case Center surface
 - [ ] Capability matrix + API reference updated
 - [ ] Deferred items explicitly documented
@@ -27,7 +27,7 @@ Scope: [`docs/governance/version-5.17-scope.md`](../governance/version-5.17-scop
 | 1     | 5.17 scope + completion checklist              | Kickoff                 | ✅     |
 | 2     | Dispute response intake + persistence          | Disputes                | ✅     |
 | 3     | §611 reinvestigation clock & no-response       | Compliance Intelligence | ✅     |
-| 4     | Reinvestigation outcome & re-dispute readiness | Disputes                | ⬜     |
+| 4     | Reinvestigation outcome & re-dispute readiness | Disputes                | ✅     |
 | 5     | Case reinvestigation summary read model + UI   | Compliance Intelligence | ⬜     |
 | 6     | Capability matrix 5.17 sign-off                | Governance              | ⬜     |
 

@@ -20,6 +20,7 @@ from api.modules.accounts.models import (
     InvestigationStatus,
     PaymentStatus,
 )
+from api.modules.accounts.redispute_readiness import RedisputeAction, RedisputePriority
 from api.modules.accounts.reinvestigation import ReinvestigationClockState
 
 AccountSortField = Literal[
@@ -432,3 +433,35 @@ class CaseReinvestigationClockResponse(BaseSchema):
     generated_at: datetime
     summary: CaseReinvestigationClockSummary
     accounts: list[AccountReinvestigationClock]
+
+
+class AccountRedisputeReadiness(BaseSchema):
+    """Advisory re-dispute / escalation recommendation for a single tradeline."""
+
+    account_id: uuid.UUID
+    creditor_name: str
+    dispute_status: DisputeStatus
+    clock_state: ReinvestigationClockState
+    latest_outcome: DisputeResponseRecordOutcome | None
+    dispute_round: int
+    risk_score: int | None
+    action: RedisputeAction
+    priority: RedisputePriority
+    reason: str
+
+
+class CaseRedisputeReadinessSummary(BaseSchema):
+    wait: int = 0
+    prepare_initial: int = 0
+    redispute: int = 0
+    escalate_cfpb: int = 0
+    escalate_attorney: int = 0
+    resolved: int = 0
+    high_priority: int = 0
+
+
+class CaseRedisputeReadinessResponse(BaseSchema):
+    case_id: uuid.UUID
+    generated_at: datetime
+    summary: CaseRedisputeReadinessSummary
+    accounts: list[AccountRedisputeReadiness]

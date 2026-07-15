@@ -13,6 +13,20 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — re-dispute / escalation readiness (Phase 10)
+
+**Decision:** Add an advisory re-dispute / escalation readiness read model. A pure `compute_redispute_readiness(...)` helper (in `accounts/redispute_readiness.py`) maps the §611 clock state, the latest recorded response outcome, the dispute round, and the account `risk_score` to a recommended `action` (`wait | prepare_initial | redispute | escalate_cfpb | escalate_attorney | resolved`) with a `priority` and human-readable `reason`. `GET /accounts/redispute-readiness?case_id=` returns a per-account list (high-priority first) plus a per-action `summary`. Shipped `@verdin/api-client` types/helper and a `CaseRedisputeReadinessPanel` on the case detail page.
+
+**Reason:** The clock (slice 3) shows _when_ a reinvestigation is overdue but not _what to do next_. Operators had to eyeball the clock state and each response outcome to decide between re-disputing, filing a CFPB complaint, or consulting an attorney. A computed recommendation collapses that judgment into a triage list without adding state or automating any action.
+
+**Guardrails (advisory only):** Pure computation over stored data — no writes, no bureau contact, and it never files a dispute or escalation. It only suggests a next step; a human always acts. `latest_outcome` falls back to the account's terminal `dispute_status` so legacy accounts (recorded via `dispute-response-received`) still yield a signal.
+
+**Alternatives considered:** Coupling readiness to the full parsed-report litigation-strength model (rejected — requires ≥2 parsed reports; `risk_score` is always present and a good-enough strength proxy); persisting a recommendation column (rejected — derivable, avoids drift); folding it into the clock endpoint (rejected — keeps each payload focused and independently cacheable).
+
+**Technical debt:** The attorney-vs-CFPB threshold is a single `risk_score ≥ 80` heuristic, not a calibrated model. Multi-round nuance is coarse (`dispute_round ≥ 2`), and MOV/§623 furnisher-direct paths are described in `reason` text rather than distinct actions.
+
+**Follow-up work:** Per-case reinvestigation summary dashboard aggregating clock + readiness (slice 5); governance sign-off (slice 6).
+
 ## Compliance intelligence — §611 reinvestigation clock (Phase 10)
 
 **Decision:** Add a computed FCRA §611 reinvestigation clock. A pure `compute_reinvestigation_clock(...)` helper (in `accounts/reinvestigation.py`) classifies a tradeline as `not_sent | awaiting | due_soon | overdue | responded` from its `last_dispute_date` and whether a real response was recorded. `GET /accounts/reinvestigation-clock?case_id=` returns a per-account list (deadline, days-remaining, state, response count) plus a per-state `summary`, sorted overdue-first. Shipped `@verdin/api-client` types/helper and a `CaseReinvestigationClockPanel` on the case detail page.
