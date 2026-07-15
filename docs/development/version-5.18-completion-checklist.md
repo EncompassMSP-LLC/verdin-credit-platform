@@ -10,7 +10,7 @@ Scope: [`docs/governance/version-5.18-scope.md`](../governance/version-5.18-scop
 
 ## Exit criteria for "5.18 done"
 
-- [ ] Each sent dispute round carries its own `sent_at`-keyed §611 reinvestigation clock
+- [x] Each sent dispute round carries its own `sent_at`-keyed §611 reinvestigation clock
 - [ ] Extended 45-day reinvestigation window modeled when documents are added mid-window
 - [ ] Per-org reinvestigation outcome analytics read model + staff surface
 - [ ] Operator-gated litigation-readiness evidence packet for attorney handoff (never auto-files)
@@ -25,7 +25,7 @@ Scope: [`docs/governance/version-5.18-scope.md`](../governance/version-5.18-scop
 | Order | Slice                                        | Epic                    | Status |
 | ----- | -------------------------------------------- | ----------------------- | ------ |
 | 1     | 5.18 scope + completion checklist            | Kickoff                 | ✅     |
-| 2     | Per-letter multi-round reinvestigation clock | Compliance Intelligence | ⬜     |
+| 2     | Per-letter multi-round reinvestigation clock | Compliance Intelligence | ✅     |
 | 3     | Extended 45-day reinvestigation window       | Compliance Intelligence | ⬜     |
 | 4     | Reinvestigation outcome analytics read model | Reporting               | ⬜     |
 | 5     | Litigation-readiness evidence packet         | Disputes                | ⬜     |

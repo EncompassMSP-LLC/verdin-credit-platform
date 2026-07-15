@@ -13,6 +13,20 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — per-letter multi-round reinvestigation clock (Phase 11)
+
+**Decision:** Key the §611 reinvestigation clock off each actually-sent dispute letter's `sent_at` instead of the account's single `last_dispute_date`. A shared `AccountService._sent_letter_rounds_by_account(...)` helper returns, per account, the latest sent `sent_at` date and the count of sent letters. Both `get_case_reinvestigation_clock` and `get_case_redispute_readiness` now derive the clock start from `latest_sent_date or last_dispute_date`. `AccountReinvestigationClock` gains `clock_start_date` (the effective date the clock runs from) and `dispute_round_count` (number of sent rounds); readiness uses `max(observed_rounds, account.dispute_round)`.
+
+**Reason:** Phase 10 slice 3 keyed the clock off `last_dispute_date`, so multi-round disputes only reflected the account's single stored date — a fresh re-dispute did not reset the 30-day window and old rounds could not be distinguished. Keying off the newest sent letter makes each round carry its own deadline (the documented slice-3 tech debt) and lets the readiness engine see the true round count.
+
+**Guardrails:** Still pure computation over stored data — no writes, no bureau contact. Only `status == sent` letters with a non-null `sent_at` count; drafts and voided letters are ignored. When no letter has been sent the clock falls back to `last_dispute_date`, so existing behavior is preserved.
+
+**Alternatives considered:** Persisting a `clock_start_date` column on the account (rejected — derivable from sent letters, avoids a migration + drift); using `created_at` of the letter (rejected — the mail date, not draft date, starts the statutory window); recomputing in each endpoint separately (rejected — a shared helper keeps the clock and readiness consistent, which the summary read model depends on).
+
+**Technical debt:** The 45-day extended reinvestigation window is still not modeled (Phase 11 slice 3). `dispute_round_count` counts sent letters regardless of recipient (bureau vs furnisher), so a mixed set is not split per recipient.
+
+**Follow-up work:** Extended 45-day window modeling (slice 3); per-org reinvestigation outcome analytics (slice 4); litigation-readiness evidence packet (slice 5).
+
 ## Compliance intelligence — per-case reinvestigation summary (Phase 10)
 
 **Decision:** Add an aggregated per-case reinvestigation dashboard read model. `GET /accounts/reinvestigation-summary?case_id=` (service `get_case_reinvestigation_summary`) rolls up the §611 clock (slice 3), advisory readiness (slice 4), and recorded responses (slice 2) into one payload: totals (`total_accounts`, `disputed_accounts`, `total_responses`), the per-state `clock` summary, the per-action `readiness` summary, the earliest still-open `next_deadline` (+ account/creditor), `most_overdue_days`, and the high-priority `action_items`. Shipped `@verdin/api-client` types/helper and a `CaseReinvestigationSummaryCard` at the top of the case reinvestigation section.

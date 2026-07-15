@@ -413,6 +413,8 @@ class AccountReinvestigationClock(BaseSchema):
     creditor_name: str
     dispute_status: DisputeStatus
     last_dispute_date: date | None
+    clock_start_date: date | None
+    dispute_round_count: int
     deadline: date | None
     days_remaining: int | None
     state: ReinvestigationClockState

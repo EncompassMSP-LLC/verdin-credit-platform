@@ -1,9 +1,12 @@
 """Tests for the FCRA §611 reinvestigation clock (Phase 10 slice 3)."""
 
-from datetime import date, timedelta
+import uuid
+from datetime import UTC, date, datetime, timedelta
 
 from fastapi.testclient import TestClient
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from api.modules.accounts.dispute_letter_models import DisputeLetter, DisputeLetterStatus
 from api.modules.accounts.reinvestigation import compute_reinvestigation_clock
 from tests.accounts.conftest import sample_account_payload
 
@@ -141,3 +144,56 @@ def test_case_reinvestigation_clock_marks_responded(
     assert entry["state"] == "responded"
     assert entry["response_received"] is True
     assert entry["response_count"] == 1
+
+
+async def test_clock_keys_off_latest_sent_letter(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+    db_session: AsyncSession,
+) -> None:
+    """A freshly sent dispute round resets the clock, overriding a stale last_dispute_date."""
+    overdue_date = (date.today() - timedelta(days=40)).isoformat()
+    account_id = _create_account_with_dispute_date(
+        api_client,
+        manager_headers,
+        sample_case_id,
+        creditor_name="Multi Round Bank",
+        last_dispute_date=overdue_date,
+    )
+    account = api_client.get(f"/api/v1/accounts/{account_id}", headers=manager_headers).json()
+
+    now = datetime.now(UTC)
+    db_session.add(
+        DisputeLetter(
+            id=uuid.uuid4(),
+            organization_id=uuid.UUID(account["organization_id"]),
+            case_id=uuid.UUID(sample_case_id),
+            account_id=uuid.UUID(account_id),
+            recipient_type="credit_bureau",
+            status=DisputeLetterStatus.SENT,
+            template_id="fcra_611",
+            subject="Dispute",
+            body="Body",
+            disputed_items=["late payment"],
+            requested_action="Delete the inaccurate tradeline.",
+            evidence_checklist=[],
+            compliance_notes=[],
+            generated_by="system",
+            generated_at=now,
+            sent_at=now,
+        )
+    )
+    await db_session.commit()
+
+    clock = api_client.get(
+        "/api/v1/accounts/reinvestigation-clock",
+        headers=manager_headers,
+        params={"case_id": sample_case_id},
+    )
+    entry = next(a for a in clock.json()["accounts"] if a["account_id"] == account_id)
+    # Clock keys off the freshly-sent letter, not the stale account last_dispute_date.
+    assert entry["clock_start_date"] == date.today().isoformat()
+    assert entry["dispute_round_count"] == 1
+    assert entry["state"] == "awaiting"
+    assert entry["last_dispute_date"] == overdue_date

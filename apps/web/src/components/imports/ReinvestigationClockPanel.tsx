@@ -59,6 +59,7 @@ function ClockRow({ entry }: { entry: AccountReinvestigationClock }) {
               ? ` · ${Math.abs(entry.days_remaining)}d overdue`
               : ` · ${entry.days_remaining}d left`
             : ''}
+          {entry.dispute_round_count > 0 ? ` · round ${entry.dispute_round_count}` : ''}
           {entry.response_count > 0 ? ` · ${entry.response_count} response(s) recorded` : ''}
         </p>
       </div>
