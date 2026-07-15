@@ -96,6 +96,42 @@ export function AccountLitigationPacketPanel({ accountId }: AccountLitigationPac
             </div>
           ) : null}
 
+          {packet.cross_bureau.compared_bureaus.length > 0 ? (
+            <div>
+              <h4 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                Cross-bureau discrepancies
+                <span className="ml-1 font-normal normal-case text-gray-400">
+                  (vs {packet.cross_bureau.compared_bureaus.join(', ')})
+                </span>
+              </h4>
+              {packet.cross_bureau.discrepancies.length === 0 ? (
+                <p className="mt-1 text-xs text-gray-500">
+                  No divergences found across the compared bureaus.
+                </p>
+              ) : (
+                <ul className="mt-1 space-y-1 text-xs text-gray-700">
+                  {packet.cross_bureau.discrepancies.map((discrepancy) => (
+                    <li
+                      key={`${discrepancy.kind}-${discrepancy.bureau}-${discrepancy.detail}`}
+                      className="flex items-start gap-2"
+                    >
+                      <span
+                        className={`mt-0.5 shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-medium ${
+                          discrepancy.kind === 'outcome_conflict'
+                            ? 'bg-red-100 text-red-700'
+                            : 'bg-gray-100 text-gray-600'
+                        }`}
+                      >
+                        {discrepancy.kind.replace(/_/g, ' ')}
+                      </span>
+                      <span>{discrepancy.detail}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ) : null}
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <h4 className="text-xs font-semibold uppercase tracking-wide text-gray-500">

@@ -541,6 +541,21 @@ class LitigationReadinessAssessment(BaseSchema):
     summary: str
 
 
+class LitigationCrossBureauDiscrepancy(BaseSchema):
+    """A single divergence between this tradeline and a sibling bureau's copy."""
+
+    kind: str
+    bureau: str
+    detail: str
+
+
+class LitigationCrossBureauEvidence(BaseSchema):
+    """Cross-bureau comparison of the same creditor's tradeline across bureaus."""
+
+    compared_bureaus: list[str]
+    discrepancies: list[LitigationCrossBureauDiscrepancy]
+
+
 class AccountLitigationPacket(BaseSchema):
     """Operator-gated litigation-readiness evidence bundle for attorney handoff.
 
@@ -564,6 +579,7 @@ class AccountLitigationPacket(BaseSchema):
     latest_outcome: DisputeResponseRecordOutcome | None
     recommended_action: RedisputeAction
     assessment: LitigationReadinessAssessment
+    cross_bureau: LitigationCrossBureauEvidence
     letters: list[LitigationPacketLetter]
     responses: list[LitigationPacketResponse]
     disclaimer: str

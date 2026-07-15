@@ -594,6 +594,17 @@ export interface LitigationReadinessAssessment {
   summary: string;
 }
 
+export interface LitigationCrossBureauDiscrepancy {
+  kind: string;
+  bureau: string;
+  detail: string;
+}
+
+export interface LitigationCrossBureauEvidence {
+  compared_bureaus: string[];
+  discrepancies: LitigationCrossBureauDiscrepancy[];
+}
+
 export interface AccountLitigationPacket {
   account_id: string;
   case_id: string;
@@ -609,6 +620,7 @@ export interface AccountLitigationPacket {
   latest_outcome: DisputeResponseRecordOutcome | null;
   recommended_action: RedisputeAction;
   assessment: LitigationReadinessAssessment;
+  cross_bureau: LitigationCrossBureauEvidence;
   letters: LitigationPacketLetter[];
   responses: LitigationPacketResponse[];
   disclaimer: string;

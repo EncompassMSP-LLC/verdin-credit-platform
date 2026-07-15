@@ -13,6 +13,20 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — litigation packet cross-bureau evidence (Phase 12)
+
+**Decision:** Fold cross-bureau discrepancy evidence into the litigation-readiness packet. A new pure module `cross_bureau.py` (`detect_cross_bureau_discrepancies(target, siblings)`) compares a tradeline to the same creditor's copies at _other_ bureaus in the case, returning typed `CrossBureauDiscrepancy` findings (`outcome_conflict`, `dispute_status_conflict`, `account_status_conflict`, `payment_status_conflict`, `balance_conflict`). `AccountService._build_cross_bureau_evidence` loads the case tradelines + recorded responses, matches siblings on normalized creditor name (plus masked account number when both present) and a different bureau, reduces each to its latest outcome/status/balance, and runs the detector. The packet gains a `cross_bureau` block, and `LitigationReadinessInputs` gains `cross_bureau_conflicts` / `cross_bureau_outcome_conflict` so `build_litigation_readiness` scores the signal (+25 for an outcome conflict, +10 for lesser divergences).
+
+**Reason:** A single furnisher item deleted at one bureau but verified at another cannot be simultaneously accurate everywhere — it is a textbook FCRA reinvestigation-failure signal. The 5.18 packet graded each bureau's tradeline in isolation and missed this cross-bureau pattern (documented as follow-up work).
+
+**Guardrails:** Read model only — compares data already stored on the platform (case tradelines + recorded responses); no live bureau contact, no writes, and still operator-gated behind `case_manager`+ write permission. Sibling matching stays conservative (same creditor **and** matching masked account number when both carry one) so distinct tradelines from the same creditor are not conflated. The detector is pure and independently unit-tested.
+
+**Alternatives considered:** Reusing the existing `intelligence_context` cross-bureau report comparison (rejected — that surface compares raw report fields for discrepancy scoring, not dispute _outcomes_; the litigation angle needs outcome-level conflicts and its own auditable grading). Matching siblings on creditor name only (rejected — would conflate multiple tradelines from the same lender); matching on account number only (rejected — many imports lack a masked number).
+
+**Technical debt:** Sibling latest-outcome reuses `_latest_response_outcome` (recorded response first, else terminal `dispute_status`), so a sibling with neither yields no outcome signal. Balance conflicts flag any difference (no tolerance band). Matching is per-case only — the same creditor across different cases is never compared (correct for now; cases are per-consumer).
+
+**Follow-up work:** Operator-gated litigation evidence export (slice 5).
+
 ## Compliance intelligence — per-recipient reinvestigation clock splits (Phase 12)
 
 **Decision:** Add a `recipients` array to each `GET /accounts/reinvestigation-clock` entry, splitting the §611 clock by recipient (credit bureau vs furnisher) when a tradeline is disputed with more than one. `AccountService._recipient_rounds_by_account` groups sent `dispute_letters` by `(account_id, recipient_type)` to compute each recipient's latest sent round + round count, and also returns a `dispute_letter_id → recipient_type` map. `_build_recipient_clocks` runs the existing `compute_reinvestigation_clock` helper per recipient, attributing recorded responses to a recipient via the response's `dispute_letter_id` — so a bureau response resolves only the bureau sub-clock. Each `AccountReinvestigationRecipientClock` carries its own `clock_start_date`, `dispute_round_count`, `deadline`, `days_remaining`, `state`, `extended`, and `response_count`. The clock panel renders the split as sub-rows only when there is more than one recipient.
