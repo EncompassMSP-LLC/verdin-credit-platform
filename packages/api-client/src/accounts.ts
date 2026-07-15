@@ -460,6 +460,7 @@ export interface AccountReinvestigationClock {
   deadline: string | null;
   days_remaining: number | null;
   state: ReinvestigationClockState;
+  extended: boolean;
   response_received: boolean;
   response_count: number;
 }
@@ -470,6 +471,7 @@ export interface CaseReinvestigationClockSummary {
   due_soon: number;
   overdue: number;
   responded: number;
+  extended_windows: number;
 }
 
 export interface CaseReinvestigationClock {

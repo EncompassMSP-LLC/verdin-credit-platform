@@ -41,6 +41,9 @@ function SummaryBadges({ summary }: { summary: CaseReinvestigationClockSummary }
       <Badge variant="info">{summary.awaiting} awaiting</Badge>
       <Badge variant="success">{summary.responded} responded</Badge>
       <Badge variant="default">{summary.not_sent} not sent</Badge>
+      {summary.extended_windows > 0 ? (
+        <Badge variant="info">{summary.extended_windows} on 45-day window</Badge>
+      ) : null}
     </div>
   );
 }
@@ -60,10 +63,18 @@ function ClockRow({ entry }: { entry: AccountReinvestigationClock }) {
               : ` · ${entry.days_remaining}d left`
             : ''}
           {entry.dispute_round_count > 0 ? ` · round ${entry.dispute_round_count}` : ''}
+          {entry.extended ? ' · 45-day window' : ''}
           {entry.response_count > 0 ? ` · ${entry.response_count} response(s) recorded` : ''}
         </p>
       </div>
-      <Badge variant={stateBadgeVariant(entry.state)}>{STATE_LABELS[entry.state]}</Badge>
+      <div className="flex items-center gap-2">
+        {entry.extended ? (
+          <span title="§611(a)(1)(B) 45-day extension">
+            <Badge variant="info">§611(a)(1)(B)</Badge>
+          </span>
+        ) : null}
+        <Badge variant={stateBadgeVariant(entry.state)}>{STATE_LABELS[entry.state]}</Badge>
+      </div>
     </li>
   );
 }
@@ -93,8 +104,9 @@ export function CaseReinvestigationClockPanel({
     <div id={id} className={className}>
       <Card title="Reinvestigation clock (FCRA §611)">
         <p className="text-sm text-gray-500">
-          Tracks the 30-day reinvestigation window from the dispute mail date. Overdue and due-soon
-          tradelines surface first. Staff-entered responses only — no live bureau polling.
+          Tracks the 30-day reinvestigation window from the dispute mail date, extended to 45 days
+          when the consumer supplies documents during the window (§611(a)(1)(B)). Overdue and
+          due-soon tradelines surface first. Staff-entered responses only — no live bureau polling.
         </p>
 
         {clockQuery.isLoading ? (

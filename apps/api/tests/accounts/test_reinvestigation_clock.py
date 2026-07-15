@@ -7,7 +7,11 @@ from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.modules.accounts.dispute_letter_models import DisputeLetter, DisputeLetterStatus
-from api.modules.accounts.reinvestigation import compute_reinvestigation_clock
+from api.modules.accounts.reinvestigation import (
+    compute_reinvestigation_clock,
+    document_extends_window,
+)
+from api.modules.documents.models import Document
 from tests.accounts.conftest import sample_account_payload
 
 _TODAY = date(2026, 7, 15)
@@ -52,6 +56,54 @@ def test_compute_clock_responded_short_circuits() -> None:
         last_dispute_date=_TODAY - timedelta(days=40), today=_TODAY, response_recorded=True
     )
     assert clock.state == "responded"
+
+
+def test_compute_clock_extended_window_uses_45_days() -> None:
+    # Day 35 is overdue on the base 30-day window but still awaiting on the 45-day window.
+    start = _TODAY - timedelta(days=35)
+    base = compute_reinvestigation_clock(
+        last_dispute_date=start, today=_TODAY, response_recorded=False
+    )
+    assert base.state == "overdue"
+
+    extended = compute_reinvestigation_clock(
+        last_dispute_date=start, today=_TODAY, response_recorded=False, extended=True
+    )
+    assert extended.state == "awaiting"
+    assert extended.extended is True
+    assert extended.deadline == start + timedelta(days=45)
+    assert extended.days_remaining == 10
+
+
+def test_document_extends_window_within_initial_period() -> None:
+    start = _TODAY
+    # Supplied on day 10 of the initial 30-day window → extends.
+    assert (
+        document_extends_window(
+            clock_start_date=start,
+            document_dates=[start + timedelta(days=10)],
+        )
+        is True
+    )
+
+
+def test_document_extends_window_ignores_out_of_window_docs() -> None:
+    start = _TODAY
+    assert (
+        document_extends_window(
+            clock_start_date=start,
+            document_dates=[
+                start - timedelta(days=5),  # before the dispute was mailed
+                start,  # same day as mailing (part of the initial packet)
+                start + timedelta(days=40),  # after the initial 30-day window
+            ],
+        )
+        is False
+    )
+
+
+def test_document_extends_window_no_clock_start() -> None:
+    assert document_extends_window(clock_start_date=None, document_dates=[_TODAY]) is False
 
 
 def _create_account_with_dispute_date(
@@ -197,3 +249,51 @@ async def test_clock_keys_off_latest_sent_letter(
     assert entry["dispute_round_count"] == 1
     assert entry["state"] == "awaiting"
     assert entry["last_dispute_date"] == overdue_date
+
+
+async def test_clock_extends_to_45_days_when_document_supplied_in_window(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+    db_session: AsyncSession,
+) -> None:
+    """A consumer document uploaded during the initial window extends the clock to 45 days."""
+    start_date = date.today() - timedelta(days=20)
+    account_id = _create_account_with_dispute_date(
+        api_client,
+        manager_headers,
+        sample_case_id,
+        creditor_name="Extension Bank",
+        last_dispute_date=start_date.isoformat(),
+    )
+    account = api_client.get(f"/api/v1/accounts/{account_id}", headers=manager_headers).json()
+
+    # Uploaded 5 days into the reinvestigation → §611(a)(1)(B) 45-day extension.
+    supplied_at = datetime.now(UTC) - timedelta(days=15)
+    db_session.add(
+        Document(
+            id=uuid.uuid4(),
+            organization_id=uuid.UUID(account["organization_id"]),
+            case_id=uuid.UUID(sample_case_id),
+            account_id=uuid.UUID(account_id),
+            title="Supplemental proof",
+            file_name="proof.pdf",
+            storage_key=f"docs/{uuid.uuid4()}.pdf",
+            file_hash=uuid.uuid4().hex,
+            created_at=supplied_at,
+        )
+    )
+    await db_session.commit()
+
+    clock = api_client.get(
+        "/api/v1/accounts/reinvestigation-clock",
+        headers=manager_headers,
+        params={"case_id": sample_case_id},
+    )
+    body = clock.json()
+    entry = next(a for a in body["accounts"] if a["account_id"] == account_id)
+    assert entry["extended"] is True
+    assert entry["deadline"] == (start_date + timedelta(days=45)).isoformat()
+    assert entry["days_remaining"] == 25
+    assert entry["state"] == "awaiting"
+    assert body["summary"]["extended_windows"] >= 1
