@@ -251,6 +251,156 @@ async def test_clock_keys_off_latest_sent_letter(
     assert entry["last_dispute_date"] == overdue_date
 
 
+def _add_sent_letter(
+    db_session: AsyncSession,
+    *,
+    organization_id: str,
+    case_id: str,
+    account_id: str,
+    recipient_type: str,
+    sent_at: datetime,
+) -> uuid.UUID:
+    letter_id = uuid.uuid4()
+    db_session.add(
+        DisputeLetter(
+            id=letter_id,
+            organization_id=uuid.UUID(organization_id),
+            case_id=uuid.UUID(case_id),
+            account_id=uuid.UUID(account_id),
+            recipient_type=recipient_type,
+            status=DisputeLetterStatus.SENT,
+            template_id="fcra_611",
+            subject=f"Dispute to {recipient_type}",
+            body="Body",
+            disputed_items=["late payment"],
+            requested_action="Delete the inaccurate tradeline.",
+            evidence_checklist=[],
+            compliance_notes=[],
+            generated_by="system",
+            generated_at=sent_at,
+            sent_at=sent_at,
+        )
+    )
+    return letter_id
+
+
+async def test_clock_splits_by_recipient(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+    db_session: AsyncSession,
+) -> None:
+    """A tradeline disputed with both a bureau and a furnisher carries two clocks."""
+    account_id = _create_account_with_dispute_date(
+        api_client,
+        manager_headers,
+        sample_case_id,
+        creditor_name="Two Recipient Bank",
+        last_dispute_date=(date.today() - timedelta(days=40)).isoformat(),
+    )
+    account = api_client.get(f"/api/v1/accounts/{account_id}", headers=manager_headers).json()
+
+    now = datetime.now(UTC)
+    # Bureau round mailed 40 days ago (overdue); furnisher round mailed 5 days ago (awaiting).
+    _add_sent_letter(
+        db_session,
+        organization_id=account["organization_id"],
+        case_id=sample_case_id,
+        account_id=account_id,
+        recipient_type="credit_bureau",
+        sent_at=now - timedelta(days=40),
+    )
+    _add_sent_letter(
+        db_session,
+        organization_id=account["organization_id"],
+        case_id=sample_case_id,
+        account_id=account_id,
+        recipient_type="furnisher",
+        sent_at=now - timedelta(days=5),
+    )
+    await db_session.commit()
+
+    clock = api_client.get(
+        "/api/v1/accounts/reinvestigation-clock",
+        headers=manager_headers,
+        params={"case_id": sample_case_id},
+    )
+    assert clock.status_code == 200, clock.text
+    entry = next(a for a in clock.json()["accounts"] if a["account_id"] == account_id)
+    recipients = {r["recipient_type"]: r for r in entry["recipients"]}
+    assert set(recipients) == {"credit_bureau", "furnisher"}
+    # Bureau first in the stable ordering.
+    assert entry["recipients"][0]["recipient_type"] == "credit_bureau"
+    assert recipients["credit_bureau"]["state"] == "overdue"
+    assert recipients["credit_bureau"]["dispute_round_count"] == 1
+    assert recipients["furnisher"]["state"] == "awaiting"
+    assert recipients["furnisher"]["dispute_round_count"] == 1
+    assert (
+        recipients["furnisher"]["clock_start_date"]
+        == (date.today() - timedelta(days=5)).isoformat()
+    )
+
+
+async def test_clock_recipient_response_resolves_only_that_recipient(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+    db_session: AsyncSession,
+) -> None:
+    """A response linked to the bureau letter resolves the bureau clock only."""
+    account_id = _create_account_with_dispute_date(
+        api_client,
+        manager_headers,
+        sample_case_id,
+        creditor_name="Selective Response Bank",
+        last_dispute_date=(date.today() - timedelta(days=40)).isoformat(),
+    )
+    account = api_client.get(f"/api/v1/accounts/{account_id}", headers=manager_headers).json()
+
+    now = datetime.now(UTC)
+    bureau_letter_id = _add_sent_letter(
+        db_session,
+        organization_id=account["organization_id"],
+        case_id=sample_case_id,
+        account_id=account_id,
+        recipient_type="credit_bureau",
+        sent_at=now - timedelta(days=40),
+    )
+    _add_sent_letter(
+        db_session,
+        organization_id=account["organization_id"],
+        case_id=sample_case_id,
+        account_id=account_id,
+        recipient_type="furnisher",
+        sent_at=now - timedelta(days=40),
+    )
+    await db_session.commit()
+
+    record = api_client.post(
+        f"/api/v1/accounts/{account_id}/dispute-responses",
+        headers=manager_headers,
+        json={
+            "outcome": "verified",
+            "response_method": "mail",
+            "dispute_letter_id": str(bureau_letter_id),
+        },
+    )
+    assert record.status_code == 201, record.text
+
+    clock = api_client.get(
+        "/api/v1/accounts/reinvestigation-clock",
+        headers=manager_headers,
+        params={"case_id": sample_case_id},
+    )
+    entry = next(a for a in clock.json()["accounts"] if a["account_id"] == account_id)
+    recipients = {r["recipient_type"]: r for r in entry["recipients"]}
+    assert recipients["credit_bureau"]["state"] == "responded"
+    assert recipients["credit_bureau"]["response_count"] == 1
+    # The furnisher clock is untouched by the bureau-linked response.
+    assert recipients["furnisher"]["state"] == "overdue"
+    assert recipients["furnisher"]["response_count"] == 0
+
+
 async def test_clock_extends_to_45_days_when_document_supplied_in_window(
     api_client: TestClient,
     manager_headers: dict[str, str],

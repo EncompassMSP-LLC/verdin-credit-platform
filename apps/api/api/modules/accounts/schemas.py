@@ -407,6 +407,19 @@ class DisputeResponseRecordResponse(BaseSchema):
         )
 
 
+class AccountReinvestigationRecipientClock(BaseSchema):
+    """Per-recipient (credit bureau vs furnisher) §611 sub-clock for a tradeline."""
+
+    recipient_type: str
+    clock_start_date: date | None
+    dispute_round_count: int
+    deadline: date | None
+    days_remaining: int | None
+    state: ReinvestigationClockState
+    extended: bool = False
+    response_count: int = 0
+
+
 class AccountReinvestigationClock(BaseSchema):
     """Per-account §611 reinvestigation clock entry."""
 
@@ -422,6 +435,7 @@ class AccountReinvestigationClock(BaseSchema):
     extended: bool = False
     response_received: bool
     response_count: int
+    recipients: list[AccountReinvestigationRecipientClock] = []
 
 
 class CaseReinvestigationClockSummary(BaseSchema):

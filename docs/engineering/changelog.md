@@ -13,6 +13,20 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — per-recipient reinvestigation clock splits (Phase 12)
+
+**Decision:** Add a `recipients` array to each `GET /accounts/reinvestigation-clock` entry, splitting the §611 clock by recipient (credit bureau vs furnisher) when a tradeline is disputed with more than one. `AccountService._recipient_rounds_by_account` groups sent `dispute_letters` by `(account_id, recipient_type)` to compute each recipient's latest sent round + round count, and also returns a `dispute_letter_id → recipient_type` map. `_build_recipient_clocks` runs the existing `compute_reinvestigation_clock` helper per recipient, attributing recorded responses to a recipient via the response's `dispute_letter_id` — so a bureau response resolves only the bureau sub-clock. Each `AccountReinvestigationRecipientClock` carries its own `clock_start_date`, `dispute_round_count`, `deadline`, `days_remaining`, `state`, `extended`, and `response_count`. The clock panel renders the split as sub-rows only when there is more than one recipient.
+
+**Reason:** The 5.18 clock reported a single recipient-agnostic `dispute_round_count` and one deadline per tradeline (documented tech debt). A tradeline disputed with both a bureau and the furnisher actually carries two independent §611 clocks; collapsing them hid whether one recipient had gone overdue while the other responded.
+
+**Guardrails:** Read model only — computed over stored sent letters and recorded responses, no live bureau contact and no writes. Response attribution requires a linked `dispute_letter_id`; unlinked responses do not resolve any recipient sub-clock (they still count toward the account-level `response_received`). The top-level clock fields are unchanged for single-recipient tradelines, so existing consumers keep working.
+
+**Alternatives considered:** Attributing responses to recipients heuristically by date proximity (rejected — brittle and non-auditable; the `dispute_letter_id` link is explicit); always emitting a `recipients` array even for single-recipient tradelines (rejected for now — the UI only needs the split when it disambiguates, and the top-level fields already cover the common case).
+
+**Technical debt:** Recipients without a linked response never leave `awaiting`/`overdue` even if the consumer heard back off-platform. The `extended` flag is computed once per tradeline (document-in-window) and applied to every recipient sub-clock rather than per recipient.
+
+**Follow-up work:** Litigation packet cross-bureau discrepancy evidence (slice 4); operator-gated evidence export (slice 5).
+
 ## Compliance intelligence — reinvestigation analytics slicing (Phase 12)
 
 **Decision:** Add optional `start` / `end` (by response day, inclusive) and `bureau` filters to `GET /reporting/reinvestigation-outcomes`. `OperationsReportingRepository.get_reinvestigation_outcomes(org, start, end, bureau)` applies the `bureau` filter in SQL (`Account.bureau == bureau`) and the date-range filter in Python over the computed response day (which uses a `recorded_at` fallback, so an all-SQL predicate would need a `coalesce`). The service echoes the applied filters back under a new `filters` block (`ReinvestigationOutcomeFilters`), and the Reporting Center "Reinvestigation outcomes" tab gains from/to date inputs and a bureau select.
