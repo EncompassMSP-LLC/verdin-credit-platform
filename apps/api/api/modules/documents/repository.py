@@ -154,6 +154,27 @@ class DocumentRepository:
         )
         return list(result.scalars().all()), total
 
+    async def list_case_document_dates(
+        self,
+        *,
+        organization_id: uuid.UUID,
+        case_id: uuid.UUID,
+    ) -> list[tuple[uuid.UUID | None, datetime]]:
+        """(account_id, created_at) for every non-deleted document in a case.
+
+        Lightweight projection used by the §611 reinvestigation clock to detect
+        consumer documents supplied during the initial window (the 45-day
+        extension signal). Avoids loading full Document rows / metadata.
+        """
+        result = await self._session.execute(
+            select(Document.account_id, Document.created_at).where(
+                Document.organization_id == organization_id,
+                Document.case_id == case_id,
+                Document.deleted_at.is_(None),
+            )
+        )
+        return [(row[0], row[1]) for row in result.all()]
+
     async def create(self, document: Document) -> Document:
         self._session.add(document)
         await self._session.flush()

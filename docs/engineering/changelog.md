@@ -13,6 +13,20 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — extended 45-day reinvestigation window (Phase 11)
+
+**Decision:** Model the FCRA §611(a)(1)(B) 45-day reinvestigation window. `compute_reinvestigation_clock(...)` gains an `extended` flag that swaps the base 30-day window for 45 days (and carries the flag onto the returned `ReinvestigationClock`). A new pure `document_extends_window(clock_start_date, document_dates)` helper flags the extension when a case/account document was uploaded strictly after the clock start and on or before the initial 30-day deadline. `AccountService._case_document_dates(...)` projects `(account_id, created_at)` per case via a new lightweight `DocumentRepository.list_case_document_dates(...)`, and both the clock and readiness endpoints pass `extended` through. `AccountReinvestigationClock` gains `extended: bool`; the clock summary gains `extended_windows`.
+
+**Reason:** §611(a)(1)(B) extends the CRA's reinvestigation window to 45 days when the consumer supplies additional relevant information during the initial 30-day period. Modeling this keeps the overdue/due-soon classification legally accurate — a tradeline that received supplemental documents mid-reinvestigation is not flagged overdue at day 31.
+
+**Guardrails:** Still pure computation over stored data — no writes, no bureau contact. Case-level documents (no `account_id`) apply to every tradeline; account-linked documents apply only to that tradeline. Documents uploaded before the clock start, on the mailing day itself (treated as part of the initial packet), or after the 30-day deadline do not trigger the extension.
+
+**Alternatives considered:** A per-account boolean/date column signalling the extension (rejected — derivable from existing document timestamps, avoids a migration + drift); loading full `Document` rows via `list_documents` (rejected — a `(account_id, created_at)` projection avoids pulling metadata for a read model); requiring an explicit staff toggle (deferred — auto-detection from uploaded documents is the least-surprising default; an explicit override can layer on later).
+
+**Technical debt:** The extension signal is any case/account document in the window; it does not yet inspect document type (e.g. only counting evidence/identity docs) or link to the specific dispute letter that was answered. `dispute_round_count` still counts sent letters regardless of recipient.
+
+**Follow-up work:** Per-org reinvestigation outcome analytics (slice 4); litigation-readiness evidence packet (slice 5).
+
 ## Compliance intelligence — per-letter multi-round reinvestigation clock (Phase 11)
 
 **Decision:** Key the §611 reinvestigation clock off each actually-sent dispute letter's `sent_at` instead of the account's single `last_dispute_date`. A shared `AccountService._sent_letter_rounds_by_account(...)` helper returns, per account, the latest sent `sent_at` date and the count of sent letters. Both `get_case_reinvestigation_clock` and `get_case_redispute_readiness` now derive the clock start from `latest_sent_date or last_dispute_date`. `AccountReinvestigationClock` gains `clock_start_date` (the effective date the clock runs from) and `dispute_round_count` (number of sent rounds); readiness uses `max(observed_rounds, account.dispute_round)`.

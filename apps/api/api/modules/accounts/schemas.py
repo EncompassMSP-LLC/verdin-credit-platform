@@ -418,6 +418,7 @@ class AccountReinvestigationClock(BaseSchema):
     deadline: date | None
     days_remaining: int | None
     state: ReinvestigationClockState
+    extended: bool = False
     response_received: bool
     response_count: int
 
@@ -428,6 +429,7 @@ class CaseReinvestigationClockSummary(BaseSchema):
     due_soon: int = 0
     overdue: int = 0
     responded: int = 0
+    extended_windows: int = 0
 
 
 class CaseReinvestigationClockResponse(BaseSchema):

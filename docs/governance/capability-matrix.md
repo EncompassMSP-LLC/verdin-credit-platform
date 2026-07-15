@@ -593,13 +593,13 @@ Scope: [version-5.17-scope.md](version-5.17-scope.md) · Checklist: [version-5.1
 
 Scope: [version-5.18-scope.md](version-5.18-scope.md) · Checklist: [version-5.18-completion-checklist.md](../development/version-5.18-completion-checklist.md)
 
-| Capability                                   | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                                     |
-| -------------------------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ----------------------------------------------------------------------------------------- |
-| Per-letter multi-round reinvestigation clock | 5.18    | ✅      | ✅      | ✅       | ✅  | —   | ✅    | Disputes     | Clock keys off latest sent `sent_at`; adds `clock_start_date` + `dispute_round_count`     |
-| Extended 45-day reinvestigation window       | 5.18    | Planned | —       | —        | —   | —   | —     | Disputes     | §611 45-day extension modeled when documents added mid-window                             |
-| Reinvestigation outcome analytics            | 5.18    | Planned | —       | —        | —   | —   | —     | Reporting    | Per-org deletion/verify/correction rates + time-to-resolution; no cross-tenant benchmarks |
-| Litigation-readiness evidence packet         | 5.18    | Planned | —       | —        | —   | —   | —     | Disputes     | Operator-gated §611/§623 evidence bundle for attorney handoff; never auto-files           |
-| Automated litigation filing                  | Never   | Planned | —       | —        | —   | —   | —     | Compliance   | Out of scope — the packet is a human handoff; the platform never files                    |
+| Capability                                   | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                                       |
+| -------------------------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ------------------------------------------------------------------------------------------- |
+| Per-letter multi-round reinvestigation clock | 5.18    | ✅      | ✅      | ✅       | ✅  | —   | ✅    | Disputes     | Clock keys off latest sent `sent_at`; adds `clock_start_date` + `dispute_round_count`       |
+| Extended 45-day reinvestigation window       | 5.18    | ✅      | ✅      | ✅       | ✅  | —   | ✅    | Disputes     | §611(a)(1)(B) 45-day extension when a document is uploaded during the initial 30-day window |
+| Reinvestigation outcome analytics            | 5.18    | Planned | —       | —        | —   | —   | —     | Reporting    | Per-org deletion/verify/correction rates + time-to-resolution; no cross-tenant benchmarks   |
+| Litigation-readiness evidence packet         | 5.18    | Planned | —       | —        | —   | —   | —     | Disputes     | Operator-gated §611/§623 evidence bundle for attorney handoff; never auto-files             |
+| Automated litigation filing                  | Never   | Planned | —       | —        | —   | —   | —     | Compliance   | Out of scope — the packet is a human handoff; the platform never files                      |
 
 ---
 

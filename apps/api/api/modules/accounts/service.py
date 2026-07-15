@@ -56,7 +56,10 @@ from api.modules.accounts.intelligence_context import (
 from api.modules.accounts.models import Account, DisputeStatus, InvestigationStatus
 from api.modules.accounts.permissions import ACCOUNT_DELETE_ROLE, ACCOUNT_WRITE_ROLE
 from api.modules.accounts.redispute_readiness import compute_redispute_readiness
-from api.modules.accounts.reinvestigation import compute_reinvestigation_clock
+from api.modules.accounts.reinvestigation import (
+    compute_reinvestigation_clock,
+    document_extends_window,
+)
 from api.modules.accounts.repository import AccountListFilters, AccountRepository
 from api.modules.accounts.schemas import (
     AccountCreate,
@@ -1542,6 +1545,9 @@ class AccountService:
         rounds_by_account = await self._sent_letter_rounds_by_account(
             organization_id=organization_id, case_id=case_id
         )
+        doc_dates_by_account, case_level_doc_dates = await self._case_document_dates(
+            organization_id=organization_id, case_id=case_id
+        )
 
         today = date.today()
         entries: list[AccountReinvestigationClock] = []
@@ -1554,10 +1560,15 @@ class AccountService:
             )
             latest_sent_date, round_count = rounds_by_account.get(account.id, (None, 0))
             clock_start_date = latest_sent_date or account.last_dispute_date
+            extended = document_extends_window(
+                clock_start_date=clock_start_date,
+                document_dates=doc_dates_by_account.get(account.id, []) + case_level_doc_dates,
+            )
             clock = compute_reinvestigation_clock(
                 last_dispute_date=clock_start_date,
                 today=today,
                 response_recorded=has_real_response,
+                extended=extended,
             )
             entries.append(
                 AccountReinvestigationClock(
@@ -1570,11 +1581,14 @@ class AccountService:
                     deadline=clock.deadline,
                     days_remaining=clock.days_remaining,
                     state=clock.state,
+                    extended=clock.extended,
                     response_received=account.response_received,
                     response_count=len(account_responses),
                 )
             )
             setattr(summary, clock.state, getattr(summary, clock.state) + 1)
+            if clock.extended:
+                summary.extended_windows += 1
 
         state_order = {"overdue": 0, "due_soon": 1, "awaiting": 2, "responded": 3, "not_sent": 4}
         entries.sort(
@@ -1616,6 +1630,9 @@ class AccountService:
         rounds_by_account = await self._sent_letter_rounds_by_account(
             organization_id=organization_id, case_id=case_id
         )
+        doc_dates_by_account, case_level_doc_dates = await self._case_document_dates(
+            organization_id=organization_id, case_id=case_id
+        )
 
         today = date.today()
         entries: list[AccountRedisputeReadiness] = []
@@ -1628,10 +1645,16 @@ class AccountService:
                 for response in account_responses
             )
             latest_sent_date, round_count = rounds_by_account.get(account.id, (None, 0))
+            clock_start_date = latest_sent_date or account.last_dispute_date
+            extended = document_extends_window(
+                clock_start_date=clock_start_date,
+                document_dates=doc_dates_by_account.get(account.id, []) + case_level_doc_dates,
+            )
             clock = compute_reinvestigation_clock(
-                last_dispute_date=latest_sent_date or account.last_dispute_date,
+                last_dispute_date=clock_start_date,
                 today=today,
                 response_recorded=has_real_response,
+                extended=extended,
             )
             # Prefer the observed number of sent rounds; fall back to the account counter.
             effective_round = max(round_count, account.dispute_round)
@@ -1750,6 +1773,35 @@ class AccountService:
             )
             rounds[letter.account_id] = (new_latest, count + 1)
         return rounds
+
+    async def _case_document_dates(
+        self,
+        *,
+        organization_id: uuid.UUID,
+        case_id: uuid.UUID,
+    ) -> tuple[dict[uuid.UUID, list[date]], list[date]]:
+        """Per-account and case-level document upload dates for §611 extension.
+
+        Returns ``(dates_by_account, case_level_dates)``. Case-level documents
+        (no ``account_id``) apply to every tradeline; account-linked documents
+        apply only to that tradeline. Used to detect the 45-day §611(a)(1)(B)
+        extension signal (consumer info supplied mid-reinvestigation).
+        """
+        by_account: dict[uuid.UUID, list[date]] = {}
+        case_level: list[date] = []
+        if self._session is None:
+            return by_account, case_level
+        rows = await DocumentRepository(self._session).list_case_document_dates(
+            organization_id=organization_id,
+            case_id=case_id,
+        )
+        for account_id, created_at in rows:
+            upload_date = created_at.date()
+            if account_id is None:
+                case_level.append(upload_date)
+            else:
+                by_account.setdefault(account_id, []).append(upload_date)
+        return by_account, case_level
 
     @staticmethod
     def _latest_response_outcome(
