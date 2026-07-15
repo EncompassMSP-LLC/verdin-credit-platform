@@ -4,6 +4,7 @@ import {
   getBureauPerformanceReporting,
   getEnterpriseReportingStatus,
   getOperationsReporting,
+  getReinvestigationOutcomeAnalytics,
   getRevenueAnalyticsReporting,
   getTeamProductivityReporting,
 } from '@verdin/api-client';
@@ -11,7 +12,11 @@ import { Badge, Button, Card } from '@verdin/ui';
 import { DashboardMetricCard } from '../../components/dashboard/DashboardMetricCard';
 import { featureFlags } from '../../lib/feature-flags';
 
-type ReportingTab = 'operations' | 'bureau' | 'team' | 'revenue';
+type ReportingTab = 'operations' | 'bureau' | 'team' | 'reinvestigation' | 'revenue';
+
+function formatPercent(rate: number) {
+  return `${(rate * 100).toFixed(1)}%`;
+}
 
 function formatGeneratedAt(value: string) {
   return new Date(value).toLocaleString();
@@ -96,6 +101,13 @@ export function ReportingCenterPage() {
         </Button>
         <Button
           type="button"
+          variant={tab === 'reinvestigation' ? 'primary' : 'secondary'}
+          onClick={() => setTab('reinvestigation')}
+        >
+          Reinvestigation outcomes
+        </Button>
+        <Button
+          type="button"
           variant={tab === 'revenue' ? 'primary' : 'secondary'}
           onClick={() => setTab('revenue')}
         >
@@ -106,6 +118,7 @@ export function ReportingCenterPage() {
       {tab === 'operations' ? <OperationsPanel /> : null}
       {tab === 'bureau' ? <BureauPerformancePanel /> : null}
       {tab === 'team' ? <TeamProductivityPanel /> : null}
+      {tab === 'reinvestigation' ? <ReinvestigationOutcomesPanel /> : null}
       {tab === 'revenue' ? <RevenueAnalyticsPanel /> : null}
     </div>
   );
@@ -400,6 +413,119 @@ function TeamProductivityPanel() {
             </table>
           </div>
         </Card>
+      )}
+    </div>
+  );
+}
+
+function ReinvestigationOutcomesPanel() {
+  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
+    queryKey: ['reporting-reinvestigation-outcomes'],
+    queryFn: getReinvestigationOutcomeAnalytics,
+  });
+
+  if (isLoading) {
+    return (
+      <Card>
+        <p className="text-sm text-gray-500">Loading reinvestigation outcomes…</p>
+      </Card>
+    );
+  }
+
+  if (isError || !data) {
+    return (
+      <Card>
+        <p className="text-sm text-red-600">
+          Failed to load reinvestigation outcomes:{' '}
+          {error instanceof Error ? error.message : 'Unknown error'}
+        </p>
+        <Button className="mt-4" variant="secondary" onClick={() => refetch()}>
+          Retry
+        </Button>
+      </Card>
+    );
+  }
+
+  const analytics = data.analytics;
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between gap-4">
+        <p className="text-sm text-gray-600">
+          {analytics.total_responses} recorded response(s) · generated{' '}
+          {formatGeneratedAt(data.generated_at)}
+        </p>
+        <Button variant="secondary" onClick={() => refetch()} disabled={isFetching}>
+          {isFetching ? 'Refreshing…' : 'Refresh'}
+        </Button>
+      </div>
+
+      {analytics.total_responses === 0 ? (
+        <Card>
+          <p className="text-sm text-gray-500">
+            No dispute responses recorded yet. Outcome trends appear once staff log bureau
+            responses.
+          </p>
+        </Card>
+      ) : (
+        <>
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+            <DashboardMetricCard
+              label="Deletion rate"
+              value={formatPercent(analytics.deletion_rate)}
+              tone="success"
+            />
+            <DashboardMetricCard
+              label="Favorable rate"
+              value={formatPercent(analytics.favorable_rate)}
+              tone="success"
+            />
+            <DashboardMetricCard
+              label="Verification rate"
+              value={formatPercent(analytics.verification_rate)}
+              tone="warning"
+            />
+            <DashboardMetricCard
+              label="Avg days to response"
+              value={
+                analytics.avg_days_to_response === null
+                  ? '—'
+                  : String(analytics.avg_days_to_response)
+              }
+              tone="info"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <Card title="Outcome breakdown">
+              <StatusBreakdown title="Recorded responses by outcome" counts={analytics.counts} />
+            </Card>
+            <Card title="Time to response">
+              <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
+                <div>
+                  <dt className="text-gray-500">Average days</dt>
+                  <dd>{analytics.avg_days_to_response ?? '—'}</dd>
+                </div>
+                <div>
+                  <dt className="text-gray-500">Median days</dt>
+                  <dd>{analytics.median_days_to_response ?? '—'}</dd>
+                </div>
+                <div>
+                  <dt className="text-gray-500">Correction rate</dt>
+                  <dd>{formatPercent(analytics.correction_rate)}</dd>
+                </div>
+                <div>
+                  <dt className="text-gray-500">No-response rate</dt>
+                  <dd>{formatPercent(analytics.no_response_rate)}</dd>
+                </div>
+                <div>
+                  <dt className="text-gray-500">Measured responses</dt>
+                  <dd>{analytics.measured_response_count}</dd>
+                </div>
+              </dl>
+            </Card>
+          </div>
+        </>
       )}
     </div>
   );

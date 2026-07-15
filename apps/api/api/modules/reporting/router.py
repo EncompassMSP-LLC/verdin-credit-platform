@@ -31,6 +31,7 @@ from api.modules.reporting.schemas import (
     PredictiveAnalyticsStatusResponse,
     PredictiveOutcomeRefreshResultResponse,
     PredictiveOutcomesReportingResponse,
+    ReinvestigationOutcomeAnalyticsResponse,
     ReportingMvRefreshResultResponse,
     ReportingMvRefreshRunListParams,
     ReportingMvRefreshRunResponse,
@@ -80,6 +81,15 @@ async def get_team_productivity_reporting(
     service: ReportingService = Depends(get_reporting_service),
 ) -> TeamProductivityReportingResponse:
     return await service.get_team_productivity(current_user)
+
+
+@router.get("/reinvestigation-outcomes", response_model=ReinvestigationOutcomeAnalyticsResponse)
+async def get_reinvestigation_outcomes_reporting(
+    current_user: User = Depends(get_current_user),
+    service: ReportingService = Depends(get_reporting_service),
+) -> ReinvestigationOutcomeAnalyticsResponse:
+    """Org-scoped reinvestigation outcome analytics (computed; no benchmarks)."""
+    return await service.get_reinvestigation_outcomes(current_user)
 
 
 @router.get(

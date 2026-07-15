@@ -109,6 +109,30 @@ export function getTeamProductivityReporting() {
   return request<TeamProductivityReportingResponse>(apiPath('/reporting/team-productivity'));
 }
 
+export interface ReinvestigationOutcomeAnalytics {
+  total_responses: number;
+  counts: Record<string, number>;
+  deletion_rate: number;
+  verification_rate: number;
+  correction_rate: number;
+  favorable_rate: number;
+  no_response_rate: number;
+  avg_days_to_response: number | null;
+  median_days_to_response: number | null;
+  measured_response_count: number;
+}
+
+export interface ReinvestigationOutcomeAnalyticsResponse {
+  generated_at: string;
+  analytics: ReinvestigationOutcomeAnalytics;
+}
+
+export function getReinvestigationOutcomeAnalytics() {
+  return request<ReinvestigationOutcomeAnalyticsResponse>(
+    apiPath('/reporting/reinvestigation-outcomes'),
+  );
+}
+
 export interface RevenueAnalytics {
   billing_enabled: boolean;
   billing_ready: boolean;

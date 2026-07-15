@@ -13,6 +13,7 @@ from api.core.materialized_reporting import (
     TEAM_PRODUCTIVITY_MV,
 )
 from api.modules.accounts.dispute_letter_models import DisputeLetter, DisputeLetterStatus
+from api.modules.accounts.dispute_response_models import DisputeResponse
 from api.modules.accounts.models import Account, AccountBureau, DisputeStatus
 from api.modules.auth.models import User
 from api.modules.cases.models import Case, CaseStatus
@@ -121,6 +122,48 @@ class OperationsReportingRepository:
                 ClientPortalUser.is_active.is_(True),
             )
         )
+
+    async def get_reinvestigation_outcomes(
+        self, organization_id: uuid.UUID
+    ) -> list[dict[str, Any]]:
+        """Recorded dispute-response outcomes for an org, reduced for analytics.
+
+        Each row is ``{"outcome": str, "days_to_response": int | None}``.
+        ``days_to_response`` is the elapsed days from the clock start (the linked
+        sent letter's ``sent_at`` when present, else the account's
+        ``last_dispute_date``) to the response date (``response_date`` when
+        recorded, else ``recorded_at``). Read-only; no live bureau contact.
+        """
+        result = await self._session.execute(
+            select(
+                DisputeResponse.outcome,
+                DisputeResponse.response_date,
+                DisputeResponse.recorded_at,
+                DisputeLetter.sent_at,
+                Account.last_dispute_date,
+            )
+            .join(Account, Account.id == DisputeResponse.account_id)
+            .outerjoin(DisputeLetter, DisputeLetter.id == DisputeResponse.dispute_letter_id)
+            .where(
+                DisputeResponse.organization_id == organization_id,
+                DisputeResponse.deleted_at.is_(None),
+            )
+        )
+        rows: list[dict[str, Any]] = []
+        for outcome, response_date, recorded_at, sent_at, last_dispute_date in result.all():
+            start_day = sent_at.date() if sent_at is not None else last_dispute_date
+            response_day = response_date if response_date is not None else recorded_at.date()
+            days_to_response: int | None = None
+            if start_day is not None and response_day is not None:
+                elapsed = (response_day - start_day).days
+                days_to_response = elapsed if elapsed >= 0 else None
+            rows.append(
+                {
+                    "outcome": outcome.value if hasattr(outcome, "value") else str(outcome),
+                    "days_to_response": days_to_response,
+                }
+            )
+        return rows
 
     async def get_bureau_performance(self, organization_id: uuid.UUID) -> dict[str, Any]:
         account_rows = await self._session.execute(
