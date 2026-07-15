@@ -559,9 +559,24 @@ export function CaseDisputeStrategyPanel({
                   {prepareMutation.data.skipped.length > 0
                     ? ` Skipped ${prepareMutation.data.skipped.length}.`
                     : ''}
+                  {(prepareMutation.data.locked?.length ?? 0) > 0
+                    ? ` Identity-theft locked: ${prepareMutation.data.locked?.length}.`
+                    : ''}
                 </p>
                 {prepareMutation.data.note ? (
                   <p className="mt-1 text-xs text-gray-500">{prepareMutation.data.note}</p>
+                ) : null}
+                {(prepareMutation.data.locked?.length ?? 0) > 0 ? (
+                  <div className="mt-2 rounded-md border border-amber-200 bg-amber-50 px-2 py-1.5 text-xs text-amber-800">
+                    <p className="font-medium">
+                      Skipped for identity-theft review (use §605B Case Center):
+                    </p>
+                    <ul className="mt-1 space-y-0.5">
+                      {prepareMutation.data.locked?.map((item) => (
+                        <li key={item.match_key}>{item.creditor_name ?? item.match_key}</li>
+                      ))}
+                    </ul>
+                  </div>
                 ) : null}
                 {prepareMutation.data.prepared.length > 0 ? (
                   <ul className="mt-2 space-y-1 text-xs">

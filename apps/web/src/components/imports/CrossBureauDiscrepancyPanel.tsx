@@ -556,6 +556,20 @@ export function CrossBureauDiscrepancyPanel({
                   prepared={prepareAllMutation.data.prepared}
                   consentBlocked={consentBlocked}
                 />
+                {(prepareAllMutation.data.locked?.length ?? 0) > 0 ? (
+                  <div className="mt-3 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+                    <p className="font-medium">
+                      {prepareAllMutation.data.locked?.length} tradeline(s) were skipped for
+                      identity-theft review. Resolve these in the Identity Theft Case Center (§605B)
+                      rather than mixing identity-theft and accuracy theories:
+                    </p>
+                    <ul className="mt-1 space-y-0.5">
+                      {prepareAllMutation.data.locked?.map((item) => (
+                        <li key={item.match_key}>{item.creditor_name ?? item.match_key}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
               </div>
             ) : null}
 
