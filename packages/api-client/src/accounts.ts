@@ -455,6 +455,8 @@ export interface AccountReinvestigationClock {
   creditor_name: string;
   dispute_status: DisputeStatus;
   last_dispute_date: string | null;
+  clock_start_date: string | null;
+  dispute_round_count: number;
   deadline: string | null;
   days_remaining: number | null;
   state: ReinvestigationClockState;

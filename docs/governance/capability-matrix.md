@@ -595,7 +595,7 @@ Scope: [version-5.18-scope.md](version-5.18-scope.md) · Checklist: [version-5.1
 
 | Capability                                   | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                                     |
 | -------------------------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ----------------------------------------------------------------------------------------- |
-| Per-letter multi-round reinvestigation clock | 5.18    | Planned | —       | —        | —   | —   | —     | Disputes     | Each sent round on its own `sent_at`-keyed §611 deadline; retains prior-round history     |
+| Per-letter multi-round reinvestigation clock | 5.18    | ✅      | ✅      | ✅       | ✅  | —   | ✅    | Disputes     | Clock keys off latest sent `sent_at`; adds `clock_start_date` + `dispute_round_count`     |
 | Extended 45-day reinvestigation window       | 5.18    | Planned | —       | —        | —   | —   | —     | Disputes     | §611 45-day extension modeled when documents added mid-window                             |
 | Reinvestigation outcome analytics            | 5.18    | Planned | —       | —        | —   | —   | —     | Reporting    | Per-org deletion/verify/correction rates + time-to-resolution; no cross-tenant benchmarks |
 | Litigation-readiness evidence packet         | 5.18    | Planned | —       | —        | —   | —   | —     | Disputes     | Operator-gated §611/§623 evidence bundle for attorney handoff; never auto-files           |

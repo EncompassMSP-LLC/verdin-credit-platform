@@ -1539,6 +1539,10 @@ class AccountService:
             for row in rows:
                 responses_by_account.setdefault(row.account_id, []).append(row)
 
+        rounds_by_account = await self._sent_letter_rounds_by_account(
+            organization_id=organization_id, case_id=case_id
+        )
+
         today = date.today()
         entries: list[AccountReinvestigationClock] = []
         summary = CaseReinvestigationClockSummary()
@@ -1548,8 +1552,10 @@ class AccountService:
                 getattr(response, "outcome", None) != DisputeResponseOutcome.NO_RESPONSE
                 for response in account_responses
             )
+            latest_sent_date, round_count = rounds_by_account.get(account.id, (None, 0))
+            clock_start_date = latest_sent_date or account.last_dispute_date
             clock = compute_reinvestigation_clock(
-                last_dispute_date=account.last_dispute_date,
+                last_dispute_date=clock_start_date,
                 today=today,
                 response_recorded=has_real_response,
             )
@@ -1559,6 +1565,8 @@ class AccountService:
                     creditor_name=account.creditor_name,
                     dispute_status=account.dispute_status,
                     last_dispute_date=account.last_dispute_date,
+                    clock_start_date=clock_start_date,
+                    dispute_round_count=round_count,
                     deadline=clock.deadline,
                     days_remaining=clock.days_remaining,
                     state=clock.state,
@@ -1605,6 +1613,10 @@ class AccountService:
             for row in rows:
                 responses_by_account.setdefault(row.account_id, []).append(row)
 
+        rounds_by_account = await self._sent_letter_rounds_by_account(
+            organization_id=organization_id, case_id=case_id
+        )
+
         today = date.today()
         entries: list[AccountRedisputeReadiness] = []
         summary = CaseRedisputeReadinessSummary()
@@ -1615,15 +1627,18 @@ class AccountService:
                 getattr(response, "outcome", None) != DisputeResponseOutcome.NO_RESPONSE
                 for response in account_responses
             )
+            latest_sent_date, round_count = rounds_by_account.get(account.id, (None, 0))
             clock = compute_reinvestigation_clock(
-                last_dispute_date=account.last_dispute_date,
+                last_dispute_date=latest_sent_date or account.last_dispute_date,
                 today=today,
                 response_recorded=has_real_response,
             )
+            # Prefer the observed number of sent rounds; fall back to the account counter.
+            effective_round = max(round_count, account.dispute_round)
             recommendation = compute_redispute_readiness(
                 clock_state=clock.state,
                 latest_outcome=latest_outcome,
-                dispute_round=account.dispute_round,
+                dispute_round=effective_round,
                 risk_score=account.risk_score,
             )
             entries.append(
@@ -1633,7 +1648,7 @@ class AccountService:
                     dispute_status=account.dispute_status,
                     clock_state=clock.state,
                     latest_outcome=latest_outcome,
-                    dispute_round=account.dispute_round,
+                    dispute_round=effective_round,
                     risk_score=account.risk_score,
                     action=recommendation.action,
                     priority=recommendation.priority,
@@ -1667,9 +1682,7 @@ class AccountService:
         readiness = await self.get_case_redispute_readiness(user, case_id)
 
         total_accounts = len(clock.accounts)
-        disputed_accounts = sum(
-            1 for entry in clock.accounts if entry.last_dispute_date is not None
-        )
+        disputed_accounts = sum(1 for entry in clock.accounts if entry.clock_start_date is not None)
         total_responses = sum(entry.response_count for entry in clock.accounts)
 
         # Earliest still-open deadline (awaiting / due-soon) for the "next up" hint.
@@ -1707,6 +1720,36 @@ class AccountService:
             most_overdue_days=most_overdue_days,
             action_items=action_items,
         )
+
+    async def _sent_letter_rounds_by_account(
+        self,
+        *,
+        organization_id: uuid.UUID,
+        case_id: uuid.UUID,
+    ) -> dict[uuid.UUID, tuple[date | None, int]]:
+        """Per-account (latest sent `sent_at` date, sent-round count) for a case.
+
+        Keys the §611 clock off each actually-sent dispute letter's `sent_at`
+        (the mailed round), so multi-round disputes reflect the newest round's
+        deadline instead of the account's single `last_dispute_date`.
+        """
+        rounds: dict[uuid.UUID, tuple[date | None, int]] = {}
+        if self._session is None:
+            return rounds
+        letters = await DisputeLetterRepository(self._session).list_for_case(
+            organization_id=organization_id,
+            case_id=case_id,
+        )
+        for letter in letters:
+            if letter.status != DisputeLetterStatus.SENT or letter.sent_at is None:
+                continue
+            sent_date = letter.sent_at.date()
+            latest_date, count = rounds.get(letter.account_id, (None, 0))
+            new_latest = (
+                sent_date if latest_date is None or sent_date > latest_date else latest_date
+            )
+            rounds[letter.account_id] = (new_latest, count + 1)
+        return rounds
 
     @staticmethod
     def _latest_response_outcome(
