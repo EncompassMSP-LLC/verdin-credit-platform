@@ -22,6 +22,7 @@
 **Version 5.13 sign-off:** [version-5.13-scope.md](version-5.13-scope.md) · Release notes: [v5.13.0.md](../release-notes/v5.13.0.md)
 **Version 5.14 sign-off:** [version-5.14-scope.md](version-5.14-scope.md) · Release notes: [v5.14.0.md](../release-notes/v5.14.0.md)
 **Version 5.15 sign-off:** [version-5.15-scope.md](version-5.15-scope.md) · Release notes: [v5.15.0.md](../release-notes/v5.15.0.md)
+**Version 5.16 scope (in progress):** [version-5.16-scope.md](version-5.16-scope.md) · Checklist: [version-5.16-completion-checklist.md](../development/version-5.16-completion-checklist.md)
 
 ## Status legend
 

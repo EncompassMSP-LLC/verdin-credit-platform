@@ -58,6 +58,7 @@ Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (
 | **5.13**  | Native Mobile Depth (gated)     | Released    | Native passkey client, OAuth marketplace, autonomous API filing, export audit (`v5.13.0`)        |
 | **5.14**  | Production Distribution (gated) | Released    | Live blob export, unsupervised filing loops, public marketplace, app store readiness (`v5.14.0`) |
 | **5.15**  | Identity Theft Detection        | Released    | Phase 8 Case Center, portal attestation, §605B packet export (`v5.15.0`)                         |
+| **5.16**  | Identity-Theft Recovery Depth   | Planned     | Phase 9 §605B evidence bundling, mixed-file detection, submission readiness, lock-aware prepare  |
 
 ### Sprint milestones
 
@@ -402,6 +403,19 @@ Scope and checklist: [`docs/governance/version-5.15-scope.md`](../governance/ver
 | 2    | Portal consumer confirmation / attestation | ✅           | Portal-scoped confirm + attestation                   |
 | 3    | §605B packet export / bureau block letters | Partial ✅   | Staff-mediated ZIP letters; no live bureau submission |
 | 4    | Capability matrix / governance sign-off    | ✅           | Scope, checklist, matrix, release notes               |
+
+### Version 5.16 — Identity-Theft Recovery Depth (planned)
+
+Scope and checklist: [`docs/governance/version-5.16-scope.md`](../governance/version-5.16-scope.md) · [`docs/development/version-5.16-completion-checklist.md`](../development/version-5.16-completion-checklist.md)
+
+Compliance Intelligence Phase 9 deepens the shipped Phase 8 engine. Live unsupervised bureau §605B submission and unrestricted cross-tenant PII export remain deferred to 5.17+ pending legal/compliance sign-off.
+
+| Epic | Theme                                          | 5.16 target | Notes                                                          |
+| ---- | ---------------------------------------------- | ----------- | -------------------------------------------------------------- |
+| 1    | §605B evidence exhibit bundling                | Planned     | Staff-selected evidence documents bundled into the §605B ZIP   |
+| 2    | Mixed-file / personal-info variation detection | Planned     | Advisory name/SSN/address/DOB variation signals (never labels) |
+| 3    | §605B submission-readiness audit               | Planned     | Operator-gated readiness run audit; no live bureau submission  |
+| 4    | Lock-aware dispute preparation                 | Planned     | `prepare` + strategy stages respect confirmed theft locks      |
 
 ## Sprint → version mapping
 
