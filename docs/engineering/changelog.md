@@ -13,6 +13,20 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — reinvestigation analytics slicing (Phase 12)
+
+**Decision:** Add optional `start` / `end` (by response day, inclusive) and `bureau` filters to `GET /reporting/reinvestigation-outcomes`. `OperationsReportingRepository.get_reinvestigation_outcomes(org, start, end, bureau)` applies the `bureau` filter in SQL (`Account.bureau == bureau`) and the date-range filter in Python over the computed response day (which uses a `recorded_at` fallback, so an all-SQL predicate would need a `coalesce`). The service echoes the applied filters back under a new `filters` block (`ReinvestigationOutcomeFilters`), and the Reporting Center "Reinvestigation outcomes" tab gains from/to date inputs and a bureau select.
+
+**Reason:** The 5.18 analytics covered all-time, all-bureau data (documented tech debt). Operators need to scope trends to a period (e.g. a quarter) or a single bureau to compare bureau behavior — both derivable from data already stored, with no new collection.
+
+**Guardrails:** Still org-scoped only — no cross-tenant benchmarks. Read-only aggregate; no writes, no live bureau contact. The date-range filter is applied on the same response day used for time-to-response (response date, else `recorded_at`), keeping the window semantics consistent.
+
+**Alternatives considered:** Pushing the date-range into SQL with `func.coalesce(response_date, recorded_at::date)` (rejected for now — the Python filter reuses the exact response-day logic already in the loop and stays trivially correct); adding a `group_by=bureau` breakdown in one call (deferred — a single-bureau filter is simpler and matches the per-recipient split coming in slice 3).
+
+**Technical debt:** No per-bureau breakdown in a single response yet (callers filter one bureau at a time). Favorable = deleted + corrected is unchanged.
+
+**Follow-up work:** Per-recipient reinvestigation clock splits (slice 3); cross-bureau litigation evidence (slice 4); operator-gated evidence export (slice 5).
+
 ## Compliance intelligence — litigation-readiness evidence packet (Phase 11)
 
 **Decision:** Add an operator-gated litigation-readiness evidence packet at `GET /accounts/{account_id}/litigation-packet`. A pure `build_litigation_readiness(inputs)` helper (in `accounts/litigation_packet.py`) grades willful-noncompliance evidence into an advisory `{ eligible, strength, score, indicators, summary }` assessment. `AccountService.get_account_litigation_packet(...)` assembles the tradeline's reinvestigation trail — all dispute `letters` and recorded `responses` — with the current §611 clock state (reusing the slice 2–3 `sent_at`-keyed start and 45-day extension logic), the latest outcome, and the advisory re-dispute recommendation. Shipped with `@verdin/api-client` types and an on-demand "Litigation-readiness packet" panel on the account detail page.

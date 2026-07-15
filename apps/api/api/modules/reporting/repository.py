@@ -1,7 +1,7 @@
 """Reporting repository — read-optimized aggregate queries."""
 
 import uuid
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from typing import Any, cast
 
 from sqlalchemy import and_, func, select, text
@@ -124,7 +124,12 @@ class OperationsReportingRepository:
         )
 
     async def get_reinvestigation_outcomes(
-        self, organization_id: uuid.UUID
+        self,
+        organization_id: uuid.UUID,
+        *,
+        start: date | None = None,
+        end: date | None = None,
+        bureau: AccountBureau | None = None,
     ) -> list[dict[str, Any]]:
         """Recorded dispute-response outcomes for an org, reduced for analytics.
 
@@ -133,7 +138,17 @@ class OperationsReportingRepository:
         sent letter's ``sent_at`` when present, else the account's
         ``last_dispute_date``) to the response date (``response_date`` when
         recorded, else ``recorded_at``). Read-only; no live bureau contact.
+
+        Optional filters: ``bureau`` scopes to a single credit bureau (applied in
+        SQL); ``start``/``end`` scope by response day inclusively (applied in
+        Python, since the response day uses a ``recorded_at`` fallback).
         """
+        conditions = [
+            DisputeResponse.organization_id == organization_id,
+            DisputeResponse.deleted_at.is_(None),
+        ]
+        if bureau is not None:
+            conditions.append(Account.bureau == bureau)
         result = await self._session.execute(
             select(
                 DisputeResponse.outcome,
@@ -144,15 +159,16 @@ class OperationsReportingRepository:
             )
             .join(Account, Account.id == DisputeResponse.account_id)
             .outerjoin(DisputeLetter, DisputeLetter.id == DisputeResponse.dispute_letter_id)
-            .where(
-                DisputeResponse.organization_id == organization_id,
-                DisputeResponse.deleted_at.is_(None),
-            )
+            .where(*conditions)
         )
         rows: list[dict[str, Any]] = []
         for outcome, response_date, recorded_at, sent_at, last_dispute_date in result.all():
             start_day = sent_at.date() if sent_at is not None else last_dispute_date
             response_day = response_date if response_date is not None else recorded_at.date()
+            if start is not None and (response_day is None or response_day < start):
+                continue
+            if end is not None and (response_day is None or response_day > end):
+                continue
             days_to_response: int | None = None
             if start_day is not None and response_day is not None:
                 elapsed = (response_day - start_day).days

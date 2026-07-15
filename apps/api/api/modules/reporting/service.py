@@ -1,7 +1,7 @@
 """Reporting service — org-scoped operational read models."""
 
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -15,6 +15,7 @@ from api.core.permissions import has_permission
 from api.core.predictive_analytics import build_predictive_outcomes, get_predictive_analytics_status
 from api.core.revenue_analytics import build_revenue_analytics
 from api.core.stripe_billing import get_billing_status
+from api.modules.accounts.models import AccountBureau
 from api.modules.accounts.reinvestigation_analytics import (
     ReinvestigationOutcomeRow,
     compute_reinvestigation_outcome_analytics,
@@ -61,6 +62,7 @@ from api.modules.reporting.schemas import (
     PredictiveOutcomesReportingResponse,
     ReinvestigationOutcomeAnalytics,
     ReinvestigationOutcomeAnalyticsResponse,
+    ReinvestigationOutcomeFilters,
     ReportingMvRefreshResultResponse,
     ReportingMvRefreshRunListParams,
     ReportingMvRefreshRunResponse,
@@ -166,17 +168,26 @@ class ReportingService:
         )
 
     async def get_reinvestigation_outcomes(
-        self, user: User
+        self,
+        user: User,
+        *,
+        start: date | None = None,
+        end: date | None = None,
+        bureau: AccountBureau | None = None,
     ) -> ReinvestigationOutcomeAnalyticsResponse:
         """Per-org reinvestigation outcome analytics over recorded responses.
 
         Read-only aggregate (deletion / verification / correction / favorable
         rates + time-to-response) scoped to the caller's organization — no
-        cross-tenant benchmarks and no live bureau contact.
+        cross-tenant benchmarks and no live bureau contact. Optional ``start`` /
+        ``end`` (by response day, inclusive) and ``bureau`` filters narrow the
+        recorded responses; the applied filters are echoed back.
         """
         self._require_read(user)
         organization_id = self._require_organization(user)
-        raw = await self._reporting.get_reinvestigation_outcomes(organization_id)
+        raw = await self._reporting.get_reinvestigation_outcomes(
+            organization_id, start=start, end=end, bureau=bureau
+        )
         result = compute_reinvestigation_outcome_analytics(
             [
                 ReinvestigationOutcomeRow(
@@ -188,6 +199,11 @@ class ReportingService:
         )
         return ReinvestigationOutcomeAnalyticsResponse(
             generated_at=datetime.now(UTC),
+            filters=ReinvestigationOutcomeFilters(
+                start=start,
+                end=end,
+                bureau=bureau.value if bureau is not None else None,
+            ),
             analytics=ReinvestigationOutcomeAnalytics(
                 total_responses=result.total_responses,
                 counts=result.counts,

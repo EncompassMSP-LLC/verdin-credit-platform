@@ -10,7 +10,7 @@ Scope: [`docs/governance/version-5.19-scope.md`](../governance/version-5.19-scop
 
 ## Exit criteria for "5.19 done"
 
-- [ ] Reinvestigation outcome analytics support date-range + per-bureau slicing
+- [x] Reinvestigation outcome analytics support date-range + per-bureau slicing
 - [ ] §611 clock start / round counts split by recipient (bureau vs furnisher)
 - [ ] Litigation-readiness assessment folds in cross-bureau discrepancy evidence
 - [ ] Operator-gated litigation evidence export (text) for attorney handoff (never auto-transmits)
@@ -25,7 +25,7 @@ Scope: [`docs/governance/version-5.19-scope.md`](../governance/version-5.19-scop
 | Order | Slice                                                 | Epic       | Status |
 | ----- | ----------------------------------------------------- | ---------- | ------ |
 | 1     | 5.19 scope + completion checklist                     | Kickoff    | ✅     |
-| 2     | Reinvestigation analytics date-range + bureau slicing | Reporting  | ⬜     |
+| 2     | Reinvestigation analytics date-range + bureau slicing | Reporting  | ✅     |
 | 3     | Per-recipient reinvestigation clock splits            | Disputes   | ⬜     |
 | 4     | Litigation packet cross-bureau evidence               | Disputes   | ⬜     |
 | 5     | Operator-gated litigation evidence export             | Disputes   | ⬜     |
