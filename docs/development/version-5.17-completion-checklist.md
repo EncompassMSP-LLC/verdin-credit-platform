@@ -10,13 +10,13 @@ Scope: [`docs/governance/version-5.17-scope.md`](../governance/version-5.17-scop
 
 ## Exit criteria for "5.17 done"
 
-- [ ] Bureau/furnisher dispute responses persist as auditable per-letter records (staff-entered; no live polling)
-- [ ] FCRA §611 reinvestigation clock computes deadlines and surfaces no-response / overdue states
+- [x] Bureau/furnisher dispute responses persist as auditable per-letter records (staff-entered; no live polling)
+- [x] FCRA §611 reinvestigation clock computes deadlines and surfaces no-response / overdue states
 - [x] Reinvestigation outcomes classify and drive advisory re-dispute / escalation readiness (never auto-files)
 - [x] Per-case reinvestigation summary read model + Case Center surface
-- [ ] Capability matrix + API reference updated
-- [ ] Deferred items explicitly documented
-- [ ] `docs/release-notes/v5.17.0.md` + tag `v5.17.0`
+- [x] Capability matrix + API reference updated
+- [x] Deferred items explicitly documented
+- [x] `docs/release-notes/v5.17.0.md` + tag `v5.17.0`
 
 ---
 
@@ -29,7 +29,7 @@ Scope: [`docs/governance/version-5.17-scope.md`](../governance/version-5.17-scop
 | 3     | §611 reinvestigation clock & no-response       | Compliance Intelligence | ✅     |
 | 4     | Reinvestigation outcome & re-dispute readiness | Disputes                | ✅     |
 | 5     | Case reinvestigation summary read model + UI   | Compliance Intelligence | ✅     |
-| 6     | Capability matrix 5.17 sign-off                | Governance              | ⬜     |
+| 6     | Capability matrix 5.17 sign-off                | Governance              | ✅     |
 
 Slice 2 persists responses against sent dispute letters. Slice 3 reuses each letter's `sent_at`. Slice 4 reuses litigation-strength / dispute-strategy signals and respects 5.16 identity-theft locks. Slice 5 aggregates slices 2–4 into a per-case read model.
 
