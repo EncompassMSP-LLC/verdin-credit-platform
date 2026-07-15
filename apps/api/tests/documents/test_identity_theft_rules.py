@@ -91,6 +91,75 @@ def test_evaluate_inquiry_burst() -> None:
     assert any(f.rule_id == "identity_theft.report.inquiry_burst" for f in result.findings)
 
 
+def test_detect_multiple_ssns_and_dobs_as_advisory_mixed_file() -> None:
+    result = evaluate_identity_theft(
+        document_id=uuid.uuid4(),
+        bureau="experian",
+        parsed_report={
+            "accounts": [],
+            "personal_information": [
+                {"field_name": "ssn", "value": "123-45-6789"},
+                {"field_name": "social security number", "value": "987-65-4321"},
+                {"field_name": "date_of_birth", "value": "01/15/1980"},
+                {"field_name": "date of birth (alternate)", "value": "02/20/1991"},
+            ],
+        },
+    )
+    rule_ids = {f.rule_id for f in result.findings}
+    assert "identity_theft.personal_info.multiple_ssns" in rule_ids
+    assert "identity_theft.personal_info.multiple_dobs" in rule_ids
+    assert result.summary["personal_info_indicators"] == 2
+    # Advisory: mixed-file signals do not lock ordinary disputes or trip the banner.
+    for finding in result.findings:
+        if finding.detection_source == "PERSONAL_INFO":
+            assert finding.ordinary_dispute_locked is False
+            assert finding.issue_type == "IDENTITY_THEFT_INDICATOR"
+            assert finding.required_action == "CONSUMER_REVIEW"
+    assert result.banner_active is False
+    assert result.ordinary_dispute_locked is False
+
+
+def test_detect_name_and_address_variations() -> None:
+    result = evaluate_identity_theft(
+        document_id=uuid.uuid4(),
+        bureau="equifax",
+        parsed_report={
+            "accounts": [],
+            "consumer": {
+                "name": "Jordan Smith",
+                "aliases": ["Jordan Rivera"],
+            },
+            "personal_information": [
+                {"field_name": "address", "value": "1 A St, Austin TX"},
+                {"field_name": "previous_address", "value": "2 B St, Austin TX"},
+                {"field_name": "former address", "value": "3 C St, Dallas TX"},
+                {"field_name": "prior_address", "value": "4 D St, Houston TX"},
+                {"field_name": "old address", "value": "5 E St, Waco TX"},
+            ],
+        },
+    )
+    rule_ids = {f.rule_id for f in result.findings}
+    assert "identity_theft.personal_info.name_variations" in rule_ids
+    assert "identity_theft.personal_info.address_variations" in rule_ids
+
+
+def test_masked_ssns_do_not_trigger_variation_signal() -> None:
+    result = evaluate_identity_theft(
+        document_id=uuid.uuid4(),
+        bureau="transunion",
+        parsed_report={
+            "accounts": [],
+            "personal_information": [
+                {"field_name": "ssn", "value": "XXX-XX-6789"},
+                {"field_name": "ssn (secondary)", "value": "***-**-4321"},
+            ],
+        },
+    )
+    rule_ids = {f.rule_id for f in result.findings}
+    assert "identity_theft.personal_info.multiple_ssns" not in rule_ids
+    assert result.summary["personal_info_indicators"] == 0
+
+
 def test_assess_fcra_605b_readiness() -> None:
     readiness = assess_fcra_605b_readiness(
         has_proof_of_identity=True,

@@ -47,6 +47,9 @@ function SummaryBadges({ summary }: { summary: IdentityTheftFindingSummary }) {
       <Badge variant="default">{summary.tradelines_evaluated} tradelines</Badge>
       <Badge variant="danger">{summary.report_level_indicators} report</Badge>
       <Badge variant="warning">{summary.tradeline_indicators} tradeline</Badge>
+      {summary.personal_info_indicators > 0 ? (
+        <Badge variant="info">{summary.personal_info_indicators} mixed-file</Badge>
+      ) : null}
       <Badge variant="danger">{summary.ordinary_dispute_locked_count} locked</Badge>
       <Badge variant="default">{summary.total} total</Badge>
     </div>

@@ -11,7 +11,7 @@ Scope: [`docs/governance/version-5.16-scope.md`](../governance/version-5.16-scop
 ## Exit criteria for "5.16 done"
 
 - [x] §605B evidence exhibits bundle into the staff-mediated packet (no unreviewed auto-attach)
-- [ ] Mixed-file / personal-info variation signals surface as advisory Case Center findings (never auto-label)
+- [x] Mixed-file / personal-info variation signals surface as advisory Case Center findings (never auto-label)
 - [ ] §605B submission readiness is auditable behind an operator gate (no live bureau submission)
 - [ ] Ordinary dispute preparation is lock-aware for confirmed identity-theft accounts
 - [ ] Capability matrix + API reference updated
@@ -26,7 +26,7 @@ Scope: [`docs/governance/version-5.16-scope.md`](../governance/version-5.16-scop
 | ----- | ---------------------------------------------- | ----------------------- | ------ |
 | 1     | 5.16 scope + completion checklist              | Kickoff                 | ✅     |
 | 2     | §605B evidence exhibit bundling                | Disputes                | ✅     |
-| 3     | Mixed-file / personal-info variation detection | Compliance Intelligence | ⬜     |
+| 3     | Mixed-file / personal-info variation detection | Compliance Intelligence | ✅     |
 | 4     | §605B submission-readiness audit               | Disputes                | ⬜     |
 | 5     | Lock-aware dispute preparation                 | Disputes                | ⬜     |
 | 6     | Capability matrix 5.16 sign-off                | Governance              | ⬜     |

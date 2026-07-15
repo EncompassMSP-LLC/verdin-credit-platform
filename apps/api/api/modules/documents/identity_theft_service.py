@@ -123,6 +123,7 @@ def aggregate_case_identity_theft_findings(
         tradelines_evaluated=sum(item.summary.tradelines_evaluated for item in documents),
         report_level_indicators=sum(item.summary.report_level_indicators for item in documents),
         tradeline_indicators=sum(item.summary.tradeline_indicators for item in documents),
+        personal_info_indicators=sum(item.summary.personal_info_indicators for item in documents),
         ordinary_dispute_locked_count=sum(
             item.summary.ordinary_dispute_locked_count for item in documents
         ),
