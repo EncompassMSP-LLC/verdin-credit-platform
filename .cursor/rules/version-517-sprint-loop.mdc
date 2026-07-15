@@ -1,0 +1,50 @@
+---
+description: Version 5.17 sprint loop — sync, slice, verify, PR, auto-merge
+alwaysApply: true
+---
+
+# Version 5.17 Sprint Loop
+
+Use this loop when continuing compliance-gated dispute-response / reinvestigation-tracking work without waiting for manual "merge and continue" messages.
+
+## When triggered
+
+- User says merge and continue, execute next steps, follow recommended order, or similar
+- Cursor Automation fires after a PR merges to `main`
+- You detect `main` advanced since the last slice (via `git fetch` + log)
+
+## Loop steps (always in order)
+
+1. **Sync** — `git checkout main && git pull origin main`
+2. **Scope** — pick the next small, reviewable Version 5.17 slice from [`docs/development/version-5.17-completion-checklist.md`](../../docs/development/version-5.17-completion-checklist.md)
+3. **Branch** — `git checkout -b feature/<short-name>` from synced `main`
+4. **Implement** — backend + tests + `@verdin/api-client` + UI (if applicable) + docs
+5. **Verify**
+   - `python -m pytest` for touched API tests (`DATABASE_URL` → `verdin_credit_test`)
+   - `pnpm --filter @verdin/api-client build` before web typecheck
+   - `pnpm --filter @verdin/web typecheck` and `lint` when web changes
+   - pre-commit hooks must pass before commit
+6. **Ship** — conventional commit, push, open PR to `main`
+7. **Auto-merge** — after `gh pr create`, run:
+   ```bash
+   gh pr merge --auto --squash
+   ```
+8. **Continue** — do not stop for user input unless blocked; after merge, start step 1 again
+
+## Slice sizing
+
+- One dispute-response intake surface, one §611 reinvestigation-clock read model, one re-dispute/escalation readiness signal group, or one case reinvestigation dashboard surface per PR
+- Follow existing patterns in `apps/api/api/modules/accounts/`, `apps/api/api/modules/documents/`, and `apps/api/api/modules/cases/`
+- Update `docs/api/reference.md`, `docs/governance/capability-matrix.md`, and checklist when shipping
+- Dispute-response and escalation slices are staff-mediated; responses are recorded by operators (mail/portal), never polled live from a bureau, and re-dispute readiness stays advisory
+- Live bureau response ingestion/polling, automated re-dispute filing, and unsupervised escalation remain explicitly deferred to 5.18+
+
+## GitHub CLI (Windows)
+
+`C:\Program Files\GitHub CLI\gh.exe`
+
+## Blockers — stop and report
+
+- CI failing after reasonable fix attempts
+- Migration conflicts or ambiguous product decisions
+- Legal/compliance sign-off required before live bureau response ingestion or automated re-dispute filing
