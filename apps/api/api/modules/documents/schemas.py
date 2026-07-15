@@ -875,6 +875,7 @@ class IdentityTheftFindingSummary(BaseSchema):
     tradelines_evaluated: int
     report_level_indicators: int = 0
     tradeline_indicators: int = 0
+    personal_info_indicators: int = 0
     ordinary_dispute_locked_count: int = 0
 
 
@@ -883,7 +884,9 @@ class IdentityTheftFindingResponse(BaseSchema):
     severity: Literal["low", "medium", "high"]
     title: str
     description: str
-    detection_source: Literal["REPORT_TEXT", "TRADELINE_HEURISTIC", "CONSUMER_CONFIRMATION"]
+    detection_source: Literal[
+        "REPORT_TEXT", "TRADELINE_HEURISTIC", "CONSUMER_CONFIRMATION", "PERSONAL_INFO"
+    ]
     issue_type: Literal["IDENTITY_THEFT_INDICATOR", "CONFIRMED_IDENTITY_THEFT_CLAIM"]
     confidence: float
     consumer_confirmed: bool
@@ -1042,9 +1045,9 @@ class ConfirmIdentityTheftAccountRequest(BaseSchema):
     match_key: str | None = None
     creditor_name: str | None = None
     account_number_masked: str | None = None
-    detection_source: Literal["REPORT_TEXT", "TRADELINE_HEURISTIC", "CONSUMER_CONFIRMATION"] = (
-        "CONSUMER_CONFIRMATION"
-    )
+    detection_source: Literal[
+        "REPORT_TEXT", "TRADELINE_HEURISTIC", "CONSUMER_CONFIRMATION", "PERSONAL_INFO"
+    ] = "CONSUMER_CONFIRMATION"
     rule_id: str | None = None
     confidence: float = Field(default=1.0, ge=0.0, le=1.0)
     discovered_at: date | None = None

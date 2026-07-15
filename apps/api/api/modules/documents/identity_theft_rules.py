@@ -15,7 +15,12 @@ from datetime import datetime
 from typing import Any, Literal
 
 Severity = Literal["low", "medium", "high"]
-DetectionSource = Literal["REPORT_TEXT", "TRADELINE_HEURISTIC", "CONSUMER_CONFIRMATION"]
+DetectionSource = Literal[
+    "REPORT_TEXT",
+    "TRADELINE_HEURISTIC",
+    "CONSUMER_CONFIRMATION",
+    "PERSONAL_INFO",
+]
 IssueType = Literal["IDENTITY_THEFT_INDICATOR", "CONFIRMED_IDENTITY_THEFT_CLAIM"]
 RequiredAction = Literal[
     "CONSUMER_REVIEW",
@@ -76,6 +81,15 @@ _VICTIM_STATEMENT_HINTS = (
 _PLAUSIBLE_BORROWING_AGE_YEARS = 18
 _INQUIRY_BURST_DAYS = 30
 _INQUIRY_BURST_MIN_COUNT = 4
+
+# Mixed-file / personal-info variation detection (Phase 9). Advisory signals only —
+# never auto-labels an account as identity theft. Ordinary §611 disputes stay
+# available (mixed_file is an unlock choice), so these findings do not lock disputes.
+_ADDRESS_VARIATION_THRESHOLD = 5
+_NAME_FIELD_HINTS = ("name", "also known", "aka", "alias")
+_SSN_FIELD_HINTS = ("ssn", "social security", "social_security")
+_DOB_FIELD_HINTS = ("birth", "dob")
+_ADDRESS_FIELD_HINTS = ("address",)
 
 
 @dataclass(frozen=True, slots=True)
@@ -606,6 +620,230 @@ def _detect_inquiry_burst(parsed_report: dict[str, Any]) -> IdentityTheftFinding
     return None
 
 
+def _personal_info_finding(
+    *,
+    rule_id: str,
+    title: str,
+    description: str,
+    confidence: float,
+    severity: Severity,
+    fields: tuple[str, ...],
+    observed: dict[str, Any],
+) -> IdentityTheftFinding:
+    """Advisory mixed-file / personal-info variation finding.
+
+    Never locks ordinary disputes and never auto-labels the account as identity
+    theft — a mixed file is investigated and confirmed by a human.
+    """
+    return IdentityTheftFinding(
+        rule_id=rule_id,
+        severity=severity,
+        title=title,
+        description=description,
+        detection_source="PERSONAL_INFO",
+        issue_type="IDENTITY_THEFT_INDICATOR",
+        confidence=confidence,
+        consumer_confirmed=False,
+        legal_path=None,
+        ordinary_dispute_locked=False,
+        required_action="CONSUMER_REVIEW",
+        tradeline_index=None,
+        creditor_name=None,
+        account_number_masked=None,
+        fields=fields,
+        observed=observed,
+    )
+
+
+def _normalize_ssn(value: object) -> str | None:
+    raw = _string_or_none(value)
+    if raw is None:
+        return None
+    if any(ch in raw for ch in ("x", "X", "*", "#")):
+        return None
+    digits = re.sub(r"\D", "", raw)
+    return digits if len(digits) == 9 else None
+
+
+def _normalize_name(value: object) -> str | None:
+    raw = _string_or_none(value)
+    if raw is None:
+        return None
+    cleaned = re.sub(r"[^a-z ]", " ", raw.lower())
+    cleaned = re.sub(r"\s+", " ", cleaned).strip()
+    return cleaned or None
+
+
+def _surname(name: str) -> str | None:
+    tokens = name.split()
+    return tokens[-1] if tokens else None
+
+
+def _normalize_address(value: object) -> str | None:
+    if isinstance(value, dict):
+        parts = [
+            _string_or_none(value.get(key))
+            for key in ("line1", "street", "address", "city", "state", "postal_code", "zip")
+        ]
+        raw = " ".join(part for part in parts if part)
+    else:
+        raw = _string_or_none(value) or ""
+    cleaned = re.sub(r"[^a-z0-9 ]", " ", raw.lower())
+    cleaned = re.sub(r"\s+", " ", cleaned).strip()
+    return cleaned or None
+
+
+def _collect_personal_info(
+    parsed_report: dict[str, Any],
+) -> tuple[set[str], set[str], set[str], set[str]]:
+    """Return (names, ssns, dobs, addresses) normalized for variation detection."""
+    names: set[str] = set()
+    ssns: set[str] = set()
+    dobs: set[str] = set()
+    addresses: set[str] = set()
+
+    def _classify(field_name: str, value: object) -> None:
+        lowered = field_name.lower()
+        if any(hint in lowered for hint in _SSN_FIELD_HINTS):
+            ssn = _normalize_ssn(value)
+            if ssn:
+                ssns.add(ssn)
+            return
+        if any(hint in lowered for hint in _DOB_FIELD_HINTS):
+            parsed = _parse_date(value)
+            if parsed is not None:
+                dobs.add(parsed.date().isoformat())
+            return
+        if any(hint in lowered for hint in _ADDRESS_FIELD_HINTS):
+            address = _normalize_address(value)
+            if address:
+                addresses.add(address)
+            return
+        if any(hint in lowered for hint in _NAME_FIELD_HINTS):
+            name = _normalize_name(value)
+            if name:
+                names.add(name)
+
+    personal = parsed_report.get("personal_information")
+    if isinstance(personal, list):
+        for item in personal:
+            if not isinstance(item, dict):
+                continue
+            field_name = _string_or_none(item.get("field_name"))
+            if field_name is None:
+                continue
+            _classify(field_name, item.get("value"))
+
+    consumer = parsed_report.get("consumer")
+    if isinstance(consumer, dict):
+        name = _normalize_name(consumer.get("name"))
+        if name:
+            names.add(name)
+        for alias in consumer.get("aliases") or consumer.get("also_known_as") or []:
+            alias_name = _normalize_name(alias)
+            if alias_name:
+                names.add(alias_name)
+        ssn = _normalize_ssn(consumer.get("ssn") or consumer.get("social_security_number"))
+        if ssn:
+            ssns.add(ssn)
+        dob = _parse_date(consumer.get("date_of_birth"))
+        if dob is not None:
+            dobs.add(dob.date().isoformat())
+        for address in consumer.get("addresses") or []:
+            normalized = _normalize_address(address)
+            if normalized:
+                addresses.add(normalized)
+
+    for address in parsed_report.get("addresses") or []:
+        normalized = _normalize_address(address)
+        if normalized:
+            addresses.add(normalized)
+
+    return names, ssns, dobs, addresses
+
+
+def _detect_personal_info_variations(
+    parsed_report: dict[str, Any],
+) -> list[IdentityTheftFinding]:
+    names, ssns, dobs, addresses = _collect_personal_info(parsed_report)
+    findings: list[IdentityTheftFinding] = []
+
+    if len(ssns) >= 2:
+        findings.append(
+            _personal_info_finding(
+                rule_id="identity_theft.personal_info.multiple_ssns",
+                title="Multiple Social Security numbers on file",
+                description=(
+                    "This report lists more than one Social Security number. That can "
+                    "indicate a mixed file (another person's data commingled) or identity "
+                    "theft. This is an advisory signal — confirm with the consumer before "
+                    "labeling any account."
+                ),
+                confidence=0.9,
+                severity="high",
+                fields=("personal_information", "ssn"),
+                observed={"distinct_ssn_count": len(ssns)},
+            )
+        )
+
+    if len(dobs) >= 2:
+        findings.append(
+            _personal_info_finding(
+                rule_id="identity_theft.personal_info.multiple_dobs",
+                title="Multiple dates of birth on file",
+                description=(
+                    "More than one date of birth appears on this report, a common "
+                    "mixed-file indicator. Advisory only — verify identity data with the "
+                    "consumer before disputing."
+                ),
+                confidence=0.85,
+                severity="high",
+                fields=("personal_information", "date_of_birth"),
+                observed={"distinct_dob_count": len(dobs)},
+            )
+        )
+
+    surnames = {surname for name in names if (surname := _surname(name)) is not None}
+    if len(surnames) >= 2:
+        findings.append(
+            _personal_info_finding(
+                rule_id="identity_theft.personal_info.name_variations",
+                title="Name variations suggest a possible mixed file",
+                description=(
+                    "Multiple distinct surnames appear among the names on this report. "
+                    "Nicknames and maiden names are common, but distinct surnames can "
+                    "indicate a mixed file. Advisory only — confirm before disputing."
+                ),
+                confidence=0.7,
+                severity="medium",
+                fields=("personal_information", "name"),
+                observed={
+                    "distinct_name_count": len(names),
+                    "distinct_surname_count": len(surnames),
+                },
+            )
+        )
+
+    if len(addresses) >= _ADDRESS_VARIATION_THRESHOLD:
+        findings.append(
+            _personal_info_finding(
+                rule_id="identity_theft.personal_info.address_variations",
+                title="Many address variations on file",
+                description=(
+                    f"{len(addresses)} distinct addresses appear on this report. Frequent "
+                    "moves are legitimate, but a large number of addresses can indicate a "
+                    "mixed file or identity theft. Advisory only — review with the consumer."
+                ),
+                confidence=0.6,
+                severity="low",
+                fields=("personal_information", "addresses"),
+                observed={"distinct_address_count": len(addresses)},
+            )
+        )
+
+    return findings
+
+
 def evaluate_identity_theft(
     *,
     document_id: uuid.UUID,
@@ -620,6 +858,8 @@ def evaluate_identity_theft(
     burst = _detect_inquiry_burst(parsed_report)
     if burst is not None:
         findings.append(burst)
+
+    findings.extend(_detect_personal_info_variations(parsed_report))
 
     accounts = parsed_report.get("accounts")
     tradelines_evaluated = 0
@@ -652,6 +892,9 @@ def evaluate_identity_theft(
         ),
         "tradeline_indicators": sum(
             1 for item in findings if item.detection_source == "TRADELINE_HEURISTIC"
+        ),
+        "personal_info_indicators": sum(
+            1 for item in findings if item.detection_source == "PERSONAL_INFO"
         ),
         "ordinary_dispute_locked_count": sum(
             1 for item in findings if item.ordinary_dispute_locked

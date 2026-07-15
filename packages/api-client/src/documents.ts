@@ -227,6 +227,7 @@ export interface IdentityTheftFindingSummary {
   tradelines_evaluated: number;
   report_level_indicators: number;
   tradeline_indicators: number;
+  personal_info_indicators: number;
   ordinary_dispute_locked_count: number;
 }
 
@@ -235,7 +236,8 @@ export interface IdentityTheftFinding {
   severity: 'low' | 'medium' | 'high';
   title: string;
   description: string;
-  detection_source: 'REPORT_TEXT' | 'TRADELINE_HEURISTIC' | 'CONSUMER_CONFIRMATION';
+  detection_source:
+    'REPORT_TEXT' | 'TRADELINE_HEURISTIC' | 'CONSUMER_CONFIRMATION' | 'PERSONAL_INFO';
   issue_type: 'IDENTITY_THEFT_INDICATOR' | 'CONFIRMED_IDENTITY_THEFT_CLAIM';
   confidence: number;
   consumer_confirmed: boolean;
@@ -389,7 +391,8 @@ export interface ConfirmIdentityTheftAccountRequest {
   match_key?: string | null;
   creditor_name?: string | null;
   account_number_masked?: string | null;
-  detection_source?: 'REPORT_TEXT' | 'TRADELINE_HEURISTIC' | 'CONSUMER_CONFIRMATION';
+  detection_source?:
+    'REPORT_TEXT' | 'TRADELINE_HEURISTIC' | 'CONSUMER_CONFIRMATION' | 'PERSONAL_INFO';
   rule_id?: string | null;
   confidence?: number;
   discovered_at?: string | null;

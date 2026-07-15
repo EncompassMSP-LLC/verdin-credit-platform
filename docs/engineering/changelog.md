@@ -13,6 +13,18 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — mixed-file / personal-info variation detection (Phase 9)
+
+**Decision:** Add advisory mixed-file / personal-info variation detection to the identity-theft engine. `evaluate_identity_theft` now inspects `personal_information`, `consumer`, and `addresses` for multiple unmasked SSNs, multiple dates of birth, distinct surname variations, and a high number of address variations, emitting findings with a new `PERSONAL_INFO` detection source (rule IDs `identity_theft.personal_info.*`). A `summary.personal_info_indicators` counter surfaces the count in the Case Center.
+
+**Reason:** Phase 8 detected fraud alerts, freezes, and tradeline warning signs but not commingled-identity signals. Mixed files are a distinct FCRA problem from identity theft and are resolved on the §611 path, so these findings must stay advisory and must **not** lock ordinary disputes (mixed_file is an unlock choice) or trip the identity-theft banner.
+
+**Alternatives considered:** Reusing `REPORT_TEXT` (rejected — would flip the fraud-alert banner and lock disputes); auto-classifying as identity theft (rejected — confirmation stays a human gate).
+
+**Technical debt:** Heuristics rely on parser field-name conventions; masked SSNs are ignored to avoid false positives. Address variation threshold is a fixed constant (5).
+
+**Follow-up work:** Cross-bureau personal-info reconciliation; per-signal consumer confirmation UX.
+
 ## Compliance intelligence — §605B evidence exhibit bundling (Phase 9)
 
 **Decision:** Extend the staff-mediated FCRA §605B block packet so operators can bundle staff-selected, case-scoped evidence documents into an `exhibits/` folder via repeated `document_id` query params on `GET /cases/{case_id}/identity-theft/605b-packet.zip`. Attachment is gated by MIME type (PDF/images/plain text), per-file size (15 MB), and total size (40 MB); skipped or missing documents are recorded with a reason in the packet manifest instead of failing the export.
