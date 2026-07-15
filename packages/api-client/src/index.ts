@@ -733,6 +733,8 @@ export {
   type CaseRedisputeReadinessSummary,
   type CaseReinvestigationSummary,
   type AccountLitigationPacket,
+  type LitigationCrossBureauDiscrepancy,
+  type LitigationCrossBureauEvidence,
   type LitigationPacketLetter,
   type LitigationPacketResponse,
   type LitigationReadinessAssessment,

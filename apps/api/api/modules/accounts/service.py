@@ -12,6 +12,11 @@ from api.core.events import publish_platform_event
 from api.core.feature_flags import FeatureFlag, is_feature_enabled
 from api.core.pagination import PaginatedResponse, paginate
 from api.core.permissions import has_permission
+from api.modules.accounts.cross_bureau import (
+    BureauTradelineView,
+    CrossBureauEvidence,
+    detect_cross_bureau_discrepancies,
+)
 from api.modules.accounts.dispute_drafts import (
     CRA_TEMPLATE_ID,
     FURNISHER_TEMPLATE_ID,
@@ -88,6 +93,8 @@ from api.modules.accounts.schemas import (
     DisputeReasonSuggestionResponse,
     DisputeResponseRecordOutcome,
     DisputeResponseRecordResponse,
+    LitigationCrossBureauDiscrepancy,
+    LitigationCrossBureauEvidence,
     LitigationPacketLetter,
     LitigationPacketResponse,
     LitigationReadinessAssessment,
@@ -1835,6 +1842,13 @@ class AccountService:
             dispute_round=effective_round,
             risk_score=account.risk_score,
         )
+
+        cross_bureau_evidence = await self._build_cross_bureau_evidence(
+            account=account,
+            latest_outcome=latest_outcome,
+            organization_id=organization_id,
+        )
+
         readiness = build_litigation_readiness(
             LitigationReadinessInputs(
                 clock_state=clock.state,
@@ -1843,6 +1857,8 @@ class AccountService:
                 risk_score=account.risk_score,
                 sent_letter_count=sent_count,
                 response_count=len(responses),
+                cross_bureau_conflicts=cross_bureau_evidence.conflict_count,
+                cross_bureau_outcome_conflict=cross_bureau_evidence.has_outcome_conflict,
             )
         )
 
@@ -1866,6 +1882,17 @@ class AccountService:
                 score=readiness.score,
                 indicators=readiness.indicators,
                 summary=readiness.summary,
+            ),
+            cross_bureau=LitigationCrossBureauEvidence(
+                compared_bureaus=cross_bureau_evidence.compared_bureaus,
+                discrepancies=[
+                    LitigationCrossBureauDiscrepancy(
+                        kind=discrepancy.kind,
+                        bureau=discrepancy.bureau,
+                        detail=discrepancy.detail,
+                    )
+                    for discrepancy in cross_bureau_evidence.discrepancies
+                ],
             ),
             letters=[
                 LitigationPacketLetter(
@@ -1897,6 +1924,99 @@ class AccountService:
                 "evidence and decide whether to litigate."
             ),
         )
+
+    @staticmethod
+    def _creditor_key(account: Account) -> tuple[str, str | None]:
+        """Normalized (creditor, masked account number) key for sibling matching."""
+        creditor = (account.creditor_name or "").strip().lower()
+        number = (account.account_number_masked or "").strip() or None
+        return creditor, number
+
+    def _is_cross_bureau_sibling(self, target: Account, candidate: Account) -> bool:
+        """True when ``candidate`` is the same creditor tradeline at another bureau.
+
+        Same normalized creditor, a different bureau, and — when both carry a
+        masked account number — the same number, so distinct tradelines from the
+        same creditor are not conflated.
+        """
+        if candidate.id == target.id:
+            return False
+        if candidate.bureau == target.bureau:
+            return False
+        target_creditor, target_number = self._creditor_key(target)
+        cand_creditor, cand_number = self._creditor_key(candidate)
+        if not target_creditor or target_creditor != cand_creditor:
+            return False
+        if target_number is not None and cand_number is not None:
+            return target_number == cand_number
+        return True
+
+    async def _build_cross_bureau_evidence(
+        self,
+        *,
+        account: Account,
+        latest_outcome: str | None,
+        organization_id: uuid.UUID,
+    ) -> CrossBureauEvidence:
+        """Compare a tradeline to the same creditor's copies at other bureaus.
+
+        Read-only: loads the case's tradelines and recorded responses already on
+        the platform, reduces each sibling to its latest outcome / reported data,
+        and detects divergences (deleted-here-but-verified-there, differing
+        balances/statuses). No live bureau contact.
+        """
+        target_view = BureauTradelineView(
+            account_id=account.id,
+            bureau=getattr(account.bureau, "value", str(account.bureau)),
+            latest_outcome=latest_outcome,
+            dispute_status=getattr(account.dispute_status, "value", str(account.dispute_status)),
+            account_status=getattr(account.account_status, "value", str(account.account_status)),
+            payment_status=getattr(account.payment_status, "value", str(account.payment_status)),
+            balance=account.balance,
+        )
+        if self._session is None:
+            return detect_cross_bureau_discrepancies(target_view, [])
+
+        case_accounts, _ = await self._accounts.list_by_case(
+            account.case_id, organization_id, limit=500
+        )
+        siblings = [
+            candidate
+            for candidate in case_accounts
+            if self._is_cross_bureau_sibling(account, candidate)
+        ]
+        if not siblings:
+            return detect_cross_bureau_discrepancies(target_view, [])
+
+        responses_by_account: dict[uuid.UUID, list[object]] = {}
+        rows = await DisputeResponseRepository(self._session).list_for_case(
+            organization_id=organization_id,
+            case_id=account.case_id,
+        )
+        for row in rows:
+            responses_by_account.setdefault(row.account_id, []).append(row)
+
+        sibling_views = [
+            BureauTradelineView(
+                account_id=sibling.id,
+                bureau=getattr(sibling.bureau, "value", str(sibling.bureau)),
+                latest_outcome=self._latest_response_outcome(
+                    sibling, responses_by_account.get(sibling.id, [])
+                ),
+                dispute_status=getattr(
+                    sibling.dispute_status, "value", str(sibling.dispute_status)
+                ),
+                account_status=getattr(
+                    sibling.account_status, "value", str(sibling.account_status)
+                ),
+                payment_status=getattr(
+                    sibling.payment_status, "value", str(sibling.payment_status)
+                ),
+                balance=sibling.balance,
+            )
+            for sibling in siblings
+        ]
+        return detect_cross_bureau_discrepancies(target_view, sibling_views)
 
     async def _sent_letter_rounds_by_account(
         self,

@@ -33,6 +33,12 @@ class LitigationReadinessInputs:
     risk_score: int | None
     sent_letter_count: int
     response_count: int
+    # Cross-bureau discrepancy signals (Phase 12 slice 4). ``cross_bureau_conflicts``
+    # is the total count of divergent fields across sibling bureaus;
+    # ``cross_bureau_outcome_conflict`` flags the strongest signal — the same item
+    # deleted/corrected at one bureau but verified/rejected at another.
+    cross_bureau_conflicts: int = 0
+    cross_bureau_outcome_conflict: bool = False
 
 
 @dataclass(frozen=True)
@@ -99,6 +105,20 @@ def build_litigation_readiness(inputs: LitigationReadinessInputs) -> LitigationR
         indicators.append(
             "Three or more dispute rounds were mailed without resolution "
             "(reinforces a pattern of noncompliance)."
+        )
+        score += 10
+
+    if inputs.cross_bureau_outcome_conflict:
+        indicators.append(
+            "The same tradeline was resolved inconsistently across bureaus "
+            "(deleted/corrected at one, verified/rejected at another) — strong evidence "
+            "that at least one reinvestigation was inadequate."
+        )
+        score += 25
+    elif inputs.cross_bureau_conflicts > 0:
+        indicators.append(
+            "The same tradeline is reported with divergent data across bureaus "
+            "(balance, status, or dispute state), supporting an inaccuracy theory."
         )
         score += 10
 
