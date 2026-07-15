@@ -122,14 +122,34 @@ export interface ReinvestigationOutcomeAnalytics {
   measured_response_count: number;
 }
 
+export interface ReinvestigationOutcomeFilters {
+  start: string | null;
+  end: string | null;
+  bureau: string | null;
+}
+
 export interface ReinvestigationOutcomeAnalyticsResponse {
   generated_at: string;
+  filters: ReinvestigationOutcomeFilters;
   analytics: ReinvestigationOutcomeAnalytics;
 }
 
-export function getReinvestigationOutcomeAnalytics() {
+export interface ReinvestigationOutcomeAnalyticsParams {
+  start?: string;
+  end?: string;
+  bureau?: string;
+}
+
+export function getReinvestigationOutcomeAnalytics(
+  params: ReinvestigationOutcomeAnalyticsParams = {},
+) {
+  const search = new URLSearchParams();
+  if (params.start) search.set('start', params.start);
+  if (params.end) search.set('end', params.end);
+  if (params.bureau) search.set('bureau', params.bureau);
+  const query = search.toString();
   return request<ReinvestigationOutcomeAnalyticsResponse>(
-    apiPath('/reporting/reinvestigation-outcomes'),
+    apiPath(`/reporting/reinvestigation-outcomes${query ? `?${query}` : ''}`),
   );
 }
 

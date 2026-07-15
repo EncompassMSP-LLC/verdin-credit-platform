@@ -1,7 +1,7 @@
 """Reporting API schemas — read-optimized operational summaries."""
 
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 
 from api.core.responses import BaseSchema
 
@@ -47,8 +47,17 @@ class ReinvestigationOutcomeAnalytics(BaseSchema):
     measured_response_count: int
 
 
+class ReinvestigationOutcomeFilters(BaseSchema):
+    """Filters applied to the reinvestigation outcome analytics query (echoed back)."""
+
+    start: date | None = None
+    end: date | None = None
+    bureau: str | None = None
+
+
 class ReinvestigationOutcomeAnalyticsResponse(BaseSchema):
     generated_at: datetime
+    filters: ReinvestigationOutcomeFilters
     analytics: ReinvestigationOutcomeAnalytics
 
 

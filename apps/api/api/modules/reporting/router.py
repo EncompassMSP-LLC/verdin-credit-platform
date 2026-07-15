@@ -1,12 +1,14 @@
 """Reporting endpoints — read-optimized operational summaries."""
 
 import uuid
+from datetime import date
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.core.pagination import PaginatedResponse
 from api.database.session import get_db
+from api.modules.accounts.models import AccountBureau
 from api.modules.auth.dependencies import get_current_user
 from api.modules.auth.models import User
 from api.modules.billing.dependencies import require_billing_enabled
@@ -85,11 +87,16 @@ async def get_team_productivity_reporting(
 
 @router.get("/reinvestigation-outcomes", response_model=ReinvestigationOutcomeAnalyticsResponse)
 async def get_reinvestigation_outcomes_reporting(
+    start: date | None = Query(None, description="Filter by response day (inclusive lower bound)"),
+    end: date | None = Query(None, description="Filter by response day (inclusive upper bound)"),
+    bureau: AccountBureau | None = Query(None, description="Filter to a single credit bureau"),
     current_user: User = Depends(get_current_user),
     service: ReportingService = Depends(get_reporting_service),
 ) -> ReinvestigationOutcomeAnalyticsResponse:
     """Org-scoped reinvestigation outcome analytics (computed; no benchmarks)."""
-    return await service.get_reinvestigation_outcomes(current_user)
+    return await service.get_reinvestigation_outcomes(
+        current_user, start=start, end=end, bureau=bureau
+    )
 
 
 @router.get(

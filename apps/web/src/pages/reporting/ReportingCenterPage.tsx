@@ -418,31 +418,92 @@ function TeamProductivityPanel() {
   );
 }
 
+const REINVESTIGATION_BUREAU_OPTIONS = [
+  { value: '', label: 'All bureaus' },
+  { value: 'equifax', label: 'Equifax' },
+  { value: 'experian', label: 'Experian' },
+  { value: 'transunion', label: 'TransUnion' },
+];
+
 function ReinvestigationOutcomesPanel() {
+  const [start, setStart] = useState('');
+  const [end, setEnd] = useState('');
+  const [bureau, setBureau] = useState('');
+
   const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ['reporting-reinvestigation-outcomes'],
-    queryFn: getReinvestigationOutcomeAnalytics,
+    queryKey: ['reporting-reinvestigation-outcomes', start, end, bureau],
+    queryFn: () =>
+      getReinvestigationOutcomeAnalytics({
+        start: start || undefined,
+        end: end || undefined,
+        bureau: bureau || undefined,
+      }),
   });
+
+  const filterControls = (
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <label className="text-xs font-medium text-gray-700">
+        From (response date)
+        <input
+          type="date"
+          className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+          value={start}
+          max={end || undefined}
+          onChange={(event) => setStart(event.target.value)}
+        />
+      </label>
+      <label className="text-xs font-medium text-gray-700">
+        To (response date)
+        <input
+          type="date"
+          className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+          value={end}
+          min={start || undefined}
+          onChange={(event) => setEnd(event.target.value)}
+        />
+      </label>
+      <label className="text-xs font-medium text-gray-700">
+        Bureau
+        <select
+          className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+          value={bureau}
+          onChange={(event) => setBureau(event.target.value)}
+        >
+          {REINVESTIGATION_BUREAU_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </label>
+    </div>
+  );
 
   if (isLoading) {
     return (
-      <Card>
-        <p className="text-sm text-gray-500">Loading reinvestigation outcomes…</p>
-      </Card>
+      <div className="space-y-6">
+        <Card>{filterControls}</Card>
+        <Card>
+          <p className="text-sm text-gray-500">Loading reinvestigation outcomes…</p>
+        </Card>
+      </div>
     );
   }
 
   if (isError || !data) {
     return (
-      <Card>
-        <p className="text-sm text-red-600">
-          Failed to load reinvestigation outcomes:{' '}
-          {error instanceof Error ? error.message : 'Unknown error'}
-        </p>
-        <Button className="mt-4" variant="secondary" onClick={() => refetch()}>
-          Retry
-        </Button>
-      </Card>
+      <div className="space-y-6">
+        <Card>{filterControls}</Card>
+        <Card>
+          <p className="text-sm text-red-600">
+            Failed to load reinvestigation outcomes:{' '}
+            {error instanceof Error ? error.message : 'Unknown error'}
+          </p>
+          <Button className="mt-4" variant="secondary" onClick={() => refetch()}>
+            Retry
+          </Button>
+        </Card>
+      </div>
     );
   }
 
@@ -450,6 +511,7 @@ function ReinvestigationOutcomesPanel() {
 
   return (
     <div className="space-y-6">
+      <Card>{filterControls}</Card>
       <div className="flex items-center justify-between gap-4">
         <p className="text-sm text-gray-600">
           {analytics.total_responses} recorded response(s) · generated{' '}

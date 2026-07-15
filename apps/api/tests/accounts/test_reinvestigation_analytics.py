@@ -69,10 +69,12 @@ def _create_account_with_dispute_date(
     *,
     creditor_name: str,
     last_dispute_date: str,
+    bureau: str = "equifax",
 ) -> str:
     payload = sample_account_payload(case_id)
     payload["creditor_name"] = creditor_name
     payload["last_dispute_date"] = last_dispute_date
+    payload["bureau"] = bureau
     create = api_client.post("/api/v1/accounts", headers=manager_headers, json=payload)
     assert create.status_code == 201, create.text
     return create.json()["id"]
@@ -134,6 +136,7 @@ def test_reinvestigation_outcomes_endpoint_aggregates_org(
     assert response.status_code == 200, response.text
     body = response.json()
     assert "generated_at" in body
+    assert body["filters"] == {"start": None, "end": None, "bureau": None}
     analytics = body["analytics"]
     assert analytics["total_responses"] == 2
     assert analytics["counts"]["deleted"] == 1
@@ -143,6 +146,107 @@ def test_reinvestigation_outcomes_endpoint_aggregates_org(
     assert analytics["favorable_rate"] == 0.5
     assert analytics["measured_response_count"] == 2
     assert analytics["avg_days_to_response"] == 17.5
+
+
+def test_reinvestigation_outcomes_filters_by_bureau(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    today = date.today()
+    equifax_id = _create_account_with_dispute_date(
+        api_client,
+        manager_headers,
+        sample_case_id,
+        creditor_name="Equifax Bank",
+        last_dispute_date=(today - timedelta(days=20)).isoformat(),
+        bureau="equifax",
+    )
+    _record_response(
+        api_client,
+        manager_headers,
+        equifax_id,
+        outcome="deleted",
+        response_date=(today - timedelta(days=5)).isoformat(),
+    )
+    experian_id = _create_account_with_dispute_date(
+        api_client,
+        manager_headers,
+        sample_case_id,
+        creditor_name="Experian Bank",
+        last_dispute_date=(today - timedelta(days=20)).isoformat(),
+        bureau="experian",
+    )
+    _record_response(
+        api_client,
+        manager_headers,
+        experian_id,
+        outcome="verified",
+        response_date=(today - timedelta(days=5)).isoformat(),
+    )
+
+    response = api_client.get(
+        "/api/v1/reporting/reinvestigation-outcomes",
+        headers=manager_headers,
+        params={"bureau": "experian"},
+    )
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["filters"]["bureau"] == "experian"
+    analytics = body["analytics"]
+    assert analytics["total_responses"] == 1
+    assert analytics["counts"]["verified"] == 1
+    assert analytics["counts"]["deleted"] == 0
+
+
+def test_reinvestigation_outcomes_filters_by_date_range(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    today = date.today()
+    old_id = _create_account_with_dispute_date(
+        api_client,
+        manager_headers,
+        sample_case_id,
+        creditor_name="Old Response Bank",
+        last_dispute_date=(today - timedelta(days=90)).isoformat(),
+    )
+    _record_response(
+        api_client,
+        manager_headers,
+        old_id,
+        outcome="deleted",
+        response_date=(today - timedelta(days=60)).isoformat(),
+    )
+    recent_id = _create_account_with_dispute_date(
+        api_client,
+        manager_headers,
+        sample_case_id,
+        creditor_name="Recent Response Bank",
+        last_dispute_date=(today - timedelta(days=20)).isoformat(),
+    )
+    _record_response(
+        api_client,
+        manager_headers,
+        recent_id,
+        outcome="verified",
+        response_date=(today - timedelta(days=5)).isoformat(),
+    )
+
+    # Window that only includes the recent response.
+    response = api_client.get(
+        "/api/v1/reporting/reinvestigation-outcomes",
+        headers=manager_headers,
+        params={"start": (today - timedelta(days=30)).isoformat()},
+    )
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["filters"]["start"] == (today - timedelta(days=30)).isoformat()
+    analytics = body["analytics"]
+    assert analytics["total_responses"] == 1
+    assert analytics["counts"]["verified"] == 1
+    assert analytics["counts"]["deleted"] == 0
 
 
 def test_reinvestigation_outcomes_requires_auth(api_client: TestClient) -> None:
