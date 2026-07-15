@@ -17,6 +17,7 @@ import { CaseTradelineChronologyPanel } from '../../components/imports/Tradeline
 import { CaseComplianceEvidencePanel } from '../../components/imports/ComplianceEvidencePanel';
 import { CaseLitigationStrengthPanel } from '../../components/imports/LitigationStrengthPanel';
 import { CaseDisputeStrategyPanel } from '../../components/imports/DisputeStrategyPanel';
+import { CaseReinvestigationClockPanel } from '../../components/imports/ReinvestigationClockPanel';
 import { featureFlags } from '../../lib/feature-flags';
 
 function formatDateTime(value: string | null) {
@@ -217,6 +218,12 @@ export function CaseDetailPage() {
         />
 
         <CaseDisputeStrategyPanel caseId={caseId} className="lg:col-span-3" id="dispute-strategy" />
+
+        <CaseReinvestigationClockPanel
+          caseId={caseId}
+          className="lg:col-span-3"
+          id="reinvestigation-clock"
+        />
 
         <CrossBureauDiscrepancyPanel
           caseId={caseId}

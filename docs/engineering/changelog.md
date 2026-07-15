@@ -13,6 +13,20 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — §611 reinvestigation clock (Phase 10)
+
+**Decision:** Add a computed FCRA §611 reinvestigation clock. A pure `compute_reinvestigation_clock(...)` helper (in `accounts/reinvestigation.py`) classifies a tradeline as `not_sent | awaiting | due_soon | overdue | responded` from its `last_dispute_date` and whether a real response was recorded. `GET /accounts/reinvestigation-clock?case_id=` returns a per-account list (deadline, days-remaining, state, response count) plus a per-state `summary`, sorted overdue-first. Shipped `@verdin/api-client` types/helper and a `CaseReinvestigationClockPanel` on the case detail page.
+
+**Reason:** Slice 2 persists responses but nothing surfaced _when_ the 30-day reinvestigation window elapses or which tradelines need attention. Operators had only the per-account `overdue_investigation_scan` (task-based) and no case-level view. A read model over existing dispute dates + Phase 10 response records gives a live triage surface without new state.
+
+**Guardrails:** Pure computation over stored data — no live bureau polling and no writes. `no_response` outcomes never count as `responded`, so a bureau that ignored a dispute still reads as `overdue`.
+
+**Alternatives considered:** Persisting a per-account deadline column (rejected — derivable from `last_dispute_date`, avoids migration + drift); extending the worker `overdue_investigation_scan` (rejected — that mutates state and is per-account, not a read model); computing on the account list endpoint (rejected — a dedicated endpoint keeps the payload focused and cacheable).
+
+**Technical debt:** The 45-day extended reinvestigation window (documents added mid-investigation) is not modeled — only the base 30 days. The clock keys off `last_dispute_date`, not the specific sent `dispute_letters.sent_at`, so multi-round disputes reflect only the latest round.
+
+**Follow-up work:** Re-dispute / escalation readiness grounded in this clock + litigation strength (slice 4); per-case reinvestigation dashboard (slice 5).
+
 ## Compliance intelligence — dispute response intake & persistence (Phase 10)
 
 **Decision:** Add an auditable dispute response record. `POST /accounts/{id}/dispute-responses` persists a row in a new `dispute_responses` table (migration `087_dispute_responses`) capturing `outcome` (`deleted | verified | updated | corrected | no_response | rejected`), `response_method` (`mail | portal | phone | email | other`), `response_date`, free-text `notes`, and optional links to a sent `dispute_letters` row and a case `documents` row. Terminal outcomes sync the account (`dispute_status`, `response_received`, `investigation_status`) and emit the existing `account_dispute_status_changed` timeline event; `GET /accounts/{id}/dispute-responses` lists records newest-first. Shipped `@verdin/api-client` types/helpers and an `AccountDisputeResponsesPanel` on the account detail page.

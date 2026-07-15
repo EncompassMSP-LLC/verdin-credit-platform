@@ -55,6 +55,7 @@ from api.modules.accounts.intelligence_context import (
 )
 from api.modules.accounts.models import Account, DisputeStatus, InvestigationStatus
 from api.modules.accounts.permissions import ACCOUNT_DELETE_ROLE, ACCOUNT_WRITE_ROLE
+from api.modules.accounts.reinvestigation import compute_reinvestigation_clock
 from api.modules.accounts.repository import AccountListFilters, AccountRepository
 from api.modules.accounts.schemas import (
     AccountCreate,
@@ -62,8 +63,11 @@ from api.modules.accounts.schemas import (
     AccountDisputeResponseReceivedRequest,
     AccountIntelligenceSummary,
     AccountListParams,
+    AccountReinvestigationClock,
     AccountResponse,
     AccountUpdate,
+    CaseReinvestigationClockResponse,
+    CaseReinvestigationClockSummary,
     CrossBureauIntelligenceSummary,
     DisputeLetterResponse,
     DisputeReasonSuggestionResponse,
@@ -1505,6 +1509,72 @@ class AccountService:
             account_id=account.id,
         )
         return [DisputeResponseRecordResponse.from_model(row) for row in rows]
+
+    async def get_case_reinvestigation_clock(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+    ) -> CaseReinvestigationClockResponse:
+        """Compute the FCRA §611 reinvestigation clock for every account in a case.
+
+        Read-only: classifies each tradeline as awaiting / due-soon / overdue /
+        responded / not-sent from its last dispute date and any recorded responses.
+        No live bureau contact — purely a computed view over stored data.
+        """
+        organization_id = self._require_organization(user)
+        accounts, _ = await self._accounts.list_by_case(case_id, organization_id, limit=500)
+
+        responses_by_account: dict[uuid.UUID, list[object]] = {}
+        if self._session is not None:
+            rows = await DisputeResponseRepository(self._session).list_for_case(
+                organization_id=organization_id,
+                case_id=case_id,
+            )
+            for row in rows:
+                responses_by_account.setdefault(row.account_id, []).append(row)
+
+        today = date.today()
+        entries: list[AccountReinvestigationClock] = []
+        summary = CaseReinvestigationClockSummary()
+        for account in accounts:
+            account_responses = responses_by_account.get(account.id, [])
+            has_real_response = account.response_received or any(
+                getattr(response, "outcome", None) != DisputeResponseOutcome.NO_RESPONSE
+                for response in account_responses
+            )
+            clock = compute_reinvestigation_clock(
+                last_dispute_date=account.last_dispute_date,
+                today=today,
+                response_recorded=has_real_response,
+            )
+            entries.append(
+                AccountReinvestigationClock(
+                    account_id=account.id,
+                    creditor_name=account.creditor_name,
+                    dispute_status=account.dispute_status,
+                    last_dispute_date=account.last_dispute_date,
+                    deadline=clock.deadline,
+                    days_remaining=clock.days_remaining,
+                    state=clock.state,
+                    response_received=account.response_received,
+                    response_count=len(account_responses),
+                )
+            )
+            setattr(summary, clock.state, getattr(summary, clock.state) + 1)
+
+        state_order = {"overdue": 0, "due_soon": 1, "awaiting": 2, "responded": 3, "not_sent": 4}
+        entries.sort(
+            key=lambda entry: (
+                state_order.get(entry.state, 9),
+                entry.days_remaining if entry.days_remaining is not None else 9999,
+            )
+        )
+        return CaseReinvestigationClockResponse(
+            case_id=case_id,
+            generated_at=datetime.now(UTC),
+            summary=summary,
+            accounts=entries,
+        )
 
     async def escalate_overdue_investigation(
         self,
