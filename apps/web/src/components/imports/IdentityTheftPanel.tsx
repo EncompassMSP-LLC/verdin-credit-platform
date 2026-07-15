@@ -4,6 +4,7 @@ import {
   confirmIdentityTheftAccount,
   downloadCaseIdentityTheft605bPacket,
   getCaseIdentityTheftCenter,
+  listDocuments,
   type IdentityTheftConfirmation,
   type IdentityTheftFinding,
   type IdentityTheftFindingSummary,
@@ -11,6 +12,17 @@ import {
 import { Badge, Card } from '@verdin/ui';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
+
+const EXHIBIT_MIME_TYPES = new Set([
+  'application/pdf',
+  'image/png',
+  'image/jpeg',
+  'image/jpg',
+  'image/gif',
+  'image/tiff',
+  'image/webp',
+  'text/plain',
+]);
 
 function downloadBlob(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
@@ -104,10 +116,17 @@ export function CaseIdentityTheftPanel({
   const [selectedFinding, setSelectedFinding] = useState<IdentityTheftFinding | null>(null);
   const [confirmation, setConfirmation] = useState<IdentityTheftConfirmation>('need_more_info');
   const [attestation, setAttestation] = useState(false);
+  const [selectedExhibitIds, setSelectedExhibitIds] = useState<string[]>([]);
 
   const centerQuery = useQuery({
     queryKey: ['case-identity-theft-center', caseId],
     queryFn: () => getCaseIdentityTheftCenter(caseId),
+    retry: false,
+  });
+
+  const documentsQuery = useQuery({
+    queryKey: ['case-documents-for-605b', caseId],
+    queryFn: () => listDocuments({ case_id: caseId, page_size: 100 }),
     retry: false,
   });
 
@@ -133,7 +152,11 @@ export function CaseIdentityTheftPanel({
   });
 
   const packetMutation = useMutation({
-    mutationFn: () => downloadCaseIdentityTheft605bPacket(caseId, { letter_format: 'pdf' }),
+    mutationFn: () =>
+      downloadCaseIdentityTheft605bPacket(caseId, {
+        letter_format: 'pdf',
+        document_ids: selectedExhibitIds.length > 0 ? selectedExhibitIds : undefined,
+      }),
     onSuccess: ({ blob, filename }) => downloadBlob(blob, filename),
   });
 
@@ -143,6 +166,17 @@ export function CaseIdentityTheftPanel({
       (review) => review.consumer_confirmation === 'identity_theft' && review.attestation_accepted,
     ),
   );
+  const exhibitCandidates = (documentsQuery.data?.items ?? []).filter((document) =>
+    document.mime_type ? EXHIBIT_MIME_TYPES.has(document.mime_type.split(';')[0].trim()) : false,
+  );
+
+  function toggleExhibit(documentId: string) {
+    setSelectedExhibitIds((current) =>
+      current.includes(documentId)
+        ? current.filter((id) => id !== documentId)
+        : [...current, documentId],
+    );
+  }
 
   return (
     <div id={id} className={className}>
@@ -333,6 +367,38 @@ export function CaseIdentityTheftPanel({
                   ))}
                 </ul>
                 <div className="mt-3">
+                  {exhibitCandidates.length > 0 ? (
+                    <div className="mb-3 rounded-md border border-gray-200 bg-gray-50 p-3">
+                      <p className="text-xs font-medium text-gray-700">
+                        Bundle evidence exhibits (optional)
+                      </p>
+                      <p className="mt-0.5 text-xs text-gray-500">
+                        Staff-selected case documents are added to the packet under{' '}
+                        <code>exhibits/</code>. Nothing is auto-attached; unsupported or oversized
+                        files are skipped with a reason in the manifest.
+                      </p>
+                      <ul className="mt-2 max-h-40 space-y-1 overflow-y-auto">
+                        {exhibitCandidates.map((document) => (
+                          <li key={document.id}>
+                            <label className="flex items-start gap-2 text-sm text-gray-700">
+                              <input
+                                type="checkbox"
+                                className="mt-1"
+                                checked={selectedExhibitIds.includes(document.id)}
+                                onChange={() => toggleExhibit(document.id)}
+                              />
+                              <span>
+                                {document.title || document.file_name}
+                                <span className="ml-1 text-xs text-gray-400">
+                                  ({document.file_name})
+                                </span>
+                              </span>
+                            </label>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
                   <button
                     type="button"
                     className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-800 hover:bg-gray-50 disabled:opacity-50"
@@ -341,7 +407,11 @@ export function CaseIdentityTheftPanel({
                   >
                     {packetMutation.isPending
                       ? 'Building §605B packet…'
-                      : 'Download §605B block packet'}
+                      : selectedExhibitIds.length > 0
+                        ? `Download §605B block packet (${selectedExhibitIds.length} exhibit${
+                            selectedExhibitIds.length === 1 ? '' : 's'
+                          })`
+                        : 'Download §605B block packet'}
                   </button>
                   <p className="mt-1 text-xs text-gray-500">
                     Staff-mediated ZIP with bureau block letters. Does not submit to bureaus.

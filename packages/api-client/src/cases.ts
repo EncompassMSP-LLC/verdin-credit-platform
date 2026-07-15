@@ -595,11 +595,15 @@ async function downloadChecklistExport(
     include_mail_packets?: boolean;
     include_report_excerpts?: boolean;
     format?: 'md' | 'pdf';
+    document_ids?: string[];
   } = {},
 ): Promise<{ blob: Blob; filename: string }> {
   const query = new URLSearchParams();
   if (params.recommended_only === false) {
     query.set('recommended_only', 'false');
+  }
+  for (const documentId of params.document_ids ?? []) {
+    query.append('document_id', documentId);
   }
   if (params.include_letters === false) {
     query.set('include_letters', 'false');
@@ -708,13 +712,13 @@ export async function downloadCaseAttorneyChecklistPacket(
 
 export async function downloadCaseIdentityTheft605bPacket(
   caseId: string,
-  params: { letter_format?: 'text' | 'pdf' } = {},
+  params: { letter_format?: 'text' | 'pdf'; document_ids?: string[] } = {},
 ): Promise<{ blob: Blob; filename: string }> {
   return downloadChecklistExport(
     caseId,
     `/cases/${caseId}/identity-theft/605b-packet.zip`,
     `fcra-605b-block-packet-${caseId.slice(0, 8)}.zip`,
-    { letter_format: params.letter_format ?? 'pdf' },
+    { letter_format: params.letter_format ?? 'pdf', document_ids: params.document_ids },
   );
 }
 

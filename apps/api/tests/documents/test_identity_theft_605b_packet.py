@@ -10,10 +10,13 @@ from io import BytesIO
 from api.modules.documents.identity_theft_605b_packet import (
     FCRA_605B_CITATION,
     BlockTradeline,
+    PacketExhibit,
     build_605b_block_letter_body,
     build_605b_packet_manifest,
     build_605b_packet_zip,
     build_block_letter_context,
+    exhibit_archive_path,
+    exhibit_type_skip_reason,
     export_block_letter,
     fcra_605b_packet_filename,
     parse_bureau,
@@ -108,3 +111,88 @@ def test_build_605b_packet_zip_includes_readme_and_letters() -> None:
         readme = archive.read("README.md").decode("utf-8")
         assert "staff-mediated" in readme.lower() or "does **not** submit" in readme
         assert str(case_id) in readme
+
+
+def test_exhibit_type_skip_reason_allows_pdf_and_images() -> None:
+    assert exhibit_type_skip_reason("application/pdf") is None
+    assert exhibit_type_skip_reason("image/png") is None
+    assert exhibit_type_skip_reason("application/pdf; charset=binary") is None
+    assert exhibit_type_skip_reason("application/zip") is not None
+    assert exhibit_type_skip_reason(None) is not None
+
+
+def test_exhibit_archive_path_is_indexed_and_slugged() -> None:
+    path = exhibit_archive_path(1, "Police Report #12.pdf")
+    assert path.startswith("exhibits/01-")
+    assert path.endswith(".pdf")
+    assert " " not in path
+
+
+def test_manifest_lists_attached_and_skipped_exhibits() -> None:
+    case_id = uuid.uuid4()
+    exhibits = [
+        PacketExhibit(
+            document_id=uuid.uuid4(),
+            title="Police Report",
+            file_name="police-report.pdf",
+            mime_type="application/pdf",
+            size_bytes=1024,
+            status="attached",
+            path="exhibits/01-police-report.pdf",
+        ),
+        PacketExhibit(
+            document_id=uuid.uuid4(),
+            title="Archive",
+            file_name="evidence.zip",
+            mime_type="application/zip",
+            size_bytes=2048,
+            status="skipped_type",
+            skip_reason="unsupported content type (application/zip)",
+        ),
+    ]
+    manifest = build_605b_packet_manifest(
+        case_id=case_id,
+        consumer_name="Jordan Consumer",
+        confirmed_count=1,
+        bureau_labels=["Experian"],
+        packet_readiness=40,
+        missing_evidence=[],
+        evidence_checklist=[],
+        exhibits=exhibits,
+    )
+    assert "Evidence exhibits attached: 1" in manifest
+    assert "exhibits/01-police-report.pdf" in manifest
+    assert "unsupported content type" in manifest
+    assert "evidence.zip" in manifest
+
+
+def test_build_605b_packet_zip_includes_exhibits() -> None:
+    manifest = build_605b_packet_manifest(
+        case_id=uuid.uuid4(),
+        consumer_name="Jordan Consumer",
+        confirmed_count=1,
+        bureau_labels=["Experian"],
+        packet_readiness=40,
+        missing_evidence=[],
+        evidence_checklist=[],
+        exhibits=[
+            PacketExhibit(
+                document_id=uuid.uuid4(),
+                title="Police Report",
+                file_name="police-report.pdf",
+                mime_type="application/pdf",
+                size_bytes=5,
+                status="attached",
+                path="exhibits/01-police-report.pdf",
+            )
+        ],
+    )
+    packet = build_605b_packet_zip(
+        manifest_markdown=manifest,
+        letter_files=[("letters/605b-block-experian.txt", b"letter")],
+        exhibit_files=[("exhibits/01-police-report.pdf", b"%PDF-x")],
+    )
+    with zipfile.ZipFile(BytesIO(packet)) as archive:
+        names = set(archive.namelist())
+        assert "exhibits/01-police-report.pdf" in names
+        assert archive.read("exhibits/01-police-report.pdf") == b"%PDF-x"

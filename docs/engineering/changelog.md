@@ -13,6 +13,18 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — §605B evidence exhibit bundling (Phase 9)
+
+**Decision:** Extend the staff-mediated FCRA §605B block packet so operators can bundle staff-selected, case-scoped evidence documents into an `exhibits/` folder via repeated `document_id` query params on `GET /cases/{case_id}/identity-theft/605b-packet.zip`. Attachment is gated by MIME type (PDF/images/plain text), per-file size (15 MB), and total size (40 MB); skipped or missing documents are recorded with a reason in the packet manifest instead of failing the export.
+
+**Reason:** Phase 8 shipped block letters plus a readiness manifest but only tracked evidence in a checklist. Investigators need the actual proof (police report, FTC report, ID) traveling with the packet, while keeping the "nothing auto-attached / nothing auto-submitted" guardrails.
+
+**Alternatives considered:** Auto-bundle every case document (rejected — unreviewed PII exposure); a separate exhibits endpoint (rejected — packet should be a single reviewable artifact); storing an exhibit selection on the incident (deferred — query params keep the download stateless).
+
+**Technical debt:** Exhibit selection is not persisted; size gating reads `file_size` then verifies actual bytes on fetch. No de-duplication across exhibits.
+
+**Follow-up work:** Persisted exhibit sets; §605B submission-readiness audit (checklist slice 4); optional exhibit ordering.
+
 ## Compliance intelligence — Identity Theft Detection & Recovery (Phase 8)
 
 **Decision:** Add Phase 8 as a first-class Compliance Intelligence Engine component with report/tradeline detection, consumer confirmation + attestation gates, Identity Theft Case Center persistence, FCRA §605B readiness (separate from §611), fraud-alert/freeze tracking, and ordinary dispute-letter pause (`409`) while indicators or confirmed claims lock an account.

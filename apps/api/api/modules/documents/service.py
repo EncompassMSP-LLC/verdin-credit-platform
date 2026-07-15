@@ -1649,19 +1649,28 @@ class DocumentService:
         case_id: uuid.UUID,
         *,
         letter_format: Literal["text", "pdf"] = "pdf",
+        document_ids: list[uuid.UUID] | None = None,
     ) -> tuple[bytes, str, str]:
         """Build a staff-mediated FCRA §605B block packet (letters + readiness manifest).
 
         Requires at least one consumer-confirmed identity-theft account review with
-        attestation. Does not call external bureau APIs.
+        attestation. Does not call external bureau APIs. Operators may bundle
+        staff-selected, case-scoped evidence documents via ``document_ids``; nothing
+        is auto-attached and unsupported or oversized files are skipped with a reason
+        recorded in the packet manifest.
         """
         from datetime import UTC, datetime
 
         from api.modules.documents.identity_theft_605b_packet import (
+            MAX_EXHIBIT_BYTES,
+            MAX_TOTAL_EXHIBIT_BYTES,
             BlockTradeline,
+            PacketExhibit,
             build_605b_packet_manifest,
             build_605b_packet_zip,
             build_block_letter_context,
+            exhibit_archive_path,
+            exhibit_type_skip_reason,
             export_block_letter,
             fcra_605b_packet_filename,
         )
@@ -1748,6 +1757,102 @@ class DocumentService:
             letter_files.append((path, content))
             bureau_labels.append(context.bureau_label)
 
+        exhibits: list[PacketExhibit] = []
+        exhibit_files: list[tuple[str, bytes]] = []
+        total_exhibit_bytes = 0
+        exhibit_index = 1
+        for document_id in document_ids or []:
+            document = await self._documents.get_by_id(
+                document_id,
+                organization_id=organization_id,
+            )
+            if document is None or document.case_id != case_id or document.deleted_at is not None:
+                exhibits.append(
+                    PacketExhibit(
+                        document_id=document_id,
+                        title="(unknown document)",
+                        file_name="(unknown)",
+                        mime_type=None,
+                        size_bytes=None,
+                        status="missing",
+                        skip_reason="document not found for this case",
+                    )
+                )
+                continue
+            title = document.title or document.file_name
+            type_reason = exhibit_type_skip_reason(document.mime_type)
+            if type_reason is not None:
+                exhibits.append(
+                    PacketExhibit(
+                        document_id=document.id,
+                        title=title,
+                        file_name=document.file_name,
+                        mime_type=document.mime_type,
+                        size_bytes=document.file_size,
+                        status="skipped_type",
+                        skip_reason=type_reason,
+                    )
+                )
+                continue
+            if document.file_size is not None and document.file_size > MAX_EXHIBIT_BYTES:
+                exhibits.append(
+                    PacketExhibit(
+                        document_id=document.id,
+                        title=title,
+                        file_name=document.file_name,
+                        mime_type=document.mime_type,
+                        size_bytes=document.file_size,
+                        status="skipped_too_large",
+                        skip_reason=f"exceeds per-file limit ({MAX_EXHIBIT_BYTES // (1024 * 1024)} MB)",
+                    )
+                )
+                continue
+            data = await async_get(self._storage, document.storage_key)
+            size = len(data)
+            if size > MAX_EXHIBIT_BYTES:
+                exhibits.append(
+                    PacketExhibit(
+                        document_id=document.id,
+                        title=title,
+                        file_name=document.file_name,
+                        mime_type=document.mime_type,
+                        size_bytes=size,
+                        status="skipped_too_large",
+                        skip_reason=f"exceeds per-file limit ({MAX_EXHIBIT_BYTES // (1024 * 1024)} MB)",
+                    )
+                )
+                continue
+            if total_exhibit_bytes + size > MAX_TOTAL_EXHIBIT_BYTES:
+                exhibits.append(
+                    PacketExhibit(
+                        document_id=document.id,
+                        title=title,
+                        file_name=document.file_name,
+                        mime_type=document.mime_type,
+                        size_bytes=size,
+                        status="skipped_total_limit",
+                        skip_reason=(
+                            f"exceeds total exhibit limit ({MAX_TOTAL_EXHIBIT_BYTES // (1024 * 1024)} MB)"
+                        ),
+                    )
+                )
+                continue
+            path = exhibit_archive_path(exhibit_index, document.file_name)
+            exhibit_files.append((path, data))
+            exhibits.append(
+                PacketExhibit(
+                    document_id=document.id,
+                    title=title,
+                    file_name=document.file_name,
+                    mime_type=document.mime_type,
+                    size_bytes=size,
+                    status="attached",
+                    path=path,
+                )
+            )
+            total_exhibit_bytes += size
+            exhibit_index += 1
+
         manifest = build_605b_packet_manifest(
             case_id=case_id,
             consumer_name=case.client_name,
@@ -1756,10 +1861,12 @@ class DocumentService:
             packet_readiness=packet_readiness,
             missing_evidence=missing_evidence,
             evidence_checklist=evidence_checklist,
+            exhibits=exhibits,
         )
         packet = build_605b_packet_zip(
             manifest_markdown=manifest,
             letter_files=letter_files,
+            exhibit_files=exhibit_files,
         )
         return packet, fcra_605b_packet_filename(case_id), "application/zip"
 
