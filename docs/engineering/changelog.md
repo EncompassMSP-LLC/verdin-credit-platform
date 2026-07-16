@@ -27,6 +27,16 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Follow-up work:** 5.21 sign-off and release notes.
 
+## Compliance intelligence — bureau response ingestion audit scaffold (Phase 15)
+
+**Decision:** Add `bureau_response_ingestion_runs` with status/list/get/start under `/compliance/bureau-response-ingestion`. Starting a run always records `status=deferred` with an explicit deferral reason — no external bureau API calls.
+
+**Reason:** Operators need an auditable trail of intended ingestion checks before live polling is approved (17.0+).
+
+**Guardrails:** Staff-mediated only; `ready`/`live_polling_enabled` stay false; write requires case_manager+.
+
+**Follow-up work:** Org-internal reinvestigation benchmarks (slice 4); 16.0 sign-off.
+
 ## Compliance intelligence — org-configurable cross-bureau tolerance (Phase 15)
 
 **Decision:** Store per-org `cross_bureau_balance_tolerance` in `organization_dispute_settings` (default $1.00, range $0.01–$100.00). Expose GET/PATCH on `/org-admin/dispute-settings`; litigation-packet cross-bureau evidence resolves the org value at read time.

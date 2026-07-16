@@ -24,6 +24,9 @@ from api.modules.accounts.unsupervised_autonomous_filing_loop_router import (
 )
 from api.modules.auth.dependencies import get_current_user
 from api.modules.auth.models import User
+from api.modules.compliance.bureau_response_ingestion_router import (
+    bureau_response_ingestion_router,
+)
 from api.modules.compliance.consent_templates.keys import ConsentDocumentTemplateKey
 from api.modules.compliance.dependencies import require_compliance_enforcement_enabled
 from api.modules.compliance.models import ConsentStatus, ConsentType, RetentionScope
@@ -59,6 +62,7 @@ router.include_router(fully_autonomous_bureau_api_filing_router)
 router.include_router(unsupervised_autonomous_filing_loop_router)
 router.include_router(bureau_refiling_router)
 router.include_router(bureau_unsupervised_refiling_router)
+router.include_router(bureau_response_ingestion_router)
 
 
 def get_compliance_service(db: AsyncSession = Depends(get_db)) -> ComplianceService:

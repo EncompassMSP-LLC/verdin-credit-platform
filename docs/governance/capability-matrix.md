@@ -652,7 +652,7 @@ Scope: [version-16.0-scope.md](version-16.0-scope.md) · Checklist: [version-16.
 | Capability                               | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                             |
 | ---------------------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | --------------------------------------------------------------------------------- |
 | Org-configurable cross-bureau tolerance  | 16.0    | ✅      | ✅      | ✅       | ✅  | —   | ✅    | Org Admin    | Per-org monetary tolerance for cross-bureau discrepancy detection (default $1.00) |
-| Bureau response ingestion audit scaffold | 16.0    | Planned | —       | —        | —   | —   | —     | Compliance   | Audit run table + list API for planned ingestion; no live bureau polling          |
+| Bureau response ingestion audit scaffold | 16.0    | ✅      | ✅      | —        | ✅  | —   | ✅    | Compliance   | Audit run table + list API for planned ingestion; no live bureau polling          |
 | Org-internal reinvestigation benchmarks  | 16.0    | Planned | —       | —        | —   | —   | —     | Reporting    | Org-scoped historical baselines on outcome analytics; no cross-tenant data        |
 
 ---

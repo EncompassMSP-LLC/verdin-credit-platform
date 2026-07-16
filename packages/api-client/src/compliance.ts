@@ -974,3 +974,81 @@ export function approveBureauUnsupervisedRefilingRun(runId: string) {
     },
   );
 }
+
+export type BureauResponseIngestionRunStatus = 'deferred' | 'failed';
+
+export interface BureauResponseIngestionStatus {
+  enabled: boolean;
+  ready: boolean;
+  live_polling_enabled: boolean;
+  blockers: string[];
+}
+
+export interface BureauResponseIngestionRun {
+  id: string;
+  organization_id: string;
+  case_id: string | null;
+  account_id: string | null;
+  bureau_target: string;
+  status: BureauResponseIngestionRunStatus;
+  summary: string;
+  deferral_reason: string;
+  requested_by_user_id: string | null;
+  requested_at: string | null;
+  error_message: string | null;
+}
+
+export interface BureauResponseIngestionStartInput {
+  summary: string;
+  bureau_target?: string;
+  case_id?: string | null;
+  account_id?: string | null;
+}
+
+export interface BureauResponseIngestionRunResult {
+  completed_at: string;
+  run: BureauResponseIngestionRun;
+}
+
+export interface ListBureauResponseIngestionRunsParams {
+  page?: number;
+  page_size?: number;
+  case_id?: string;
+  account_id?: string;
+}
+
+export function getBureauResponseIngestionStatus() {
+  return request<BureauResponseIngestionStatus>(
+    apiPath('/compliance/bureau-response-ingestion/status'),
+  );
+}
+
+export function listBureauResponseIngestionRuns(
+  params: ListBureauResponseIngestionRunsParams = {},
+) {
+  const search = new URLSearchParams();
+  if (params.page) search.set('page', String(params.page));
+  if (params.page_size) search.set('page_size', String(params.page_size));
+  if (params.case_id) search.set('case_id', params.case_id);
+  if (params.account_id) search.set('account_id', params.account_id);
+  const query = search.toString();
+  return request<PaginatedResponse<BureauResponseIngestionRun>>(
+    apiPath(`/compliance/bureau-response-ingestion/runs${query ? `?${query}` : ''}`),
+  );
+}
+
+export function getBureauResponseIngestionRun(runId: string) {
+  return request<BureauResponseIngestionRun>(
+    apiPath(`/compliance/bureau-response-ingestion/runs/${runId}`),
+  );
+}
+
+export function startBureauResponseIngestionRun(input: BureauResponseIngestionStartInput) {
+  return request<BureauResponseIngestionRunResult>(
+    apiPath('/compliance/bureau-response-ingestion/runs'),
+    {
+      method: 'POST',
+      body: input,
+    },
+  );
+}
