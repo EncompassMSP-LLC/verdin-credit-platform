@@ -13,6 +13,20 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — structured PDF litigation export layout (Phase 14)
+
+**Decision:** Replace the litigation-packet PDF's plain wrapped-text canvas with a reportlab platypus `SimpleDocTemplate` layout: title/subtitle, spaced section headings, and bullet lists for tradeline, Section 611 clock, assessment, indicators, cross-bureau discrepancies, mailed rounds, and recorded responses.
+
+**Reason:** Phase 13 shipped PDF export as a simple text dump on canvas — hard to scan for attorneys. Structured sections close documented 5.20 tech debt without changing packet content or the text export.
+
+**Guardrails:** Same disclaimer and fields as `build_litigation_packet_text`; no branding/templates per org; no auto-filing or transmission.
+
+**Alternatives considered:** Reusing dispute-letter canvas helpers (rejected — litigation packet has many sections); HTML-to-PDF (rejected — adds dependency and diverges from existing reportlab stack).
+
+**Technical debt:** PDF still substitutes "Section 611" for the § glyph (Helvetica limitation); org-specific letterhead deferred.
+
+**Follow-up work:** 5.21 sign-off and release notes.
+
 ## Compliance intelligence — per-recipient reinvestigation analytics breakdown (Phase 14)
 
 **Decision:** Extend `GET /reporting/reinvestigation-outcomes` so `group_by=recipient` returns a `by_recipient` array of `{recipient, analytics}` entries. Recipient is taken from the linked dispute letter's `recipient_type`; responses without a linked letter are bucketed as `unknown`. Existing `group_by=bureau` behavior is unchanged. The Reporting Center adds a "Break down by" control (Bureau / Recipient).

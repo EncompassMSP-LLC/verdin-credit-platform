@@ -2,6 +2,7 @@
 
 import uuid
 from datetime import UTC, date, datetime
+from io import BytesIO
 
 from fastapi.testclient import TestClient
 
@@ -111,9 +112,18 @@ def test_export_filename_and_sanitize() -> None:
 
 
 def test_export_pdf_bytes_are_valid_pdf() -> None:
+    from pypdf import PdfReader
+
     content = build_litigation_packet_pdf_bytes(_packet())
     assert content.startswith(b"%PDF")
-    assert len(content) > 200
+    assert len(content) > 500
+    reader = PdfReader(BytesIO(content))
+    assert len(reader.pages) >= 1
+    extracted = "\n".join(page.extract_text() or "" for page in reader.pages)
+    assert "LITIGATION-READINESS EVIDENCE PACKET" in extracted
+    assert "DISCLAIMER" in extracted
+    assert "CROSS-BUREAU DISCREPANCIES" in extracted
+    assert "SECTION 611 REINVESTIGATION CLOCK" in extracted
 
 
 def test_build_export_dispatches_by_format() -> None:
