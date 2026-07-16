@@ -6,6 +6,8 @@ from datetime import UTC, date, datetime
 from fastapi.testclient import TestClient
 
 from api.modules.accounts.litigation_packet_export import (
+    build_litigation_packet_export,
+    build_litigation_packet_pdf_bytes,
     build_litigation_packet_text,
     export_filename,
     sanitize_content_disposition_filename,
@@ -104,7 +106,26 @@ def test_export_filename_and_sanitize() -> None:
     name = export_filename(packet, "text")
     assert name.startswith("litigation-packet-")
     assert name.endswith(".txt")
+    assert export_filename(packet, "pdf").endswith(".pdf")
     assert sanitize_content_disposition_filename("a b/c.txt") == "a_b_c.txt"
+
+
+def test_export_pdf_bytes_are_valid_pdf() -> None:
+    content = build_litigation_packet_pdf_bytes(_packet())
+    assert content.startswith(b"%PDF")
+    assert len(content) > 200
+
+
+def test_build_export_dispatches_by_format() -> None:
+    packet = _packet()
+    text_bytes, text_name, text_media = build_litigation_packet_export(packet, "text")
+    pdf_bytes, pdf_name, pdf_media = build_litigation_packet_export(packet, "pdf")
+    assert text_media.startswith("text/plain")
+    assert text_name.endswith(".txt")
+    assert b"LITIGATION-READINESS EVIDENCE PACKET" in text_bytes
+    assert pdf_media == "application/pdf"
+    assert pdf_name.endswith(".pdf")
+    assert pdf_bytes.startswith(b"%PDF")
 
 
 def _create_account(
@@ -145,6 +166,41 @@ def test_export_endpoint_returns_text_attachment(
     assert "attachment; filename=" in response.headers["content-disposition"]
     assert "LITIGATION-READINESS EVIDENCE PACKET" in response.text
     assert "Endpoint Bank" in response.text
+
+
+def test_export_endpoint_returns_pdf_attachment(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    account_id = _create_account(
+        api_client, manager_headers, sample_case_id, creditor_name="Pdf Endpoint Bank"
+    )
+    response = api_client.get(
+        f"/api/v1/accounts/{account_id}/litigation-packet/export",
+        headers=manager_headers,
+        params={"format": "pdf"},
+    )
+    assert response.status_code == 200, response.text
+    assert response.headers["content-type"].startswith("application/pdf")
+    assert response.headers["content-disposition"].endswith('.pdf"')
+    assert response.content.startswith(b"%PDF")
+
+
+def test_export_endpoint_rejects_unknown_format(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    account_id = _create_account(
+        api_client, manager_headers, sample_case_id, creditor_name="Bad Format Bank"
+    )
+    response = api_client.get(
+        f"/api/v1/accounts/{account_id}/litigation-packet/export",
+        headers=manager_headers,
+        params={"format": "docx"},
+    )
+    assert response.status_code == 422
 
 
 def test_export_endpoint_requires_write_permission(

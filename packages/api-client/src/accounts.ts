@@ -634,9 +634,10 @@ export async function getAccountLitigationPacket(
 
 export async function downloadAccountLitigationPacket(
   accountId: string,
+  format: 'text' | 'pdf' = 'text',
 ): Promise<{ blob: Blob; filename: string }> {
   const url = `${getApiBaseUrl()}${apiPath(
-    `/accounts/${accountId}/litigation-packet/export?format=text`,
+    `/accounts/${accountId}/litigation-packet/export?format=${format}`,
   )}`;
   const headers: Record<string, string> = {};
   const token = getAccessToken();
@@ -656,9 +657,10 @@ export async function downloadAccountLitigationPacket(
     );
   }
 
+  const fallbackExt = format === 'pdf' ? 'pdf' : 'txt';
   const filename = parseContentDispositionFilename(
     response.headers.get('content-disposition'),
-    `litigation-packet-${accountId.slice(0, 8)}.txt`,
+    `litigation-packet-${accountId.slice(0, 8)}.${fallbackExt}`,
   );
   const blob = await response.blob();
   return { blob, filename };

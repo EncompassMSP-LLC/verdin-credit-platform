@@ -1,8 +1,8 @@
-"""Plain-text export of the litigation-readiness evidence packet (Phase 12 slice 5).
+"""Export of the litigation-readiness evidence packet (Phase 12 / 13).
 
 Renders an already-assembled :class:`AccountLitigationPacket` into a human-readable
-text document for a **licensed attorney to review**. This is a pure formatter — it
-performs no assembly, no scoring, no I/O, and no network calls.
+text or PDF document for a **licensed attorney to review**. This is a pure
+formatter — it performs no assembly, no scoring, no I/O, and no network calls.
 
 Guardrails: the export is a manual attorney handoff. The platform never files suit,
 drafts pleadings, transmits the document anywhere, or contacts a court/bureau. The
@@ -12,6 +12,7 @@ packet's disclaimer is reproduced prominently at the top of every export.
 from __future__ import annotations
 
 import re
+from io import BytesIO
 from typing import Literal
 
 from api.modules.accounts.schemas import (
@@ -20,10 +21,11 @@ from api.modules.accounts.schemas import (
     LitigationPacketResponse,
 )
 
-LitigationPacketExportFormat = Literal["text"]
+LitigationPacketExportFormat = Literal["text", "pdf"]
 
 _MEDIA_TYPES: dict[LitigationPacketExportFormat, str] = {
     "text": "text/plain; charset=utf-8",
+    "pdf": "application/pdf",
 }
 
 
@@ -35,7 +37,7 @@ def export_filename(
     packet: AccountLitigationPacket, export_format: LitigationPacketExportFormat
 ) -> str:
     short_id = str(packet.account_id).split("-", 1)[0]
-    extension = "txt"
+    extension = "txt" if export_format == "text" else "pdf"
     return f"litigation-packet-{short_id}.{extension}"
 
 
@@ -124,13 +126,90 @@ def _response_lines(responses: list[LitigationPacketResponse]) -> list[str]:
     ]
 
 
+def _wrap_lines(text: str, *, max_chars: int = 90) -> list[str]:
+    lines: list[str] = []
+    for paragraph in text.splitlines():
+        stripped = paragraph.strip()
+        if not stripped:
+            lines.append("")
+            continue
+        current = ""
+        for word in stripped.split():
+            candidate = f"{current} {word}".strip()
+            if len(candidate) <= max_chars:
+                current = candidate
+            else:
+                if current:
+                    lines.append(current)
+                current = word
+        if current:
+            lines.append(current)
+    return lines
+
+
+def build_litigation_packet_pdf_bytes(packet: AccountLitigationPacket) -> bytes:
+    """Render the packet as a multi-page PDF using the same content as the text export."""
+    from reportlab.lib.pagesizes import letter as letter_page_size
+    from reportlab.pdfgen import canvas
+
+    buffer = BytesIO()
+    pdf = canvas.Canvas(buffer, pagesize=letter_page_size)
+    page_width, page_height = letter_page_size
+    margin = 72
+    line_height = 14
+    y = page_height - margin
+    text = build_litigation_packet_text(packet)
+
+    def new_page() -> None:
+        nonlocal y
+        pdf.showPage()
+        y = page_height - margin
+
+    heading_markers = {
+        "LITIGATION-READINESS EVIDENCE PACKET",
+        "DISCLAIMER",
+        "TRADELINE",
+        "§611 REINVESTIGATION CLOCK",
+        "WILLFUL-NONCOMPLIANCE ASSESSMENT (ADVISORY)",
+        "INDICATORS",
+        "CROSS-BUREAU DISCREPANCIES",
+    }
+
+    for raw_line in text.splitlines():
+        is_heading = (
+            raw_line in heading_markers
+            or raw_line.startswith("DISPUTE ROUNDS MAILED")
+            or raw_line.startswith("RECORDED RESPONSES")
+        )
+        font_name = "Helvetica-Bold" if is_heading else "Helvetica"
+        font_size = 12 if raw_line == "LITIGATION-READINESS EVIDENCE PACKET" else 11
+        pdf.setFont(font_name, font_size)
+        for wrapped in _wrap_lines(raw_line if raw_line else " "):
+            if y < margin:
+                new_page()
+                pdf.setFont(font_name, font_size)
+            if not wrapped.strip():
+                y -= line_height
+                continue
+            # reportlab Helvetica lacks §; substitute a plain label for PDF glyphs.
+            draw_text = wrapped.replace("§", "Section ")
+            pdf.drawString(margin, y, draw_text)
+            y -= line_height
+
+    pdf.save()
+    return buffer.getvalue()
+
+
 def build_litigation_packet_export(
     packet: AccountLitigationPacket,
     export_format: LitigationPacketExportFormat,
 ) -> tuple[bytes, str, str]:
     filename = export_filename(packet, export_format)
     media_type = export_media_type(export_format)
-    content = build_litigation_packet_text(packet).encode("utf-8")
+    if export_format == "text":
+        content = build_litigation_packet_text(packet).encode("utf-8")
+    else:
+        content = build_litigation_packet_pdf_bytes(packet)
     return content, filename, media_type
 
 
