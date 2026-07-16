@@ -29,6 +29,7 @@
 **Version 5.20 sign-off:** [version-5.20-scope.md](version-5.20-scope.md) · Release notes: [v5.20.0.md](../release-notes/v5.20.0.md)
 **Version 5.21 sign-off:** [version-5.21-scope.md](version-5.21-scope.md) · Release notes: [v5.21.0.md](../release-notes/v5.21.0.md)
 **Version 16.0 sign-off:** [version-16.0-scope.md](version-16.0-scope.md) · Release notes: [v16.0.0.md](../release-notes/v16.0.0.md)
+**Version 17.0 scope (in progress):** [version-17.0-scope.md](version-17.0-scope.md) · Checklist: [version-17.0-completion-checklist.md](../development/version-17.0-completion-checklist.md)
 
 ## Status legend
 
@@ -654,6 +655,17 @@ Scope: [version-16.0-scope.md](version-16.0-scope.md) · Checklist: [version-16.
 | Org-configurable cross-bureau tolerance  | 16.0    | ✅     | ✅      | ✅       | ✅  | —   | ✅    | Org Admin    | Per-org monetary tolerance for cross-bureau discrepancy detection (default $1.00) |
 | Bureau response ingestion audit scaffold | 16.0    | ✅     | ✅      | —        | ✅  | —   | ✅    | Compliance   | Audit run table + list API for planned ingestion; no live bureau polling          |
 | Org-internal reinvestigation benchmarks  | 16.0    | ✅     | ✅      | —        | ✅  | —   | ✅    | Reporting    | Org-scoped trailing baselines on outcome analytics; no cross-tenant data          |
+
+---
+
+## Version 17.0 — Reinvestigation Operations Surfaces (in progress — 🚧)
+
+Scope: [version-17.0-scope.md](version-17.0-scope.md) · Checklist: [version-17.0-completion-checklist.md](../development/version-17.0-completion-checklist.md)
+
+| Capability                                  | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                              |
+| ------------------------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ------------------------------------------------------------------ |
+| Reporting Center org-internal benchmarks UI | 17.0    | Planned | ✅      | —        | ✅  | —   | —     | Reporting    | Staff UI for trailing baseline/recent rates + advisory deltas      |
+| Compliance Center ingestion audit UI        | 17.0    | Planned | ✅      | —        | ✅  | —   | —     | Compliance   | Staff UI for deferred ingestion audit runs; no live bureau polling |
 
 ---
 

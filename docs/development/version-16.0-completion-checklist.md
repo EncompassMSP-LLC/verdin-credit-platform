@@ -33,12 +33,13 @@ Slice 2 moves cross-bureau monetary tolerance from a module constant to per-org 
 
 ---
 
-## Explicitly not 16.0 (→ 17.0+)
+## Explicitly not 16.0 (→ 17.0+ / 18.0+)
 
-| Capability                                      | Version | Why defer                                               |
-| ----------------------------------------------- | ------- | ------------------------------------------------------- |
-| Live bureau response ingestion / polling        | 17.0+   | Live bureau API access + legal/compliance sign-off      |
-| Automated re-dispute filing execution           | 17.0+   | Depends on deferred live submission                     |
-| Unsupervised CFPB / attorney escalation         | Never   | Escalation stays an advisory, human-filed signal        |
-| Automated litigation filing / e-filing          | Never   | The export is a human handoff; the platform never files |
-| Cross-tenant reinvestigation-outcome benchmarks | 17.0+   | Data governance and legal review not complete           |
+| Capability                                       | Version | Why defer                                               |
+| ------------------------------------------------ | ------- | ------------------------------------------------------- |
+| Reporting / Compliance operator UI for scaffolds | 17.0    | Surfaced in Phase 16 operations surfaces                |
+| Live bureau response ingestion / polling         | 18.0+   | Live bureau API access + legal/compliance sign-off      |
+| Automated re-dispute filing execution            | 18.0+   | Depends on deferred live submission                     |
+| Unsupervised CFPB / attorney escalation          | Never   | Escalation stays an advisory, human-filed signal        |
+| Automated litigation filing / e-filing           | Never   | The export is a human handoff; the platform never files |
+| Cross-tenant reinvestigation-outcome benchmarks  | 18.0+   | Data governance and legal review not complete           |

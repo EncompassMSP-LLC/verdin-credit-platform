@@ -26,13 +26,14 @@ All v5.21.0 APIs, UI, and `@verdin/api-client` functions remain production capab
 
 ## Explicit deferrals (not 16.0)
 
-| Capability                                      | Deferred to | Reason                                                         |
-| ----------------------------------------------- | ----------- | -------------------------------------------------------------- |
-| Live bureau response ingestion / polling        | 17.0+       | Requires live bureau API access + legal/compliance sign-off    |
-| Automated re-dispute filing execution           | 17.0+       | Depends on deferred live submission; stays a human gate        |
-| Unsupervised escalation (CFPB / attorney)       | Never       | Escalation is an advisory signal; a human decides and files    |
-| Cross-tenant reinvestigation-outcome benchmarks | 17.0+       | Data governance and legal review not complete                  |
-| Automated litigation filing / e-filing          | Never       | The packet/export is a human handoff; the platform never files |
+| Capability                                       | Deferred to | Reason                                                         |
+| ------------------------------------------------ | ----------- | -------------------------------------------------------------- |
+| Reporting / Compliance operator UI for scaffolds | 17.0        | Surfaced in Phase 16 operations surfaces                       |
+| Live bureau response ingestion / polling         | 18.0+       | Requires live bureau API access + legal/compliance sign-off    |
+| Automated re-dispute filing execution            | 18.0+       | Depends on deferred live submission; stays a human gate        |
+| Unsupervised escalation (CFPB / attorney)        | Never       | Escalation is an advisory signal; a human decides and files    |
+| Cross-tenant reinvestigation-outcome benchmarks  | 18.0+       | Data governance and legal review not complete                  |
+| Automated litigation filing / e-filing           | Never       | The packet/export is a human handoff; the platform never files |
 
 ## Partial capability limits (16.0 targets)
 
