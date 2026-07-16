@@ -64,7 +64,7 @@ Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (
 | **5.19**  | Reinvestigation Analytics & Evidence Depth      | Released    | Phase 12 analytics date-range/bureau slicing, per-recipient clock splits, cross-bureau litigation evidence, evidence export (`v5.19.0`)          |
 | **5.20**  | Reinvestigation Analytics & Evidence Refinement | Released    | Phase 13 per-bureau analytics breakdown, per-recipient extended-window accuracy, PDF evidence export, cross-bureau discrepancy depth (`v5.20.0`) |
 | **5.21**  | Reinvestigation Analytics & Evidence Polish     | Released    | Phase 14 per-recipient analytics breakdown, cross-bureau high_balance/credit_limit, structured PDF litigation export layout (`v5.21.0`)          |
-| **16.0**  | Reinvestigation Operations & Configuration      | Planned     | Phase 15 org cross-bureau tolerance, bureau response ingestion audit scaffold, org-internal outcome benchmarks                                   |
+| **16.0**  | Reinvestigation Operations & Configuration      | Released    | Phase 15 org cross-bureau tolerance, bureau response ingestion audit scaffold, org-internal outcome benchmarks (`v16.0.0`)                       |
 
 ### Sprint milestones
 
@@ -491,17 +491,17 @@ Compliance Intelligence Phase 14 polishes the 5.20 analytics and evidence surfac
 | 2    | Cross-bureau high_balance / credit_limit | Released    | Compare high balance and credit limit across sibling bureaus         |
 | 3    | Structured PDF litigation export layout  | Released    | Multi-section reportlab layout for the operator-gated litigation PDF |
 
-### Version 16.0 — Reinvestigation Operations & Configuration (planned)
+### Version 16.0 — Reinvestigation Operations & Configuration (released — `v16.0.0`)
 
-Scope and checklist: [`docs/governance/version-16.0-scope.md`](../governance/version-16.0-scope.md) · [`docs/development/version-16.0-completion-checklist.md`](../development/version-16.0-completion-checklist.md)
+Scope and checklist: [`docs/governance/version-16.0-scope.md`](../governance/version-16.0-scope.md) · [`docs/development/version-16.0-completion-checklist.md`](../development/version-16.0-completion-checklist.md) · Release notes: [`docs/release-notes/v16.0.0.md`](../release-notes/v16.0.0.md)
 
 Compliance Intelligence Phase 15 closes the configuration and operations gaps deferred from 5.21: per-org cross-bureau monetary tolerance, a bureau response ingestion audit scaffold (no live polling), and org-internal reinvestigation outcome benchmarks. Live bureau response ingestion execution, automated re-dispute filing execution, unsupervised escalation, automated litigation filing, and cross-tenant benchmarks remain deferred (17.0+ or never) pending legal/compliance sign-off.
 
 | Epic | Theme                                           | 16.0 target | Notes                                                             |
 | ---- | ----------------------------------------------- | ----------- | ----------------------------------------------------------------- |
-| 1    | Org-configurable cross-bureau balance tolerance | Planned     | Per-org monetary tolerance for cross-bureau discrepancy detection |
-| 2    | Bureau response ingestion audit scaffold        | Planned     | Compliance audit runs for planned ingestion; no live bureau API   |
-| 3    | Org-internal reinvestigation benchmarks         | Planned     | Org-scoped historical baselines on outcome analytics              |
+| 1    | Org-configurable cross-bureau balance tolerance | Released    | Per-org monetary tolerance for cross-bureau discrepancy detection |
+| 2    | Bureau response ingestion audit scaffold        | Released    | Compliance audit runs for planned ingestion; no live bureau API   |
+| 3    | Org-internal reinvestigation benchmarks         | Released    | Org-scoped historical baselines on outcome analytics              |
 
 ## Sprint → version mapping
 
