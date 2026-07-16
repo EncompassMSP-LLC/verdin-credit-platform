@@ -13,6 +13,20 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — cross-bureau discrepancy depth (Phase 13)
+
+**Decision:** Give `detect_cross_bureau_discrepancies` a default `$1.00` balance/past-due tolerance (`DEFAULT_BALANCE_TOLERANCE`, overridable via `balance_tolerance`) so trivial rounding differences no longer flag as conflicts, and compare two additional stored fields — `past_due_amount` (`past_due_conflict`) and `date_reported` (`date_reported_conflict`). `BureauTradelineView` and the litigation-packet assembly pass those fields through from the account model.
+
+**Reason:** Phase 12 flagged any balance difference, including $0.01 rounding noise that cluttered the packet. Past-due amount and date-reported are high-signal FCRA accuracy fields already on the tradeline model but were unused in the comparison.
+
+**Guardrails:** Read-only comparison over stored parsed-report data; no new bureau collection; tolerance applies only to monetary fields (status/outcome/date still exact-match). Findings remain advisory for attorney review.
+
+**Alternatives considered:** Percentage-based tolerance (rejected — absolute $1.00 is simpler and matches typical CRA rounding); exposing tolerance as a query param (rejected for this slice — constant is enough; the kwarg keeps it unit-testable).
+
+**Technical debt:** Tolerance is a module constant, not org-configurable. High-balance / credit-limit fields are still not compared.
+
+**Follow-up work:** Capability matrix 5.20 sign-off + release notes (slice 6).
+
 ## Compliance intelligence — PDF litigation evidence export (Phase 13)
 
 **Decision:** Extend `GET /accounts/{account_id}/litigation-packet/export` to accept `format=pdf` alongside the existing `text` default. `build_litigation_packet_pdf_bytes` renders the same attorney-review content as the text export via reportlab (mirroring `dispute_letter_export.py`). The web packet panel offers both Download .txt and Download .pdf. Guardrails unchanged: write-permission gate, disclaimer at top, never auto-transmitted.

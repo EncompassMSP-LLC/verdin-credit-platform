@@ -1999,6 +1999,8 @@ class AccountService:
             account_status=getattr(account.account_status, "value", str(account.account_status)),
             payment_status=getattr(account.payment_status, "value", str(account.payment_status)),
             balance=account.balance,
+            past_due_amount=account.past_due_amount,
+            date_reported=account.date_reported,
         )
         if self._session is None:
             return detect_cross_bureau_discrepancies(target_view, [])
@@ -2039,6 +2041,8 @@ class AccountService:
                     sibling.payment_status, "value", str(sibling.payment_status)
                 ),
                 balance=sibling.balance,
+                past_due_amount=sibling.past_due_amount,
+                date_reported=sibling.date_reported,
             )
             for sibling in siblings
         ]
