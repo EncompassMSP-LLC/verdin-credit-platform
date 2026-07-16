@@ -27,6 +27,16 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Follow-up work:** 5.21 sign-off and release notes.
 
+## Compliance intelligence — Reporting Center org-internal benchmarks UI (Phase 16)
+
+**Decision:** Add an "Outcome benchmarks" tab on the Enterprise reporting page that calls `GET /reporting/reinvestigation-outcomes/benchmarks`, showing baseline/recent windows, advisory rate deltas, and optional bureau filter.
+
+**Reason:** Phase 15 shipped the read model without a staff surface; operators need in-product access to org-internal baselines.
+
+**Guardrails:** Org-scoped only; no cross-tenant data; read-only; no live bureau contact.
+
+**Follow-up work:** Compliance Center ingestion audit UI (slice 3); 17.0 sign-off.
+
 ## Compliance intelligence — Version 16.0 sign-off (Phase 15)
 
 **Decision:** Mark Version 16.0 / Compliance Intelligence Phase 15 as shipped with release notes `v16.0.0` and tag `v16.0.0`. Flip capability matrix, roadmap, scope epic outcomes, and checklist exit criteria to released.

@@ -10,7 +10,7 @@ Scope: [`docs/governance/version-17.0-scope.md`](../governance/version-17.0-scop
 
 ## Exit criteria for "17.0 done"
 
-- [ ] Reporting Center exposes org-internal reinvestigation outcome benchmarks
+- [x] Reporting Center exposes org-internal reinvestigation outcome benchmarks
 - [ ] Compliance Center exposes bureau response ingestion audit runs (start stays deferred)
 - [ ] Capability matrix + API reference updated
 - [ ] Deferred items explicitly documented
@@ -23,7 +23,7 @@ Scope: [`docs/governance/version-17.0-scope.md`](../governance/version-17.0-scop
 | Order | Slice                                                | Epic       | Status |
 | ----- | ---------------------------------------------------- | ---------- | ------ |
 | 1     | 17.0 scope + completion checklist                    | Kickoff    | ✅     |
-| 2     | Reporting Center org-internal benchmarks UI          | Reporting  | ⬜     |
+| 2     | Reporting Center org-internal benchmarks UI          | Reporting  | ✅     |
 | 3     | Compliance Center bureau response ingestion audit UI | Compliance | ⬜     |
 | 4     | Capability matrix 17.0 sign-off                      | Governance | ⬜     |
 
