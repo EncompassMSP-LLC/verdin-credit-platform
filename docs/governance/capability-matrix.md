@@ -28,6 +28,7 @@
 **Version 5.19 sign-off:** [version-5.19-scope.md](version-5.19-scope.md) · Release notes: [v5.19.0.md](../release-notes/v5.19.0.md)
 **Version 5.20 sign-off:** [version-5.20-scope.md](version-5.20-scope.md) · Release notes: [v5.20.0.md](../release-notes/v5.20.0.md)
 **Version 5.21 sign-off:** [version-5.21-scope.md](version-5.21-scope.md) · Release notes: [v5.21.0.md](../release-notes/v5.21.0.md)
+**Version 16.0 scope (in progress):** [version-16.0-scope.md](version-16.0-scope.md) · Checklist: [version-16.0-completion-checklist.md](../development/version-16.0-completion-checklist.md)
 
 ## Status legend
 
@@ -641,6 +642,18 @@ Scope: [version-5.21-scope.md](version-5.21-scope.md) · Checklist: [version-5.2
 | Per-recipient analytics breakdown        | 5.21    | ✅     | ✅      | ✅       | ✅  | —   | ✅    | Reporting    | Single-call `group_by=recipient` roll-up (bureau vs furnisher); org-scoped     |
 | Cross-bureau high_balance / credit_limit | 5.21    | ✅     | ✅      | —        | ✅  | —   | ✅    | Disputes     | Compare high balance and credit limit across sibling bureaus ($1.00 tolerance) |
 | Structured PDF litigation export layout  | 5.21    | ✅     | ✅      | —        | ✅  | —   | ✅    | Disputes     | Multi-section reportlab layout for the operator-gated litigation PDF           |
+
+---
+
+## Version 16.0 — Reinvestigation Operations & Configuration (in progress — 🚧)
+
+Scope: [version-16.0-scope.md](version-16.0-scope.md) · Checklist: [version-16.0-completion-checklist.md](../development/version-16.0-completion-checklist.md)
+
+| Capability                               | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                             |
+| ---------------------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | --------------------------------------------------------------------------------- |
+| Org-configurable cross-bureau tolerance  | 16.0    | Planned | —       | —        | —   | —   | —     | Org Admin    | Per-org monetary tolerance for cross-bureau discrepancy detection (default $1.00) |
+| Bureau response ingestion audit scaffold | 16.0    | Planned | —       | —        | —   | —   | —     | Compliance   | Audit run table + list API for planned ingestion; no live bureau polling          |
+| Org-internal reinvestigation benchmarks  | 16.0    | Planned | —       | —        | —   | —   | —     | Reporting    | Org-scoped historical baselines on outcome analytics; no cross-tenant data        |
 
 ---
 
