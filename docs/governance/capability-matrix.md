@@ -27,6 +27,7 @@
 **Version 5.18 sign-off:** [version-5.18-scope.md](version-5.18-scope.md) · Release notes: [v5.18.0.md](../release-notes/v5.18.0.md)
 **Version 5.19 sign-off:** [version-5.19-scope.md](version-5.19-scope.md) · Release notes: [v5.19.0.md](../release-notes/v5.19.0.md)
 **Version 5.20 sign-off:** [version-5.20-scope.md](version-5.20-scope.md) · Release notes: [v5.20.0.md](../release-notes/v5.20.0.md)
+**Version 5.21 scope (in progress):** [version-5.21-scope.md](version-5.21-scope.md) · Checklist: [version-5.21-completion-checklist.md](../development/version-5.21-completion-checklist.md)
 
 ## Status legend
 
@@ -628,6 +629,18 @@ Scope: [version-5.20-scope.md](version-5.20-scope.md) · Checklist: [version-5.2
 | Per-recipient extended-window accuracy | 5.20    | ✅     | ✅      | ✅       | ✅  | —   | ✅    | Disputes     | §611(a)(1)(B) 45-day flag computed per recipient sub-clock, not per tradeline              |
 | PDF litigation evidence export         | 5.20    | ✅     | ✅      | ✅       | ✅  | —   | ✅    | Disputes     | `pdf` format on the operator-gated litigation evidence export; never auto-transmitted      |
 | Cross-bureau discrepancy depth         | 5.20    | ✅     | ✅      | —        | ✅  | —   | ✅    | Disputes     | $1.00 balance/past-due tolerance + `past_due`/`date_reported` compared fields              |
+
+---
+
+## Version 5.21 — Reinvestigation Analytics & Evidence Polish (in progress — 🚧)
+
+Scope: [version-5.21-scope.md](version-5.21-scope.md) · Checklist: [version-5.21-completion-checklist.md](../development/version-5.21-completion-checklist.md)
+
+| Capability                               | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                          |
+| ---------------------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ------------------------------------------------------------------------------ |
+| Per-recipient analytics breakdown        | 5.21    | Planned | —       | —        | —   | —   | —     | Reporting    | Single-call `group_by=recipient` roll-up (bureau vs furnisher); org-scoped     |
+| Cross-bureau high_balance / credit_limit | 5.21    | Planned | —       | —        | —   | —   | —     | Disputes     | Compare high balance and credit limit across sibling bureaus ($1.00 tolerance) |
+| Structured PDF litigation export layout  | 5.21    | Planned | —       | —        | —   | —   | —     | Disputes     | Multi-section reportlab layout for the operator-gated litigation PDF           |
 
 ---
 
