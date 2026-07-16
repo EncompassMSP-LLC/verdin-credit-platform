@@ -11,7 +11,7 @@ Scope: [`docs/governance/version-18.0-scope.md`](../governance/version-18.0-scop
 ## Exit criteria for "18.0 done"
 
 - [x] Organizations can configure default reinvestigation benchmark windows
-- [ ] Compliance Center ingestion audit supports case/account scope in UI
+- [x] Compliance Center ingestion audit supports case/account scope in UI
 - [ ] Capability matrix + API reference updated
 - [ ] Deferred items explicitly documented
 - [ ] `docs/release-notes/v18.0.0.md` + tag `v18.0.0`
@@ -24,7 +24,7 @@ Scope: [`docs/governance/version-18.0-scope.md`](../governance/version-18.0-scop
 | ----- | ------------------------------------------ | ---------- | ------ |
 | 1     | 18.0 scope + completion checklist          | Kickoff    | ✅     |
 | 2     | Org-configurable benchmark window defaults | Org Admin  | ✅     |
-| 3     | Ingestion audit case/account scope UI      | Compliance | ⬜     |
+| 3     | Ingestion audit case/account scope UI      | Compliance | ✅     |
 | 4     | Capability matrix 18.0 sign-off            | Governance | ⬜     |
 
 Slice 2 stores org default baseline/recent window days and wires Reporting Center to them. Slice 3 exposes existing API case/account fields in the Compliance Center ingestion audit UI. Live polling, automated filing, and cross-tenant benchmarks stay out of scope.

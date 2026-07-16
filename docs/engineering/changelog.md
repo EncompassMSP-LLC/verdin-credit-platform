@@ -27,6 +27,16 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Follow-up work:** 5.21 sign-off and release notes.
 
+## Compliance intelligence — ingestion audit case/account scope UI (Phase 17)
+
+**Decision:** Extend the Compliance Center Response ingestion tab so start and list filters accept optional `case_id` / `account_id` (already supported by the Phase 15 API). History table shows scoped IDs when present.
+
+**Reason:** Phase 16 UI could only start org-wide deferred runs; operators need to scope audit intent to a case or account without live polling.
+
+**Guardrails:** UUID validation client-side; start still always records `status=deferred`; no bureau API calls.
+
+**Follow-up work:** 18.0 sign-off and release notes.
+
 ## Compliance intelligence — org-configurable benchmark window defaults (Phase 17)
 
 **Decision:** Persist `reinvestigation_benchmark_baseline_days` (default 90) and `reinvestigation_benchmark_recent_days` (default 30) on `organization_dispute_settings`. Omit window query params on `GET /reporting/reinvestigation-outcomes/benchmarks` to apply org defaults. Org Admin dispute settings and Reporting Center Outcome benchmarks consume the same values.
