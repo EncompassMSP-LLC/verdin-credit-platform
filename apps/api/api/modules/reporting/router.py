@@ -34,6 +34,7 @@ from api.modules.reporting.schemas import (
     PredictiveOutcomeRefreshResultResponse,
     PredictiveOutcomesReportingResponse,
     ReinvestigationOutcomeAnalyticsResponse,
+    ReinvestigationOutcomeBenchmarksResponse,
     ReportingMvRefreshResultResponse,
     ReportingMvRefreshRunListParams,
     ReportingMvRefreshRunResponse,
@@ -85,6 +86,30 @@ async def get_team_productivity_reporting(
     return await service.get_team_productivity(current_user)
 
 
+@router.get(
+    "/reinvestigation-outcomes/benchmarks",
+    response_model=ReinvestigationOutcomeBenchmarksResponse,
+)
+async def get_reinvestigation_outcome_benchmarks_reporting(
+    baseline_days: int = Query(
+        90, ge=7, le=365, description="Trailing baseline window in calendar days"
+    ),
+    recent_days: int = Query(
+        30, ge=1, le=365, description="Recent comparison window (must be <= baseline_days)"
+    ),
+    bureau: AccountBureau | None = Query(None, description="Filter to a single credit bureau"),
+    current_user: User = Depends(get_current_user),
+    service: ReportingService = Depends(get_reporting_service),
+) -> ReinvestigationOutcomeBenchmarksResponse:
+    """Org-internal trailing baselines for reinvestigation outcomes (no cross-tenant data)."""
+    return await service.get_reinvestigation_outcome_benchmarks(
+        current_user,
+        baseline_days=baseline_days,
+        recent_days=recent_days,
+        bureau=bureau,
+    )
+
+
 @router.get("/reinvestigation-outcomes", response_model=ReinvestigationOutcomeAnalyticsResponse)
 async def get_reinvestigation_outcomes_reporting(
     start: date | None = Query(None, description="Filter by response day (inclusive lower bound)"),
@@ -96,7 +121,7 @@ async def get_reinvestigation_outcomes_reporting(
     current_user: User = Depends(get_current_user),
     service: ReportingService = Depends(get_reporting_service),
 ) -> ReinvestigationOutcomeAnalyticsResponse:
-    """Org-scoped reinvestigation outcome analytics (computed; no benchmarks)."""
+    """Org-scoped reinvestigation outcome analytics (computed over recorded responses)."""
     return await service.get_reinvestigation_outcomes(
         current_user, start=start, end=end, bureau=bureau, group_by=group_by
     )

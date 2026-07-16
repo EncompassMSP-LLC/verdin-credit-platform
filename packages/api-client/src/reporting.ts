@@ -168,6 +168,50 @@ export function getReinvestigationOutcomeAnalytics(
   );
 }
 
+export interface ReinvestigationOutcomeBenchmarkPeriod {
+  start: string;
+  end: string;
+  window_days: number;
+}
+
+export interface ReinvestigationOutcomeRateDeltas {
+  deletion_rate: number;
+  verification_rate: number;
+  correction_rate: number;
+  favorable_rate: number;
+  no_response_rate: number;
+}
+
+export interface ReinvestigationOutcomeBenchmarksResponse {
+  generated_at: string;
+  scope: 'organization';
+  bureau: string | null;
+  baseline_period: ReinvestigationOutcomeBenchmarkPeriod;
+  baseline: ReinvestigationOutcomeAnalytics;
+  recent_period: ReinvestigationOutcomeBenchmarkPeriod;
+  recent: ReinvestigationOutcomeAnalytics;
+  rate_deltas: ReinvestigationOutcomeRateDeltas;
+}
+
+export interface ReinvestigationOutcomeBenchmarksParams {
+  baseline_days?: number;
+  recent_days?: number;
+  bureau?: string;
+}
+
+export function getReinvestigationOutcomeBenchmarks(
+  params: ReinvestigationOutcomeBenchmarksParams = {},
+) {
+  const search = new URLSearchParams();
+  if (params.baseline_days != null) search.set('baseline_days', String(params.baseline_days));
+  if (params.recent_days != null) search.set('recent_days', String(params.recent_days));
+  if (params.bureau) search.set('bureau', params.bureau);
+  const query = search.toString();
+  return request<ReinvestigationOutcomeBenchmarksResponse>(
+    apiPath(`/reporting/reinvestigation-outcomes/benchmarks${query ? `?${query}` : ''}`),
+  );
+}
+
 export interface RevenueAnalytics {
   billing_enabled: boolean;
   billing_ready: boolean;

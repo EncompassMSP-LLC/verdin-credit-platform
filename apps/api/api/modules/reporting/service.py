@@ -2,7 +2,7 @@
 
 import uuid
 from collections import defaultdict
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -66,8 +66,11 @@ from api.modules.reporting.schemas import (
     PredictiveOutcomesReportingResponse,
     ReinvestigationOutcomeAnalytics,
     ReinvestigationOutcomeAnalyticsResponse,
+    ReinvestigationOutcomeBenchmarkPeriod,
+    ReinvestigationOutcomeBenchmarksResponse,
     ReinvestigationOutcomeBureauBreakdown,
     ReinvestigationOutcomeFilters,
+    ReinvestigationOutcomeRateDeltas,
     ReinvestigationOutcomeRecipientBreakdown,
     ReportingMvRefreshResultResponse,
     ReportingMvRefreshRunListParams,
@@ -231,6 +234,91 @@ class ReportingService:
             analytics=self._to_reinvestigation_analytics_schema(result),
             by_bureau=by_bureau,
             by_recipient=by_recipient,
+        )
+
+    async def get_reinvestigation_outcome_benchmarks(
+        self,
+        user: User,
+        *,
+        baseline_days: int = 90,
+        recent_days: int = 30,
+        bureau: AccountBureau | None = None,
+    ) -> ReinvestigationOutcomeBenchmarksResponse:
+        """Org-internal trailing baselines for reinvestigation outcome rates.
+
+        Computes the same analytics shape over a trailing ``baseline_days``
+        window and a nested ``recent_days`` window (both ending today, UTC),
+        then returns advisory ``rate_deltas`` (recent minus baseline). Scoped
+        strictly to the caller's organization — no cross-tenant data and no
+        live bureau contact.
+        """
+        self._require_read(user)
+        organization_id = self._require_organization(user)
+        if baseline_days < 7 or baseline_days > 365:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="baseline_days must be between 7 and 365",
+            )
+        if recent_days < 1 or recent_days > baseline_days:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="recent_days must be between 1 and baseline_days",
+            )
+
+        end = datetime.now(UTC).date()
+        baseline_start = end - timedelta(days=baseline_days - 1)
+        recent_start = end - timedelta(days=recent_days - 1)
+
+        baseline_raw = await self._reporting.get_reinvestigation_outcomes(
+            organization_id, start=baseline_start, end=end, bureau=bureau
+        )
+        recent_raw = await self._reporting.get_reinvestigation_outcomes(
+            organization_id, start=recent_start, end=end, bureau=bureau
+        )
+
+        baseline_result = compute_reinvestigation_outcome_analytics(
+            [
+                ReinvestigationOutcomeRow(
+                    outcome=row["outcome"],
+                    days_to_response=row["days_to_response"],
+                )
+                for row in baseline_raw
+            ]
+        )
+        recent_result = compute_reinvestigation_outcome_analytics(
+            [
+                ReinvestigationOutcomeRow(
+                    outcome=row["outcome"],
+                    days_to_response=row["days_to_response"],
+                )
+                for row in recent_raw
+            ]
+        )
+        baseline = self._to_reinvestigation_analytics_schema(baseline_result)
+        recent = self._to_reinvestigation_analytics_schema(recent_result)
+        return ReinvestigationOutcomeBenchmarksResponse(
+            generated_at=datetime.now(UTC),
+            scope="organization",
+            bureau=bureau.value if bureau is not None else None,
+            baseline_period=ReinvestigationOutcomeBenchmarkPeriod(
+                start=baseline_start,
+                end=end,
+                window_days=baseline_days,
+            ),
+            baseline=baseline,
+            recent_period=ReinvestigationOutcomeBenchmarkPeriod(
+                start=recent_start,
+                end=end,
+                window_days=recent_days,
+            ),
+            recent=recent,
+            rate_deltas=ReinvestigationOutcomeRateDeltas(
+                deletion_rate=recent.deletion_rate - baseline.deletion_rate,
+                verification_rate=recent.verification_rate - baseline.verification_rate,
+                correction_rate=recent.correction_rate - baseline.correction_rate,
+                favorable_rate=recent.favorable_rate - baseline.favorable_rate,
+                no_response_rate=recent.no_response_rate - baseline.no_response_rate,
+            ),
         )
 
     @staticmethod

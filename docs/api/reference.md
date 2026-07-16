@@ -897,15 +897,18 @@ The Mission Control `GET /dashboard` response also embeds an `operations` sectio
 
 Bureau performance and team productivity read models for enterprise dashboards. All endpoints are org-scoped aggregates — no cross-org queries.
 
-| Method | Path                                  | Min role  | Description                                             |
-| ------ | ------------------------------------- | --------- | ------------------------------------------------------- |
-| GET    | `/reporting/status`                   | read_only | Enterprise reporting capabilities overview              |
-| GET    | `/reporting/bureau-performance`       | read_only | Tradeline counts and dispute outcomes grouped by bureau |
-| GET    | `/reporting/team-productivity`        | read_only | Per-staff task and case productivity (30-day window)    |
-| GET    | `/reporting/reinvestigation-outcomes` | read_only | Org reinvestigation outcome analytics (computed)        |
-| GET    | `/reporting/revenue`                  | read_only | Org revenue readiness from Stripe billing state         |
+| Method | Path                                             | Min role  | Description                                               |
+| ------ | ------------------------------------------------ | --------- | --------------------------------------------------------- |
+| GET    | `/reporting/status`                              | read_only | Enterprise reporting capabilities overview                |
+| GET    | `/reporting/bureau-performance`                  | read_only | Tradeline counts and dispute outcomes grouped by bureau   |
+| GET    | `/reporting/team-productivity`                   | read_only | Per-staff task and case productivity (30-day window)      |
+| GET    | `/reporting/reinvestigation-outcomes`            | read_only | Org reinvestigation outcome analytics (computed)          |
+| GET    | `/reporting/reinvestigation-outcomes/benchmarks` | read_only | Org-internal trailing outcome baselines (no cross-tenant) |
+| GET    | `/reporting/revenue`                             | read_only | Org revenue readiness from Stripe billing state           |
 
 `GET /reporting/reinvestigation-outcomes` (Phase 11) returns an org-scoped analytics read model over recorded dispute responses. `analytics` contains `total_responses`, per-outcome `counts` (`deleted`/`verified`/`updated`/`corrected`/`no_response`/`rejected`), and the derived rates `deletion_rate`, `verification_rate`, `correction_rate`, `favorable_rate` (deleted + corrected), and `no_response_rate` (each a fraction of total responses). Time-to-response is measured from the linked sent letter's `sent_at` (falling back to the account `last_dispute_date`) to the response date: `avg_days_to_response`, `median_days_to_response`, and `measured_response_count` cover only substantive responses (a recorded `no_response` has no elapsed time). As of Phase 12 the endpoint accepts optional `start` / `end` (filter by response day, inclusive) and `bureau` (single credit bureau) query params; the applied filters are echoed back under `filters` (`start`/`end`/`bureau`/`group_by`, each `null` when unset). As of Phase 13, optional `group_by=bureau` returns a `by_bureau` array of `{bureau, analytics}` roll-ups so operators can compare all bureaus in one call (the top-level `analytics` aggregate is unchanged). As of Phase 14, optional `group_by=recipient` returns a `by_recipient` array of `{recipient, analytics}` roll-ups (credit bureau vs furnisher, attributed via the linked dispute letter; unlinked responses are bucketed as `unknown`); other `group_by` values return `422`. Purely computed over stored data — org-scoped only (no cross-tenant benchmarks) and no live bureau contact.
+
+`GET /reporting/reinvestigation-outcomes/benchmarks` (Phase 15) returns org-internal trailing baselines for the same analytics shape. Query params: `baseline_days` (default `90`, range 7–365), `recent_days` (default `30`, must be ≤ `baseline_days`), and optional `bureau`. Response includes `scope` (`organization`), `baseline_period` / `baseline`, `recent_period` / `recent`, and advisory `rate_deltas` (recent rate minus baseline rate for deletion/verification/correction/favorable/no_response). No cross-tenant data and no live bureau contact; `recent_days` > `baseline_days` returns `422`.
 
 When `ENABLE_BILLING=true`, `GET /reporting/revenue` returns subscription status, client/portal counts, and a heuristic readiness score (0–100) derived from billing configuration and operations metrics. Returns `404` when billing is disabled.
 
