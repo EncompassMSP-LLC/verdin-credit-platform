@@ -74,6 +74,10 @@ from api.modules.client_portal.push_models import (
     PortalPushSubscription,
 )
 from api.modules.clients.models import Client, ClientContact, ClientStatus, ContactRelationship
+from api.modules.compliance.bureau_response_ingestion_models import (
+    BureauResponseIngestionRun,
+    BureauResponseIngestionRunStatus,
+)
 from api.modules.compliance.models import (
     ConsentRecord,
     ConsentStatus,
@@ -308,6 +312,8 @@ __all__ = [
     "DisputeResponseOutcome",
     "DisputeFilingPrepRun",
     "DisputeFilingPrepStatus",
+    "BureauResponseIngestionRun",
+    "BureauResponseIngestionRunStatus",
     "DisputeBureauSubmissionRun",
     "DisputeBureauSubmissionStatus",
     "DisputeStrategyRun",
