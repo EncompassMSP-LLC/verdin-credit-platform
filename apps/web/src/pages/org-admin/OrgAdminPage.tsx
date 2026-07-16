@@ -14,6 +14,7 @@ import {
 import { Badge, Button, Card } from '@verdin/ui';
 import { DashboardMetricCard } from '../../components/dashboard/DashboardMetricCard';
 import { BillingSettingsCard } from '../../components/org-admin/BillingSettingsCard';
+import { DisputeSettingsCard } from '../../components/org-admin/DisputeSettingsCard';
 import { EmailDeliverySettingsCard } from '../../components/org-admin/EmailDeliverySettingsCard';
 import { featureFlags } from '../../lib/feature-flags';
 
@@ -53,6 +54,7 @@ export function OrgAdminPage() {
       </div>
 
       <OrgAdminStatusCard />
+      <DisputeSettingsCard />
       <BillingSettingsCard />
       <EmailDeliverySettingsCard />
       <DeveloperPortalCard onKeyRotated={setCreatedKey} />

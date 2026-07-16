@@ -524,6 +524,8 @@ export {
   getPublicOAuthMarketplaceListingStatus,
   getOrgAdminStatus,
   getOrganizationAdminSummary,
+  getOrganizationDisputeSettings,
+  updateOrganizationDisputeSettings,
   getOrganizationApiKey,
   listOAuthDeveloperApps,
   listOAuthMarketplacePublishingRuns,
@@ -557,6 +559,8 @@ export {
   type PublicOAuthMarketplaceListingSubmitInput,
   type OrgAdminStatus,
   type OrganizationAdminSummary,
+  type OrganizationDisputeSettings,
+  type OrganizationDisputeSettingsUpdateInput,
 } from './orgAdmin';
 
 export {

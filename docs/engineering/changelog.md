@@ -27,6 +27,16 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Follow-up work:** 5.21 sign-off and release notes.
 
+## Compliance intelligence — org-configurable cross-bureau tolerance (Phase 15)
+
+**Decision:** Store per-org `cross_bureau_balance_tolerance` in `organization_dispute_settings` (default $1.00, range $0.01–$100.00). Expose GET/PATCH on `/org-admin/dispute-settings`; litigation-packet cross-bureau evidence resolves the org value at read time.
+
+**Reason:** Phase 14 left tolerance as a module constant; operators need org-level control without cross-tenant configuration.
+
+**Guardrails:** Admin-only org-admin gate; no live bureau contact; tolerance applies only to monetary cross-bureau fields (balance, past-due, high_balance, credit_limit).
+
+**Follow-up work:** Bureau response ingestion audit scaffold (slice 3); org-internal benchmarks (slice 4).
+
 ## Compliance intelligence — structured PDF litigation export layout (Phase 14)
 
 **Decision:** Replace the litigation-packet PDF's plain wrapped-text canvas with a reportlab platypus `SimpleDocTemplate` layout: title/subtitle, spaced section headings, and bullet lists for tradeline, Section 611 clock, assessment, indicators, cross-bureau discrepancies, mailed rounds, and recorded responses.

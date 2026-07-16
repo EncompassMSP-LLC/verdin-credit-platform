@@ -55,6 +55,28 @@ export function getOrganizationAdminSummary() {
   return request<OrganizationAdminSummary>(apiPath('/org-admin/organization'));
 }
 
+export interface OrganizationDisputeSettings {
+  organization_id: string;
+  cross_bureau_balance_tolerance: string;
+  platform_default_tolerance: string;
+  updated_at: string | null;
+}
+
+export interface OrganizationDisputeSettingsUpdateInput {
+  cross_bureau_balance_tolerance: string;
+}
+
+export function getOrganizationDisputeSettings() {
+  return request<OrganizationDisputeSettings>(apiPath('/org-admin/dispute-settings'));
+}
+
+export function updateOrganizationDisputeSettings(input: OrganizationDisputeSettingsUpdateInput) {
+  return request<OrganizationDisputeSettings>(apiPath('/org-admin/dispute-settings'), {
+    method: 'PATCH',
+    body: input,
+  });
+}
+
 export function listOrganizationApiKeys() {
   return request<ApiKey[]>(apiPath('/org-admin/api-keys'));
 }

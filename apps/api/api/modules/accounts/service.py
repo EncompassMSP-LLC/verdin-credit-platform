@@ -113,6 +113,7 @@ from api.modules.compliance.consent_gates import require_signed_consents
 from api.modules.compliance.repository import ConsentRepository
 from api.modules.documents.repository import DocumentRepository
 from api.modules.documents.storage import DocumentStorage, get_document_storage
+from api.modules.org_admin.cross_bureau_tolerance import resolve_cross_bureau_balance_tolerance
 from api.modules.tasks.models import Task, TaskPriority
 from api.modules.tasks.repository import TaskRepository
 from api.modules.tasks.schemas import TaskResponse
@@ -2004,8 +2005,13 @@ class AccountService:
             high_balance=account.high_balance,
             credit_limit=account.credit_limit,
         )
+        balance_tolerance = await resolve_cross_bureau_balance_tolerance(
+            self._session, organization_id
+        )
         if self._session is None:
-            return detect_cross_bureau_discrepancies(target_view, [])
+            return detect_cross_bureau_discrepancies(
+                target_view, [], balance_tolerance=balance_tolerance
+            )
 
         case_accounts, _ = await self._accounts.list_by_case(
             account.case_id, organization_id, limit=500
@@ -2016,7 +2022,9 @@ class AccountService:
             if self._is_cross_bureau_sibling(account, candidate)
         ]
         if not siblings:
-            return detect_cross_bureau_discrepancies(target_view, [])
+            return detect_cross_bureau_discrepancies(
+                target_view, [], balance_tolerance=balance_tolerance
+            )
 
         responses_by_account: dict[uuid.UUID, list[object]] = {}
         rows = await DisputeResponseRepository(self._session).list_for_case(
@@ -2050,7 +2058,9 @@ class AccountService:
             )
             for sibling in siblings
         ]
-        return detect_cross_bureau_discrepancies(target_view, sibling_views)
+        return detect_cross_bureau_discrepancies(
+            target_view, sibling_views, balance_tolerance=balance_tolerance
+        )
 
     async def _sent_letter_rounds_by_account(
         self,

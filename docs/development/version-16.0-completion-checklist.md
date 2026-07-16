@@ -10,7 +10,7 @@ Scope: [`docs/governance/version-16.0-scope.md`](../governance/version-16.0-scop
 
 ## Exit criteria for "16.0 done"
 
-- [ ] Organizations can configure cross-bureau monetary tolerance (default $1.00)
+- [x] Organizations can configure cross-bureau monetary tolerance (default $1.00)
 - [ ] Bureau response ingestion audit scaffold exposes run history (no live polling)
 - [ ] Org-internal reinvestigation outcome benchmarks are available as a read model
 - [ ] Capability matrix + API reference updated
@@ -24,7 +24,7 @@ Scope: [`docs/governance/version-16.0-scope.md`](../governance/version-16.0-scop
 | Order | Slice                                           | Epic       | Status |
 | ----- | ----------------------------------------------- | ---------- | ------ |
 | 1     | 16.0 scope + completion checklist               | Kickoff    | ✅     |
-| 2     | Org-configurable cross-bureau balance tolerance | Org Admin  | ⬜     |
+| 2     | Org-configurable cross-bureau balance tolerance | Org Admin  | ✅     |
 | 3     | Bureau response ingestion audit scaffold        | Compliance | ⬜     |
 | 4     | Org-internal reinvestigation outcome benchmarks | Reporting  | ⬜     |
 | 5     | Capability matrix 16.0 sign-off                 | Governance | ⬜     |

@@ -30,6 +30,8 @@ from api.modules.org_admin.schemas import (
     OAuthDeveloperAppResponse,
     OrgAdminStatusResponse,
     OrganizationAdminSummary,
+    OrganizationDisputeSettingsResponse,
+    OrganizationDisputeSettingsUpdate,
 )
 from api.modules.org_admin.service import OrgAdminService
 
@@ -67,6 +69,25 @@ async def get_organization_admin_summary(
     service: OrgAdminService = Depends(get_org_admin_service),
 ) -> OrganizationAdminSummary:
     return await service.get_organization_summary(current_user)
+
+
+@router.get("/dispute-settings", response_model=OrganizationDisputeSettingsResponse)
+async def get_organization_dispute_settings(
+    _: None = Depends(require_org_admin_enabled),
+    current_user: User = Depends(get_current_user),
+    service: OrgAdminService = Depends(get_org_admin_service),
+) -> OrganizationDisputeSettingsResponse:
+    return await service.get_dispute_settings(current_user)
+
+
+@router.patch("/dispute-settings", response_model=OrganizationDisputeSettingsResponse)
+async def update_organization_dispute_settings(
+    body: OrganizationDisputeSettingsUpdate,
+    _: None = Depends(require_org_admin_enabled),
+    current_user: User = Depends(get_current_user),
+    service: OrgAdminService = Depends(get_org_admin_service),
+) -> OrganizationDisputeSettingsResponse:
+    return await service.update_dispute_settings(current_user, body)
 
 
 @router.get("/api-keys", response_model=list[ApiKeyResponse])
