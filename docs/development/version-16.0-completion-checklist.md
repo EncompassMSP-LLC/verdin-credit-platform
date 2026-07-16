@@ -2,7 +2,7 @@
 
 Ordered path for **Compliance Intelligence Phase 15 — Reinvestigation Operations & Configuration** and follow-on governance work.
 
-Preceded by shipped **v5.21.0**. **Targeting v16.0.0.**
+Preceded by shipped **v5.21.0**. **Shipped as v16.0.0.**
 
 Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 
@@ -13,9 +13,9 @@ Scope: [`docs/governance/version-16.0-scope.md`](../governance/version-16.0-scop
 - [x] Organizations can configure cross-bureau monetary tolerance (default $1.00)
 - [x] Bureau response ingestion audit scaffold exposes run history (no live polling)
 - [x] Org-internal reinvestigation outcome benchmarks are available as a read model
-- [ ] Capability matrix + API reference updated
-- [ ] Deferred items explicitly documented
-- [ ] `docs/release-notes/v16.0.0.md` + tag `v16.0.0`
+- [x] Capability matrix + API reference updated
+- [x] Deferred items explicitly documented
+- [x] `docs/release-notes/v16.0.0.md` + tag `v16.0.0`
 
 ---
 
@@ -27,7 +27,7 @@ Scope: [`docs/governance/version-16.0-scope.md`](../governance/version-16.0-scop
 | 2     | Org-configurable cross-bureau balance tolerance | Org Admin  | ✅     |
 | 3     | Bureau response ingestion audit scaffold        | Compliance | ✅     |
 | 4     | Org-internal reinvestigation outcome benchmarks | Reporting  | ✅     |
-| 5     | Capability matrix 16.0 sign-off                 | Governance | ⬜     |
+| 5     | Capability matrix 16.0 sign-off                 | Governance | ✅     |
 
 Slice 2 moves cross-bureau monetary tolerance from a module constant to per-org dispute settings (addresses the 5.21 org-settings deferral). Slice 3 adds a compliance audit run table for planned bureau response ingestion without live API calls (addresses the long-deferred ingestion audit gap). Slice 4 adds org-scoped historical baselines on reinvestigation outcomes — advisory context only, no cross-tenant data.
 

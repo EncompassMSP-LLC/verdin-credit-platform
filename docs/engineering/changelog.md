@@ -27,6 +27,14 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Follow-up work:** 5.21 sign-off and release notes.
 
+## Compliance intelligence — Version 16.0 sign-off (Phase 15)
+
+**Decision:** Mark Version 16.0 / Compliance Intelligence Phase 15 as shipped with release notes `v16.0.0` and tag `v16.0.0`. Flip capability matrix, roadmap, scope epic outcomes, and checklist exit criteria to released.
+
+**Reason:** All Phase 15 slices (org tolerance, ingestion audit scaffold, org-internal benchmarks) are merged; governance docs must match production state.
+
+**Follow-up work:** 17.0+ live bureau polling / automated filing only after legal/compliance sign-off.
+
 ## Compliance intelligence — org-internal reinvestigation benchmarks (Phase 15)
 
 **Decision:** Add `GET /reporting/reinvestigation-outcomes/benchmarks` returning trailing org-scoped `baseline` (default 90 days) and nested `recent` (default 30 days) analytics plus advisory `rate_deltas` (recent − baseline). Reuses the existing outcome analytics computation — no new tables.

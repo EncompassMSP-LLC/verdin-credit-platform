@@ -15,10 +15,10 @@ Everything remains **staff-mediated and advisory**. The platform still never pol
 
 | Epic | Theme                                           | 16.0 target | Summary                                                                               |
 | ---- | ----------------------------------------------- | ----------- | ------------------------------------------------------------------------------------- |
-| 1    | Org-configurable cross-bureau balance tolerance | Planned     | Per-org monetary tolerance for cross-bureau discrepancy detection (default $1.00)     |
-| 2    | Bureau response ingestion audit scaffold        | Planned     | Compliance audit run table + list/status API for planned ingestion (no live polling)  |
-| 3    | Org-internal reinvestigation benchmark scaffold | Planned     | Org-scoped historical baseline read model on outcome analytics (no cross-tenant data) |
-| 4    | Capability matrix / governance sign-off         | Planned     | Scope, checklist, matrix rows, release notes                                          |
+| 1    | Org-configurable cross-bureau balance tolerance | Released    | Per-org monetary tolerance for cross-bureau discrepancy detection (default $1.00)     |
+| 2    | Bureau response ingestion audit scaffold        | Released    | Compliance audit run table + list/status API for planned ingestion (no live polling)  |
+| 3    | Org-internal reinvestigation benchmark scaffold | Released    | Org-scoped historical baseline read model on outcome analytics (no cross-tenant data) |
+| 4    | Capability matrix / governance sign-off         | Released    | Scope, checklist, matrix rows, release notes                                          |
 
 ## Shipped from 5.21 (foundation — do not regress)
 
@@ -36,19 +36,19 @@ All v5.21.0 APIs, UI, and `@verdin/api-client` functions remain production capab
 
 ## Partial capability limits (16.0 targets)
 
-### Org-configurable cross-bureau balance tolerance (Planned)
+### Org-configurable cross-bureau balance tolerance (Released)
 
 **Included:** Per-organization `cross_bureau_balance_tolerance` (Decimal, default $1.00) stored in org dispute settings; read/write via org-admin API; wired into litigation-packet cross-bureau evidence using the org value when present.
 
 **Not included:** Per-tradeline tolerance; tolerance for non-monetary fields; live bureau comparison beyond stored data.
 
-### Bureau response ingestion audit scaffold (Planned)
+### Bureau response ingestion audit scaffold (Released)
 
 **Included:** `bureau_response_ingestion_runs` audit table + list/get endpoints under compliance; records operator-initiated or scheduled **scaffold** runs with status, case/account scope, and deferral reason — no external bureau API calls.
 
 **Not included:** Live polling, webhook receivers, or auto-recording bureau mail/portal responses without staff review.
 
-### Org-internal reinvestigation benchmark scaffold (Planned)
+### Org-internal reinvestigation benchmark scaffold (Released)
 
 **Included:** `GET /reporting/reinvestigation-outcomes/benchmarks` returning org-scoped historical baselines (e.g. trailing 90-day verified/deleted rates) computed from the org's own stored responses — advisory comparison context for operators.
 
@@ -57,6 +57,7 @@ All v5.21.0 APIs, UI, and `@verdin/api-client` functions remain production capab
 ## Related documents
 
 - [Version 16.0 completion checklist](../development/version-16.0-completion-checklist.md)
+- [Release notes — v16.0.0](../release-notes/v16.0.0.md)
 - [Version 5.21 scope](version-5.21-scope.md)
 - [Capability matrix](capability-matrix.md)
 - [Product roadmap](../roadmap/README.md)
