@@ -18,6 +18,8 @@ const BUREAU_TARGET_OPTIONS = [
   { value: 'transunion', label: 'TransUnion' },
 ];
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 function formatDate(value: string | null) {
   return value ? new Date(value).toLocaleString() : '—';
 }
@@ -28,6 +30,16 @@ function statusBadgeVariant(status: string): 'default' | 'success' | 'warning' |
   return 'default';
 }
 
+function optionalUuid(value: string): string | undefined {
+  const trimmed = value.trim();
+  return trimmed || undefined;
+}
+
+function isValidOptionalUuid(value: string): boolean {
+  const trimmed = value.trim();
+  return trimmed.length === 0 || UUID_RE.test(trimmed);
+}
+
 export function BureauResponseIngestionPanel() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const authReady = isAuthenticated && !authLoading;
@@ -35,6 +47,12 @@ export function BureauResponseIngestionPanel() {
   const [page, setPage] = useState(1);
   const [summary, setSummary] = useState('');
   const [bureauTarget, setBureauTarget] = useState('all');
+  const [startCaseId, setStartCaseId] = useState('');
+  const [startAccountId, setStartAccountId] = useState('');
+  const [filterCaseId, setFilterCaseId] = useState('');
+  const [filterAccountId, setFilterAccountId] = useState('');
+  const [appliedCaseId, setAppliedCaseId] = useState('');
+  const [appliedAccountId, setAppliedAccountId] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
 
   const statusQuery = useQuery({
@@ -44,8 +62,14 @@ export function BureauResponseIngestionPanel() {
   });
 
   const runsQuery = useQuery({
-    queryKey: ['bureau-response-ingestion-runs', page],
-    queryFn: () => listBureauResponseIngestionRuns({ page, page_size: 20 }),
+    queryKey: ['bureau-response-ingestion-runs', page, appliedCaseId, appliedAccountId],
+    queryFn: () =>
+      listBureauResponseIngestionRuns({
+        page,
+        page_size: 20,
+        case_id: optionalUuid(appliedCaseId),
+        account_id: optionalUuid(appliedAccountId),
+      }),
     enabled: authReady,
   });
 
@@ -53,6 +77,8 @@ export function BureauResponseIngestionPanel() {
     mutationFn: startBureauResponseIngestionRun,
     onSuccess: async () => {
       setSummary('');
+      setStartCaseId('');
+      setStartAccountId('');
       setFormError(null);
       setPage(1);
       await queryClient.invalidateQueries({ queryKey: ['bureau-response-ingestion-runs'] });
@@ -136,10 +162,16 @@ export function BureauResponseIngestionPanel() {
               setFormError('Summary is required');
               return;
             }
+            if (!isValidOptionalUuid(startCaseId) || !isValidOptionalUuid(startAccountId)) {
+              setFormError('Case ID and Account ID must be valid UUIDs when provided');
+              return;
+            }
             setFormError(null);
             startMutation.mutate({
               summary: trimmed,
               bureau_target: bureauTarget,
+              case_id: optionalUuid(startCaseId) ?? null,
+              account_id: optionalUuid(startAccountId) ?? null,
             });
           }}
         >
@@ -167,6 +199,26 @@ export function BureauResponseIngestionPanel() {
               ))}
             </select>
           </label>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <label className="block text-xs font-medium text-gray-700">
+              Case ID (optional)
+              <input
+                className={inputClass}
+                value={startCaseId}
+                placeholder="UUID"
+                onChange={(event) => setStartCaseId(event.target.value)}
+              />
+            </label>
+            <label className="block text-xs font-medium text-gray-700">
+              Account ID (optional)
+              <input
+                className={inputClass}
+                value={startAccountId}
+                placeholder="UUID"
+                onChange={(event) => setStartAccountId(event.target.value)}
+              />
+            </label>
+          </div>
           {formError ? <p className="text-sm text-red-600">{formError}</p> : null}
           {startMutation.isSuccess ? (
             <p className="text-sm text-amber-700">
@@ -180,6 +232,55 @@ export function BureauResponseIngestionPanel() {
       </Card>
 
       <Card title="Audit run history">
+        <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <label className="block text-xs font-medium text-gray-700">
+            Filter case ID
+            <input
+              className={inputClass}
+              value={filterCaseId}
+              placeholder="UUID"
+              onChange={(event) => setFilterCaseId(event.target.value)}
+            />
+          </label>
+          <label className="block text-xs font-medium text-gray-700">
+            Filter account ID
+            <input
+              className={inputClass}
+              value={filterAccountId}
+              placeholder="UUID"
+              onChange={(event) => setFilterAccountId(event.target.value)}
+            />
+          </label>
+          <div className="flex items-end gap-2">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => {
+                if (!isValidOptionalUuid(filterCaseId) || !isValidOptionalUuid(filterAccountId)) {
+                  return;
+                }
+                setAppliedCaseId(filterCaseId.trim());
+                setAppliedAccountId(filterAccountId.trim());
+                setPage(1);
+              }}
+            >
+              Apply filters
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => {
+                setFilterCaseId('');
+                setFilterAccountId('');
+                setAppliedCaseId('');
+                setAppliedAccountId('');
+                setPage(1);
+              }}
+            >
+              Clear
+            </Button>
+          </div>
+        </div>
         <div className="mb-3 flex items-center justify-between gap-4">
           <p className="text-sm text-gray-600">
             {runs ? `${runs.total} run(s)` : '—'} · page {page} of {totalPages}
@@ -206,6 +307,8 @@ export function BureauResponseIngestionPanel() {
                   <th className="py-2 pr-4 font-medium">Requested</th>
                   <th className="py-2 pr-4 font-medium">Status</th>
                   <th className="py-2 pr-4 font-medium">Bureau</th>
+                  <th className="py-2 pr-4 font-medium">Case</th>
+                  <th className="py-2 pr-4 font-medium">Account</th>
                   <th className="py-2 pr-4 font-medium">Summary</th>
                   <th className="py-2 font-medium">Deferral</th>
                 </tr>
@@ -218,8 +321,10 @@ export function BureauResponseIngestionPanel() {
                       <Badge variant={statusBadgeVariant(run.status)}>{run.status}</Badge>
                     </td>
                     <td className="py-2 pr-4">{run.bureau_target}</td>
-                    <td className="py-2 pr-4 max-w-xs">{run.summary}</td>
-                    <td className="py-2 max-w-sm text-gray-600">{run.deferral_reason}</td>
+                    <td className="py-2 pr-4 font-mono text-xs">{run.case_id ?? '—'}</td>
+                    <td className="py-2 pr-4 font-mono text-xs">{run.account_id ?? '—'}</td>
+                    <td className="max-w-xs py-2 pr-4">{run.summary}</td>
+                    <td className="max-w-sm py-2 text-gray-600">{run.deferral_reason}</td>
                   </tr>
                 ))}
               </tbody>
