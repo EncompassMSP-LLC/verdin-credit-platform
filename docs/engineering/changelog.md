@@ -13,6 +13,14 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — Version 18.0 sign-off (Phase 17)
+
+**Decision:** Close Phase 17 as shipped `v18.0.0` after org benchmark window defaults and ingestion case/account scope UI. Keep live bureau polling, automated filing, unsupervised escalation, litigation e-filing, and cross-tenant benchmarks deferred to 19.0+ or never.
+
+**Reason:** Operator polish over owned configuration and staff surfaces is complete; remaining items need legal/compliance or product decisions outside this phase.
+
+**Follow-up work:** Tag `v18.0.0`; next non-blocked polish or gated live-integration phase only with explicit sign-off.
+
 ## Compliance intelligence — cross-bureau high_balance / credit_limit (Phase 14)
 
 **Decision:** Extend litigation-packet cross-bureau comparison to include stored `high_balance` and `credit_limit` on sibling tradelines. New discrepancy kinds `high_balance_conflict` and `credit_limit_conflict` use the same $1.00 monetary tolerance as balance and past-due.

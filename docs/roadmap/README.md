@@ -66,7 +66,7 @@ Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (
 | **5.21**  | Reinvestigation Analytics & Evidence Polish     | Released    | Phase 14 per-recipient analytics breakdown, cross-bureau high_balance/credit_limit, structured PDF litigation export layout (`v5.21.0`)          |
 | **16.0**  | Reinvestigation Operations & Configuration      | Released    | Phase 15 org cross-bureau tolerance, bureau response ingestion audit scaffold, org-internal outcome benchmarks (`v16.0.0`)                       |
 | **17.0**  | Reinvestigation Operations Surfaces             | Released    | Phase 16 Reporting Center benchmarks UI, Compliance Center ingestion audit UI (`v17.0.0`)                                                        |
-| **18.0**  | Reinvestigation Operations Polish               | Planned     | Phase 17 org benchmark window defaults, ingestion audit case/account scope UI                                                                    |
+| **18.0**  | Reinvestigation Operations Polish               | Released    | Phase 17 org benchmark window defaults, ingestion audit case/account scope UI (`v18.0.0`)                                                        |
 
 ### Sprint milestones
 
@@ -516,16 +516,16 @@ Compliance Intelligence Phase 16 surfaces the Phase 15 operator APIs in staff UI
 | 1    | Reporting Center org-internal benchmarks UI | Released    | Staff UI for trailing baseline/recent rates + advisory deltas  |
 | 2    | Compliance Center ingestion audit UI        | Released    | Staff UI for deferred ingestion audit runs; no live bureau API |
 
-### Version 18.0 — Reinvestigation Operations Polish (planned)
+### Version 18.0 — Reinvestigation Operations Polish (released — `v18.0.0`)
 
-Scope and checklist: [`docs/governance/version-18.0-scope.md`](../governance/version-18.0-scope.md) · [`docs/development/version-18.0-completion-checklist.md`](../development/version-18.0-completion-checklist.md)
+Scope and checklist: [`docs/governance/version-18.0-scope.md`](../governance/version-18.0-scope.md) · [`docs/development/version-18.0-completion-checklist.md`](../development/version-18.0-completion-checklist.md) · Release notes: [`docs/release-notes/v18.0.0.md`](../release-notes/v18.0.0.md)
 
 Compliance Intelligence Phase 17 polishes Phase 15/16 operator surfaces without crossing the live-bureau frontier: org-configurable default windows for org-internal outcome benchmarks, and case/account scoping on the Compliance Center ingestion audit UI. Live bureau response ingestion execution, automated re-dispute filing execution, unsupervised escalation, automated litigation filing, and cross-tenant benchmarks remain deferred (19.0+ or never) pending legal/compliance sign-off.
 
 | Epic | Theme                                      | 18.0 target | Notes                                                              |
 | ---- | ------------------------------------------ | ----------- | ------------------------------------------------------------------ |
-| 1    | Org-configurable benchmark window defaults | Planned     | Per-org baseline/recent days on dispute settings + Reporting UI    |
-| 2    | Ingestion audit case/account scope UI      | Planned     | Optional case_id / account_id on Compliance Center start + filters |
+| 1    | Org-configurable benchmark window defaults | Released    | Per-org baseline/recent days on dispute settings + Reporting UI    |
+| 2    | Ingestion audit case/account scope UI      | Released    | Optional case_id / account_id on Compliance Center start + filters |
 
 ## Sprint → version mapping
 
