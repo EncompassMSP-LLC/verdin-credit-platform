@@ -27,6 +27,16 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Follow-up work:** 5.21 sign-off and release notes.
 
+## Compliance intelligence — org-configurable benchmark window defaults (Phase 17)
+
+**Decision:** Persist `reinvestigation_benchmark_baseline_days` (default 90) and `reinvestigation_benchmark_recent_days` (default 30) on `organization_dispute_settings`. Omit window query params on `GET /reporting/reinvestigation-outcomes/benchmarks` to apply org defaults. Org Admin dispute settings and Reporting Center Outcome benchmarks consume the same values.
+
+**Reason:** Phase 16 hard-coded 90/30 in the UI; operators need org-level defaults without editing every query.
+
+**Guardrails:** Admin write; recent ≤ baseline; org-scoped only; no cross-tenant data.
+
+**Follow-up work:** Ingestion audit case/account scope UI (slice 3); 18.0 sign-off.
+
 ## Compliance intelligence — Version 17.0 sign-off (Phase 16)
 
 **Decision:** Mark Version 17.0 / Compliance Intelligence Phase 16 as shipped with release notes `v17.0.0` and tag `v17.0.0`. Flip capability matrix, roadmap, scope epic outcomes, and checklist exit criteria to released.

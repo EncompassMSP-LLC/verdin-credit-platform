@@ -676,7 +676,7 @@ Scope: [version-18.0-scope.md](version-18.0-scope.md) · Checklist: [version-18.
 
 | Capability                                 | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                    |
 | ------------------------------------------ | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ------------------------------------------------------------------------ |
-| Org-configurable benchmark window defaults | 18.0    | Planned | —       | —        | —   | —   | —     | Org Admin    | Per-org baseline/recent days; Reporting UI initializes from org defaults |
+| Org-configurable benchmark window defaults | 18.0    | ✅      | ✅      | ✅       | ✅  | —   | ✅    | Org Admin    | Per-org baseline/recent days; Reporting UI initializes from org defaults |
 | Ingestion audit case/account scope UI      | 18.0    | Planned | ✅      | —        | ✅  | —   | —     | Compliance   | Optional case_id / account_id on start form and list filters             |
 
 ---

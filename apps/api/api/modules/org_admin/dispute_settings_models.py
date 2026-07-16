@@ -3,7 +3,7 @@
 import uuid
 from decimal import Decimal
 
-from sqlalchemy import ForeignKey, Numeric, UniqueConstraint
+from sqlalchemy import ForeignKey, Integer, Numeric, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -13,6 +13,12 @@ from api.database.base import Base
 DEFAULT_CROSS_BUREAU_BALANCE_TOLERANCE = Decimal("1.00")
 MIN_CROSS_BUREAU_BALANCE_TOLERANCE = Decimal("0.01")
 MAX_CROSS_BUREAU_BALANCE_TOLERANCE = Decimal("100.00")
+
+DEFAULT_REINVESTIGATION_BENCHMARK_BASELINE_DAYS = 90
+DEFAULT_REINVESTIGATION_BENCHMARK_RECENT_DAYS = 30
+MIN_REINVESTIGATION_BENCHMARK_BASELINE_DAYS = 7
+MAX_REINVESTIGATION_BENCHMARK_BASELINE_DAYS = 365
+MIN_REINVESTIGATION_BENCHMARK_RECENT_DAYS = 1
 
 
 class OrganizationDisputeSettings(Base, TimestampMixin, AuditMixin):
@@ -34,4 +40,14 @@ class OrganizationDisputeSettings(Base, TimestampMixin, AuditMixin):
         Numeric(12, 2),
         nullable=False,
         default=DEFAULT_CROSS_BUREAU_BALANCE_TOLERANCE,
+    )
+    reinvestigation_benchmark_baseline_days: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=DEFAULT_REINVESTIGATION_BENCHMARK_BASELINE_DAYS,
+    )
+    reinvestigation_benchmark_recent_days: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=DEFAULT_REINVESTIGATION_BENCHMARK_RECENT_DAYS,
     )

@@ -334,11 +334,53 @@ class OrgAdminService:
             )
         settings = await self._dispute_settings.get_by_organization(organization_id)
         if settings is None:
-            settings = OrganizationDisputeSettings(organization_id=organization_id)
+            from api.modules.org_admin.dispute_settings_models import (
+                DEFAULT_CROSS_BUREAU_BALANCE_TOLERANCE,
+                DEFAULT_REINVESTIGATION_BENCHMARK_BASELINE_DAYS,
+                DEFAULT_REINVESTIGATION_BENCHMARK_RECENT_DAYS,
+            )
+
+            settings = OrganizationDisputeSettings(
+                organization_id=organization_id,
+                cross_bureau_balance_tolerance=DEFAULT_CROSS_BUREAU_BALANCE_TOLERANCE,
+                reinvestigation_benchmark_baseline_days=(
+                    DEFAULT_REINVESTIGATION_BENCHMARK_BASELINE_DAYS
+                ),
+                reinvestigation_benchmark_recent_days=(
+                    DEFAULT_REINVESTIGATION_BENCHMARK_RECENT_DAYS
+                ),
+            )
             apply_audit_on_create(settings, user.id)
         else:
             apply_audit_on_update(settings, user.id)
-        settings.cross_bureau_balance_tolerance = body.cross_bureau_balance_tolerance
+
+        if (
+            body.cross_bureau_balance_tolerance is None
+            and body.reinvestigation_benchmark_baseline_days is None
+            and body.reinvestigation_benchmark_recent_days is None
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="At least one dispute settings field is required",
+            )
+        if body.cross_bureau_balance_tolerance is not None:
+            settings.cross_bureau_balance_tolerance = body.cross_bureau_balance_tolerance
+        if body.reinvestigation_benchmark_baseline_days is not None:
+            settings.reinvestigation_benchmark_baseline_days = (
+                body.reinvestigation_benchmark_baseline_days
+            )
+        if body.reinvestigation_benchmark_recent_days is not None:
+            settings.reinvestigation_benchmark_recent_days = (
+                body.reinvestigation_benchmark_recent_days
+            )
+        if (
+            settings.reinvestigation_benchmark_recent_days
+            > settings.reinvestigation_benchmark_baseline_days
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="reinvestigation_benchmark_recent_days must be <= baseline_days",
+            )
         settings = await self._dispute_settings.save(settings)
         await self._session.commit()
         return OrganizationDisputeSettingsResponse.from_model(settings)

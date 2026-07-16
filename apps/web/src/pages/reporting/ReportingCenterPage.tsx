@@ -706,22 +706,25 @@ function ReinvestigationOutcomesPanel() {
 }
 
 function ReinvestigationBenchmarksPanel() {
-  const [baselineDays, setBaselineDays] = useState('90');
-  const [recentDays, setRecentDays] = useState('30');
+  const [baselineOverride, setBaselineOverride] = useState<string | null>(null);
+  const [recentOverride, setRecentOverride] = useState<string | null>(null);
   const [bureau, setBureau] = useState('');
 
-  const baselineDaysNum = Number.parseInt(baselineDays, 10) || 90;
-  const recentDaysNum = Number.parseInt(recentDays, 10) || 30;
-
   const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ['reporting-reinvestigation-benchmarks', baselineDaysNum, recentDaysNum, bureau],
+    queryKey: ['reporting-reinvestigation-benchmarks', baselineOverride, recentOverride, bureau],
     queryFn: () =>
       getReinvestigationOutcomeBenchmarks({
-        baseline_days: baselineDaysNum,
-        recent_days: recentDaysNum,
+        baseline_days:
+          baselineOverride != null ? Number.parseInt(baselineOverride, 10) || undefined : undefined,
+        recent_days:
+          recentOverride != null ? Number.parseInt(recentOverride, 10) || undefined : undefined,
         bureau: bureau || undefined,
       }),
   });
+
+  const displayBaseline =
+    baselineOverride ?? (data ? String(data.baseline_period.window_days) : '');
+  const displayRecent = recentOverride ?? (data ? String(data.recent_period.window_days) : '');
 
   const filterControls = (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -732,8 +735,9 @@ function ReinvestigationBenchmarksPanel() {
           min={7}
           max={365}
           className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
-          value={baselineDays}
-          onChange={(event) => setBaselineDays(event.target.value)}
+          value={displayBaseline}
+          placeholder="Org default"
+          onChange={(event) => setBaselineOverride(event.target.value)}
         />
       </label>
       <label className="text-xs font-medium text-gray-700">
@@ -743,8 +747,9 @@ function ReinvestigationBenchmarksPanel() {
           min={1}
           max={365}
           className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
-          value={recentDays}
-          onChange={(event) => setRecentDays(event.target.value)}
+          value={displayRecent}
+          placeholder="Org default"
+          onChange={(event) => setRecentOverride(event.target.value)}
         />
       </label>
       <label className="text-xs font-medium text-gray-700">

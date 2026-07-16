@@ -16,11 +16,14 @@ export function DisputeSettingsCard() {
     queryFn: getOrganizationDisputeSettings,
   });
   const [tolerance, setTolerance] = useState('');
+  const [baselineDays, setBaselineDays] = useState('');
+  const [recentDays, setRecentDays] = useState('');
 
   const save = useMutation({
     mutationFn: updateOrganizationDisputeSettings,
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['org-admin-dispute-settings'] });
+      void queryClient.invalidateQueries({ queryKey: ['reporting-reinvestigation-benchmarks'] });
     },
   });
 
@@ -40,13 +43,15 @@ export function DisputeSettingsCard() {
     );
   }
 
-  const current = tolerance || data.cross_bureau_balance_tolerance;
+  const currentTolerance = tolerance || data.cross_bureau_balance_tolerance;
+  const currentBaseline = baselineDays || String(data.reinvestigation_benchmark_baseline_days);
+  const currentRecent = recentDays || String(data.reinvestigation_benchmark_recent_days);
 
   return (
     <Card className="mb-6" title="Dispute settings">
       <p className="text-sm text-gray-600">
-        Cross-bureau monetary tolerance for litigation-packet discrepancy detection. Differences at
-        or below this amount are treated as rounding noise.
+        Cross-bureau monetary tolerance and default windows for org-internal reinvestigation outcome
+        benchmarks.
       </p>
       <label
         className="mt-4 block text-sm font-medium text-gray-700"
@@ -61,19 +66,56 @@ export function DisputeSettingsCard() {
         min="0.01"
         max="100"
         step="0.01"
-        value={current}
+        value={currentTolerance}
         onChange={(event) => setTolerance(event.target.value)}
       />
       <p className="mt-2 text-xs text-gray-500">
-        Platform default: ${data.platform_default_tolerance}. Last updated:{' '}
-        {data.updated_at ? new Date(data.updated_at).toLocaleString() : 'never (using default)'}
+        Platform default: ${data.platform_default_tolerance}
+      </p>
+
+      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <label className="block text-sm font-medium text-gray-700" htmlFor="benchmark-baseline">
+          Benchmark baseline window (days)
+          <input
+            id="benchmark-baseline"
+            className={inputClass}
+            type="number"
+            min={7}
+            max={365}
+            value={currentBaseline}
+            onChange={(event) => setBaselineDays(event.target.value)}
+          />
+        </label>
+        <label className="block text-sm font-medium text-gray-700" htmlFor="benchmark-recent">
+          Benchmark recent window (days)
+          <input
+            id="benchmark-recent"
+            className={inputClass}
+            type="number"
+            min={1}
+            max={365}
+            value={currentRecent}
+            onChange={(event) => setRecentDays(event.target.value)}
+          />
+        </label>
+      </div>
+      <p className="mt-2 text-xs text-gray-500">
+        Platform defaults: {data.platform_default_baseline_days}d /{' '}
+        {data.platform_default_recent_days}d. Recent must be ≤ baseline. Last updated:{' '}
+        {data.updated_at ? new Date(data.updated_at).toLocaleString() : 'never (using defaults)'}
       </p>
       <Button
         className="mt-4"
         disabled={save.isPending}
-        onClick={() => save.mutate({ cross_bureau_balance_tolerance: current })}
+        onClick={() =>
+          save.mutate({
+            cross_bureau_balance_tolerance: currentTolerance,
+            reinvestigation_benchmark_baseline_days: Number.parseInt(currentBaseline, 10),
+            reinvestigation_benchmark_recent_days: Number.parseInt(currentRecent, 10),
+          })
+        }
       >
-        {save.isPending ? 'Saving…' : 'Save tolerance'}
+        {save.isPending ? 'Saving…' : 'Save dispute settings'}
       </Button>
       {save.isError ? (
         <p className="mt-2 text-sm text-red-600">Failed to save dispute settings.</p>
