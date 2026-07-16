@@ -25,6 +25,8 @@ def _view(bureau: str, **overrides: object) -> BureauTradelineView:
         "account_status": None,
         "payment_status": None,
         "balance": None,
+        "past_due_amount": None,
+        "date_reported": None,
     }
     base.update(overrides)
     return BureauTradelineView(**base)  # type: ignore[arg-type]
@@ -66,6 +68,44 @@ def test_detect_balance_and_status_conflicts() -> None:
     assert "dispute_status_conflict" in kinds
     assert "account_status_conflict" in kinds
     assert "balance_conflict" in kinds
+
+
+def test_balance_within_tolerance_is_not_a_conflict() -> None:
+    target = _view("experian", balance=Decimal("1000.00"))
+    sibling = _view("equifax", balance=Decimal("1000.50"))
+    evidence = detect_cross_bureau_discrepancies(target, [sibling])
+    assert evidence.conflict_count == 0
+
+
+def test_balance_exactly_at_tolerance_is_not_a_conflict() -> None:
+    target = _view("experian", balance=Decimal("1000.00"))
+    sibling = _view("equifax", balance=Decimal("1001.00"))
+    evidence = detect_cross_bureau_discrepancies(target, [sibling])
+    assert evidence.conflict_count == 0
+
+
+def test_past_due_and_date_reported_conflicts() -> None:
+    target = _view(
+        "experian",
+        past_due_amount=Decimal("250.00"),
+        date_reported=date(2026, 1, 15),
+    )
+    sibling = _view(
+        "equifax",
+        past_due_amount=Decimal("400.00"),
+        date_reported=date(2026, 2, 1),
+    )
+    evidence = detect_cross_bureau_discrepancies(target, [sibling])
+    kinds = {d.kind for d in evidence.discrepancies}
+    assert "past_due_conflict" in kinds
+    assert "date_reported_conflict" in kinds
+
+
+def test_past_due_within_tolerance_is_not_a_conflict() -> None:
+    target = _view("experian", past_due_amount=Decimal("50.00"))
+    sibling = _view("equifax", past_due_amount=Decimal("50.75"))
+    evidence = detect_cross_bureau_discrepancies(target, [sibling])
+    assert evidence.conflict_count == 0
 
 
 def test_detect_empty_when_no_siblings() -> None:
