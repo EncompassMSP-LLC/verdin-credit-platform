@@ -11,7 +11,7 @@ Scope: [`docs/governance/version-5.21-scope.md`](../governance/version-5.21-scop
 ## Exit criteria for "5.21 done"
 
 - [x] Reinvestigation outcome analytics support a single-call per-recipient breakdown
-- [ ] Cross-bureau discrepancy detection compares high_balance and credit_limit
+- [x] Cross-bureau discrepancy detection compares high_balance and credit_limit
 - [ ] Operator-gated litigation evidence PDF uses a structured multi-section layout
 - [ ] Capability matrix + API reference updated
 - [ ] Deferred items explicitly documented
@@ -25,7 +25,7 @@ Scope: [`docs/governance/version-5.21-scope.md`](../governance/version-5.21-scop
 | ----- | --------------------------------------------------- | ---------- | ------ |
 | 1     | 5.21 scope + completion checklist                   | Kickoff    | ✅     |
 | 2     | Per-recipient reinvestigation analytics breakdown   | Reporting  | ✅     |
-| 3     | Cross-bureau high_balance + credit_limit comparison | Disputes   | ⬜     |
+| 3     | Cross-bureau high_balance + credit_limit comparison | Disputes   | ✅     |
 | 4     | Structured PDF litigation evidence export layout    | Disputes   | ⬜     |
 | 5     | Capability matrix 5.21 sign-off                     | Governance | ⬜     |
 

@@ -2001,6 +2001,8 @@ class AccountService:
             balance=account.balance,
             past_due_amount=account.past_due_amount,
             date_reported=account.date_reported,
+            high_balance=account.high_balance,
+            credit_limit=account.credit_limit,
         )
         if self._session is None:
             return detect_cross_bureau_discrepancies(target_view, [])
@@ -2043,6 +2045,8 @@ class AccountService:
                 balance=sibling.balance,
                 past_due_amount=sibling.past_due_amount,
                 date_reported=sibling.date_reported,
+                high_balance=sibling.high_balance,
+                credit_limit=sibling.credit_limit,
             )
             for sibling in siblings
         ]

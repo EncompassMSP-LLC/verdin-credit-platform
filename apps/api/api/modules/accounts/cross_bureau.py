@@ -26,6 +26,8 @@ CrossBureauKind = Literal[
     "payment_status_conflict",
     "past_due_conflict",
     "date_reported_conflict",
+    "high_balance_conflict",
+    "credit_limit_conflict",
 ]
 
 # Outcomes that mean the item was removed/fixed at that bureau.
@@ -50,6 +52,8 @@ class BureauTradelineView:
     balance: Decimal | None
     past_due_amount: Decimal | None = None
     date_reported: date | None = None
+    high_balance: Decimal | None = None
+    credit_limit: Decimal | None = None
 
 
 @dataclass(frozen=True)
@@ -226,6 +230,36 @@ def detect_cross_bureau_discrepancies(
                     detail=(
                         f"Date reported differs across bureaus: {target.date_reported} here vs "
                         f"{sibling.date_reported} at {sibling.bureau}."
+                    ),
+                )
+            )
+
+        if _exceeds_tolerance(
+            target.high_balance, sibling.high_balance, tolerance=balance_tolerance
+        ):
+            discrepancies.append(
+                CrossBureauDiscrepancy(
+                    kind="high_balance_conflict",
+                    bureau=sibling.bureau,
+                    detail=(
+                        f"High balance differs across bureaus: {target.high_balance} here vs "
+                        f"{sibling.high_balance} at {sibling.bureau} "
+                        f"(tolerance ${balance_tolerance})."
+                    ),
+                )
+            )
+
+        if _exceeds_tolerance(
+            target.credit_limit, sibling.credit_limit, tolerance=balance_tolerance
+        ):
+            discrepancies.append(
+                CrossBureauDiscrepancy(
+                    kind="credit_limit_conflict",
+                    bureau=sibling.bureau,
+                    detail=(
+                        f"Credit limit differs across bureaus: {target.credit_limit} here vs "
+                        f"{sibling.credit_limit} at {sibling.bureau} "
+                        f"(tolerance ${balance_tolerance})."
                     ),
                 )
             )

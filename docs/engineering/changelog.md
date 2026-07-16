@@ -13,6 +13,20 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — cross-bureau high_balance / credit_limit (Phase 14)
+
+**Decision:** Extend litigation-packet cross-bureau comparison to include stored `high_balance` and `credit_limit` on sibling tradelines. New discrepancy kinds `high_balance_conflict` and `credit_limit_conflict` use the same $1.00 monetary tolerance as balance and past-due.
+
+**Reason:** Phase 13 added past-due and date-reported fields but left high-balance and credit-limit unused despite being stored on accounts — closing documented 5.20 tech debt.
+
+**Guardrails:** Read-only comparison of data already on the platform; no live bureau contact; tolerance remains a module constant (org-configurable tolerance deferred to 5.22+).
+
+**Alternatives considered:** Reusing `balance_conflict` for high balance (rejected — distinct FCRA reinvestigation signals); comparing only when both fields are non-null with strict equality (rejected — inconsistent with existing tolerance band for monetary fields).
+
+**Technical debt:** Fields depend on parsed report ingestion quality; missing values are skipped rather than flagged.
+
+**Follow-up work:** Structured PDF litigation export layout (slice 4); 5.21 sign-off.
+
 ## Compliance intelligence — per-recipient reinvestigation analytics breakdown (Phase 14)
 
 **Decision:** Extend `GET /reporting/reinvestigation-outcomes` so `group_by=recipient` returns a `by_recipient` array of `{recipient, analytics}` entries. Recipient is taken from the linked dispute letter's `recipient_type`; responses without a linked letter are bucketed as `unknown`. Existing `group_by=bureau` behavior is unchanged. The Reporting Center adds a "Break down by" control (Bureau / Recipient).

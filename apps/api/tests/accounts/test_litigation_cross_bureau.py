@@ -27,6 +27,8 @@ def _view(bureau: str, **overrides: object) -> BureauTradelineView:
         "balance": None,
         "past_due_amount": None,
         "date_reported": None,
+        "high_balance": None,
+        "credit_limit": None,
     }
     base.update(overrides)
     return BureauTradelineView(**base)  # type: ignore[arg-type]
@@ -112,6 +114,37 @@ def test_detect_empty_when_no_siblings() -> None:
     evidence = detect_cross_bureau_discrepancies(_view("experian"), [])
     assert evidence.conflict_count == 0
     assert evidence.compared_bureaus == []
+
+
+def test_high_balance_and_credit_limit_conflicts() -> None:
+    target = _view(
+        "experian",
+        high_balance=Decimal("5000.00"),
+        credit_limit=Decimal("10000.00"),
+    )
+    sibling = _view(
+        "equifax",
+        high_balance=Decimal("6200.00"),
+        credit_limit=Decimal("8000.00"),
+    )
+    evidence = detect_cross_bureau_discrepancies(target, [sibling])
+    kinds = {d.kind for d in evidence.discrepancies}
+    assert "high_balance_conflict" in kinds
+    assert "credit_limit_conflict" in kinds
+
+
+def test_high_balance_within_tolerance_is_not_a_conflict() -> None:
+    target = _view("experian", high_balance=Decimal("2500.00"))
+    sibling = _view("equifax", high_balance=Decimal("2500.75"))
+    evidence = detect_cross_bureau_discrepancies(target, [sibling])
+    assert evidence.conflict_count == 0
+
+
+def test_credit_limit_within_tolerance_is_not_a_conflict() -> None:
+    target = _view("experian", credit_limit=Decimal("5000.00"))
+    sibling = _view("equifax", credit_limit=Decimal("5001.00"))
+    evidence = detect_cross_bureau_discrepancies(target, [sibling])
+    assert evidence.conflict_count == 0
 
 
 def test_readiness_folds_outcome_conflict() -> None:
@@ -247,3 +280,41 @@ def test_litigation_packet_no_cross_bureau_conflict_when_single_bureau(
     body = packet.json()
     assert body["cross_bureau"]["compared_bureaus"] == []
     assert body["cross_bureau"]["discrepancies"] == []
+
+
+def test_litigation_packet_surfaces_high_balance_and_credit_limit_conflicts(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    today = date.today().isoformat()
+    payload_base = sample_account_payload(sample_case_id)
+    payload_base["creditor_name"] = "Limit Mismatch Bank"
+    payload_base["last_dispute_date"] = today
+
+    experian_payload = {
+        **payload_base,
+        "bureau": "experian",
+        "high_balance": "5000.00",
+        "credit_limit": "10000.00",
+    }
+    equifax_payload = {
+        **payload_base,
+        "bureau": "equifax",
+        "high_balance": "6200.00",
+        "credit_limit": "8000.00",
+    }
+    experian = api_client.post("/api/v1/accounts", headers=manager_headers, json=experian_payload)
+    equifax = api_client.post("/api/v1/accounts", headers=manager_headers, json=equifax_payload)
+    assert experian.status_code == 201, experian.text
+    assert equifax.status_code == 201, equifax.text
+    experian_id = experian.json()["id"]
+
+    packet = api_client.get(
+        f"/api/v1/accounts/{experian_id}/litigation-packet",
+        headers=manager_headers,
+    )
+    assert packet.status_code == 200, packet.text
+    kinds = {d["kind"] for d in packet.json()["cross_bureau"]["discrepancies"]}
+    assert "high_balance_conflict" in kinds
+    assert "credit_limit_conflict" in kinds
