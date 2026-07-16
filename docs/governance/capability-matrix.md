@@ -30,7 +30,7 @@
 **Version 5.21 sign-off:** [version-5.21-scope.md](version-5.21-scope.md) · Release notes: [v5.21.0.md](../release-notes/v5.21.0.md)
 **Version 16.0 sign-off:** [version-16.0-scope.md](version-16.0-scope.md) · Release notes: [v16.0.0.md](../release-notes/v16.0.0.md)
 **Version 17.0 sign-off:** [version-17.0-scope.md](version-17.0-scope.md) · Release notes: [v17.0.0.md](../release-notes/v17.0.0.md)
-**Version 18.0 scope (in progress):** [version-18.0-scope.md](version-18.0-scope.md) · Checklist: [version-18.0-completion-checklist.md](../development/version-18.0-completion-checklist.md)
+**Version 18.0 sign-off:** [version-18.0-scope.md](version-18.0-scope.md) · Release notes: [v18.0.0.md](../release-notes/v18.0.0.md)
 
 ## Status legend
 
@@ -670,9 +670,9 @@ Scope: [version-17.0-scope.md](version-17.0-scope.md) · Checklist: [version-17.
 
 ---
 
-## Version 18.0 — Reinvestigation Operations Polish (in progress — 🚧)
+## Version 18.0 — Reinvestigation Operations Polish (shipped — ✅)
 
-Scope: [version-18.0-scope.md](version-18.0-scope.md) · Checklist: [version-18.0-completion-checklist.md](../development/version-18.0-completion-checklist.md)
+Scope: [version-18.0-scope.md](version-18.0-scope.md) · Checklist: [version-18.0-completion-checklist.md](../development/version-18.0-completion-checklist.md) · Release: [v18.0.0.md](../release-notes/v18.0.0.md)
 
 | Capability                                 | Version | Status | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                    |
 | ------------------------------------------ | ------- | ------ | ------- | -------- | --- | --- | ----- | ------------ | ------------------------------------------------------------------------ |

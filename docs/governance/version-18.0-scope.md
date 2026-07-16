@@ -15,9 +15,9 @@ Everything remains **staff-mediated and advisory**. The platform still never pol
 
 | Epic | Theme                                      | 18.0 target | Summary                                                                                      |
 | ---- | ------------------------------------------ | ----------- | -------------------------------------------------------------------------------------------- |
-| 1    | Org-configurable benchmark window defaults | Planned     | Per-org `baseline_days` / `recent_days` on dispute settings; Reporting UI reads org defaults |
-| 2    | Ingestion audit case/account scope UI      | Planned     | Compliance Center filters + start form accept optional case_id / account_id                  |
-| 3    | Capability matrix / governance sign-off    | Planned     | Scope, checklist, matrix rows, release notes                                                 |
+| 1    | Org-configurable benchmark window defaults | Released    | Per-org `baseline_days` / `recent_days` on dispute settings; Reporting UI reads org defaults |
+| 2    | Ingestion audit case/account scope UI      | Released    | Compliance Center filters + start form accept optional case_id / account_id                  |
+| 3    | Capability matrix / governance sign-off    | Released    | Scope, checklist, matrix rows, release notes                                                 |
 
 ## Shipped from 17.0 (foundation — do not regress)
 
@@ -36,13 +36,13 @@ All v17.0.0 APIs, UI, and `@verdin/api-client` functions remain production capab
 
 ## Partial capability limits (18.0 targets)
 
-### Org-configurable benchmark window defaults (Planned)
+### Org-configurable benchmark window defaults (Released)
 
 **Included:** Persist per-org `reinvestigation_benchmark_baseline_days` (default 90) and `reinvestigation_benchmark_recent_days` (default 30) on organization dispute settings; expose via org-admin GET/PATCH; Reporting Center Outcome benchmarks tab initializes filters from org defaults.
 
 **Not included:** Per-bureau default windows; automatic scheduled recompute jobs; cross-tenant baselines.
 
-### Ingestion audit case/account scope UI (Planned)
+### Ingestion audit case/account scope UI (Released)
 
 **Included:** Optional case_id / account_id on Compliance Center start form and list filters (API already supports these fields).
 
@@ -51,6 +51,7 @@ All v17.0.0 APIs, UI, and `@verdin/api-client` functions remain production capab
 ## Related documents
 
 - [Version 18.0 completion checklist](../development/version-18.0-completion-checklist.md)
+- [Release notes — v18.0.0](../release-notes/v18.0.0.md)
 - [Version 17.0 scope](version-17.0-scope.md)
 - [Capability matrix](capability-matrix.md)
 - [Product roadmap](../roadmap/README.md)
