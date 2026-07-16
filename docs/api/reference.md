@@ -787,6 +787,8 @@ Retention enforcement endpoints require `ENABLE_COMPLIANCE_ENFORCEMENT=true`. Ac
 | GET    | `/compliance/bureau-response-ingestion/runs/{id}` | read_only    | Get a single ingestion audit run                                    |
 | POST   | `/compliance/bureau-response-ingestion/runs`      | case_manager | Record operator-initiated scaffold run (always `deferred`, no poll) |
 
+As of Phase 16 the Compliance Center exposes a **Response ingestion** tab for status, run history, and starting deferred scaffold runs (no live polling).
+
 Dispute filing prep endpoints require `ENABLE_DISPUTE_FILING_PREP=true` (and human-gated agent execution readiness). Admin approval marks a prep run as `prepared` without autonomous bureau submission.
 
 | Method | Path                                                    | Role         | Description                             |
