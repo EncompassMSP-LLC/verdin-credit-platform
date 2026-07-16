@@ -37,14 +37,14 @@ export function AccountLitigationPacketPanel({ accountId }: AccountLitigationPac
   });
 
   const packet = packetQuery.data;
-  const [downloading, setDownloading] = useState(false);
+  const [downloading, setDownloading] = useState<'text' | 'pdf' | null>(null);
   const [downloadError, setDownloadError] = useState<string | null>(null);
 
-  const handleDownload = async () => {
-    setDownloading(true);
+  const handleDownload = async (format: 'text' | 'pdf') => {
+    setDownloading(format);
     setDownloadError(null);
     try {
-      const { blob, filename } = await downloadAccountLitigationPacket(accountId);
+      const { blob, filename } = await downloadAccountLitigationPacket(accountId, format);
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement('a');
       anchor.href = url;
@@ -54,7 +54,7 @@ export function AccountLitigationPacketPanel({ accountId }: AccountLitigationPac
     } catch (error) {
       setDownloadError(error instanceof Error ? error.message : 'Download failed');
     } finally {
-      setDownloading(false);
+      setDownloading(null);
     }
   };
 
@@ -64,14 +64,24 @@ export function AccountLitigationPacketPanel({ accountId }: AccountLitigationPac
         <h3 className="text-sm font-semibold text-gray-900">Litigation-readiness packet</h3>
         <div className="flex items-center gap-2">
           {packet ? (
-            <button
-              type="button"
-              className="rounded-md border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-              onClick={handleDownload}
-              disabled={downloading}
-            >
-              {downloading ? 'Preparing…' : 'Download evidence (.txt)'}
-            </button>
+            <>
+              <button
+                type="button"
+                className="rounded-md border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                onClick={() => handleDownload('text')}
+                disabled={downloading !== null}
+              >
+                {downloading === 'text' ? 'Preparing…' : 'Download .txt'}
+              </button>
+              <button
+                type="button"
+                className="rounded-md border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                onClick={() => handleDownload('pdf')}
+                disabled={downloading !== null}
+              >
+                {downloading === 'pdf' ? 'Preparing…' : 'Download .pdf'}
+              </button>
+            </>
           ) : null}
           <button
             type="button"

@@ -63,7 +63,10 @@ from api.modules.accounts.litigation_packet import (
     LitigationReadinessInputs,
     build_litigation_readiness,
 )
-from api.modules.accounts.litigation_packet_export import build_litigation_packet_export
+from api.modules.accounts.litigation_packet_export import (
+    LitigationPacketExportFormat,
+    build_litigation_packet_export,
+)
 from api.modules.accounts.models import Account, DisputeStatus, InvestigationStatus
 from api.modules.accounts.permissions import ACCOUNT_DELETE_ROLE, ACCOUNT_WRITE_ROLE
 from api.modules.accounts.redispute_readiness import compute_redispute_readiness
@@ -1939,13 +1942,14 @@ class AccountService:
         and formats it for a licensed attorney to review. Read-only — the platform
         never files, drafts pleadings, or transmits the document anywhere.
         """
-        if export_format != "text":
+        if export_format not in {"text", "pdf"}:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="Only 'text' export is supported for litigation packets",
+                detail="Only 'text' and 'pdf' export formats are supported for litigation packets",
             )
         packet = await self.get_account_litigation_packet(user, account_id)
-        return build_litigation_packet_export(packet, "text")
+        typed_format: LitigationPacketExportFormat = "pdf" if export_format == "pdf" else "text"
+        return build_litigation_packet_export(packet, typed_format)
 
     @staticmethod
     def _creditor_key(account: Account) -> tuple[str, str | None]:

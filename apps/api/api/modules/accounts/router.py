@@ -409,11 +409,11 @@ async def get_account_litigation_packet(
 @router.get("/{account_id}/litigation-packet/export")
 async def export_account_litigation_packet(
     account_id: uuid.UUID,
-    format: Literal["text"] = Query("text", alias="format"),
+    format: Literal["text", "pdf"] = Query("text", alias="format"),
     current_user: User = Depends(get_current_user),
     service: AccountService = Depends(get_account_service),
 ) -> Response:
-    """Operator-gated litigation-packet export (text) for attorney handoff."""
+    """Operator-gated litigation-packet export (text/pdf) for attorney handoff."""
     content, file_name, media_type = await service.export_litigation_packet(
         current_user,
         account_id,

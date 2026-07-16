@@ -13,6 +13,20 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — PDF litigation evidence export (Phase 13)
+
+**Decision:** Extend `GET /accounts/{account_id}/litigation-packet/export` to accept `format=pdf` alongside the existing `text` default. `build_litigation_packet_pdf_bytes` renders the same attorney-review content as the text export via reportlab (mirroring `dispute_letter_export.py`). The web packet panel offers both Download .txt and Download .pdf. Guardrails unchanged: write-permission gate, disclaimer at top, never auto-transmitted.
+
+**Reason:** Phase 12 shipped text-only. Attorneys commonly prefer PDF for handoff and archival; reusing the dispute-letter reportlab pipeline keeps the slice small and consistent.
+
+**Guardrails:** Operator-gated (`case_manager`+); formats limited to `text`/`pdf` (`422` otherwise); platform never files, drafts pleadings, or transmits the file.
+
+**Alternatives considered:** HTML-to-PDF via WeasyPrint (rejected — heavier dependency when reportlab is already in-tree); PDF-only default (rejected — keeps greppable text as the default).
+
+**Technical debt:** PDF layout is a simple wrapped-text canvas (no tables/styles); Section markers substitute for § glyphs that Helvetica lacks.
+
+**Follow-up work:** Cross-bureau discrepancy depth (slice 5).
+
 ## Compliance intelligence — per-recipient extended-window accuracy (Phase 13)
 
 **Decision:** Compute the §611(a)(1)(B) 45-day `extended` flag independently for each recipient sub-clock in `_build_recipient_clocks`, using that recipient's own `clock_start_date` and the shared account/case document dates. The tradeline-level `extended` flag (derived from the latest overall sent round) is unchanged. The clock panel shows a per-recipient §611(a)(1)(B) badge when a sub-clock is extended.
