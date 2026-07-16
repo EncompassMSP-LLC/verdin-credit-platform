@@ -33,7 +33,7 @@ Slice 2 adds `group_by=recipient` so operators compare bureau vs furnisher outco
 
 ---
 
-## Explicitly not 5.21 (→ 5.22+)
+## Explicitly not 5.21 (→ 16.0+)
 
 | Capability                                      | Version | Why defer                                               |
 | ----------------------------------------------- | ------- | ------------------------------------------------------- |
@@ -42,4 +42,4 @@ Slice 2 adds `group_by=recipient` so operators compare bureau vs furnisher outco
 | Unsupervised CFPB / attorney escalation         | Never   | Escalation stays an advisory, human-filed signal        |
 | Automated litigation filing / e-filing          | Never   | The export is a human handoff; the platform never files |
 | Cross-tenant reinvestigation-outcome benchmarks | 5.22+   | Data governance and legal review not complete           |
-| Org-configurable cross-bureau balance tolerance | 5.22+   | Needs org-settings product decision                     |
+| Org-configurable cross-bureau balance tolerance | 16.0+   | Needs org-settings product decision                     |
