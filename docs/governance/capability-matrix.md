@@ -30,6 +30,7 @@
 **Version 5.21 sign-off:** [version-5.21-scope.md](version-5.21-scope.md) · Release notes: [v5.21.0.md](../release-notes/v5.21.0.md)
 **Version 16.0 sign-off:** [version-16.0-scope.md](version-16.0-scope.md) · Release notes: [v16.0.0.md](../release-notes/v16.0.0.md)
 **Version 17.0 sign-off:** [version-17.0-scope.md](version-17.0-scope.md) · Release notes: [v17.0.0.md](../release-notes/v17.0.0.md)
+**Version 18.0 scope (in progress):** [version-18.0-scope.md](version-18.0-scope.md) · Checklist: [version-18.0-completion-checklist.md](../development/version-18.0-completion-checklist.md)
 
 ## Status legend
 
@@ -666,6 +667,17 @@ Scope: [version-17.0-scope.md](version-17.0-scope.md) · Checklist: [version-17.
 | ------------------------------------------- | ------- | ------ | ------- | -------- | --- | --- | ----- | ------------ | ------------------------------------------------------------------ |
 | Reporting Center org-internal benchmarks UI | 17.0    | ✅     | ✅      | ✅       | ✅  | —   | —     | Reporting    | Staff UI for trailing baseline/recent rates + advisory deltas      |
 | Compliance Center ingestion audit UI        | 17.0    | ✅     | ✅      | ✅       | ✅  | —   | —     | Compliance   | Staff UI for deferred ingestion audit runs; no live bureau polling |
+
+---
+
+## Version 18.0 — Reinvestigation Operations Polish (in progress — 🚧)
+
+Scope: [version-18.0-scope.md](version-18.0-scope.md) · Checklist: [version-18.0-completion-checklist.md](../development/version-18.0-completion-checklist.md)
+
+| Capability                                 | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                    |
+| ------------------------------------------ | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ------------------------------------------------------------------------ |
+| Org-configurable benchmark window defaults | 18.0    | Planned | —       | —        | —   | —   | —     | Org Admin    | Per-org baseline/recent days; Reporting UI initializes from org defaults |
+| Ingestion audit case/account scope UI      | 18.0    | Planned | ✅      | —        | ✅  | —   | —     | Compliance   | Optional case_id / account_id on start form and list filters             |
 
 ---
 
