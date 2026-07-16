@@ -1,6 +1,7 @@
 """Reporting service — org-scoped operational read models."""
 
 import uuid
+from collections import defaultdict
 from datetime import UTC, date, datetime
 
 from fastapi import HTTPException, status
@@ -16,6 +17,9 @@ from api.core.predictive_analytics import build_predictive_outcomes, get_predict
 from api.core.revenue_analytics import build_revenue_analytics
 from api.core.stripe_billing import get_billing_status
 from api.modules.accounts.models import AccountBureau
+from api.modules.accounts.reinvestigation_analytics import (
+    ReinvestigationOutcomeAnalytics as ReinvestigationOutcomeAnalyticsResult,
+)
 from api.modules.accounts.reinvestigation_analytics import (
     ReinvestigationOutcomeRow,
     compute_reinvestigation_outcome_analytics,
@@ -62,6 +66,7 @@ from api.modules.reporting.schemas import (
     PredictiveOutcomesReportingResponse,
     ReinvestigationOutcomeAnalytics,
     ReinvestigationOutcomeAnalyticsResponse,
+    ReinvestigationOutcomeBureauBreakdown,
     ReinvestigationOutcomeFilters,
     ReportingMvRefreshResultResponse,
     ReportingMvRefreshRunListParams,
@@ -174,6 +179,7 @@ class ReportingService:
         start: date | None = None,
         end: date | None = None,
         bureau: AccountBureau | None = None,
+        group_by: str | None = None,
     ) -> ReinvestigationOutcomeAnalyticsResponse:
         """Per-org reinvestigation outcome analytics over recorded responses.
 
@@ -181,10 +187,17 @@ class ReportingService:
         rates + time-to-response) scoped to the caller's organization — no
         cross-tenant benchmarks and no live bureau contact. Optional ``start`` /
         ``end`` (by response day, inclusive) and ``bureau`` filters narrow the
-        recorded responses; the applied filters are echoed back.
+        recorded responses; the applied filters are echoed back. When
+        ``group_by="bureau"``, ``by_bureau`` carries a per-bureau roll-up of the
+        same analytics shape so operators can compare all bureaus in one call.
         """
         self._require_read(user)
         organization_id = self._require_organization(user)
+        if group_by is not None and group_by != "bureau":
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="group_by must be 'bureau' or omitted",
+            )
         raw = await self._reporting.get_reinvestigation_outcomes(
             organization_id, start=start, end=end, bureau=bureau
         )
@@ -197,26 +210,66 @@ class ReportingService:
                 for row in raw
             ]
         )
+        by_bureau: list[ReinvestigationOutcomeBureauBreakdown] = []
+        if group_by == "bureau":
+            by_bureau = self._build_bureau_breakdown(raw)
         return ReinvestigationOutcomeAnalyticsResponse(
             generated_at=datetime.now(UTC),
             filters=ReinvestigationOutcomeFilters(
                 start=start,
                 end=end,
                 bureau=bureau.value if bureau is not None else None,
+                group_by=group_by,
             ),
-            analytics=ReinvestigationOutcomeAnalytics(
-                total_responses=result.total_responses,
-                counts=result.counts,
-                deletion_rate=result.deletion_rate,
-                verification_rate=result.verification_rate,
-                correction_rate=result.correction_rate,
-                favorable_rate=result.favorable_rate,
-                no_response_rate=result.no_response_rate,
-                avg_days_to_response=result.avg_days_to_response,
-                median_days_to_response=result.median_days_to_response,
-                measured_response_count=result.measured_response_count,
-            ),
+            analytics=self._to_reinvestigation_analytics_schema(result),
+            by_bureau=by_bureau,
         )
+
+    @staticmethod
+    def _to_reinvestigation_analytics_schema(
+        result: ReinvestigationOutcomeAnalyticsResult,
+    ) -> ReinvestigationOutcomeAnalytics:
+        return ReinvestigationOutcomeAnalytics(
+            total_responses=result.total_responses,
+            counts=result.counts,
+            deletion_rate=result.deletion_rate,
+            verification_rate=result.verification_rate,
+            correction_rate=result.correction_rate,
+            favorable_rate=result.favorable_rate,
+            no_response_rate=result.no_response_rate,
+            avg_days_to_response=result.avg_days_to_response,
+            median_days_to_response=result.median_days_to_response,
+            measured_response_count=result.measured_response_count,
+        )
+
+    @classmethod
+    def _build_bureau_breakdown(
+        cls, raw: list[dict[str, object]]
+    ) -> list[ReinvestigationOutcomeBureauBreakdown]:
+        """Group raw response rows by bureau and compute per-bureau analytics."""
+        by_bureau_rows: dict[str, list[ReinvestigationOutcomeRow]] = defaultdict(list)
+        for row in raw:
+            bureau_key = str(row.get("bureau") or "unknown")
+            raw_days = row.get("days_to_response")
+            days_to_response = raw_days if isinstance(raw_days, int) else None
+            by_bureau_rows[bureau_key].append(
+                ReinvestigationOutcomeRow(
+                    outcome=str(row["outcome"]),
+                    days_to_response=days_to_response,
+                )
+            )
+        # Stable bureau ordering for deterministic responses.
+        order = {"equifax": 0, "experian": 1, "transunion": 2}
+        breakdown: list[ReinvestigationOutcomeBureauBreakdown] = []
+        for bureau_key in sorted(by_bureau_rows, key=lambda b: (order.get(b, 9), b)):
+            result = compute_reinvestigation_outcome_analytics(by_bureau_rows[bureau_key])
+            breakdown.append(
+                ReinvestigationOutcomeBureauBreakdown(
+                    bureau=bureau_key,
+                    analytics=cls._to_reinvestigation_analytics_schema(result),
+                )
+            )
+        return breakdown
 
     async def get_team_productivity(self, user: User) -> TeamProductivityReportingResponse:
         self._require_read(user)

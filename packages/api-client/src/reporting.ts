@@ -126,18 +126,26 @@ export interface ReinvestigationOutcomeFilters {
   start: string | null;
   end: string | null;
   bureau: string | null;
+  group_by: string | null;
+}
+
+export interface ReinvestigationOutcomeBureauBreakdown {
+  bureau: string;
+  analytics: ReinvestigationOutcomeAnalytics;
 }
 
 export interface ReinvestigationOutcomeAnalyticsResponse {
   generated_at: string;
   filters: ReinvestigationOutcomeFilters;
   analytics: ReinvestigationOutcomeAnalytics;
+  by_bureau: ReinvestigationOutcomeBureauBreakdown[];
 }
 
 export interface ReinvestigationOutcomeAnalyticsParams {
   start?: string;
   end?: string;
   bureau?: string;
+  group_by?: 'bureau';
 }
 
 export function getReinvestigationOutcomeAnalytics(
@@ -147,6 +155,7 @@ export function getReinvestigationOutcomeAnalytics(
   if (params.start) search.set('start', params.start);
   if (params.end) search.set('end', params.end);
   if (params.bureau) search.set('bureau', params.bureau);
+  if (params.group_by) search.set('group_by', params.group_by);
   const query = search.toString();
   return request<ReinvestigationOutcomeAnalyticsResponse>(
     apiPath(`/reporting/reinvestigation-outcomes${query ? `?${query}` : ''}`),

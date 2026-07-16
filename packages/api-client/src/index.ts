@@ -98,6 +98,7 @@ export {
   type ReinvestigationOutcomeAnalytics,
   type ReinvestigationOutcomeAnalyticsParams,
   type ReinvestigationOutcomeAnalyticsResponse,
+  type ReinvestigationOutcomeBureauBreakdown,
   type ReinvestigationOutcomeFilters,
   type ReportingMvRefreshResult,
   type ReportingMvRefreshRun,

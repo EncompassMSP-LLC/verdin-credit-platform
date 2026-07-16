@@ -90,12 +90,15 @@ async def get_reinvestigation_outcomes_reporting(
     start: date | None = Query(None, description="Filter by response day (inclusive lower bound)"),
     end: date | None = Query(None, description="Filter by response day (inclusive upper bound)"),
     bureau: AccountBureau | None = Query(None, description="Filter to a single credit bureau"),
+    group_by: str | None = Query(
+        None, description="Optional roll-up dimension; only 'bureau' is supported"
+    ),
     current_user: User = Depends(get_current_user),
     service: ReportingService = Depends(get_reporting_service),
 ) -> ReinvestigationOutcomeAnalyticsResponse:
     """Org-scoped reinvestigation outcome analytics (computed; no benchmarks)."""
     return await service.get_reinvestigation_outcomes(
-        current_user, start=start, end=end, bureau=bureau
+        current_user, start=start, end=end, bureau=bureau, group_by=group_by
     )
 
 
