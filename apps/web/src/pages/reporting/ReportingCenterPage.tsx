@@ -5,6 +5,7 @@ import {
   getEnterpriseReportingStatus,
   getOperationsReporting,
   getReinvestigationOutcomeAnalytics,
+  getReinvestigationOutcomeBenchmarks,
   getRevenueAnalyticsReporting,
   getTeamProductivityReporting,
 } from '@verdin/api-client';
@@ -12,10 +13,17 @@ import { Badge, Button, Card } from '@verdin/ui';
 import { DashboardMetricCard } from '../../components/dashboard/DashboardMetricCard';
 import { featureFlags } from '../../lib/feature-flags';
 
-type ReportingTab = 'operations' | 'bureau' | 'team' | 'reinvestigation' | 'revenue';
+type ReportingTab = 'operations' | 'bureau' | 'team' | 'reinvestigation' | 'benchmarks' | 'revenue';
 
 function formatPercent(rate: number) {
   return `${(rate * 100).toFixed(1)}%`;
+}
+
+function formatSignedPercent(rate: number) {
+  const pct = (rate * 100).toFixed(1);
+  if (rate > 0) return `+${pct}%`;
+  if (rate < 0) return `${pct}%`;
+  return `${pct}%`;
 }
 
 function formatGeneratedAt(value: string) {
@@ -71,7 +79,8 @@ export function ReportingCenterPage() {
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Enterprise reporting</h1>
         <p className="mt-1 text-gray-500">
-          Operations KPIs, bureau performance, team productivity, and revenue readiness.
+          Operations KPIs, bureau performance, team productivity, reinvestigation outcomes, and
+          org-internal baselines.
         </p>
       </div>
 
@@ -108,6 +117,13 @@ export function ReportingCenterPage() {
         </Button>
         <Button
           type="button"
+          variant={tab === 'benchmarks' ? 'primary' : 'secondary'}
+          onClick={() => setTab('benchmarks')}
+        >
+          Outcome benchmarks
+        </Button>
+        <Button
+          type="button"
           variant={tab === 'revenue' ? 'primary' : 'secondary'}
           onClick={() => setTab('revenue')}
         >
@@ -119,6 +135,7 @@ export function ReportingCenterPage() {
       {tab === 'bureau' ? <BureauPerformancePanel /> : null}
       {tab === 'team' ? <TeamProductivityPanel /> : null}
       {tab === 'reinvestigation' ? <ReinvestigationOutcomesPanel /> : null}
+      {tab === 'benchmarks' ? <ReinvestigationBenchmarksPanel /> : null}
       {tab === 'revenue' ? <RevenueAnalyticsPanel /> : null}
     </div>
   );
@@ -684,6 +701,209 @@ function ReinvestigationOutcomesPanel() {
           ) : null}
         </>
       )}
+    </div>
+  );
+}
+
+function ReinvestigationBenchmarksPanel() {
+  const [baselineDays, setBaselineDays] = useState('90');
+  const [recentDays, setRecentDays] = useState('30');
+  const [bureau, setBureau] = useState('');
+
+  const baselineDaysNum = Number.parseInt(baselineDays, 10) || 90;
+  const recentDaysNum = Number.parseInt(recentDays, 10) || 30;
+
+  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
+    queryKey: ['reporting-reinvestigation-benchmarks', baselineDaysNum, recentDaysNum, bureau],
+    queryFn: () =>
+      getReinvestigationOutcomeBenchmarks({
+        baseline_days: baselineDaysNum,
+        recent_days: recentDaysNum,
+        bureau: bureau || undefined,
+      }),
+  });
+
+  const filterControls = (
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <label className="text-xs font-medium text-gray-700">
+        Baseline window (days)
+        <input
+          type="number"
+          min={7}
+          max={365}
+          className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+          value={baselineDays}
+          onChange={(event) => setBaselineDays(event.target.value)}
+        />
+      </label>
+      <label className="text-xs font-medium text-gray-700">
+        Recent window (days)
+        <input
+          type="number"
+          min={1}
+          max={365}
+          className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+          value={recentDays}
+          onChange={(event) => setRecentDays(event.target.value)}
+        />
+      </label>
+      <label className="text-xs font-medium text-gray-700">
+        Bureau
+        <select
+          className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+          value={bureau}
+          onChange={(event) => setBureau(event.target.value)}
+        >
+          {REINVESTIGATION_BUREAU_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </label>
+    </div>
+  );
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <Card>{filterControls}</Card>
+        <Card>
+          <p className="text-sm text-gray-500">Loading org-internal outcome benchmarks…</p>
+        </Card>
+      </div>
+    );
+  }
+
+  if (isError || !data) {
+    return (
+      <div className="space-y-6">
+        <Card>{filterControls}</Card>
+        <Card>
+          <p className="text-sm text-red-600">
+            Failed to load outcome benchmarks:{' '}
+            {error instanceof Error ? error.message : 'Unknown error'}
+          </p>
+          <Button className="mt-4" variant="secondary" onClick={() => refetch()}>
+            Retry
+          </Button>
+        </Card>
+      </div>
+    );
+  }
+
+  const { baseline, recent, rate_deltas: deltas, baseline_period, recent_period } = data;
+
+  return (
+    <div className="space-y-6">
+      <Card>{filterControls}</Card>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="space-y-1 text-sm text-gray-600">
+          <p>
+            Org-scoped only ({data.scope}) · generated {formatGeneratedAt(data.generated_at)}
+          </p>
+          <p>
+            Baseline {baseline_period.start} → {baseline_period.end} ({baseline_period.window_days}
+            d) · Recent {recent_period.start} → {recent_period.end} ({recent_period.window_days}d)
+          </p>
+        </div>
+        <Button variant="secondary" onClick={() => refetch()} disabled={isFetching}>
+          {isFetching ? 'Refreshing…' : 'Refresh'}
+        </Button>
+      </div>
+
+      <Card title="Advisory rate deltas (recent − baseline)">
+        <p className="mb-4 text-xs text-gray-500">
+          Positive means the recent window is higher than the trailing baseline. Comparison uses
+          this organization&apos;s recorded responses only — no cross-tenant data.
+        </p>
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
+          <DashboardMetricCard
+            label="Deletion Δ"
+            value={formatSignedPercent(deltas.deletion_rate)}
+            tone={deltas.deletion_rate >= 0 ? 'success' : 'warning'}
+          />
+          <DashboardMetricCard
+            label="Favorable Δ"
+            value={formatSignedPercent(deltas.favorable_rate)}
+            tone={deltas.favorable_rate >= 0 ? 'success' : 'warning'}
+          />
+          <DashboardMetricCard
+            label="Verification Δ"
+            value={formatSignedPercent(deltas.verification_rate)}
+            tone="info"
+          />
+          <DashboardMetricCard
+            label="Correction Δ"
+            value={formatSignedPercent(deltas.correction_rate)}
+            tone="info"
+          />
+          <DashboardMetricCard
+            label="No-response Δ"
+            value={formatSignedPercent(deltas.no_response_rate)}
+            tone={deltas.no_response_rate <= 0 ? 'success' : 'warning'}
+          />
+        </div>
+      </Card>
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <Card title={`Baseline (${baseline_period.window_days}d)`}>
+          <p className="mb-3 text-sm text-gray-600">{baseline.total_responses} response(s)</p>
+          <div className="mb-4 grid grid-cols-2 gap-3">
+            <DashboardMetricCard
+              label="Deletion rate"
+              value={formatPercent(baseline.deletion_rate)}
+              tone="success"
+            />
+            <DashboardMetricCard
+              label="Favorable rate"
+              value={formatPercent(baseline.favorable_rate)}
+              tone="success"
+            />
+            <DashboardMetricCard
+              label="Verification rate"
+              value={formatPercent(baseline.verification_rate)}
+              tone="warning"
+            />
+            <DashboardMetricCard
+              label="Avg days"
+              value={
+                baseline.avg_days_to_response === null ? '—' : String(baseline.avg_days_to_response)
+              }
+              tone="info"
+            />
+          </div>
+          <StatusBreakdown title="Baseline outcomes" counts={baseline.counts} />
+        </Card>
+        <Card title={`Recent (${recent_period.window_days}d)`}>
+          <p className="mb-3 text-sm text-gray-600">{recent.total_responses} response(s)</p>
+          <div className="mb-4 grid grid-cols-2 gap-3">
+            <DashboardMetricCard
+              label="Deletion rate"
+              value={formatPercent(recent.deletion_rate)}
+              tone="success"
+            />
+            <DashboardMetricCard
+              label="Favorable rate"
+              value={formatPercent(recent.favorable_rate)}
+              tone="success"
+            />
+            <DashboardMetricCard
+              label="Verification rate"
+              value={formatPercent(recent.verification_rate)}
+              tone="warning"
+            />
+            <DashboardMetricCard
+              label="Avg days"
+              value={
+                recent.avg_days_to_response === null ? '—' : String(recent.avg_days_to_response)
+              }
+              tone="info"
+            />
+          </div>
+          <StatusBreakdown title="Recent outcomes" counts={recent.counts} />
+        </Card>
+      </div>
     </div>
   );
 }

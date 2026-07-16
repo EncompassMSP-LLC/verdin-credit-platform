@@ -664,7 +664,7 @@ Scope: [version-17.0-scope.md](version-17.0-scope.md) · Checklist: [version-17.
 
 | Capability                                  | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                              |
 | ------------------------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ------------------------------------------------------------------ |
-| Reporting Center org-internal benchmarks UI | 17.0    | Planned | ✅      | —        | ✅  | —   | —     | Reporting    | Staff UI for trailing baseline/recent rates + advisory deltas      |
+| Reporting Center org-internal benchmarks UI | 17.0    | ✅      | ✅      | ✅       | ✅  | —   | —     | Reporting    | Staff UI for trailing baseline/recent rates + advisory deltas      |
 | Compliance Center ingestion audit UI        | 17.0    | Planned | ✅      | —        | ✅  | —   | —     | Compliance   | Staff UI for deferred ingestion audit runs; no live bureau polling |
 
 ---
