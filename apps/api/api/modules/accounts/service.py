@@ -1595,7 +1595,7 @@ class AccountService:
                 recipient_rounds=recipient_rounds.get(account.id, {}),
                 account_responses=account_responses,
                 letter_recipient=letter_recipient,
-                extended=extended,
+                document_dates=doc_dates_by_account.get(account.id, []) + case_level_doc_dates,
                 today=today,
             )
             entries.append(
@@ -2112,7 +2112,7 @@ class AccountService:
         recipient_rounds: dict[str, tuple[date | None, int]],
         account_responses: list[object],
         letter_recipient: dict[uuid.UUID, str],
-        extended: bool,
+        document_dates: list[date],
         today: date,
     ) -> list[AccountReinvestigationRecipientClock]:
         """Compute independent §611 sub-clocks per recipient for one tradeline.
@@ -2120,7 +2120,9 @@ class AccountService:
         A tradeline disputed with both a credit bureau and a furnisher carries
         two deadlines. Responses are attributed to a recipient via the recorded
         response's ``dispute_letter_id`` (which maps to that letter's recipient);
-        unlinked responses do not resolve a recipient's clock.
+        unlinked responses do not resolve a recipient's clock. The §611(a)(1)(B)
+        45-day extended-window flag is computed independently for each recipient
+        against that recipient's own ``clock_start_date``.
         """
         recipient_clocks: list[AccountReinvestigationRecipientClock] = []
         # Stable, readable ordering: bureau first, then furnisher, then the rest.
@@ -2136,6 +2138,10 @@ class AccountService:
             responded = any(
                 getattr(response, "outcome", None) != DisputeResponseOutcome.NO_RESPONSE
                 for response in attributed
+            )
+            extended = document_extends_window(
+                clock_start_date=start_date,
+                document_dates=document_dates,
             )
             clock = compute_reinvestigation_clock(
                 last_dispute_date=start_date,

@@ -625,7 +625,7 @@ Scope: [version-5.20-scope.md](version-5.20-scope.md) · Checklist: [version-5.2
 | Capability                             | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                                      |
 | -------------------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ------------------------------------------------------------------------------------------ |
 | Per-bureau analytics breakdown         | 5.20    | ✅      | ✅      | ✅       | ✅  | —   | ✅    | Reporting    | Single-call `group_by=bureau` roll-up on the reinvestigation outcome analytics; org-scoped |
-| Per-recipient extended-window accuracy | 5.20    | Planned | —       | —        | —   | —   | —     | Disputes     | §611(a)(1)(B) 45-day flag computed per recipient sub-clock, not per tradeline              |
+| Per-recipient extended-window accuracy | 5.20    | ✅      | ✅      | ✅       | ✅  | —   | ✅    | Disputes     | §611(a)(1)(B) 45-day flag computed per recipient sub-clock, not per tradeline              |
 | PDF litigation evidence export         | 5.20    | Planned | —       | —        | —   | —   | —     | Disputes     | `pdf` format on the operator-gated litigation evidence export; never auto-transmitted      |
 | Cross-bureau discrepancy depth         | 5.20    | Planned | —       | —        | —   | —   | —     | Disputes     | Balance tolerance band + extra compared fields in cross-bureau evidence                    |
 

@@ -72,8 +72,16 @@ function RecipientClockLine({ recipient }: { recipient: AccountReinvestigationRe
             : ` · ${recipient.days_remaining}d left`
           : ''}
         {recipient.dispute_round_count > 0 ? ` · round ${recipient.dispute_round_count}` : ''}
+        {recipient.extended ? ' · 45-day window' : ''}
       </span>
-      <Badge variant={stateBadgeVariant(recipient.state)}>{STATE_LABELS[recipient.state]}</Badge>
+      <div className="flex items-center gap-1.5">
+        {recipient.extended ? (
+          <span title="§611(a)(1)(B) 45-day extension for this recipient">
+            <Badge variant="info">§611(a)(1)(B)</Badge>
+          </span>
+        ) : null}
+        <Badge variant={stateBadgeVariant(recipient.state)}>{STATE_LABELS[recipient.state]}</Badge>
+      </div>
     </li>
   );
 }

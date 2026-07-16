@@ -13,6 +13,20 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — per-recipient extended-window accuracy (Phase 13)
+
+**Decision:** Compute the §611(a)(1)(B) 45-day `extended` flag independently for each recipient sub-clock in `_build_recipient_clocks`, using that recipient's own `clock_start_date` and the shared account/case document dates. The tradeline-level `extended` flag (derived from the latest overall sent round) is unchanged. The clock panel shows a per-recipient §611(a)(1)(B) badge when a sub-clock is extended.
+
+**Reason:** Phase 12 applied one tradeline-level `extended` boolean to every recipient sub-clock. A document uploaded during an early bureau round incorrectly stretched a later furnisher deadline (or vice versa). Evaluating the window against each recipient's start date closes that documented tech debt.
+
+**Guardrails:** Read model only — no new document collection, no writes, no live bureau contact. Case-level documents still apply to every tradeline; account-linked documents still apply only to that tradeline. Attribution of which document "belongs" to which recipient is not attempted — only the timing relative to each recipient's clock start matters.
+
+**Alternatives considered:** Linking documents to a specific dispute letter / recipient (rejected — documents are not currently recipient-scoped, and inventing that linkage is out of scope); leaving the shared flag (rejected — the inaccurate deadlines were the bug this slice fixes).
+
+**Technical debt:** Documents are still not recipient-tagged; a furnisher-only supplemental upload that happens to fall inside an earlier bureau window will still extend the bureau clock.
+
+**Follow-up work:** PDF litigation evidence export (slice 4); cross-bureau discrepancy depth (slice 5).
+
 ## Compliance intelligence — per-bureau reinvestigation analytics breakdown (Phase 13)
 
 **Decision:** Add an optional `group_by=bureau` query param to `GET /reporting/reinvestigation-outcomes`. When set, the response includes a `by_bureau` array of `{bureau, analytics}` entries — each carrying the same analytics shape as the top-level aggregate — so operators can compare Equifax / Experian / TransUnion in a single call. The repository now returns `bureau` with each raw row; the service groups and reuses `compute_reinvestigation_outcome_analytics`. Invalid `group_by` values return `422`. The Reporting Center always requests `group_by=bureau` and renders a per-bureau rates table under the org aggregate.

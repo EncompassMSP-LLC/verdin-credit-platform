@@ -401,6 +401,82 @@ async def test_clock_recipient_response_resolves_only_that_recipient(
     assert recipients["furnisher"]["response_count"] == 0
 
 
+async def test_clock_extended_flag_is_per_recipient(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+    db_session: AsyncSession,
+) -> None:
+    """§611(a)(1)(B) extension is evaluated against each recipient's own clock start.
+
+    A document uploaded during the bureau's initial window must extend only the
+    bureau sub-clock when the furnisher round started after that upload.
+    """
+    account_id = _create_account_with_dispute_date(
+        api_client,
+        manager_headers,
+        sample_case_id,
+        creditor_name="Per Recipient Extension Bank",
+        last_dispute_date=(date.today() - timedelta(days=40)).isoformat(),
+    )
+    account = api_client.get(f"/api/v1/accounts/{account_id}", headers=manager_headers).json()
+    org_id = account["organization_id"]
+
+    bureau_start = datetime.now(UTC) - timedelta(days=40)
+    furnisher_start = datetime.now(UTC) - timedelta(days=10)
+    _add_sent_letter(
+        db_session,
+        organization_id=org_id,
+        case_id=sample_case_id,
+        account_id=account_id,
+        recipient_type="credit_bureau",
+        sent_at=bureau_start,
+    )
+    _add_sent_letter(
+        db_session,
+        organization_id=org_id,
+        case_id=sample_case_id,
+        account_id=account_id,
+        recipient_type="furnisher",
+        sent_at=furnisher_start,
+    )
+    # Uploaded 25 days ago: inside the bureau's initial 30-day window, but before
+    # the furnisher round started — so only the bureau clock extends to 45 days.
+    db_session.add(
+        Document(
+            id=uuid.uuid4(),
+            organization_id=uuid.UUID(org_id),
+            case_id=uuid.UUID(sample_case_id),
+            account_id=uuid.UUID(account_id),
+            title="Supplemental proof for bureau round",
+            file_name="proof.pdf",
+            storage_key=f"docs/{uuid.uuid4()}.pdf",
+            file_hash=uuid.uuid4().hex,
+            created_at=datetime.now(UTC) - timedelta(days=25),
+        )
+    )
+    await db_session.commit()
+
+    clock = api_client.get(
+        "/api/v1/accounts/reinvestigation-clock",
+        headers=manager_headers,
+        params={"case_id": sample_case_id},
+    )
+    assert clock.status_code == 200, clock.text
+    entry = next(a for a in clock.json()["accounts"] if a["account_id"] == account_id)
+    recipients = {r["recipient_type"]: r for r in entry["recipients"]}
+    assert recipients["credit_bureau"]["extended"] is True
+    assert (
+        recipients["credit_bureau"]["deadline"]
+        == (bureau_start.date() + timedelta(days=45)).isoformat()
+    )
+    assert recipients["furnisher"]["extended"] is False
+    assert (
+        recipients["furnisher"]["deadline"]
+        == (furnisher_start.date() + timedelta(days=30)).isoformat()
+    )
+
+
 async def test_clock_extends_to_45_days_when_document_supplied_in_window(
     api_client: TestClient,
     manager_headers: dict[str, str],
