@@ -26,6 +26,7 @@
 **Version 5.17 sign-off:** [version-5.17-scope.md](version-5.17-scope.md) · Release notes: [v5.17.0.md](../release-notes/v5.17.0.md)
 **Version 5.18 sign-off:** [version-5.18-scope.md](version-5.18-scope.md) · Release notes: [v5.18.0.md](../release-notes/v5.18.0.md)
 **Version 5.19 sign-off:** [version-5.19-scope.md](version-5.19-scope.md) · Release notes: [v5.19.0.md](../release-notes/v5.19.0.md)
+**Version 5.20 scope (in progress):** [version-5.20-scope.md](version-5.20-scope.md) · Checklist: [version-5.20-completion-checklist.md](../development/version-5.20-completion-checklist.md)
 
 ## Status legend
 
@@ -614,6 +615,19 @@ Scope: [version-5.19-scope.md](version-5.19-scope.md) · Checklist: [version-5.1
 | Per-recipient reinvestigation clock splits | 5.19    | ✅     | ✅      | ✅       | ✅  | —   | ✅    | Disputes     | §611 clock start / round counts split by recipient (credit bureau vs furnisher)        |
 | Litigation packet cross-bureau evidence    | 5.19    | ✅     | ✅      | ✅       | ✅  | —   | ✅    | Disputes     | Cross-bureau discrepancy signals added as willful-noncompliance indicators             |
 | Operator-gated litigation evidence export  | 5.19    | ✅     | ✅      | ✅       | ✅  | —   | ✅    | Disputes     | Downloadable evidence document (text) for attorney handoff; never auto-transmitted     |
+
+---
+
+## Version 5.20 — Reinvestigation Analytics & Evidence Refinement (in progress — 🚧)
+
+Scope: [version-5.20-scope.md](version-5.20-scope.md) · Checklist: [version-5.20-completion-checklist.md](../development/version-5.20-completion-checklist.md)
+
+| Capability                             | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                                 |
+| -------------------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ------------------------------------------------------------------------------------- |
+| Per-bureau analytics breakdown         | 5.20    | Planned | —       | —        | —   | —   | —     | Reporting    | Single-call per-bureau roll-up on the reinvestigation outcome analytics; org-scoped   |
+| Per-recipient extended-window accuracy | 5.20    | Planned | —       | —        | —   | —   | —     | Disputes     | §611(a)(1)(B) 45-day flag computed per recipient sub-clock, not per tradeline         |
+| PDF litigation evidence export         | 5.20    | Planned | —       | —        | —   | —   | —     | Disputes     | `pdf` format on the operator-gated litigation evidence export; never auto-transmitted |
+| Cross-bureau discrepancy depth         | 5.20    | Planned | —       | —        | —   | —   | —     | Disputes     | Balance tolerance band + extra compared fields in cross-bureau evidence               |
 
 ---
 
