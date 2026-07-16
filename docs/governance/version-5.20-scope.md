@@ -15,11 +15,11 @@ Everything remains **staff-mediated and advisory**. The platform still never pol
 
 | Epic | Theme                                   | 5.20 target | Summary                                                                            |
 | ---- | --------------------------------------- | ----------- | ---------------------------------------------------------------------------------- |
-| 1    | Per-bureau analytics breakdown          | Planned     | Single-call per-bureau roll-up on the reinvestigation outcome analytics read model |
-| 2    | Per-recipient extended-window accuracy  | Planned     | Compute the §611(a)(1)(B) 45-day flag per recipient sub-clock, not per tradeline   |
-| 3    | PDF litigation evidence export          | Planned     | Add a `pdf` format to the operator-gated litigation evidence export                |
-| 4    | Cross-bureau discrepancy depth          | Planned     | Balance tolerance band + additional compared fields in cross-bureau evidence       |
-| 5    | Capability matrix / governance sign-off | Planned     | Scope, checklist, matrix rows, release notes                                       |
+| 1    | Per-bureau analytics breakdown          | Released    | Single-call per-bureau roll-up on the reinvestigation outcome analytics read model |
+| 2    | Per-recipient extended-window accuracy  | Released    | Compute the §611(a)(1)(B) 45-day flag per recipient sub-clock, not per tradeline   |
+| 3    | PDF litigation evidence export          | Released    | Add a `pdf` format to the operator-gated litigation evidence export                |
+| 4    | Cross-bureau discrepancy depth          | Released    | Balance tolerance band + additional compared fields in cross-bureau evidence       |
+| 5    | Capability matrix / governance sign-off | Released    | Scope, checklist, matrix rows, release notes                                       |
 
 ## Shipped from 5.19 (foundation — do not regress)
 
