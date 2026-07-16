@@ -53,12 +53,21 @@ class ReinvestigationOutcomeFilters(BaseSchema):
     start: date | None = None
     end: date | None = None
     bureau: str | None = None
+    group_by: str | None = None
+
+
+class ReinvestigationOutcomeBureauBreakdown(BaseSchema):
+    """Per-bureau roll-up within a reinvestigation outcome analytics response."""
+
+    bureau: str
+    analytics: ReinvestigationOutcomeAnalytics
 
 
 class ReinvestigationOutcomeAnalyticsResponse(BaseSchema):
     generated_at: datetime
     filters: ReinvestigationOutcomeFilters
     analytics: ReinvestigationOutcomeAnalytics
+    by_bureau: list[ReinvestigationOutcomeBureauBreakdown] = []
 
 
 class BureauPerformanceItem(BaseSchema):

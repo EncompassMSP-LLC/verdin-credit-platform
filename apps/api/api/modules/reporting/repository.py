@@ -133,11 +133,12 @@ class OperationsReportingRepository:
     ) -> list[dict[str, Any]]:
         """Recorded dispute-response outcomes for an org, reduced for analytics.
 
-        Each row is ``{"outcome": str, "days_to_response": int | None}``.
-        ``days_to_response`` is the elapsed days from the clock start (the linked
-        sent letter's ``sent_at`` when present, else the account's
-        ``last_dispute_date``) to the response date (``response_date`` when
-        recorded, else ``recorded_at``). Read-only; no live bureau contact.
+        Each row is ``{"outcome": str, "days_to_response": int | None,
+        "bureau": str}``. ``days_to_response`` is the elapsed days from the
+        clock start (the linked sent letter's ``sent_at`` when present, else
+        the account's ``last_dispute_date``) to the response date
+        (``response_date`` when recorded, else ``recorded_at``). Read-only; no
+        live bureau contact.
 
         Optional filters: ``bureau`` scopes to a single credit bureau (applied in
         SQL); ``start``/``end`` scope by response day inclusively (applied in
@@ -156,13 +157,21 @@ class OperationsReportingRepository:
                 DisputeResponse.recorded_at,
                 DisputeLetter.sent_at,
                 Account.last_dispute_date,
+                Account.bureau,
             )
             .join(Account, Account.id == DisputeResponse.account_id)
             .outerjoin(DisputeLetter, DisputeLetter.id == DisputeResponse.dispute_letter_id)
             .where(*conditions)
         )
         rows: list[dict[str, Any]] = []
-        for outcome, response_date, recorded_at, sent_at, last_dispute_date in result.all():
+        for (
+            outcome,
+            response_date,
+            recorded_at,
+            sent_at,
+            last_dispute_date,
+            account_bureau,
+        ) in result.all():
             start_day = sent_at.date() if sent_at is not None else last_dispute_date
             response_day = response_date if response_date is not None else recorded_at.date()
             if start is not None and (response_day is None or response_day < start):
@@ -173,10 +182,14 @@ class OperationsReportingRepository:
             if start_day is not None and response_day is not None:
                 elapsed = (response_day - start_day).days
                 days_to_response = elapsed if elapsed >= 0 else None
+            bureau_value = (
+                account_bureau.value if hasattr(account_bureau, "value") else str(account_bureau)
+            )
             rows.append(
                 {
                     "outcome": outcome.value if hasattr(outcome, "value") else str(outcome),
                     "days_to_response": days_to_response,
+                    "bureau": bureau_value,
                 }
             )
         return rows

@@ -13,6 +13,20 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — per-bureau reinvestigation analytics breakdown (Phase 13)
+
+**Decision:** Add an optional `group_by=bureau` query param to `GET /reporting/reinvestigation-outcomes`. When set, the response includes a `by_bureau` array of `{bureau, analytics}` entries — each carrying the same analytics shape as the top-level aggregate — so operators can compare Equifax / Experian / TransUnion in a single call. The repository now returns `bureau` with each raw row; the service groups and reuses `compute_reinvestigation_outcome_analytics`. Invalid `group_by` values return `422`. The Reporting Center always requests `group_by=bureau` and renders a per-bureau rates table under the org aggregate.
+
+**Reason:** Phase 12 only filtered one bureau at a time. Comparing bureaus required N round-trips and client-side join logic; a single-call roll-up closes that documented tech debt without changing the existing filter semantics.
+
+**Guardrails:** Read model only — computed over stored dispute responses, org-scoped, no cross-tenant data and no live bureau contact. Top-level `analytics` remains the filtered aggregate so existing consumers keep working when `group_by` is omitted (`by_bureau` defaults to `[]`).
+
+**Alternatives considered:** Always emitting `by_bureau` without a query param (rejected — keeps the default payload smaller for consumers that only need the org aggregate); a separate `/reinvestigation-outcomes/by-bureau` endpoint (rejected — duplicates filter semantics and auth).
+
+**Technical debt:** Only `bureau` is supported as a `group_by` dimension; per-recipient (bureau vs furnisher) roll-ups remain out of scope for this slice.
+
+**Follow-up work:** Per-recipient extended-window accuracy (slice 3); PDF litigation evidence export (slice 4); cross-bureau discrepancy depth (slice 5).
+
 ## Compliance intelligence — operator-gated litigation evidence export (Phase 12)
 
 **Decision:** Add `GET /accounts/{account_id}/litigation-packet/export?format=text`, returning the assembled litigation packet as a downloadable `text/plain` attachment. A new pure formatter `litigation_packet_export.py` (`build_litigation_packet_text(packet)`) renders the packet; `AccountService.export_litigation_packet` calls the existing `get_account_litigation_packet` (reusing its `case_manager`+ write-permission gate) then formats it. The web packet panel gains a "Download evidence (.txt)" button that fetches the blob and triggers a browser download, reusing the case dispute-export download pattern.

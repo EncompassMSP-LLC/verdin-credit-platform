@@ -10,7 +10,7 @@ Scope: [`docs/governance/version-5.20-scope.md`](../governance/version-5.20-scop
 
 ## Exit criteria for "5.20 done"
 
-- [ ] Reinvestigation outcome analytics support a single-call per-bureau breakdown
+- [x] Reinvestigation outcome analytics support a single-call per-bureau breakdown
 - [ ] §611(a)(1)(B) extended-window flag computed per recipient sub-clock
 - [ ] Operator-gated litigation evidence export supports a PDF format
 - [ ] Cross-bureau discrepancy detection gains a balance tolerance band + extra fields
@@ -25,7 +25,7 @@ Scope: [`docs/governance/version-5.20-scope.md`](../governance/version-5.20-scop
 | Order | Slice                                            | Epic       | Status |
 | ----- | ------------------------------------------------ | ---------- | ------ |
 | 1     | 5.20 scope + completion checklist                | Kickoff    | ✅     |
-| 2     | Per-bureau reinvestigation analytics breakdown   | Reporting  | ⬜     |
+| 2     | Per-bureau reinvestigation analytics breakdown   | Reporting  | ✅     |
 | 3     | Per-recipient extended-window accuracy           | Disputes   | ⬜     |
 | 4     | PDF litigation evidence export                   | Disputes   | ⬜     |
 | 5     | Cross-bureau discrepancy tolerance + field depth | Disputes   | ⬜     |

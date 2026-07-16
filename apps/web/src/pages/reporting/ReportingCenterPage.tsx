@@ -437,6 +437,7 @@ function ReinvestigationOutcomesPanel() {
         start: start || undefined,
         end: end || undefined,
         bureau: bureau || undefined,
+        group_by: 'bureau',
       }),
   });
 
@@ -587,6 +588,47 @@ function ReinvestigationOutcomesPanel() {
               </dl>
             </Card>
           </div>
+
+          {data.by_bureau.length > 0 ? (
+            <Card title="Per-bureau breakdown">
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-left text-sm">
+                  <thead>
+                    <tr className="border-b border-gray-200 text-xs uppercase tracking-wide text-gray-500">
+                      <th className="py-2 pr-4 font-medium">Bureau</th>
+                      <th className="py-2 pr-4 font-medium">Responses</th>
+                      <th className="py-2 pr-4 font-medium">Deletion</th>
+                      <th className="py-2 pr-4 font-medium">Favorable</th>
+                      <th className="py-2 pr-4 font-medium">Verification</th>
+                      <th className="py-2 font-medium">Avg days</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.by_bureau.map((item) => (
+                      <tr key={item.bureau} className="border-b border-gray-100">
+                        <td className="py-2 pr-4 font-medium text-gray-900">
+                          {formatLabel(item.bureau)}
+                        </td>
+                        <td className="py-2 pr-4">{item.analytics.total_responses}</td>
+                        <td className="py-2 pr-4">{formatPercent(item.analytics.deletion_rate)}</td>
+                        <td className="py-2 pr-4">
+                          {formatPercent(item.analytics.favorable_rate)}
+                        </td>
+                        <td className="py-2 pr-4">
+                          {formatPercent(item.analytics.verification_rate)}
+                        </td>
+                        <td className="py-2">
+                          {item.analytics.avg_days_to_response === null
+                            ? '—'
+                            : String(item.analytics.avg_days_to_response)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+          ) : null}
         </>
       )}
     </div>

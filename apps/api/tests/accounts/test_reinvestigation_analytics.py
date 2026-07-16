@@ -136,7 +136,8 @@ def test_reinvestigation_outcomes_endpoint_aggregates_org(
     assert response.status_code == 200, response.text
     body = response.json()
     assert "generated_at" in body
-    assert body["filters"] == {"start": None, "end": None, "bureau": None}
+    assert body["filters"] == {"start": None, "end": None, "bureau": None, "group_by": None}
+    assert body["by_bureau"] == []
     analytics = body["analytics"]
     assert analytics["total_responses"] == 2
     assert analytics["counts"]["deleted"] == 1
@@ -247,6 +248,76 @@ def test_reinvestigation_outcomes_filters_by_date_range(
     assert analytics["total_responses"] == 1
     assert analytics["counts"]["verified"] == 1
     assert analytics["counts"]["deleted"] == 0
+
+
+def test_reinvestigation_outcomes_group_by_bureau(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    today = date.today()
+    equifax_id = _create_account_with_dispute_date(
+        api_client,
+        manager_headers,
+        sample_case_id,
+        creditor_name="Equifax Group Bank",
+        last_dispute_date=(today - timedelta(days=20)).isoformat(),
+        bureau="equifax",
+    )
+    _record_response(
+        api_client,
+        manager_headers,
+        equifax_id,
+        outcome="deleted",
+        response_date=(today - timedelta(days=5)).isoformat(),
+    )
+    experian_id = _create_account_with_dispute_date(
+        api_client,
+        manager_headers,
+        sample_case_id,
+        creditor_name="Experian Group Bank",
+        last_dispute_date=(today - timedelta(days=30)).isoformat(),
+        bureau="experian",
+    )
+    _record_response(
+        api_client,
+        manager_headers,
+        experian_id,
+        outcome="verified",
+        response_date=(today - timedelta(days=10)).isoformat(),
+    )
+
+    response = api_client.get(
+        "/api/v1/reporting/reinvestigation-outcomes",
+        headers=manager_headers,
+        params={"group_by": "bureau"},
+    )
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["filters"]["group_by"] == "bureau"
+    assert body["analytics"]["total_responses"] == 2
+    by_bureau = {entry["bureau"]: entry["analytics"] for entry in body["by_bureau"]}
+    assert set(by_bureau) == {"equifax", "experian"}
+    assert by_bureau["equifax"]["total_responses"] == 1
+    assert by_bureau["equifax"]["counts"]["deleted"] == 1
+    assert by_bureau["equifax"]["deletion_rate"] == 1.0
+    assert by_bureau["experian"]["total_responses"] == 1
+    assert by_bureau["experian"]["counts"]["verified"] == 1
+    assert by_bureau["experian"]["verification_rate"] == 1.0
+    # Stable ordering: equifax before experian.
+    assert [entry["bureau"] for entry in body["by_bureau"]] == ["equifax", "experian"]
+
+
+def test_reinvestigation_outcomes_rejects_invalid_group_by(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+) -> None:
+    response = api_client.get(
+        "/api/v1/reporting/reinvestigation-outcomes",
+        headers=manager_headers,
+        params={"group_by": "recipient"},
+    )
+    assert response.status_code == 422
 
 
 def test_reinvestigation_outcomes_requires_auth(api_client: TestClient) -> None:
