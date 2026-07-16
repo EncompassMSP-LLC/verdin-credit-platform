@@ -65,6 +65,7 @@ Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (
 | **5.20**  | Reinvestigation Analytics & Evidence Refinement | Released    | Phase 13 per-bureau analytics breakdown, per-recipient extended-window accuracy, PDF evidence export, cross-bureau discrepancy depth (`v5.20.0`) |
 | **5.21**  | Reinvestigation Analytics & Evidence Polish     | Released    | Phase 14 per-recipient analytics breakdown, cross-bureau high_balance/credit_limit, structured PDF litigation export layout (`v5.21.0`)          |
 | **16.0**  | Reinvestigation Operations & Configuration      | Released    | Phase 15 org cross-bureau tolerance, bureau response ingestion audit scaffold, org-internal outcome benchmarks (`v16.0.0`)                       |
+| **17.0**  | Reinvestigation Operations Surfaces             | Planned     | Phase 16 Reporting Center benchmarks UI, Compliance Center ingestion audit UI                                                                    |
 
 ### Sprint milestones
 
@@ -502,6 +503,17 @@ Compliance Intelligence Phase 15 closes the configuration and operations gaps de
 | 1    | Org-configurable cross-bureau balance tolerance | Released    | Per-org monetary tolerance for cross-bureau discrepancy detection |
 | 2    | Bureau response ingestion audit scaffold        | Released    | Compliance audit runs for planned ingestion; no live bureau API   |
 | 3    | Org-internal reinvestigation benchmarks         | Released    | Org-scoped historical baselines on outcome analytics              |
+
+### Version 17.0 — Reinvestigation Operations Surfaces (planned)
+
+Scope and checklist: [`docs/governance/version-17.0-scope.md`](../governance/version-17.0-scope.md) · [`docs/development/version-17.0-completion-checklist.md`](../development/version-17.0-completion-checklist.md)
+
+Compliance Intelligence Phase 16 surfaces the Phase 15 operator APIs in staff UI: Reporting Center org-internal benchmarks and Compliance Center bureau response ingestion audit (start stays deferred). Live bureau response ingestion execution, automated re-dispute filing execution, unsupervised escalation, automated litigation filing, and cross-tenant benchmarks remain deferred (18.0+ or never) pending legal/compliance sign-off.
+
+| Epic | Theme                                       | 17.0 target | Notes                                                          |
+| ---- | ------------------------------------------- | ----------- | -------------------------------------------------------------- |
+| 1    | Reporting Center org-internal benchmarks UI | Planned     | Staff UI for trailing baseline/recent rates + advisory deltas  |
+| 2    | Compliance Center ingestion audit UI        | Planned     | Staff UI for deferred ingestion audit runs; no live bureau API |
 
 ## Sprint → version mapping
 
