@@ -2,11 +2,18 @@
 
 import uuid
 from datetime import datetime
+from decimal import Decimal
 
 from pydantic import Field
 
 from api.core.responses import BaseSchema
 from api.modules.billing.schemas import OrganizationBillingSummary
+from api.modules.org_admin.dispute_settings_models import (
+    DEFAULT_CROSS_BUREAU_BALANCE_TOLERANCE,
+    MAX_CROSS_BUREAU_BALANCE_TOLERANCE,
+    MIN_CROSS_BUREAU_BALANCE_TOLERANCE,
+    OrganizationDisputeSettings,
+)
 from api.modules.org_admin.models import (
     ApiKeyScope,
     OAuthDeveloperApp,
@@ -30,6 +37,40 @@ class OrganizationAdminSummary(BaseSchema):
     active_user_count: int
     active_api_key_count: int
     billing: OrganizationBillingSummary | None = None
+
+
+class OrganizationDisputeSettingsResponse(BaseSchema):
+    organization_id: uuid.UUID
+    cross_bureau_balance_tolerance: Decimal
+    platform_default_tolerance: Decimal = DEFAULT_CROSS_BUREAU_BALANCE_TOLERANCE
+    updated_at: datetime | None = None
+
+    @classmethod
+    def from_model(
+        cls, settings: OrganizationDisputeSettings
+    ) -> "OrganizationDisputeSettingsResponse":
+        return cls(
+            organization_id=settings.organization_id,
+            cross_bureau_balance_tolerance=settings.cross_bureau_balance_tolerance,
+            updated_at=settings.updated_at,
+        )
+
+    @classmethod
+    def default_for_organization(
+        cls, organization_id: uuid.UUID
+    ) -> "OrganizationDisputeSettingsResponse":
+        return cls(
+            organization_id=organization_id,
+            cross_bureau_balance_tolerance=DEFAULT_CROSS_BUREAU_BALANCE_TOLERANCE,
+            updated_at=None,
+        )
+
+
+class OrganizationDisputeSettingsUpdate(BaseSchema):
+    cross_bureau_balance_tolerance: Decimal = Field(
+        ge=MIN_CROSS_BUREAU_BALANCE_TOLERANCE,
+        le=MAX_CROSS_BUREAU_BALANCE_TOLERANCE,
+    )
 
 
 class ApiKeyCreate(BaseSchema):

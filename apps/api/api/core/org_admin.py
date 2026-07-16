@@ -10,6 +10,7 @@ _ORG_ADMIN_CAPABILITIES = [
     "scoped_key_permissions",
     "key_revocation_audit",
     "billing_status",
+    "dispute_settings",
 ]
 
 _DEFERRED_CAPABILITIES = [

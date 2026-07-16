@@ -14,6 +14,8 @@ from api.core.org_admin import get_org_admin_status
 from api.core.permissions import has_permission
 from api.modules.auth.models import User
 from api.modules.billing.service import BillingService
+from api.modules.org_admin.dispute_settings_models import OrganizationDisputeSettings
+from api.modules.org_admin.dispute_settings_repository import OrganizationDisputeSettingsRepository
 from api.modules.org_admin.models import OAuthDeveloperAppStatus, OrganizationApiKey
 from api.modules.org_admin.permissions import ORG_ADMIN_READ_ROLE, ORG_ADMIN_WRITE_ROLE
 from api.modules.org_admin.repository import OrgAdminRepository
@@ -29,6 +31,8 @@ from api.modules.org_admin.schemas import (
     OAuthDeveloperAppResponse,
     OrgAdminStatusResponse,
     OrganizationAdminSummary,
+    OrganizationDisputeSettingsResponse,
+    OrganizationDisputeSettingsUpdate,
 )
 
 
@@ -43,6 +47,9 @@ class OrgAdminService:
         self._session = session
         self._billing = billing_service
         self._rotations = ApiKeyRotationRepository(session) if session is not None else None
+        self._dispute_settings = (
+            OrganizationDisputeSettingsRepository(session) if session is not None else None
+        )
 
     @classmethod
     def from_session(cls, session: AsyncSession) -> "OrgAdminService":
@@ -302,3 +309,36 @@ class OrgAdminService:
         if self._session is not None:
             await self._session.commit()
         return OAuthDeveloperAppResponse.from_model(app)
+
+    async def get_dispute_settings(self, user: User) -> OrganizationDisputeSettingsResponse:
+        self._require_read(user)
+        organization_id = self._require_organization(user)
+        if self._dispute_settings is None:
+            return OrganizationDisputeSettingsResponse.default_for_organization(organization_id)
+        settings = await self._dispute_settings.get_by_organization(organization_id)
+        if settings is None:
+            return OrganizationDisputeSettingsResponse.default_for_organization(organization_id)
+        return OrganizationDisputeSettingsResponse.from_model(settings)
+
+    async def update_dispute_settings(
+        self,
+        user: User,
+        body: OrganizationDisputeSettingsUpdate,
+    ) -> OrganizationDisputeSettingsResponse:
+        self._require_write(user)
+        organization_id = self._require_organization(user)
+        if self._dispute_settings is None or self._session is None:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Dispute settings repository is not configured",
+            )
+        settings = await self._dispute_settings.get_by_organization(organization_id)
+        if settings is None:
+            settings = OrganizationDisputeSettings(organization_id=organization_id)
+            apply_audit_on_create(settings, user.id)
+        else:
+            apply_audit_on_update(settings, user.id)
+        settings.cross_bureau_balance_tolerance = body.cross_bureau_balance_tolerance
+        settings = await self._dispute_settings.save(settings)
+        await self._session.commit()
+        return OrganizationDisputeSettingsResponse.from_model(settings)

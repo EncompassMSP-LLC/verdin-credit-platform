@@ -189,6 +189,7 @@ from api.modules.notifications.sms_campaign_models import (
     SmsMarketingCampaignStatus,
     SmsMarketingTriggerSource,
 )
+from api.modules.org_admin.dispute_settings_models import OrganizationDisputeSettings
 from api.modules.org_admin.models import (
     ApiKeyScope,
     OAuthDeveloperApp,
@@ -334,6 +335,7 @@ __all__ = [
     "NotificationCategory",
     "Organization",
     "OrganizationApiKey",
+    "OrganizationDisputeSettings",
     "OrganizationBillingAccount",
     "PortalPushDeliveryLog",
     "PortalPushDeliveryStatus",
