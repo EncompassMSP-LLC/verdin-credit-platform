@@ -13,6 +13,20 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — per-recipient reinvestigation analytics breakdown (Phase 14)
+
+**Decision:** Extend `GET /reporting/reinvestigation-outcomes` so `group_by=recipient` returns a `by_recipient` array of `{recipient, analytics}` entries. Recipient is taken from the linked dispute letter's `recipient_type`; responses without a linked letter are bucketed as `unknown`. Existing `group_by=bureau` behavior is unchanged. The Reporting Center adds a "Break down by" control (Bureau / Recipient).
+
+**Reason:** Phase 13 only supported `group_by=bureau`. Operators also need to compare credit-bureau vs furnisher response rates without N filtered calls — closing the documented bureau-only `group_by` tech debt.
+
+**Guardrails:** Read model only — org-scoped, no cross-tenant data, no live bureau contact. Top-level `analytics` remains the filtered aggregate. Invalid `group_by` values still return `422`.
+
+**Alternatives considered:** Always emitting both `by_bureau` and `by_recipient` (rejected — keeps payloads smaller and matches the existing single-dimension pattern); filtering by recipient as a query param instead of a roll-up (rejected — does not close the single-call comparison gap).
+
+**Technical debt:** Unlinked responses (no `dispute_letter_id`) always land in `unknown`, which can dilute recipient rates when staff record outcomes without linking the letter.
+
+**Follow-up work:** Cross-bureau high_balance / credit_limit comparison (slice 3); structured PDF litigation export layout (slice 4).
+
 ## Compliance intelligence — cross-bureau discrepancy depth (Phase 13)
 
 **Decision:** Give `detect_cross_bureau_discrepancies` a default `$1.00` balance/past-due tolerance (`DEFAULT_BALANCE_TOLERANCE`, overridable via `balance_tolerance`) so trivial rounding differences no longer flag as conflicts, and compare two additional stored fields — `past_due_amount` (`past_due_conflict`) and `date_reported` (`date_reported_conflict`). `BureauTradelineView` and the litigation-packet assembly pass those fields through from the account model.

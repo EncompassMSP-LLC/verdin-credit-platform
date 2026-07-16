@@ -134,18 +134,24 @@ export interface ReinvestigationOutcomeBureauBreakdown {
   analytics: ReinvestigationOutcomeAnalytics;
 }
 
+export interface ReinvestigationOutcomeRecipientBreakdown {
+  recipient: string;
+  analytics: ReinvestigationOutcomeAnalytics;
+}
+
 export interface ReinvestigationOutcomeAnalyticsResponse {
   generated_at: string;
   filters: ReinvestigationOutcomeFilters;
   analytics: ReinvestigationOutcomeAnalytics;
   by_bureau: ReinvestigationOutcomeBureauBreakdown[];
+  by_recipient: ReinvestigationOutcomeRecipientBreakdown[];
 }
 
 export interface ReinvestigationOutcomeAnalyticsParams {
   start?: string;
   end?: string;
   bureau?: string;
-  group_by?: 'bureau';
+  group_by?: 'bureau' | 'recipient';
 }
 
 export function getReinvestigationOutcomeAnalytics(

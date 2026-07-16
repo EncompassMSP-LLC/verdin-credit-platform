@@ -91,7 +91,7 @@ async def get_reinvestigation_outcomes_reporting(
     end: date | None = Query(None, description="Filter by response day (inclusive upper bound)"),
     bureau: AccountBureau | None = Query(None, description="Filter to a single credit bureau"),
     group_by: str | None = Query(
-        None, description="Optional roll-up dimension; only 'bureau' is supported"
+        None, description="Optional roll-up dimension; 'bureau' or 'recipient'"
     ),
     current_user: User = Depends(get_current_user),
     service: ReportingService = Depends(get_reporting_service),
