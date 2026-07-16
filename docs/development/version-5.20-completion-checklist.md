@@ -14,9 +14,9 @@ Scope: [`docs/governance/version-5.20-scope.md`](../governance/version-5.20-scop
 - [x] §611(a)(1)(B) extended-window flag computed per recipient sub-clock
 - [x] Operator-gated litigation evidence export supports a PDF format
 - [x] Cross-bureau discrepancy detection gains a balance tolerance band + extra fields
-- [ ] Capability matrix + API reference updated
-- [ ] Deferred items explicitly documented
-- [ ] `docs/release-notes/v5.20.0.md` + tag `v5.20.0`
+- [x] Capability matrix + API reference updated
+- [x] Deferred items explicitly documented
+- [x] `docs/release-notes/v5.20.0.md` + tag `v5.20.0`
 
 ---
 
@@ -29,7 +29,7 @@ Scope: [`docs/governance/version-5.20-scope.md`](../governance/version-5.20-scop
 | 3     | Per-recipient extended-window accuracy           | Disputes   | ✅     |
 | 4     | PDF litigation evidence export                   | Disputes   | ✅     |
 | 5     | Cross-bureau discrepancy tolerance + field depth | Disputes   | ✅     |
-| 6     | Capability matrix 5.20 sign-off                  | Governance | ⬜     |
+| 6     | Capability matrix 5.20 sign-off                  | Governance | ✅     |
 
 Slice 2 adds an optional `group_by=bureau` breakdown so operators compare all bureaus in one response (addresses the 5.19 no-single-call-breakdown tech debt). Slice 3 computes the §611 45-day flag per recipient sub-clock (addresses the tradeline-level `extended` tech debt). Slice 4 adds a `pdf` format to the litigation evidence export, reusing the reportlab pipeline (addresses the text-only tech debt). Slice 5 gives cross-bureau detection a balance tolerance band and additional compared fields (addresses the any-difference balance-conflict tech debt).
 
