@@ -126,77 +126,159 @@ def _response_lines(responses: list[LitigationPacketResponse]) -> list[str]:
     ]
 
 
-def _wrap_lines(text: str, *, max_chars: int = 90) -> list[str]:
-    lines: list[str] = []
-    for paragraph in text.splitlines():
-        stripped = paragraph.strip()
-        if not stripped:
-            lines.append("")
-            continue
-        current = ""
-        for word in stripped.split():
-            candidate = f"{current} {word}".strip()
-            if len(candidate) <= max_chars:
-                current = candidate
-            else:
-                if current:
-                    lines.append(current)
-                current = word
-        if current:
-            lines.append(current)
-    return lines
-
-
 def build_litigation_packet_pdf_bytes(packet: AccountLitigationPacket) -> bytes:
-    """Render the packet as a multi-page PDF using the same content as the text export."""
+    """Render the packet as a structured multi-section PDF for attorney review."""
+    from reportlab.lib import colors
     from reportlab.lib.pagesizes import letter as letter_page_size
-    from reportlab.pdfgen import canvas
+    from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+    from reportlab.lib.units import inch
+    from reportlab.platypus import ListFlowable, ListItem, Paragraph, SimpleDocTemplate, Spacer
 
     buffer = BytesIO()
-    pdf = canvas.Canvas(buffer, pagesize=letter_page_size)
-    page_width, page_height = letter_page_size
-    margin = 72
-    line_height = 14
-    y = page_height - margin
-    text = build_litigation_packet_text(packet)
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=letter_page_size,
+        leftMargin=0.85 * inch,
+        rightMargin=0.85 * inch,
+        topMargin=0.75 * inch,
+        bottomMargin=0.75 * inch,
+        title="Litigation-readiness evidence packet",
+    )
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        "LitigationTitle",
+        parent=styles["Heading1"],
+        fontName="Helvetica-Bold",
+        fontSize=16,
+        leading=20,
+        spaceAfter=6,
+        textColor=colors.HexColor("#1a1a1a"),
+    )
+    subtitle_style = ParagraphStyle(
+        "LitigationSubtitle",
+        parent=styles["Normal"],
+        fontName="Helvetica-Oblique",
+        fontSize=10,
+        leading=13,
+        spaceAfter=14,
+        textColor=colors.HexColor("#444444"),
+    )
+    section_style = ParagraphStyle(
+        "LitigationSection",
+        parent=styles["Heading2"],
+        fontName="Helvetica-Bold",
+        fontSize=12,
+        leading=15,
+        spaceBefore=14,
+        spaceAfter=8,
+        textColor=colors.HexColor("#1a1a1a"),
+    )
+    body_style = ParagraphStyle(
+        "LitigationBody",
+        parent=styles["Normal"],
+        fontName="Helvetica",
+        fontSize=10,
+        leading=14,
+        spaceAfter=4,
+    )
+    bullet_style = ParagraphStyle(
+        "LitigationBullet",
+        parent=body_style,
+        leftIndent=12,
+        bulletIndent=0,
+        spaceAfter=3,
+    )
 
-    def new_page() -> None:
-        nonlocal y
-        pdf.showPage()
-        y = page_height - margin
-
-    heading_markers = {
-        "LITIGATION-READINESS EVIDENCE PACKET",
-        "DISCLAIMER",
-        "TRADELINE",
-        "§611 REINVESTIGATION CLOCK",
-        "WILLFUL-NONCOMPLIANCE ASSESSMENT (ADVISORY)",
-        "INDICATORS",
-        "CROSS-BUREAU DISCREPANCIES",
-    }
-
-    for raw_line in text.splitlines():
-        is_heading = (
-            raw_line in heading_markers
-            or raw_line.startswith("DISPUTE ROUNDS MAILED")
-            or raw_line.startswith("RECORDED RESPONSES")
+    def esc(text: str) -> str:
+        return (
+            text.replace("&", "&amp;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+            .replace("§", "Section ")
         )
-        font_name = "Helvetica-Bold" if is_heading else "Helvetica"
-        font_size = 12 if raw_line == "LITIGATION-READINESS EVIDENCE PACKET" else 11
-        pdf.setFont(font_name, font_size)
-        for wrapped in _wrap_lines(raw_line if raw_line else " "):
-            if y < margin:
-                new_page()
-                pdf.setFont(font_name, font_size)
-            if not wrapped.strip():
-                y -= line_height
-                continue
-            # reportlab Helvetica lacks §; substitute a plain label for PDF glyphs.
-            draw_text = wrapped.replace("§", "Section ")
-            pdf.drawString(margin, y, draw_text)
-            y -= line_height
 
-    pdf.save()
+    def section_heading(title: str) -> Paragraph:
+        return Paragraph(esc(title), section_style)
+
+    def bullet_list(items: list[str]) -> ListFlowable:
+        if not items:
+            items = ["(none)"]
+        return ListFlowable(
+            [ListItem(Paragraph(esc(item), bullet_style), leftIndent=12) for item in items],
+            bulletType="bullet",
+            start=None,
+            leftIndent=18,
+        )
+
+    assessment = packet.assessment
+    cross_bureau = packet.cross_bureau
+    story: list[object] = [
+        Paragraph("LITIGATION-READINESS EVIDENCE PACKET", title_style),
+        Paragraph("For licensed-attorney review only — not legal advice.", subtitle_style),
+        section_heading("DISCLAIMER"),
+        Paragraph(esc(packet.disclaimer), body_style),
+        Spacer(1, 6),
+        section_heading("TRADELINE"),
+        bullet_list(
+            [
+                f"Creditor: {packet.creditor_name}",
+                f"Bureau: {packet.bureau}",
+                f"Dispute status: {packet.dispute_status}",
+                f"Dispute round: {packet.dispute_round}",
+                f"Risk score: {packet.risk_score if packet.risk_score is not None else '—'}",
+                f"Latest outcome: {packet.latest_outcome or '—'}",
+                f"Recommended next action (advisory): {packet.recommended_action}",
+                f"Generated at: {_format_date(packet.generated_at)}",
+            ]
+        ),
+        section_heading("SECTION 611 REINVESTIGATION CLOCK"),
+        bullet_list(
+            [
+                f"State: {packet.clock_state}",
+                f"Deadline: {_format_date(packet.clock_deadline)}",
+                f"Extended 45-day window: {'yes' if packet.clock_extended else 'no'}",
+            ]
+        ),
+        section_heading("WILLFUL-NONCOMPLIANCE ASSESSMENT (ADVISORY)"),
+        bullet_list(
+            [
+                f"Strength: {assessment.strength}",
+                f"Score: {assessment.score}/100",
+                f"Eligible for attorney handoff: {'yes' if assessment.eligible else 'no'}",
+                f"Summary: {assessment.summary}",
+            ]
+        ),
+        section_heading("INDICATORS"),
+        bullet_list(assessment.indicators),
+        section_heading("CROSS-BUREAU DISCREPANCIES"),
+        Paragraph(
+            esc(
+                f"Compared bureaus: {', '.join(cross_bureau.compared_bureaus)}"
+                if cross_bureau.compared_bureaus
+                else "Compared bureaus: (none — no same-creditor tradelines at other bureaus)"
+            ),
+            body_style,
+        ),
+        Spacer(1, 4),
+        bullet_list([f"[{d.kind}] {d.detail}" for d in cross_bureau.discrepancies]),
+        section_heading(f"DISPUTE ROUNDS MAILED ({len(packet.letters)})"),
+        bullet_list(
+            [
+                f"{letter.subject} [{letter.status}] to {letter.recipient_type}, "
+                f"sent {_format_date(letter.sent_at)}"
+                for letter in packet.letters
+            ]
+        ),
+        section_heading(f"RECORDED RESPONSES ({len(packet.responses)})"),
+        bullet_list(
+            [
+                f"{response.outcome} via {response.response_method} "
+                f"on {_format_date(response.response_date)}"
+                for response in packet.responses
+            ]
+        ),
+    ]
+    doc.build(story)
     return buffer.getvalue()
 
 

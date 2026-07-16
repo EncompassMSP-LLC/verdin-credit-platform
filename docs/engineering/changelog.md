@@ -25,7 +25,21 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Technical debt:** Fields depend on parsed report ingestion quality; missing values are skipped rather than flagged.
 
-**Follow-up work:** Structured PDF litigation export layout (slice 4); 5.21 sign-off.
+**Follow-up work:** 5.21 sign-off and release notes.
+
+## Compliance intelligence — structured PDF litigation export layout (Phase 14)
+
+**Decision:** Replace the litigation-packet PDF's plain wrapped-text canvas with a reportlab platypus `SimpleDocTemplate` layout: title/subtitle, spaced section headings, and bullet lists for tradeline, Section 611 clock, assessment, indicators, cross-bureau discrepancies, mailed rounds, and recorded responses.
+
+**Reason:** Phase 13 shipped PDF export as a simple text dump on canvas — hard to scan for attorneys. Structured sections close documented 5.20 tech debt without changing packet content or the text export.
+
+**Guardrails:** Same disclaimer and fields as `build_litigation_packet_text`; no branding/templates per org; no auto-filing or transmission.
+
+**Alternatives considered:** Reusing dispute-letter canvas helpers (rejected — litigation packet has many sections); HTML-to-PDF (rejected — adds dependency and diverges from existing reportlab stack).
+
+**Technical debt:** PDF still substitutes "Section 611" for the § glyph (Helvetica limitation); org-specific letterhead deferred.
+
+**Follow-up work:** 5.21 sign-off and release notes.
 
 ## Compliance intelligence — per-recipient reinvestigation analytics breakdown (Phase 14)
 
@@ -39,7 +53,7 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Technical debt:** Unlinked responses (no `dispute_letter_id`) always land in `unknown`, which can dilute recipient rates when staff record outcomes without linking the letter.
 
-**Follow-up work:** Cross-bureau high_balance / credit_limit comparison (slice 3); structured PDF litigation export layout (slice 4).
+**Follow-up work:** 5.21 sign-off and release notes.
 
 ## Compliance intelligence — cross-bureau discrepancy depth (Phase 13)
 
