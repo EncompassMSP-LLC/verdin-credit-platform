@@ -27,6 +27,16 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Follow-up work:** 5.21 sign-off and release notes.
 
+## Compliance intelligence — org-internal reinvestigation benchmarks (Phase 15)
+
+**Decision:** Add `GET /reporting/reinvestigation-outcomes/benchmarks` returning trailing org-scoped `baseline` (default 90 days) and nested `recent` (default 30 days) analytics plus advisory `rate_deltas` (recent − baseline). Reuses the existing outcome analytics computation — no new tables.
+
+**Reason:** Operators need in-org historical context when reading deletion/verification rates without waiting on cross-tenant benchmark governance (17.0+).
+
+**Guardrails:** `scope` is always `organization`; no cross-tenant rows; no live bureau contact; `recent_days` must be ≤ `baseline_days`.
+
+**Follow-up work:** 16.0 sign-off and release notes.
+
 ## Compliance intelligence — bureau response ingestion audit scaffold (Phase 15)
 
 **Decision:** Add `bureau_response_ingestion_runs` with status/list/get/start under `/compliance/bureau-response-ingestion`. Starting a run always records `status=deferred` with an explicit deferral reason — no external bureau API calls.

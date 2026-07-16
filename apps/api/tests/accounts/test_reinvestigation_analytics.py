@@ -418,3 +418,79 @@ def test_reinvestigation_outcomes_rejects_invalid_group_by(
 def test_reinvestigation_outcomes_requires_auth(api_client: TestClient) -> None:
     response = api_client.get("/api/v1/reporting/reinvestigation-outcomes")
     assert response.status_code == 401
+
+
+def test_reinvestigation_outcome_benchmarks_returns_org_baseline(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    today = date.today()
+    # Inside the recent (30d) window — counts toward both baseline and recent.
+    recent_id = _create_account_with_dispute_date(
+        api_client,
+        manager_headers,
+        sample_case_id,
+        creditor_name="Recent Deleted Bank",
+        last_dispute_date=(today - timedelta(days=20)).isoformat(),
+    )
+    _record_response(
+        api_client,
+        manager_headers,
+        recent_id,
+        outcome="deleted",
+        response_date=(today - timedelta(days=5)).isoformat(),
+    )
+    # Outside recent, inside a 90-day baseline — baseline-only.
+    baseline_only_id = _create_account_with_dispute_date(
+        api_client,
+        manager_headers,
+        sample_case_id,
+        creditor_name="Baseline Verified Bank",
+        last_dispute_date=(today - timedelta(days=80)).isoformat(),
+    )
+    _record_response(
+        api_client,
+        manager_headers,
+        baseline_only_id,
+        outcome="verified",
+        response_date=(today - timedelta(days=60)).isoformat(),
+    )
+
+    response = api_client.get(
+        "/api/v1/reporting/reinvestigation-outcomes/benchmarks",
+        headers=manager_headers,
+        params={"baseline_days": 90, "recent_days": 30},
+    )
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["scope"] == "organization"
+    assert body["bureau"] is None
+    assert body["baseline_period"]["window_days"] == 90
+    assert body["recent_period"]["window_days"] == 30
+    assert body["baseline"]["total_responses"] == 2
+    assert body["baseline"]["counts"]["deleted"] == 1
+    assert body["baseline"]["counts"]["verified"] == 1
+    assert body["baseline"]["deletion_rate"] == 0.5
+    assert body["recent"]["total_responses"] == 1
+    assert body["recent"]["counts"]["deleted"] == 1
+    assert body["recent"]["deletion_rate"] == 1.0
+    assert body["rate_deltas"]["deletion_rate"] == 0.5
+    assert body["rate_deltas"]["verification_rate"] == -0.5
+
+
+def test_reinvestigation_outcome_benchmarks_rejects_recent_gt_baseline(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+) -> None:
+    response = api_client.get(
+        "/api/v1/reporting/reinvestigation-outcomes/benchmarks",
+        headers=manager_headers,
+        params={"baseline_days": 30, "recent_days": 60},
+    )
+    assert response.status_code == 422
+
+
+def test_reinvestigation_outcome_benchmarks_requires_auth(api_client: TestClient) -> None:
+    response = api_client.get("/api/v1/reporting/reinvestigation-outcomes/benchmarks")
+    assert response.status_code == 401

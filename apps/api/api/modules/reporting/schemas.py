@@ -78,6 +78,37 @@ class ReinvestigationOutcomeAnalyticsResponse(BaseSchema):
     by_recipient: list[ReinvestigationOutcomeRecipientBreakdown] = []
 
 
+class ReinvestigationOutcomeBenchmarkPeriod(BaseSchema):
+    """Inclusive calendar-day window for an org-internal baseline or recent slice."""
+
+    start: date
+    end: date
+    window_days: int
+
+
+class ReinvestigationOutcomeRateDeltas(BaseSchema):
+    """Advisory deltas: recent window rate minus baseline window rate."""
+
+    deletion_rate: float
+    verification_rate: float
+    correction_rate: float
+    favorable_rate: float
+    no_response_rate: float
+
+
+class ReinvestigationOutcomeBenchmarksResponse(BaseSchema):
+    """Org-scoped historical baselines for reinvestigation outcomes (no cross-tenant data)."""
+
+    generated_at: datetime
+    scope: str = "organization"
+    bureau: str | None = None
+    baseline_period: ReinvestigationOutcomeBenchmarkPeriod
+    baseline: ReinvestigationOutcomeAnalytics
+    recent_period: ReinvestigationOutcomeBenchmarkPeriod
+    recent: ReinvestigationOutcomeAnalytics
+    rate_deltas: ReinvestigationOutcomeRateDeltas
+
+
 class BureauPerformanceItem(BaseSchema):
     bureau: str
     total_accounts: int
