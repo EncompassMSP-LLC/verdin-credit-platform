@@ -15,6 +15,7 @@ import {
 } from '@verdin/api-client';
 import { Badge, Button, Card } from '@verdin/ui';
 import { ConsentTemplatesPanel } from '../../components/compliance/ConsentTemplatesPanel';
+import { BureauResponseIngestionPanel } from '../../components/compliance/BureauResponseIngestionPanel';
 import { useAuth } from '../../lib/auth';
 import { featureFlags } from '../../lib/feature-flags';
 import { CONSENT_TEMPLATE_LABELS, TEMPLATE_TO_CONSENT_TYPE } from '../../lib/consent-gaps';
@@ -38,7 +39,7 @@ const RETENTION_SCOPE_LABELS: Record<RetentionScope, string> = {
   client_profiles: 'Client profiles',
 };
 
-type ComplianceTab = 'consents' | 'templates' | 'retention';
+type ComplianceTab = 'consents' | 'templates' | 'retention' | 'ingestion';
 
 function formatDate(value: string | null) {
   return value ? new Date(value).toLocaleString() : '—';
@@ -64,13 +65,13 @@ export function ComplianceCenterPage() {
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Compliance center</h1>
         <p className="mt-1 text-gray-500">
-          Track client consent records and configure retention policy placeholders.
+          Track consent, retention policies, and deferred bureau response ingestion audits.
         </p>
       </div>
 
       <ComplianceStatusCard />
 
-      <div className="mb-6 flex gap-2">
+      <div className="mb-6 flex flex-wrap gap-2">
         <Button
           type="button"
           variant={tab === 'consents' ? 'primary' : 'secondary'}
@@ -92,14 +93,23 @@ export function ComplianceCenterPage() {
         >
           Retention policies
         </Button>
+        <Button
+          type="button"
+          variant={tab === 'ingestion' ? 'primary' : 'secondary'}
+          onClick={() => setTab('ingestion')}
+        >
+          Response ingestion
+        </Button>
       </div>
 
       {tab === 'consents' ? (
         <ConsentRecordsPanel />
       ) : tab === 'templates' ? (
         <ConsentTemplatesPanel />
-      ) : (
+      ) : tab === 'retention' ? (
         <RetentionPoliciesPanel />
+      ) : (
+        <BureauResponseIngestionPanel />
       )}
     </div>
   );

@@ -11,7 +11,7 @@ Scope: [`docs/governance/version-17.0-scope.md`](../governance/version-17.0-scop
 ## Exit criteria for "17.0 done"
 
 - [x] Reporting Center exposes org-internal reinvestigation outcome benchmarks
-- [ ] Compliance Center exposes bureau response ingestion audit runs (start stays deferred)
+- [x] Compliance Center exposes bureau response ingestion audit runs (start stays deferred)
 - [ ] Capability matrix + API reference updated
 - [ ] Deferred items explicitly documented
 - [ ] `docs/release-notes/v17.0.0.md` + tag `v17.0.0`
@@ -24,7 +24,7 @@ Scope: [`docs/governance/version-17.0-scope.md`](../governance/version-17.0-scop
 | ----- | ---------------------------------------------------- | ---------- | ------ |
 | 1     | 17.0 scope + completion checklist                    | Kickoff    | ✅     |
 | 2     | Reporting Center org-internal benchmarks UI          | Reporting  | ✅     |
-| 3     | Compliance Center bureau response ingestion audit UI | Compliance | ⬜     |
+| 3     | Compliance Center bureau response ingestion audit UI | Compliance | ✅     |
 | 4     | Capability matrix 17.0 sign-off                      | Governance | ⬜     |
 
 Slice 2 surfaces the Phase 15 benchmarks read model in Reporting Center. Slice 3 surfaces the Phase 15 ingestion audit scaffold in Compliance Center (start remains deferred — no live bureau calls). Live polling, automated filing, and cross-tenant benchmarks stay out of scope.
