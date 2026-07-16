@@ -63,7 +63,7 @@ Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (
 | **5.18**  | Reinvestigation Depth & Litigation              | Released    | Phase 11 per-letter multi-round clock, 45-day extended window, outcome analytics, litigation-readiness packet (`v5.18.0`)                        |
 | **5.19**  | Reinvestigation Analytics & Evidence Depth      | Released    | Phase 12 analytics date-range/bureau slicing, per-recipient clock splits, cross-bureau litigation evidence, evidence export (`v5.19.0`)          |
 | **5.20**  | Reinvestigation Analytics & Evidence Refinement | Released    | Phase 13 per-bureau analytics breakdown, per-recipient extended-window accuracy, PDF evidence export, cross-bureau discrepancy depth (`v5.20.0`) |
-| **5.21**  | Reinvestigation Analytics & Evidence Polish     | Planned     | Phase 14 per-recipient analytics breakdown, cross-bureau high_balance/credit_limit, structured PDF litigation export layout                      |
+| **5.21**  | Reinvestigation Analytics & Evidence Polish     | Released    | Phase 14 per-recipient analytics breakdown, cross-bureau high_balance/credit_limit, structured PDF litigation export layout (`v5.21.0`)          |
 
 ### Sprint milestones
 
@@ -478,17 +478,17 @@ Compliance Intelligence Phase 13 refines the 5.19 analytics and evidence surface
 | 3    | PDF litigation evidence export         | Released    | `pdf` format on the operator-gated litigation evidence export  |
 | 4    | Cross-bureau discrepancy depth         | Released    | Balance tolerance band + extra fields in cross-bureau evidence |
 
-### Version 5.21 — Reinvestigation Analytics & Evidence Polish (planned)
+### Version 5.21 — Reinvestigation Analytics & Evidence Polish (released — `v5.21.0`)
 
-Scope and checklist: [`docs/governance/version-5.21-scope.md`](../governance/version-5.21-scope.md) · [`docs/development/version-5.21-completion-checklist.md`](../development/version-5.21-completion-checklist.md)
+Scope and checklist: [`docs/governance/version-5.21-scope.md`](../governance/version-5.21-scope.md) · [`docs/development/version-5.21-completion-checklist.md`](../development/version-5.21-completion-checklist.md) · Release notes: [`docs/release-notes/v5.21.0.md`](../release-notes/v5.21.0.md)
 
 Compliance Intelligence Phase 14 polishes the 5.20 analytics and evidence surfaces by closing their documented limitations: a single-call per-recipient (bureau vs furnisher) breakdown on reinvestigation outcome analytics, high-balance and credit-limit comparison in cross-bureau discrepancy detection, and a structured multi-section layout for the litigation evidence PDF. Live bureau response ingestion, automated re-dispute filing, unsupervised escalation, automated litigation filing, and cross-tenant benchmarks remain deferred (5.22+ or never) pending legal/compliance sign-off.
 
 | Epic | Theme                                    | 5.21 target | Notes                                                                |
 | ---- | ---------------------------------------- | ----------- | -------------------------------------------------------------------- |
-| 1    | Per-recipient analytics breakdown        | Planned     | Single-call `group_by=recipient` roll-up on the outcome analytics    |
-| 2    | Cross-bureau high_balance / credit_limit | Planned     | Compare high balance and credit limit across sibling bureaus         |
-| 3    | Structured PDF litigation export layout  | Planned     | Multi-section reportlab layout for the operator-gated litigation PDF |
+| 1    | Per-recipient analytics breakdown        | Released    | Single-call `group_by=recipient` roll-up on the outcome analytics    |
+| 2    | Cross-bureau high_balance / credit_limit | Released    | Compare high balance and credit limit across sibling bureaus         |
+| 3    | Structured PDF litigation export layout  | Released    | Multi-section reportlab layout for the operator-gated litigation PDF |
 
 ## Sprint → version mapping
 

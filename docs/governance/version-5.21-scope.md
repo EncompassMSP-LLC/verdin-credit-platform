@@ -15,10 +15,10 @@ Everything remains **staff-mediated and advisory**. The platform still never pol
 
 | Epic | Theme                                    | 5.21 target | Summary                                                                                 |
 | ---- | ---------------------------------------- | ----------- | --------------------------------------------------------------------------------------- |
-| 1    | Per-recipient analytics breakdown        | Planned     | Single-call `group_by=recipient` roll-up on the reinvestigation outcome analytics model |
-| 2    | Cross-bureau high_balance / credit_limit | Planned     | Compare high balance and credit limit across sibling bureaus in litigation evidence     |
-| 3    | Structured PDF litigation export layout  | Planned     | Multi-section reportlab layout for the operator-gated litigation evidence PDF           |
-| 4    | Capability matrix / governance sign-off  | Planned     | Scope, checklist, matrix rows, release notes                                            |
+| 1    | Per-recipient analytics breakdown        | Released    | Single-call `group_by=recipient` roll-up on the reinvestigation outcome analytics model |
+| 2    | Cross-bureau high_balance / credit_limit | Released    | Compare high balance and credit limit across sibling bureaus in litigation evidence     |
+| 3    | Structured PDF litigation export layout  | Released    | Multi-section reportlab layout for the operator-gated litigation evidence PDF           |
+| 4    | Capability matrix / governance sign-off  | Released    | Scope, checklist, matrix rows, release notes                                            |
 
 ## Shipped from 5.20 (foundation — do not regress)
 

@@ -27,7 +27,7 @@
 **Version 5.18 sign-off:** [version-5.18-scope.md](version-5.18-scope.md) · Release notes: [v5.18.0.md](../release-notes/v5.18.0.md)
 **Version 5.19 sign-off:** [version-5.19-scope.md](version-5.19-scope.md) · Release notes: [v5.19.0.md](../release-notes/v5.19.0.md)
 **Version 5.20 sign-off:** [version-5.20-scope.md](version-5.20-scope.md) · Release notes: [v5.20.0.md](../release-notes/v5.20.0.md)
-**Version 5.21 scope (in progress):** [version-5.21-scope.md](version-5.21-scope.md) · Checklist: [version-5.21-completion-checklist.md](../development/version-5.21-completion-checklist.md)
+**Version 5.21 sign-off:** [version-5.21-scope.md](version-5.21-scope.md) · Release notes: [v5.21.0.md](../release-notes/v5.21.0.md)
 
 ## Status legend
 
@@ -632,15 +632,15 @@ Scope: [version-5.20-scope.md](version-5.20-scope.md) · Checklist: [version-5.2
 
 ---
 
-## Version 5.21 — Reinvestigation Analytics & Evidence Polish (in progress — 🚧)
+## Version 5.21 — Reinvestigation Analytics & Evidence Polish (shipped — ✅)
 
 Scope: [version-5.21-scope.md](version-5.21-scope.md) · Checklist: [version-5.21-completion-checklist.md](../development/version-5.21-completion-checklist.md)
 
 | Capability                               | Version | Status | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                          |
 | ---------------------------------------- | ------- | ------ | ------- | -------- | --- | --- | ----- | ------------ | ------------------------------------------------------------------------------ |
 | Per-recipient analytics breakdown        | 5.21    | ✅     | ✅      | ✅       | ✅  | —   | ✅    | Reporting    | Single-call `group_by=recipient` roll-up (bureau vs furnisher); org-scoped     |
-| Cross-bureau high_balance / credit_limit | 5.21    | ✅     | —       | —        | —   | —   | —     | Disputes     | Compare high balance and credit limit across sibling bureaus ($1.00 tolerance) |
-| Structured PDF litigation export layout  | 5.21    | ✅     | —       | —        | —   | —   | —     | Disputes     | Multi-section reportlab layout for the operator-gated litigation PDF           |
+| Cross-bureau high_balance / credit_limit | 5.21    | ✅     | ✅      | —        | ✅  | —   | ✅    | Disputes     | Compare high balance and credit limit across sibling bureaus ($1.00 tolerance) |
+| Structured PDF litigation export layout  | 5.21    | ✅     | ✅      | —        | ✅  | —   | ✅    | Disputes     | Multi-section reportlab layout for the operator-gated litigation PDF           |
 
 ---
 
