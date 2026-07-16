@@ -91,11 +91,14 @@ async def get_team_productivity_reporting(
     response_model=ReinvestigationOutcomeBenchmarksResponse,
 )
 async def get_reinvestigation_outcome_benchmarks_reporting(
-    baseline_days: int = Query(
-        90, ge=7, le=365, description="Trailing baseline window in calendar days"
+    baseline_days: int | None = Query(
+        None, ge=7, le=365, description="Trailing baseline window; omit to use org default"
     ),
-    recent_days: int = Query(
-        30, ge=1, le=365, description="Recent comparison window (must be <= baseline_days)"
+    recent_days: int | None = Query(
+        None,
+        ge=1,
+        le=365,
+        description="Recent comparison window; omit to use org default (must be <= baseline)",
     ),
     bureau: AccountBureau | None = Query(None, description="Filter to a single credit bureau"),
     current_user: User = Depends(get_current_user),

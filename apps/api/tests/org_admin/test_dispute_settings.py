@@ -17,6 +17,10 @@ def test_get_dispute_settings_defaults(
     body = response.json()
     assert body["cross_bureau_balance_tolerance"] == "1.00"
     assert body["platform_default_tolerance"] == "1.00"
+    assert body["reinvestigation_benchmark_baseline_days"] == 90
+    assert body["reinvestigation_benchmark_recent_days"] == 30
+    assert body["platform_default_baseline_days"] == 90
+    assert body["platform_default_recent_days"] == 30
     assert body["updated_at"] is None
 
 
@@ -37,6 +41,49 @@ def test_patch_dispute_settings_persists_tolerance(
     get = api_client.get("/api/v1/org-admin/dispute-settings", headers=admin_headers)
     assert get.status_code == 200
     assert get.json()["cross_bureau_balance_tolerance"] == "2.50"
+
+
+def test_patch_dispute_settings_persists_benchmark_windows(
+    api_client: TestClient,
+    admin_headers: dict[str, str],
+    enterprise_enabled: None,
+) -> None:
+    patch = api_client.patch(
+        "/api/v1/org-admin/dispute-settings",
+        headers=admin_headers,
+        json={
+            "reinvestigation_benchmark_baseline_days": 120,
+            "reinvestigation_benchmark_recent_days": 45,
+        },
+    )
+    assert patch.status_code == 200, patch.text
+    body = patch.json()
+    assert body["reinvestigation_benchmark_baseline_days"] == 120
+    assert body["reinvestigation_benchmark_recent_days"] == 45
+
+    benchmarks = api_client.get(
+        "/api/v1/reporting/reinvestigation-outcomes/benchmarks",
+        headers=admin_headers,
+    )
+    assert benchmarks.status_code == 200, benchmarks.text
+    assert benchmarks.json()["baseline_period"]["window_days"] == 120
+    assert benchmarks.json()["recent_period"]["window_days"] == 45
+
+
+def test_patch_dispute_settings_rejects_recent_gt_baseline(
+    api_client: TestClient,
+    admin_headers: dict[str, str],
+    enterprise_enabled: None,
+) -> None:
+    response = api_client.patch(
+        "/api/v1/org-admin/dispute-settings",
+        headers=admin_headers,
+        json={
+            "reinvestigation_benchmark_baseline_days": 30,
+            "reinvestigation_benchmark_recent_days": 60,
+        },
+    )
+    assert response.status_code == 422
 
 
 def test_patch_dispute_settings_rejects_out_of_range(

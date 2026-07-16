@@ -659,17 +659,17 @@ Endpoints return `404` when the corresponding feature flag is false.
 
 Enterprise org administration scaffold for API key lifecycle and organization summary metrics. All endpoints require `ENABLE_ENTERPRISE=true` and **admin** role.
 
-| Method | Path                                    | Min role | Description                                     |
-| ------ | --------------------------------------- | -------- | ----------------------------------------------- |
-| GET    | `/org-admin/status`                     | admin    | Org admin capabilities overview                 |
-| GET    | `/org-admin/organization`               | admin    | Organization summary (users, API keys, billing) |
-| GET    | `/org-admin/dispute-settings`           | admin    | Org dispute settings (cross-bureau tolerance)   |
-| PATCH  | `/org-admin/dispute-settings`           | admin    | Update org dispute settings                     |
-| GET    | `/org-admin/api-keys`                   | admin    | List organization API keys (prefix only)        |
-| POST   | `/org-admin/api-keys`                   | admin    | Create API key (full secret returned once)      |
-| GET    | `/org-admin/api-keys/{id}`              | admin    | Get API key metadata                            |
-| POST   | `/org-admin/api-keys/{id}/revoke`       | admin    | Revoke an active API key                        |
-| GET    | `/org-admin/api-keys/rate-limit/status` | admin    | API key rate-limit configuration (5.2)          |
+| Method | Path                                    | Min role | Description                                          |
+| ------ | --------------------------------------- | -------- | ---------------------------------------------------- |
+| GET    | `/org-admin/status`                     | admin    | Org admin capabilities overview                      |
+| GET    | `/org-admin/organization`               | admin    | Organization summary (users, API keys, billing)      |
+| GET    | `/org-admin/dispute-settings`           | admin    | Org dispute settings (tolerance + benchmark windows) |
+| PATCH  | `/org-admin/dispute-settings`           | admin    | Update org dispute settings                          |
+| GET    | `/org-admin/api-keys`                   | admin    | List organization API keys (prefix only)             |
+| POST   | `/org-admin/api-keys`                   | admin    | Create API key (full secret returned once)           |
+| GET    | `/org-admin/api-keys/{id}`              | admin    | Get API key metadata                                 |
+| POST   | `/org-admin/api-keys/{id}/revoke`       | admin    | Revoke an active API key                             |
+| GET    | `/org-admin/api-keys/rate-limit/status` | admin    | API key rate-limit configuration (5.2)               |
 
 When `ENABLE_API_DEVELOPER_PORTAL=true`, admins can access the internal developer portal and rotate active keys. When `ENABLE_PUBLIC_OAUTH_DEVELOPER_PORTAL=true`, admins can register and approve OAuth developer portal apps.
 
@@ -910,7 +910,7 @@ Bureau performance and team productivity read models for enterprise dashboards. 
 
 `GET /reporting/reinvestigation-outcomes` (Phase 11) returns an org-scoped analytics read model over recorded dispute responses. `analytics` contains `total_responses`, per-outcome `counts` (`deleted`/`verified`/`updated`/`corrected`/`no_response`/`rejected`), and the derived rates `deletion_rate`, `verification_rate`, `correction_rate`, `favorable_rate` (deleted + corrected), and `no_response_rate` (each a fraction of total responses). Time-to-response is measured from the linked sent letter's `sent_at` (falling back to the account `last_dispute_date`) to the response date: `avg_days_to_response`, `median_days_to_response`, and `measured_response_count` cover only substantive responses (a recorded `no_response` has no elapsed time). As of Phase 12 the endpoint accepts optional `start` / `end` (filter by response day, inclusive) and `bureau` (single credit bureau) query params; the applied filters are echoed back under `filters` (`start`/`end`/`bureau`/`group_by`, each `null` when unset). As of Phase 13, optional `group_by=bureau` returns a `by_bureau` array of `{bureau, analytics}` roll-ups so operators can compare all bureaus in one call (the top-level `analytics` aggregate is unchanged). As of Phase 14, optional `group_by=recipient` returns a `by_recipient` array of `{recipient, analytics}` roll-ups (credit bureau vs furnisher, attributed via the linked dispute letter; unlinked responses are bucketed as `unknown`); other `group_by` values return `422`. Purely computed over stored data — org-scoped only (no cross-tenant benchmarks) and no live bureau contact.
 
-`GET /reporting/reinvestigation-outcomes/benchmarks` (Phase 15) returns org-internal trailing baselines for the same analytics shape. Query params: `baseline_days` (default `90`, range 7–365), `recent_days` (default `30`, must be ≤ `baseline_days`), and optional `bureau`. Response includes `scope` (`organization`), `baseline_period` / `baseline`, `recent_period` / `recent`, and advisory `rate_deltas` (recent rate minus baseline rate for deletion/verification/correction/favorable/no_response). No cross-tenant data and no live bureau contact; `recent_days` > `baseline_days` returns `422`. As of Phase 16 the Enterprise reporting UI exposes an **Outcome benchmarks** tab for this endpoint.
+`GET /reporting/reinvestigation-outcomes/benchmarks` (Phase 15) returns org-internal trailing baselines for the same analytics shape. Query params: `baseline_days` (range 7–365), `recent_days` (must be ≤ `baseline_days`), and optional `bureau`. When window params are omitted, org dispute-settings defaults apply (platform `90` / `30` when unset — Phase 17). Response includes `scope` (`organization`), `baseline_period` / `baseline`, `recent_period` / `recent`, and advisory `rate_deltas` (recent rate minus baseline rate for deletion/verification/correction/favorable/no_response). No cross-tenant data and no live bureau contact; `recent_days` > `baseline_days` returns `422`. As of Phase 16 the Enterprise reporting UI exposes an **Outcome benchmarks** tab for this endpoint; Phase 17 initializes the tab from org defaults.
 
 When `ENABLE_BILLING=true`, `GET /reporting/revenue` returns subscription status, client/portal counts, and a heuristic readiness score (0–100) derived from billing configuration and operations metrics. Returns `404` when billing is disabled.
 

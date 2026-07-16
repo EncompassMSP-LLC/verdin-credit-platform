@@ -10,8 +10,13 @@ from api.core.responses import BaseSchema
 from api.modules.billing.schemas import OrganizationBillingSummary
 from api.modules.org_admin.dispute_settings_models import (
     DEFAULT_CROSS_BUREAU_BALANCE_TOLERANCE,
+    DEFAULT_REINVESTIGATION_BENCHMARK_BASELINE_DAYS,
+    DEFAULT_REINVESTIGATION_BENCHMARK_RECENT_DAYS,
     MAX_CROSS_BUREAU_BALANCE_TOLERANCE,
+    MAX_REINVESTIGATION_BENCHMARK_BASELINE_DAYS,
     MIN_CROSS_BUREAU_BALANCE_TOLERANCE,
+    MIN_REINVESTIGATION_BENCHMARK_BASELINE_DAYS,
+    MIN_REINVESTIGATION_BENCHMARK_RECENT_DAYS,
     OrganizationDisputeSettings,
 )
 from api.modules.org_admin.models import (
@@ -43,6 +48,10 @@ class OrganizationDisputeSettingsResponse(BaseSchema):
     organization_id: uuid.UUID
     cross_bureau_balance_tolerance: Decimal
     platform_default_tolerance: Decimal = DEFAULT_CROSS_BUREAU_BALANCE_TOLERANCE
+    reinvestigation_benchmark_baseline_days: int = DEFAULT_REINVESTIGATION_BENCHMARK_BASELINE_DAYS
+    reinvestigation_benchmark_recent_days: int = DEFAULT_REINVESTIGATION_BENCHMARK_RECENT_DAYS
+    platform_default_baseline_days: int = DEFAULT_REINVESTIGATION_BENCHMARK_BASELINE_DAYS
+    platform_default_recent_days: int = DEFAULT_REINVESTIGATION_BENCHMARK_RECENT_DAYS
     updated_at: datetime | None = None
 
     @classmethod
@@ -52,6 +61,10 @@ class OrganizationDisputeSettingsResponse(BaseSchema):
         return cls(
             organization_id=settings.organization_id,
             cross_bureau_balance_tolerance=settings.cross_bureau_balance_tolerance,
+            reinvestigation_benchmark_baseline_days=(
+                settings.reinvestigation_benchmark_baseline_days
+            ),
+            reinvestigation_benchmark_recent_days=settings.reinvestigation_benchmark_recent_days,
             updated_at=settings.updated_at,
         )
 
@@ -62,14 +75,29 @@ class OrganizationDisputeSettingsResponse(BaseSchema):
         return cls(
             organization_id=organization_id,
             cross_bureau_balance_tolerance=DEFAULT_CROSS_BUREAU_BALANCE_TOLERANCE,
+            reinvestigation_benchmark_baseline_days=(
+                DEFAULT_REINVESTIGATION_BENCHMARK_BASELINE_DAYS
+            ),
+            reinvestigation_benchmark_recent_days=DEFAULT_REINVESTIGATION_BENCHMARK_RECENT_DAYS,
             updated_at=None,
         )
 
 
 class OrganizationDisputeSettingsUpdate(BaseSchema):
-    cross_bureau_balance_tolerance: Decimal = Field(
+    cross_bureau_balance_tolerance: Decimal | None = Field(
+        default=None,
         ge=MIN_CROSS_BUREAU_BALANCE_TOLERANCE,
         le=MAX_CROSS_BUREAU_BALANCE_TOLERANCE,
+    )
+    reinvestigation_benchmark_baseline_days: int | None = Field(
+        default=None,
+        ge=MIN_REINVESTIGATION_BENCHMARK_BASELINE_DAYS,
+        le=MAX_REINVESTIGATION_BENCHMARK_BASELINE_DAYS,
+    )
+    reinvestigation_benchmark_recent_days: int | None = Field(
+        default=None,
+        ge=MIN_REINVESTIGATION_BENCHMARK_RECENT_DAYS,
+        le=MAX_REINVESTIGATION_BENCHMARK_BASELINE_DAYS,
     )
 
 

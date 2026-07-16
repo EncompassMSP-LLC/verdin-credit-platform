@@ -240,8 +240,8 @@ class ReportingService:
         self,
         user: User,
         *,
-        baseline_days: int = 90,
-        recent_days: int = 30,
+        baseline_days: int | None = None,
+        recent_days: int | None = None,
         bureau: AccountBureau | None = None,
     ) -> ReinvestigationOutcomeBenchmarksResponse:
         """Org-internal trailing baselines for reinvestigation outcome rates.
@@ -250,24 +250,28 @@ class ReportingService:
         window and a nested ``recent_days`` window (both ending today, UTC),
         then returns advisory ``rate_deltas`` (recent minus baseline). Scoped
         strictly to the caller's organization — no cross-tenant data and no
-        live bureau contact.
+        live bureau contact. When window args are omitted, org dispute-settings
+        defaults apply (platform 90/30 when unset).
         """
         self._require_read(user)
         organization_id = self._require_organization(user)
-        if baseline_days < 7 or baseline_days > 365:
+        org_baseline, org_recent = await self._resolve_benchmark_window_defaults(organization_id)
+        resolved_baseline = org_baseline if baseline_days is None else baseline_days
+        resolved_recent = org_recent if recent_days is None else recent_days
+        if resolved_baseline < 7 or resolved_baseline > 365:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail="baseline_days must be between 7 and 365",
             )
-        if recent_days < 1 or recent_days > baseline_days:
+        if resolved_recent < 1 or resolved_recent > resolved_baseline:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail="recent_days must be between 1 and baseline_days",
             )
 
         end = datetime.now(UTC).date()
-        baseline_start = end - timedelta(days=baseline_days - 1)
-        recent_start = end - timedelta(days=recent_days - 1)
+        baseline_start = end - timedelta(days=resolved_baseline - 1)
+        recent_start = end - timedelta(days=resolved_recent - 1)
 
         baseline_raw = await self._reporting.get_reinvestigation_outcomes(
             organization_id, start=baseline_start, end=end, bureau=bureau
@@ -303,13 +307,13 @@ class ReportingService:
             baseline_period=ReinvestigationOutcomeBenchmarkPeriod(
                 start=baseline_start,
                 end=end,
-                window_days=baseline_days,
+                window_days=resolved_baseline,
             ),
             baseline=baseline,
             recent_period=ReinvestigationOutcomeBenchmarkPeriod(
                 start=recent_start,
                 end=end,
-                window_days=recent_days,
+                window_days=resolved_recent,
             ),
             recent=recent,
             rate_deltas=ReinvestigationOutcomeRateDeltas(
@@ -319,6 +323,35 @@ class ReportingService:
                 favorable_rate=recent.favorable_rate - baseline.favorable_rate,
                 no_response_rate=recent.no_response_rate - baseline.no_response_rate,
             ),
+        )
+
+    async def _resolve_benchmark_window_defaults(
+        self, organization_id: uuid.UUID
+    ) -> tuple[int, int]:
+        from api.modules.org_admin.dispute_settings_models import (
+            DEFAULT_REINVESTIGATION_BENCHMARK_BASELINE_DAYS,
+            DEFAULT_REINVESTIGATION_BENCHMARK_RECENT_DAYS,
+        )
+        from api.modules.org_admin.dispute_settings_repository import (
+            OrganizationDisputeSettingsRepository,
+        )
+
+        if self._session is None:
+            return (
+                DEFAULT_REINVESTIGATION_BENCHMARK_BASELINE_DAYS,
+                DEFAULT_REINVESTIGATION_BENCHMARK_RECENT_DAYS,
+            )
+        settings = await OrganizationDisputeSettingsRepository(self._session).get_by_organization(
+            organization_id
+        )
+        if settings is None:
+            return (
+                DEFAULT_REINVESTIGATION_BENCHMARK_BASELINE_DAYS,
+                DEFAULT_REINVESTIGATION_BENCHMARK_RECENT_DAYS,
+            )
+        return (
+            settings.reinvestigation_benchmark_baseline_days,
+            settings.reinvestigation_benchmark_recent_days,
         )
 
     @staticmethod
