@@ -27,6 +27,14 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Follow-up work:** 5.21 sign-off and release notes.
 
+## Compliance intelligence — Version 17.0 sign-off (Phase 16)
+
+**Decision:** Mark Version 17.0 / Compliance Intelligence Phase 16 as shipped with release notes `v17.0.0` and tag `v17.0.0`. Flip capability matrix, roadmap, scope epic outcomes, and checklist exit criteria to released.
+
+**Reason:** Reporting Center benchmarks UI and Compliance Center ingestion audit UI are merged; governance docs must match production state.
+
+**Follow-up work:** 18.0+ live bureau polling / automated filing only after legal/compliance sign-off.
+
 ## Compliance intelligence — Compliance Center ingestion audit UI (Phase 16)
 
 **Decision:** Add a Compliance Center **Response ingestion** tab that lists scaffold status, paginated audit runs, and starts deferred runs via the Phase 15 API (always `status=deferred`).

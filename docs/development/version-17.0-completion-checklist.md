@@ -2,7 +2,7 @@
 
 Ordered path for **Compliance Intelligence Phase 16 — Reinvestigation Operations Surfaces** and follow-on governance work.
 
-Preceded by shipped **v16.0.0**. **Targeting v17.0.0.**
+Preceded by shipped **v16.0.0**. **Shipped as v17.0.0.**
 
 Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 
@@ -12,9 +12,9 @@ Scope: [`docs/governance/version-17.0-scope.md`](../governance/version-17.0-scop
 
 - [x] Reporting Center exposes org-internal reinvestigation outcome benchmarks
 - [x] Compliance Center exposes bureau response ingestion audit runs (start stays deferred)
-- [ ] Capability matrix + API reference updated
-- [ ] Deferred items explicitly documented
-- [ ] `docs/release-notes/v17.0.0.md` + tag `v17.0.0`
+- [x] Capability matrix + API reference updated
+- [x] Deferred items explicitly documented
+- [x] `docs/release-notes/v17.0.0.md` + tag `v17.0.0`
 
 ---
 
@@ -25,7 +25,7 @@ Scope: [`docs/governance/version-17.0-scope.md`](../governance/version-17.0-scop
 | 1     | 17.0 scope + completion checklist                    | Kickoff    | ✅     |
 | 2     | Reporting Center org-internal benchmarks UI          | Reporting  | ✅     |
 | 3     | Compliance Center bureau response ingestion audit UI | Compliance | ✅     |
-| 4     | Capability matrix 17.0 sign-off                      | Governance | ⬜     |
+| 4     | Capability matrix 17.0 sign-off                      | Governance | ✅     |
 
 Slice 2 surfaces the Phase 15 benchmarks read model in Reporting Center. Slice 3 surfaces the Phase 15 ingestion audit scaffold in Compliance Center (start remains deferred — no live bureau calls). Live polling, automated filing, and cross-tenant benchmarks stay out of scope.
 
