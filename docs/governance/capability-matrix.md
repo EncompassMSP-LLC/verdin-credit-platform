@@ -636,11 +636,11 @@ Scope: [version-5.20-scope.md](version-5.20-scope.md) · Checklist: [version-5.2
 
 Scope: [version-5.21-scope.md](version-5.21-scope.md) · Checklist: [version-5.21-completion-checklist.md](../development/version-5.21-completion-checklist.md)
 
-| Capability                               | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                          |
-| ---------------------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ------------------------------------------------------------------------------ |
-| Per-recipient analytics breakdown        | 5.21    | ✅      | ✅      | ✅       | ✅  | —   | ✅    | Reporting    | Single-call `group_by=recipient` roll-up (bureau vs furnisher); org-scoped     |
-| Cross-bureau high_balance / credit_limit | 5.21    | Planned | —       | —        | —   | —   | —     | Disputes     | Compare high balance and credit limit across sibling bureaus ($1.00 tolerance) |
-| Structured PDF litigation export layout  | 5.21    | ✅      | —       | —        | —   | —   | —     | Disputes     | Multi-section reportlab layout for the operator-gated litigation PDF           |
+| Capability                               | Version | Status | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                          |
+| ---------------------------------------- | ------- | ------ | ------- | -------- | --- | --- | ----- | ------------ | ------------------------------------------------------------------------------ |
+| Per-recipient analytics breakdown        | 5.21    | ✅     | ✅      | ✅       | ✅  | —   | ✅    | Reporting    | Single-call `group_by=recipient` roll-up (bureau vs furnisher); org-scoped     |
+| Cross-bureau high_balance / credit_limit | 5.21    | ✅     | —       | —        | —   | —   | —     | Disputes     | Compare high balance and credit limit across sibling bureaus ($1.00 tolerance) |
+| Structured PDF litigation export layout  | 5.21    | ✅     | —       | —        | —   | —   | —     | Disputes     | Multi-section reportlab layout for the operator-gated litigation PDF           |
 
 ---
 

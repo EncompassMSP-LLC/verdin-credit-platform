@@ -13,6 +13,20 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — cross-bureau high_balance / credit_limit (Phase 14)
+
+**Decision:** Extend litigation-packet cross-bureau comparison to include stored `high_balance` and `credit_limit` on sibling tradelines. New discrepancy kinds `high_balance_conflict` and `credit_limit_conflict` use the same $1.00 monetary tolerance as balance and past-due.
+
+**Reason:** Phase 13 added past-due and date-reported fields but left high-balance and credit-limit unused despite being stored on accounts — closing documented 5.20 tech debt.
+
+**Guardrails:** Read-only comparison of data already on the platform; no live bureau contact; tolerance remains a module constant (org-configurable tolerance deferred to 5.22+).
+
+**Alternatives considered:** Reusing `balance_conflict` for high balance (rejected — distinct FCRA reinvestigation signals); comparing only when both fields are non-null with strict equality (rejected — inconsistent with existing tolerance band for monetary fields).
+
+**Technical debt:** Fields depend on parsed report ingestion quality; missing values are skipped rather than flagged.
+
+**Follow-up work:** 5.21 sign-off and release notes.
+
 ## Compliance intelligence — structured PDF litigation export layout (Phase 14)
 
 **Decision:** Replace the litigation-packet PDF's plain wrapped-text canvas with a reportlab platypus `SimpleDocTemplate` layout: title/subtitle, spaced section headings, and bullet lists for tradeline, Section 611 clock, assessment, indicators, cross-bureau discrepancies, mailed rounds, and recorded responses.
@@ -39,7 +53,7 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Technical debt:** Unlinked responses (no `dispute_letter_id`) always land in `unknown`, which can dilute recipient rates when staff record outcomes without linking the letter.
 
-**Follow-up work:** Cross-bureau high_balance / credit_limit comparison (slice 3); structured PDF litigation export layout (slice 4).
+**Follow-up work:** 5.21 sign-off and release notes.
 
 ## Compliance intelligence — cross-bureau discrepancy depth (Phase 13)
 
