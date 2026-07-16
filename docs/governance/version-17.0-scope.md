@@ -15,9 +15,9 @@ Everything remains **staff-mediated and advisory**. The platform still never pol
 
 | Epic | Theme                                       | 17.0 target | Summary                                                                     |
 | ---- | ------------------------------------------- | ----------- | --------------------------------------------------------------------------- |
-| 1    | Reporting Center org-internal benchmarks UI | Planned     | Staff UI for trailing baseline/recent outcome rates + advisory deltas       |
-| 2    | Compliance Center ingestion audit UI        | Planned     | Staff UI to list/status/start deferred bureau response ingestion audit runs |
-| 3    | Capability matrix / governance sign-off     | Planned     | Scope, checklist, matrix rows, release notes                                |
+| 1    | Reporting Center org-internal benchmarks UI | Released    | Staff UI for trailing baseline/recent outcome rates + advisory deltas       |
+| 2    | Compliance Center ingestion audit UI        | Released    | Staff UI to list/status/start deferred bureau response ingestion audit runs |
+| 3    | Capability matrix / governance sign-off     | Released    | Scope, checklist, matrix rows, release notes                                |
 
 ## Shipped from 16.0 (foundation — do not regress)
 
@@ -35,13 +35,13 @@ All v16.0.0 APIs, UI, and `@verdin/api-client` functions remain production capab
 
 ## Partial capability limits (17.0 targets)
 
-### Reporting Center org-internal benchmarks UI (Planned)
+### Reporting Center org-internal benchmarks UI (Released)
 
 **Included:** Reporting Center panel consuming `GET /reporting/reinvestigation-outcomes/benchmarks` with baseline/recent windows, rates, and advisory deltas; optional bureau filter.
 
 **Not included:** Cross-tenant percentile ranks; editing historical responses from the panel; exporting benchmark PII.
 
-### Compliance Center ingestion audit UI (Planned)
+### Compliance Center ingestion audit UI (Released)
 
 **Included:** Compliance Center tab for ingestion status, paginated run history, and starting a deferred scaffold run (always records `status=deferred`).
 
@@ -50,6 +50,7 @@ All v16.0.0 APIs, UI, and `@verdin/api-client` functions remain production capab
 ## Related documents
 
 - [Version 17.0 completion checklist](../development/version-17.0-completion-checklist.md)
+- [Release notes — v17.0.0](../release-notes/v17.0.0.md)
 - [Version 16.0 scope](version-16.0-scope.md)
 - [Capability matrix](capability-matrix.md)
 - [Product roadmap](../roadmap/README.md)

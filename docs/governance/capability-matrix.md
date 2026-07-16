@@ -29,7 +29,7 @@
 **Version 5.20 sign-off:** [version-5.20-scope.md](version-5.20-scope.md) · Release notes: [v5.20.0.md](../release-notes/v5.20.0.md)
 **Version 5.21 sign-off:** [version-5.21-scope.md](version-5.21-scope.md) · Release notes: [v5.21.0.md](../release-notes/v5.21.0.md)
 **Version 16.0 sign-off:** [version-16.0-scope.md](version-16.0-scope.md) · Release notes: [v16.0.0.md](../release-notes/v16.0.0.md)
-**Version 17.0 scope (in progress):** [version-17.0-scope.md](version-17.0-scope.md) · Checklist: [version-17.0-completion-checklist.md](../development/version-17.0-completion-checklist.md)
+**Version 17.0 sign-off:** [version-17.0-scope.md](version-17.0-scope.md) · Release notes: [v17.0.0.md](../release-notes/v17.0.0.md)
 
 ## Status legend
 
@@ -658,9 +658,9 @@ Scope: [version-16.0-scope.md](version-16.0-scope.md) · Checklist: [version-16.
 
 ---
 
-## Version 17.0 — Reinvestigation Operations Surfaces (in progress — 🚧)
+## Version 17.0 — Reinvestigation Operations Surfaces (shipped — ✅)
 
-Scope: [version-17.0-scope.md](version-17.0-scope.md) · Checklist: [version-17.0-completion-checklist.md](../development/version-17.0-completion-checklist.md)
+Scope: [version-17.0-scope.md](version-17.0-scope.md) · Checklist: [version-17.0-completion-checklist.md](../development/version-17.0-completion-checklist.md) · Release: [v17.0.0.md](../release-notes/v17.0.0.md)
 
 | Capability                                  | Version | Status | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                              |
 | ------------------------------------------- | ------- | ------ | ------- | -------- | --- | --- | ----- | ------------ | ------------------------------------------------------------------ |
