@@ -1,9 +1,12 @@
 """Tests for reinvestigation outcome analytics (Phase 11 slice 4)."""
 
-from datetime import date, timedelta
+import uuid
+from datetime import UTC, date, datetime, timedelta
 
 from fastapi.testclient import TestClient
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from api.modules.accounts.dispute_letter_models import DisputeLetter, DisputeLetterStatus
 from api.modules.accounts.reinvestigation_analytics import (
     ReinvestigationOutcomeRow,
     compute_reinvestigation_outcome_analytics,
@@ -138,6 +141,7 @@ def test_reinvestigation_outcomes_endpoint_aggregates_org(
     assert "generated_at" in body
     assert body["filters"] == {"start": None, "end": None, "bureau": None, "group_by": None}
     assert body["by_bureau"] == []
+    assert body["by_recipient"] == []
     analytics = body["analytics"]
     assert analytics["total_responses"] == 2
     assert analytics["counts"]["deleted"] == 1
@@ -308,6 +312,97 @@ def test_reinvestigation_outcomes_group_by_bureau(
     assert [entry["bureau"] for entry in body["by_bureau"]] == ["equifax", "experian"]
 
 
+async def test_reinvestigation_outcomes_group_by_recipient(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+    db_session: AsyncSession,
+) -> None:
+    """group_by=recipient rolls up outcomes by the linked letter recipient type."""
+    today = date.today()
+    bureau_account = _create_account_with_dispute_date(
+        api_client,
+        manager_headers,
+        sample_case_id,
+        creditor_name="Recipient Bureau Bank",
+        last_dispute_date=(today - timedelta(days=20)).isoformat(),
+    )
+    furnisher_account = _create_account_with_dispute_date(
+        api_client,
+        manager_headers,
+        sample_case_id,
+        creditor_name="Recipient Furnisher Bank",
+        last_dispute_date=(today - timedelta(days=20)).isoformat(),
+    )
+    bureau_acct = api_client.get(
+        f"/api/v1/accounts/{bureau_account}", headers=manager_headers
+    ).json()
+    org_id = bureau_acct["organization_id"]
+    sent_at = datetime.now(UTC) - timedelta(days=20)
+
+    bureau_letter_id = uuid.uuid4()
+    furnisher_letter_id = uuid.uuid4()
+    for letter_id, account_id, recipient in (
+        (bureau_letter_id, bureau_account, "credit_bureau"),
+        (furnisher_letter_id, furnisher_account, "furnisher"),
+    ):
+        db_session.add(
+            DisputeLetter(
+                id=letter_id,
+                organization_id=uuid.UUID(org_id),
+                case_id=uuid.UUID(sample_case_id),
+                account_id=uuid.UUID(account_id),
+                recipient_type=recipient,
+                status=DisputeLetterStatus.SENT,
+                template_id="fcra_611",
+                subject=f"Dispute to {recipient}",
+                body="Body",
+                disputed_items=["late payment"],
+                requested_action="Delete the inaccurate tradeline.",
+                evidence_checklist=[],
+                compliance_notes=[],
+                generated_by="system",
+                generated_at=sent_at,
+                sent_at=sent_at,
+            )
+        )
+    await db_session.commit()
+
+    for account_id, letter_id, outcome in (
+        (bureau_account, bureau_letter_id, "deleted"),
+        (furnisher_account, furnisher_letter_id, "verified"),
+    ):
+        response = api_client.post(
+            f"/api/v1/accounts/{account_id}/dispute-responses",
+            headers=manager_headers,
+            json={
+                "outcome": outcome,
+                "response_method": "mail",
+                "response_date": (today - timedelta(days=5)).isoformat(),
+                "dispute_letter_id": str(letter_id),
+            },
+        )
+        assert response.status_code == 201, response.text
+
+    response = api_client.get(
+        "/api/v1/reporting/reinvestigation-outcomes",
+        headers=manager_headers,
+        params={"group_by": "recipient"},
+    )
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["filters"]["group_by"] == "recipient"
+    assert body["by_bureau"] == []
+    by_recipient = {entry["recipient"]: entry["analytics"] for entry in body["by_recipient"]}
+    assert set(by_recipient) == {"credit_bureau", "furnisher"}
+    assert by_recipient["credit_bureau"]["counts"]["deleted"] == 1
+    assert by_recipient["furnisher"]["counts"]["verified"] == 1
+    assert [entry["recipient"] for entry in body["by_recipient"]] == [
+        "credit_bureau",
+        "furnisher",
+    ]
+
+
 def test_reinvestigation_outcomes_rejects_invalid_group_by(
     api_client: TestClient,
     manager_headers: dict[str, str],
@@ -315,7 +410,7 @@ def test_reinvestigation_outcomes_rejects_invalid_group_by(
     response = api_client.get(
         "/api/v1/reporting/reinvestigation-outcomes",
         headers=manager_headers,
-        params={"group_by": "recipient"},
+        params={"group_by": "creditor"},
     )
     assert response.status_code == 422
 

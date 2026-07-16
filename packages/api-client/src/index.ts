@@ -100,6 +100,7 @@ export {
   type ReinvestigationOutcomeAnalyticsResponse,
   type ReinvestigationOutcomeBureauBreakdown,
   type ReinvestigationOutcomeFilters,
+  type ReinvestigationOutcomeRecipientBreakdown,
   type ReportingMvRefreshResult,
   type ReportingMvRefreshRun,
   type RevenueAnalytics,

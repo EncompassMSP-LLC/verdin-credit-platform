@@ -134,11 +134,12 @@ class OperationsReportingRepository:
         """Recorded dispute-response outcomes for an org, reduced for analytics.
 
         Each row is ``{"outcome": str, "days_to_response": int | None,
-        "bureau": str}``. ``days_to_response`` is the elapsed days from the
-        clock start (the linked sent letter's ``sent_at`` when present, else
-        the account's ``last_dispute_date``) to the response date
-        (``response_date`` when recorded, else ``recorded_at``). Read-only; no
-        live bureau contact.
+        "bureau": str, "recipient": str}``. ``days_to_response`` is the elapsed
+        days from the clock start (the linked sent letter's ``sent_at`` when
+        present, else the account's ``last_dispute_date``) to the response date
+        (``response_date`` when recorded, else ``recorded_at``). ``recipient``
+        is the linked dispute letter's ``recipient_type`` when present, else
+        ``"unknown"``. Read-only; no live bureau contact.
 
         Optional filters: ``bureau`` scopes to a single credit bureau (applied in
         SQL); ``start``/``end`` scope by response day inclusively (applied in
@@ -158,6 +159,7 @@ class OperationsReportingRepository:
                 DisputeLetter.sent_at,
                 Account.last_dispute_date,
                 Account.bureau,
+                DisputeLetter.recipient_type,
             )
             .join(Account, Account.id == DisputeResponse.account_id)
             .outerjoin(DisputeLetter, DisputeLetter.id == DisputeResponse.dispute_letter_id)
@@ -171,6 +173,7 @@ class OperationsReportingRepository:
             sent_at,
             last_dispute_date,
             account_bureau,
+            letter_recipient,
         ) in result.all():
             start_day = sent_at.date() if sent_at is not None else last_dispute_date
             response_day = response_date if response_date is not None else recorded_at.date()
@@ -185,11 +188,18 @@ class OperationsReportingRepository:
             bureau_value = (
                 account_bureau.value if hasattr(account_bureau, "value") else str(account_bureau)
             )
+            if letter_recipient is None:
+                recipient_value = "unknown"
+            elif hasattr(letter_recipient, "value"):
+                recipient_value = str(letter_recipient.value)
+            else:
+                recipient_value = str(letter_recipient) or "unknown"
             rows.append(
                 {
                     "outcome": outcome.value if hasattr(outcome, "value") else str(outcome),
                     "days_to_response": days_to_response,
                     "bureau": bureau_value,
+                    "recipient": recipient_value,
                 }
             )
         return rows

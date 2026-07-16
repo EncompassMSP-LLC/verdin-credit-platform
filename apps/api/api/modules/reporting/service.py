@@ -68,6 +68,7 @@ from api.modules.reporting.schemas import (
     ReinvestigationOutcomeAnalyticsResponse,
     ReinvestigationOutcomeBureauBreakdown,
     ReinvestigationOutcomeFilters,
+    ReinvestigationOutcomeRecipientBreakdown,
     ReportingMvRefreshResultResponse,
     ReportingMvRefreshRunListParams,
     ReportingMvRefreshRunResponse,
@@ -190,13 +191,16 @@ class ReportingService:
         recorded responses; the applied filters are echoed back. When
         ``group_by="bureau"``, ``by_bureau`` carries a per-bureau roll-up of the
         same analytics shape so operators can compare all bureaus in one call.
+        When ``group_by="recipient"``, ``by_recipient`` rolls up by the linked
+        dispute letter's recipient type (credit bureau vs furnisher); unlinked
+        responses are bucketed as ``unknown``.
         """
         self._require_read(user)
         organization_id = self._require_organization(user)
-        if group_by is not None and group_by != "bureau":
+        if group_by is not None and group_by not in {"bureau", "recipient"}:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="group_by must be 'bureau' or omitted",
+                detail="group_by must be 'bureau', 'recipient', or omitted",
             )
         raw = await self._reporting.get_reinvestigation_outcomes(
             organization_id, start=start, end=end, bureau=bureau
@@ -211,8 +215,11 @@ class ReportingService:
             ]
         )
         by_bureau: list[ReinvestigationOutcomeBureauBreakdown] = []
+        by_recipient: list[ReinvestigationOutcomeRecipientBreakdown] = []
         if group_by == "bureau":
             by_bureau = self._build_bureau_breakdown(raw)
+        elif group_by == "recipient":
+            by_recipient = self._build_recipient_breakdown(raw)
         return ReinvestigationOutcomeAnalyticsResponse(
             generated_at=datetime.now(UTC),
             filters=ReinvestigationOutcomeFilters(
@@ -223,6 +230,7 @@ class ReportingService:
             ),
             analytics=self._to_reinvestigation_analytics_schema(result),
             by_bureau=by_bureau,
+            by_recipient=by_recipient,
         )
 
     @staticmethod
@@ -266,6 +274,34 @@ class ReportingService:
             breakdown.append(
                 ReinvestigationOutcomeBureauBreakdown(
                     bureau=bureau_key,
+                    analytics=cls._to_reinvestigation_analytics_schema(result),
+                )
+            )
+        return breakdown
+
+    @classmethod
+    def _build_recipient_breakdown(
+        cls, raw: list[dict[str, object]]
+    ) -> list[ReinvestigationOutcomeRecipientBreakdown]:
+        """Group raw response rows by recipient and compute per-recipient analytics."""
+        by_recipient_rows: dict[str, list[ReinvestigationOutcomeRow]] = defaultdict(list)
+        for row in raw:
+            recipient_key = str(row.get("recipient") or "unknown")
+            raw_days = row.get("days_to_response")
+            days_to_response = raw_days if isinstance(raw_days, int) else None
+            by_recipient_rows[recipient_key].append(
+                ReinvestigationOutcomeRow(
+                    outcome=str(row["outcome"]),
+                    days_to_response=days_to_response,
+                )
+            )
+        order = {"credit_bureau": 0, "furnisher": 1, "unknown": 9}
+        breakdown: list[ReinvestigationOutcomeRecipientBreakdown] = []
+        for recipient_key in sorted(by_recipient_rows, key=lambda r: (order.get(r, 5), r)):
+            result = compute_reinvestigation_outcome_analytics(by_recipient_rows[recipient_key])
+            breakdown.append(
+                ReinvestigationOutcomeRecipientBreakdown(
+                    recipient=recipient_key,
                     analytics=cls._to_reinvestigation_analytics_schema(result),
                 )
             )

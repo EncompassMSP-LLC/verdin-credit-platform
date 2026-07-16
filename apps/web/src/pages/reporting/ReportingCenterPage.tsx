@@ -429,20 +429,21 @@ function ReinvestigationOutcomesPanel() {
   const [start, setStart] = useState('');
   const [end, setEnd] = useState('');
   const [bureau, setBureau] = useState('');
+  const [groupBy, setGroupBy] = useState<'bureau' | 'recipient'>('bureau');
 
   const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ['reporting-reinvestigation-outcomes', start, end, bureau],
+    queryKey: ['reporting-reinvestigation-outcomes', start, end, bureau, groupBy],
     queryFn: () =>
       getReinvestigationOutcomeAnalytics({
         start: start || undefined,
         end: end || undefined,
         bureau: bureau || undefined,
-        group_by: 'bureau',
+        group_by: groupBy,
       }),
   });
 
   const filterControls = (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
       <label className="text-xs font-medium text-gray-700">
         From (response date)
         <input
@@ -475,6 +476,17 @@ function ReinvestigationOutcomesPanel() {
               {option.label}
             </option>
           ))}
+        </select>
+      </label>
+      <label className="text-xs font-medium text-gray-700">
+        Break down by
+        <select
+          className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+          value={groupBy}
+          onChange={(event) => setGroupBy(event.target.value as 'bureau' | 'recipient')}
+        >
+          <option value="bureau">Bureau</option>
+          <option value="recipient">Recipient</option>
         </select>
       </label>
     </div>
@@ -608,6 +620,47 @@ function ReinvestigationOutcomesPanel() {
                       <tr key={item.bureau} className="border-b border-gray-100">
                         <td className="py-2 pr-4 font-medium text-gray-900">
                           {formatLabel(item.bureau)}
+                        </td>
+                        <td className="py-2 pr-4">{item.analytics.total_responses}</td>
+                        <td className="py-2 pr-4">{formatPercent(item.analytics.deletion_rate)}</td>
+                        <td className="py-2 pr-4">
+                          {formatPercent(item.analytics.favorable_rate)}
+                        </td>
+                        <td className="py-2 pr-4">
+                          {formatPercent(item.analytics.verification_rate)}
+                        </td>
+                        <td className="py-2">
+                          {item.analytics.avg_days_to_response === null
+                            ? '—'
+                            : String(item.analytics.avg_days_to_response)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+          ) : null}
+
+          {data.by_recipient.length > 0 ? (
+            <Card title="Per-recipient breakdown">
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-left text-sm">
+                  <thead>
+                    <tr className="border-b border-gray-200 text-xs uppercase tracking-wide text-gray-500">
+                      <th className="py-2 pr-4 font-medium">Recipient</th>
+                      <th className="py-2 pr-4 font-medium">Responses</th>
+                      <th className="py-2 pr-4 font-medium">Deletion</th>
+                      <th className="py-2 pr-4 font-medium">Favorable</th>
+                      <th className="py-2 pr-4 font-medium">Verification</th>
+                      <th className="py-2 font-medium">Avg days</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.by_recipient.map((item) => (
+                      <tr key={item.recipient} className="border-b border-gray-100">
+                        <td className="py-2 pr-4 font-medium text-gray-900">
+                          {formatLabel(item.recipient)}
                         </td>
                         <td className="py-2 pr-4">{item.analytics.total_responses}</td>
                         <td className="py-2 pr-4">{formatPercent(item.analytics.deletion_rate)}</td>

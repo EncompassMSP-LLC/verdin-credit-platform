@@ -63,11 +63,19 @@ class ReinvestigationOutcomeBureauBreakdown(BaseSchema):
     analytics: ReinvestigationOutcomeAnalytics
 
 
+class ReinvestigationOutcomeRecipientBreakdown(BaseSchema):
+    """Per-recipient (bureau vs furnisher) roll-up within outcome analytics."""
+
+    recipient: str
+    analytics: ReinvestigationOutcomeAnalytics
+
+
 class ReinvestigationOutcomeAnalyticsResponse(BaseSchema):
     generated_at: datetime
     filters: ReinvestigationOutcomeFilters
     analytics: ReinvestigationOutcomeAnalytics
     by_bureau: list[ReinvestigationOutcomeBureauBreakdown] = []
+    by_recipient: list[ReinvestigationOutcomeRecipientBreakdown] = []
 
 
 class BureauPerformanceItem(BaseSchema):
