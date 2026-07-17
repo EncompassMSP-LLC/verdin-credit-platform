@@ -102,6 +102,9 @@ async def export_reinvestigation_outcome_benchmarks_reporting(
         description="Recent comparison window; omit to use org default (must be <= baseline)",
     ),
     bureau: AccountBureau | None = Query(None, description="Filter to a single credit bureau"),
+    recipient: str | None = Query(
+        None, description="Filter to credit_bureau or furnisher (also selects window override)"
+    ),
     group_by: str | None = Query(
         None, description="Optional roll-up dimension; 'bureau' or 'recipient'"
     ),
@@ -115,6 +118,7 @@ async def export_reinvestigation_outcome_benchmarks_reporting(
         baseline_days=baseline_days,
         recent_days=recent_days,
         bureau=bureau,
+        recipient=recipient,
         group_by=group_by,
     )
     safe_name = sanitize_content_disposition_filename(file_name)
@@ -140,6 +144,9 @@ async def get_reinvestigation_outcome_benchmarks_reporting(
         description="Recent comparison window; omit to use org default (must be <= baseline)",
     ),
     bureau: AccountBureau | None = Query(None, description="Filter to a single credit bureau"),
+    recipient: str | None = Query(
+        None, description="Filter to credit_bureau or furnisher (also selects window override)"
+    ),
     group_by: str | None = Query(
         None, description="Optional roll-up dimension; 'bureau' or 'recipient'"
     ),
@@ -152,6 +159,7 @@ async def get_reinvestigation_outcome_benchmarks_reporting(
         baseline_days=baseline_days,
         recent_days=recent_days,
         bureau=bureau,
+        recipient=recipient,
         group_by=group_by,
     )
 

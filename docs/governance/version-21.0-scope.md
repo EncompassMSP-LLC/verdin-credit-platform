@@ -15,7 +15,7 @@ Everything remains **staff-mediated and advisory**. The platform still never pol
 
 | Epic | Theme                                      | 21.0 target | Summary                                                                                        |
 | ---- | ------------------------------------------ | ----------- | ---------------------------------------------------------------------------------------------- |
-| 1    | Per-recipient benchmark window defaults    | Planned     | Optional credit_bureau / furnisher window overrides on dispute settings; fall back to org pair |
+| 1    | Per-recipient benchmark window defaults    | Released    | Optional credit_bureau / furnisher window overrides on dispute settings; fall back to org pair |
 | 2    | Ingestion audit bureau/status list filters | Planned     | Optional `bureau_target` + `status` on Compliance Center ingestion run list                    |
 | 3    | Capability matrix / governance sign-off    | Planned     | Scope, checklist, matrix rows, release notes                                                   |
 
@@ -38,7 +38,7 @@ All v20.0.0 APIs, UI, and `@verdin/api-client` functions remain production capab
 
 ## Partial capability limits (21.0 targets)
 
-### Per-recipient benchmark window defaults (Planned)
+### Per-recipient benchmark window defaults (Released)
 
 **Included:** Optional per-recipient `baseline_days` / `recent_days` overrides (`credit_bureau` / `furnisher`) on organization dispute settings; resolve when Reporting requests `group_by=recipient` or filters by recipient context; Org Admin UI to edit overrides; fall back to org-wide pair then platform defaults (90/30).
 

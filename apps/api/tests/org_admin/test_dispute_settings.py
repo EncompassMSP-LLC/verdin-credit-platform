@@ -20,6 +20,7 @@ def test_get_dispute_settings_defaults(
     assert body["reinvestigation_benchmark_baseline_days"] == 90
     assert body["reinvestigation_benchmark_recent_days"] == 30
     assert body["reinvestigation_benchmark_bureau_windows"] == {}
+    assert body["reinvestigation_benchmark_recipient_windows"] == {}
     assert body["platform_default_baseline_days"] == 90
     assert body["platform_default_recent_days"] == 30
     assert body["updated_at"] is None
@@ -117,6 +118,95 @@ def test_patch_dispute_settings_persists_per_bureau_windows(
     )
     assert experian.status_code == 200, experian.text
     assert experian.json()["baseline_period"]["window_days"] == 90
+
+
+def test_patch_dispute_settings_persists_per_recipient_windows(
+    api_client: TestClient,
+    admin_headers: dict[str, str],
+    enterprise_enabled: None,
+) -> None:
+    patch = api_client.patch(
+        "/api/v1/org-admin/dispute-settings",
+        headers=admin_headers,
+        json={
+            "reinvestigation_benchmark_baseline_days": 90,
+            "reinvestigation_benchmark_recent_days": 30,
+            "reinvestigation_benchmark_recipient_windows": {
+                "credit_bureau": {"baseline_days": 150, "recent_days": 45},
+            },
+        },
+    )
+    assert patch.status_code == 200, patch.text
+    body = patch.json()
+    assert body["reinvestigation_benchmark_recipient_windows"]["credit_bureau"] == {
+        "baseline_days": 150,
+        "recent_days": 45,
+    }
+
+    org_wide = api_client.get(
+        "/api/v1/reporting/reinvestigation-outcomes/benchmarks",
+        headers=admin_headers,
+    )
+    assert org_wide.status_code == 200, org_wide.text
+    assert org_wide.json()["baseline_period"]["window_days"] == 90
+
+    credit_bureau = api_client.get(
+        "/api/v1/reporting/reinvestigation-outcomes/benchmarks",
+        headers=admin_headers,
+        params={"recipient": "credit_bureau"},
+    )
+    assert credit_bureau.status_code == 200, credit_bureau.text
+    assert credit_bureau.json()["baseline_period"]["window_days"] == 150
+    assert credit_bureau.json()["recent_period"]["window_days"] == 45
+    assert credit_bureau.json()["recipient"] == "credit_bureau"
+
+    furnisher = api_client.get(
+        "/api/v1/reporting/reinvestigation-outcomes/benchmarks",
+        headers=admin_headers,
+        params={"recipient": "furnisher"},
+    )
+    assert furnisher.status_code == 200, furnisher.text
+    assert furnisher.json()["baseline_period"]["window_days"] == 90
+
+
+def test_patch_dispute_settings_clears_per_recipient_window(
+    api_client: TestClient,
+    admin_headers: dict[str, str],
+    enterprise_enabled: None,
+) -> None:
+    api_client.patch(
+        "/api/v1/org-admin/dispute-settings",
+        headers=admin_headers,
+        json={
+            "reinvestigation_benchmark_recipient_windows": {
+                "furnisher": {"baseline_days": 120, "recent_days": 40},
+            },
+        },
+    )
+    clear = api_client.patch(
+        "/api/v1/org-admin/dispute-settings",
+        headers=admin_headers,
+        json={"reinvestigation_benchmark_recipient_windows": {"furnisher": None}},
+    )
+    assert clear.status_code == 200, clear.text
+    assert clear.json()["reinvestigation_benchmark_recipient_windows"] == {}
+
+
+def test_patch_dispute_settings_rejects_invalid_recipient_window_key(
+    api_client: TestClient,
+    admin_headers: dict[str, str],
+    enterprise_enabled: None,
+) -> None:
+    response = api_client.patch(
+        "/api/v1/org-admin/dispute-settings",
+        headers=admin_headers,
+        json={
+            "reinvestigation_benchmark_recipient_windows": {
+                "unknown": {"baseline_days": 90, "recent_days": 30},
+            },
+        },
+    )
+    assert response.status_code == 422
 
 
 def test_patch_dispute_settings_clears_per_bureau_window(

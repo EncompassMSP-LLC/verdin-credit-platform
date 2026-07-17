@@ -22,6 +22,7 @@ MAX_REINVESTIGATION_BENCHMARK_BASELINE_DAYS = 365
 MIN_REINVESTIGATION_BENCHMARK_RECENT_DAYS = 1
 
 BENCHMARK_WINDOW_BUREAUS = frozenset({"equifax", "experian", "transunion"})
+BENCHMARK_WINDOW_RECIPIENTS = frozenset({"credit_bureau", "furnisher"})
 
 
 class OrganizationDisputeSettings(Base, TimestampMixin, AuditMixin):
@@ -55,6 +56,11 @@ class OrganizationDisputeSettings(Base, TimestampMixin, AuditMixin):
         default=DEFAULT_REINVESTIGATION_BENCHMARK_RECENT_DAYS,
     )
     reinvestigation_benchmark_bureau_windows: Mapped[dict[str, Any]] = mapped_column(
+        JSONB,
+        nullable=False,
+        default=dict,
+    )
+    reinvestigation_benchmark_recipient_windows: Mapped[dict[str, Any]] = mapped_column(
         JSONB,
         nullable=False,
         default=dict,

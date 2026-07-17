@@ -73,6 +73,8 @@ def build_reinvestigation_benchmark_csv(
             benchmarks.scope,
             "bureau_filter",
             benchmarks.bureau or "",
+            "recipient_filter",
+            benchmarks.recipient or "",
             "group_by",
             benchmarks.group_by or "",
             "baseline_start",

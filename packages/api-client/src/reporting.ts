@@ -186,6 +186,7 @@ export interface ReinvestigationOutcomeBenchmarksResponse {
   generated_at: string;
   scope: 'organization';
   bureau: string | null;
+  recipient: string | null;
   group_by: string | null;
   baseline_period: ReinvestigationOutcomeBenchmarkPeriod;
   baseline: ReinvestigationOutcomeAnalytics;
@@ -214,6 +215,7 @@ export interface ReinvestigationOutcomeBenchmarksParams {
   baseline_days?: number;
   recent_days?: number;
   bureau?: string;
+  recipient?: 'credit_bureau' | 'furnisher';
   group_by?: 'bureau' | 'recipient';
 }
 
@@ -224,6 +226,7 @@ export function getReinvestigationOutcomeBenchmarks(
   if (params.baseline_days != null) search.set('baseline_days', String(params.baseline_days));
   if (params.recent_days != null) search.set('recent_days', String(params.recent_days));
   if (params.bureau) search.set('bureau', params.bureau);
+  if (params.recipient) search.set('recipient', params.recipient);
   if (params.group_by) search.set('group_by', params.group_by);
   const query = search.toString();
   return request<ReinvestigationOutcomeBenchmarksResponse>(
@@ -244,6 +247,7 @@ export async function downloadReinvestigationOutcomeBenchmarksCsv(
   if (params.baseline_days != null) search.set('baseline_days', String(params.baseline_days));
   if (params.recent_days != null) search.set('recent_days', String(params.recent_days));
   if (params.bureau) search.set('bureau', params.bureau);
+  if (params.recipient) search.set('recipient', params.recipient);
   if (params.group_by) search.set('group_by', params.group_by);
   const url = `${getApiBaseUrl()}${apiPath(
     `/reporting/reinvestigation-outcomes/benchmarks/export?${search.toString()}`,

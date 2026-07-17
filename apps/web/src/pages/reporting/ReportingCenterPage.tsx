@@ -710,6 +710,7 @@ function ReinvestigationBenchmarksPanel() {
   const [baselineOverride, setBaselineOverride] = useState<string | null>(null);
   const [recentOverride, setRecentOverride] = useState<string | null>(null);
   const [bureau, setBureau] = useState('');
+  const [recipient, setRecipient] = useState('');
   const [groupBy, setGroupBy] = useState<'bureau' | 'recipient'>('bureau');
   const [isExporting, setIsExporting] = useState(false);
 
@@ -719,6 +720,7 @@ function ReinvestigationBenchmarksPanel() {
     recent_days:
       recentOverride != null ? Number.parseInt(recentOverride, 10) || undefined : undefined,
     bureau: bureau || undefined,
+    recipient: (recipient || undefined) as 'credit_bureau' | 'furnisher' | undefined,
     group_by: groupBy,
   };
 
@@ -728,6 +730,7 @@ function ReinvestigationBenchmarksPanel() {
       baselineOverride,
       recentOverride,
       bureau,
+      recipient,
       groupBy,
     ],
     queryFn: () => getReinvestigationOutcomeBenchmarks(benchmarkParams),
@@ -753,7 +756,7 @@ function ReinvestigationBenchmarksPanel() {
   const displayRecent = recentOverride ?? (data ? String(data.recent_period.window_days) : '');
 
   const filterControls = (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
       <label className="text-xs font-medium text-gray-700">
         Baseline window (days)
         <input
@@ -790,6 +793,18 @@ function ReinvestigationBenchmarksPanel() {
               {option.label}
             </option>
           ))}
+        </select>
+      </label>
+      <label className="text-xs font-medium text-gray-700">
+        Recipient
+        <select
+          className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+          value={recipient}
+          onChange={(event) => setRecipient(event.target.value)}
+        >
+          <option value="">All recipients</option>
+          <option value="credit_bureau">Credit bureau</option>
+          <option value="furnisher">Furnisher</option>
         </select>
       </label>
       <label className="text-xs font-medium text-gray-700">
