@@ -13,6 +13,14 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## E2E — Poll awaiting-response before CRA outcome (2026-07-17)
+
+**Decision:** After `dispute-awaiting-response`, poll GET account until `dispute_status=awaiting_response` before `dispute-response-received` (same pattern as post-send).
+
+**Reason:** Live ASGI can return the awaiting-response body before `get_db` commits; the next POST then reads stale `dispute_sent` and 422s. Artifact timing showed ~5ms between success and failure.
+
+**Follow-up:** Consider committing the session before the response body is finalized for mutation endpoints (larger change).
+
 ## Compliance intelligence — Version 19.0 sign-off (Phase 18)
 
 **Decision:** Close Phase 18 as shipped `v19.0.0` after per-bureau window defaults and benchmarks `group_by=bureau`. Keep live bureau polling, automated filing, unsupervised escalation, litigation e-filing, and cross-tenant benchmarks deferred to 20.0+ or never.
