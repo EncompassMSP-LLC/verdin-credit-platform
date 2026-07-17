@@ -566,6 +566,7 @@ export {
   type OrganizationAdminSummary,
   type OrganizationDisputeSettings,
   type OrganizationDisputeSettingsUpdateInput,
+  type BureauBenchmarkWindow,
 } from './orgAdmin';
 
 export {

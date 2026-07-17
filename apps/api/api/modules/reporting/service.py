@@ -251,11 +251,14 @@ class ReportingService:
         then returns advisory ``rate_deltas`` (recent minus baseline). Scoped
         strictly to the caller's organization — no cross-tenant data and no
         live bureau contact. When window args are omitted, org dispute-settings
-        defaults apply (platform 90/30 when unset).
+        defaults apply (per-bureau override when ``bureau`` is set, else org-wide
+        pair, else platform 90/30).
         """
         self._require_read(user)
         organization_id = self._require_organization(user)
-        org_baseline, org_recent = await self._resolve_benchmark_window_defaults(organization_id)
+        org_baseline, org_recent = await self._resolve_benchmark_window_defaults(
+            organization_id, bureau=bureau
+        )
         resolved_baseline = org_baseline if baseline_days is None else baseline_days
         resolved_recent = org_recent if recent_days is None else recent_days
         if resolved_baseline < 7 or resolved_baseline > 365:
@@ -326,9 +329,13 @@ class ReportingService:
         )
 
     async def _resolve_benchmark_window_defaults(
-        self, organization_id: uuid.UUID
+        self,
+        organization_id: uuid.UUID,
+        *,
+        bureau: AccountBureau | None = None,
     ) -> tuple[int, int]:
         from api.modules.org_admin.dispute_settings_models import (
+            BENCHMARK_WINDOW_BUREAUS,
             DEFAULT_REINVESTIGATION_BENCHMARK_BASELINE_DAYS,
             DEFAULT_REINVESTIGATION_BENCHMARK_RECENT_DAYS,
         )
@@ -349,10 +356,17 @@ class ReportingService:
                 DEFAULT_REINVESTIGATION_BENCHMARK_BASELINE_DAYS,
                 DEFAULT_REINVESTIGATION_BENCHMARK_RECENT_DAYS,
             )
-        return (
-            settings.reinvestigation_benchmark_baseline_days,
-            settings.reinvestigation_benchmark_recent_days,
-        )
+        org_baseline = settings.reinvestigation_benchmark_baseline_days
+        org_recent = settings.reinvestigation_benchmark_recent_days
+        if bureau is not None and bureau.value in BENCHMARK_WINDOW_BUREAUS:
+            override = (settings.reinvestigation_benchmark_bureau_windows or {}).get(bureau.value)
+            if (
+                isinstance(override, dict)
+                and "baseline_days" in override
+                and "recent_days" in override
+            ):
+                return int(override["baseline_days"]), int(override["recent_days"])
+        return org_baseline, org_recent
 
     @staticmethod
     def _to_reinvestigation_analytics_schema(
