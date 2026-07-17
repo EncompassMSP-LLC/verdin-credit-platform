@@ -705,6 +705,17 @@ Scope: [version-20.0-scope.md](version-20.0-scope.md) · Checklist: [version-20.
 
 ---
 
+## Version 21.0 — Reinvestigation Operations Filters (in progress — 🚧)
+
+Scope: [version-21.0-scope.md](version-21.0-scope.md) · Checklist: [version-21.0-completion-checklist.md](../development/version-21.0-completion-checklist.md)
+
+| Capability                                 | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                      |
+| ------------------------------------------ | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | -------------------------------------------------------------------------- |
+| Per-recipient benchmark window defaults    | 21.0    | Planned | —       | —        | —   | —   | —     | Org Admin    | Optional credit_bureau / furnisher window overrides; fall back to org pair |
+| Ingestion audit bureau/status list filters | 21.0    | Planned | —       | —        | —   | —   | —     | Compliance   | Optional bureau_target + status on Compliance Center ingestion run list    |
+
+---
+
 ## Related documents
 
 - [Governance hub](README.md) — lifecycle and build order

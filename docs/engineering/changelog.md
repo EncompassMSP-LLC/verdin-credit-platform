@@ -13,6 +13,14 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — Version 21.0 scope (Phase 20)
+
+**Decision:** Scope Version 21.0 as Reinvestigation Operations Filters — per-recipient benchmark window defaults and ingestion audit bureau/status list filters. Keep live bureau polling, automated filing, unsupervised escalation, litigation e-filing, and cross-tenant benchmarks deferred to 22.0+ or never.
+
+**Reason:** After 20.0 recipient breakdown and CSV export, CRA vs furnisher window configuration and ingestion list filter parity are the next non-blocked polish gaps.
+
+**Follow-up work:** Slice 2 — per-recipient window defaults; Slice 3 — ingestion list filters; Slice 4 — sign-off.
+
 ## Compliance intelligence — Version 20.0 sign-off (Phase 19)
 
 **Decision:** Close Phase 19 as shipped `v20.0.0` after benchmarks `group_by=recipient` and aggregate rates CSV export. Keep live bureau polling, automated filing, unsupervised escalation, litigation e-filing, and cross-tenant benchmarks deferred to 21.0+ or never.
