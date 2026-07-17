@@ -165,6 +165,20 @@ def run_dispute_letter_lifecycle(
     assert awaiting["dispute_status"] == "awaiting_response"
     assert awaiting["investigation_status"] == "pending"
 
+    # Poll: live ASGI can return the awaiting-response body before get_db commits.
+    account_awaiting_response = poll_until(
+        lambda: http.get(f"/api/v1/accounts/{account_id}", headers=headers),
+        lambda response: (
+            response.status_code == 200
+            and response.json().get("dispute_status") == "awaiting_response"
+            and response.json().get("investigation_status") == "pending"
+        ),
+        description="account dispute_status == awaiting_response after mark awaiting",
+        timeout=15.0,
+        interval=0.25,
+    )
+    artifacts.record(f"{label}_account_after_awaiting", account_awaiting_response.json())
+
     outcome = expect_ok(
         http.post(
             f"/api/v1/accounts/{account_id}/dispute-response-received",
