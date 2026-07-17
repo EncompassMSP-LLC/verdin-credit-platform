@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
+  downloadReinvestigationOutcomeBenchmarksCsv,
   getBureauPerformanceReporting,
   getEnterpriseReportingStatus,
   getOperationsReporting,
@@ -710,6 +711,16 @@ function ReinvestigationBenchmarksPanel() {
   const [recentOverride, setRecentOverride] = useState<string | null>(null);
   const [bureau, setBureau] = useState('');
   const [groupBy, setGroupBy] = useState<'bureau' | 'recipient'>('bureau');
+  const [isExporting, setIsExporting] = useState(false);
+
+  const benchmarkParams = {
+    baseline_days:
+      baselineOverride != null ? Number.parseInt(baselineOverride, 10) || undefined : undefined,
+    recent_days:
+      recentOverride != null ? Number.parseInt(recentOverride, 10) || undefined : undefined,
+    bureau: bureau || undefined,
+    group_by: groupBy,
+  };
 
   const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
     queryKey: [
@@ -719,16 +730,23 @@ function ReinvestigationBenchmarksPanel() {
       bureau,
       groupBy,
     ],
-    queryFn: () =>
-      getReinvestigationOutcomeBenchmarks({
-        baseline_days:
-          baselineOverride != null ? Number.parseInt(baselineOverride, 10) || undefined : undefined,
-        recent_days:
-          recentOverride != null ? Number.parseInt(recentOverride, 10) || undefined : undefined,
-        bureau: bureau || undefined,
-        group_by: groupBy,
-      }),
+    queryFn: () => getReinvestigationOutcomeBenchmarks(benchmarkParams),
   });
+
+  async function handleExportCsv() {
+    setIsExporting(true);
+    try {
+      const { blob, filename } = await downloadReinvestigationOutcomeBenchmarksCsv(benchmarkParams);
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = filename;
+      anchor.click();
+      URL.revokeObjectURL(url);
+    } finally {
+      setIsExporting(false);
+    }
+  }
 
   const displayBaseline =
     baselineOverride ?? (data ? String(data.baseline_period.window_days) : '');
@@ -831,9 +849,14 @@ function ReinvestigationBenchmarksPanel() {
             d) · Recent {recent_period.start} → {recent_period.end} ({recent_period.window_days}d)
           </p>
         </div>
-        <Button variant="secondary" onClick={() => refetch()} disabled={isFetching}>
-          {isFetching ? 'Refreshing…' : 'Refresh'}
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="secondary" onClick={() => void handleExportCsv()} disabled={isExporting}>
+            {isExporting ? 'Exporting…' : 'Download CSV'}
+          </Button>
+          <Button variant="secondary" onClick={() => refetch()} disabled={isFetching}>
+            {isFetching ? 'Refreshing…' : 'Refresh'}
+          </Button>
+        </div>
       </div>
 
       <Card title="Advisory rate deltas (recent − baseline)">

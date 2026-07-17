@@ -2,12 +2,15 @@
 
 import uuid
 from datetime import date
+from typing import Literal
 
 from fastapi import APIRouter, Depends, Query
+from fastapi.responses import Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.core.pagination import PaginatedResponse
 from api.database.session import get_db
+from api.modules.accounts.dispute_letter_export import sanitize_content_disposition_filename
 from api.modules.accounts.models import AccountBureau
 from api.modules.auth.dependencies import get_current_user
 from api.modules.auth.models import User
@@ -84,6 +87,42 @@ async def get_team_productivity_reporting(
     service: ReportingService = Depends(get_reporting_service),
 ) -> TeamProductivityReportingResponse:
     return await service.get_team_productivity(current_user)
+
+
+@router.get("/reinvestigation-outcomes/benchmarks/export")
+async def export_reinvestigation_outcome_benchmarks_reporting(
+    format: Literal["csv"] = Query(..., alias="format", description="Export format; csv only"),
+    baseline_days: int | None = Query(
+        None, ge=7, le=365, description="Trailing baseline window; omit to use org default"
+    ),
+    recent_days: int | None = Query(
+        None,
+        ge=1,
+        le=365,
+        description="Recent comparison window; omit to use org default (must be <= baseline)",
+    ),
+    bureau: AccountBureau | None = Query(None, description="Filter to a single credit bureau"),
+    group_by: str | None = Query(
+        None, description="Optional roll-up dimension; 'bureau' or 'recipient'"
+    ),
+    current_user: User = Depends(get_current_user),
+    service: ReportingService = Depends(get_reporting_service),
+) -> Response:
+    """Download org-internal benchmark rates as CSV (counts/rates only; no PII)."""
+    content, file_name, media_type = await service.export_reinvestigation_outcome_benchmarks(
+        current_user,
+        export_format=format,
+        baseline_days=baseline_days,
+        recent_days=recent_days,
+        bureau=bureau,
+        group_by=group_by,
+    )
+    safe_name = sanitize_content_disposition_filename(file_name)
+    return Response(
+        content=content,
+        media_type=media_type,
+        headers={"Content-Disposition": f'attachment; filename="{safe_name}"'},
+    )
 
 
 @router.get(

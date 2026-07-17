@@ -54,6 +54,7 @@ export {
   getPredictiveOutcomesReporting,
   getReinvestigationOutcomeAnalytics,
   getReinvestigationOutcomeBenchmarks,
+  downloadReinvestigationOutcomeBenchmarksCsv,
   getRevenueAnalyticsReporting,
   getTeamProductivityReporting,
   getUnredactedCrossOrgBenchmarkExportStatus,

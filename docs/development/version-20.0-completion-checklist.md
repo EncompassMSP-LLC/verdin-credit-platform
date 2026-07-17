@@ -11,7 +11,7 @@ Scope: [`docs/governance/version-20.0-scope.md`](../governance/version-20.0-scop
 ## Exit criteria for "20.0 done"
 
 - [x] Outcome benchmarks API/UI expose a per-recipient breakdown in one call
-- [ ] Staff can download an aggregate rates CSV (no PII) from Outcome benchmarks
+- [x] Staff can download an aggregate rates CSV (no PII) from Outcome benchmarks
 - [ ] Capability matrix + API reference updated
 - [ ] Deferred items explicitly documented
 - [ ] `docs/release-notes/v20.0.0.md` + tag `v20.0.0`
@@ -24,7 +24,7 @@ Scope: [`docs/governance/version-20.0-scope.md`](../governance/version-20.0-scop
 | ----- | ---------------------------------------------- | ---------- | ------ |
 | 1     | 20.0 scope + completion checklist              | Kickoff    | ✅     |
 | 2     | Outcome benchmarks per-recipient breakdown     | Reporting  | ✅     |
-| 3     | Org-internal benchmarks aggregate rates export | Reporting  | ☐      |
+| 3     | Org-internal benchmarks aggregate rates export | Reporting  | ✅     |
 | 4     | Capability matrix 20.0 sign-off                | Governance | ☐      |
 
 Slice 2 adds `group_by=recipient` parity with outcome analytics on the benchmarks read model. Slice 3 adds an operator-gated CSV of aggregate rates (windows + org/bureau/recipient counts/rates; no client/account IDs). Live polling, automated filing, and cross-tenant benchmarks stay out of scope.

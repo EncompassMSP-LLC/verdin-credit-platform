@@ -342,6 +342,42 @@ class ReportingService:
             by_recipient=by_recipient,
         )
 
+    async def export_reinvestigation_outcome_benchmarks(
+        self,
+        user: User,
+        *,
+        export_format: str,
+        baseline_days: int | None = None,
+        recent_days: int | None = None,
+        bureau: AccountBureau | None = None,
+        group_by: str | None = None,
+    ) -> tuple[bytes, str, str]:
+        """Export org-internal benchmark rates as CSV (aggregate counts/rates only; no PII)."""
+        if export_format != "csv":
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="format must be 'csv'",
+            )
+        from api.modules.reporting.reinvestigation_benchmark_export import (
+            build_reinvestigation_benchmark_csv,
+            export_filename,
+            export_media_type,
+        )
+
+        benchmarks = await self.get_reinvestigation_outcome_benchmarks(
+            user,
+            baseline_days=baseline_days,
+            recent_days=recent_days,
+            bureau=bureau,
+            group_by=group_by,
+        )
+        csv_text = build_reinvestigation_benchmark_csv(benchmarks)
+        return (
+            csv_text.encode("utf-8"),
+            export_filename(),
+            export_media_type("csv"),
+        )
+
     @classmethod
     def _rate_deltas(
         cls,
