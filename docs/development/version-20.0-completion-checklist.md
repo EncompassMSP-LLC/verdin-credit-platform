@@ -10,7 +10,7 @@ Scope: [`docs/governance/version-20.0-scope.md`](../governance/version-20.0-scop
 
 ## Exit criteria for "20.0 done"
 
-- [ ] Outcome benchmarks API/UI expose a per-recipient breakdown in one call
+- [x] Outcome benchmarks API/UI expose a per-recipient breakdown in one call
 - [ ] Staff can download an aggregate rates CSV (no PII) from Outcome benchmarks
 - [ ] Capability matrix + API reference updated
 - [ ] Deferred items explicitly documented
@@ -23,7 +23,7 @@ Scope: [`docs/governance/version-20.0-scope.md`](../governance/version-20.0-scop
 | Order | Slice                                          | Epic       | Status |
 | ----- | ---------------------------------------------- | ---------- | ------ |
 | 1     | 20.0 scope + completion checklist              | Kickoff    | ✅     |
-| 2     | Outcome benchmarks per-recipient breakdown     | Reporting  | ☐      |
+| 2     | Outcome benchmarks per-recipient breakdown     | Reporting  | ✅     |
 | 3     | Org-internal benchmarks aggregate rates export | Reporting  | ☐      |
 | 4     | Capability matrix 20.0 sign-off                | Governance | ☐      |
 

@@ -105,6 +105,15 @@ class ReinvestigationOutcomeBenchmarkBureauBreakdown(BaseSchema):
     rate_deltas: ReinvestigationOutcomeRateDeltas
 
 
+class ReinvestigationOutcomeBenchmarkRecipientBreakdown(BaseSchema):
+    """Per-recipient baseline/recent roll-up within an org-internal benchmarks response."""
+
+    recipient: str
+    baseline: ReinvestigationOutcomeAnalytics
+    recent: ReinvestigationOutcomeAnalytics
+    rate_deltas: ReinvestigationOutcomeRateDeltas
+
+
 class ReinvestigationOutcomeBenchmarksResponse(BaseSchema):
     """Org-scoped historical baselines for reinvestigation outcomes (no cross-tenant data)."""
 
@@ -118,6 +127,7 @@ class ReinvestigationOutcomeBenchmarksResponse(BaseSchema):
     recent: ReinvestigationOutcomeAnalytics
     rate_deltas: ReinvestigationOutcomeRateDeltas
     by_bureau: list[ReinvestigationOutcomeBenchmarkBureauBreakdown] = []
+    by_recipient: list[ReinvestigationOutcomeBenchmarkRecipientBreakdown] = []
 
 
 class BureauPerformanceItem(BaseSchema):

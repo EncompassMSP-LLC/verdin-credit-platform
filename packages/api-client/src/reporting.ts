@@ -193,6 +193,7 @@ export interface ReinvestigationOutcomeBenchmarksResponse {
   recent: ReinvestigationOutcomeAnalytics;
   rate_deltas: ReinvestigationOutcomeRateDeltas;
   by_bureau: ReinvestigationOutcomeBenchmarkBureauBreakdown[];
+  by_recipient: ReinvestigationOutcomeBenchmarkRecipientBreakdown[];
 }
 
 export interface ReinvestigationOutcomeBenchmarkBureauBreakdown {
@@ -202,11 +203,18 @@ export interface ReinvestigationOutcomeBenchmarkBureauBreakdown {
   rate_deltas: ReinvestigationOutcomeRateDeltas;
 }
 
+export interface ReinvestigationOutcomeBenchmarkRecipientBreakdown {
+  recipient: string;
+  baseline: ReinvestigationOutcomeAnalytics;
+  recent: ReinvestigationOutcomeAnalytics;
+  rate_deltas: ReinvestigationOutcomeRateDeltas;
+}
+
 export interface ReinvestigationOutcomeBenchmarksParams {
   baseline_days?: number;
   recent_days?: number;
   bureau?: string;
-  group_by?: 'bureau';
+  group_by?: 'bureau' | 'recipient';
 }
 
 export function getReinvestigationOutcomeBenchmarks(

@@ -699,7 +699,7 @@ Scope: [version-20.0-scope.md](version-20.0-scope.md) · Checklist: [version-20.
 
 | Capability                                     | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                              |
 | ---------------------------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ---------------------------------------------------------------------------------- |
-| Outcome benchmarks per-recipient breakdown     | 20.0    | Planned | —       | —        | —   | —   | —     | Reporting    | `group_by=recipient` on benchmarks API + Reporting Center Bureau/Recipient control |
+| Outcome benchmarks per-recipient breakdown     | 20.0    | ✅      | ✅      | ✅       | ✅  | —   | ✅    | Reporting    | `group_by=recipient` on benchmarks API + Reporting Center Bureau/Recipient control |
 | Org-internal benchmarks aggregate rates export | 20.0    | Planned | —       | —        | —   | —   | —     | Reporting    | Operator-gated CSV of windows + rates; counts/rates only; no client/account PII    |
 
 ---
