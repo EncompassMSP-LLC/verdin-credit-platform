@@ -9,6 +9,7 @@ from pydantic import Field
 from api.core.responses import BaseSchema
 from api.modules.billing.schemas import OrganizationBillingSummary
 from api.modules.org_admin.dispute_settings_models import (
+    BENCHMARK_WINDOW_BUREAUS,
     DEFAULT_CROSS_BUREAU_BALANCE_TOLERANCE,
     DEFAULT_REINVESTIGATION_BENCHMARK_BASELINE_DAYS,
     DEFAULT_REINVESTIGATION_BENCHMARK_RECENT_DAYS,
@@ -44,12 +45,26 @@ class OrganizationAdminSummary(BaseSchema):
     billing: OrganizationBillingSummary | None = None
 
 
+class BureauBenchmarkWindow(BaseSchema):
+    baseline_days: int = Field(
+        ge=MIN_REINVESTIGATION_BENCHMARK_BASELINE_DAYS,
+        le=MAX_REINVESTIGATION_BENCHMARK_BASELINE_DAYS,
+    )
+    recent_days: int = Field(
+        ge=MIN_REINVESTIGATION_BENCHMARK_RECENT_DAYS,
+        le=MAX_REINVESTIGATION_BENCHMARK_BASELINE_DAYS,
+    )
+
+
 class OrganizationDisputeSettingsResponse(BaseSchema):
     organization_id: uuid.UUID
     cross_bureau_balance_tolerance: Decimal
     platform_default_tolerance: Decimal = DEFAULT_CROSS_BUREAU_BALANCE_TOLERANCE
     reinvestigation_benchmark_baseline_days: int = DEFAULT_REINVESTIGATION_BENCHMARK_BASELINE_DAYS
     reinvestigation_benchmark_recent_days: int = DEFAULT_REINVESTIGATION_BENCHMARK_RECENT_DAYS
+    reinvestigation_benchmark_bureau_windows: dict[str, BureauBenchmarkWindow] = Field(
+        default_factory=dict
+    )
     platform_default_baseline_days: int = DEFAULT_REINVESTIGATION_BENCHMARK_BASELINE_DAYS
     platform_default_recent_days: int = DEFAULT_REINVESTIGATION_BENCHMARK_RECENT_DAYS
     updated_at: datetime | None = None
@@ -65,6 +80,9 @@ class OrganizationDisputeSettingsResponse(BaseSchema):
                 settings.reinvestigation_benchmark_baseline_days
             ),
             reinvestigation_benchmark_recent_days=settings.reinvestigation_benchmark_recent_days,
+            reinvestigation_benchmark_bureau_windows=_parse_bureau_windows(
+                settings.reinvestigation_benchmark_bureau_windows or {}
+            ),
             updated_at=settings.updated_at,
         )
 
@@ -79,6 +97,7 @@ class OrganizationDisputeSettingsResponse(BaseSchema):
                 DEFAULT_REINVESTIGATION_BENCHMARK_BASELINE_DAYS
             ),
             reinvestigation_benchmark_recent_days=DEFAULT_REINVESTIGATION_BENCHMARK_RECENT_DAYS,
+            reinvestigation_benchmark_bureau_windows={},
             updated_at=None,
         )
 
@@ -99,6 +118,40 @@ class OrganizationDisputeSettingsUpdate(BaseSchema):
         ge=MIN_REINVESTIGATION_BENCHMARK_RECENT_DAYS,
         le=MAX_REINVESTIGATION_BENCHMARK_BASELINE_DAYS,
     )
+    reinvestigation_benchmark_bureau_windows: dict[str, BureauBenchmarkWindow | None] | None = None
+
+
+def _parse_bureau_windows(raw: dict[str, object]) -> dict[str, BureauBenchmarkWindow]:
+    parsed: dict[str, BureauBenchmarkWindow] = {}
+    for bureau, value in raw.items():
+        if bureau not in BENCHMARK_WINDOW_BUREAUS or not isinstance(value, dict):
+            continue
+        parsed[bureau] = BureauBenchmarkWindow(
+            baseline_days=int(value["baseline_days"]),
+            recent_days=int(value["recent_days"]),
+        )
+    return parsed
+
+
+def normalize_bureau_window_updates(
+    updates: dict[str, BureauBenchmarkWindow | None],
+    existing: dict[str, BureauBenchmarkWindow],
+) -> dict[str, dict[str, int]]:
+    """Merge PATCH bureau-window map; ``null`` clears an override."""
+    merged = {key: value.model_dump() for key, value in existing.items()}
+    for bureau, value in updates.items():
+        if bureau not in BENCHMARK_WINDOW_BUREAUS:
+            raise ValueError(f"Unsupported bureau for benchmark windows: {bureau}")
+        if value is None:
+            merged.pop(bureau, None)
+            continue
+        if value.recent_days > value.baseline_days:
+            raise ValueError(
+                f"reinvestigation_benchmark_bureau_windows.{bureau}: "
+                "recent_days must be <= baseline_days"
+            )
+        merged[bureau] = value.model_dump()
+    return merged
 
 
 class ApiKeyCreate(BaseSchema):

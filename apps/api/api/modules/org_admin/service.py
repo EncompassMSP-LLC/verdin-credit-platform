@@ -33,6 +33,7 @@ from api.modules.org_admin.schemas import (
     OrganizationAdminSummary,
     OrganizationDisputeSettingsResponse,
     OrganizationDisputeSettingsUpdate,
+    normalize_bureau_window_updates,
 )
 
 
@@ -349,6 +350,7 @@ class OrgAdminService:
                 reinvestigation_benchmark_recent_days=(
                     DEFAULT_REINVESTIGATION_BENCHMARK_RECENT_DAYS
                 ),
+                reinvestigation_benchmark_bureau_windows={},
             )
             apply_audit_on_create(settings, user.id)
         else:
@@ -358,6 +360,7 @@ class OrgAdminService:
             body.cross_bureau_balance_tolerance is None
             and body.reinvestigation_benchmark_baseline_days is None
             and body.reinvestigation_benchmark_recent_days is None
+            and body.reinvestigation_benchmark_bureau_windows is None
         ):
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -373,6 +376,20 @@ class OrgAdminService:
             settings.reinvestigation_benchmark_recent_days = (
                 body.reinvestigation_benchmark_recent_days
             )
+        if body.reinvestigation_benchmark_bureau_windows is not None:
+            existing = OrganizationDisputeSettingsResponse.from_model(
+                settings
+            ).reinvestigation_benchmark_bureau_windows
+            try:
+                settings.reinvestigation_benchmark_bureau_windows = normalize_bureau_window_updates(
+                    body.reinvestigation_benchmark_bureau_windows,
+                    existing,
+                )
+            except ValueError as exc:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail=str(exc),
+                ) from exc
         if (
             settings.reinvestigation_benchmark_recent_days
             > settings.reinvestigation_benchmark_baseline_days

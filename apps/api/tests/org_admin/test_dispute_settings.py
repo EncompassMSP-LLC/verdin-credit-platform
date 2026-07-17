@@ -1,4 +1,4 @@
-"""Tests for organization dispute settings (Version 16.0 slice 2)."""
+"""Tests for organization dispute settings (Version 16.0 / 18.0 / 19.0)."""
 
 from fastapi.testclient import TestClient
 
@@ -19,6 +19,7 @@ def test_get_dispute_settings_defaults(
     assert body["platform_default_tolerance"] == "1.00"
     assert body["reinvestigation_benchmark_baseline_days"] == 90
     assert body["reinvestigation_benchmark_recent_days"] == 30
+    assert body["reinvestigation_benchmark_bureau_windows"] == {}
     assert body["platform_default_baseline_days"] == 90
     assert body["platform_default_recent_days"] == 30
     assert body["updated_at"] is None
@@ -68,6 +69,77 @@ def test_patch_dispute_settings_persists_benchmark_windows(
     assert benchmarks.status_code == 200, benchmarks.text
     assert benchmarks.json()["baseline_period"]["window_days"] == 120
     assert benchmarks.json()["recent_period"]["window_days"] == 45
+
+
+def test_patch_dispute_settings_persists_per_bureau_windows(
+    api_client: TestClient,
+    admin_headers: dict[str, str],
+    enterprise_enabled: None,
+) -> None:
+    patch = api_client.patch(
+        "/api/v1/org-admin/dispute-settings",
+        headers=admin_headers,
+        json={
+            "reinvestigation_benchmark_baseline_days": 90,
+            "reinvestigation_benchmark_recent_days": 30,
+            "reinvestigation_benchmark_bureau_windows": {
+                "equifax": {"baseline_days": 180, "recent_days": 60},
+            },
+        },
+    )
+    assert patch.status_code == 200, patch.text
+    body = patch.json()
+    assert body["reinvestigation_benchmark_bureau_windows"]["equifax"] == {
+        "baseline_days": 180,
+        "recent_days": 60,
+    }
+
+    org_wide = api_client.get(
+        "/api/v1/reporting/reinvestigation-outcomes/benchmarks",
+        headers=admin_headers,
+    )
+    assert org_wide.status_code == 200, org_wide.text
+    assert org_wide.json()["baseline_period"]["window_days"] == 90
+
+    equifax = api_client.get(
+        "/api/v1/reporting/reinvestigation-outcomes/benchmarks",
+        headers=admin_headers,
+        params={"bureau": "equifax"},
+    )
+    assert equifax.status_code == 200, equifax.text
+    assert equifax.json()["baseline_period"]["window_days"] == 180
+    assert equifax.json()["recent_period"]["window_days"] == 60
+
+    experian = api_client.get(
+        "/api/v1/reporting/reinvestigation-outcomes/benchmarks",
+        headers=admin_headers,
+        params={"bureau": "experian"},
+    )
+    assert experian.status_code == 200, experian.text
+    assert experian.json()["baseline_period"]["window_days"] == 90
+
+
+def test_patch_dispute_settings_clears_per_bureau_window(
+    api_client: TestClient,
+    admin_headers: dict[str, str],
+    enterprise_enabled: None,
+) -> None:
+    api_client.patch(
+        "/api/v1/org-admin/dispute-settings",
+        headers=admin_headers,
+        json={
+            "reinvestigation_benchmark_bureau_windows": {
+                "equifax": {"baseline_days": 180, "recent_days": 60},
+            },
+        },
+    )
+    clear = api_client.patch(
+        "/api/v1/org-admin/dispute-settings",
+        headers=admin_headers,
+        json={"reinvestigation_benchmark_bureau_windows": {"equifax": None}},
+    )
+    assert clear.status_code == 200, clear.text
+    assert clear.json()["reinvestigation_benchmark_bureau_windows"] == {}
 
 
 def test_patch_dispute_settings_rejects_recent_gt_baseline(

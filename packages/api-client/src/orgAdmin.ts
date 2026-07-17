@@ -55,12 +55,18 @@ export function getOrganizationAdminSummary() {
   return request<OrganizationAdminSummary>(apiPath('/org-admin/organization'));
 }
 
+export interface BureauBenchmarkWindow {
+  baseline_days: number;
+  recent_days: number;
+}
+
 export interface OrganizationDisputeSettings {
   organization_id: string;
   cross_bureau_balance_tolerance: string;
   platform_default_tolerance: string;
   reinvestigation_benchmark_baseline_days: number;
   reinvestigation_benchmark_recent_days: number;
+  reinvestigation_benchmark_bureau_windows: Record<string, BureauBenchmarkWindow>;
   platform_default_baseline_days: number;
   platform_default_recent_days: number;
   updated_at: string | null;
@@ -70,6 +76,7 @@ export interface OrganizationDisputeSettingsUpdateInput {
   cross_bureau_balance_tolerance?: string;
   reinvestigation_benchmark_baseline_days?: number;
   reinvestigation_benchmark_recent_days?: number;
+  reinvestigation_benchmark_bureau_windows?: Record<string, BureauBenchmarkWindow | null>;
 }
 
 export function getOrganizationDisputeSettings() {

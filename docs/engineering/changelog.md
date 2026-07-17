@@ -13,6 +13,16 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — per-bureau benchmark window defaults (Phase 18)
+
+**Decision:** Persist optional Equifax/Experian/TransUnion window overrides in `reinvestigation_benchmark_bureau_windows` JSONB on `organization_dispute_settings`. When `GET /reporting/reinvestigation-outcomes/benchmarks` omits window params and includes `bureau=`, resolve override → org-wide → platform 90/30.
+
+**Reason:** Explicit 18.0 “Not included”; Reporting bureau filter previously always used the single org-wide pair.
+
+**Guardrails:** Only three CRA keys; `null` clears an override; recent ≤ baseline per bureau; org-scoped only.
+
+**Follow-up work:** Outcome benchmarks `group_by=bureau` (slice 3); 19.0 sign-off.
+
 ## Compliance intelligence — Version 19.0 kickoff (Phase 18)
 
 **Decision:** Scope Version 19.0 as Reinvestigation Benchmark Depth — per-bureau window defaults and outcome benchmarks `group_by=bureau` breakdown. Keep live bureau polling, automated filing, unsupervised escalation, litigation e-filing, and cross-tenant benchmarks deferred to 20.0+ or never.

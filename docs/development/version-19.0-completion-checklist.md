@@ -10,7 +10,7 @@ Scope: [`docs/governance/version-19.0-scope.md`](../governance/version-19.0-scop
 
 ## Exit criteria for "19.0 done"
 
-- [ ] Organizations can configure optional per-bureau benchmark window overrides
+- [x] Organizations can configure optional per-bureau benchmark window overrides
 - [ ] Outcome benchmarks API/UI expose a per-bureau breakdown in one call
 - [ ] Capability matrix + API reference updated
 - [ ] Deferred items explicitly documented
@@ -23,7 +23,7 @@ Scope: [`docs/governance/version-19.0-scope.md`](../governance/version-19.0-scop
 | Order | Slice                                   | Epic       | Status |
 | ----- | --------------------------------------- | ---------- | ------ |
 | 1     | 19.0 scope + completion checklist       | Kickoff    | ✅     |
-| 2     | Per-bureau benchmark window defaults    | Org Admin  | ⬜     |
+| 2     | Per-bureau benchmark window defaults    | Org Admin  | ✅     |
 | 3     | Outcome benchmarks per-bureau breakdown | Reporting  | ⬜     |
 | 4     | Capability matrix 19.0 sign-off         | Governance | ⬜     |
 
