@@ -31,6 +31,7 @@
 **Version 16.0 sign-off:** [version-16.0-scope.md](version-16.0-scope.md) · Release notes: [v16.0.0.md](../release-notes/v16.0.0.md)
 **Version 17.0 sign-off:** [version-17.0-scope.md](version-17.0-scope.md) · Release notes: [v17.0.0.md](../release-notes/v17.0.0.md)
 **Version 18.0 sign-off:** [version-18.0-scope.md](version-18.0-scope.md) · Release notes: [v18.0.0.md](../release-notes/v18.0.0.md)
+**Version 19.0 scope (in progress):** [version-19.0-scope.md](version-19.0-scope.md) · Checklist: [version-19.0-completion-checklist.md](../development/version-19.0-completion-checklist.md)
 
 ## Status legend
 
@@ -678,6 +679,17 @@ Scope: [version-18.0-scope.md](version-18.0-scope.md) · Checklist: [version-18.
 | ------------------------------------------ | ------- | ------ | ------- | -------- | --- | --- | ----- | ------------ | ------------------------------------------------------------------------ |
 | Org-configurable benchmark window defaults | 18.0    | ✅     | ✅      | ✅       | ✅  | —   | ✅    | Org Admin    | Per-org baseline/recent days; Reporting UI initializes from org defaults |
 | Ingestion audit case/account scope UI      | 18.0    | ✅     | ✅      | ✅       | ✅  | —   | —     | Compliance   | Optional case_id / account_id on start form and list filters             |
+
+---
+
+## Version 19.0 — Reinvestigation Benchmark Depth (in progress — 🚧)
+
+Scope: [version-19.0-scope.md](version-19.0-scope.md) · Checklist: [version-19.0-completion-checklist.md](../development/version-19.0-completion-checklist.md)
+
+| Capability                              | Version | Status | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                         |
+| --------------------------------------- | ------- | ------ | ------- | -------- | --- | --- | ----- | ------------ | ----------------------------------------------------------------------------- |
+| Per-bureau benchmark window defaults    | 19.0    | 🚧     | 🚧      | 🚧       | 🚧  | —   | 🚧    | Org Admin    | Optional Equifax/Experian/TransUnion window overrides; fall back to org pair  |
+| Outcome benchmarks per-bureau breakdown | 19.0    | 🚧     | 🚧      | 🚧       | 🚧  | —   | 🚧    | Reporting    | `group_by=bureau` on benchmarks API + Reporting Center per-bureau rates table |
 
 ---
 

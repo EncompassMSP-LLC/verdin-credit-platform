@@ -25,14 +25,15 @@ All v17.0.0 APIs, UI, and `@verdin/api-client` functions remain production capab
 
 ## Explicit deferrals (not 18.0)
 
-| Capability                                      | Deferred to | Reason                                                         |
-| ----------------------------------------------- | ----------- | -------------------------------------------------------------- |
-| Live bureau response ingestion / polling        | 19.0+       | Requires live bureau API access + legal/compliance sign-off    |
-| Automated re-dispute filing execution           | 19.0+       | Depends on deferred live submission; stays a human gate        |
-| Unsupervised escalation (CFPB / attorney)       | Never       | Escalation is an advisory signal; a human decides and files    |
-| Cross-tenant reinvestigation-outcome benchmarks | 19.0+       | Data governance and legal review not complete                  |
-| Automated litigation filing / e-filing          | Never       | The packet/export is a human handoff; the platform never files |
-| Org-specific litigation PDF letterhead          | 19.0+       | Branding / template product decision                           |
+| Capability                                           | Deferred to | Reason                                                         |
+| ---------------------------------------------------- | ----------- | -------------------------------------------------------------- |
+| Per-bureau benchmark windows / benchmarks `group_by` | 19.0        | Surfaced in Phase 18 benchmark depth                           |
+| Live bureau response ingestion / polling             | 20.0+       | Requires live bureau API access + legal/compliance sign-off    |
+| Automated re-dispute filing execution                | 20.0+       | Depends on deferred live submission; stays a human gate        |
+| Unsupervised escalation (CFPB / attorney)            | Never       | Escalation is an advisory signal; a human decides and files    |
+| Cross-tenant reinvestigation-outcome benchmarks      | 20.0+       | Data governance and legal review not complete                  |
+| Automated litigation filing / e-filing               | Never       | The packet/export is a human handoff; the platform never files |
+| Org-specific litigation PDF letterhead               | 20.0+       | Branding / template product decision                           |
 
 ## Partial capability limits (18.0 targets)
 

@@ -31,13 +31,14 @@ Slice 2 stores org default baseline/recent window days and wires Reporting Cente
 
 ---
 
-## Explicitly not 18.0 (→ 19.0+)
+## Explicitly not 18.0 (→ 19.0 / 20.0+)
 
 | Capability                                      | Version | Why defer                                               |
 | ----------------------------------------------- | ------- | ------------------------------------------------------- |
-| Live bureau response ingestion / polling        | 19.0+   | Live bureau API access + legal/compliance sign-off      |
-| Automated re-dispute filing execution           | 19.0+   | Depends on deferred live submission                     |
+| Per-bureau benchmark windows / benchmarks depth | 19.0    | Surfaced in Phase 18 benchmark depth                    |
+| Live bureau response ingestion / polling        | 20.0+   | Live bureau API access + legal/compliance sign-off      |
+| Automated re-dispute filing execution           | 20.0+   | Depends on deferred live submission                     |
 | Unsupervised CFPB / attorney escalation         | Never   | Escalation stays an advisory, human-filed signal        |
 | Automated litigation filing / e-filing          | Never   | The export is a human handoff; the platform never files |
-| Cross-tenant reinvestigation-outcome benchmarks | 19.0+   | Data governance and legal review not complete           |
-| Org-specific litigation PDF letterhead          | 19.0+   | Branding / template product decision                    |
+| Cross-tenant reinvestigation-outcome benchmarks | 20.0+   | Data governance and legal review not complete           |
+| Org-specific litigation PDF letterhead          | 20.0+   | Branding / template product decision                    |
