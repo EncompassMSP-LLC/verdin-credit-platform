@@ -26,11 +26,15 @@ class BureauResponseIngestionRunListFilters:
         limit: int,
         case_id: uuid.UUID | None = None,
         account_id: uuid.UUID | None = None,
+        bureau_target: str | None = None,
+        status: BureauResponseIngestionRunStatus | None = None,
     ) -> None:
         self.skip = skip
         self.limit = limit
         self.case_id = case_id
         self.account_id = account_id
+        self.bureau_target = bureau_target
+        self.status = status
 
 
 class BureauResponseIngestionRunRepository:
@@ -98,6 +102,14 @@ class BureauResponseIngestionRunRepository:
             count_query = count_query.where(
                 BureauResponseIngestionRun.account_id == filters.account_id
             )
+        if filters.bureau_target is not None:
+            base = base.where(BureauResponseIngestionRun.bureau_target == filters.bureau_target)
+            count_query = count_query.where(
+                BureauResponseIngestionRun.bureau_target == filters.bureau_target
+            )
+        if filters.status is not None:
+            base = base.where(BureauResponseIngestionRun.status == filters.status)
+            count_query = count_query.where(BureauResponseIngestionRun.status == filters.status)
         total = int((await self._session.execute(count_query)).scalar_one())
         query = (
             base.order_by(BureauResponseIngestionRun.requested_at.desc().nullslast())

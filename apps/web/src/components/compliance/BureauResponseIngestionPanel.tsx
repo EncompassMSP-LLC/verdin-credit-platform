@@ -18,6 +18,17 @@ const BUREAU_TARGET_OPTIONS = [
   { value: 'transunion', label: 'TransUnion' },
 ];
 
+const STATUS_FILTER_OPTIONS = [
+  { value: '', label: 'Any status' },
+  { value: 'deferred', label: 'Deferred' },
+  { value: 'failed', label: 'Failed' },
+] as const;
+
+const BUREAU_FILTER_OPTIONS = [
+  { value: '', label: 'Any bureau' },
+  ...BUREAU_TARGET_OPTIONS,
+] as const;
+
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function formatDate(value: string | null) {
@@ -51,8 +62,12 @@ export function BureauResponseIngestionPanel() {
   const [startAccountId, setStartAccountId] = useState('');
   const [filterCaseId, setFilterCaseId] = useState('');
   const [filterAccountId, setFilterAccountId] = useState('');
+  const [filterBureauTarget, setFilterBureauTarget] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
   const [appliedCaseId, setAppliedCaseId] = useState('');
   const [appliedAccountId, setAppliedAccountId] = useState('');
+  const [appliedBureauTarget, setAppliedBureauTarget] = useState('');
+  const [appliedStatus, setAppliedStatus] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
 
   const statusQuery = useQuery({
@@ -62,13 +77,23 @@ export function BureauResponseIngestionPanel() {
   });
 
   const runsQuery = useQuery({
-    queryKey: ['bureau-response-ingestion-runs', page, appliedCaseId, appliedAccountId],
+    queryKey: [
+      'bureau-response-ingestion-runs',
+      page,
+      appliedCaseId,
+      appliedAccountId,
+      appliedBureauTarget,
+      appliedStatus,
+    ],
     queryFn: () =>
       listBureauResponseIngestionRuns({
         page,
         page_size: 20,
         case_id: optionalUuid(appliedCaseId),
         account_id: optionalUuid(appliedAccountId),
+        bureau_target: appliedBureauTarget || undefined,
+        status:
+          appliedStatus === 'deferred' || appliedStatus === 'failed' ? appliedStatus : undefined,
       }),
     enabled: authReady,
   });
@@ -232,7 +257,7 @@ export function BureauResponseIngestionPanel() {
       </Card>
 
       <Card title="Audit run history">
-        <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <label className="block text-xs font-medium text-gray-700">
             Filter case ID
             <input
@@ -251,7 +276,35 @@ export function BureauResponseIngestionPanel() {
               onChange={(event) => setFilterAccountId(event.target.value)}
             />
           </label>
-          <div className="flex items-end gap-2">
+          <label className="block text-xs font-medium text-gray-700">
+            Filter bureau
+            <select
+              className={inputClass}
+              value={filterBureauTarget}
+              onChange={(event) => setFilterBureauTarget(event.target.value)}
+            >
+              {BUREAU_FILTER_OPTIONS.map((option) => (
+                <option key={option.value || 'any'} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="block text-xs font-medium text-gray-700">
+            Filter status
+            <select
+              className={inputClass}
+              value={filterStatus}
+              onChange={(event) => setFilterStatus(event.target.value)}
+            >
+              {STATUS_FILTER_OPTIONS.map((option) => (
+                <option key={option.value || 'any'} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <div className="flex items-end gap-2 sm:col-span-2 lg:col-span-1">
             <Button
               type="button"
               variant="secondary"
@@ -261,6 +314,8 @@ export function BureauResponseIngestionPanel() {
                 }
                 setAppliedCaseId(filterCaseId.trim());
                 setAppliedAccountId(filterAccountId.trim());
+                setAppliedBureauTarget(filterBureauTarget);
+                setAppliedStatus(filterStatus);
                 setPage(1);
               }}
             >
@@ -272,8 +327,12 @@ export function BureauResponseIngestionPanel() {
               onClick={() => {
                 setFilterCaseId('');
                 setFilterAccountId('');
+                setFilterBureauTarget('');
+                setFilterStatus('');
                 setAppliedCaseId('');
                 setAppliedAccountId('');
+                setAppliedBureauTarget('');
+                setAppliedStatus('');
                 setPage(1);
               }}
             >

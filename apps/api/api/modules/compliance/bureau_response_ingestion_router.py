@@ -9,6 +9,9 @@ from api.core.pagination import PaginatedResponse
 from api.database.session import get_db
 from api.modules.auth.dependencies import get_current_user
 from api.modules.auth.models import User
+from api.modules.compliance.bureau_response_ingestion_models import (
+    BureauResponseIngestionRunStatus,
+)
 from api.modules.compliance.bureau_response_ingestion_schemas import (
     BureauResponseIngestionRunListParams,
     BureauResponseIngestionRunResponse,
@@ -49,6 +52,8 @@ async def list_bureau_response_ingestion_runs(
     page_size: int = Query(20, ge=1, le=100),
     case_id: uuid.UUID | None = None,
     account_id: uuid.UUID | None = None,
+    bureau_target: str | None = Query(None, min_length=1, max_length=32),
+    status: BureauResponseIngestionRunStatus | None = None,
     current_user: User = Depends(get_current_user),
     service: BureauResponseIngestionService = Depends(get_bureau_response_ingestion_service),
 ) -> PaginatedResponse[BureauResponseIngestionRunResponse]:
@@ -57,6 +62,8 @@ async def list_bureau_response_ingestion_runs(
         page_size=page_size,
         case_id=case_id,
         account_id=account_id,
+        bureau_target=bureau_target,
+        status=status,
     )
     return await service.list_runs(current_user, params)
 

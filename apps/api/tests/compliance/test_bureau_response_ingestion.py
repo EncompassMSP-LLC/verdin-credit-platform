@@ -63,3 +63,68 @@ def test_start_ingestion_run_requires_write(
         json={"summary": "Should be denied"},
     )
     assert forbidden.status_code == 403
+
+
+def test_list_ingestion_runs_filters_by_bureau_target_and_status(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+) -> None:
+    experian = api_client.post(
+        "/api/v1/compliance/bureau-response-ingestion/runs",
+        headers=manager_headers,
+        json={
+            "summary": "Experian deferred check",
+            "bureau_target": "experian",
+        },
+    )
+    assert experian.status_code == 201, experian.text
+    experian_id = experian.json()["run"]["id"]
+
+    equifax = api_client.post(
+        "/api/v1/compliance/bureau-response-ingestion/runs",
+        headers=manager_headers,
+        json={
+            "summary": "Equifax deferred check",
+            "bureau_target": "equifax",
+        },
+    )
+    assert equifax.status_code == 201, equifax.text
+    equifax_id = equifax.json()["run"]["id"]
+
+    by_bureau = api_client.get(
+        "/api/v1/compliance/bureau-response-ingestion/runs",
+        headers=manager_headers,
+        params={"bureau_target": "experian"},
+    )
+    assert by_bureau.status_code == 200, by_bureau.text
+    bureau_ids = {item["id"] for item in by_bureau.json()["items"]}
+    assert experian_id in bureau_ids
+    assert equifax_id not in bureau_ids
+
+    by_status = api_client.get(
+        "/api/v1/compliance/bureau-response-ingestion/runs",
+        headers=manager_headers,
+        params={"status": "deferred"},
+    )
+    assert by_status.status_code == 200, by_status.text
+    status_ids = {item["id"] for item in by_status.json()["items"]}
+    assert experian_id in status_ids
+    assert equifax_id in status_ids
+    assert all(item["status"] == "deferred" for item in by_status.json()["items"])
+
+    by_failed = api_client.get(
+        "/api/v1/compliance/bureau-response-ingestion/runs",
+        headers=manager_headers,
+        params={"status": "failed"},
+    )
+    assert by_failed.status_code == 200, by_failed.text
+    failed_ids = {item["id"] for item in by_failed.json()["items"]}
+    assert experian_id not in failed_ids
+    assert equifax_id not in failed_ids
+
+    invalid = api_client.get(
+        "/api/v1/compliance/bureau-response-ingestion/runs",
+        headers=manager_headers,
+        params={"status": "not-a-status"},
+    )
+    assert invalid.status_code == 422

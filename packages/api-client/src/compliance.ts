@@ -1015,6 +1015,8 @@ export interface ListBureauResponseIngestionRunsParams {
   page_size?: number;
   case_id?: string;
   account_id?: string;
+  bureau_target?: string;
+  status?: BureauResponseIngestionRunStatus;
 }
 
 export function getBureauResponseIngestionStatus() {
@@ -1031,6 +1033,8 @@ export function listBureauResponseIngestionRuns(
   if (params.page_size) search.set('page_size', String(params.page_size));
   if (params.case_id) search.set('case_id', params.case_id);
   if (params.account_id) search.set('account_id', params.account_id);
+  if (params.bureau_target) search.set('bureau_target', params.bureau_target);
+  if (params.status) search.set('status', params.status);
   const query = search.toString();
   return request<PaginatedResponse<BureauResponseIngestionRun>>(
     apiPath(`/compliance/bureau-response-ingestion/runs${query ? `?${query}` : ''}`),

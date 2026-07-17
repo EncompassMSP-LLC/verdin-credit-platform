@@ -92,6 +92,8 @@ class BureauResponseIngestionService:
                 limit=params.page_size,
                 case_id=params.case_id,
                 account_id=params.account_id,
+                bureau_target=params.bureau_target,
+                status=params.status,
             ),
         )
         items = [BureauResponseIngestionRunResponse.from_model(run) for run in runs]
