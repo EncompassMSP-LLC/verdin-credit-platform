@@ -186,9 +186,18 @@ export interface ReinvestigationOutcomeBenchmarksResponse {
   generated_at: string;
   scope: 'organization';
   bureau: string | null;
+  group_by: string | null;
   baseline_period: ReinvestigationOutcomeBenchmarkPeriod;
   baseline: ReinvestigationOutcomeAnalytics;
   recent_period: ReinvestigationOutcomeBenchmarkPeriod;
+  recent: ReinvestigationOutcomeAnalytics;
+  rate_deltas: ReinvestigationOutcomeRateDeltas;
+  by_bureau: ReinvestigationOutcomeBenchmarkBureauBreakdown[];
+}
+
+export interface ReinvestigationOutcomeBenchmarkBureauBreakdown {
+  bureau: string;
+  baseline: ReinvestigationOutcomeAnalytics;
   recent: ReinvestigationOutcomeAnalytics;
   rate_deltas: ReinvestigationOutcomeRateDeltas;
 }
@@ -197,6 +206,7 @@ export interface ReinvestigationOutcomeBenchmarksParams {
   baseline_days?: number;
   recent_days?: number;
   bureau?: string;
+  group_by?: 'bureau';
 }
 
 export function getReinvestigationOutcomeBenchmarks(
@@ -206,6 +216,7 @@ export function getReinvestigationOutcomeBenchmarks(
   if (params.baseline_days != null) search.set('baseline_days', String(params.baseline_days));
   if (params.recent_days != null) search.set('recent_days', String(params.recent_days));
   if (params.bureau) search.set('bureau', params.bureau);
+  if (params.group_by) search.set('group_by', params.group_by);
   const query = search.toString();
   return request<ReinvestigationOutcomeBenchmarksResponse>(
     apiPath(`/reporting/reinvestigation-outcomes/benchmarks${query ? `?${query}` : ''}`),

@@ -96,17 +96,28 @@ class ReinvestigationOutcomeRateDeltas(BaseSchema):
     no_response_rate: float
 
 
+class ReinvestigationOutcomeBenchmarkBureauBreakdown(BaseSchema):
+    """Per-bureau baseline/recent roll-up within an org-internal benchmarks response."""
+
+    bureau: str
+    baseline: ReinvestigationOutcomeAnalytics
+    recent: ReinvestigationOutcomeAnalytics
+    rate_deltas: ReinvestigationOutcomeRateDeltas
+
+
 class ReinvestigationOutcomeBenchmarksResponse(BaseSchema):
     """Org-scoped historical baselines for reinvestigation outcomes (no cross-tenant data)."""
 
     generated_at: datetime
     scope: str = "organization"
     bureau: str | None = None
+    group_by: str | None = None
     baseline_period: ReinvestigationOutcomeBenchmarkPeriod
     baseline: ReinvestigationOutcomeAnalytics
     recent_period: ReinvestigationOutcomeBenchmarkPeriod
     recent: ReinvestigationOutcomeAnalytics
     rate_deltas: ReinvestigationOutcomeRateDeltas
+    by_bureau: list[ReinvestigationOutcomeBenchmarkBureauBreakdown] = []
 
 
 class BureauPerformanceItem(BaseSchema):

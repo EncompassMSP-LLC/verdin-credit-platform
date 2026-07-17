@@ -66,6 +66,7 @@ from api.modules.reporting.schemas import (
     PredictiveOutcomesReportingResponse,
     ReinvestigationOutcomeAnalytics,
     ReinvestigationOutcomeAnalyticsResponse,
+    ReinvestigationOutcomeBenchmarkBureauBreakdown,
     ReinvestigationOutcomeBenchmarkPeriod,
     ReinvestigationOutcomeBenchmarksResponse,
     ReinvestigationOutcomeBureauBreakdown,
@@ -243,6 +244,7 @@ class ReportingService:
         baseline_days: int | None = None,
         recent_days: int | None = None,
         bureau: AccountBureau | None = None,
+        group_by: str | None = None,
     ) -> ReinvestigationOutcomeBenchmarksResponse:
         """Org-internal trailing baselines for reinvestigation outcome rates.
 
@@ -252,10 +254,16 @@ class ReportingService:
         strictly to the caller's organization — no cross-tenant data and no
         live bureau contact. When window args are omitted, org dispute-settings
         defaults apply (per-bureau override when ``bureau`` is set, else org-wide
-        pair, else platform 90/30).
+        pair, else platform 90/30). When ``group_by="bureau"``, ``by_bureau``
+        carries per-bureau baseline/recent analytics and rate deltas.
         """
         self._require_read(user)
         organization_id = self._require_organization(user)
+        if group_by is not None and group_by != "bureau":
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="group_by must be 'bureau' or omitted",
+            )
         org_baseline, org_recent = await self._resolve_benchmark_window_defaults(
             organization_id, bureau=bureau
         )
@@ -303,10 +311,14 @@ class ReportingService:
         )
         baseline = self._to_reinvestigation_analytics_schema(baseline_result)
         recent = self._to_reinvestigation_analytics_schema(recent_result)
+        by_bureau: list[ReinvestigationOutcomeBenchmarkBureauBreakdown] = []
+        if group_by == "bureau":
+            by_bureau = self._build_benchmark_bureau_breakdown(baseline_raw, recent_raw)
         return ReinvestigationOutcomeBenchmarksResponse(
             generated_at=datetime.now(UTC),
             scope="organization",
             bureau=bureau.value if bureau is not None else None,
+            group_by=group_by,
             baseline_period=ReinvestigationOutcomeBenchmarkPeriod(
                 start=baseline_start,
                 end=end,
@@ -319,14 +331,70 @@ class ReportingService:
                 window_days=resolved_recent,
             ),
             recent=recent,
-            rate_deltas=ReinvestigationOutcomeRateDeltas(
-                deletion_rate=recent.deletion_rate - baseline.deletion_rate,
-                verification_rate=recent.verification_rate - baseline.verification_rate,
-                correction_rate=recent.correction_rate - baseline.correction_rate,
-                favorable_rate=recent.favorable_rate - baseline.favorable_rate,
-                no_response_rate=recent.no_response_rate - baseline.no_response_rate,
-            ),
+            rate_deltas=self._rate_deltas(baseline, recent),
+            by_bureau=by_bureau,
         )
+
+    @classmethod
+    def _rate_deltas(
+        cls,
+        baseline: ReinvestigationOutcomeAnalytics,
+        recent: ReinvestigationOutcomeAnalytics,
+    ) -> ReinvestigationOutcomeRateDeltas:
+        return ReinvestigationOutcomeRateDeltas(
+            deletion_rate=recent.deletion_rate - baseline.deletion_rate,
+            verification_rate=recent.verification_rate - baseline.verification_rate,
+            correction_rate=recent.correction_rate - baseline.correction_rate,
+            favorable_rate=recent.favorable_rate - baseline.favorable_rate,
+            no_response_rate=recent.no_response_rate - baseline.no_response_rate,
+        )
+
+    @classmethod
+    def _empty_reinvestigation_analytics(cls) -> ReinvestigationOutcomeAnalytics:
+        return ReinvestigationOutcomeAnalytics(
+            total_responses=0,
+            counts={},
+            deletion_rate=0.0,
+            verification_rate=0.0,
+            correction_rate=0.0,
+            favorable_rate=0.0,
+            no_response_rate=0.0,
+            avg_days_to_response=None,
+            median_days_to_response=None,
+            measured_response_count=0,
+        )
+
+    @classmethod
+    def _build_benchmark_bureau_breakdown(
+        cls,
+        baseline_raw: list[dict[str, object]],
+        recent_raw: list[dict[str, object]],
+    ) -> list[ReinvestigationOutcomeBenchmarkBureauBreakdown]:
+        baseline_by = {
+            item.bureau: item.analytics for item in cls._build_bureau_breakdown(baseline_raw)
+        }
+        recent_by = {
+            item.bureau: item.analytics for item in cls._build_bureau_breakdown(recent_raw)
+        }
+        order = {"equifax": 0, "experian": 1, "transunion": 2}
+        bureau_keys = sorted(
+            set(baseline_by) | set(recent_by),
+            key=lambda b: (order.get(b, 9), b),
+        )
+        empty = cls._empty_reinvestigation_analytics()
+        breakdown: list[ReinvestigationOutcomeBenchmarkBureauBreakdown] = []
+        for bureau_key in bureau_keys:
+            baseline = baseline_by.get(bureau_key, empty)
+            recent = recent_by.get(bureau_key, empty)
+            breakdown.append(
+                ReinvestigationOutcomeBenchmarkBureauBreakdown(
+                    bureau=bureau_key,
+                    baseline=baseline,
+                    recent=recent,
+                    rate_deltas=cls._rate_deltas(baseline, recent),
+                )
+            )
+        return breakdown
 
     async def _resolve_benchmark_window_defaults(
         self,

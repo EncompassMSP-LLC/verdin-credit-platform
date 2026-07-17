@@ -101,6 +101,9 @@ async def get_reinvestigation_outcome_benchmarks_reporting(
         description="Recent comparison window; omit to use org default (must be <= baseline)",
     ),
     bureau: AccountBureau | None = Query(None, description="Filter to a single credit bureau"),
+    group_by: str | None = Query(
+        None, description="Optional roll-up dimension; currently only 'bureau'"
+    ),
     current_user: User = Depends(get_current_user),
     service: ReportingService = Depends(get_reporting_service),
 ) -> ReinvestigationOutcomeBenchmarksResponse:
@@ -110,6 +113,7 @@ async def get_reinvestigation_outcome_benchmarks_reporting(
         baseline_days=baseline_days,
         recent_days=recent_days,
         bureau=bureau,
+        group_by=group_by,
     )
 
 
