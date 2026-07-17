@@ -13,6 +13,14 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — Version 20.0 sign-off (Phase 19)
+
+**Decision:** Close Phase 19 as shipped `v20.0.0` after benchmarks `group_by=recipient` and aggregate rates CSV export. Keep live bureau polling, automated filing, unsupervised escalation, litigation e-filing, and cross-tenant benchmarks deferred to 21.0+ or never.
+
+**Reason:** Non-blocked benchmark parity over owned analytics and operator-gated aggregate export is complete; remaining items need legal/compliance or product decisions.
+
+**Follow-up work:** Tag `v20.0.0`; next non-blocked polish or gated live-integration phase only with explicit sign-off.
+
 ## Compliance intelligence — org-internal benchmarks aggregate CSV export (Phase 19)
 
 **Decision:** Add `GET /reporting/reinvestigation-outcomes/benchmarks/export?format=csv` and a Download CSV control on Outcome benchmarks. Export org aggregate + optional breakdown rows using the same query params as the JSON endpoint.

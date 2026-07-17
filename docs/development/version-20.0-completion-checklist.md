@@ -2,7 +2,7 @@
 
 Ordered path for **Compliance Intelligence Phase 19 — Reinvestigation Benchmark Parity** and follow-on governance work.
 
-Preceded by shipped **v19.0.0**. Target tag: **v20.0.0**.
+Preceded by shipped **v19.0.0**. **Shipped as v20.0.0.**
 
 Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 
@@ -12,9 +12,9 @@ Scope: [`docs/governance/version-20.0-scope.md`](../governance/version-20.0-scop
 
 - [x] Outcome benchmarks API/UI expose a per-recipient breakdown in one call
 - [x] Staff can download an aggregate rates CSV (no PII) from Outcome benchmarks
-- [ ] Capability matrix + API reference updated
-- [ ] Deferred items explicitly documented
-- [ ] `docs/release-notes/v20.0.0.md` + tag `v20.0.0`
+- [x] Capability matrix + API reference updated
+- [x] Deferred items explicitly documented
+- [x] `docs/release-notes/v20.0.0.md` + tag `v20.0.0`
 
 ---
 
@@ -25,7 +25,7 @@ Scope: [`docs/governance/version-20.0-scope.md`](../governance/version-20.0-scop
 | 1     | 20.0 scope + completion checklist              | Kickoff    | ✅     |
 | 2     | Outcome benchmarks per-recipient breakdown     | Reporting  | ✅     |
 | 3     | Org-internal benchmarks aggregate rates export | Reporting  | ✅     |
-| 4     | Capability matrix 20.0 sign-off                | Governance | ☐      |
+| 4     | Capability matrix 20.0 sign-off                | Governance | ✅     |
 
 Slice 2 adds `group_by=recipient` parity with outcome analytics on the benchmarks read model. Slice 3 adds an operator-gated CSV of aggregate rates (windows + org/bureau/recipient counts/rates; no client/account IDs). Live polling, automated filing, and cross-tenant benchmarks stay out of scope.
 

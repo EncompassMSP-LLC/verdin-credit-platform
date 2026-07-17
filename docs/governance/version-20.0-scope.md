@@ -17,7 +17,7 @@ Everything remains **staff-mediated and advisory**. The platform still never pol
 | ---- | ---------------------------------------------- | ----------- | -------------------------------------------------------------------------------------- |
 | 1    | Outcome benchmarks per-recipient breakdown     | Released    | `group_by=recipient` on benchmarks API + Reporting Center Bureau/Recipient control     |
 | 2    | Org-internal benchmarks aggregate rates export | Released    | Operator-gated CSV of windows + org/bureau/recipient rates (counts/rates only; no PII) |
-| 3    | Capability matrix / governance sign-off        | Planned     | Scope, checklist, matrix rows, release notes                                           |
+| 3    | Capability matrix / governance sign-off        | Released    | Scope, checklist, matrix rows, release notes                                           |
 
 ## Shipped from 19.0 (foundation — do not regress)
 
