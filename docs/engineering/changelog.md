@@ -13,6 +13,14 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — Version 20.0 scope (Phase 19)
+
+**Decision:** Scope Version 20.0 as Reinvestigation Benchmark Parity — outcome benchmarks `group_by=recipient` and an operator-gated aggregate rates CSV export (no PII). Keep live bureau polling, automated filing, unsupervised escalation, litigation e-filing, and cross-tenant benchmarks deferred to 21.0+ or never.
+
+**Reason:** After 19.0 bureau breakdown, CRA vs furnisher benchmark comparison and staff handoff download are the next non-blocked parity gaps over owned analytics.
+
+**Follow-up work:** Slice 2 — benchmarks `group_by=recipient`; Slice 3 — aggregate rates CSV export; Slice 4 — sign-off.
+
 ## E2E — Poll awaiting-response before CRA outcome (2026-07-17)
 
 **Decision:** After `dispute-awaiting-response`, poll GET account until `dispute_status=awaiting_response` before `dispute-response-received` (same pattern as post-send).

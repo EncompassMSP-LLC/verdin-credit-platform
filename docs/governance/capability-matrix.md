@@ -693,6 +693,17 @@ Scope: [version-19.0-scope.md](version-19.0-scope.md) · Checklist: [version-19.
 
 ---
 
+## Version 20.0 — Reinvestigation Benchmark Parity (in progress — 🚧)
+
+Scope: [version-20.0-scope.md](version-20.0-scope.md) · Checklist: [version-20.0-completion-checklist.md](../development/version-20.0-completion-checklist.md)
+
+| Capability                                     | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                              |
+| ---------------------------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ---------------------------------------------------------------------------------- |
+| Outcome benchmarks per-recipient breakdown     | 20.0    | Planned | —       | —        | —   | —   | —     | Reporting    | `group_by=recipient` on benchmarks API + Reporting Center Bureau/Recipient control |
+| Org-internal benchmarks aggregate rates export | 20.0    | Planned | —       | —        | —   | —   | —     | Reporting    | Operator-gated CSV of windows + rates; counts/rates only; no client/account PII    |
+
+---
+
 ## Related documents
 
 - [Governance hub](README.md) — lifecycle and build order
