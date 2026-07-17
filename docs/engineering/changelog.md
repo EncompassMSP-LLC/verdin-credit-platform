@@ -13,6 +13,14 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — Version 21.0 sign-off (Phase 20)
+
+**Decision:** Close Phase 20 as shipped `v21.0.0` after per-recipient benchmark window defaults and ingestion audit bureau/status list filters. Keep live bureau polling, automated filing, unsupervised escalation, litigation e-filing, and cross-tenant benchmarks deferred to 22.0+ or never.
+
+**Reason:** Non-blocked configuration and audit-filter polish over owned surfaces is complete; remaining items need legal/compliance or product decisions.
+
+**Follow-up work:** Tag `v21.0.0`; next gated live-integration phase only with explicit legal/compliance sign-off.
+
 ## Compliance intelligence — ingestion audit bureau/status list filters (Phase 20)
 
 **Decision:** Add optional `bureau_target` and `status` query params on `GET /compliance/bureau-response-ingestion/runs`, with matching Compliance Center filter controls. Invalid `status` values return 422; start-run remains always-deferred.

@@ -17,7 +17,7 @@ Everything remains **staff-mediated and advisory**. The platform still never pol
 | ---- | ------------------------------------------ | ----------- | ---------------------------------------------------------------------------------------------- |
 | 1    | Per-recipient benchmark window defaults    | Released    | Optional credit_bureau / furnisher window overrides on dispute settings; fall back to org pair |
 | 2    | Ingestion audit bureau/status list filters | Released    | Optional `bureau_target` + `status` on Compliance Center ingestion run list                    |
-| 3    | Capability matrix / governance sign-off    | Planned     | Scope, checklist, matrix rows, release notes                                                   |
+| 3    | Capability matrix / governance sign-off    | Released    | Scope, checklist, matrix rows, release notes                                                   |
 
 ## Shipped from 20.0 (foundation — do not regress)
 

@@ -69,7 +69,7 @@ Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (
 | **18.0**  | Reinvestigation Operations Polish               | Released    | Phase 17 org benchmark window defaults, ingestion audit case/account scope UI (`v18.0.0`)                                                        |
 | **19.0**  | Reinvestigation Benchmark Depth                 | Released    | Phase 18 per-bureau benchmark window defaults, outcome benchmarks per-bureau breakdown (`v19.0.0`)                                               |
 | **20.0**  | Reinvestigation Benchmark Parity                | Released    | Phase 19 benchmarks `group_by=recipient`, aggregate rates CSV export (no PII) (`v20.0.0`)                                                        |
-| **21.0**  | Reinvestigation Operations Filters              | Planned     | Phase 20 per-recipient benchmark window defaults, ingestion audit bureau/status list filters                                                     |
+| **21.0**  | Reinvestigation Operations Filters              | Released    | Phase 20 per-recipient benchmark window defaults, ingestion audit bureau/status list filters (`v21.0.0`)                                         |
 
 ### Sprint milestones
 
@@ -552,16 +552,16 @@ Compliance Intelligence Phase 19 closes parity gaps on org-internal outcome benc
 | 1    | Outcome benchmarks per-recipient breakdown     | Released    | `group_by=recipient` parity with outcome analytics + Reporting Center UI   |
 | 2    | Org-internal benchmarks aggregate rates export | Released    | Operator-gated CSV of windows + rates (counts only; no client/account IDs) |
 
-### Version 21.0 — Reinvestigation Operations Filters (planned)
+### Version 21.0 — Reinvestigation Operations Filters (released — `v21.0.0`)
 
-Scope and checklist: [`docs/governance/version-21.0-scope.md`](../governance/version-21.0-scope.md) · [`docs/development/version-21.0-completion-checklist.md`](../development/version-21.0-completion-checklist.md)
+Scope and checklist: [`docs/governance/version-21.0-scope.md`](../governance/version-21.0-scope.md) · [`docs/development/version-21.0-completion-checklist.md`](../development/version-21.0-completion-checklist.md) · Release notes: [`docs/release-notes/v21.0.0.md`](../release-notes/v21.0.0.md)
 
 Compliance Intelligence Phase 20 polishes remaining non-blocked configuration and audit-filter gaps without crossing the live-bureau frontier: optional per-recipient (credit bureau vs furnisher) benchmark window defaults on dispute settings, and Compliance Center ingestion audit list filters for `bureau_target` and `status`. Live bureau response ingestion execution, automated re-dispute filing execution, unsupervised escalation, automated litigation filing, and cross-tenant benchmarks remain deferred (22.0+ or never) pending legal/compliance sign-off.
 
 | Epic | Theme                                      | 21.0 target | Notes                                                                    |
 | ---- | ------------------------------------------ | ----------- | ------------------------------------------------------------------------ |
-| 1    | Per-recipient benchmark window defaults    | Planned     | Optional credit_bureau / furnisher overrides; fall back to org-wide pair |
-| 2    | Ingestion audit bureau/status list filters | Planned     | Optional bureau_target + status on Compliance Center ingestion run list  |
+| 1    | Per-recipient benchmark window defaults    | Released    | Optional credit_bureau / furnisher overrides; fall back to org-wide pair |
+| 2    | Ingestion audit bureau/status list filters | Released    | Optional bureau_target + status on Compliance Center ingestion run list  |
 
 ## Sprint → version mapping
 
