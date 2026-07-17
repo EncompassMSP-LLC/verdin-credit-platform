@@ -12,9 +12,9 @@ Scope: [`docs/governance/version-21.0-scope.md`](../governance/version-21.0-scop
 
 - [x] Organizations can configure optional per-recipient benchmark window overrides
 - [x] Compliance Center ingestion run list filters by bureau target and status
-- [ ] Capability matrix + API reference updated
-- [ ] Deferred items explicitly documented
-- [ ] `docs/release-notes/v21.0.0.md` + tag `v21.0.0`
+- [x] Capability matrix + API reference updated
+- [x] Deferred items explicitly documented
+- [x] `docs/release-notes/v21.0.0.md` + tag `v21.0.0`
 
 ---
 
@@ -25,7 +25,7 @@ Scope: [`docs/governance/version-21.0-scope.md`](../governance/version-21.0-scop
 | 1     | 21.0 scope + completion checklist          | Kickoff    | ✅     |
 | 2     | Per-recipient benchmark window defaults    | Org Admin  | ✅     |
 | 3     | Ingestion audit bureau/status list filters | Compliance | ✅     |
-| 4     | Capability matrix 21.0 sign-off            | Governance | ☐      |
+| 4     | Capability matrix 21.0 sign-off            | Governance | ✅     |
 
 Slice 2 adds optional credit_bureau / furnisher window overrides on dispute settings (falls back to org-wide 90/30). Slice 3 adds `bureau_target` + `status` filters on the ingestion audit run list. Live polling, automated filing, and cross-tenant benchmarks stay out of scope.
 
