@@ -13,6 +13,16 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — org-internal benchmarks aggregate CSV export (Phase 19)
+
+**Decision:** Add `GET /reporting/reinvestigation-outcomes/benchmarks/export?format=csv` and a Download CSV control on Outcome benchmarks. Export org aggregate + optional breakdown rows using the same query params as the JSON endpoint.
+
+**Reason:** Staff need a handoff artifact for advisory rate comparisons without response-level PII.
+
+**Guardrails:** Counts/rates only; no client/account IDs; org-scoped; `format=csv` only.
+
+**Follow-up work:** Slice 4 — sign-off and `v20.0.0` tag.
+
 ## Compliance intelligence — outcome benchmarks per-recipient breakdown (Phase 19)
 
 **Decision:** Add optional `group_by=recipient` to `GET /reporting/reinvestigation-outcomes/benchmarks` returning `by_recipient` entries with per-recipient baseline/recent analytics and advisory rate deltas. Reporting Center adds a Bureau/Recipient breakdown control (parity with outcome analytics).

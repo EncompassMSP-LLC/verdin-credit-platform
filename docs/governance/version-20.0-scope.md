@@ -16,7 +16,7 @@ Everything remains **staff-mediated and advisory**. The platform still never pol
 | Epic | Theme                                          | 20.0 target | Summary                                                                                |
 | ---- | ---------------------------------------------- | ----------- | -------------------------------------------------------------------------------------- |
 | 1    | Outcome benchmarks per-recipient breakdown     | Released    | `group_by=recipient` on benchmarks API + Reporting Center Bureau/Recipient control     |
-| 2    | Org-internal benchmarks aggregate rates export | Planned     | Operator-gated CSV of windows + org/bureau/recipient rates (counts/rates only; no PII) |
+| 2    | Org-internal benchmarks aggregate rates export | Released    | Operator-gated CSV of windows + org/bureau/recipient rates (counts/rates only; no PII) |
 | 3    | Capability matrix / governance sign-off        | Planned     | Scope, checklist, matrix rows, release notes                                           |
 
 ## Shipped from 19.0 (foundation — do not regress)
@@ -45,7 +45,7 @@ All v19.0.0 APIs, UI, and `@verdin/api-client` functions remain production capab
 
 **Not included:** Cross-tenant percentile ranks; editing historical responses from the panel; exporting benchmark PII.
 
-### Org-internal benchmarks aggregate rates export (Planned)
+### Org-internal benchmarks aggregate rates export (Released)
 
 **Included:** Operator-gated download (CSV) of org aggregate + optional `by_bureau` / `by_recipient` rates and window metadata from the Outcome benchmarks surface; counts and rates only.
 

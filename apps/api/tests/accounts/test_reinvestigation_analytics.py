@@ -654,3 +654,49 @@ def test_reinvestigation_outcome_benchmarks_rejects_recent_gt_baseline(
 def test_reinvestigation_outcome_benchmarks_requires_auth(api_client: TestClient) -> None:
     response = api_client.get("/api/v1/reporting/reinvestigation-outcomes/benchmarks")
     assert response.status_code == 401
+
+
+def test_reinvestigation_outcome_benchmarks_csv_export(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    today = date.today()
+    account_id = _create_account_with_dispute_date(
+        api_client,
+        manager_headers,
+        sample_case_id,
+        creditor_name="CSV Bench Bank",
+        last_dispute_date=(today - timedelta(days=20)).isoformat(),
+    )
+    _record_response(
+        api_client,
+        manager_headers,
+        account_id,
+        outcome="deleted",
+        response_date=(today - timedelta(days=5)).isoformat(),
+    )
+
+    response = api_client.get(
+        "/api/v1/reporting/reinvestigation-outcomes/benchmarks/export",
+        headers=manager_headers,
+        params={"format": "csv", "baseline_days": 90, "recent_days": 30},
+    )
+    assert response.status_code == 200, response.text
+    assert "text/csv" in response.headers.get("content-type", "")
+    body = response.text
+    assert "breakdown_type" in body
+    assert "organization" in body
+    assert "baseline_deletion_rate" in body
+    assert "client_id" not in body.lower()
+    assert "account_id" not in body.lower()
+
+
+def test_reinvestigation_outcome_benchmarks_csv_export_requires_auth(
+    api_client: TestClient,
+) -> None:
+    response = api_client.get(
+        "/api/v1/reporting/reinvestigation-outcomes/benchmarks/export",
+        params={"format": "csv"},
+    )
+    assert response.status_code == 401

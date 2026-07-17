@@ -697,10 +697,10 @@ Scope: [version-19.0-scope.md](version-19.0-scope.md) · Checklist: [version-19.
 
 Scope: [version-20.0-scope.md](version-20.0-scope.md) · Checklist: [version-20.0-completion-checklist.md](../development/version-20.0-completion-checklist.md)
 
-| Capability                                     | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                              |
-| ---------------------------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ---------------------------------------------------------------------------------- |
-| Outcome benchmarks per-recipient breakdown     | 20.0    | ✅      | ✅      | ✅       | ✅  | —   | ✅    | Reporting    | `group_by=recipient` on benchmarks API + Reporting Center Bureau/Recipient control |
-| Org-internal benchmarks aggregate rates export | 20.0    | Planned | —       | —        | —   | —   | —     | Reporting    | Operator-gated CSV of windows + rates; counts/rates only; no client/account PII    |
+| Capability                                     | Version | Status | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                              |
+| ---------------------------------------------- | ------- | ------ | ------- | -------- | --- | --- | ----- | ------------ | ---------------------------------------------------------------------------------- |
+| Outcome benchmarks per-recipient breakdown     | 20.0    | ✅     | ✅      | ✅       | ✅  | —   | ✅    | Reporting    | `group_by=recipient` on benchmarks API + Reporting Center Bureau/Recipient control |
+| Org-internal benchmarks aggregate rates export | 20.0    | ✅     | ✅      | ✅       | ✅  | —   | ✅    | Reporting    | Operator-gated CSV of windows + rates; counts/rates only; no client/account PII    |
 
 ---
 

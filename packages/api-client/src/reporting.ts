@@ -1,4 +1,4 @@
-import { apiPath, request } from './http';
+import { apiPath, ApiClientError, getAccessToken, getApiBaseUrl, request } from './http';
 
 export interface ClientReportingMetrics {
   total: number;
@@ -229,6 +229,46 @@ export function getReinvestigationOutcomeBenchmarks(
   return request<ReinvestigationOutcomeBenchmarksResponse>(
     apiPath(`/reporting/reinvestigation-outcomes/benchmarks${query ? `?${query}` : ''}`),
   );
+}
+
+function parseContentDispositionFilename(header: string | null, fallback: string): string {
+  if (!header) return fallback;
+  const match = /filename="([^"]+)"/.exec(header);
+  return match?.[1] ?? fallback;
+}
+
+export async function downloadReinvestigationOutcomeBenchmarksCsv(
+  params: ReinvestigationOutcomeBenchmarksParams = {},
+): Promise<{ blob: Blob; filename: string }> {
+  const search = new URLSearchParams({ format: 'csv' });
+  if (params.baseline_days != null) search.set('baseline_days', String(params.baseline_days));
+  if (params.recent_days != null) search.set('recent_days', String(params.recent_days));
+  if (params.bureau) search.set('bureau', params.bureau);
+  if (params.group_by) search.set('group_by', params.group_by);
+  const url = `${getApiBaseUrl()}${apiPath(
+    `/reporting/reinvestigation-outcomes/benchmarks/export?${search.toString()}`,
+  )}`;
+  const headers: Record<string, string> = {};
+  const token = getAccessToken();
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+  const response = await fetch(url, { headers });
+  if (!response.ok) {
+    const error = (await response.json().catch(() => ({
+      detail: 'Request failed',
+    }))) as { detail?: string; code?: string };
+    throw new ApiClientError(
+      error.detail || `HTTP ${response.status}`,
+      response.status,
+      error.code,
+    );
+  }
+  const filename = parseContentDispositionFilename(
+    response.headers.get('Content-Disposition'),
+    'reinvestigation-outcome-benchmarks.csv',
+  );
+  return { blob: await response.blob(), filename };
 }
 
 export interface RevenueAnalytics {
