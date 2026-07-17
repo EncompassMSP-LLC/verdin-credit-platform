@@ -68,6 +68,7 @@ Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (
 | **17.0**  | Reinvestigation Operations Surfaces             | Released    | Phase 16 Reporting Center benchmarks UI, Compliance Center ingestion audit UI (`v17.0.0`)                                                        |
 | **18.0**  | Reinvestigation Operations Polish               | Released    | Phase 17 org benchmark window defaults, ingestion audit case/account scope UI (`v18.0.0`)                                                        |
 | **19.0**  | Reinvestigation Benchmark Depth                 | Released    | Phase 18 per-bureau benchmark window defaults, outcome benchmarks per-bureau breakdown (`v19.0.0`)                                               |
+| **20.0**  | Reinvestigation Benchmark Parity                | Planned     | Phase 19 benchmarks `group_by=recipient`, aggregate rates CSV export (no PII)                                                                    |
 
 ### Sprint milestones
 
@@ -538,6 +539,17 @@ Compliance Intelligence Phase 18 deepens org-internal outcome benchmarks without
 | ---- | --------------------------------------- | ----------- | -------------------------------------------------------------------------- |
 | 1    | Per-bureau benchmark window defaults    | Released    | Optional Equifax/Experian/TransUnion overrides; fall back to org-wide pair |
 | 2    | Outcome benchmarks per-bureau breakdown | Released    | `group_by=bureau` parity with outcome analytics + Reporting Center table   |
+
+### Version 20.0 — Reinvestigation Benchmark Parity (planned)
+
+Scope and checklist: [`docs/governance/version-20.0-scope.md`](../governance/version-20.0-scope.md) · [`docs/development/version-20.0-completion-checklist.md`](../development/version-20.0-completion-checklist.md)
+
+Compliance Intelligence Phase 19 closes parity gaps on org-internal outcome benchmarks without crossing the live-bureau frontier: single-call `group_by=recipient` on the Outcome benchmarks API/UI (matching outcome analytics), and an operator-gated aggregate rates CSV export with no PII. Live bureau response ingestion execution, automated re-dispute filing execution, unsupervised escalation, automated litigation filing, and cross-tenant benchmarks remain deferred (21.0+ or never) pending legal/compliance sign-off.
+
+| Epic | Theme                                          | 20.0 target | Notes                                                                      |
+| ---- | ---------------------------------------------- | ----------- | -------------------------------------------------------------------------- |
+| 1    | Outcome benchmarks per-recipient breakdown     | Planned     | `group_by=recipient` parity with outcome analytics + Reporting Center UI   |
+| 2    | Org-internal benchmarks aggregate rates export | Planned     | Operator-gated CSV of windows + rates (counts only; no client/account IDs) |
 
 ## Sprint → version mapping
 
