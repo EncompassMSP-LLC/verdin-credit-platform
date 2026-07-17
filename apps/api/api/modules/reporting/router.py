@@ -102,7 +102,7 @@ async def get_reinvestigation_outcome_benchmarks_reporting(
     ),
     bureau: AccountBureau | None = Query(None, description="Filter to a single credit bureau"),
     group_by: str | None = Query(
-        None, description="Optional roll-up dimension; currently only 'bureau'"
+        None, description="Optional roll-up dimension; 'bureau' or 'recipient'"
     ),
     current_user: User = Depends(get_current_user),
     service: ReportingService = Depends(get_reporting_service),

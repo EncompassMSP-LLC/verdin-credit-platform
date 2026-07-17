@@ -68,6 +68,7 @@ from api.modules.reporting.schemas import (
     ReinvestigationOutcomeAnalyticsResponse,
     ReinvestigationOutcomeBenchmarkBureauBreakdown,
     ReinvestigationOutcomeBenchmarkPeriod,
+    ReinvestigationOutcomeBenchmarkRecipientBreakdown,
     ReinvestigationOutcomeBenchmarksResponse,
     ReinvestigationOutcomeBureauBreakdown,
     ReinvestigationOutcomeFilters,
@@ -255,14 +256,16 @@ class ReportingService:
         live bureau contact. When window args are omitted, org dispute-settings
         defaults apply (per-bureau override when ``bureau`` is set, else org-wide
         pair, else platform 90/30). When ``group_by="bureau"``, ``by_bureau``
-        carries per-bureau baseline/recent analytics and rate deltas.
+        carries per-bureau baseline/recent analytics and rate deltas. When
+        ``group_by="recipient"``, ``by_recipient`` rolls up by linked letter
+        recipient type (credit_bureau / furnisher / unknown).
         """
         self._require_read(user)
         organization_id = self._require_organization(user)
-        if group_by is not None and group_by != "bureau":
+        if group_by is not None and group_by not in {"bureau", "recipient"}:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="group_by must be 'bureau' or omitted",
+                detail="group_by must be 'bureau', 'recipient', or omitted",
             )
         org_baseline, org_recent = await self._resolve_benchmark_window_defaults(
             organization_id, bureau=bureau
@@ -312,8 +315,11 @@ class ReportingService:
         baseline = self._to_reinvestigation_analytics_schema(baseline_result)
         recent = self._to_reinvestigation_analytics_schema(recent_result)
         by_bureau: list[ReinvestigationOutcomeBenchmarkBureauBreakdown] = []
+        by_recipient: list[ReinvestigationOutcomeBenchmarkRecipientBreakdown] = []
         if group_by == "bureau":
             by_bureau = self._build_benchmark_bureau_breakdown(baseline_raw, recent_raw)
+        elif group_by == "recipient":
+            by_recipient = self._build_benchmark_recipient_breakdown(baseline_raw, recent_raw)
         return ReinvestigationOutcomeBenchmarksResponse(
             generated_at=datetime.now(UTC),
             scope="organization",
@@ -333,6 +339,7 @@ class ReportingService:
             recent=recent,
             rate_deltas=self._rate_deltas(baseline, recent),
             by_bureau=by_bureau,
+            by_recipient=by_recipient,
         )
 
     @classmethod
@@ -389,6 +396,38 @@ class ReportingService:
             breakdown.append(
                 ReinvestigationOutcomeBenchmarkBureauBreakdown(
                     bureau=bureau_key,
+                    baseline=baseline,
+                    recent=recent,
+                    rate_deltas=cls._rate_deltas(baseline, recent),
+                )
+            )
+        return breakdown
+
+    @classmethod
+    def _build_benchmark_recipient_breakdown(
+        cls,
+        baseline_raw: list[dict[str, object]],
+        recent_raw: list[dict[str, object]],
+    ) -> list[ReinvestigationOutcomeBenchmarkRecipientBreakdown]:
+        baseline_by = {
+            item.recipient: item.analytics for item in cls._build_recipient_breakdown(baseline_raw)
+        }
+        recent_by = {
+            item.recipient: item.analytics for item in cls._build_recipient_breakdown(recent_raw)
+        }
+        order = {"credit_bureau": 0, "furnisher": 1, "unknown": 9}
+        recipient_keys = sorted(
+            set(baseline_by) | set(recent_by),
+            key=lambda r: (order.get(r, 5), r),
+        )
+        empty = cls._empty_reinvestigation_analytics()
+        breakdown: list[ReinvestigationOutcomeBenchmarkRecipientBreakdown] = []
+        for recipient_key in recipient_keys:
+            baseline = baseline_by.get(recipient_key, empty)
+            recent = recent_by.get(recipient_key, empty)
+            breakdown.append(
+                ReinvestigationOutcomeBenchmarkRecipientBreakdown(
+                    recipient=recipient_key,
                     baseline=baseline,
                     recent=recent,
                     rate_deltas=cls._rate_deltas(baseline, recent),

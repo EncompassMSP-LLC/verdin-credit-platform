@@ -709,9 +709,16 @@ function ReinvestigationBenchmarksPanel() {
   const [baselineOverride, setBaselineOverride] = useState<string | null>(null);
   const [recentOverride, setRecentOverride] = useState<string | null>(null);
   const [bureau, setBureau] = useState('');
+  const [groupBy, setGroupBy] = useState<'bureau' | 'recipient'>('bureau');
 
   const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ['reporting-reinvestigation-benchmarks', baselineOverride, recentOverride, bureau],
+    queryKey: [
+      'reporting-reinvestigation-benchmarks',
+      baselineOverride,
+      recentOverride,
+      bureau,
+      groupBy,
+    ],
     queryFn: () =>
       getReinvestigationOutcomeBenchmarks({
         baseline_days:
@@ -719,7 +726,7 @@ function ReinvestigationBenchmarksPanel() {
         recent_days:
           recentOverride != null ? Number.parseInt(recentOverride, 10) || undefined : undefined,
         bureau: bureau || undefined,
-        group_by: 'bureau',
+        group_by: groupBy,
       }),
   });
 
@@ -728,7 +735,7 @@ function ReinvestigationBenchmarksPanel() {
   const displayRecent = recentOverride ?? (data ? String(data.recent_period.window_days) : '');
 
   const filterControls = (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
       <label className="text-xs font-medium text-gray-700">
         Baseline window (days)
         <input
@@ -765,6 +772,17 @@ function ReinvestigationBenchmarksPanel() {
               {option.label}
             </option>
           ))}
+        </select>
+      </label>
+      <label className="text-xs font-medium text-gray-700">
+        Break down by
+        <select
+          className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+          value={groupBy}
+          onChange={(event) => setGroupBy(event.target.value as 'bureau' | 'recipient')}
+        >
+          <option value="bureau">Bureau</option>
+          <option value="recipient">Recipient</option>
         </select>
       </label>
     </div>
@@ -934,6 +952,47 @@ function ReinvestigationBenchmarksPanel() {
                   <tr key={item.bureau} className="border-b border-gray-100">
                     <td className="py-2 pr-4 font-medium text-gray-900">
                       {formatLabel(item.bureau)}
+                    </td>
+                    <td className="py-2 pr-4">{item.baseline.total_responses}</td>
+                    <td className="py-2 pr-4">{item.recent.total_responses}</td>
+                    <td className="py-2 pr-4">
+                      {formatSignedPercent(item.rate_deltas.deletion_rate)}
+                    </td>
+                    <td className="py-2 pr-4">
+                      {formatSignedPercent(item.rate_deltas.favorable_rate)}
+                    </td>
+                    <td className="py-2">{formatPercent(item.recent.deletion_rate)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      ) : null}
+
+      {data.by_recipient.length > 0 ? (
+        <Card title="Per-recipient breakdown">
+          <p className="mb-3 text-xs text-gray-500">
+            Same baseline/recent windows as the org aggregate. Recipient is the linked dispute
+            letter type (credit bureau vs furnisher); unlinked responses are unknown.
+          </p>
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-gray-200 text-xs uppercase tracking-wide text-gray-500">
+                  <th className="py-2 pr-4 font-medium">Recipient</th>
+                  <th className="py-2 pr-4 font-medium">Baseline resp.</th>
+                  <th className="py-2 pr-4 font-medium">Recent resp.</th>
+                  <th className="py-2 pr-4 font-medium">Deletion Δ</th>
+                  <th className="py-2 pr-4 font-medium">Favorable Δ</th>
+                  <th className="py-2 font-medium">Recent deletion</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.by_recipient.map((item) => (
+                  <tr key={item.recipient} className="border-b border-gray-100">
+                    <td className="py-2 pr-4 font-medium text-gray-900">
+                      {formatLabel(item.recipient)}
                     </td>
                     <td className="py-2 pr-4">{item.baseline.total_responses}</td>
                     <td className="py-2 pr-4">{item.recent.total_responses}</td>

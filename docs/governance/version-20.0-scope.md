@@ -15,7 +15,7 @@ Everything remains **staff-mediated and advisory**. The platform still never pol
 
 | Epic | Theme                                          | 20.0 target | Summary                                                                                |
 | ---- | ---------------------------------------------- | ----------- | -------------------------------------------------------------------------------------- |
-| 1    | Outcome benchmarks per-recipient breakdown     | Planned     | `group_by=recipient` on benchmarks API + Reporting Center Bureau/Recipient control     |
+| 1    | Outcome benchmarks per-recipient breakdown     | Released    | `group_by=recipient` on benchmarks API + Reporting Center Bureau/Recipient control     |
 | 2    | Org-internal benchmarks aggregate rates export | Planned     | Operator-gated CSV of windows + org/bureau/recipient rates (counts/rates only; no PII) |
 | 3    | Capability matrix / governance sign-off        | Planned     | Scope, checklist, matrix rows, release notes                                           |
 
@@ -39,7 +39,7 @@ All v19.0.0 APIs, UI, and `@verdin/api-client` functions remain production capab
 
 ## Partial capability limits (20.0 targets)
 
-### Outcome benchmarks per-recipient breakdown (Planned)
+### Outcome benchmarks per-recipient breakdown (Released)
 
 **Included:** Optional `group_by=recipient` on `GET /reporting/reinvestigation-outcomes/benchmarks` returning per-recipient baseline/recent analytics and advisory rate deltas (credit_bureau / furnisher / unknown); Reporting Center Bureau/Recipient breakdown control mirroring outcome analytics.
 

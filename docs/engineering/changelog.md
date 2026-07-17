@@ -13,6 +13,16 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — outcome benchmarks per-recipient breakdown (Phase 19)
+
+**Decision:** Add optional `group_by=recipient` to `GET /reporting/reinvestigation-outcomes/benchmarks` returning `by_recipient` entries with per-recipient baseline/recent analytics and advisory rate deltas. Reporting Center adds a Bureau/Recipient breakdown control (parity with outcome analytics).
+
+**Reason:** After 19.0 bureau breakdown, CRA vs furnisher benchmark comparison still required switching surfaces or multiple round-trips.
+
+**Guardrails:** Org-scoped only; same windows as the aggregate; unlinked responses bucket as `unknown`; invalid `group_by` → 422.
+
+**Follow-up work:** Slice 3 — aggregate rates CSV export; Slice 4 — sign-off.
+
 ## Compliance intelligence — Version 20.0 scope (Phase 19)
 
 **Decision:** Scope Version 20.0 as Reinvestigation Benchmark Parity — outcome benchmarks `group_by=recipient` and an operator-gated aggregate rates CSV export (no PII). Keep live bureau polling, automated filing, unsupervised escalation, litigation e-filing, and cross-tenant benchmarks deferred to 21.0+ or never.

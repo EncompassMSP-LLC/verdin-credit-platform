@@ -103,6 +103,7 @@ export {
   type ReinvestigationOutcomeBenchmarksParams,
   type ReinvestigationOutcomeBenchmarksResponse,
   type ReinvestigationOutcomeBenchmarkBureauBreakdown,
+  type ReinvestigationOutcomeBenchmarkRecipientBreakdown,
   type ReinvestigationOutcomeBureauBreakdown,
   type ReinvestigationOutcomeFilters,
   type ReinvestigationOutcomeRateDeltas,
