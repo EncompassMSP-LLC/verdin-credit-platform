@@ -2,7 +2,7 @@
 
 Ordered path for **Compliance Intelligence Phase 18 — Reinvestigation Benchmark Depth** and follow-on governance work.
 
-Preceded by shipped **v18.0.0**. **Targeting v19.0.0.**
+Preceded by shipped **v18.0.0**. **Shipped as v19.0.0.**
 
 Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 
@@ -12,9 +12,9 @@ Scope: [`docs/governance/version-19.0-scope.md`](../governance/version-19.0-scop
 
 - [x] Organizations can configure optional per-bureau benchmark window overrides
 - [x] Outcome benchmarks API/UI expose a per-bureau breakdown in one call
-- [ ] Capability matrix + API reference updated
-- [ ] Deferred items explicitly documented
-- [ ] `docs/release-notes/v19.0.0.md` + tag `v19.0.0`
+- [x] Capability matrix + API reference updated
+- [x] Deferred items explicitly documented
+- [x] `docs/release-notes/v19.0.0.md` + tag `v19.0.0`
 
 ---
 
@@ -25,7 +25,7 @@ Scope: [`docs/governance/version-19.0-scope.md`](../governance/version-19.0-scop
 | 1     | 19.0 scope + completion checklist       | Kickoff    | ✅     |
 | 2     | Per-bureau benchmark window defaults    | Org Admin  | ✅     |
 | 3     | Outcome benchmarks per-bureau breakdown | Reporting  | ✅     |
-| 4     | Capability matrix 19.0 sign-off         | Governance | ⬜     |
+| 4     | Capability matrix 19.0 sign-off         | Governance | ✅     |
 
 Slice 2 adds optional Equifax/Experian/TransUnion window overrides on dispute settings (falls back to org-wide 90/30). Slice 3 adds `group_by=bureau` parity with outcome analytics on the benchmarks read model. Live polling, automated filing, and cross-tenant benchmarks stay out of scope.
 

@@ -15,9 +15,9 @@ Everything remains **staff-mediated and advisory**. The platform still never pol
 
 | Epic | Theme                                   | 19.0 target | Summary                                                                                          |
 | ---- | --------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------ |
-| 1    | Per-bureau benchmark window defaults    | Planned     | Optional Equifax/Experian/TransUnion window overrides on dispute settings; fall back to org pair |
-| 2    | Outcome benchmarks per-bureau breakdown | Planned     | `group_by=bureau` on benchmarks API + Reporting Center per-bureau rates table                    |
-| 3    | Capability matrix / governance sign-off | Planned     | Scope, checklist, matrix rows, release notes                                                     |
+| 1    | Per-bureau benchmark window defaults    | Released    | Optional Equifax/Experian/TransUnion window overrides on dispute settings; fall back to org pair |
+| 2    | Outcome benchmarks per-bureau breakdown | Released    | `group_by=bureau` on benchmarks API + Reporting Center per-bureau rates table                    |
+| 3    | Capability matrix / governance sign-off | Released    | Scope, checklist, matrix rows, release notes                                                     |
 
 ## Shipped from 18.0 (foundation — do not regress)
 
@@ -37,13 +37,13 @@ All v18.0.0 APIs, UI, and `@verdin/api-client` functions remain production capab
 
 ## Partial capability limits (19.0 targets)
 
-### Per-bureau benchmark window defaults (Planned)
+### Per-bureau benchmark window defaults (Released)
 
 **Included:** Optional per-bureau `baseline_days` / `recent_days` overrides (Equifax / Experian / TransUnion) on organization dispute settings; resolve when Reporting requests a bureau filter; Org Admin UI to edit overrides; fall back to org-wide pair then platform defaults (90/30).
 
 **Not included:** Per-recipient windows; automatic scheduled recompute jobs; cross-tenant baselines.
 
-### Outcome benchmarks per-bureau breakdown (Planned)
+### Outcome benchmarks per-bureau breakdown (Released)
 
 **Included:** Optional `group_by=bureau` on `GET /reporting/reinvestigation-outcomes/benchmarks` returning per-bureau baseline/recent analytics and advisory rate deltas; Reporting Center always requests the breakdown and renders a per-bureau table under the org aggregate.
 
@@ -52,6 +52,7 @@ All v18.0.0 APIs, UI, and `@verdin/api-client` functions remain production capab
 ## Related documents
 
 - [Version 19.0 completion checklist](../development/version-19.0-completion-checklist.md)
+- [Release notes — v19.0.0](../release-notes/v19.0.0.md)
 - [Version 18.0 scope](version-18.0-scope.md)
 - [Capability matrix](capability-matrix.md)
 - [Product roadmap](../roadmap/README.md)

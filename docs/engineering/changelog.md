@@ -13,6 +13,14 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — Version 19.0 sign-off (Phase 18)
+
+**Decision:** Close Phase 18 as shipped `v19.0.0` after per-bureau window defaults and benchmarks `group_by=bureau`. Keep live bureau polling, automated filing, unsupervised escalation, litigation e-filing, and cross-tenant benchmarks deferred to 20.0+ or never.
+
+**Reason:** Non-blocked benchmark depth over owned configuration and analytics is complete; remaining items need legal/compliance or product decisions.
+
+**Follow-up work:** Tag `v19.0.0`; next non-blocked polish or gated live-integration phase only with explicit sign-off.
+
 ## Compliance intelligence — outcome benchmarks per-bureau breakdown (Phase 18)
 
 **Decision:** Add optional `group_by=bureau` to `GET /reporting/reinvestigation-outcomes/benchmarks` returning `by_bureau` entries with per-bureau baseline/recent analytics and advisory rate deltas. Reporting Center always requests the breakdown.
