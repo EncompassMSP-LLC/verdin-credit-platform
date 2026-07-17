@@ -32,6 +32,7 @@
 **Version 17.0 sign-off:** [version-17.0-scope.md](version-17.0-scope.md) · Release notes: [v17.0.0.md](../release-notes/v17.0.0.md)
 **Version 18.0 sign-off:** [version-18.0-scope.md](version-18.0-scope.md) · Release notes: [v18.0.0.md](../release-notes/v18.0.0.md)
 **Version 19.0 sign-off:** [version-19.0-scope.md](version-19.0-scope.md) · Release notes: [v19.0.0.md](../release-notes/v19.0.0.md)
+**Version 20.0 sign-off:** [version-20.0-scope.md](version-20.0-scope.md) · Release notes: [v20.0.0.md](../release-notes/v20.0.0.md)
 
 ## Status legend
 
@@ -693,9 +694,9 @@ Scope: [version-19.0-scope.md](version-19.0-scope.md) · Checklist: [version-19.
 
 ---
 
-## Version 20.0 — Reinvestigation Benchmark Parity (in progress — 🚧)
+## Version 20.0 — Reinvestigation Benchmark Parity (shipped — ✅)
 
-Scope: [version-20.0-scope.md](version-20.0-scope.md) · Checklist: [version-20.0-completion-checklist.md](../development/version-20.0-completion-checklist.md)
+Scope: [version-20.0-scope.md](version-20.0-scope.md) · Checklist: [version-20.0-completion-checklist.md](../development/version-20.0-completion-checklist.md) · Release: [v20.0.0.md](../release-notes/v20.0.0.md)
 
 | Capability                                     | Version | Status | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                              |
 | ---------------------------------------------- | ------- | ------ | ------- | -------- | --- | --- | ----- | ------------ | ---------------------------------------------------------------------------------- |
