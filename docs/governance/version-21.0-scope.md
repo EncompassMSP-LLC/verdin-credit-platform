@@ -16,7 +16,7 @@ Everything remains **staff-mediated and advisory**. The platform still never pol
 | Epic | Theme                                      | 21.0 target | Summary                                                                                        |
 | ---- | ------------------------------------------ | ----------- | ---------------------------------------------------------------------------------------------- |
 | 1    | Per-recipient benchmark window defaults    | Released    | Optional credit_bureau / furnisher window overrides on dispute settings; fall back to org pair |
-| 2    | Ingestion audit bureau/status list filters | Planned     | Optional `bureau_target` + `status` on Compliance Center ingestion run list                    |
+| 2    | Ingestion audit bureau/status list filters | Released    | Optional `bureau_target` + `status` on Compliance Center ingestion run list                    |
 | 3    | Capability matrix / governance sign-off    | Planned     | Scope, checklist, matrix rows, release notes                                                   |
 
 ## Shipped from 20.0 (foundation — do not regress)
@@ -44,7 +44,7 @@ All v20.0.0 APIs, UI, and `@verdin/api-client` functions remain production capab
 
 **Not included:** Per-bureau×recipient matrix; automatic scheduled recompute jobs; cross-tenant baselines.
 
-### Ingestion audit bureau/status list filters (Planned)
+### Ingestion audit bureau/status list filters (Released)
 
 **Included:** Optional `bureau_target` and `status` query params on the bureau response ingestion run list API; Compliance Center list filter controls; no change to start-from-deferred behavior.
 

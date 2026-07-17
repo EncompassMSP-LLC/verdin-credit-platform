@@ -13,6 +13,16 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — ingestion audit bureau/status list filters (Phase 20)
+
+**Decision:** Add optional `bureau_target` and `status` query params on `GET /compliance/bureau-response-ingestion/runs`, with matching Compliance Center filter controls. Invalid `status` values return 422; start-run remains always-deferred.
+
+**Reason:** Operators already store bureau target and status on each audit row; list filtering completes the audit surface without enabling live polling.
+
+**Guardrails:** Org-scoped only; no change to deferred start semantics; live polling stays deferred.
+
+**Follow-up work:** Slice 4 — Version 21.0 sign-off + release notes.
+
 ## Compliance intelligence — per-recipient benchmark window defaults (Phase 20)
 
 **Decision:** Add optional `reinvestigation_benchmark_recipient_windows` on dispute settings (`credit_bureau` / `furnisher`) with the same merge/null-clear semantics as bureau windows. Reporting resolves recipient override → bureau override → org → platform when `recipient` is set on benchmarks.

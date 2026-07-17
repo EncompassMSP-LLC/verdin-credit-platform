@@ -780,14 +780,14 @@ Retention enforcement endpoints require `ENABLE_COMPLIANCE_ENFORCEMENT=true`. Ac
 | GET    | `/compliance/enforcement/runs`   | read_only | Paginated retention enforcement audit log        |
 | POST   | `/compliance/enforcement/run`    | admin     | Run retention enforcement for current org        |
 
-| Method | Path                                              | Min role     | Description                                                         |
-| ------ | ------------------------------------------------- | ------------ | ------------------------------------------------------------------- |
-| GET    | `/compliance/bureau-response-ingestion/status`    | read_only    | Ingestion scaffold readiness (live polling deferred)                |
-| GET    | `/compliance/bureau-response-ingestion/runs`      | read_only    | Paginated bureau response ingestion audit log                       |
-| GET    | `/compliance/bureau-response-ingestion/runs/{id}` | read_only    | Get a single ingestion audit run                                    |
-| POST   | `/compliance/bureau-response-ingestion/runs`      | case_manager | Record operator-initiated scaffold run (always `deferred`, no poll) |
+| Method | Path                                              | Min role     | Description                                                                        |
+| ------ | ------------------------------------------------- | ------------ | ---------------------------------------------------------------------------------- |
+| GET    | `/compliance/bureau-response-ingestion/status`    | read_only    | Ingestion scaffold readiness (live polling deferred)                               |
+| GET    | `/compliance/bureau-response-ingestion/runs`      | read_only    | Paginated ingestion audit log (`case_id`, `account_id`, `bureau_target`, `status`) |
+| GET    | `/compliance/bureau-response-ingestion/runs/{id}` | read_only    | Get a single ingestion audit run                                                   |
+| POST   | `/compliance/bureau-response-ingestion/runs`      | case_manager | Record operator-initiated scaffold run (always `deferred`, no poll)                |
 
-As of Phase 16 the Compliance Center exposes a **Response ingestion** tab for status, run history, and starting deferred scaffold runs (no live polling). As of Phase 17 the tab accepts optional `case_id` / `account_id` on start and list filters.
+As of Phase 16 the Compliance Center exposes a **Response ingestion** tab for status, run history, and starting deferred scaffold runs (no live polling). As of Phase 17 the tab accepts optional `case_id` / `account_id` on start and list filters. As of Phase 20 (Version 21.0) the run list also filters by optional `bureau_target` and `status`.
 
 Dispute filing prep endpoints require `ENABLE_DISPUTE_FILING_PREP=true` (and human-gated agent execution readiness). Admin approval marks a prep run as `prepared` without autonomous bureau submission.
 

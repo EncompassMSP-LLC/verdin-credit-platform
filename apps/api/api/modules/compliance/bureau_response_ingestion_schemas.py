@@ -71,3 +71,5 @@ class BureauResponseIngestionRunListParams(BaseSchema):
     page_size: int = Field(default=20, ge=1, le=100)
     case_id: uuid.UUID | None = None
     account_id: uuid.UUID | None = None
+    bureau_target: str | None = Field(default=None, min_length=1, max_length=32)
+    status: BureauResponseIngestionRunStatus | None = None
