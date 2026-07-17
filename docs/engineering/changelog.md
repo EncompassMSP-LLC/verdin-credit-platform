@@ -13,6 +13,16 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — per-recipient benchmark window defaults (Phase 20)
+
+**Decision:** Add optional `reinvestigation_benchmark_recipient_windows` on dispute settings (`credit_bureau` / `furnisher`) with the same merge/null-clear semantics as bureau windows. Reporting resolves recipient override → bureau override → org → platform when `recipient` is set on benchmarks.
+
+**Reason:** After 20.0 recipient breakdown, CRA vs furnisher clocks often need different trailing windows than the org-wide pair.
+
+**Guardrails:** Org-scoped only; invalid recipient keys → 422; recent ≤ baseline.
+
+**Follow-up work:** Slice 3 — ingestion audit bureau/status list filters.
+
 ## Compliance intelligence — Version 21.0 scope (Phase 20)
 
 **Decision:** Scope Version 21.0 as Reinvestigation Operations Filters — per-recipient benchmark window defaults and ingestion audit bureau/status list filters. Keep live bureau polling, automated filing, unsupervised escalation, litigation e-filing, and cross-tenant benchmarks deferred to 22.0+ or never.

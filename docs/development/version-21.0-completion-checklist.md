@@ -10,7 +10,7 @@ Scope: [`docs/governance/version-21.0-scope.md`](../governance/version-21.0-scop
 
 ## Exit criteria for "21.0 done"
 
-- [ ] Organizations can configure optional per-recipient benchmark window overrides
+- [x] Organizations can configure optional per-recipient benchmark window overrides
 - [ ] Compliance Center ingestion run list filters by bureau target and status
 - [ ] Capability matrix + API reference updated
 - [ ] Deferred items explicitly documented
@@ -23,7 +23,7 @@ Scope: [`docs/governance/version-21.0-scope.md`](../governance/version-21.0-scop
 | Order | Slice                                      | Epic       | Status |
 | ----- | ------------------------------------------ | ---------- | ------ |
 | 1     | 21.0 scope + completion checklist          | Kickoff    | ✅     |
-| 2     | Per-recipient benchmark window defaults    | Org Admin  | ☐      |
+| 2     | Per-recipient benchmark window defaults    | Org Admin  | ✅     |
 | 3     | Ingestion audit bureau/status list filters | Compliance | ☐      |
 | 4     | Capability matrix 21.0 sign-off            | Governance | ☐      |
 

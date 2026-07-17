@@ -120,6 +120,7 @@ class ReinvestigationOutcomeBenchmarksResponse(BaseSchema):
     generated_at: datetime
     scope: str = "organization"
     bureau: str | None = None
+    recipient: str | None = None
     group_by: str | None = None
     baseline_period: ReinvestigationOutcomeBenchmarkPeriod
     baseline: ReinvestigationOutcomeAnalytics

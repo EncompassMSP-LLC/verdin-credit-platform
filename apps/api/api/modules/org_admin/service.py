@@ -34,6 +34,7 @@ from api.modules.org_admin.schemas import (
     OrganizationDisputeSettingsResponse,
     OrganizationDisputeSettingsUpdate,
     normalize_bureau_window_updates,
+    normalize_recipient_window_updates,
 )
 
 
@@ -351,6 +352,7 @@ class OrgAdminService:
                     DEFAULT_REINVESTIGATION_BENCHMARK_RECENT_DAYS
                 ),
                 reinvestigation_benchmark_bureau_windows={},
+                reinvestigation_benchmark_recipient_windows={},
             )
             apply_audit_on_create(settings, user.id)
         else:
@@ -361,6 +363,7 @@ class OrgAdminService:
             and body.reinvestigation_benchmark_baseline_days is None
             and body.reinvestigation_benchmark_recent_days is None
             and body.reinvestigation_benchmark_bureau_windows is None
+            and body.reinvestigation_benchmark_recipient_windows is None
         ):
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -384,6 +387,22 @@ class OrgAdminService:
                 settings.reinvestigation_benchmark_bureau_windows = normalize_bureau_window_updates(
                     body.reinvestigation_benchmark_bureau_windows,
                     existing,
+                )
+            except ValueError as exc:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail=str(exc),
+                ) from exc
+        if body.reinvestigation_benchmark_recipient_windows is not None:
+            existing_recipients = OrganizationDisputeSettingsResponse.from_model(
+                settings
+            ).reinvestigation_benchmark_recipient_windows
+            try:
+                settings.reinvestigation_benchmark_recipient_windows = (
+                    normalize_recipient_window_updates(
+                        body.reinvestigation_benchmark_recipient_windows,
+                        existing_recipients,
+                    )
                 )
             except ValueError as exc:
                 raise HTTPException(

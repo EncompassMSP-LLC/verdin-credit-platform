@@ -10,6 +10,7 @@ from api.core.responses import BaseSchema
 from api.modules.billing.schemas import OrganizationBillingSummary
 from api.modules.org_admin.dispute_settings_models import (
     BENCHMARK_WINDOW_BUREAUS,
+    BENCHMARK_WINDOW_RECIPIENTS,
     DEFAULT_CROSS_BUREAU_BALANCE_TOLERANCE,
     DEFAULT_REINVESTIGATION_BENCHMARK_BASELINE_DAYS,
     DEFAULT_REINVESTIGATION_BENCHMARK_RECENT_DAYS,
@@ -65,6 +66,9 @@ class OrganizationDisputeSettingsResponse(BaseSchema):
     reinvestigation_benchmark_bureau_windows: dict[str, BureauBenchmarkWindow] = Field(
         default_factory=dict
     )
+    reinvestigation_benchmark_recipient_windows: dict[str, BureauBenchmarkWindow] = Field(
+        default_factory=dict
+    )
     platform_default_baseline_days: int = DEFAULT_REINVESTIGATION_BENCHMARK_BASELINE_DAYS
     platform_default_recent_days: int = DEFAULT_REINVESTIGATION_BENCHMARK_RECENT_DAYS
     updated_at: datetime | None = None
@@ -83,6 +87,9 @@ class OrganizationDisputeSettingsResponse(BaseSchema):
             reinvestigation_benchmark_bureau_windows=_parse_bureau_windows(
                 settings.reinvestigation_benchmark_bureau_windows or {}
             ),
+            reinvestigation_benchmark_recipient_windows=_parse_recipient_windows(
+                settings.reinvestigation_benchmark_recipient_windows or {}
+            ),
             updated_at=settings.updated_at,
         )
 
@@ -98,6 +105,7 @@ class OrganizationDisputeSettingsResponse(BaseSchema):
             ),
             reinvestigation_benchmark_recent_days=DEFAULT_REINVESTIGATION_BENCHMARK_RECENT_DAYS,
             reinvestigation_benchmark_bureau_windows={},
+            reinvestigation_benchmark_recipient_windows={},
             updated_at=None,
         )
 
@@ -119,6 +127,9 @@ class OrganizationDisputeSettingsUpdate(BaseSchema):
         le=MAX_REINVESTIGATION_BENCHMARK_BASELINE_DAYS,
     )
     reinvestigation_benchmark_bureau_windows: dict[str, BureauBenchmarkWindow | None] | None = None
+    reinvestigation_benchmark_recipient_windows: dict[str, BureauBenchmarkWindow | None] | None = (
+        None
+    )
 
 
 def _parse_bureau_windows(raw: dict[str, object]) -> dict[str, BureauBenchmarkWindow]:
@@ -127,6 +138,18 @@ def _parse_bureau_windows(raw: dict[str, object]) -> dict[str, BureauBenchmarkWi
         if bureau not in BENCHMARK_WINDOW_BUREAUS or not isinstance(value, dict):
             continue
         parsed[bureau] = BureauBenchmarkWindow(
+            baseline_days=int(value["baseline_days"]),
+            recent_days=int(value["recent_days"]),
+        )
+    return parsed
+
+
+def _parse_recipient_windows(raw: dict[str, object]) -> dict[str, BureauBenchmarkWindow]:
+    parsed: dict[str, BureauBenchmarkWindow] = {}
+    for recipient, value in raw.items():
+        if recipient not in BENCHMARK_WINDOW_RECIPIENTS or not isinstance(value, dict):
+            continue
+        parsed[recipient] = BureauBenchmarkWindow(
             baseline_days=int(value["baseline_days"]),
             recent_days=int(value["recent_days"]),
         )
@@ -151,6 +174,27 @@ def normalize_bureau_window_updates(
                 "recent_days must be <= baseline_days"
             )
         merged[bureau] = value.model_dump()
+    return merged
+
+
+def normalize_recipient_window_updates(
+    updates: dict[str, BureauBenchmarkWindow | None],
+    existing: dict[str, BureauBenchmarkWindow],
+) -> dict[str, dict[str, int]]:
+    """Merge PATCH recipient-window map; ``null`` clears an override."""
+    merged = {key: value.model_dump() for key, value in existing.items()}
+    for recipient, value in updates.items():
+        if recipient not in BENCHMARK_WINDOW_RECIPIENTS:
+            raise ValueError(f"Unsupported recipient for benchmark windows: {recipient}")
+        if value is None:
+            merged.pop(recipient, None)
+            continue
+        if value.recent_days > value.baseline_days:
+            raise ValueError(
+                f"reinvestigation_benchmark_recipient_windows.{recipient}: "
+                "recent_days must be <= baseline_days"
+            )
+        merged[recipient] = value.model_dump()
     return merged
 
 

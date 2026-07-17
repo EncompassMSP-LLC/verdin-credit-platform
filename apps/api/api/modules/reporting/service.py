@@ -245,6 +245,7 @@ class ReportingService:
         baseline_days: int | None = None,
         recent_days: int | None = None,
         bureau: AccountBureau | None = None,
+        recipient: str | None = None,
         group_by: str | None = None,
     ) -> ReinvestigationOutcomeBenchmarksResponse:
         """Org-internal trailing baselines for reinvestigation outcome rates.
@@ -254,9 +255,10 @@ class ReportingService:
         then returns advisory ``rate_deltas`` (recent minus baseline). Scoped
         strictly to the caller's organization — no cross-tenant data and no
         live bureau contact. When window args are omitted, org dispute-settings
-        defaults apply (per-bureau override when ``bureau`` is set, else org-wide
-        pair, else platform 90/30). When ``group_by="bureau"``, ``by_bureau``
-        carries per-bureau baseline/recent analytics and rate deltas. When
+        defaults apply (per-recipient override when ``recipient`` is set, else
+        per-bureau override when ``bureau`` is set, else org-wide pair, else
+        platform 90/30). When ``group_by="bureau"``, ``by_bureau`` carries
+        per-bureau baseline/recent analytics and rate deltas. When
         ``group_by="recipient"``, ``by_recipient`` rolls up by linked letter
         recipient type (credit_bureau / furnisher / unknown).
         """
@@ -267,8 +269,13 @@ class ReportingService:
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail="group_by must be 'bureau', 'recipient', or omitted",
             )
+        if recipient is not None and recipient not in {"credit_bureau", "furnisher"}:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="recipient must be 'credit_bureau', 'furnisher', or omitted",
+            )
         org_baseline, org_recent = await self._resolve_benchmark_window_defaults(
-            organization_id, bureau=bureau
+            organization_id, bureau=bureau, recipient=recipient
         )
         resolved_baseline = org_baseline if baseline_days is None else baseline_days
         resolved_recent = org_recent if recent_days is None else recent_days
@@ -293,6 +300,9 @@ class ReportingService:
         recent_raw = await self._reporting.get_reinvestigation_outcomes(
             organization_id, start=recent_start, end=end, bureau=bureau
         )
+        if recipient is not None:
+            baseline_raw = [row for row in baseline_raw if row.get("recipient") == recipient]
+            recent_raw = [row for row in recent_raw if row.get("recipient") == recipient]
 
         baseline_result = compute_reinvestigation_outcome_analytics(
             [
@@ -324,6 +334,7 @@ class ReportingService:
             generated_at=datetime.now(UTC),
             scope="organization",
             bureau=bureau.value if bureau is not None else None,
+            recipient=recipient,
             group_by=group_by,
             baseline_period=ReinvestigationOutcomeBenchmarkPeriod(
                 start=baseline_start,
@@ -350,6 +361,7 @@ class ReportingService:
         baseline_days: int | None = None,
         recent_days: int | None = None,
         bureau: AccountBureau | None = None,
+        recipient: str | None = None,
         group_by: str | None = None,
     ) -> tuple[bytes, str, str]:
         """Export org-internal benchmark rates as CSV (aggregate counts/rates only; no PII)."""
@@ -369,6 +381,7 @@ class ReportingService:
             baseline_days=baseline_days,
             recent_days=recent_days,
             bureau=bureau,
+            recipient=recipient,
             group_by=group_by,
         )
         csv_text = build_reinvestigation_benchmark_csv(benchmarks)
@@ -476,9 +489,11 @@ class ReportingService:
         organization_id: uuid.UUID,
         *,
         bureau: AccountBureau | None = None,
+        recipient: str | None = None,
     ) -> tuple[int, int]:
         from api.modules.org_admin.dispute_settings_models import (
             BENCHMARK_WINDOW_BUREAUS,
+            BENCHMARK_WINDOW_RECIPIENTS,
             DEFAULT_REINVESTIGATION_BENCHMARK_BASELINE_DAYS,
             DEFAULT_REINVESTIGATION_BENCHMARK_RECENT_DAYS,
         )
@@ -501,6 +516,14 @@ class ReportingService:
             )
         org_baseline = settings.reinvestigation_benchmark_baseline_days
         org_recent = settings.reinvestigation_benchmark_recent_days
+        if recipient is not None and recipient in BENCHMARK_WINDOW_RECIPIENTS:
+            override = (settings.reinvestigation_benchmark_recipient_windows or {}).get(recipient)
+            if (
+                isinstance(override, dict)
+                and "baseline_days" in override
+                and "recent_days" in override
+            ):
+                return int(override["baseline_days"]), int(override["recent_days"])
         if bureau is not None and bureau.value in BENCHMARK_WINDOW_BUREAUS:
             override = (settings.reinvestigation_benchmark_bureau_windows or {}).get(bureau.value)
             if (
