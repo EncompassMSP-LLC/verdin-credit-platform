@@ -13,6 +13,14 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — Version 19.0 kickoff (Phase 18)
+
+**Decision:** Scope Version 19.0 as Reinvestigation Benchmark Depth — per-bureau window defaults and outcome benchmarks `group_by=bureau` breakdown. Keep live bureau polling, automated filing, unsupervised escalation, litigation e-filing, and cross-tenant benchmarks deferred to 20.0+ or never.
+
+**Reason:** 18.0 closed org-wide window defaults and ingestion case/account scope; operators still need bureau-specific windows and single-call bureau comparison on the benchmarks read model.
+
+**Follow-up work:** Implement checklist slices 2–4 toward `v19.0.0`.
+
 ## Compliance intelligence — Version 18.0 sign-off (Phase 17)
 
 **Decision:** Close Phase 17 as shipped `v18.0.0` after org benchmark window defaults and ingestion case/account scope UI. Keep live bureau polling, automated filing, unsupervised escalation, litigation e-filing, and cross-tenant benchmarks deferred to 19.0+ or never.
