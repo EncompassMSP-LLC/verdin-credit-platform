@@ -102,6 +102,7 @@ export {
   type ReinvestigationOutcomeBenchmarkPeriod,
   type ReinvestigationOutcomeBenchmarksParams,
   type ReinvestigationOutcomeBenchmarksResponse,
+  type ReinvestigationOutcomeBenchmarkBureauBreakdown,
   type ReinvestigationOutcomeBureauBreakdown,
   type ReinvestigationOutcomeFilters,
   type ReinvestigationOutcomeRateDeltas,

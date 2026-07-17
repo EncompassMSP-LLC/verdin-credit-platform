@@ -477,6 +477,73 @@ def test_reinvestigation_outcome_benchmarks_returns_org_baseline(
     assert body["recent"]["deletion_rate"] == 1.0
     assert body["rate_deltas"]["deletion_rate"] == 0.5
     assert body["rate_deltas"]["verification_rate"] == -0.5
+    assert body["by_bureau"] == []
+    assert body["group_by"] is None
+
+
+def test_reinvestigation_outcome_benchmarks_group_by_bureau(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    today = date.today()
+    equifax_id = _create_account_with_dispute_date(
+        api_client,
+        manager_headers,
+        sample_case_id,
+        creditor_name="Equifax Bench Bank",
+        last_dispute_date=(today - timedelta(days=20)).isoformat(),
+        bureau="equifax",
+    )
+    _record_response(
+        api_client,
+        manager_headers,
+        equifax_id,
+        outcome="deleted",
+        response_date=(today - timedelta(days=5)).isoformat(),
+    )
+    experian_id = _create_account_with_dispute_date(
+        api_client,
+        manager_headers,
+        sample_case_id,
+        creditor_name="Experian Bench Bank",
+        last_dispute_date=(today - timedelta(days=20)).isoformat(),
+        bureau="experian",
+    )
+    _record_response(
+        api_client,
+        manager_headers,
+        experian_id,
+        outcome="verified",
+        response_date=(today - timedelta(days=5)).isoformat(),
+    )
+
+    response = api_client.get(
+        "/api/v1/reporting/reinvestigation-outcomes/benchmarks",
+        headers=manager_headers,
+        params={"baseline_days": 90, "recent_days": 30, "group_by": "bureau"},
+    )
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["group_by"] == "bureau"
+    bureaus = {item["bureau"]: item for item in body["by_bureau"]}
+    assert "equifax" in bureaus
+    assert "experian" in bureaus
+    assert bureaus["equifax"]["recent"]["counts"]["deleted"] == 1
+    assert bureaus["experian"]["recent"]["counts"]["verified"] == 1
+    assert "rate_deltas" in bureaus["equifax"]
+
+
+def test_reinvestigation_outcome_benchmarks_rejects_invalid_group_by(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+) -> None:
+    response = api_client.get(
+        "/api/v1/reporting/reinvestigation-outcomes/benchmarks",
+        headers=manager_headers,
+        params={"group_by": "recipient"},
+    )
+    assert response.status_code == 422
 
 
 def test_reinvestigation_outcome_benchmarks_rejects_recent_gt_baseline(

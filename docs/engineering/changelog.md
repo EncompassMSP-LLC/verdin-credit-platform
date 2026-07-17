@@ -13,6 +13,16 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — outcome benchmarks per-bureau breakdown (Phase 18)
+
+**Decision:** Add optional `group_by=bureau` to `GET /reporting/reinvestigation-outcomes/benchmarks` returning `by_bureau` entries with per-bureau baseline/recent analytics and advisory rate deltas. Reporting Center always requests the breakdown.
+
+**Reason:** Outcome analytics already supported single-call bureau comparison; benchmarks required N round-trips.
+
+**Guardrails:** Org-scoped only; same windows as the aggregate; no cross-tenant data; invalid `group_by` → 422.
+
+**Follow-up work:** 19.0 sign-off and release notes.
+
 ## Compliance intelligence — per-bureau benchmark window defaults (Phase 18)
 
 **Decision:** Persist optional Equifax/Experian/TransUnion window overrides in `reinvestigation_benchmark_bureau_windows` JSONB on `organization_dispute_settings`. When `GET /reporting/reinvestigation-outcomes/benchmarks` omits window params and includes `bureau=`, resolve override → org-wide → platform 90/30.

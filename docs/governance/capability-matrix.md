@@ -689,7 +689,7 @@ Scope: [version-19.0-scope.md](version-19.0-scope.md) · Checklist: [version-19.
 | Capability                              | Version | Status | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                         |
 | --------------------------------------- | ------- | ------ | ------- | -------- | --- | --- | ----- | ------------ | ----------------------------------------------------------------------------- |
 | Per-bureau benchmark window defaults    | 19.0    | ✅     | ✅      | ✅       | ✅  | —   | ✅    | Org Admin    | Optional Equifax/Experian/TransUnion window overrides; fall back to org pair  |
-| Outcome benchmarks per-bureau breakdown | 19.0    | 🚧     | 🚧      | 🚧       | 🚧  | —   | 🚧    | Reporting    | `group_by=bureau` on benchmarks API + Reporting Center per-bureau rates table |
+| Outcome benchmarks per-bureau breakdown | 19.0    | ✅     | ✅      | ✅       | ✅  | —   | ✅    | Reporting    | `group_by=bureau` on benchmarks API + Reporting Center per-bureau rates table |
 
 ---
 

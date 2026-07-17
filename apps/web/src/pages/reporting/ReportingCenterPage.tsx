@@ -719,6 +719,7 @@ function ReinvestigationBenchmarksPanel() {
         recent_days:
           recentOverride != null ? Number.parseInt(recentOverride, 10) || undefined : undefined,
         bureau: bureau || undefined,
+        group_by: 'bureau',
       }),
   });
 
@@ -909,6 +910,47 @@ function ReinvestigationBenchmarksPanel() {
           <StatusBreakdown title="Recent outcomes" counts={recent.counts} />
         </Card>
       </div>
+
+      {data.by_bureau.length > 0 ? (
+        <Card title="Per-bureau breakdown">
+          <p className="mb-3 text-xs text-gray-500">
+            Same baseline/recent windows as the org aggregate. Deletion Δ is recent − baseline for
+            each bureau.
+          </p>
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-gray-200 text-xs uppercase tracking-wide text-gray-500">
+                  <th className="py-2 pr-4 font-medium">Bureau</th>
+                  <th className="py-2 pr-4 font-medium">Baseline resp.</th>
+                  <th className="py-2 pr-4 font-medium">Recent resp.</th>
+                  <th className="py-2 pr-4 font-medium">Deletion Δ</th>
+                  <th className="py-2 pr-4 font-medium">Favorable Δ</th>
+                  <th className="py-2 font-medium">Recent deletion</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.by_bureau.map((item) => (
+                  <tr key={item.bureau} className="border-b border-gray-100">
+                    <td className="py-2 pr-4 font-medium text-gray-900">
+                      {formatLabel(item.bureau)}
+                    </td>
+                    <td className="py-2 pr-4">{item.baseline.total_responses}</td>
+                    <td className="py-2 pr-4">{item.recent.total_responses}</td>
+                    <td className="py-2 pr-4">
+                      {formatSignedPercent(item.rate_deltas.deletion_rate)}
+                    </td>
+                    <td className="py-2 pr-4">
+                      {formatSignedPercent(item.rate_deltas.favorable_rate)}
+                    </td>
+                    <td className="py-2">{formatPercent(item.recent.deletion_rate)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      ) : null}
     </div>
   );
 }
