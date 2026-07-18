@@ -28,7 +28,7 @@ document_metadata_table = Table(
     Column("report_date", Date),
     Column("open_date", Date),
     Column("balance", Numeric(12, 2)),
-    Column("payment_status", String(50)),
+    Column("payment_status", String(255)),
     Column("addresses", JSONB),
     Column("phone_numbers", JSONB),
     Column("ssn_masked", String(20)),

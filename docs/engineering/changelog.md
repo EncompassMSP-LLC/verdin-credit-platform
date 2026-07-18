@@ -13,6 +13,16 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — widen metadata payment_status (Phase 21)
+
+**Decision:** Widen `document_metadata.payment_status` from varchar(50) to varchar(255) via migration `093_widen_meta_pay_status`, and align API `DocumentMetadata` + worker metadata table definitions.
+
+**Reason:** Bureau status narratives (charged-off / past-due text) exceeded 50 characters and caused metadata extract writes to fail during pilot OCR.
+
+**Guardrails:** Schema-only widen; no truncation of existing values; no PII export change.
+
+**Follow-up work:** Slice 3 — operator re-parse; Slice 4 — Version 22.0 sign-off.
+
 ## Compliance intelligence — Version 22.0 scope (Phase 21)
 
 **Decision:** Scope Version 22.0 as Document Pipeline Hardening — widen `document_metadata.payment_status` and add an operator-gated credit-report re-parse enqueue. Keep live bureau polling, automated filing, unsupervised escalation, litigation e-filing, and cross-tenant benchmarks deferred to 23.0+ or never.

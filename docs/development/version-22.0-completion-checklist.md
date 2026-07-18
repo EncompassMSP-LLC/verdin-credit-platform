@@ -10,7 +10,7 @@ Scope: [`docs/governance/version-22.0-scope.md`](../governance/version-22.0-scop
 
 ## Exit criteria for "22.0 done"
 
-- [ ] `document_metadata.payment_status` accepts bureau status narratives (varchar 255)
+- [x] `document_metadata.payment_status` accepts bureau status narratives (varchar 255)
 - [ ] Staff can re-enqueue credit report parse for eligible documents
 - [ ] Capability matrix + API reference updated
 - [ ] Deferred items explicitly documented
@@ -23,7 +23,7 @@ Scope: [`docs/governance/version-22.0-scope.md`](../governance/version-22.0-scop
 | Order | Slice                             | Epic       | Status |
 | ----- | --------------------------------- | ---------- | ------ |
 | 1     | 22.0 scope + completion checklist | Kickoff    | ✅     |
-| 2     | Widen metadata payment_status     | Documents  | ☐      |
+| 2     | Widen metadata payment_status     | Documents  | ✅     |
 | 3     | Operator re-parse credit report   | Documents  | ☐      |
 | 4     | Capability matrix 22.0 sign-off   | Governance | ☐      |
 
