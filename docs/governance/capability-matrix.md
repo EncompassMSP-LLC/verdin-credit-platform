@@ -34,6 +34,7 @@
 **Version 19.0 sign-off:** [version-19.0-scope.md](version-19.0-scope.md) · Release notes: [v19.0.0.md](../release-notes/v19.0.0.md)
 **Version 20.0 sign-off:** [version-20.0-scope.md](version-20.0-scope.md) · Release notes: [v20.0.0.md](../release-notes/v20.0.0.md)
 **Version 21.0 sign-off:** [version-21.0-scope.md](version-21.0-scope.md) · Release notes: [v21.0.0.md](../release-notes/v21.0.0.md)
+**Version 22.0 (in progress):** [version-22.0-scope.md](version-22.0-scope.md) · Checklist: [version-22.0-completion-checklist.md](../development/version-22.0-completion-checklist.md)
 
 ## Status legend
 
@@ -714,6 +715,17 @@ Scope: [version-21.0-scope.md](version-21.0-scope.md) · Checklist: [version-21.
 | ------------------------------------------ | ------- | ------ | ------- | -------- | --- | --- | ----- | ------------ | -------------------------------------------------------------------------- |
 | Per-recipient benchmark window defaults    | 21.0    | ✅     | ✅      | ✅       | ✅  | —   | ✅    | Org Admin    | Optional credit_bureau / furnisher window overrides; fall back to org pair |
 | Ingestion audit bureau/status list filters | 21.0    | ✅     | ✅      | ✅       | ✅  | —   | ✅    | Compliance   | Optional bureau_target + status on Compliance Center ingestion run list    |
+
+---
+
+## Version 22.0 — Document Pipeline Hardening (in progress — 🚧)
+
+Scope: [version-22.0-scope.md](version-22.0-scope.md) · Checklist: [version-22.0-completion-checklist.md](../development/version-22.0-completion-checklist.md)
+
+| Capability                      | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                        |
+| ------------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ---------------------------------------------------------------------------- |
+| Widen metadata payment_status   | 22.0    | Planned | —       | —        | —   | —   | —     | Documents    | payment_status varchar(255) so bureau status narratives persist              |
+| Operator re-parse credit report | 22.0    | Planned | —       | —        | —   | —   | —     | Documents    | Staff enqueue document_credit_report_parse for OCR'd credit_report documents |
 
 ---
 

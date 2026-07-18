@@ -70,6 +70,7 @@ Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (
 | **19.0**  | Reinvestigation Benchmark Depth                 | Released    | Phase 18 per-bureau benchmark window defaults, outcome benchmarks per-bureau breakdown (`v19.0.0`)                                               |
 | **20.0**  | Reinvestigation Benchmark Parity                | Released    | Phase 19 benchmarks `group_by=recipient`, aggregate rates CSV export (no PII) (`v20.0.0`)                                                        |
 | **21.0**  | Reinvestigation Operations Filters              | Released    | Phase 20 per-recipient benchmark window defaults, ingestion audit bureau/status list filters (`v21.0.0`)                                         |
+| **22.0**  | Document Pipeline Hardening                     | Planned     | Phase 21 widen metadata payment_status, operator re-parse credit report                                                                          |
 
 ### Sprint milestones
 
@@ -562,6 +563,17 @@ Compliance Intelligence Phase 20 polishes remaining non-blocked configuration an
 | ---- | ------------------------------------------ | ----------- | ------------------------------------------------------------------------ |
 | 1    | Per-recipient benchmark window defaults    | Released    | Optional credit_bureau / furnisher overrides; fall back to org-wide pair |
 | 2    | Ingestion audit bureau/status list filters | Released    | Optional bureau_target + status on Compliance Center ingestion run list  |
+
+### Version 22.0 — Document Pipeline Hardening (planned)
+
+Scope and checklist: [`docs/governance/version-22.0-scope.md`](../governance/version-22.0-scope.md) · [`docs/development/version-22.0-completion-checklist.md`](../development/version-22.0-completion-checklist.md)
+
+Compliance Intelligence Phase 21 hardens the owned document pipeline without crossing the live-bureau frontier: widen `document_metadata.payment_status` for bureau status narratives, and add an operator-gated re-parse action for classified credit reports with OCR. Live bureau response ingestion execution, automated re-dispute filing execution, unsupervised escalation, automated litigation filing, and cross-tenant benchmarks remain deferred (23.0+ or never) pending legal/compliance sign-off.
+
+| Epic | Theme                           | 22.0 target | Notes                                                                  |
+| ---- | ------------------------------- | ----------- | ---------------------------------------------------------------------- |
+| 1    | Widen metadata payment_status   | Planned     | varchar(255) so charged-off / past-due narratives persist              |
+| 2    | Operator re-parse credit report | Planned     | Staff POST enqueue document_credit_report_parse for eligible documents |
 
 ## Sprint → version mapping
 

@@ -13,6 +13,14 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — Version 22.0 scope (Phase 21)
+
+**Decision:** Scope Version 22.0 as Document Pipeline Hardening — widen `document_metadata.payment_status` and add an operator-gated credit-report re-parse enqueue. Keep live bureau polling, automated filing, unsupervised escalation, litigation e-filing, and cross-tenant benchmarks deferred to 23.0+ or never.
+
+**Reason:** After 21.0 and pilot uploads, metadata extract failures on long payment-status text and missed parse jobs (stale worker / no staff re-enqueue) are the next non-blocked hardening gaps.
+
+**Follow-up work:** Slice 2 — widen payment_status; Slice 3 — operator re-parse; Slice 4 — sign-off.
+
 ## Compliance intelligence — Version 21.0 sign-off (Phase 20)
 
 **Decision:** Close Phase 20 as shipped `v21.0.0` after per-recipient benchmark window defaults and ingestion audit bureau/status list filters. Keep live bureau polling, automated filing, unsupervised escalation, litigation e-filing, and cross-tenant benchmarks deferred to 22.0+ or never.
