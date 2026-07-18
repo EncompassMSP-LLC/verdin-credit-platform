@@ -39,7 +39,7 @@ class DocumentMetadata(Base, TimestampMixin):
     report_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     open_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     balance: Mapped[Decimal | None] = mapped_column(Numeric(12, 2), nullable=True)
-    payment_status: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    payment_status: Mapped[str | None] = mapped_column(String(255), nullable=True)
     addresses: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list)
     phone_numbers: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list)
     ssn_masked: Mapped[str | None] = mapped_column(String(20), nullable=True)

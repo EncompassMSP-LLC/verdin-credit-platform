@@ -15,7 +15,7 @@ Everything remains **staff-mediated and advisory**. The platform still never pol
 
 | Epic | Theme                                   | 22.0 target | Summary                                                                                      |
 | ---- | --------------------------------------- | ----------- | -------------------------------------------------------------------------------------------- |
-| 1    | Widen metadata payment_status           | Planned     | `document_metadata.payment_status` → varchar(255); models/worker tables aligned              |
+| 1    | Widen metadata payment_status           | Shipped     | `document_metadata.payment_status` → varchar(255); models/worker tables aligned              |
 | 2    | Operator re-parse credit report         | Planned     | Staff POST to enqueue parse when OCR text exists and document is classified as credit_report |
 | 3    | Capability matrix / governance sign-off | Planned     | Scope, checklist, matrix rows, release notes                                                 |
 
@@ -38,7 +38,7 @@ All v21.0.0 APIs, UI, and `@verdin/api-client` functions remain production capab
 
 ## Partial capability limits (22.0 targets)
 
-### Widen metadata payment_status (Planned)
+### Widen metadata payment_status (Shipped)
 
 **Included:** Alembic widen of `document_metadata.payment_status` to 255 characters; API + worker column definitions updated so bureau status narratives (e.g. charged-off text) persist.
 

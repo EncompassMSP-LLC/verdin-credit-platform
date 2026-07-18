@@ -572,7 +572,7 @@ Compliance Intelligence Phase 21 hardens the owned document pipeline without cro
 
 | Epic | Theme                           | 22.0 target | Notes                                                                  |
 | ---- | ------------------------------- | ----------- | ---------------------------------------------------------------------- |
-| 1    | Widen metadata payment_status   | Planned     | varchar(255) so charged-off / past-due narratives persist              |
+| 1    | Widen metadata payment_status   | Shipped     | varchar(255) so charged-off / past-due narratives persist              |
 | 2    | Operator re-parse credit report | Planned     | Staff POST enqueue document_credit_report_parse for eligible documents |
 
 ## Sprint → version mapping
