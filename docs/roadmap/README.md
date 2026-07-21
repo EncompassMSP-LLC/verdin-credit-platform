@@ -71,7 +71,7 @@ Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (
 | **20.0**  | Reinvestigation Benchmark Parity                | Released    | Phase 19 benchmarks `group_by=recipient`, aggregate rates CSV export (no PII) (`v20.0.0`)                                                        |
 | **21.0**  | Reinvestigation Operations Filters              | Released    | Phase 20 per-recipient benchmark window defaults, ingestion audit bureau/status list filters (`v21.0.0`)                                         |
 | **22.0**  | Document Pipeline Hardening                     | Released    | Phase 21 widen metadata payment_status, operator re-parse credit report (`v22.0.0`)                                                              |
-| **23.0**  | Document Pipeline Recovery Depth                | Planned     | Phase 22 async metadata re-extract enqueue, case-level bulk credit-report re-parse                                                               |
+| **23.0**  | Document Pipeline Recovery Depth                | Released    | Phase 22 async metadata re-extract enqueue, case-level bulk credit-report re-parse (`v23.0.0`)                                                   |
 
 ### Sprint milestones
 
@@ -576,16 +576,16 @@ Compliance Intelligence Phase 21 hardens the owned document pipeline without cro
 | 1    | Widen metadata payment_status   | Released    | varchar(255) so charged-off / past-due narratives persist              |
 | 2    | Operator re-parse credit report | Released    | Staff POST enqueue document_credit_report_parse for eligible documents |
 
-### Version 23.0 — Document Pipeline Recovery Depth (planned)
+### Version 23.0 — Document Pipeline Recovery Depth (released — `v23.0.0`)
 
-Scope and checklist: [`docs/governance/version-23.0-scope.md`](../governance/version-23.0-scope.md) · [`docs/development/version-23.0-completion-checklist.md`](../development/version-23.0-completion-checklist.md)
+Scope and checklist: [`docs/governance/version-23.0-scope.md`](../governance/version-23.0-scope.md) · [`docs/development/version-23.0-completion-checklist.md`](../development/version-23.0-completion-checklist.md) · Release notes: [`docs/release-notes/v23.0.0.md`](../release-notes/v23.0.0.md)
 
 Compliance Intelligence Phase 22 deepens owned document-pipeline recovery without crossing the live-bureau frontier: operator-gated async metadata re-extract enqueue, and case-level bulk credit-report re-parse for eligible documents. Live bureau response ingestion execution, automated re-dispute filing execution, unsupervised escalation, automated litigation filing, and cross-tenant benchmarks remain deferred (24.0+ or never) pending legal/compliance sign-off.
 
 | Epic | Theme                                  | 23.0 target | Notes                                                         |
 | ---- | -------------------------------------- | ----------- | ------------------------------------------------------------- |
-| 1    | Operator async metadata re-extract     | Shipped     | Enqueue document_metadata_extract; keep sync extract endpoint |
-| 2    | Case-level bulk credit-report re-parse | Shipped     | Enqueue parse for all OCR'd credit_report docs on a case      |
+| 1    | Operator async metadata re-extract     | Released    | Enqueue document_metadata_extract; keep sync extract endpoint |
+| 2    | Case-level bulk credit-report re-parse | Released    | Enqueue parse for all OCR'd credit_report docs on a case      |
 
 ## Sprint → version mapping
 
