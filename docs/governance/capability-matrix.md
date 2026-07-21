@@ -746,10 +746,10 @@ Scope: [version-23.0-scope.md](version-23.0-scope.md) · Checklist: [version-23.
 
 Scope: [version-24.0-scope.md](version-24.0-scope.md) · Checklist: [version-24.0-completion-checklist.md](../development/version-24.0-completion-checklist.md)
 
-| Capability                          | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                            |
-| ----------------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ---------------------------------------------------------------- |
-| Case-level bulk metadata re-extract | 24.0    | ✅      | ✅      | ✅       | ✅  | —   | ✅    | Cases        | Staff enqueue document_metadata_extract for OCR'd docs on a case |
-| Operator re-classify document       | 24.0    | Planned | —       | —        | —   | —   | —     | Documents    | Staff enqueue document_classify when OCR exists                  |
+| Capability                          | Version | Status | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                            |
+| ----------------------------------- | ------- | ------ | ------- | -------- | --- | --- | ----- | ------------ | ---------------------------------------------------------------- |
+| Case-level bulk metadata re-extract | 24.0    | ✅     | ✅      | ✅       | ✅  | —   | ✅    | Cases        | Staff enqueue document_metadata_extract for OCR'd docs on a case |
+| Operator re-classify document       | 24.0    | ✅     | ✅      | ✅       | ✅  | —   | ✅    | Documents    | Staff enqueue document_classify when OCR exists                  |
 
 ---
 

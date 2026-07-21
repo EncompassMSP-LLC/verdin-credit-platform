@@ -45,6 +45,7 @@ from api.modules.documents.schemas import (
     DocumentParsedCreditReportAccountCandidatesResponse,
     DocumentParsedCreditReportComparisonResponse,
     DocumentParsedCreditReportResponse,
+    DocumentReclassifyResponse,
     DocumentResponse,
     DocumentSortField,
     DocumentSortOrder,
@@ -342,6 +343,18 @@ async def classify_document(
     service: DocumentService = Depends(get_document_service),
 ) -> DocumentClassificationResponse:
     return await service.classify_document(current_user, document_id)
+
+
+@router.post(
+    "/{document_id}/classify/reclassify",
+    response_model=DocumentReclassifyResponse,
+)
+async def reclassify_document(
+    document_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> DocumentReclassifyResponse:
+    return await service.reclassify_document(current_user, document_id)
 
 
 @router.get("/{document_id}/metadata", response_model=DocumentMetadataResponse)

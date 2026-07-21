@@ -986,6 +986,19 @@ export async function reextractDocumentMetadata(
   );
 }
 
+export interface DocumentReclassify {
+  document_id: string;
+  job_id: string;
+  job_type: string;
+  queued: boolean;
+}
+
+export async function reclassifyDocument(documentId: string): Promise<DocumentReclassify> {
+  return request<DocumentReclassify>(apiPath(`/documents/${documentId}/classify/reclassify`), {
+    method: 'POST',
+  });
+}
+
 export async function getDocumentResolutions(documentId: string): Promise<DocumentResolutions> {
   return request<DocumentResolutions>(apiPath(`/documents/${documentId}/resolutions`));
 }
