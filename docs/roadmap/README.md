@@ -72,6 +72,7 @@ Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (
 | **21.0**  | Reinvestigation Operations Filters              | Released    | Phase 20 per-recipient benchmark window defaults, ingestion audit bureau/status list filters (`v21.0.0`)                                         |
 | **22.0**  | Document Pipeline Hardening                     | Released    | Phase 21 widen metadata payment_status, operator re-parse credit report (`v22.0.0`)                                                              |
 | **23.0**  | Document Pipeline Recovery Depth                | Released    | Phase 22 async metadata re-extract enqueue, case-level bulk credit-report re-parse (`v23.0.0`)                                                   |
+| **24.0**  | Document Pipeline Recovery Parity               | Planned     | Phase 23 case-level bulk metadata re-extract, operator re-classify enqueue                                                                       |
 
 ### Sprint milestones
 
@@ -586,6 +587,17 @@ Compliance Intelligence Phase 22 deepens owned document-pipeline recovery withou
 | ---- | -------------------------------------- | ----------- | ------------------------------------------------------------- |
 | 1    | Operator async metadata re-extract     | Released    | Enqueue document_metadata_extract; keep sync extract endpoint |
 | 2    | Case-level bulk credit-report re-parse | Released    | Enqueue parse for all OCR'd credit_report docs on a case      |
+
+### Version 24.0 — Document Pipeline Recovery Parity (planned)
+
+Scope and checklist: [`docs/governance/version-24.0-scope.md`](../governance/version-24.0-scope.md) · [`docs/development/version-24.0-completion-checklist.md`](../development/version-24.0-completion-checklist.md)
+
+Compliance Intelligence Phase 23 closes remaining owned document-pipeline recovery parity gaps without crossing the live-bureau frontier: case-level bulk metadata re-extract, and an operator-gated re-classify enqueue for OCR'd documents. Live bureau response ingestion execution, automated re-dispute filing execution, unsupervised escalation, automated litigation filing, and cross-tenant benchmarks remain deferred (25.0+ or never) pending legal/compliance sign-off.
+
+| Epic | Theme                               | 24.0 target | Notes                                                      |
+| ---- | ----------------------------------- | ----------- | ---------------------------------------------------------- |
+| 1    | Case-level bulk metadata re-extract | Planned     | Enqueue document_metadata_extract for OCR'd docs on a case |
+| 2    | Operator re-classify document       | Planned     | Enqueue document_classify when OCR exists                  |
 
 ## Sprint → version mapping
 
