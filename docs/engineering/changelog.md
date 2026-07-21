@@ -13,6 +13,16 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — Case Documents recovery panel (Phase 25)
+
+**Decision:** Add Case Detail `CaseDocumentsRecoveryPanel` hosting case bulk OCR retry, re-classify, metadata re-extract, and credit-report re-parse when any case documents exist. Move those actions out of Credit Report History so recovery is not gated on `document_type=credit_report`.
+
+**Reason:** After 25.0 APIs shipped, failed OCR and unclassified PDFs still could not reach recovery UI because Case Detail only mounted bulk controls inside credit-report history.
+
+**Guardrails:** Staff-mediated; reuses existing case bulk endpoints; no API semantics change; no live bureau contact.
+
+**Follow-up work:** Slice 3 — operator async entity re-resolve; Slice 4 — Version 26.0 sign-off.
+
 ## Compliance intelligence — Version 26.0 scope (Phase 25)
 
 **Decision:** Scope Version 26.0 as Document Pipeline Resolution & Operator Surfaces — Case Documents recovery panel (ungate bulk recovery from credit-report-only UI) and operator async entity re-resolve enqueue. Keep live bureau polling, automated filing, unsupervised escalation, litigation e-filing, and cross-tenant benchmarks deferred to 27.0+ or never.

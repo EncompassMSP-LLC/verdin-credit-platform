@@ -9,6 +9,7 @@ import { CaseLlmSummaryPanel } from '../../components/cases/CaseLlmSummaryPanel'
 import { CaseMessageThreadPanel } from '../../components/cases/CaseMessageThreadPanel';
 import { CasePriorityBadge, CaseStatusChip } from '../../components/cases/CaseBadges';
 import { CreditReportHistoryPanel } from '../../components/imports/CreditReportHistoryPanel';
+import { CaseDocumentsRecoveryPanel } from '../../components/cases/CaseDocumentsRecoveryPanel';
 import { CrossBureauDiscrepancyPanel } from '../../components/imports/CrossBureauDiscrepancyPanel';
 import { CaseMetro2FindingsPanel } from '../../components/imports/Metro2FindingsPanel';
 import { CaseFcraFindingsPanel } from '../../components/imports/FcraFindingsPanel';
@@ -188,6 +189,8 @@ export function CaseDetailPage() {
             </div>
           </dl>
         </Card>
+
+        <CaseDocumentsRecoveryPanel caseId={caseId} className="lg:col-span-3" />
 
         <CreditReportHistoryPanel caseId={caseId} className="lg:col-span-3" />
 
