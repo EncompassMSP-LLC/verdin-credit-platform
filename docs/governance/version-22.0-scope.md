@@ -16,7 +16,7 @@ Everything remains **staff-mediated and advisory**. The platform still never pol
 | Epic | Theme                                   | 22.0 target | Summary                                                                                      |
 | ---- | --------------------------------------- | ----------- | -------------------------------------------------------------------------------------------- |
 | 1    | Widen metadata payment_status           | Shipped     | `document_metadata.payment_status` → varchar(255); models/worker tables aligned              |
-| 2    | Operator re-parse credit report         | Planned     | Staff POST to enqueue parse when OCR text exists and document is classified as credit_report |
+| 2    | Operator re-parse credit report         | Shipped     | Staff POST to enqueue parse when OCR text exists and document is classified as credit_report |
 | 3    | Capability matrix / governance sign-off | Planned     | Scope, checklist, matrix rows, release notes                                                 |
 
 ## Shipped from 21.0 (foundation — do not regress)
@@ -44,7 +44,7 @@ All v21.0.0 APIs, UI, and `@verdin/api-client` functions remain production capab
 
 **Not included:** Normalizing payment status into enums; changing account import payment-status mapping.
 
-### Operator re-parse credit report (Planned)
+### Operator re-parse credit report (Shipped)
 
 **Included:** Authenticated staff endpoint to enqueue `document_credit_report_parse` for an org-scoped document that has OCR text and `document_type=credit_report`; document detail UI action; no live bureau contact.
 

@@ -326,6 +326,9 @@ Secure document storage with MinIO, SHA-256 hashing, versioning, and duplicate d
 | POST   | `/documents/{document_id}/metadata/extract` | case_manager | Extract metadata from OCR text     |
 
 `document_metadata.payment_status` is varchar(255) so bureau status narratives (charged-off / past-due text) persist without extract write failures.
+
+| GET | `/documents/{document_id}/parsed-credit-report` | read_only | Get parsed credit report |
+| POST | `/documents/{document_id}/parsed-credit-report/reparse` | case_manager | Re-enqueue credit report parse (OCR + type) |
 | GET | `/documents/{document_id}/parsed-credit-report/account-candidates` | read_only | Build account candidates from parsed tradelines |
 | GET | `/documents/{document_id}/parsed-credit-report/comparison` | read_only | Compare against previous report |
 | GET | `/documents/{document_id}/parsed-credit-report/metro2-findings` | read_only | Deterministic Metro 2 consistency findings |
@@ -338,6 +341,8 @@ Secure document storage with MinIO, SHA-256 hashing, versioning, and duplicate d
 | POST | `/documents/{document_id}/resolutions/{resolution_id}/confirm` | case_manager | Confirm or manually select match |
 | POST | `/documents/{document_id}/resolutions/{resolution_id}/reject` | case_manager | Reject proposed match |
 | POST | `/documents/{document_id}/llm-summary` | case_manager | Generate scrubbed document summary |
+
+`POST /documents/{document_id}/parsed-credit-report/reparse` enqueues `document_credit_report_parse` when the document has OCR text and `document_type=credit_report`. Returns 422 otherwise. Staff-mediated only; no live bureau contact.
 
 **List query parameters:** `metadata_status` (`pending`, `extracted`, `failed`), `resolution_status` (`matched`, `ambiguous`, `unmatched`, `confirmed`, `rejected`).
 

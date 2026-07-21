@@ -13,6 +13,16 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — operator re-parse credit report (Phase 21)
+
+**Decision:** Add `POST /documents/{id}/parsed-credit-report/reparse` (case_manager+) to enqueue `document_credit_report_parse` when OCR text exists and `document_type=credit_report`, plus Document Detail UI action and `@verdin/api-client` helper.
+
+**Reason:** Pilot uploads could finish OCR/classify while parse never ran (stale worker image / missed enqueue); staff needed a recovery control without re-uploading.
+
+**Guardrails:** Org-scoped; 422 without OCR or non-credit_report type; no live bureau contact; no bulk/auto re-parse.
+
+**Follow-up work:** Slice 4 — Version 22.0 sign-off + release notes.
+
 ## Compliance intelligence — widen metadata payment_status (Phase 21)
 
 **Decision:** Widen `document_metadata.payment_status` from varchar(50) to varchar(255) via migration `093_widen_meta_pay_status`, and align API `DocumentMetadata` + worker metadata table definitions.

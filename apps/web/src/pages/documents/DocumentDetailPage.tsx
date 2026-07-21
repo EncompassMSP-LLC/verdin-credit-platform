@@ -13,6 +13,7 @@ import {
   getDocumentParsedCreditReport,
   getDocumentParsedCreditReportAccountCandidates,
   importParsedCreditReportAccounts,
+  reparseDocumentCreditReport,
   retryDocumentOcr,
   type DocumentParsedCreditReportAccountCandidates,
   type ParsedReportAccountCandidate,
@@ -237,6 +238,20 @@ export function DocumentDetailPage() {
     },
   });
 
+  const reparseMutation = useMutation({
+    mutationFn: () => reparseDocumentCreditReport(documentId!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['document', documentId] });
+      queryClient.invalidateQueries({ queryKey: ['document-parsed-credit-report', documentId] });
+      queryClient.invalidateQueries({
+        queryKey: ['document-parsed-credit-report-comparison', documentId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['document-parsed-credit-report-account-candidates', documentId],
+      });
+    },
+  });
+
   const deleteMutation = useMutation({
     mutationFn: () => deleteDocument(documentId!),
     onSuccess: () => {
@@ -323,6 +338,15 @@ export function DocumentDetailPage() {
               disabled={retryMutation.isPending}
             >
               Retry OCR
+            </Button>
+          ) : null}
+          {data.document_type === 'credit_report' && ocrData?.ocr_text ? (
+            <Button
+              variant="secondary"
+              onClick={() => reparseMutation.mutate()}
+              disabled={reparseMutation.isPending}
+            >
+              {reparseMutation.isPending ? 'Re-parsing…' : 'Re-parse credit report'}
             </Button>
           ) : null}
           <Button variant="secondary" onClick={handleDownload}>
@@ -434,9 +458,28 @@ export function DocumentDetailPage() {
                 <ParsedReportTradelines parsedReport={parsedReport} />
               </div>
             ) : (
-              <p className="text-sm text-gray-500">
-                Structured parser output is not available for this credit report yet.
-              </p>
+              <div className="space-y-3">
+                <p className="text-sm text-gray-500">
+                  Structured parser output is not available for this credit report yet.
+                </p>
+                {ocrData?.ocr_text ? (
+                  <Button
+                    variant="secondary"
+                    onClick={() => reparseMutation.mutate()}
+                    disabled={reparseMutation.isPending}
+                  >
+                    {reparseMutation.isPending ? 'Re-parsing…' : 'Re-parse credit report'}
+                  </Button>
+                ) : null}
+                {reparseMutation.isSuccess ? (
+                  <p className="text-sm text-green-700">
+                    Parse job queued. Refresh shortly for structured tradelines.
+                  </p>
+                ) : null}
+                {reparseMutation.isError ? (
+                  <p className="text-sm text-red-600">Could not queue re-parse. Try again.</p>
+                ) : null}
+              </div>
             )}
           </Card>
         ) : null}
