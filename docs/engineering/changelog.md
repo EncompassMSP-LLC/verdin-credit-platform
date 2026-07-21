@@ -13,6 +13,14 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — Version 26.0 scope (Phase 25)
+
+**Decision:** Scope Version 26.0 as Document Pipeline Resolution & Operator Surfaces — Case Documents recovery panel (ungate bulk recovery from credit-report-only UI) and operator async entity re-resolve enqueue. Keep live bureau polling, automated filing, unsupervised escalation, litigation e-filing, and cross-tenant benchmarks deferred to 27.0+ or never.
+
+**Reason:** After 25.0, bulk recovery APIs exist but Case Detail hides them unless classified credit reports are present; entity resolution still lacks an async staff re-enqueue path.
+
+**Follow-up work:** Slice 2 — Case Documents recovery panel; Slice 3 — operator entity re-resolve; Slice 4 — sign-off.
+
 ## Compliance intelligence — Version 25.0 sign-off (Phase 24)
 
 **Decision:** Close Phase 24 as shipped `v25.0.0` after case-level bulk re-classify and case-level bulk OCR retry for failed eligible documents. Keep live bureau polling, automated filing, unsupervised escalation, litigation e-filing, and cross-tenant benchmarks deferred to 26.0+ or never.

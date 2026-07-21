@@ -38,6 +38,7 @@
 **Version 23.0 sign-off:** [version-23.0-scope.md](version-23.0-scope.md) · Release notes: [v23.0.0.md](../release-notes/v23.0.0.md)
 **Version 24.0 sign-off:** [version-24.0-scope.md](version-24.0-scope.md) · Release notes: [v24.0.0.md](../release-notes/v24.0.0.md)
 **Version 25.0 sign-off:** [version-25.0-scope.md](version-25.0-scope.md) · Release notes: [v25.0.0.md](../release-notes/v25.0.0.md)
+**Version 26.0 (in progress):** [version-26.0-scope.md](version-26.0-scope.md) · Checklist: [version-26.0-completion-checklist.md](../development/version-26.0-completion-checklist.md)
 
 ## Status legend
 
@@ -762,6 +763,17 @@ Scope: [version-25.0-scope.md](version-25.0-scope.md) · Checklist: [version-25.
 | --------------------------------------- | ------- | ------ | ------- | -------- | --- | --- | ----- | ------------ | -------------------------------------------------------- |
 | Case-level bulk re-classify             | 25.0    | ✅     | ✅      | ✅       | ✅  | —   | ✅    | Cases        | Staff enqueue document_classify for OCR'd docs on a case |
 | Case-level bulk OCR retry (failed docs) | 25.0    | ✅     | ✅      | ✅       | ✅  | —   | ✅    | Cases        | Staff re-enqueue OCR for failed eligible docs on a case  |
+
+---
+
+## Version 26.0 — Document Pipeline Resolution & Operator Surfaces (in progress — 🚧)
+
+Scope: [version-26.0-scope.md](version-26.0-scope.md) · Checklist: [version-26.0-completion-checklist.md](../development/version-26.0-completion-checklist.md)
+
+| Capability                               | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                             |
+| ---------------------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ----------------------------------------------------------------- |
+| Case Documents recovery panel            | 26.0    | Planned | —       | Planned  | —   | —   | —     | Cases        | Bulk recovery actions when any case docs exist (not credit-gated) |
+| Operator async entity re-resolve enqueue | 26.0    | Planned | Planned | Planned  | —   | —   | —     | Documents    | Staff enqueue document_entity_resolve when metadata exists        |
 
 ---
 
