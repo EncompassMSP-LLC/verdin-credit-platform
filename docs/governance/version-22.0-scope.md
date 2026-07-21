@@ -17,7 +17,7 @@ Everything remains **staff-mediated and advisory**. The platform still never pol
 | ---- | --------------------------------------- | ----------- | -------------------------------------------------------------------------------------------- |
 | 1    | Widen metadata payment_status           | Shipped     | `document_metadata.payment_status` → varchar(255); models/worker tables aligned              |
 | 2    | Operator re-parse credit report         | Shipped     | Staff POST to enqueue parse when OCR text exists and document is classified as credit_report |
-| 3    | Capability matrix / governance sign-off | Planned     | Scope, checklist, matrix rows, release notes                                                 |
+| 3    | Capability matrix / governance sign-off | Shipped     | Scope, checklist, matrix rows, release notes                                                 |
 
 ## Shipped from 21.0 (foundation — do not regress)
 

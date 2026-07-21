@@ -13,6 +13,14 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — Version 22.0 sign-off (Phase 21)
+
+**Decision:** Close Phase 21 as shipped `v22.0.0` after widening `document_metadata.payment_status` and shipping the operator credit-report re-parse enqueue. Keep live bureau polling, automated filing, unsupervised escalation, litigation e-filing, and cross-tenant benchmarks deferred to 23.0+ or never.
+
+**Reason:** Non-blocked document-pipeline hardening over owned surfaces is complete; remaining items need legal/compliance or product decisions.
+
+**Follow-up work:** Tag `v22.0.0`; next gated live-integration phase only with explicit legal/compliance sign-off.
+
 ## Compliance intelligence — operator re-parse credit report (Phase 21)
 
 **Decision:** Add `POST /documents/{id}/parsed-credit-report/reparse` (case_manager+) to enqueue `document_credit_report_parse` when OCR text exists and `document_type=credit_report`, plus Document Detail UI action and `@verdin/api-client` helper.
