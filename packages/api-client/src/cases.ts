@@ -583,6 +583,31 @@ export async function bulkReextractCaseMetadata(
   });
 }
 
+export interface CaseReclassifyQueuedItem {
+  document_id: string;
+  job_id: string;
+  job_type: string;
+}
+
+export interface CaseReclassifySkippedItem {
+  document_id: string;
+  reason: string;
+}
+
+export interface CaseBulkReclassify {
+  case_id: string;
+  queued_count: number;
+  skipped_count: number;
+  queued: CaseReclassifyQueuedItem[];
+  skipped: CaseReclassifySkippedItem[];
+}
+
+export async function bulkReclassifyCaseDocuments(caseId: string): Promise<CaseBulkReclassify> {
+  return request<CaseBulkReclassify>(apiPath(`/cases/${caseId}/classify/reclassify`), {
+    method: 'POST',
+  });
+}
+
 function parseContentDispositionFilename(header: string | null, fallback: string): string {
   if (!header) return fallback;
   const match = /filename="([^"]+)"/.exec(header);

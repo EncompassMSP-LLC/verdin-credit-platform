@@ -760,7 +760,7 @@ Scope: [version-25.0-scope.md](version-25.0-scope.md) · Checklist: [version-25.
 
 | Capability                              | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                    |
 | --------------------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | -------------------------------------------------------- |
-| Case-level bulk re-classify             | 25.0    | Planned | —       | —        | —   | —   | —     | Cases        | Staff enqueue document_classify for OCR'd docs on a case |
+| Case-level bulk re-classify             | 25.0    | ✅      | ✅      | ✅       | ✅  | —   | ✅    | Cases        | Staff enqueue document_classify for OCR'd docs on a case |
 | Case-level bulk OCR retry (failed docs) | 25.0    | Planned | —       | —        | —   | —   | —     | Cases        | Staff re-enqueue OCR for failed eligible docs on a case  |
 
 ---
