@@ -1,12 +1,13 @@
 import { useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ApiClientError,
+  bulkReparseCaseCreditReports,
   compareDocumentParsedCreditReport,
   getDocumentDuplicateGroup,
   listDocuments,
 } from '@verdin/api-client';
-import { Card } from '@verdin/ui';
+import { Button, Card } from '@verdin/ui';
 import { Link } from 'react-router-dom';
 import { DocumentDuplicateAlert } from '../documents/DocumentDuplicatePanel';
 import {
@@ -29,7 +30,9 @@ export function CreditReportHistoryPanel({
   title?: string;
   className?: string;
 }) {
+  const queryClient = useQueryClient();
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
+  const [bulkSummary, setBulkSummary] = useState<string | null>(null);
 
   const documentsQuery = useQuery({
     queryKey: ['case-credit-reports', caseId],
@@ -78,6 +81,26 @@ export function CreditReportHistoryPanel({
     retry: false,
   });
 
+  const bulkReparseMutation = useMutation({
+    mutationFn: () => bulkReparseCaseCreditReports(caseId),
+    onSuccess: (result) => {
+      setBulkSummary(
+        `Queued ${result.queued_count} re-parse job(s); skipped ${result.skipped_count}.`,
+      );
+      queryClient.invalidateQueries({ queryKey: ['case-credit-reports', caseId] });
+      if (activeDocumentId) {
+        queryClient.invalidateQueries({
+          queryKey: ['document-parsed-credit-report-comparison', activeDocumentId],
+        });
+      }
+    },
+    onError: (error) => {
+      setBulkSummary(
+        error instanceof Error ? error.message : 'Failed to enqueue bulk credit report re-parse',
+      );
+    },
+  });
+
   return (
     <Card title={title} className={className}>
       {documentsQuery.isLoading ? (
@@ -94,37 +117,47 @@ export function CreditReportHistoryPanel({
         </p>
       ) : (
         <div className="space-y-4">
-          <div>
-            <label
-              htmlFor={`credit-report-select-${caseId}`}
-              className="block text-sm font-medium text-gray-700"
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div className="min-w-0 flex-1">
+              <label
+                htmlFor={`credit-report-select-${caseId}`}
+                className="block text-sm font-medium text-gray-700"
+              >
+                Compare report
+              </label>
+              <select
+                id={`credit-report-select-${caseId}`}
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 sm:max-w-xl"
+                value={activeDocumentId ?? ''}
+                onChange={(event) => setSelectedDocumentId(event.target.value)}
+              >
+                {creditReports.map((document) => (
+                  <option key={document.id} value={document.id}>
+                    {document.title} ({formatDateTime(document.created_at)})
+                    {document.is_duplicate ? ' · duplicate' : ''}
+                  </option>
+                ))}
+              </select>
+              {selectedDocument ? (
+                <p className="mt-2 text-xs text-gray-500">
+                  <Link
+                    to={`/documents/${selectedDocument.id}`}
+                    className="text-brand-600 hover:underline"
+                  >
+                    Open {selectedDocument.file_name}
+                  </Link>
+                </p>
+              ) : null}
+            </div>
+            <Button
+              variant="secondary"
+              onClick={() => bulkReparseMutation.mutate()}
+              disabled={bulkReparseMutation.isPending}
             >
-              Compare report
-            </label>
-            <select
-              id={`credit-report-select-${caseId}`}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 sm:max-w-xl"
-              value={activeDocumentId ?? ''}
-              onChange={(event) => setSelectedDocumentId(event.target.value)}
-            >
-              {creditReports.map((document) => (
-                <option key={document.id} value={document.id}>
-                  {document.title} ({formatDateTime(document.created_at)})
-                  {document.is_duplicate ? ' · duplicate' : ''}
-                </option>
-              ))}
-            </select>
-            {selectedDocument ? (
-              <p className="mt-2 text-xs text-gray-500">
-                <Link
-                  to={`/documents/${selectedDocument.id}`}
-                  className="text-brand-600 hover:underline"
-                >
-                  Open {selectedDocument.file_name}
-                </Link>
-              </p>
-            ) : null}
+              {bulkReparseMutation.isPending ? 'Re-parsing…' : 'Re-parse all credit reports'}
+            </Button>
           </div>
+          {bulkSummary ? <p className="text-sm text-gray-600">{bulkSummary}</p> : null}
 
           {selectedDocument && duplicateGroupQuery.data ? (
             <DocumentDuplicateAlert

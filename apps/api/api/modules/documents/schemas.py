@@ -208,6 +208,25 @@ class DocumentMetadataReextractResponse(BaseSchema):
     queued: bool = True
 
 
+class CaseCreditReportReparseQueuedItem(BaseSchema):
+    document_id: uuid.UUID
+    job_id: str
+    job_type: str
+
+
+class CaseCreditReportReparseSkippedItem(BaseSchema):
+    document_id: uuid.UUID
+    reason: str
+
+
+class CaseCreditReportBulkReparseResponse(BaseSchema):
+    case_id: uuid.UUID
+    queued_count: int
+    skipped_count: int
+    queued: list[CaseCreditReportReparseQueuedItem]
+    skipped: list[CaseCreditReportReparseSkippedItem]
+
+
 class DocumentLlmSummaryResponse(BaseSchema):
     document_id: uuid.UUID
     summary: str

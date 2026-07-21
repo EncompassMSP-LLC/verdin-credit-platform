@@ -528,6 +528,34 @@ export async function prepareCaseCreditReportDisputes(
   );
 }
 
+export interface CaseCreditReportReparseQueuedItem {
+  document_id: string;
+  job_id: string;
+  job_type: string;
+}
+
+export interface CaseCreditReportReparseSkippedItem {
+  document_id: string;
+  reason: string;
+}
+
+export interface CaseCreditReportBulkReparse {
+  case_id: string;
+  queued_count: number;
+  skipped_count: number;
+  queued: CaseCreditReportReparseQueuedItem[];
+  skipped: CaseCreditReportReparseSkippedItem[];
+}
+
+export async function bulkReparseCaseCreditReports(
+  caseId: string,
+): Promise<CaseCreditReportBulkReparse> {
+  return request<CaseCreditReportBulkReparse>(
+    apiPath(`/cases/${caseId}/parsed-credit-reports/reparse`),
+    { method: 'POST' },
+  );
+}
+
 function parseContentDispositionFilename(header: string | null, fallback: string): string {
   if (!header) return fallback;
   const match = /filename="([^"]+)"/.exec(header);

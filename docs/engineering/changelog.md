@@ -13,6 +13,16 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — case-level bulk credit-report re-parse (Phase 22)
+
+**Decision:** Add `POST /cases/{id}/parsed-credit-reports/reparse` (case_manager+) to enqueue `document_credit_report_parse` for each OCR'd `credit_report` on the case, returning queued/skipped counts with reasons; Case Detail Credit Report History panel action + `@verdin/api-client` helper.
+
+**Reason:** Multi-bureau pilot uploads needed a case-scoped recovery control so staff are not forced to re-parse one PDF at a time.
+
+**Guardrails:** Org-scoped; soft-skip missing OCR / wrong type / enqueue failure; no auto re-parse; no live bureau contact; list capped via existing case document listing.
+
+**Follow-up work:** Slice 4 — Version 23.0 sign-off + release notes.
+
 ## Compliance intelligence — operator async metadata re-extract (Phase 22)
 
 **Decision:** Add `POST /documents/{id}/metadata/reextract` (case_manager+) to enqueue `document_metadata_extract` when OCR text exists, plus Document Detail UI action and `@verdin/api-client` helper. Keep sync `POST .../metadata/extract`.

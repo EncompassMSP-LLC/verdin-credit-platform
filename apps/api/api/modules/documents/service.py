@@ -65,7 +65,10 @@ from api.modules.documents.schemas import (
     CaseAttorneyChecklistResponse,
     CaseCfpbChecklistResponse,
     CaseComplianceEvidenceLinksResponse,
+    CaseCreditReportBulkReparseResponse,
     CaseCreditReportDiscrepanciesResponse,
+    CaseCreditReportReparseQueuedItem,
+    CaseCreditReportReparseSkippedItem,
     CaseDisputeStrategyResponse,
     CaseFcraFindingsResponse,
     CaseIdentityTheftFindingsResponse,
@@ -1165,6 +1168,78 @@ class DocumentService:
             job_id=message.job_id,
             job_type=JobType.DOCUMENT_METADATA_EXTRACT.value,
             queued=True,
+        )
+
+    async def bulk_reparse_case_credit_reports(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+    ) -> CaseCreditReportBulkReparseResponse:
+        """Enqueue parse for each OCR'd credit_report document on a case."""
+        self._require_write(user)
+        organization_id = self._require_organization(user)
+        await self._validate_case(case_id, organization_id)
+
+        documents = await self.list_documents_for_case(
+            organization_id=organization_id,
+            case_id=case_id,
+        )
+
+        queued: list[CaseCreditReportReparseQueuedItem] = []
+        skipped: list[CaseCreditReportReparseSkippedItem] = []
+
+        for document in documents:
+            if document.document_type != DocumentType.CREDIT_REPORT.value:
+                skipped.append(
+                    CaseCreditReportReparseSkippedItem(
+                        document_id=document.id,
+                        reason="not_credit_report",
+                    )
+                )
+                continue
+            if not document.ocr_text:
+                skipped.append(
+                    CaseCreditReportReparseSkippedItem(
+                        document_id=document.id,
+                        reason="missing_ocr",
+                    )
+                )
+                continue
+
+            try:
+                message = enqueue_job(
+                    JobType.DOCUMENT_CREDIT_REPORT_PARSE,
+                    {"document_id": str(document.id)},
+                )
+            except Exception:
+                logger.exception(
+                    "Failed to enqueue credit report parse for document %s",
+                    document.id,
+                )
+                skipped.append(
+                    CaseCreditReportReparseSkippedItem(
+                        document_id=document.id,
+                        reason="enqueue_failed",
+                    )
+                )
+                continue
+
+            apply_audit_on_update(document, user.id)
+            await self._documents.update(document)
+            queued.append(
+                CaseCreditReportReparseQueuedItem(
+                    document_id=document.id,
+                    job_id=message.job_id,
+                    job_type=JobType.DOCUMENT_CREDIT_REPORT_PARSE.value,
+                )
+            )
+
+        return CaseCreditReportBulkReparseResponse(
+            case_id=case_id,
+            queued_count=len(queued),
+            skipped_count=len(skipped),
+            queued=queued,
+            skipped=skipped,
         )
 
     def _build_classification_context(self, document: Document) -> ClassificationContext:
