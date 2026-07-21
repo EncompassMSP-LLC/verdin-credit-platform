@@ -63,6 +63,7 @@ from api.modules.documents.schemas import (
     AttorneyChecklistSummary,
     BureauTradelineSnapshotResponse,
     CaseAttorneyChecklistResponse,
+    CaseBulkReclassifyResponse,
     CaseCfpbChecklistResponse,
     CaseComplianceEvidenceLinksResponse,
     CaseCreditReportBulkReparseResponse,
@@ -77,6 +78,8 @@ from api.modules.documents.schemas import (
     CaseMetadataReextractQueuedItem,
     CaseMetadataReextractSkippedItem,
     CaseMetro2FindingsResponse,
+    CaseReclassifyQueuedItem,
+    CaseReclassifySkippedItem,
     CaseTradelineChronologyResponse,
     CfpbChecklistItem,
     CfpbChecklistSummary,
@@ -1354,6 +1357,77 @@ class DocumentService:
             )
 
         return CaseMetadataBulkReextractResponse(
+            case_id=case_id,
+            queued_count=len(queued),
+            skipped_count=len(skipped),
+            queued=queued,
+            skipped=skipped,
+        )
+
+    async def bulk_reclassify_case_documents(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+    ) -> CaseBulkReclassifyResponse:
+        """Enqueue classification for each OCR'd document on a case."""
+        self._require_write(user)
+        organization_id = self._require_organization(user)
+        await self._validate_case(case_id, organization_id)
+
+        settings = get_settings()
+        if not settings.document_classification_enabled:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Document classification is disabled",
+            )
+
+        documents = await self.list_documents_for_case(
+            organization_id=organization_id,
+            case_id=case_id,
+        )
+
+        queued: list[CaseReclassifyQueuedItem] = []
+        skipped: list[CaseReclassifySkippedItem] = []
+
+        for document in documents:
+            if not document.ocr_text:
+                skipped.append(
+                    CaseReclassifySkippedItem(
+                        document_id=document.id,
+                        reason="missing_ocr",
+                    )
+                )
+                continue
+
+            try:
+                message = enqueue_job(
+                    JobType.DOCUMENT_CLASSIFY,
+                    {"document_id": str(document.id)},
+                )
+            except Exception:
+                logger.exception(
+                    "Failed to enqueue classify for document %s",
+                    document.id,
+                )
+                skipped.append(
+                    CaseReclassifySkippedItem(
+                        document_id=document.id,
+                        reason="enqueue_failed",
+                    )
+                )
+                continue
+
+            apply_audit_on_update(document, user.id)
+            await self._documents.update(document)
+            queued.append(
+                CaseReclassifyQueuedItem(
+                    document_id=document.id,
+                    job_id=message.job_id,
+                    job_type=JobType.DOCUMENT_CLASSIFY.value,
+                )
+            )
+
+        return CaseBulkReclassifyResponse(
             case_id=case_id,
             queued_count=len(queued),
             skipped_count=len(skipped),

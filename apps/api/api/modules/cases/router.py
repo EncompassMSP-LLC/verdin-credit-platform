@@ -32,6 +32,7 @@ from api.modules.cases.schemas import (
 from api.modules.cases.service import CaseService
 from api.modules.documents.schemas import (
     CaseAttorneyChecklistResponse,
+    CaseBulkReclassifyResponse,
     CaseCfpbChecklistResponse,
     CaseComplianceEvidenceLinksResponse,
     CaseCreditReportBulkReparseResponse,
@@ -202,6 +203,18 @@ async def bulk_reextract_case_metadata(
     service: DocumentService = Depends(get_document_service),
 ) -> CaseMetadataBulkReextractResponse:
     return await service.bulk_reextract_case_metadata(current_user, case_id)
+
+
+@router.post(
+    "/{case_id}/classify/reclassify",
+    response_model=CaseBulkReclassifyResponse,
+)
+async def bulk_reclassify_case_documents(
+    case_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> CaseBulkReclassifyResponse:
+    return await service.bulk_reclassify_case_documents(current_user, case_id)
 
 
 @router.get(

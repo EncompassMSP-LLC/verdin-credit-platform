@@ -13,6 +13,16 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — case-level bulk re-classify (Phase 24)
+
+**Decision:** Add `POST /cases/{id}/classify/reclassify` (case_manager+) to enqueue `document_classify` for each OCR'd document on the case, returning queued/skipped counts; Case Detail Credit Report History panel action + `@verdin/api-client` helper.
+
+**Reason:** After OCR completes without usable types across many PDFs, staff need case-scoped bulk re-classify so multi-document cases are not one-click-per-PDF.
+
+**Guardrails:** Org-scoped; soft-skip missing OCR / enqueue failure; 503 when classification disabled; no forced type; no auto loops; no live bureau contact.
+
+**Follow-up work:** Slice 3 — case bulk OCR retry; Slice 4 — Version 25.0 sign-off.
+
 ## Compliance intelligence — Version 25.0 scope (Phase 24)
 
 **Decision:** Scope Version 25.0 as Document Pipeline Recovery Bulk Closeout — case-level bulk re-classify enqueue and case-level bulk OCR retry for failed eligible documents. Keep live bureau polling, automated filing, unsupervised escalation, litigation e-filing, and cross-tenant benchmarks deferred to 26.0+ or never.

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ApiClientError,
+  bulkReclassifyCaseDocuments,
   bulkReextractCaseMetadata,
   bulkReparseCaseCreditReports,
   compareDocumentParsedCreditReport,
@@ -117,6 +118,25 @@ export function CreditReportHistoryPanel({
     },
   });
 
+  const bulkReclassifyMutation = useMutation({
+    mutationFn: () => bulkReclassifyCaseDocuments(caseId),
+    onSuccess: (result) => {
+      setBulkSummary(
+        `Queued ${result.queued_count} re-classify job(s); skipped ${result.skipped_count}.`,
+      );
+      queryClient.invalidateQueries({ queryKey: ['case-credit-reports', caseId] });
+      queryClient.invalidateQueries({ queryKey: ['documents'] });
+    },
+    onError: (error) => {
+      setBulkSummary(error instanceof Error ? error.message : 'Failed to enqueue bulk re-classify');
+    },
+  });
+
+  const bulkActionsPending =
+    bulkReparseMutation.isPending ||
+    bulkReextractMutation.isPending ||
+    bulkReclassifyMutation.isPending;
+
   return (
     <Card title={title} className={className}>
       {documentsQuery.isLoading ? (
@@ -169,14 +189,23 @@ export function CreditReportHistoryPanel({
               <Button
                 variant="secondary"
                 onClick={() => bulkReextractMutation.mutate()}
-                disabled={bulkReextractMutation.isPending || bulkReparseMutation.isPending}
+                disabled={bulkActionsPending}
               >
                 {bulkReextractMutation.isPending ? 'Re-extracting…' : 'Re-extract metadata (case)'}
               </Button>
               <Button
                 variant="secondary"
+                onClick={() => bulkReclassifyMutation.mutate()}
+                disabled={bulkActionsPending}
+              >
+                {bulkReclassifyMutation.isPending
+                  ? 'Re-classifying…'
+                  : 'Re-classify documents (case)'}
+              </Button>
+              <Button
+                variant="secondary"
                 onClick={() => bulkReparseMutation.mutate()}
-                disabled={bulkReparseMutation.isPending || bulkReextractMutation.isPending}
+                disabled={bulkActionsPending}
               >
                 {bulkReparseMutation.isPending ? 'Re-parsing…' : 'Re-parse all credit reports'}
               </Button>

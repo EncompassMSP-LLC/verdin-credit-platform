@@ -253,6 +253,25 @@ class CaseMetadataBulkReextractResponse(BaseSchema):
     skipped: list[CaseMetadataReextractSkippedItem]
 
 
+class CaseReclassifyQueuedItem(BaseSchema):
+    document_id: uuid.UUID
+    job_id: str
+    job_type: str
+
+
+class CaseReclassifySkippedItem(BaseSchema):
+    document_id: uuid.UUID
+    reason: str
+
+
+class CaseBulkReclassifyResponse(BaseSchema):
+    case_id: uuid.UUID
+    queued_count: int
+    skipped_count: int
+    queued: list[CaseReclassifyQueuedItem]
+    skipped: list[CaseReclassifySkippedItem]
+
+
 class DocumentLlmSummaryResponse(BaseSchema):
     document_id: uuid.UUID
     summary: str
