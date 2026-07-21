@@ -309,21 +309,22 @@ Accounts automatically compute `risk_score`, `readiness_score`, `next_eligible_d
 
 Secure document storage with MinIO, SHA-256 hashing, versioning, and duplicate detection. See [`docs/epics/document-intelligence-platform.md`](../epics/document-intelligence-platform.md).
 
-| Method | Path                                        | Min role     | Description                        |
-| ------ | ------------------------------------------- | ------------ | ---------------------------------- |
-| POST   | `/documents`                                | case_manager | Upload document (multipart)        |
-| GET    | `/documents`                                | read_only    | List documents                     |
-| GET    | `/documents/{document_id}`                  | read_only    | Get document with versions         |
-| GET    | `/documents/{document_id}/duplicates`       | read_only    | Get exact-hash duplicate group     |
-| PATCH  | `/documents/{document_id}`                  | case_manager | Update metadata                    |
-| DELETE | `/documents/{document_id}`                  | admin        | Soft-delete document               |
-| GET    | `/documents/{document_id}/ocr`              | read_only    | OCR status and extracted text      |
-| POST   | `/documents/{document_id}/ocr/retry`        | case_manager | Re-queue OCR for failed document   |
-| GET    | `/documents/{document_id}/download`         | read_only    | Download file (optional `version`) |
-| POST   | `/documents/{document_id}/versions`         | case_manager | Upload new version                 |
-| GET    | `/documents/{document_id}/versions`         | read_only    | List version history               |
-| GET    | `/documents/{document_id}/metadata`         | read_only    | Get extracted metadata             |
-| POST   | `/documents/{document_id}/metadata/extract` | case_manager | Extract metadata from OCR text     |
+| Method | Path                                          | Min role     | Description                                   |
+| ------ | --------------------------------------------- | ------------ | --------------------------------------------- |
+| POST   | `/documents`                                  | case_manager | Upload document (multipart)                   |
+| GET    | `/documents`                                  | read_only    | List documents                                |
+| GET    | `/documents/{document_id}`                    | read_only    | Get document with versions                    |
+| GET    | `/documents/{document_id}/duplicates`         | read_only    | Get exact-hash duplicate group                |
+| PATCH  | `/documents/{document_id}`                    | case_manager | Update metadata                               |
+| DELETE | `/documents/{document_id}`                    | admin        | Soft-delete document                          |
+| GET    | `/documents/{document_id}/ocr`                | read_only    | OCR status and extracted text                 |
+| POST   | `/documents/{document_id}/ocr/retry`          | case_manager | Re-queue OCR for failed document              |
+| GET    | `/documents/{document_id}/download`           | read_only    | Download file (optional `version`)            |
+| POST   | `/documents/{document_id}/versions`           | case_manager | Upload new version                            |
+| GET    | `/documents/{document_id}/versions`           | read_only    | List version history                          |
+| GET    | `/documents/{document_id}/metadata`           | read_only    | Get extracted metadata                        |
+| POST   | `/documents/{document_id}/metadata/extract`   | case_manager | Extract metadata from OCR text (sync)         |
+| POST   | `/documents/{document_id}/metadata/reextract` | case_manager | Enqueue async metadata extract (OCR required) |
 
 `document_metadata.payment_status` is varchar(255) so bureau status narratives (charged-off / past-due text) persist without extract write failures.
 
@@ -343,6 +344,8 @@ Secure document storage with MinIO, SHA-256 hashing, versioning, and duplicate d
 | POST | `/documents/{document_id}/llm-summary` | case_manager | Generate scrubbed document summary |
 
 `POST /documents/{document_id}/parsed-credit-report/reparse` enqueues `document_credit_report_parse` when the document has OCR text and `document_type=credit_report`. Returns 422 otherwise. Staff-mediated only; no live bureau contact.
+
+`POST /documents/{document_id}/metadata/reextract` enqueues `document_metadata_extract` when the document has OCR text. Returns 422 without OCR. Sync `POST .../metadata/extract` remains available for immediate extract. Staff-mediated only.
 
 **List query parameters:** `metadata_status` (`pending`, `extracted`, `failed`), `resolution_status` (`matched`, `ambiguous`, `unmatched`, `confirmed`, `rejected`).
 

@@ -10,7 +10,7 @@ Scope: [`docs/governance/version-23.0-scope.md`](../governance/version-23.0-scop
 
 ## Exit criteria for "23.0 done"
 
-- [ ] Staff can enqueue async metadata re-extract for OCR'd documents
+- [x] Staff can enqueue async metadata re-extract for OCR'd documents
 - [ ] Staff can bulk re-parse eligible credit reports on a case
 - [ ] Capability matrix + API reference updated
 - [ ] Deferred items explicitly documented
@@ -23,7 +23,7 @@ Scope: [`docs/governance/version-23.0-scope.md`](../governance/version-23.0-scop
 | Order | Slice                                  | Epic       | Status |
 | ----- | -------------------------------------- | ---------- | ------ |
 | 1     | 23.0 scope + completion checklist      | Kickoff    | ✅     |
-| 2     | Operator async metadata re-extract     | Documents  | ☐      |
+| 2     | Operator async metadata re-extract     | Documents  | ✅     |
 | 3     | Case-level bulk credit-report re-parse | Documents  | ☐      |
 | 4     | Capability matrix 23.0 sign-off        | Governance | ☐      |
 

@@ -584,7 +584,7 @@ Compliance Intelligence Phase 22 deepens owned document-pipeline recovery withou
 
 | Epic | Theme                                  | 23.0 target | Notes                                                         |
 | ---- | -------------------------------------- | ----------- | ------------------------------------------------------------- |
-| 1    | Operator async metadata re-extract     | Planned     | Enqueue document_metadata_extract; keep sync extract endpoint |
+| 1    | Operator async metadata re-extract     | Shipped     | Enqueue document_metadata_extract; keep sync extract endpoint |
 | 2    | Case-level bulk credit-report re-parse | Planned     | Enqueue parse for all OCR'd credit_report docs on a case      |
 
 ## Sprint → version mapping

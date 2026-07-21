@@ -968,6 +968,24 @@ export async function extractDocumentMetadata(documentId: string): Promise<Docum
   });
 }
 
+export interface DocumentMetadataReextract {
+  document_id: string;
+  job_id: string;
+  job_type: string;
+  queued: boolean;
+}
+
+export async function reextractDocumentMetadata(
+  documentId: string,
+): Promise<DocumentMetadataReextract> {
+  return request<DocumentMetadataReextract>(
+    apiPath(`/documents/${documentId}/metadata/reextract`),
+    {
+      method: 'POST',
+    },
+  );
+}
+
 export async function getDocumentResolutions(documentId: string): Promise<DocumentResolutions> {
   return request<DocumentResolutions>(apiPath(`/documents/${documentId}/resolutions`));
 }

@@ -13,6 +13,16 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — operator async metadata re-extract (Phase 22)
+
+**Decision:** Add `POST /documents/{id}/metadata/reextract` (case_manager+) to enqueue `document_metadata_extract` when OCR text exists, plus Document Detail UI action and `@verdin/api-client` helper. Keep sync `POST .../metadata/extract`.
+
+**Reason:** After schema/worker fixes, staff need a non-blocking recovery path so metadata re-runs do not hang the API the way sync extract can on large OCR payloads.
+
+**Guardrails:** Org-scoped; 422 without OCR; 503 when metadata feature disabled or enqueue fails; no bulk/auto re-extract; no live bureau contact.
+
+**Follow-up work:** Slice 3 — case bulk re-parse; Slice 4 — Version 23.0 sign-off.
+
 ## Compliance intelligence — Version 23.0 scope (Phase 22)
 
 **Decision:** Scope Version 23.0 as Document Pipeline Recovery Depth — operator async metadata re-extract enqueue and case-level bulk credit-report re-parse. Keep live bureau polling, automated filing, unsupervised escalation, litigation e-filing, and cross-tenant benchmarks deferred to 24.0+ or never.

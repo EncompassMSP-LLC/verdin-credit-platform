@@ -736,7 +736,7 @@ Scope: [version-23.0-scope.md](version-23.0-scope.md) · Checklist: [version-23.
 
 | Capability                             | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                         |
 | -------------------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ------------------------------------------------------------- |
-| Operator async metadata re-extract     | 23.0    | Planned | —       | —        | —   | —   | —     | Documents    | Staff enqueue document_metadata_extract for OCR'd documents   |
+| Operator async metadata re-extract     | 23.0    | ✅      | ✅      | ✅       | ✅  | —   | ✅    | Documents    | Staff enqueue document_metadata_extract for OCR'd documents   |
 | Case-level bulk credit-report re-parse | 23.0    | Planned | —       | —        | —   | —   | —     | Cases        | Staff enqueue parse for all eligible credit reports on a case |
 
 ---

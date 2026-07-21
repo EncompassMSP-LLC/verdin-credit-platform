@@ -39,6 +39,7 @@ from api.modules.documents.schemas import (
     DocumentIdentityTheftFindingsResponse,
     DocumentListParams,
     DocumentLlmSummaryResponse,
+    DocumentMetadataReextractResponse,
     DocumentMetro2FindingsResponse,
     DocumentOcrResponse,
     DocumentParsedCreditReportAccountCandidatesResponse,
@@ -359,6 +360,18 @@ async def extract_document_metadata(
     service: DocumentService = Depends(get_document_service),
 ) -> DocumentMetadataResponse:
     return await service.extract_metadata(current_user, document_id)
+
+
+@router.post(
+    "/{document_id}/metadata/reextract",
+    response_model=DocumentMetadataReextractResponse,
+)
+async def reextract_document_metadata(
+    document_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> DocumentMetadataReextractResponse:
+    return await service.reextract_metadata(current_user, document_id)
 
 
 @router.get("/{document_id}/resolutions", response_model=DocumentResolutionsResponse)
