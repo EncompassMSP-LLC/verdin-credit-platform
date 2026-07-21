@@ -770,10 +770,10 @@ Scope: [version-25.0-scope.md](version-25.0-scope.md) · Checklist: [version-25.
 
 Scope: [version-26.0-scope.md](version-26.0-scope.md) · Checklist: [version-26.0-completion-checklist.md](../development/version-26.0-completion-checklist.md)
 
-| Capability                               | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                             |
-| ---------------------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ----------------------------------------------------------------- |
-| Case Documents recovery panel            | 26.0    | ✅      | —       | ✅       | —   | —   | —     | Cases        | Bulk recovery actions when any case docs exist (not credit-gated) |
-| Operator async entity re-resolve enqueue | 26.0    | Planned | Planned | Planned  | —   | —   | —     | Documents    | Staff enqueue document_entity_resolve when metadata exists        |
+| Capability                               | Version | Status | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                             |
+| ---------------------------------------- | ------- | ------ | ------- | -------- | --- | --- | ----- | ------------ | ----------------------------------------------------------------- |
+| Case Documents recovery panel            | 26.0    | ✅     | —       | ✅       | —   | —   | —     | Cases        | Bulk recovery actions when any case docs exist (not credit-gated) |
+| Operator async entity re-resolve enqueue | 26.0    | ✅     | ✅      | ✅       | ✅  | —   | ✅    | Documents    | Staff enqueue document_entity_resolve when metadata exists        |
 
 ---
 

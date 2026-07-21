@@ -16,7 +16,7 @@ Everything remains **staff-mediated and advisory**. The platform still never pol
 | Epic | Theme                                    | 26.0 target | Summary                                                                              |
 | ---- | ---------------------------------------- | ----------- | ------------------------------------------------------------------------------------ |
 | 1    | Case Documents recovery panel            | Shipped     | Case Detail panel hosting bulk recovery actions for any case documents               |
-| 2    | Operator async entity re-resolve enqueue | Planned     | Staff enqueue `document_entity_resolve` when metadata exists; Document Detail action |
+| 2    | Operator async entity re-resolve enqueue | Shipped     | Staff enqueue `document_entity_resolve` when metadata exists; Document Detail action |
 | 3    | Capability matrix / governance sign-off  | Planned     | Scope, checklist, matrix rows, release notes                                         |
 
 ## Shipped from 25.0 (foundation — do not regress)
@@ -46,7 +46,7 @@ All v25.0.0 APIs, UI, and `@verdin/api-client` functions remain production capab
 
 **Not included:** Changing bulk API semantics; new worker jobs; live bureau contact.
 
-### Operator async entity re-resolve enqueue (Planned)
+### Operator async entity re-resolve enqueue (Shipped)
 
 **Included:** Authenticated staff endpoint to enqueue `document_entity_resolve` for an org-scoped document that has extracted metadata; Document Detail UI action; keep sync `POST .../resolutions/resolve`.
 

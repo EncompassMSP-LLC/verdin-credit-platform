@@ -4,6 +4,7 @@ import {
   confirmDocumentResolution,
   getDocumentResolutions,
   rejectDocumentResolution,
+  reresolveDocumentEntities,
   resolveDocumentEntities,
   type DocumentEntityResolution,
 } from '@verdin/api-client';
@@ -173,6 +174,14 @@ export function DocumentEntityResolutionPanel({
     },
   });
 
+  const reresolveMutation = useMutation({
+    mutationFn: () => reresolveDocumentEntities(documentId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['document-resolutions', documentId] });
+      queryClient.invalidateQueries({ queryKey: ['document', documentId] });
+    },
+  });
+
   if (!hasMetadata) {
     return (
       <Card title="Entity matches">
@@ -183,14 +192,22 @@ export function DocumentEntityResolutionPanel({
 
   return (
     <Card title="Entity matches">
-      <div className="mb-4 flex justify-end">
+      <div className="mb-4 flex flex-wrap justify-end gap-2">
         <Button
           variant="secondary"
           size="sm"
           onClick={() => resolveMutation.mutate()}
-          disabled={resolveMutation.isPending}
+          disabled={resolveMutation.isPending || reresolveMutation.isPending}
         >
           Resolve
+        </Button>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => reresolveMutation.mutate()}
+          disabled={reresolveMutation.isPending || resolveMutation.isPending}
+        >
+          {reresolveMutation.isPending ? 'Queuing…' : 'Re-resolve (async)'}
         </Button>
       </div>
       {isLoading ? <p className="text-sm text-gray-500">Loading resolutions...</p> : null}
@@ -217,11 +234,23 @@ export function DocumentEntityResolutionPanel({
           </p>
         )
       )}
+      {reresolveMutation.isSuccess ? (
+        <p className="mt-3 text-sm text-green-700">
+          Entity re-resolve job queued. Refresh shortly for updated matches.
+        </p>
+      ) : null}
       {resolveMutation.isError ? (
         <p className="mt-3 text-sm text-red-600">
           {resolveMutation.error instanceof Error
             ? resolveMutation.error.message
             : 'Resolution failed'}
+        </p>
+      ) : null}
+      {reresolveMutation.isError ? (
+        <p className="mt-3 text-sm text-red-600">
+          {reresolveMutation.error instanceof Error
+            ? reresolveMutation.error.message
+            : 'Re-resolve enqueue failed'}
         </p>
       ) : null}
     </Card>

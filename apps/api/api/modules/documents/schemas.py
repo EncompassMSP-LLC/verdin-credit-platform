@@ -215,6 +215,13 @@ class DocumentReclassifyResponse(BaseSchema):
     queued: bool = True
 
 
+class DocumentEntityReresolveResponse(BaseSchema):
+    document_id: uuid.UUID
+    job_id: str
+    job_type: str
+    queued: bool = True
+
+
 class CaseCreditReportReparseQueuedItem(BaseSchema):
     document_id: uuid.UUID
     job_id: str

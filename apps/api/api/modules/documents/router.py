@@ -35,6 +35,7 @@ from api.modules.documents.schemas import (
     DocumentClassificationResponse,
     DocumentCreditReportReparseResponse,
     DocumentDuplicateGroupResponse,
+    DocumentEntityReresolveResponse,
     DocumentFcraFindingsResponse,
     DocumentIdentityTheftFindingsResponse,
     DocumentListParams,
@@ -403,6 +404,18 @@ async def resolve_document_entities(
     service: DocumentService = Depends(get_document_service),
 ) -> DocumentResolutionsResponse:
     return await service.resolve_entities(current_user, document_id)
+
+
+@router.post(
+    "/{document_id}/resolutions/reresolve",
+    response_model=DocumentEntityReresolveResponse,
+)
+async def reresolve_document_entities(
+    document_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> DocumentEntityReresolveResponse:
+    return await service.reresolve_entities(current_user, document_id)
 
 
 @router.post(

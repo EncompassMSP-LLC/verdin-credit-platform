@@ -13,6 +13,16 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — Operator async entity re-resolve (Phase 25)
+
+**Decision:** Add `POST /documents/{id}/resolutions/reresolve` (case_manager+) to enqueue `document_entity_resolve` when metadata status is `extracted`, plus Document Detail "Re-resolve (async)" action and `@verdin/api-client` helper. Keep sync `POST .../resolutions/resolve`.
+
+**Reason:** Metadata extraction already auto-queues entity resolve, but staff had no recovery path when the job was missed, failed, or resolutions went stale after account/case changes.
+
+**Guardrails:** Requires extracted metadata (422 otherwise); returns 503 when entity resolution is disabled; staff-mediated only; no case bulk re-resolve in 26.0; no live bureau contact.
+
+**Follow-up work:** Slice 4 — Version 26.0 sign-off; case bulk entity re-resolve deferred to 27.0+.
+
 ## Compliance intelligence — Case Documents recovery panel (Phase 25)
 
 **Decision:** Add Case Detail `CaseDocumentsRecoveryPanel` hosting case bulk OCR retry, re-classify, metadata re-extract, and credit-report re-parse when any case documents exist. Move those actions out of Credit Report History so recovery is not gated on `document_type=credit_report`.
