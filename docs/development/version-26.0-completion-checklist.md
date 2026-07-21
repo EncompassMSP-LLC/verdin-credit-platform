@@ -11,8 +11,8 @@ Scope: [`docs/governance/version-26.0-scope.md`](../governance/version-26.0-scop
 ## Exit criteria for "26.0 done"
 
 - [x] Staff can run case bulk recovery actions without a classified credit report present
-- [ ] Staff can enqueue async entity re-resolve when metadata exists
-- [ ] Capability matrix + API reference updated
+- [x] Staff can enqueue async entity re-resolve when metadata exists
+- [x] Capability matrix + API reference updated
 - [ ] Deferred items explicitly documented
 - [ ] `docs/release-notes/v26.0.0.md` + tag `v26.0.0`
 
@@ -24,7 +24,7 @@ Scope: [`docs/governance/version-26.0-scope.md`](../governance/version-26.0-scop
 | ----- | ---------------------------------------- | ---------- | ------ |
 | 1     | 26.0 scope + completion checklist        | Kickoff    | ✅     |
 | 2     | Case Documents recovery panel            | Documents  | ✅     |
-| 3     | Operator async entity re-resolve enqueue | Documents  | ☐      |
+| 3     | Operator async entity re-resolve enqueue | Documents  | ✅     |
 | 4     | Capability matrix 26.0 sign-off          | Governance | ☐      |
 
 Slice 2 ungates existing bulk recovery APIs on Case Detail when any case documents exist. Slice 3 adds an operator-gated async entity re-resolve enqueue for documents with metadata. Live polling, automated filing, and cross-tenant benchmarks stay out of scope.

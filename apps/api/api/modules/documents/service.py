@@ -31,6 +31,7 @@ from api.modules.documents.constants import (
     DocumentProcessingStatus,
     DocumentType,
     MatchedEntityType,
+    MetadataStatus,
     ResolutionMethod,
     ResolutionStatus,
     is_ocr_eligible,
@@ -102,6 +103,7 @@ from api.modules.documents.schemas import (
     DocumentClassificationResponse,
     DocumentCreditReportReparseResponse,
     DocumentDuplicateGroupResponse,
+    DocumentEntityReresolveResponse,
     DocumentFcraFindingsResponse,
     DocumentIdentityTheftFindingsResponse,
     DocumentListParams,
@@ -1221,6 +1223,54 @@ class DocumentService:
             document_id=document.id,
             job_id=message.job_id,
             job_type=JobType.DOCUMENT_CLASSIFY.value,
+            queued=True,
+        )
+
+    async def reresolve_entities(
+        self,
+        user: User,
+        document_id: uuid.UUID,
+    ) -> DocumentEntityReresolveResponse:
+        """Enqueue entity resolution when metadata is extracted (async recovery path)."""
+        self._require_write(user)
+        document = await self._get_document_for_user(document_id, user)
+
+        settings = get_settings()
+        if not settings.document_entity_resolution_enabled:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Document entity resolution is disabled",
+            )
+
+        metadata = await self._metadata.get_metadata_by_document(
+            document.id,
+            organization_id=document.organization_id,
+        )
+        if metadata is None or metadata.metadata_status != MetadataStatus.EXTRACTED.value:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Metadata must be extracted before entity re-resolve",
+            )
+
+        try:
+            message = enqueue_job(
+                JobType.DOCUMENT_ENTITY_RESOLVE,
+                {"document_id": str(document.id)},
+            )
+        except Exception as exc:
+            logger.exception("Failed to enqueue entity resolve for document %s", document.id)
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Unable to enqueue entity resolve job",
+            ) from exc
+
+        apply_audit_on_update(document, user.id)
+        await self._documents.update(document)
+
+        return DocumentEntityReresolveResponse(
+            document_id=document.id,
+            job_id=message.job_id,
+            job_type=JobType.DOCUMENT_ENTITY_RESOLVE.value,
             queued=True,
         )
 

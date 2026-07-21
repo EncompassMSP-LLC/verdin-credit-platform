@@ -1009,6 +1009,24 @@ export async function resolveDocumentEntities(documentId: string): Promise<Docum
   });
 }
 
+export interface DocumentEntityReresolve {
+  document_id: string;
+  job_id: string;
+  job_type: string;
+  queued: boolean;
+}
+
+export async function reresolveDocumentEntities(
+  documentId: string,
+): Promise<DocumentEntityReresolve> {
+  return request<DocumentEntityReresolve>(
+    apiPath(`/documents/${documentId}/resolutions/reresolve`),
+    {
+      method: 'POST',
+    },
+  );
+}
+
 export async function confirmDocumentResolution(
   documentId: string,
   resolutionId: string,

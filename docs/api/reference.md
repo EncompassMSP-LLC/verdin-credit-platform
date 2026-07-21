@@ -343,7 +343,8 @@ Secure document storage with MinIO, SHA-256 hashing, versioning, and duplicate d
 | GET | `/documents/{document_id}/parsed-credit-report/account-candidates` | read_only | Parsed tradelines as import candidates |
 | POST | `/documents/{document_id}/parsed-credit-report/review-task` | case_manager | Create or reuse account candidate review task |
 | GET | `/documents/{document_id}/resolutions` | read_only | List entity resolution results |
-| POST | `/documents/{document_id}/resolutions/resolve` | case_manager | Run entity resolution |
+| POST | `/documents/{document_id}/resolutions/resolve` | case_manager | Run entity resolution (sync) |
+| POST | `/documents/{document_id}/resolutions/reresolve` | case_manager | Enqueue async entity resolution (metadata required) |
 | POST | `/documents/{document_id}/resolutions/{resolution_id}/confirm` | case_manager | Confirm or manually select match |
 | POST | `/documents/{document_id}/resolutions/{resolution_id}/reject` | case_manager | Reject proposed match |
 | POST | `/documents/{document_id}/llm-summary` | case_manager | Generate scrubbed document summary |
@@ -353,6 +354,8 @@ Secure document storage with MinIO, SHA-256 hashing, versioning, and duplicate d
 `POST /documents/{document_id}/metadata/reextract` enqueues `document_metadata_extract` when the document has OCR text. Returns 422 without OCR. Sync `POST .../metadata/extract` remains available for immediate extract. Staff-mediated only.
 
 `POST /documents/{document_id}/classify/reclassify` enqueues `document_classify` when the document has OCR text. Returns 422 without OCR. Returns 503 when classification is disabled. Sync `POST .../classify` remains available for immediate classify. Staff-mediated only.
+
+`POST /documents/{document_id}/resolutions/reresolve` enqueues `document_entity_resolve` when metadata status is `extracted`. Returns 422 without extracted metadata. Returns 503 when entity resolution is disabled. Sync `POST .../resolutions/resolve` remains available for immediate resolve. Staff-mediated only.
 
 `POST /cases/{case_id}/parsed-credit-reports/reparse` enqueues `document_credit_report_parse` for each case document with OCR text and `document_type=credit_report`. Returns queued/skipped counts with per-document job ids and skip reasons (`missing_ocr`, `not_credit_report`, `enqueue_failed`). Soft-skips ineligible docs (200 even when nothing queued). Staff-mediated only; no live bureau contact.
 

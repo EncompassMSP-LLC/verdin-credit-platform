@@ -620,8 +620,8 @@ Compliance Intelligence Phase 25 closes remaining owned document-pipeline **oper
 
 | Epic | Theme                                    | 26.0 target | Notes                                                            |
 | ---- | ---------------------------------------- | ----------- | ---------------------------------------------------------------- |
-| 1    | Case Documents recovery panel            | Planned     | Bulk recovery when any case docs exist (not credit-report-gated) |
-| 2    | Operator async entity re-resolve enqueue | Planned     | Enqueue document_entity_resolve when metadata exists             |
+| 1    | Case Documents recovery panel            | Shipped     | Bulk recovery when any case docs exist (not credit-report-gated) |
+| 2    | Operator async entity re-resolve enqueue | Shipped     | Enqueue document_entity_resolve when metadata exists             |
 
 ## Sprint → version mapping
 
