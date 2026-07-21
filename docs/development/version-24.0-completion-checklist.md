@@ -10,7 +10,7 @@ Scope: [`docs/governance/version-24.0-scope.md`](../governance/version-24.0-scop
 
 ## Exit criteria for "24.0 done"
 
-- [ ] Staff can bulk re-extract metadata for OCR'd documents on a case
+- [x] Staff can bulk re-extract metadata for OCR'd documents on a case
 - [ ] Staff can re-enqueue document classification when OCR exists
 - [ ] Capability matrix + API reference updated
 - [ ] Deferred items explicitly documented
@@ -23,7 +23,7 @@ Scope: [`docs/governance/version-24.0-scope.md`](../governance/version-24.0-scop
 | Order | Slice                                 | Epic       | Status |
 | ----- | ------------------------------------- | ---------- | ------ |
 | 1     | 24.0 scope + completion checklist     | Kickoff    | ✅     |
-| 2     | Case-level bulk metadata re-extract   | Documents  | ☐      |
+| 2     | Case-level bulk metadata re-extract   | Documents  | ✅     |
 | 3     | Operator re-classify document enqueue | Documents  | ☐      |
 | 4     | Capability matrix 24.0 sign-off       | Governance | ☐      |
 

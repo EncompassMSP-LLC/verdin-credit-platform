@@ -40,6 +40,7 @@ from api.modules.documents.schemas import (
     CaseFcraFindingsResponse,
     CaseIdentityTheftFindingsResponse,
     CaseLitigationStrengthResponse,
+    CaseMetadataBulkReextractResponse,
     CaseMetro2FindingsResponse,
     CaseTradelineChronologyResponse,
     ConfirmIdentityTheftAccountRequest,
@@ -189,6 +190,18 @@ async def bulk_reparse_case_credit_reports(
     service: DocumentService = Depends(get_document_service),
 ) -> CaseCreditReportBulkReparseResponse:
     return await service.bulk_reparse_case_credit_reports(current_user, case_id)
+
+
+@router.post(
+    "/{case_id}/metadata/reextract",
+    response_model=CaseMetadataBulkReextractResponse,
+)
+async def bulk_reextract_case_metadata(
+    case_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> CaseMetadataBulkReextractResponse:
+    return await service.bulk_reextract_case_metadata(current_user, case_id)
 
 
 @router.get(

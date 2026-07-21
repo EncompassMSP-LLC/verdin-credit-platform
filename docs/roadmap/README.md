@@ -596,7 +596,7 @@ Compliance Intelligence Phase 23 closes remaining owned document-pipeline recove
 
 | Epic | Theme                               | 24.0 target | Notes                                                      |
 | ---- | ----------------------------------- | ----------- | ---------------------------------------------------------- |
-| 1    | Case-level bulk metadata re-extract | Planned     | Enqueue document_metadata_extract for OCR'd docs on a case |
+| 1    | Case-level bulk metadata re-extract | Shipped     | Enqueue document_metadata_extract for OCR'd docs on a case |
 | 2    | Operator re-classify document       | Planned     | Enqueue document_classify when OCR exists                  |
 
 ## Sprint → version mapping

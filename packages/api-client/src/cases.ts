@@ -556,6 +556,33 @@ export async function bulkReparseCaseCreditReports(
   );
 }
 
+export interface CaseMetadataReextractQueuedItem {
+  document_id: string;
+  job_id: string;
+  job_type: string;
+}
+
+export interface CaseMetadataReextractSkippedItem {
+  document_id: string;
+  reason: string;
+}
+
+export interface CaseMetadataBulkReextract {
+  case_id: string;
+  queued_count: number;
+  skipped_count: number;
+  queued: CaseMetadataReextractQueuedItem[];
+  skipped: CaseMetadataReextractSkippedItem[];
+}
+
+export async function bulkReextractCaseMetadata(
+  caseId: string,
+): Promise<CaseMetadataBulkReextract> {
+  return request<CaseMetadataBulkReextract>(apiPath(`/cases/${caseId}/metadata/reextract`), {
+    method: 'POST',
+  });
+}
+
 function parseContentDispositionFilename(header: string | null, fallback: string): string {
   if (!header) return fallback;
   const match = /filename="([^"]+)"/.exec(header);

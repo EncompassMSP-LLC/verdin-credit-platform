@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ApiClientError,
+  bulkReextractCaseMetadata,
   bulkReparseCaseCreditReports,
   compareDocumentParsedCreditReport,
   getDocumentDuplicateGroup,
@@ -101,6 +102,21 @@ export function CreditReportHistoryPanel({
     },
   });
 
+  const bulkReextractMutation = useMutation({
+    mutationFn: () => bulkReextractCaseMetadata(caseId),
+    onSuccess: (result) => {
+      setBulkSummary(
+        `Queued ${result.queued_count} metadata re-extract job(s); skipped ${result.skipped_count}.`,
+      );
+      queryClient.invalidateQueries({ queryKey: ['case-credit-reports', caseId] });
+    },
+    onError: (error) => {
+      setBulkSummary(
+        error instanceof Error ? error.message : 'Failed to enqueue bulk metadata re-extract',
+      );
+    },
+  });
+
   return (
     <Card title={title} className={className}>
       {documentsQuery.isLoading ? (
@@ -149,13 +165,22 @@ export function CreditReportHistoryPanel({
                 </p>
               ) : null}
             </div>
-            <Button
-              variant="secondary"
-              onClick={() => bulkReparseMutation.mutate()}
-              disabled={bulkReparseMutation.isPending}
-            >
-              {bulkReparseMutation.isPending ? 'Re-parsing…' : 'Re-parse all credit reports'}
-            </Button>
+            <div className="flex flex-col gap-2 sm:items-stretch">
+              <Button
+                variant="secondary"
+                onClick={() => bulkReextractMutation.mutate()}
+                disabled={bulkReextractMutation.isPending || bulkReparseMutation.isPending}
+              >
+                {bulkReextractMutation.isPending ? 'Re-extracting…' : 'Re-extract metadata (case)'}
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => bulkReparseMutation.mutate()}
+                disabled={bulkReparseMutation.isPending || bulkReextractMutation.isPending}
+              >
+                {bulkReparseMutation.isPending ? 'Re-parsing…' : 'Re-parse all credit reports'}
+              </Button>
+            </div>
           </div>
           {bulkSummary ? <p className="text-sm text-gray-600">{bulkSummary}</p> : null}
 
