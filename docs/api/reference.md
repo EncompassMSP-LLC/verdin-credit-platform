@@ -81,6 +81,7 @@ All case endpoints require authentication. Users are scoped to their organizatio
 | PATCH  | `/cases/{case_id}`                                                | case_manager | Update a case                                                                                                                                          |
 | DELETE | `/cases/{case_id}`                                                | admin        | Soft-delete a case                                                                                                                                     |
 | GET    | `/cases/{case_id}/metro2-findings`                                | read_only    | Aggregate Metro 2 findings across latest bureau reports                                                                                                |
+| POST   | `/cases/{case_id}/parsed-credit-reports/reparse`                  | case_manager | Bulk enqueue credit report parse for OCR'd credit_report docs on the case                                                                              |
 | GET    | `/cases/{case_id}/fcra-findings`                                  | read_only    | Aggregate FCRA checklist findings across latest bureau reports                                                                                         |
 | GET    | `/cases/{case_id}/identity-theft-findings`                        | read_only    | Aggregate identity-theft indicators (Phase 8) across latest bureau reports                                                                             |
 | GET    | `/cases/{case_id}/identity-theft-center`                          | read_only    | Identity Theft Case Center â€” findings, incident, protections, Â§605B readiness                                                                       |
@@ -346,6 +347,8 @@ Secure document storage with MinIO, SHA-256 hashing, versioning, and duplicate d
 `POST /documents/{document_id}/parsed-credit-report/reparse` enqueues `document_credit_report_parse` when the document has OCR text and `document_type=credit_report`. Returns 422 otherwise. Staff-mediated only; no live bureau contact.
 
 `POST /documents/{document_id}/metadata/reextract` enqueues `document_metadata_extract` when the document has OCR text. Returns 422 without OCR. Sync `POST .../metadata/extract` remains available for immediate extract. Staff-mediated only.
+
+`POST /cases/{case_id}/parsed-credit-reports/reparse` enqueues `document_credit_report_parse` for each case document with OCR text and `document_type=credit_report`. Returns queued/skipped counts with per-document job ids and skip reasons (`missing_ocr`, `not_credit_report`, `enqueue_failed`). Soft-skips ineligible docs (200 even when nothing queued). Staff-mediated only; no live bureau contact.
 
 **List query parameters:** `metadata_status` (`pending`, `extracted`, `failed`), `resolution_status` (`matched`, `ambiguous`, `unmatched`, `confirmed`, `rejected`).
 
