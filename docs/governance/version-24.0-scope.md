@@ -17,7 +17,7 @@ Everything remains **staff-mediated and advisory**. The platform still never pol
 | ---- | --------------------------------------- | ----------- | ---------------------------------------------------------------------------------- |
 | 1    | Case-level bulk metadata re-extract     | Shipped     | Staff enqueue `document_metadata_extract` for OCR'd docs on a case; Case UI action |
 | 2    | Operator re-classify document enqueue   | Shipped     | Staff enqueue `document_classify` when OCR exists; Document Detail action          |
-| 3    | Capability matrix / governance sign-off | Planned     | Scope, checklist, matrix rows, release notes                                       |
+| 3    | Capability matrix / governance sign-off | Shipped     | Scope, checklist, matrix rows, release notes                                       |
 
 ## Shipped from 23.0 (foundation — do not regress)
 
