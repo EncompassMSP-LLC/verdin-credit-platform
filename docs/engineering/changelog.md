@@ -13,6 +13,14 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — Version 25.0 scope (Phase 24)
+
+**Decision:** Scope Version 25.0 as Document Pipeline Recovery Bulk Closeout — case-level bulk re-classify enqueue and case-level bulk OCR retry for failed eligible documents. Keep live bureau polling, automated filing, unsupervised escalation, litigation e-filing, and cross-tenant benchmarks deferred to 26.0+ or never.
+
+**Reason:** After 24.0, staff still need case-scoped bulk re-classify (called out as not-included in 24.0) and case-scoped bulk OCR retry so multi-document recovery is not one-click-per-PDF.
+
+**Follow-up work:** Slice 2 — case bulk re-classify; Slice 3 — case bulk OCR retry; Slice 4 — sign-off.
+
 ## Compliance intelligence — Version 24.0 sign-off (Phase 23)
 
 **Decision:** Close Phase 23 as shipped `v24.0.0` after case-level bulk metadata re-extract and operator re-classify enqueue. Keep live bureau polling, automated filing, unsupervised escalation, litigation e-filing, and cross-tenant benchmarks deferred to 25.0+ or never.

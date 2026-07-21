@@ -73,6 +73,7 @@ Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (
 | **22.0**  | Document Pipeline Hardening                     | Released    | Phase 21 widen metadata payment_status, operator re-parse credit report (`v22.0.0`)                                                              |
 | **23.0**  | Document Pipeline Recovery Depth                | Released    | Phase 22 async metadata re-extract enqueue, case-level bulk credit-report re-parse (`v23.0.0`)                                                   |
 | **24.0**  | Document Pipeline Recovery Parity               | Released    | Phase 23 case-level bulk metadata re-extract, operator re-classify enqueue (`v24.0.0`)                                                           |
+| **25.0**  | Document Pipeline Recovery Bulk Closeout        | Planned     | Phase 24 case-level bulk re-classify, case-level bulk OCR retry for failed docs                                                                  |
 
 ### Sprint milestones
 
@@ -598,6 +599,17 @@ Compliance Intelligence Phase 23 closes remaining owned document-pipeline recove
 | ---- | ----------------------------------- | ----------- | ---------------------------------------------------------- |
 | 1    | Case-level bulk metadata re-extract | Released    | Enqueue document_metadata_extract for OCR'd docs on a case |
 | 2    | Operator re-classify document       | Released    | Enqueue document_classify when OCR exists                  |
+
+### Version 25.0 — Document Pipeline Recovery Bulk Closeout (planned)
+
+Scope and checklist: [`docs/governance/version-25.0-scope.md`](../governance/version-25.0-scope.md) · [`docs/development/version-25.0-completion-checklist.md`](../development/version-25.0-completion-checklist.md)
+
+Compliance Intelligence Phase 24 closes remaining owned **case-scoped bulk** document-pipeline recovery gaps without crossing the live-bureau frontier: case-level bulk re-classify for OCR'd documents, and case-level bulk OCR retry for failed eligible documents. Live bureau response ingestion execution, automated re-dispute filing execution, unsupervised escalation, automated litigation filing, and cross-tenant benchmarks remain deferred (26.0+ or never) pending legal/compliance sign-off.
+
+| Epic | Theme                                   | 25.0 target | Notes                                              |
+| ---- | --------------------------------------- | ----------- | -------------------------------------------------- |
+| 1    | Case-level bulk re-classify enqueue     | Planned     | Enqueue document_classify for OCR'd docs on a case |
+| 2    | Case-level bulk OCR retry (failed docs) | Planned     | Re-enqueue OCR for failed eligible docs on a case  |
 
 ## Sprint → version mapping
 
