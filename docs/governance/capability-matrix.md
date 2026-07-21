@@ -722,10 +722,10 @@ Scope: [version-21.0-scope.md](version-21.0-scope.md) · Checklist: [version-21.
 
 Scope: [version-22.0-scope.md](version-22.0-scope.md) · Checklist: [version-22.0-completion-checklist.md](../development/version-22.0-completion-checklist.md)
 
-| Capability                      | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                        |
-| ------------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ---------------------------------------------------------------------------- |
-| Widen metadata payment_status   | 22.0    | ✅      | ✅      | —        | —   | —   | ✅    | Documents    | payment_status varchar(255) so bureau status narratives persist              |
-| Operator re-parse credit report | 22.0    | Planned | —       | —        | —   | —   | —     | Documents    | Staff enqueue document_credit_report_parse for OCR'd credit_report documents |
+| Capability                      | Version | Status | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                        |
+| ------------------------------- | ------- | ------ | ------- | -------- | --- | --- | ----- | ------------ | ---------------------------------------------------------------------------- |
+| Widen metadata payment_status   | 22.0    | ✅     | ✅      | —        | —   | —   | ✅    | Documents    | payment_status varchar(255) so bureau status narratives persist              |
+| Operator re-parse credit report | 22.0    | ✅     | ✅      | ✅       | ✅  | —   | ✅    | Documents    | Staff enqueue document_credit_report_parse for OCR'd credit_report documents |
 
 ---
 

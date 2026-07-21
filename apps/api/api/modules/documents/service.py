@@ -29,6 +29,7 @@ from api.modules.auth.models import User
 from api.modules.cases.repository import CaseRepository
 from api.modules.documents.constants import (
     DocumentProcessingStatus,
+    DocumentType,
     MatchedEntityType,
     ResolutionMethod,
     ResolutionStatus,
@@ -87,6 +88,7 @@ from api.modules.documents.schemas import (
     DisputeStrategyStage,
     DisputeStrategySummary,
     DocumentClassificationResponse,
+    DocumentCreditReportReparseResponse,
     DocumentDuplicateGroupResponse,
     DocumentFcraFindingsResponse,
     DocumentIdentityTheftFindingsResponse,
@@ -1077,6 +1079,48 @@ class DocumentService:
         self._queue_ocr_job(document)
         await self._documents.update(document)
         return DocumentOcrResponse.from_model(document)
+
+    async def reparse_credit_report(
+        self,
+        user: User,
+        document_id: uuid.UUID,
+    ) -> DocumentCreditReportReparseResponse:
+        """Enqueue credit-report parse for an OCR'd, classified credit report."""
+        self._require_write(user)
+        document = await self._get_document_for_user(document_id, user)
+
+        if not document.ocr_text:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="OCR text is required before credit report re-parse",
+            )
+        if document.document_type != DocumentType.CREDIT_REPORT.value:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Document must be classified as credit_report to re-parse",
+            )
+
+        try:
+            message = enqueue_job(
+                JobType.DOCUMENT_CREDIT_REPORT_PARSE,
+                {"document_id": str(document.id)},
+            )
+        except Exception as exc:
+            logger.exception("Failed to enqueue credit report parse for document %s", document.id)
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Unable to enqueue credit report parse job",
+            ) from exc
+
+        apply_audit_on_update(document, user.id)
+        await self._documents.update(document)
+
+        return DocumentCreditReportReparseResponse(
+            document_id=document.id,
+            job_id=message.job_id,
+            job_type=JobType.DOCUMENT_CREDIT_REPORT_PARSE.value,
+            queued=True,
+        )
 
     def _build_classification_context(self, document: Document) -> ClassificationContext:
         return ClassificationContext(

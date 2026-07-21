@@ -887,6 +887,22 @@ export async function getDocumentParsedCreditReport(
   );
 }
 
+export interface DocumentCreditReportReparse {
+  document_id: string;
+  job_id: string;
+  job_type: string;
+  queued: boolean;
+}
+
+export async function reparseDocumentCreditReport(
+  documentId: string,
+): Promise<DocumentCreditReportReparse> {
+  return request<DocumentCreditReportReparse>(
+    apiPath(`/documents/${documentId}/parsed-credit-report/reparse`),
+    { method: 'POST' },
+  );
+}
+
 export async function compareDocumentParsedCreditReport(
   documentId: string,
 ): Promise<DocumentParsedCreditReportComparison> {

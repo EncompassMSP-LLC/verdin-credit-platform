@@ -11,7 +11,7 @@ Scope: [`docs/governance/version-22.0-scope.md`](../governance/version-22.0-scop
 ## Exit criteria for "22.0 done"
 
 - [x] `document_metadata.payment_status` accepts bureau status narratives (varchar 255)
-- [ ] Staff can re-enqueue credit report parse for eligible documents
+- [x] Staff can re-enqueue credit report parse for eligible documents
 - [ ] Capability matrix + API reference updated
 - [ ] Deferred items explicitly documented
 - [ ] `docs/release-notes/v22.0.0.md` + tag `v22.0.0`
@@ -24,7 +24,7 @@ Scope: [`docs/governance/version-22.0-scope.md`](../governance/version-22.0-scop
 | ----- | --------------------------------- | ---------- | ------ |
 | 1     | 22.0 scope + completion checklist | Kickoff    | ✅     |
 | 2     | Widen metadata payment_status     | Documents  | ✅     |
-| 3     | Operator re-parse credit report   | Documents  | ☐      |
+| 3     | Operator re-parse credit report   | Documents  | ✅     |
 | 4     | Capability matrix 22.0 sign-off   | Governance | ☐      |
 
 Slice 2 widens `payment_status` so metadata extract no longer fails on long bureau text. Slice 3 adds an operator-gated re-parse enqueue for classified credit reports with OCR. Live polling, automated filing, and cross-tenant benchmarks stay out of scope.

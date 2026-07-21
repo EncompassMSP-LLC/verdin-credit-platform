@@ -33,6 +33,7 @@ from api.modules.documents.metadata_schemas import (
 )
 from api.modules.documents.schemas import (
     DocumentClassificationResponse,
+    DocumentCreditReportReparseResponse,
     DocumentDuplicateGroupResponse,
     DocumentFcraFindingsResponse,
     DocumentIdentityTheftFindingsResponse,
@@ -234,6 +235,18 @@ async def get_document_parsed_credit_report(
     service: DocumentService = Depends(get_document_service),
 ) -> DocumentParsedCreditReportResponse:
     return await service.get_parsed_credit_report(current_user, document_id)
+
+
+@router.post(
+    "/{document_id}/parsed-credit-report/reparse",
+    response_model=DocumentCreditReportReparseResponse,
+)
+async def reparse_document_credit_report(
+    document_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> DocumentCreditReportReparseResponse:
+    return await service.reparse_credit_report(current_user, document_id)
 
 
 @router.get(

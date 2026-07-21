@@ -194,6 +194,13 @@ class DocumentOcrResponse(BaseSchema):
         )
 
 
+class DocumentCreditReportReparseResponse(BaseSchema):
+    document_id: uuid.UUID
+    job_id: str
+    job_type: str
+    queued: bool = True
+
+
 class DocumentLlmSummaryResponse(BaseSchema):
     document_id: uuid.UUID
     summary: str
