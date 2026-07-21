@@ -37,7 +37,7 @@
 **Version 22.0 sign-off:** [version-22.0-scope.md](version-22.0-scope.md) · Release notes: [v22.0.0.md](../release-notes/v22.0.0.md)
 **Version 23.0 sign-off:** [version-23.0-scope.md](version-23.0-scope.md) · Release notes: [v23.0.0.md](../release-notes/v23.0.0.md)
 **Version 24.0 sign-off:** [version-24.0-scope.md](version-24.0-scope.md) · Release notes: [v24.0.0.md](../release-notes/v24.0.0.md)
-**Version 25.0 (in progress):** [version-25.0-scope.md](version-25.0-scope.md) · Checklist: [version-25.0-completion-checklist.md](../development/version-25.0-completion-checklist.md)
+**Version 25.0 sign-off:** [version-25.0-scope.md](version-25.0-scope.md) · Release notes: [v25.0.0.md](../release-notes/v25.0.0.md)
 
 ## Status legend
 
@@ -754,9 +754,9 @@ Scope: [version-24.0-scope.md](version-24.0-scope.md) · Checklist: [version-24.
 
 ---
 
-## Version 25.0 — Document Pipeline Recovery Bulk Closeout (in progress — 🚧)
+## Version 25.0 — Document Pipeline Recovery Bulk Closeout (sign-off)
 
-Scope: [version-25.0-scope.md](version-25.0-scope.md) · Checklist: [version-25.0-completion-checklist.md](../development/version-25.0-completion-checklist.md)
+Scope: [version-25.0-scope.md](version-25.0-scope.md) · Checklist: [version-25.0-completion-checklist.md](../development/version-25.0-completion-checklist.md) · Release: [v25.0.0.md](../release-notes/v25.0.0.md)
 
 | Capability                              | Version | Status | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                    |
 | --------------------------------------- | ------- | ------ | ------- | -------- | --- | --- | ----- | ------------ | -------------------------------------------------------- |

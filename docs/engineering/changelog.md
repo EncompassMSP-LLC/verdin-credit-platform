@@ -13,6 +13,14 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — Version 25.0 sign-off (Phase 24)
+
+**Decision:** Close Phase 24 as shipped `v25.0.0` after case-level bulk re-classify and case-level bulk OCR retry for failed eligible documents. Keep live bureau polling, automated filing, unsupervised escalation, litigation e-filing, and cross-tenant benchmarks deferred to 26.0+ or never.
+
+**Reason:** Non-blocked case-scoped document-pipeline recovery bulk closeout over owned surfaces is complete; remaining items need legal/compliance or product decisions.
+
+**Follow-up work:** Tag `v25.0.0`; next gated live-integration phase only with explicit legal/compliance sign-off.
+
 ## Compliance intelligence — case-level bulk OCR retry (Phase 24)
 
 **Decision:** Add `POST /cases/{id}/ocr/retry` (case_manager+) to re-enqueue OCR for each failed, OCR-eligible document on the case, returning queued/skipped counts; Case Detail Credit Report History panel action + `@verdin/api-client` helper.
