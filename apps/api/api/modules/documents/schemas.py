@@ -227,6 +227,25 @@ class CaseCreditReportBulkReparseResponse(BaseSchema):
     skipped: list[CaseCreditReportReparseSkippedItem]
 
 
+class CaseMetadataReextractQueuedItem(BaseSchema):
+    document_id: uuid.UUID
+    job_id: str
+    job_type: str
+
+
+class CaseMetadataReextractSkippedItem(BaseSchema):
+    document_id: uuid.UUID
+    reason: str
+
+
+class CaseMetadataBulkReextractResponse(BaseSchema):
+    case_id: uuid.UUID
+    queued_count: int
+    skipped_count: int
+    queued: list[CaseMetadataReextractQueuedItem]
+    skipped: list[CaseMetadataReextractSkippedItem]
+
+
 class DocumentLlmSummaryResponse(BaseSchema):
     document_id: uuid.UUID
     summary: str

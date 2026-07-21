@@ -73,6 +73,9 @@ from api.modules.documents.schemas import (
     CaseFcraFindingsResponse,
     CaseIdentityTheftFindingsResponse,
     CaseLitigationStrengthResponse,
+    CaseMetadataBulkReextractResponse,
+    CaseMetadataReextractQueuedItem,
+    CaseMetadataReextractSkippedItem,
     CaseMetro2FindingsResponse,
     CaseTradelineChronologyResponse,
     CfpbChecklistItem,
@@ -1235,6 +1238,77 @@ class DocumentService:
             )
 
         return CaseCreditReportBulkReparseResponse(
+            case_id=case_id,
+            queued_count=len(queued),
+            skipped_count=len(skipped),
+            queued=queued,
+            skipped=skipped,
+        )
+
+    async def bulk_reextract_case_metadata(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+    ) -> CaseMetadataBulkReextractResponse:
+        """Enqueue metadata extract for each OCR'd document on a case."""
+        self._require_write(user)
+        organization_id = self._require_organization(user)
+        await self._validate_case(case_id, organization_id)
+
+        settings = get_settings()
+        if not settings.document_metadata_enabled:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Document metadata extraction is disabled",
+            )
+
+        documents = await self.list_documents_for_case(
+            organization_id=organization_id,
+            case_id=case_id,
+        )
+
+        queued: list[CaseMetadataReextractQueuedItem] = []
+        skipped: list[CaseMetadataReextractSkippedItem] = []
+
+        for document in documents:
+            if not document.ocr_text:
+                skipped.append(
+                    CaseMetadataReextractSkippedItem(
+                        document_id=document.id,
+                        reason="missing_ocr",
+                    )
+                )
+                continue
+
+            try:
+                message = enqueue_job(
+                    JobType.DOCUMENT_METADATA_EXTRACT,
+                    {"document_id": str(document.id)},
+                )
+            except Exception:
+                logger.exception(
+                    "Failed to enqueue metadata extract for document %s",
+                    document.id,
+                )
+                skipped.append(
+                    CaseMetadataReextractSkippedItem(
+                        document_id=document.id,
+                        reason="enqueue_failed",
+                    )
+                )
+                continue
+
+            apply_audit_on_update(document, user.id)
+            await self._documents.update(document)
+            queued.append(
+                CaseMetadataReextractQueuedItem(
+                    document_id=document.id,
+                    job_id=message.job_id,
+                    job_type=JobType.DOCUMENT_METADATA_EXTRACT.value,
+                )
+            )
+
+        return CaseMetadataBulkReextractResponse(
             case_id=case_id,
             queued_count=len(queued),
             skipped_count=len(skipped),

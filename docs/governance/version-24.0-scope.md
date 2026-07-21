@@ -15,7 +15,7 @@ Everything remains **staff-mediated and advisory**. The platform still never pol
 
 | Epic | Theme                                   | 24.0 target | Summary                                                                            |
 | ---- | --------------------------------------- | ----------- | ---------------------------------------------------------------------------------- |
-| 1    | Case-level bulk metadata re-extract     | Planned     | Staff enqueue `document_metadata_extract` for OCR'd docs on a case; Case UI action |
+| 1    | Case-level bulk metadata re-extract     | Shipped     | Staff enqueue `document_metadata_extract` for OCR'd docs on a case; Case UI action |
 | 2    | Operator re-classify document enqueue   | Planned     | Staff enqueue `document_classify` when OCR exists; Document Detail action          |
 | 3    | Capability matrix / governance sign-off | Planned     | Scope, checklist, matrix rows, release notes                                       |
 
@@ -39,7 +39,7 @@ All v23.0.0 APIs, UI, and `@verdin/api-client` functions remain production capab
 
 ## Partial capability limits (24.0 targets)
 
-### Case-level bulk metadata re-extract (Planned)
+### Case-level bulk metadata re-extract (Shipped)
 
 **Included:** Authenticated staff endpoint to enqueue `document_metadata_extract` for each case document that has OCR text; Case Detail UI action summarizing queued/skipped counts; soft-skip documents without OCR.
 

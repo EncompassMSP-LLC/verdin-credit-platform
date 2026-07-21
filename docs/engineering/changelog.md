@@ -13,6 +13,16 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — case-level bulk metadata re-extract (Phase 23)
+
+**Decision:** Add `POST /cases/{id}/metadata/reextract` (case_manager+) to enqueue `document_metadata_extract` for each OCR'd document on the case, returning queued/skipped counts; Case Detail Credit Report History panel action + `@verdin/api-client` helper.
+
+**Reason:** After schema/worker fixes, staff need case-scoped bulk metadata recovery so multi-document cases are not one-click-per-PDF.
+
+**Guardrails:** Org-scoped; soft-skip missing OCR / enqueue failure; 503 when metadata disabled; no auto re-extract; no live bureau contact.
+
+**Follow-up work:** Slice 3 — operator re-classify; Slice 4 — Version 24.0 sign-off.
+
 ## Compliance intelligence — Version 24.0 scope (Phase 23)
 
 **Decision:** Scope Version 24.0 as Document Pipeline Recovery Parity — case-level bulk metadata re-extract and operator re-classify enqueue. Keep live bureau polling, automated filing, unsupervised escalation, litigation e-filing, and cross-tenant benchmarks deferred to 25.0+ or never.
