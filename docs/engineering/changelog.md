@@ -13,6 +13,16 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — operator re-classify document enqueue (Phase 23)
+
+**Decision:** Add `POST /documents/{id}/classify/reclassify` (case_manager+) to enqueue `document_classify` when OCR text exists, plus Document Detail UI action and `@verdin/api-client` helper. Keep sync `POST .../classify`.
+
+**Reason:** After OCR completes without a usable document type (or after classification worker gaps), staff need a recovery control without re-uploading the file.
+
+**Guardrails:** Org-scoped; 422 without OCR; 503 when classification disabled; no bulk case re-classify; no forced type; no live bureau contact.
+
+**Follow-up work:** Slice 4 — Version 24.0 sign-off.
+
 ## Compliance intelligence — case-level bulk metadata re-extract (Phase 23)
 
 **Decision:** Add `POST /cases/{id}/metadata/reextract` (case_manager+) to enqueue `document_metadata_extract` for each OCR'd document on the case, returning queued/skipped counts; Case Detail Credit Report History panel action + `@verdin/api-client` helper.

@@ -15,6 +15,7 @@ import {
   importParsedCreditReportAccounts,
   reparseDocumentCreditReport,
   reextractDocumentMetadata,
+  reclassifyDocument,
   retryDocumentOcr,
   type DocumentParsedCreditReportAccountCandidates,
   type ParsedReportAccountCandidate,
@@ -261,6 +262,13 @@ export function DocumentDetailPage() {
     },
   });
 
+  const reclassifyMutation = useMutation({
+    mutationFn: () => reclassifyDocument(documentId!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['document', documentId] });
+    },
+  });
+
   const deleteMutation = useMutation({
     mutationFn: () => deleteDocument(documentId!),
     onSuccess: () => {
@@ -356,6 +364,15 @@ export function DocumentDetailPage() {
               disabled={reextractMutation.isPending}
             >
               {reextractMutation.isPending ? 'Re-extracting…' : 'Re-extract metadata'}
+            </Button>
+          ) : null}
+          {ocrData?.ocr_text ? (
+            <Button
+              variant="secondary"
+              onClick={() => reclassifyMutation.mutate()}
+              disabled={reclassifyMutation.isPending}
+            >
+              {reclassifyMutation.isPending ? 'Re-classifying…' : 'Re-classify document'}
             </Button>
           ) : null}
           {data.document_type === 'credit_report' && ocrData?.ocr_text ? (

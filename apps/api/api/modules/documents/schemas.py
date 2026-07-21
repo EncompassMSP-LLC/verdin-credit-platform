@@ -208,6 +208,13 @@ class DocumentMetadataReextractResponse(BaseSchema):
     queued: bool = True
 
 
+class DocumentReclassifyResponse(BaseSchema):
+    document_id: uuid.UUID
+    job_id: str
+    job_type: str
+    queued: bool = True
+
+
 class CaseCreditReportReparseQueuedItem(BaseSchema):
     document_id: uuid.UUID
     job_id: str

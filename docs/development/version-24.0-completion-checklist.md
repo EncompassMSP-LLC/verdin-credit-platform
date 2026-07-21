@@ -11,8 +11,8 @@ Scope: [`docs/governance/version-24.0-scope.md`](../governance/version-24.0-scop
 ## Exit criteria for "24.0 done"
 
 - [x] Staff can bulk re-extract metadata for OCR'd documents on a case
-- [ ] Staff can re-enqueue document classification when OCR exists
-- [ ] Capability matrix + API reference updated
+- [x] Staff can re-enqueue document classification when OCR exists
+- [x] Capability matrix + API reference updated
 - [ ] Deferred items explicitly documented
 - [ ] `docs/release-notes/v24.0.0.md` + tag `v24.0.0`
 
@@ -24,7 +24,7 @@ Scope: [`docs/governance/version-24.0-scope.md`](../governance/version-24.0-scop
 | ----- | ------------------------------------- | ---------- | ------ |
 | 1     | 24.0 scope + completion checklist     | Kickoff    | ✅     |
 | 2     | Case-level bulk metadata re-extract   | Documents  | ✅     |
-| 3     | Operator re-classify document enqueue | Documents  | ☐      |
+| 3     | Operator re-classify document enqueue | Documents  | ✅     |
 | 4     | Capability matrix 24.0 sign-off       | Governance | ☐      |
 
 Slice 2 adds case-scoped bulk metadata re-extract (parity with bulk credit-report re-parse). Slice 3 adds an operator-gated re-classify enqueue for OCR'd documents. Live polling, automated filing, and cross-tenant benchmarks stay out of scope.

@@ -105,6 +105,7 @@ from api.modules.documents.schemas import (
     DocumentParsedCreditReportAccountCandidatesResponse,
     DocumentParsedCreditReportComparisonResponse,
     DocumentParsedCreditReportResponse,
+    DocumentReclassifyResponse,
     DocumentResponse,
     DocumentUpdate,
     DocumentVersionResponse,
@@ -1170,6 +1171,50 @@ class DocumentService:
             document_id=document.id,
             job_id=message.job_id,
             job_type=JobType.DOCUMENT_METADATA_EXTRACT.value,
+            queued=True,
+        )
+
+    async def reclassify_document(
+        self,
+        user: User,
+        document_id: uuid.UUID,
+    ) -> DocumentReclassifyResponse:
+        """Enqueue classification for an OCR'd document (async recovery path)."""
+        self._require_write(user)
+        document = await self._get_document_for_user(document_id, user)
+
+        if not document.ocr_text:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="OCR text is required before re-classify",
+            )
+
+        settings = get_settings()
+        if not settings.document_classification_enabled:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Document classification is disabled",
+            )
+
+        try:
+            message = enqueue_job(
+                JobType.DOCUMENT_CLASSIFY,
+                {"document_id": str(document.id)},
+            )
+        except Exception as exc:
+            logger.exception("Failed to enqueue classify for document %s", document.id)
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Unable to enqueue classify job",
+            ) from exc
+
+        apply_audit_on_update(document, user.id)
+        await self._documents.update(document)
+
+        return DocumentReclassifyResponse(
+            document_id=document.id,
+            job_id=message.job_id,
+            job_type=JobType.DOCUMENT_CLASSIFY.value,
             queued=True,
         )
 
