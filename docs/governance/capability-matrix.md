@@ -35,6 +35,7 @@
 **Version 20.0 sign-off:** [version-20.0-scope.md](version-20.0-scope.md) · Release notes: [v20.0.0.md](../release-notes/v20.0.0.md)
 **Version 21.0 sign-off:** [version-21.0-scope.md](version-21.0-scope.md) · Release notes: [v21.0.0.md](../release-notes/v21.0.0.md)
 **Version 22.0 sign-off:** [version-22.0-scope.md](version-22.0-scope.md) · Release notes: [v22.0.0.md](../release-notes/v22.0.0.md)
+**Version 23.0 (in progress):** [version-23.0-scope.md](version-23.0-scope.md) · Checklist: [version-23.0-completion-checklist.md](../development/version-23.0-completion-checklist.md)
 
 ## Status legend
 
@@ -726,6 +727,17 @@ Scope: [version-22.0-scope.md](version-22.0-scope.md) · Checklist: [version-22.
 | ------------------------------- | ------- | ------ | ------- | -------- | --- | --- | ----- | ------------ | ---------------------------------------------------------------------------- |
 | Widen metadata payment_status   | 22.0    | ✅     | ✅      | —        | —   | —   | ✅    | Documents    | payment_status varchar(255) so bureau status narratives persist              |
 | Operator re-parse credit report | 22.0    | ✅     | ✅      | ✅       | ✅  | —   | ✅    | Documents    | Staff enqueue document_credit_report_parse for OCR'd credit_report documents |
+
+---
+
+## Version 23.0 — Document Pipeline Recovery Depth (in progress — 🚧)
+
+Scope: [version-23.0-scope.md](version-23.0-scope.md) · Checklist: [version-23.0-completion-checklist.md](../development/version-23.0-completion-checklist.md)
+
+| Capability                             | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                         |
+| -------------------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ------------------------------------------------------------- |
+| Operator async metadata re-extract     | 23.0    | Planned | —       | —        | —   | —   | —     | Documents    | Staff enqueue document_metadata_extract for OCR'd documents   |
+| Case-level bulk credit-report re-parse | 23.0    | Planned | —       | —        | —   | —   | —     | Cases        | Staff enqueue parse for all eligible credit reports on a case |
 
 ---
 
