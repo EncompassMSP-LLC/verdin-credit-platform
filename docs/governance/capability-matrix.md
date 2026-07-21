@@ -37,6 +37,7 @@
 **Version 22.0 sign-off:** [version-22.0-scope.md](version-22.0-scope.md) · Release notes: [v22.0.0.md](../release-notes/v22.0.0.md)
 **Version 23.0 sign-off:** [version-23.0-scope.md](version-23.0-scope.md) · Release notes: [v23.0.0.md](../release-notes/v23.0.0.md)
 **Version 24.0 sign-off:** [version-24.0-scope.md](version-24.0-scope.md) · Release notes: [v24.0.0.md](../release-notes/v24.0.0.md)
+**Version 25.0 (in progress):** [version-25.0-scope.md](version-25.0-scope.md) · Checklist: [version-25.0-completion-checklist.md](../development/version-25.0-completion-checklist.md)
 
 ## Status legend
 
@@ -750,6 +751,17 @@ Scope: [version-24.0-scope.md](version-24.0-scope.md) · Checklist: [version-24.
 | ----------------------------------- | ------- | ------ | ------- | -------- | --- | --- | ----- | ------------ | ---------------------------------------------------------------- |
 | Case-level bulk metadata re-extract | 24.0    | ✅     | ✅      | ✅       | ✅  | —   | ✅    | Cases        | Staff enqueue document_metadata_extract for OCR'd docs on a case |
 | Operator re-classify document       | 24.0    | ✅     | ✅      | ✅       | ✅  | —   | ✅    | Documents    | Staff enqueue document_classify when OCR exists                  |
+
+---
+
+## Version 25.0 — Document Pipeline Recovery Bulk Closeout (in progress — 🚧)
+
+Scope: [version-25.0-scope.md](version-25.0-scope.md) · Checklist: [version-25.0-completion-checklist.md](../development/version-25.0-completion-checklist.md)
+
+| Capability                              | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                    |
+| --------------------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | -------------------------------------------------------- |
+| Case-level bulk re-classify             | 25.0    | Planned | —       | —        | —   | —   | —     | Cases        | Staff enqueue document_classify for OCR'd docs on a case |
+| Case-level bulk OCR retry (failed docs) | 25.0    | Planned | —       | —        | —   | —   | —     | Cases        | Staff re-enqueue OCR for failed eligible docs on a case  |
 
 ---
 
