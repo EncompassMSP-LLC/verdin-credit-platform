@@ -13,6 +13,14 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — Version 24.0 sign-off (Phase 23)
+
+**Decision:** Close Phase 23 as shipped `v24.0.0` after case-level bulk metadata re-extract and operator re-classify enqueue. Keep live bureau polling, automated filing, unsupervised escalation, litigation e-filing, and cross-tenant benchmarks deferred to 25.0+ or never.
+
+**Reason:** Non-blocked document-pipeline recovery parity over owned surfaces is complete; remaining items need legal/compliance or product decisions.
+
+**Follow-up work:** Tag `v24.0.0`; next gated live-integration phase only with explicit legal/compliance sign-off.
+
 ## Compliance intelligence — operator re-classify document enqueue (Phase 23)
 
 **Decision:** Add `POST /documents/{id}/classify/reclassify` (case_manager+) to enqueue `document_classify` when OCR text exists, plus Document Detail UI action and `@verdin/api-client` helper. Keep sync `POST .../classify`.
