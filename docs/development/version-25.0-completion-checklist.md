@@ -11,7 +11,7 @@ Scope: [`docs/governance/version-25.0-scope.md`](../governance/version-25.0-scop
 ## Exit criteria for "25.0 done"
 
 - [x] Staff can bulk re-classify OCR'd documents on a case
-- [ ] Staff can bulk retry OCR for failed eligible documents on a case
+- [x] Staff can bulk retry OCR for failed eligible documents on a case
 - [x] Capability matrix + API reference updated
 - [ ] Deferred items explicitly documented
 - [ ] `docs/release-notes/v25.0.0.md` + tag `v25.0.0`
@@ -24,7 +24,7 @@ Scope: [`docs/governance/version-25.0-scope.md`](../governance/version-25.0-scop
 | ----- | --------------------------------------- | ---------- | ------ |
 | 1     | 25.0 scope + completion checklist       | Kickoff    | ✅     |
 | 2     | Case-level bulk re-classify enqueue     | Documents  | ✅     |
-| 3     | Case-level bulk OCR retry (failed docs) | Documents  | ☐      |
+| 3     | Case-level bulk OCR retry (failed docs) | Documents  | ✅     |
 | 4     | Capability matrix 25.0 sign-off         | Governance | ☐      |
 
 Slice 2 adds case-scoped bulk re-classify (parity with single-document re-classify and other case bulk recovery actions). Slice 3 adds case-scoped bulk OCR retry for failed eligible documents. Live polling, automated filing, and cross-tenant benchmarks stay out of scope.

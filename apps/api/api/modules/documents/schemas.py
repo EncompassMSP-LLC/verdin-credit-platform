@@ -272,6 +272,25 @@ class CaseBulkReclassifyResponse(BaseSchema):
     skipped: list[CaseReclassifySkippedItem]
 
 
+class CaseOcrRetryQueuedItem(BaseSchema):
+    document_id: uuid.UUID
+    job_id: str
+    job_type: str
+
+
+class CaseOcrRetrySkippedItem(BaseSchema):
+    document_id: uuid.UUID
+    reason: str
+
+
+class CaseBulkOcrRetryResponse(BaseSchema):
+    case_id: uuid.UUID
+    queued_count: int
+    skipped_count: int
+    queued: list[CaseOcrRetryQueuedItem]
+    skipped: list[CaseOcrRetrySkippedItem]
+
+
 class DocumentLlmSummaryResponse(BaseSchema):
     document_id: uuid.UUID
     summary: str

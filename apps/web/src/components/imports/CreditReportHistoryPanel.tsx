@@ -5,6 +5,7 @@ import {
   bulkReclassifyCaseDocuments,
   bulkReextractCaseMetadata,
   bulkReparseCaseCreditReports,
+  bulkRetryCaseOcr,
   compareDocumentParsedCreditReport,
   getDocumentDuplicateGroup,
   listDocuments,
@@ -132,10 +133,25 @@ export function CreditReportHistoryPanel({
     },
   });
 
+  const bulkOcrRetryMutation = useMutation({
+    mutationFn: () => bulkRetryCaseOcr(caseId),
+    onSuccess: (result) => {
+      setBulkSummary(
+        `Queued ${result.queued_count} OCR retry job(s); skipped ${result.skipped_count}.`,
+      );
+      queryClient.invalidateQueries({ queryKey: ['case-credit-reports', caseId] });
+      queryClient.invalidateQueries({ queryKey: ['documents'] });
+    },
+    onError: (error) => {
+      setBulkSummary(error instanceof Error ? error.message : 'Failed to enqueue bulk OCR retry');
+    },
+  });
+
   const bulkActionsPending =
     bulkReparseMutation.isPending ||
     bulkReextractMutation.isPending ||
-    bulkReclassifyMutation.isPending;
+    bulkReclassifyMutation.isPending ||
+    bulkOcrRetryMutation.isPending;
 
   return (
     <Card title={title} className={className}>
@@ -201,6 +217,13 @@ export function CreditReportHistoryPanel({
                 {bulkReclassifyMutation.isPending
                   ? 'Re-classifying…'
                   : 'Re-classify documents (case)'}
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => bulkOcrRetryMutation.mutate()}
+                disabled={bulkActionsPending}
+              >
+                {bulkOcrRetryMutation.isPending ? 'Retrying OCR…' : 'Retry failed OCR (case)'}
               </Button>
               <Button
                 variant="secondary"

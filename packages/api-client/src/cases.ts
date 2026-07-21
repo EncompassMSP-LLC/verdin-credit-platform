@@ -608,6 +608,31 @@ export async function bulkReclassifyCaseDocuments(caseId: string): Promise<CaseB
   });
 }
 
+export interface CaseOcrRetryQueuedItem {
+  document_id: string;
+  job_id: string;
+  job_type: string;
+}
+
+export interface CaseOcrRetrySkippedItem {
+  document_id: string;
+  reason: string;
+}
+
+export interface CaseBulkOcrRetry {
+  case_id: string;
+  queued_count: number;
+  skipped_count: number;
+  queued: CaseOcrRetryQueuedItem[];
+  skipped: CaseOcrRetrySkippedItem[];
+}
+
+export async function bulkRetryCaseOcr(caseId: string): Promise<CaseBulkOcrRetry> {
+  return request<CaseBulkOcrRetry>(apiPath(`/cases/${caseId}/ocr/retry`), {
+    method: 'POST',
+  });
+}
+
 function parseContentDispositionFilename(header: string | null, fallback: string): string {
   if (!header) return fallback;
   const match = /filename="([^"]+)"/.exec(header);

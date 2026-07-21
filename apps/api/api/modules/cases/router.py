@@ -32,6 +32,7 @@ from api.modules.cases.schemas import (
 from api.modules.cases.service import CaseService
 from api.modules.documents.schemas import (
     CaseAttorneyChecklistResponse,
+    CaseBulkOcrRetryResponse,
     CaseBulkReclassifyResponse,
     CaseCfpbChecklistResponse,
     CaseComplianceEvidenceLinksResponse,
@@ -215,6 +216,18 @@ async def bulk_reclassify_case_documents(
     service: DocumentService = Depends(get_document_service),
 ) -> CaseBulkReclassifyResponse:
     return await service.bulk_reclassify_case_documents(current_user, case_id)
+
+
+@router.post(
+    "/{case_id}/ocr/retry",
+    response_model=CaseBulkOcrRetryResponse,
+)
+async def bulk_retry_case_ocr(
+    case_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> CaseBulkOcrRetryResponse:
+    return await service.bulk_retry_case_ocr(current_user, case_id)
 
 
 @router.get(
