@@ -15,7 +15,7 @@ Everything remains **staff-mediated and advisory**. The platform still never pol
 
 | Epic | Theme                                    | 26.0 target | Summary                                                                              |
 | ---- | ---------------------------------------- | ----------- | ------------------------------------------------------------------------------------ |
-| 1    | Case Documents recovery panel            | Planned     | Case Detail panel hosting bulk recovery actions for any case documents               |
+| 1    | Case Documents recovery panel            | Shipped     | Case Detail panel hosting bulk recovery actions for any case documents               |
 | 2    | Operator async entity re-resolve enqueue | Planned     | Staff enqueue `document_entity_resolve` when metadata exists; Document Detail action |
 | 3    | Capability matrix / governance sign-off  | Planned     | Scope, checklist, matrix rows, release notes                                         |
 
@@ -40,7 +40,7 @@ All v25.0.0 APIs, UI, and `@verdin/api-client` functions remain production capab
 
 ## Partial capability limits (26.0 targets)
 
-### Case Documents recovery panel (Planned)
+### Case Documents recovery panel (Shipped)
 
 **Included:** Case Detail UI panel that lists case documents (or at least exposes recovery when any docs exist) and hosts staff bulk recovery actions already shipped (OCR retry, re-classify, metadata re-extract, credit-report re-parse) without requiring a classified credit report to be present.
 

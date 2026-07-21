@@ -10,7 +10,7 @@ Scope: [`docs/governance/version-26.0-scope.md`](../governance/version-26.0-scop
 
 ## Exit criteria for "26.0 done"
 
-- [ ] Staff can run case bulk recovery actions without a classified credit report present
+- [x] Staff can run case bulk recovery actions without a classified credit report present
 - [ ] Staff can enqueue async entity re-resolve when metadata exists
 - [ ] Capability matrix + API reference updated
 - [ ] Deferred items explicitly documented
@@ -23,7 +23,7 @@ Scope: [`docs/governance/version-26.0-scope.md`](../governance/version-26.0-scop
 | Order | Slice                                    | Epic       | Status |
 | ----- | ---------------------------------------- | ---------- | ------ |
 | 1     | 26.0 scope + completion checklist        | Kickoff    | ✅     |
-| 2     | Case Documents recovery panel            | Documents  | ☐      |
+| 2     | Case Documents recovery panel            | Documents  | ✅     |
 | 3     | Operator async entity re-resolve enqueue | Documents  | ☐      |
 | 4     | Capability matrix 26.0 sign-off          | Governance | ☐      |
 
