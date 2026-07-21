@@ -93,6 +93,7 @@ from api.modules.documents.schemas import (
     DocumentFcraFindingsResponse,
     DocumentIdentityTheftFindingsResponse,
     DocumentListParams,
+    DocumentMetadataReextractResponse,
     DocumentMetro2FindingsResponse,
     DocumentOcrResponse,
     DocumentParsedCreditReportAccountCandidatesResponse,
@@ -1119,6 +1120,50 @@ class DocumentService:
             document_id=document.id,
             job_id=message.job_id,
             job_type=JobType.DOCUMENT_CREDIT_REPORT_PARSE.value,
+            queued=True,
+        )
+
+    async def reextract_metadata(
+        self,
+        user: User,
+        document_id: uuid.UUID,
+    ) -> DocumentMetadataReextractResponse:
+        """Enqueue metadata extract for an OCR'd document (async recovery path)."""
+        self._require_write(user)
+        document = await self._get_document_for_user(document_id, user)
+
+        if not document.ocr_text:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="OCR text is required before metadata re-extract",
+            )
+
+        settings = get_settings()
+        if not settings.document_metadata_enabled:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Document metadata extraction is disabled",
+            )
+
+        try:
+            message = enqueue_job(
+                JobType.DOCUMENT_METADATA_EXTRACT,
+                {"document_id": str(document.id)},
+            )
+        except Exception as exc:
+            logger.exception("Failed to enqueue metadata extract for document %s", document.id)
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Unable to enqueue metadata extract job",
+            ) from exc
+
+        apply_audit_on_update(document, user.id)
+        await self._documents.update(document)
+
+        return DocumentMetadataReextractResponse(
+            document_id=document.id,
+            job_id=message.job_id,
+            job_type=JobType.DOCUMENT_METADATA_EXTRACT.value,
             queued=True,
         )
 

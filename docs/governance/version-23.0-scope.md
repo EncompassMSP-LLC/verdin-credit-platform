@@ -15,7 +15,7 @@ Everything remains **staff-mediated and advisory**. The platform still never pol
 
 | Epic | Theme                                   | 23.0 target | Summary                                                                                 |
 | ---- | --------------------------------------- | ----------- | --------------------------------------------------------------------------------------- |
-| 1    | Operator async metadata re-extract      | Planned     | Staff enqueue `document_metadata_extract` when OCR exists; Document Detail action       |
+| 1    | Operator async metadata re-extract      | Shipped     | Staff enqueue `document_metadata_extract` when OCR exists; Document Detail action       |
 | 2    | Case-level bulk credit-report re-parse  | Planned     | Staff enqueue parse for all eligible credit reports on a case; Case Documents UI action |
 | 3    | Capability matrix / governance sign-off | Planned     | Scope, checklist, matrix rows, release notes                                            |
 
@@ -39,7 +39,7 @@ All v22.0.0 APIs, UI, and `@verdin/api-client` functions remain production capab
 
 ## Partial capability limits (23.0 targets)
 
-### Operator async metadata re-extract (Planned)
+### Operator async metadata re-extract (Shipped)
 
 **Included:** Authenticated staff endpoint to enqueue `document_metadata_extract` for an org-scoped document that has OCR text; Document Detail UI action; keep existing sync `POST .../metadata/extract` for immediate extract when desired.
 
