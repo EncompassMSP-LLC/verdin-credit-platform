@@ -17,7 +17,7 @@ Everything remains **staff-mediated and advisory**. The platform still never pol
 | ---- | --------------------------------------- | ----------- | -------------------------------------------------------------------------- |
 | 1    | Case-level bulk re-classify enqueue     | Shipped     | Staff enqueue `document_classify` for OCR'd docs on a case; Case UI action |
 | 2    | Case-level bulk OCR retry (failed docs) | Shipped     | Staff enqueue OCR retry for failed eligible docs on a case; Case UI action |
-| 3    | Capability matrix / governance sign-off | Planned     | Scope, checklist, matrix rows, release notes                               |
+| 3    | Capability matrix / governance sign-off | Shipped     | Scope, checklist, matrix rows, release notes                               |
 
 ## Shipped from 24.0 (foundation — do not regress)
 
