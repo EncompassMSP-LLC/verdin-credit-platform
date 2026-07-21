@@ -74,7 +74,7 @@ Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (
 | **23.0**  | Document Pipeline Recovery Depth                 | Released    | Phase 22 async metadata re-extract enqueue, case-level bulk credit-report re-parse (`v23.0.0`)                                                   |
 | **24.0**  | Document Pipeline Recovery Parity                | Released    | Phase 23 case-level bulk metadata re-extract, operator re-classify enqueue (`v24.0.0`)                                                           |
 | **25.0**  | Document Pipeline Recovery Bulk Closeout         | Released    | Phase 24 case-level bulk re-classify, case-level bulk OCR retry for failed docs (`v25.0.0`)                                                      |
-| **26.0**  | Document Pipeline Resolution & Operator Surfaces | Planned     | Phase 25 Case Documents recovery panel, operator async entity re-resolve enqueue                                                                 |
+| **26.0**  | Document Pipeline Resolution & Operator Surfaces | Released    | Phase 25 Case Documents recovery panel, operator async entity re-resolve enqueue (`v26.0.0`)                                                     |
 
 ### Sprint milestones
 
@@ -612,16 +612,16 @@ Compliance Intelligence Phase 24 closes remaining owned **case-scoped bulk** doc
 | 1    | Case-level bulk re-classify enqueue     | Released    | Enqueue document_classify for OCR'd docs on a case |
 | 2    | Case-level bulk OCR retry (failed docs) | Released    | Re-enqueue OCR for failed eligible docs on a case  |
 
-### Version 26.0 — Document Pipeline Resolution & Operator Surfaces (planned)
+### Version 26.0 — Document Pipeline Resolution & Operator Surfaces (released — `v26.0.0`)
 
-Scope and checklist: [`docs/governance/version-26.0-scope.md`](../governance/version-26.0-scope.md) · [`docs/development/version-26.0-completion-checklist.md`](../development/version-26.0-completion-checklist.md)
+Scope and checklist: [`docs/governance/version-26.0-scope.md`](../governance/version-26.0-scope.md) · [`docs/development/version-26.0-completion-checklist.md`](../development/version-26.0-completion-checklist.md) · Release notes: [`docs/release-notes/v26.0.0.md`](../release-notes/v26.0.0.md)
 
 Compliance Intelligence Phase 25 closes remaining owned document-pipeline **operator surface** gaps without crossing the live-bureau frontier: Case Documents recovery panel (ungate bulk recovery from credit-report-only UI), and operator async entity re-resolve enqueue. Live bureau response ingestion execution, automated re-dispute filing execution, unsupervised escalation, automated litigation filing, and cross-tenant benchmarks remain deferred (27.0+ or never) pending legal/compliance sign-off.
 
 | Epic | Theme                                    | 26.0 target | Notes                                                            |
 | ---- | ---------------------------------------- | ----------- | ---------------------------------------------------------------- |
-| 1    | Case Documents recovery panel            | Shipped     | Bulk recovery when any case docs exist (not credit-report-gated) |
-| 2    | Operator async entity re-resolve enqueue | Shipped     | Enqueue document_entity_resolve when metadata exists             |
+| 1    | Case Documents recovery panel            | Released    | Bulk recovery when any case docs exist (not credit-report-gated) |
+| 2    | Operator async entity re-resolve enqueue | Released    | Enqueue document_entity_resolve when metadata exists             |
 
 ## Sprint → version mapping
 

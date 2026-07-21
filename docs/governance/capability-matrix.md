@@ -38,7 +38,7 @@
 **Version 23.0 sign-off:** [version-23.0-scope.md](version-23.0-scope.md) · Release notes: [v23.0.0.md](../release-notes/v23.0.0.md)
 **Version 24.0 sign-off:** [version-24.0-scope.md](version-24.0-scope.md) · Release notes: [v24.0.0.md](../release-notes/v24.0.0.md)
 **Version 25.0 sign-off:** [version-25.0-scope.md](version-25.0-scope.md) · Release notes: [v25.0.0.md](../release-notes/v25.0.0.md)
-**Version 26.0 (in progress):** [version-26.0-scope.md](version-26.0-scope.md) · Checklist: [version-26.0-completion-checklist.md](../development/version-26.0-completion-checklist.md)
+**Version 26.0 sign-off:** [version-26.0-scope.md](version-26.0-scope.md) · Release notes: [v26.0.0.md](../release-notes/v26.0.0.md)
 
 ## Status legend
 
@@ -766,9 +766,9 @@ Scope: [version-25.0-scope.md](version-25.0-scope.md) · Checklist: [version-25.
 
 ---
 
-## Version 26.0 — Document Pipeline Resolution & Operator Surfaces (in progress — 🚧)
+## Version 26.0 — Document Pipeline Resolution & Operator Surfaces (sign-off)
 
-Scope: [version-26.0-scope.md](version-26.0-scope.md) · Checklist: [version-26.0-completion-checklist.md](../development/version-26.0-completion-checklist.md)
+Scope: [version-26.0-scope.md](version-26.0-scope.md) · Checklist: [version-26.0-completion-checklist.md](../development/version-26.0-completion-checklist.md) · Release: [v26.0.0.md](../release-notes/v26.0.0.md)
 
 | Capability                               | Version | Status | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                             |
 | ---------------------------------------- | ------- | ------ | ------- | -------- | --- | --- | ----- | ------------ | ----------------------------------------------------------------- |

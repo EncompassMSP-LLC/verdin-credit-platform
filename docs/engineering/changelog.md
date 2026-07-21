@@ -13,6 +13,14 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — Version 26.0 sign-off (Phase 25)
+
+**Decision:** Close Phase 25 as shipped `v26.0.0` after Case Documents recovery panel and operator async entity re-resolve enqueue. Keep live bureau polling, automated filing, unsupervised escalation, litigation e-filing, and cross-tenant benchmarks deferred to 27.0+ or never.
+
+**Reason:** Non-blocked document-pipeline operator-surface gaps over owned surfaces are complete; remaining items need legal/compliance or product decisions (including case bulk entity re-resolve).
+
+**Follow-up work:** Tag `v26.0.0`; next gated live-integration phase only with explicit legal/compliance sign-off.
+
 ## Compliance intelligence — Operator async entity re-resolve (Phase 25)
 
 **Decision:** Add `POST /documents/{id}/resolutions/reresolve` (case_manager+) to enqueue `document_entity_resolve` when metadata status is `extracted`, plus Document Detail "Re-resolve (async)" action and `@verdin/api-client` helper. Keep sync `POST .../resolutions/resolve`.

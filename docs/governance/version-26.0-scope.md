@@ -17,7 +17,7 @@ Everything remains **staff-mediated and advisory**. The platform still never pol
 | ---- | ---------------------------------------- | ----------- | ------------------------------------------------------------------------------------ |
 | 1    | Case Documents recovery panel            | Shipped     | Case Detail panel hosting bulk recovery actions for any case documents               |
 | 2    | Operator async entity re-resolve enqueue | Shipped     | Staff enqueue `document_entity_resolve` when metadata exists; Document Detail action |
-| 3    | Capability matrix / governance sign-off  | Planned     | Scope, checklist, matrix rows, release notes                                         |
+| 3    | Capability matrix / governance sign-off  | Shipped     | Scope, checklist, matrix rows, release notes                                         |
 
 ## Shipped from 25.0 (foundation — do not regress)
 
