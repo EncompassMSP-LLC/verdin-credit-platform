@@ -12,9 +12,9 @@ Scope: [`docs/governance/version-23.0-scope.md`](../governance/version-23.0-scop
 
 - [x] Staff can enqueue async metadata re-extract for OCR'd documents
 - [x] Staff can bulk re-parse eligible credit reports on a case
-- [ ] Capability matrix + API reference updated
-- [ ] Deferred items explicitly documented
-- [ ] `docs/release-notes/v23.0.0.md` + tag `v23.0.0`
+- [x] Capability matrix + API reference updated
+- [x] Deferred items explicitly documented
+- [x] `docs/release-notes/v23.0.0.md` + tag `v23.0.0`
 
 ---
 
@@ -25,7 +25,7 @@ Scope: [`docs/governance/version-23.0-scope.md`](../governance/version-23.0-scop
 | 1     | 23.0 scope + completion checklist      | Kickoff    | ✅     |
 | 2     | Operator async metadata re-extract     | Documents  | ✅     |
 | 3     | Case-level bulk credit-report re-parse | Documents  | ✅     |
-| 4     | Capability matrix 23.0 sign-off        | Governance | ☐      |
+| 4     | Capability matrix 23.0 sign-off        | Governance | ✅     |
 
 Slice 2 adds an operator-gated async metadata extract enqueue (parity with single-document re-parse). Slice 3 adds case-scoped bulk re-parse for eligible credit reports. Live polling, automated filing, and cross-tenant benchmarks stay out of scope.
 

@@ -17,7 +17,7 @@ Everything remains **staff-mediated and advisory**. The platform still never pol
 | ---- | --------------------------------------- | ----------- | --------------------------------------------------------------------------------------- |
 | 1    | Operator async metadata re-extract      | Shipped     | Staff enqueue `document_metadata_extract` when OCR exists; Document Detail action       |
 | 2    | Case-level bulk credit-report re-parse  | Shipped     | Staff enqueue parse for all eligible credit reports on a case; Case Documents UI action |
-| 3    | Capability matrix / governance sign-off | Planned     | Scope, checklist, matrix rows, release notes                                            |
+| 3    | Capability matrix / governance sign-off | Shipped     | Scope, checklist, matrix rows, release notes                                            |
 
 ## Shipped from 22.0 (foundation — do not regress)
 

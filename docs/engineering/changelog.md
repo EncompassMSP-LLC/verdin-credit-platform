@@ -13,6 +13,14 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — Version 23.0 sign-off (Phase 22)
+
+**Decision:** Close Phase 22 as shipped `v23.0.0` after async metadata re-extract enqueue and case-level bulk credit-report re-parse. Keep live bureau polling, automated filing, unsupervised escalation, litigation e-filing, and cross-tenant benchmarks deferred to 24.0+ or never.
+
+**Reason:** Non-blocked document-pipeline recovery over owned surfaces is complete; remaining items need legal/compliance or product decisions.
+
+**Follow-up work:** Tag `v23.0.0`; next gated live-integration phase only with explicit legal/compliance sign-off.
+
 ## Compliance intelligence — case-level bulk credit-report re-parse (Phase 22)
 
 **Decision:** Add `POST /cases/{id}/parsed-credit-reports/reparse` (case_manager+) to enqueue `document_credit_report_parse` for each OCR'd `credit_report` on the case, returning queued/skipped counts with reasons; Case Detail Credit Report History panel action + `@verdin/api-client` helper.
