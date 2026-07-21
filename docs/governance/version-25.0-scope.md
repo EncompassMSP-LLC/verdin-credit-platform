@@ -16,7 +16,7 @@ Everything remains **staff-mediated and advisory**. The platform still never pol
 | Epic | Theme                                   | 25.0 target | Summary                                                                    |
 | ---- | --------------------------------------- | ----------- | -------------------------------------------------------------------------- |
 | 1    | Case-level bulk re-classify enqueue     | Shipped     | Staff enqueue `document_classify` for OCR'd docs on a case; Case UI action |
-| 2    | Case-level bulk OCR retry (failed docs) | Planned     | Staff enqueue OCR retry for failed eligible docs on a case; Case UI action |
+| 2    | Case-level bulk OCR retry (failed docs) | Shipped     | Staff enqueue OCR retry for failed eligible docs on a case; Case UI action |
 | 3    | Capability matrix / governance sign-off | Planned     | Scope, checklist, matrix rows, release notes                               |
 
 ## Shipped from 24.0 (foundation — do not regress)
@@ -45,7 +45,7 @@ All v24.0.0 APIs, UI, and `@verdin/api-client` functions remain production capab
 
 **Not included:** Forcing a specific document type; unsupervised reclassification loops; live bureau contact.
 
-### Case-level bulk OCR retry for failed documents (Planned)
+### Case-level bulk OCR retry for failed documents (Shipped)
 
 **Included:** Authenticated staff endpoint to re-enqueue OCR for each case document that is OCR-eligible and in a failed processing state; Case Detail UI action summarizing queued/skipped counts; soft-skip ineligible or non-failed docs.
 

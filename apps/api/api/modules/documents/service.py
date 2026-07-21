@@ -63,6 +63,7 @@ from api.modules.documents.schemas import (
     AttorneyChecklistSummary,
     BureauTradelineSnapshotResponse,
     CaseAttorneyChecklistResponse,
+    CaseBulkOcrRetryResponse,
     CaseBulkReclassifyResponse,
     CaseCfpbChecklistResponse,
     CaseComplianceEvidenceLinksResponse,
@@ -78,6 +79,8 @@ from api.modules.documents.schemas import (
     CaseMetadataReextractQueuedItem,
     CaseMetadataReextractSkippedItem,
     CaseMetro2FindingsResponse,
+    CaseOcrRetryQueuedItem,
+    CaseOcrRetrySkippedItem,
     CaseReclassifyQueuedItem,
     CaseReclassifySkippedItem,
     CaseTradelineChronologyResponse,
@@ -1428,6 +1431,102 @@ class DocumentService:
             )
 
         return CaseBulkReclassifyResponse(
+            case_id=case_id,
+            queued_count=len(queued),
+            skipped_count=len(skipped),
+            queued=queued,
+            skipped=skipped,
+        )
+
+    async def bulk_retry_case_ocr(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+    ) -> CaseBulkOcrRetryResponse:
+        """Re-enqueue OCR for each failed, OCR-eligible document on a case."""
+        self._require_write(user)
+        organization_id = self._require_organization(user)
+        await self._validate_case(case_id, organization_id)
+
+        settings = get_settings()
+        if not settings.document_ocr_enabled:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Document OCR is disabled",
+            )
+
+        documents = await self.list_documents_for_case(
+            organization_id=organization_id,
+            case_id=case_id,
+        )
+
+        queued: list[CaseOcrRetryQueuedItem] = []
+        skipped: list[CaseOcrRetrySkippedItem] = []
+
+        for document in documents:
+            if not is_ocr_eligible(document.mime_type):
+                skipped.append(
+                    CaseOcrRetrySkippedItem(
+                        document_id=document.id,
+                        reason="not_ocr_eligible",
+                    )
+                )
+                continue
+
+            if document.processing_status != DocumentProcessingStatus.FAILED.value:
+                skipped.append(
+                    CaseOcrRetrySkippedItem(
+                        document_id=document.id,
+                        reason="not_failed",
+                    )
+                )
+                continue
+
+            document.ocr_text = None
+            document.ocr_error = None
+            document.ocr_processed_at = None
+            document.ocr_version_number = None
+            document.document_type = None
+            document.confidence_score = None
+            document.classification_method = None
+            document.classified_at = None
+            document.classified_by_id = None
+            self._apply_initial_processing_status(document)
+
+            try:
+                message = enqueue_job(
+                    JobType.OCR,
+                    {
+                        "document_id": str(document.id),
+                        "version_number": document.version_number,
+                    },
+                )
+            except Exception:
+                logger.exception("Failed to enqueue OCR for document %s", document.id)
+                skipped.append(
+                    CaseOcrRetrySkippedItem(
+                        document_id=document.id,
+                        reason="enqueue_failed",
+                    )
+                )
+                apply_audit_on_update(document, user.id)
+                await self._documents.update(document)
+                continue
+
+            document.processing_status = DocumentProcessingStatus.QUEUED.value
+            document.ocr_job_id = message.job_id
+            document.ocr_error = None
+            apply_audit_on_update(document, user.id)
+            await self._documents.update(document)
+            queued.append(
+                CaseOcrRetryQueuedItem(
+                    document_id=document.id,
+                    job_id=message.job_id,
+                    job_type=JobType.OCR.value,
+                )
+            )
+
+        return CaseBulkOcrRetryResponse(
             case_id=case_id,
             queued_count=len(queued),
             skipped_count=len(skipped),

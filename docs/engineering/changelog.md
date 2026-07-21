@@ -13,6 +13,16 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — case-level bulk OCR retry (Phase 24)
+
+**Decision:** Add `POST /cases/{id}/ocr/retry` (case_manager+) to re-enqueue OCR for each failed, OCR-eligible document on the case, returning queued/skipped counts; Case Detail Credit Report History panel action + `@verdin/api-client` helper.
+
+**Reason:** After worker or extract failures across many uploads, staff need case-scoped bulk OCR retry so multi-document recovery is not one-click-per-PDF.
+
+**Guardrails:** Org-scoped; soft-skip not failed / not OCR-eligible / enqueue failure; 503 when OCR disabled; no unsupervised retry loops; no live bureau contact.
+
+**Follow-up work:** Slice 4 — Version 25.0 sign-off.
+
 ## Compliance intelligence — case-level bulk re-classify (Phase 24)
 
 **Decision:** Add `POST /cases/{id}/classify/reclassify` (case_manager+) to enqueue `document_classify` for each OCR'd document on the case, returning queued/skipped counts; Case Detail Credit Report History panel action + `@verdin/api-client` helper.
