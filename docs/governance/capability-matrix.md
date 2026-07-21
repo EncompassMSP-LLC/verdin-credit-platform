@@ -36,6 +36,7 @@
 **Version 21.0 sign-off:** [version-21.0-scope.md](version-21.0-scope.md) · Release notes: [v21.0.0.md](../release-notes/v21.0.0.md)
 **Version 22.0 sign-off:** [version-22.0-scope.md](version-22.0-scope.md) · Release notes: [v22.0.0.md](../release-notes/v22.0.0.md)
 **Version 23.0 sign-off:** [version-23.0-scope.md](version-23.0-scope.md) · Release notes: [v23.0.0.md](../release-notes/v23.0.0.md)
+**Version 24.0 (in progress):** [version-24.0-scope.md](version-24.0-scope.md) · Checklist: [version-24.0-completion-checklist.md](../development/version-24.0-completion-checklist.md)
 
 ## Status legend
 
@@ -738,6 +739,17 @@ Scope: [version-23.0-scope.md](version-23.0-scope.md) · Checklist: [version-23.
 | -------------------------------------- | ------- | ------ | ------- | -------- | --- | --- | ----- | ------------ | ------------------------------------------------------------- |
 | Operator async metadata re-extract     | 23.0    | ✅     | ✅      | ✅       | ✅  | —   | ✅    | Documents    | Staff enqueue document_metadata_extract for OCR'd documents   |
 | Case-level bulk credit-report re-parse | 23.0    | ✅     | ✅      | ✅       | ✅  | —   | ✅    | Cases        | Staff enqueue parse for all eligible credit reports on a case |
+
+---
+
+## Version 24.0 — Document Pipeline Recovery Parity (in progress — 🚧)
+
+Scope: [version-24.0-scope.md](version-24.0-scope.md) · Checklist: [version-24.0-completion-checklist.md](../development/version-24.0-completion-checklist.md)
+
+| Capability                          | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                            |
+| ----------------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ---------------------------------------------------------------- |
+| Case-level bulk metadata re-extract | 24.0    | Planned | —       | —        | —   | —   | —     | Cases        | Staff enqueue document_metadata_extract for OCR'd docs on a case |
+| Operator re-classify document       | 24.0    | Planned | —       | —        | —   | —   | —     | Documents    | Staff enqueue document_classify when OCR exists                  |
 
 ---
 

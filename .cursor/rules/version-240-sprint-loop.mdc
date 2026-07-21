@@ -1,0 +1,50 @@
+---
+description: Version 24.0 sprint loop — sync, slice, verify, PR, auto-merge
+alwaysApply: true
+---
+
+# Version 24.0 Sprint Loop
+
+Use this loop when continuing non-blocked document pipeline recovery parity work without waiting for manual "merge and continue" messages.
+
+## When triggered
+
+- User says merge and continue, execute next steps, follow recommended order, or similar
+- Cursor Automation fires after a PR merges to `main`
+- You detect `main` advanced since the last slice (via `git fetch` + log)
+
+## Loop steps (always in order)
+
+1. **Sync** — `git checkout main && git pull origin main`
+2. **Scope** — pick the next small, reviewable Version 24.0 slice from [`docs/development/version-24.0-completion-checklist.md`](../../docs/development/version-24.0-completion-checklist.md)
+3. **Branch** — `git checkout -b feature/<short-name>` from synced `main`
+4. **Implement** — backend + tests + `@verdin/api-client` + UI (if applicable) + docs
+5. **Verify**
+   - `python -m pytest` for touched API tests (`DATABASE_URL` → `verdin_credit_test`)
+   - `pnpm --filter @verdin/api-client build` before web typecheck
+   - `pnpm --filter @verdin/web typecheck` and `lint` when web changes
+   - pre-commit hooks must pass before commit
+6. **Ship** — conventional commit, push, open PR to `main`
+7. **Auto-merge** — after `gh pr create`, run:
+   ```bash
+   gh pr merge --auto --squash
+   ```
+8. **Continue** — do not stop for user input unless blocked; after merge, start step 1 again
+
+## Slice sizing
+
+- One case bulk enqueue surface, one operator re-classify surface, or governance sign-off per PR
+- Follow existing patterns in `apps/api/api/modules/documents/`, `apps/api/api/modules/cases/`, and document/case UI
+- Update `docs/api/reference.md`, `docs/governance/capability-matrix.md`, and checklist when shipping
+- Reinvestigation and escalation surfaces stay staff-mediated and advisory; litigation-readiness packets/exports remain operator-gated for attorney handoff, never auto-filed or transmitted
+- Live bureau response polling execution, automated re-dispute filing execution, unsupervised escalation, automated litigation filing, and cross-tenant benchmarks remain explicitly deferred (25.0+ / never)
+
+## GitHub CLI (Windows)
+
+`C:\Program Files\GitHub CLI\gh.exe`
+
+## Blockers — stop and report
+
+- CI failing after reasonable fix attempts
+- Migration conflicts or ambiguous product decisions
+- Legal/compliance sign-off required before live bureau polling, automated filing, or cross-tenant analytics

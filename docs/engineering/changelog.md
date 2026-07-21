@@ -13,6 +13,14 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — Version 24.0 scope (Phase 23)
+
+**Decision:** Scope Version 24.0 as Document Pipeline Recovery Parity — case-level bulk metadata re-extract and operator re-classify enqueue. Keep live bureau polling, automated filing, unsupervised escalation, litigation e-filing, and cross-tenant benchmarks deferred to 25.0+ or never.
+
+**Reason:** After 23.0, staff still need case-scoped bulk metadata recovery and a re-classify control when OCR completed without a usable document type.
+
+**Follow-up work:** Slice 2 — case bulk metadata re-extract; Slice 3 — operator re-classify; Slice 4 — sign-off.
+
 ## Compliance intelligence — Version 23.0 sign-off (Phase 22)
 
 **Decision:** Close Phase 22 as shipped `v23.0.0` after async metadata re-extract enqueue and case-level bulk credit-report re-parse. Keep live bureau polling, automated filing, unsupervised escalation, litigation e-filing, and cross-tenant benchmarks deferred to 24.0+ or never.
