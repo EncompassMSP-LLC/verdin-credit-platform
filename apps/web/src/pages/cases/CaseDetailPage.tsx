@@ -90,6 +90,9 @@ export function CaseDetailPage() {
           {data.case_number ? <p className="text-sm text-gray-500">{data.case_number}</p> : null}
         </div>
         <div className="flex flex-wrap gap-2">
+          <Link to={`/cases/${caseId}/dispute-playbook`}>
+            <Button>Dispute playbook</Button>
+          </Link>
           <Link to={`/guides/dispute-workflow?case_id=${caseId}`}>
             <Button variant="secondary">Dispute guide</Button>
           </Link>
@@ -167,6 +170,11 @@ export function CaseDetailPage() {
             <Link to={`/cases/${caseId}/accounts`}>
               <Button variant="secondary" size="sm">
                 View accounts
+              </Button>
+            </Link>
+            <Link to={`/cases/${caseId}/dispute-playbook`}>
+              <Button variant="secondary" size="sm">
+                Dispute playbook
               </Button>
             </Link>
             {featureFlags.enableImports ? (

@@ -6,6 +6,7 @@ import { DashboardPage } from '../pages/DashboardPage';
 import { CasesListPage } from '../pages/cases/CasesListPage';
 import { CaseCreatePage } from '../pages/cases/CaseCreatePage';
 import { CaseDetailPage } from '../pages/cases/CaseDetailPage';
+import { CaseDisputePlaybookPage } from '../pages/cases/CaseDisputePlaybookPage';
 import { CaseEditPage } from '../pages/cases/CaseEditPage';
 import { AccountsListPage } from '../pages/accounts/AccountsListPage';
 import { AccountCreatePage } from '../pages/accounts/AccountCreatePage';
@@ -79,6 +80,7 @@ export function AppRoutes() {
         <Route path="cases" element={<CasesListPage />} />
         <Route path="cases/new" element={<CaseCreatePage />} />
         <Route path="cases/:caseId" element={<CaseDetailPage />} />
+        <Route path="cases/:caseId/dispute-playbook" element={<CaseDisputePlaybookPage />} />
         <Route path="cases/:caseId/edit" element={<CaseEditPage />} />
         <Route path="cases/:caseId/accounts" element={<CaseAccountsPage />} />
         <Route path="clients" element={<ClientsListPage />} />
