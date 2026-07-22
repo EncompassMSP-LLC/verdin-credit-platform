@@ -13,6 +13,14 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — Version 27.0 scope (Phase 26)
+
+**Decision:** Scope Version 27.0 as Dispute Playbook Depth & Case Entity Re-resolve — playbook finding deep-links into Case Detail panels, and case-level bulk entity re-resolve enqueue. Keep live bureau polling, automated filing, unsupervised escalation, litigation e-filing, and cross-tenant benchmarks deferred to 28.0+ or never.
+
+**Reason:** After 26.0 and the Dispute Playbook page, investigators still cannot jump from ranked issues to finding detail, and staff lack case-scoped bulk re-resolve after single-document async enqueue shipped.
+
+**Follow-up work:** Slice 2 — playbook deep-links; Slice 3 — case bulk entity re-resolve; Slice 4 — sign-off.
+
 ## Compliance intelligence — Case Dispute Playbook page
 
 **Decision:** Add `/cases/{id}/dispute-playbook` composing existing `GET …/dispute-strategy`, `GET …/litigation-strength`, and `GET …/reinvestigation-summary` into an issue-first per-account playbook with prepare-letter CTAs for recommended CRA/furnisher stages. No new recommendation engine.
