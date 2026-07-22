@@ -12,9 +12,9 @@ Scope: [`docs/governance/version-28.0-scope.md`](../governance/version-28.0-scop
 
 - [x] IdentityIQ golden fixture + expected JSON regression runs in CI
 - [x] Staff can parse SmartCredit monitoring / tri-merge PDFs into per-bureau tradelines
-- [ ] Capability matrix + API reference updated
-- [ ] Deferred items explicitly documented
-- [ ] `docs/release-notes/v28.0.0.md` + tag `v28.0.0`
+- [x] Capability matrix + API reference updated
+- [x] Deferred items explicitly documented
+- [x] `docs/release-notes/v28.0.0.md` + tag `v28.0.0`
 
 ---
 
@@ -25,7 +25,7 @@ Scope: [`docs/governance/version-28.0-scope.md`](../governance/version-28.0-scop
 | 1     | 28.0 scope + completion checklist         | Kickoff        | ✅     |
 | 2     | IdentityIQ golden fixture regression      | Report parsers | ✅     |
 | 3     | SmartCredit monitoring / tri-merge parser | Report parsers | ✅     |
-| 4     | Capability matrix 28.0 sign-off           | Governance     | ☐      |
+| 4     | Capability matrix 28.0 sign-off           | Governance     | ✅     |
 
 Slice 2 hardens the shipped IdentityIQ parser with CI regression. Slice 3 adds the SmartCredit sibling layout. Live polling, automated filing, and cross-tenant benchmarks stay out of scope.
 
@@ -47,3 +47,4 @@ Slice 2 hardens the shipped IdentityIQ parser with CI regression. Slice 3 adds t
 | New dispute scoring / LLM playbook engine         | 29.0+   | Compose existing engines first                          |
 | IdentityIQ / SmartCredit live B2B pull APIs       | Never   | Not offered to CROs; client PDF import is the path      |
 | MyScoreIQ / other monitoring siblings             | 29.0+   | SmartCredit first                                       |
+| Mortgage Partner Edition                          | 29.0    | Edition on shared platform (no fork) — see Version 29.0 |

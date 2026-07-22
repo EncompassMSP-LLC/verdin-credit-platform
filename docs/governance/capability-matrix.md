@@ -40,7 +40,7 @@
 **Version 25.0 sign-off:** [version-25.0-scope.md](version-25.0-scope.md) · Release notes: [v25.0.0.md](../release-notes/v25.0.0.md)
 **Version 26.0 sign-off:** [version-26.0-scope.md](version-26.0-scope.md) · Release notes: [v26.0.0.md](../release-notes/v26.0.0.md)
 **Version 27.0 sign-off:** [version-27.0-scope.md](version-27.0-scope.md) · Release notes: [v27.0.0.md](../release-notes/v27.0.0.md)
-**Version 28.0 (in progress):** [version-28.0-scope.md](version-28.0-scope.md) · Checklist: [version-28.0-completion-checklist.md](../development/version-28.0-completion-checklist.md)
+**Version 28.0 sign-off:** [version-28.0-scope.md](version-28.0-scope.md) · Release notes: [v28.0.0.md](../release-notes/v28.0.0.md)
 **Version 29.0 (planned):** [version-29.0-scope.md](version-29.0-scope.md) · Checklist: [version-29.0-completion-checklist.md](../development/version-29.0-completion-checklist.md)
 
 ## Status legend
@@ -792,9 +792,9 @@ Scope: [version-27.0-scope.md](version-27.0-scope.md) · Checklist: [version-27.
 
 ---
 
-## Version 28.0 — Monitoring Report Parser Depth (in progress — 🚧)
+## Version 28.0 — Monitoring Report Parser Depth (shipped — ✅)
 
-Scope: [version-28.0-scope.md](version-28.0-scope.md) · Checklist: [version-28.0-completion-checklist.md](../development/version-28.0-completion-checklist.md)
+Scope: [version-28.0-scope.md](version-28.0-scope.md) · Checklist: [version-28.0-completion-checklist.md](../development/version-28.0-completion-checklist.md) · Release notes: [v28.0.0.md](../release-notes/v28.0.0.md)
 
 | Capability                                | Version | Status | Backend | Frontend | API | AI  | Tests | Dependencies   | Notes                                                             |
 | ----------------------------------------- | ------- | ------ | ------- | -------- | --- | --- | ----- | -------------- | ----------------------------------------------------------------- |

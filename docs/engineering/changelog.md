@@ -33,6 +33,20 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Follow-up work:** Golden PDF fixture + expected JSON regression (optional); MyScoreIQ deferred to 30.0+ (Mortgage Partner is 29.0).
 
+## Mortgage Partner Edition — next after Version 28.0
+
+**Decision:** After Monitoring Report Parser Depth sign-off, Version 29.0 is Mortgage Partner Edition foundation on the shared platform (no fork). See [`version-29.0-scope.md`](../governance/version-29.0-scope.md) when present on `main`.
+
+**Follow-up work:** Partner org/RBAC → lender dashboard/pipeline → readiness score/export → sign-off.
+
+## Compliance intelligence — Version 28.0 sign-off (Phase 27)
+
+**Decision:** Sign off Version 28.0 — IdentityIQ golden PDF/expected-JSON CI regression and SmartCredit monitoring / tri-merge parser are production capabilities. Tag `v28.0.0`.
+
+**Reason:** Both Phase 27 parser epics shipped with tests and docs; remaining work is Mortgage Partner packaging and deferred live-bureau items.
+
+**Follow-up work:** Version 29.0 Mortgage Partner Edition; MyScoreIQ parsers remain backlog.
+
 ## Compliance intelligence — Version 28.0 scope (Phase 27)
 
 **Decision:** Scope Version 28.0 as Monitoring Report Parser Depth — IdentityIQ golden fixture / expected-JSON regression, and a SmartCredit monitoring / tri-merge parser. Keep live bureau polling, automated filing, unsupervised escalation, litigation e-filing, cross-tenant benchmarks, and monitoring B2B pull APIs deferred to 29.0+ or never.
