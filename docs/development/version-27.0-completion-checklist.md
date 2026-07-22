@@ -13,8 +13,8 @@ Scope: [`docs/governance/version-27.0-scope.md`](../governance/version-27.0-scop
 - [x] Staff can deep-link from Dispute Playbook issues into Case Detail finding panels
 - [x] Staff can enqueue case-level bulk entity re-resolve when metadata exists
 - [x] Capability matrix + API reference updated
-- [ ] Deferred items explicitly documented
-- [ ] `docs/release-notes/v27.0.0.md` + tag `v27.0.0`
+- [x] Deferred items explicitly documented
+- [x] `docs/release-notes/v27.0.0.md` + tag `v27.0.0`
 
 ---
 
@@ -25,7 +25,7 @@ Scope: [`docs/governance/version-27.0-scope.md`](../governance/version-27.0-scop
 | 1     | 27.0 scope + completion checklist         | Kickoff    | ✅     |
 | 2     | Playbook finding deep-links               | Cases      | ✅     |
 | 3     | Case-level bulk entity re-resolve enqueue | Documents  | ✅     |
-| 4     | Capability matrix 27.0 sign-off           | Governance | ☐      |
+| 4     | Capability matrix 27.0 sign-off           | Governance | ✅     |
 
 Slice 2 deepens the Dispute Playbook with finding-panel navigation. Slice 3 adds case-scoped bulk `document_entity_resolve` enqueue. Live polling, automated filing, and cross-tenant benchmarks stay out of scope.
 

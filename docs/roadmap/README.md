@@ -75,7 +75,7 @@ Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (
 | **24.0**  | Document Pipeline Recovery Parity                | Released    | Phase 23 case-level bulk metadata re-extract, operator re-classify enqueue (`v24.0.0`)                                                           |
 | **25.0**  | Document Pipeline Recovery Bulk Closeout         | Released    | Phase 24 case-level bulk re-classify, case-level bulk OCR retry for failed docs (`v25.0.0`)                                                      |
 | **26.0**  | Document Pipeline Resolution & Operator Surfaces | Released    | Phase 25 Case Documents recovery panel, operator async entity re-resolve enqueue (`v26.0.0`)                                                     |
-| **27.0**  | Dispute Playbook Depth & Case Entity Re-resolve  | Planned     | Phase 26 playbook finding deep-links, case-level bulk entity re-resolve enqueue                                                                  |
+| **27.0**  | Dispute Playbook Depth & Case Entity Re-resolve  | Released    | Phase 26 playbook finding deep-links, case-level bulk entity re-resolve enqueue (`v27.0.0`)                                                      |
 
 ### Sprint milestones
 
@@ -624,16 +624,18 @@ Compliance Intelligence Phase 25 closes remaining owned document-pipeline **oper
 | 1    | Case Documents recovery panel            | Released    | Bulk recovery when any case docs exist (not credit-report-gated) |
 | 2    | Operator async entity re-resolve enqueue | Released    | Enqueue document_entity_resolve when metadata exists             |
 
-### Version 27.0 — Dispute Playbook Depth & Case Entity Re-resolve (planned)
+### Version 27.0 — Dispute Playbook Depth & Case Entity Re-resolve (shipped)
 
-Scope and checklist: [`docs/governance/version-27.0-scope.md`](../governance/version-27.0-scope.md) · [`docs/development/version-27.0-completion-checklist.md`](../development/version-27.0-completion-checklist.md)
+Scope and checklist: [`docs/governance/version-27.0-scope.md`](../governance/version-27.0-scope.md) · [`docs/development/version-27.0-completion-checklist.md`](../development/version-27.0-completion-checklist.md) · Release notes: [`docs/release-notes/v27.0.0.md`](../release-notes/v27.0.0.md)
 
-Compliance Intelligence Phase 26 closes remaining owned **investigator playbook** and **case-scoped entity recovery** gaps without crossing the live-bureau frontier: Dispute Playbook finding deep-links, and case-level bulk entity re-resolve enqueue. Live bureau response ingestion execution, automated re-dispute filing execution, unsupervised escalation, automated litigation filing, and cross-tenant benchmarks remain deferred (28.0+ or never) pending legal/compliance sign-off.
+Compliance Intelligence Phase 26 closed remaining owned **investigator playbook** and **case-scoped entity recovery** gaps without crossing the live-bureau frontier: Dispute Playbook finding deep-links, and case-level bulk entity re-resolve enqueue. Live bureau response ingestion execution, automated re-dispute filing execution, unsupervised escalation, automated litigation filing, and cross-tenant benchmarks remain deferred (28.0+ or never) pending legal/compliance sign-off.
 
 | Epic | Theme                                     | 27.0 target | Notes                                                          |
 | ---- | ----------------------------------------- | ----------- | -------------------------------------------------------------- |
-| 1    | Playbook finding deep-links               | Planned     | Navigate from playbook issues into Case Detail finding anchors |
-| 2    | Case-level bulk entity re-resolve enqueue | Planned     | Enqueue document_entity_resolve for case docs with metadata    |
+| 1    | Playbook finding deep-links               | Released    | Navigate from playbook issues into Case Detail finding anchors |
+| 2    | Case-level bulk entity re-resolve enqueue | Released    | Enqueue document_entity_resolve for case docs with metadata    |
+
+**Tag:** `v27.0.0` — Dispute Playbook Depth & Case Entity Re-resolve.
 
 ## Sprint → version mapping
 

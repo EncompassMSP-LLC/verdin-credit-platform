@@ -13,6 +13,14 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — Version 27.0 sign-off (Phase 26)
+
+**Decision:** Close Phase 26 as shipped `v27.0.0` after playbook finding deep-links and case-level bulk entity re-resolve enqueue. Keep live bureau polling, automated filing, unsupervised escalation, litigation e-filing, and cross-tenant benchmarks deferred to 28.0+ or never.
+
+**Reason:** Owned investigator playbook and case-scoped entity recovery gaps are closed; remaining frontiers require legal/compliance gates.
+
+**Follow-up work:** Tag `v27.0.0`; next gated live-integration phase only with explicit legal/compliance sign-off.
+
 ## Report parsers — IdentityIQ monitoring / tri-merge layout
 
 **Decision:** Add an IdentityIQ-specific credit report parser (`identityiq`) that detects `member.identityiq.com` / IdentityIQ branding, segments Personal Information / Accounts / Inquiries / Public Records / Collections, and expands tri-bureau account columns into per-bureau tradelines. Single-bureau Experian/Equifax/TransUnion parsers return confidence `0` when IdentityIQ markers are present so the registry cannot mis-route.
@@ -31,7 +39,7 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Guardrails:** Requires extracted metadata; 503 when entity resolution disabled; staff-mediated; no auto-match forcing; no live bureau contact.
 
-**Follow-up work:** Slice 4 — Version 27.0 sign-off.
+**Follow-up work:** Closed in Version 27.0 sign-off (`v27.0.0`).
 
 ## Compliance intelligence — Playbook finding deep-links (Phase 26)
 
@@ -39,7 +47,7 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Reason:** Investigators needed one click from ranked playbook issues into the underlying finding panels.
 
-**Follow-up work:** Slice 3 — case bulk entity re-resolve; Slice 4 — Version 27.0 sign-off.
+**Follow-up work:** Closed in Version 27.0 sign-off (`v27.0.0`).
 
 ## Compliance intelligence — Version 27.0 scope (Phase 26)
 
@@ -47,7 +55,7 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Reason:** After 26.0 and the Dispute Playbook page, investigators still cannot jump from ranked issues to finding detail, and staff lack case-scoped bulk re-resolve after single-document async enqueue shipped.
 
-**Follow-up work:** Slice 2 — playbook deep-links; Slice 3 — case bulk entity re-resolve; Slice 4 — sign-off.
+**Follow-up work:** Closed in Version 27.0 sign-off (`v27.0.0`).
 
 ## Compliance intelligence — Case Dispute Playbook page
 
