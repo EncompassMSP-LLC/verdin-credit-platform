@@ -7,7 +7,7 @@ from verdin_report_parsers.registry import list_bureau_parsers, list_parsers
 
 def test_registry_lists_bureau_and_fallback_parsers() -> None:
     names = {parser.name for parser in list_parsers()}
-    assert names == {"experian", "equifax", "transunion", "fallback"}
+    assert names == {"identityiq", "experian", "equifax", "transunion", "fallback"}
 
 
 def test_low_confidence_bureau_layout_uses_fallback() -> None:
@@ -38,4 +38,4 @@ def test_parse_credit_report_uses_fallback_for_unknown_layout() -> None:
 
 def test_bureau_parsers_are_registered() -> None:
     bureau_names = {parser.name for parser in list_bureau_parsers()}
-    assert bureau_names == {"experian", "equifax", "transunion"}
+    assert bureau_names == {"identityiq", "experian", "equifax", "transunion"}
