@@ -647,7 +647,7 @@ Compliance Intelligence Phase 27 deepens **client-sourced monitoring report** pa
 | Epic | Theme                                     | 28.0 target | Notes                                                       |
 | ---- | ----------------------------------------- | ----------- | ----------------------------------------------------------- |
 | 1    | IdentityIQ golden fixture regression      | Planned     | CI golden OCR + expected JSON for IdentityIQ                |
-| 2    | SmartCredit monitoring / tri-merge parser | Planned     | Detect SmartCredit; expand tri-bureau columns to per-bureau |
+| 2    | SmartCredit monitoring / tri-merge parser | Released    | Detect SmartCredit; expand tri-bureau columns to per-bureau |
 
 ## Sprint → version mapping
 

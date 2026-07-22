@@ -7,10 +7,12 @@ from verdin_report_parsers.parsers.equifax.parser import EquifaxParser
 from verdin_report_parsers.parsers.experian.parser import ExperianParser
 from verdin_report_parsers.parsers.fallback.parser import FallbackParser
 from verdin_report_parsers.parsers.identityiq.parser import IdentityIQParser
+from verdin_report_parsers.parsers.smartcredit.parser import SmartCreditParser
 from verdin_report_parsers.parsers.transunion.parser import TransUnionParser
 
 _BUREAU_PARSERS: tuple[CreditReportParser, ...] = (
     IdentityIQParser(),
+    SmartCreditParser(),
     ExperianParser(),
     EquifaxParser(),
     TransUnionParser(),
