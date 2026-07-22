@@ -1,0 +1,69 @@
+@import "../styles/tokens.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  body {
+    @apply bg-lrp-surface text-navy-900 font-sans antialiased;
+    font-size: 1.0625rem;
+    line-height: 1.6;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-gold-500;
+  }
+
+  ::selection {
+    @apply bg-gold-500/25 text-navy-900;
+  }
+}
+
+@layer components {
+  .eyebrow {
+    @apply font-sans text-[0.7rem] font-medium uppercase tracking-eyebrow text-gold-600;
+  }
+
+  .brand-rule {
+    @apply h-px w-full bg-gold-line;
+  }
+
+  .brand-diamond {
+    @apply inline-block h-1.5 w-1.5 rotate-45 bg-gold-500;
+  }
+
+  .prose-lrp {
+    @apply max-w-prose text-ink-700;
+  }
+
+  .prose-lrp p + p {
+    @apply mt-4;
+  }
+
+  .lrp-shell-surface {
+    @apply min-h-screen bg-lrp-surface text-navy-900;
+  }
+
+  .lrp-panel {
+    @apply rounded-brand border border-lrp-border bg-lrp-surface-elevated;
+  }
+}

@@ -1,0 +1,31 @@
+/**
+ * LRP design tokens — Vol 23 (ready-for-build)
+ * Spec: docs/lrp-enterprise/build-bible/volumes/23-design-system/
+ * FOUNDER-REVIEW P2-13: no dark mode v1 · P2-14: app-local tokens
+ */
+
+:root {
+  --lrp-navy: #00133e;
+  --lrp-navy-ink: #0a1b3d;
+  --lrp-navy-700: #0a244f;
+  --lrp-navy-600: #163a6b;
+  --lrp-gold: #c29e5b;
+  --lrp-gold-600: #a88850;
+  --lrp-gold-400: #d0a848;
+  --lrp-surface: #f7f8fa;
+  --lrp-surface-elevated: #ffffff;
+  --lrp-border: #d7dce5;
+  --lrp-success: #007860;
+  --lrp-warning: #b45309;
+  --lrp-danger: #b91c1c;
+  --lrp-info: #1d4ed8;
+
+  /* Readiness bands (Vol 22 / P0-2) */
+  --lrp-band-building: #64748b;
+  --lrp-band-progressing: #a88850;
+  --lrp-band-near-ready: #c29e5b;
+  --lrp-band-lending-ready: #8a6f3e;
+
+  --background: var(--lrp-surface);
+  --foreground: var(--lrp-navy);
+}
