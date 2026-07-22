@@ -64,6 +64,7 @@ from api.modules.documents.schemas import (
     AttorneyChecklistSummary,
     BureauTradelineSnapshotResponse,
     CaseAttorneyChecklistResponse,
+    CaseBulkEntityReresolveResponse,
     CaseBulkOcrRetryResponse,
     CaseBulkReclassifyResponse,
     CaseCfpbChecklistResponse,
@@ -73,6 +74,8 @@ from api.modules.documents.schemas import (
     CaseCreditReportReparseQueuedItem,
     CaseCreditReportReparseSkippedItem,
     CaseDisputeStrategyResponse,
+    CaseEntityReresolveQueuedItem,
+    CaseEntityReresolveSkippedItem,
     CaseFcraFindingsResponse,
     CaseIdentityTheftFindingsResponse,
     CaseLitigationStrengthResponse,
@@ -1481,6 +1484,81 @@ class DocumentService:
             )
 
         return CaseBulkReclassifyResponse(
+            case_id=case_id,
+            queued_count=len(queued),
+            skipped_count=len(skipped),
+            queued=queued,
+            skipped=skipped,
+        )
+
+    async def bulk_reresolve_case_entities(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+    ) -> CaseBulkEntityReresolveResponse:
+        """Enqueue entity resolve for each case document with extracted metadata."""
+        self._require_write(user)
+        organization_id = self._require_organization(user)
+        await self._validate_case(case_id, organization_id)
+
+        settings = get_settings()
+        if not settings.document_entity_resolution_enabled:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Document entity resolution is disabled",
+            )
+
+        documents = await self.list_documents_for_case(
+            organization_id=organization_id,
+            case_id=case_id,
+        )
+
+        queued: list[CaseEntityReresolveQueuedItem] = []
+        skipped: list[CaseEntityReresolveSkippedItem] = []
+
+        for document in documents:
+            metadata = await self._metadata.get_metadata_by_document(
+                document.id,
+                organization_id=document.organization_id,
+            )
+            if metadata is None or metadata.metadata_status != MetadataStatus.EXTRACTED.value:
+                skipped.append(
+                    CaseEntityReresolveSkippedItem(
+                        document_id=document.id,
+                        reason="missing_metadata",
+                    )
+                )
+                continue
+
+            try:
+                message = enqueue_job(
+                    JobType.DOCUMENT_ENTITY_RESOLVE,
+                    {"document_id": str(document.id)},
+                )
+            except Exception:
+                logger.exception(
+                    "Failed to enqueue entity resolve for document %s",
+                    document.id,
+                )
+                skipped.append(
+                    CaseEntityReresolveSkippedItem(
+                        document_id=document.id,
+                        reason="enqueue_failed",
+                    )
+                )
+                continue
+
+            apply_audit_on_update(document, user.id)
+            await self._documents.update(document)
+            queued.append(
+                CaseEntityReresolveQueuedItem(
+                    document_id=document.id,
+                    job_id=message.job_id,
+                    job_type=JobType.DOCUMENT_ENTITY_RESOLVE.value,
+                )
+            )
+
+        return CaseBulkEntityReresolveResponse(
             case_id=case_id,
             queued_count=len(queued),
             skipped_count=len(skipped),

@@ -13,6 +13,16 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — Case bulk entity re-resolve (Phase 26)
+
+**Decision:** Add `POST /cases/{id}/resolutions/reresolve` (case_manager+) to enqueue `document_entity_resolve` for each case document with extracted metadata (soft-skip `missing_metadata` / `enqueue_failed`), plus Case Documents recovery UI action and `@verdin/api-client` helper.
+
+**Reason:** After single-document async re-resolve shipped in 26.0, multi-document cases still required one click per PDF when resolve jobs were missed or stale.
+
+**Guardrails:** Requires extracted metadata; 503 when entity resolution disabled; staff-mediated; no auto-match forcing; no live bureau contact.
+
+**Follow-up work:** Slice 4 — Version 27.0 sign-off.
+
 ## Compliance intelligence — Playbook finding deep-links (Phase 26)
 
 **Decision:** Add playbook → Case Detail deep-links via `?finding_source=` + panel hash anchors, with Metro2/FCRA row highlight and cross-bureau match_key highlight. No new backend.

@@ -16,7 +16,7 @@ Everything remains **staff-mediated and advisory**. The platform still never pol
 | Epic | Theme                                     | 27.0 target | Summary                                                                             |
 | ---- | ----------------------------------------- | ----------- | ----------------------------------------------------------------------------------- |
 | 1    | Playbook finding deep-links               | Shipped     | From playbook issues, link into Case Detail finding panels by `source_id` / anchors |
-| 2    | Case-level bulk entity re-resolve enqueue | Planned     | Staff enqueue `document_entity_resolve` for case docs with extracted metadata       |
+| 2    | Case-level bulk entity re-resolve enqueue | Shipped     | Staff enqueue `document_entity_resolve` for case docs with extracted metadata       |
 | 3    | Capability matrix / governance sign-off   | Planned     | Scope, checklist, matrix rows, release notes                                        |
 
 ## Shipped from 26.0 (+ playbook foundation — do not regress)
@@ -46,7 +46,7 @@ All v26.0.0 APIs/UI remain production capabilities. The Case Dispute Playbook (`
 
 **Not included:** New scoring engines; auto-file; unsupervised escalation.
 
-### Case-level bulk entity re-resolve enqueue (Planned)
+### Case-level bulk entity re-resolve enqueue (Shipped)
 
 **Included:** Authenticated staff endpoint to enqueue `document_entity_resolve` for each case document with extracted metadata; queued/skipped counts; Case Documents recovery (or Document) UI action; keep single-document `POST .../resolutions/reresolve`.
 

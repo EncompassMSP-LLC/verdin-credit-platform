@@ -4,6 +4,7 @@ import {
   bulkReclassifyCaseDocuments,
   bulkReextractCaseMetadata,
   bulkReparseCaseCreditReports,
+  bulkReresolveCaseEntities,
   bulkRetryCaseOcr,
   listDocuments,
 } from '@verdin/api-client';
@@ -118,10 +119,26 @@ export function CaseDocumentsRecoveryPanel({
     },
   });
 
+  const bulkReresolveMutation = useMutation({
+    mutationFn: () => bulkReresolveCaseEntities(caseId),
+    onSuccess: (result) => {
+      setBulkSummary(
+        `Queued ${result.queued_count} entity re-resolve job(s); skipped ${result.skipped_count}.`,
+      );
+      invalidateCaseDocuments();
+    },
+    onError: (error) => {
+      setBulkSummary(
+        error instanceof Error ? error.message : 'Failed to enqueue bulk entity re-resolve',
+      );
+    },
+  });
+
   const bulkActionsPending =
     bulkReparseMutation.isPending ||
     bulkReextractMutation.isPending ||
     bulkReclassifyMutation.isPending ||
+    bulkReresolveMutation.isPending ||
     bulkOcrRetryMutation.isPending;
 
   return (
@@ -168,6 +185,13 @@ export function CaseDocumentsRecoveryPanel({
               disabled={bulkActionsPending}
             >
               {bulkReextractMutation.isPending ? 'Re-extracting…' : 'Re-extract metadata (case)'}
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => bulkReresolveMutation.mutate()}
+              disabled={bulkActionsPending}
+            >
+              {bulkReresolveMutation.isPending ? 'Re-resolving…' : 'Re-resolve entities (case)'}
             </Button>
             <Button
               variant="secondary"
