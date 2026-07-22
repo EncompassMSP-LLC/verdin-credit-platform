@@ -15,9 +15,9 @@ Everything remains **staff-mediated and advisory**. The platform still never pol
 
 | Epic | Theme                                     | 28.0 target | Summary                                                                             |
 | ---- | ----------------------------------------- | ----------- | ----------------------------------------------------------------------------------- |
-| 1    | IdentityIQ golden fixture regression      | Planned     | Golden OCR fixture + expected JSON so IdentityIQ parse regressions are caught in CI |
+| 1    | IdentityIQ golden fixture regression      | Released    | Golden OCR fixture + expected JSON so IdentityIQ parse regressions are caught in CI |
 | 2    | SmartCredit monitoring / tri-merge parser | Released    | Detect SmartCredit branding; expand tri-bureau columns into per-bureau tradelines   |
-| 3    | Capability matrix / governance sign-off   | Planned     | Scope, checklist, matrix rows, release notes                                        |
+| 3    | Capability matrix / governance sign-off   | Released    | Scope, checklist, matrix rows, release notes                                        |
 
 ## Shipped from 27.0 (+ IdentityIQ foundation — do not regress)
 
@@ -42,7 +42,7 @@ All v27.0.0 APIs/UI remain production capabilities. The IdentityIQ parser (`iden
 
 ## Partial capability limits (28.0 targets)
 
-### IdentityIQ golden fixture regression (Planned)
+### IdentityIQ golden fixture regression (Released)
 
 **Included:** Checked-in OCR (or synthetic) fixture plus expected `ParsedCreditReport` JSON (or equivalent assertions) exercised in CI so IdentityIQ layout/extract regressions fail loudly.
 
