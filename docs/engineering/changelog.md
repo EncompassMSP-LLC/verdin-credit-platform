@@ -13,6 +13,16 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Mortgage Partner Edition — Version 29.0 scope (foundation)
+
+**Decision:** Scope Version 29.0 as Mortgage Partner Edition foundation on the **shared** Ultimate Credit Repair LLC platform — partner org/RBAC, lender dashboard + pipeline, mortgage readiness score/export. Explicitly **do not** fork or copy the codebase into a separate Mortgage product.
+
+**Reason:** Most lender features map to existing cases, FCRA/Metro2, cross-bureau, intelligence, and reporting; a fork doubles maintenance and compliance surface.
+
+**Guardrails:** Feature-flagged edition; partner-scoped data only; no cross-tenant lender marketplace; no live bureau soft-pull or automated filing in 29.0; ADR-012 for any LLM action-plan augment.
+
+**Follow-up work:** Slice 2 — partner org/RBAC; Slice 3 — lender dashboard/pipeline; Slice 4 — readiness score/export; Slice 5 — sign-off.
+
 ## Report parsers — SmartCredit monitoring / tri-merge layout
 
 **Decision:** Add a SmartCredit-specific credit report parser (`smartcredit`) that detects `smartcredit.com` / SmartCredit branding, segments Personal Information / Accounts / Inquiries / Public Records / Collections, and expands tri-bureau account columns into per-bureau tradelines (shared extract helpers with IdentityIQ). Single-bureau Experian/Equifax/TransUnion parsers return confidence `0` when SmartCredit markers are present so the registry cannot mis-route.
@@ -21,7 +31,7 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Guardrails:** Heuristic OCR aid only; no live SmartCredit B2B pulls; report-level bureau remains `unknown`; empty bureau columns skipped.
 
-**Follow-up work:** Golden PDF fixture + expected JSON regression (optional); MyScoreIQ deferred to 29.0+.
+**Follow-up work:** Golden PDF fixture + expected JSON regression (optional); MyScoreIQ deferred to 30.0+ (Mortgage Partner is 29.0).
 
 ## Compliance intelligence — Version 28.0 scope (Phase 27)
 

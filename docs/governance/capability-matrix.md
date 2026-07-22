@@ -41,6 +41,7 @@
 **Version 26.0 sign-off:** [version-26.0-scope.md](version-26.0-scope.md) · Release notes: [v26.0.0.md](../release-notes/v26.0.0.md)
 **Version 27.0 sign-off:** [version-27.0-scope.md](version-27.0-scope.md) · Release notes: [v27.0.0.md](../release-notes/v27.0.0.md)
 **Version 28.0 (in progress):** [version-28.0-scope.md](version-28.0-scope.md) · Checklist: [version-28.0-completion-checklist.md](../development/version-28.0-completion-checklist.md)
+**Version 29.0 (planned):** [version-29.0-scope.md](version-29.0-scope.md) · Checklist: [version-29.0-completion-checklist.md](../development/version-29.0-completion-checklist.md)
 
 ## Status legend
 
@@ -795,10 +796,24 @@ Scope: [version-27.0-scope.md](version-27.0-scope.md) · Checklist: [version-27.
 
 Scope: [version-28.0-scope.md](version-28.0-scope.md) · Checklist: [version-28.0-completion-checklist.md](../development/version-28.0-completion-checklist.md)
 
-| Capability                                | Version | Status  | Backend | Frontend | API | AI  | Tests   | Dependencies   | Notes                                                             |
-| ----------------------------------------- | ------- | ------- | ------- | -------- | --- | --- | ------- | -------------- | ----------------------------------------------------------------- |
-| IdentityIQ golden fixture regression      | 28.0    | Planned | —       | —        | —   | —   | Planned | Report parsers | CI golden OCR + expected JSON for IdentityIQ                      |
-| SmartCredit monitoring / tri-merge parser | 28.0    | ✅      | ✅      | —        | —   | —   | ✅      | Report parsers | Detect SmartCredit; expand tri-bureau columns to per-bureau lines |
+| Capability                                | Version | Status | Backend | Frontend | API | AI  | Tests | Dependencies   | Notes                                                             |
+| ----------------------------------------- | ------- | ------ | ------- | -------- | --- | --- | ----- | -------------- | ----------------------------------------------------------------- |
+| IdentityIQ golden fixture regression      | 28.0    | ✅     | —       | —        | —   | —   | ✅    | Report parsers | CI golden OCR + expected JSON for IdentityIQ                      |
+| SmartCredit monitoring / tri-merge parser | 28.0    | ✅     | ✅      | —        | —   | —   | ✅    | Report parsers | Detect SmartCredit; expand tri-bureau columns to per-bureau lines |
+
+---
+
+## Version 29.0 — Mortgage Partner Edition (planned — 🚧)
+
+Scope: [version-29.0-scope.md](version-29.0-scope.md) · Checklist: [version-29.0-completion-checklist.md](../development/version-29.0-completion-checklist.md)
+
+**Architecture:** Edition on the shared platform — **do not fork**. Reuse FCRA/Metro2/cross-bureau/intelligence.
+
+| Capability                               | Version | Status  | Backend | Frontend | API     | AI      | Tests   | Dependencies | Notes                                               |
+| ---------------------------------------- | ------- | ------- | ------- | -------- | ------- | ------- | ------- | ------------ | --------------------------------------------------- |
+| Partner org model + lender RBAC          | 29.0    | Planned | Planned | —        | Planned | —       | Planned | Auth/orgs    | `ENABLE_MORTGAGE_PARTNER`; Lender ↔ CRO partnership |
+| Lender dashboard + pipeline + milestones | 29.0    | Planned | Planned | Planned  | Planned | —       | Planned | Cases        | Partner UI over shared clients/cases                |
+| Mortgage readiness score + report export | 29.0    | Planned | Planned | Planned  | Planned | Partial | Planned | Intelligence | Deterministic estimator; LLM only behind ADR-012    |
 
 ---
 
