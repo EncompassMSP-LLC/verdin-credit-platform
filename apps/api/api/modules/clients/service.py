@@ -144,6 +144,11 @@ class ClientService:
     async def delete_client(self, user: User, client_id: uuid.UUID) -> None:
         self._require_delete(user)
         client = await self._get_client_for_user(client_id, user)
+        await self._clients.cascade_soft_delete_related(
+            organization_id=client.organization_id,
+            client_id=client.id,
+            updated_by_id=user.id,
+        )
         client.soft_delete()
         apply_audit_on_update(client, user.id)
         await self._clients.save(client)

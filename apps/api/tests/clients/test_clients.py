@@ -165,3 +165,75 @@ def test_delete_client_requires_admin(
 
     missing = api_client.get(f"/api/v1/clients/{client_id}", headers=manager_headers)
     assert missing.status_code == 404
+
+
+def test_delete_client_cascades_cases_and_accounts(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    admin_headers: dict[str, str],
+) -> None:
+    client_id = api_client.post(
+        "/api/v1/clients",
+        headers=manager_headers,
+        json=sample_client_payload(display_name="Cascade Delete Client"),
+    ).json()["id"]
+
+    case_id = api_client.post(
+        "/api/v1/cases",
+        headers=manager_headers,
+        json={
+            "title": "Cascade Case",
+            "client_id": client_id,
+            "client_name": "Cascade Delete Client",
+        },
+    ).json()["id"]
+
+    account_id = api_client.post(
+        "/api/v1/accounts",
+        headers=manager_headers,
+        json={
+            "case_id": case_id,
+            "creditor_name": "Cascade Creditor",
+            "bureau": "equifax",
+            "account_type": "credit_card",
+            "account_status": "open",
+            "payment_status": "current",
+            "account_number_masked": "****9999",
+        },
+    ).json()["id"]
+
+    contact_id = api_client.post(
+        f"/api/v1/clients/{client_id}/contacts",
+        headers=manager_headers,
+        json={
+            "full_name": "Primary Contact",
+            "relationship_type": "primary",
+            "is_primary": True,
+        },
+    ).json()["id"]
+
+    deleted = api_client.delete(f"/api/v1/clients/{client_id}", headers=admin_headers)
+    assert deleted.status_code == 204
+
+    assert (
+        api_client.get(f"/api/v1/clients/{client_id}", headers=manager_headers).status_code == 404
+    )
+    assert api_client.get(f"/api/v1/cases/{case_id}", headers=manager_headers).status_code == 404
+    assert (
+        api_client.get(f"/api/v1/accounts/{account_id}", headers=manager_headers).status_code == 404
+    )
+    assert (
+        api_client.get(
+            f"/api/v1/clients/{client_id}/contacts/{contact_id}",
+            headers=manager_headers,
+        ).status_code
+        == 404
+    )
+
+    accounts_list = api_client.get("/api/v1/accounts", headers=manager_headers)
+    assert accounts_list.status_code == 200
+    assert all(item["id"] != account_id for item in accounts_list.json()["items"])
+
+    cases_list = api_client.get("/api/v1/cases", headers=manager_headers)
+    assert cases_list.status_code == 200
+    assert all(item["id"] != case_id for item in cases_list.json()["items"])

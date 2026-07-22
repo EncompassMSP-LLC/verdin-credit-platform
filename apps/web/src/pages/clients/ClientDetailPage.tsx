@@ -190,6 +190,9 @@ export function ClientDetailPage() {
           </Link>
           {confirmDelete ? (
             <>
+              <p className="w-full text-sm text-red-700 sm:order-first sm:mr-auto sm:w-auto">
+                Also deletes linked cases, accounts, documents, and dispute history.
+              </p>
               <Button variant="secondary" onClick={() => setConfirmDelete(false)}>
                 Cancel
               </Button>

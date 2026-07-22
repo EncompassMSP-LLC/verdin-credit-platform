@@ -238,17 +238,17 @@ Scope: [version-5.0-scope.md](version-5.0-scope.md) · Release notes: [v5.0.0.md
 
 Scope: [version-5.0-plus-scope.md](version-5.0-plus-scope.md) · Checklist: [version-5.0-plus-completion-checklist.md](../development/version-5.0-plus-completion-checklist.md)
 
-| Capability              | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                     |
-| ----------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | --------------------------------------------------------- |
-| Web dev DX (`predev`)   | 5.0+    | Partial | —       | ✅       | —   | —   | —     | Monorepo     | `@verdin/api-client` + validation build before `pnpm dev` |
-| Staff client management | 5.0+    | Partial | ✅      | ✅       | ✅  | —   | ✅    | Auth         | Clients list/CRUD, contacts, portal provision             |
-| Case–client linking UI  | 5.0+    | Partial | ✅      | ✅       | ✅  | —   | ✅    | Clients      | `client_id` picker on case create/edit                    |
-| Portal product surfaces | 5.0+    | Partial | ✅      | ✅       | ✅  | —   | ✅    | Portal       | Upload + messaging UI on linked cases                     |
-| Staff portal messaging  | 5.0+    | Partial | ✅      | ✅       | ✅  | —   | ✅    | Messaging    | Case message thread panel on staff case detail            |
-| Compliance center UI    | 5.0+    | Partial | ✅      | ✅       | ✅  | —   | ✅    | Compliance   | Consent + retention policy management at `/compliance`    |
-| Enterprise reporting UI | 5.0+    | Partial | ✅      | ✅       | ✅  | —   | ✅    | Reporting    | Operations, bureau, team tabs at `/reporting`             |
-| Org admin UI            | 5.0+    | Partial | ✅      | ✅       | ✅  | —   | ✅    | Enterprise   | Org summary + API key lifecycle at `/org-admin`           |
-| LLM case summary UI     | 5.0+    | Partial | ✅      | ✅       | ✅  | —   | ✅    | LLM gates    | `CaseLlmSummaryPanel` on case detail behind `ENABLE_LLM`  |
+| Capability              | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                                                 |
+| ----------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | ------------------------------------------------------------------------------------- |
+| Web dev DX (`predev`)   | 5.0+    | Partial | —       | ✅       | —   | —   | —     | Monorepo     | `@verdin/api-client` + validation build before `pnpm dev`                             |
+| Staff client management | 5.0+    | Partial | ✅      | ✅       | ✅  | —   | ✅    | Auth         | Clients list/CRUD, contacts, portal provision; delete cascades cases/accounts/history |
+| Case–client linking UI  | 5.0+    | Partial | ✅      | ✅       | ✅  | —   | ✅    | Clients      | `client_id` picker on case create/edit                                                |
+| Portal product surfaces | 5.0+    | Partial | ✅      | ✅       | ✅  | —   | ✅    | Portal       | Upload + messaging UI on linked cases                                                 |
+| Staff portal messaging  | 5.0+    | Partial | ✅      | ✅       | ✅  | —   | ✅    | Messaging    | Case message thread panel on staff case detail                                        |
+| Compliance center UI    | 5.0+    | Partial | ✅      | ✅       | ✅  | —   | ✅    | Compliance   | Consent + retention policy management at `/compliance`                                |
+| Enterprise reporting UI | 5.0+    | Partial | ✅      | ✅       | ✅  | —   | ✅    | Reporting    | Operations, bureau, team tabs at `/reporting`                                         |
+| Org admin UI            | 5.0+    | Partial | ✅      | ✅       | ✅  | —   | ✅    | Enterprise   | Org summary + API key lifecycle at `/org-admin`                                       |
+| LLM case summary UI     | 5.0+    | Partial | ✅      | ✅       | ✅  | —   | ✅    | LLM gates    | `CaseLlmSummaryPanel` on case detail behind `ENABLE_LLM`                              |
 
 ### Version 5.0+ epic sign-off
 
