@@ -13,6 +13,16 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Client delete cascade — cases, accounts, and history
+
+**Decision:** `DELETE /clients/{id}` cascade soft-deletes linked cases and their accounts, documents, dispute letters/responses, communications, and tasks, plus contacts and portal user. Timeline events stay append-only.
+
+**Reason:** Deleting a client left orphan tradelines and case history visible in org-wide lists.
+
+**Guardrails:** Soft-delete only (no hard purge); admin-only; timeline/audit stream retained.
+
+**Follow-up work:** Retention hard-purge remains deferred with compliance enforcement.
+
 ## Disputes — best-available FCRA legal references on letter drafts
 
 **Decision:** Dispute draft generation and mail-letter export select legal citations from the strongest matched case FCRA finding (ranked with litigation-strength heuristics), always retaining the procedural dispute right (§611 CRA / §623 furnisher). Falls back to procedural-only when no tradeline-matched finding sections exist.

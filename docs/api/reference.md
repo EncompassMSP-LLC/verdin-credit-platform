@@ -138,22 +138,22 @@ Optional `client_id` links a case to a `clients` record in the same organization
 
 Client records and nested contacts for credit repair consumers. Organization-scoped; distinct from credit tradeline **accounts**.
 
-| Method | Path                                 | Min role     | Description              |
-| ------ | ------------------------------------ | ------------ | ------------------------ |
-| POST   | `/clients`                           | case_manager | Create a client          |
-| GET    | `/clients`                           | read_only    | List clients             |
-| GET    | `/clients/{client_id}`               | read_only    | Get client by ID         |
-| PATCH  | `/clients/{client_id}`               | case_manager | Update a client          |
-| DELETE | `/clients/{client_id}`               | admin        | Soft-delete a client     |
-| POST   | `/clients/{client_id}/contacts`      | case_manager | Add a contact            |
-| GET    | `/clients/{client_id}/contacts`      | read_only    | List contacts for client |
-| GET    | `/clients/{client_id}/contacts/{id}` | read_only    | Get contact by ID        |
-| PATCH  | `/clients/{client_id}/contacts/{id}` | case_manager | Update a contact         |
-| DELETE | `/clients/{client_id}/contacts/{id}` | admin        | Soft-delete a contact    |
-| POST   | `/clients/{client_id}/portal-user`   | case_manager | Provision portal login   |
-| GET    | `/clients/{client_id}/portal-user`   | read_only    | Get portal user metadata |
-| PATCH  | `/clients/{client_id}/portal-user`   | case_manager | Update portal access     |
-| DELETE | `/clients/{client_id}/portal-user`   | case_manager | Revoke portal access     |
+| Method | Path                                 | Min role     | Description                                                                                                                                                                          |
+| ------ | ------------------------------------ | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| POST   | `/clients`                           | case_manager | Create a client                                                                                                                                                                      |
+| GET    | `/clients`                           | read_only    | List clients                                                                                                                                                                         |
+| GET    | `/clients/{client_id}`               | read_only    | Get client by ID                                                                                                                                                                     |
+| PATCH  | `/clients/{client_id}`               | case_manager | Update a client                                                                                                                                                                      |
+| DELETE | `/clients/{client_id}`               | admin        | Soft-delete client and cascade soft-delete linked cases, accounts, documents, dispute letters/responses, communications, tasks, contacts, and portal user (timeline events retained) |
+| POST   | `/clients/{client_id}/contacts`      | case_manager | Add a contact                                                                                                                                                                        |
+| GET    | `/clients/{client_id}/contacts`      | read_only    | List contacts for client                                                                                                                                                             |
+| GET    | `/clients/{client_id}/contacts/{id}` | read_only    | Get contact by ID                                                                                                                                                                    |
+| PATCH  | `/clients/{client_id}/contacts/{id}` | case_manager | Update a contact                                                                                                                                                                     |
+| DELETE | `/clients/{client_id}/contacts/{id}` | admin        | Soft-delete a contact                                                                                                                                                                |
+| POST   | `/clients/{client_id}/portal-user`   | case_manager | Provision portal login                                                                                                                                                               |
+| GET    | `/clients/{client_id}/portal-user`   | read_only    | Get portal user metadata                                                                                                                                                             |
+| PATCH  | `/clients/{client_id}/portal-user`   | case_manager | Update portal access                                                                                                                                                                 |
+| DELETE | `/clients/{client_id}/portal-user`   | case_manager | Revoke portal access                                                                                                                                                                 |
 
 Portal provisioning requires `ENABLE_CLIENT_PORTAL=true`.
 
