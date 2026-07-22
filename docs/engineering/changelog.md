@@ -57,7 +57,17 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Guardrails:** Heuristic OCR parser only — investigator aid; report-level bureau remains `unknown`; empty bureau columns are skipped.
 
-**Follow-up work:** Golden PDF fixture + expected JSON regression; SmartCredit / MyScoreIQ sibling layouts if needed.
+**Follow-up work:** SmartCredit / MyScoreIQ sibling layouts (Version 28.0+).
+
+## Compliance intelligence — IdentityIQ golden fixture regression (Phase 27)
+
+**Decision:** Add IdentityIQ corpus PDF + `report_001.expected.json` and a regression suite mirroring Experian/Equifax/TransUnion golden fixtures so layout/extract changes fail in CI.
+
+**Reason:** IdentityIQ shipped with unit tests against synthetic OCR lines; PDF→parse→expected JSON closes the same regression gap bureau parsers already have.
+
+**Guardrails:** Synthetic PII only; heuristic OCR parser aid; no live IdentityIQ pulls.
+
+**Follow-up work:** Slice 3 — SmartCredit parser; Slice 4 — Version 28.0 sign-off.
 
 ## Compliance intelligence — Case bulk entity re-resolve (Phase 26)
 
