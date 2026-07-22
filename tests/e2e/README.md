@@ -1,7 +1,8 @@
 # End-to-End Workflow Suite
 
-A single black-box test that validates the **entire platform working as one
-system** — the Sprint 4.3.1 release gate.
+Black-box tests that validate the **platform working as one system** against a running API + worker stack.
+
+Primary golden path (`test_full_case_lifecycle.py`):
 
 ```
 Organization → User → Authenticate → Case → Account → Document Upload
@@ -13,24 +14,25 @@ The organization and owner user are seeded directly in the database (there is
 no public sign-up endpoint); **every other step runs through the HTTP API**,
 and the asynchronous document pipeline is processed by the **real worker**.
 
-Keep `test_full_case_lifecycle.py` as the fast, deterministic golden path.
-Additional edge cases should be separate tests so CI failures stay isolated:
+## Tests on disk
 
-- `test_import_to_dispute_lifecycle.py` — import through dispute letter outcome (4.5 exit gate)
-- `test_dispute_letter_lifecycle.py` — dispute draft through CRA outcome
-- `test_entity_resolution_ambiguous.py` — ambiguous match
-- `test_entity_resolution_unmatched.py` — no match
-- `test_ocr_failure_recovery.py` — OCR retry
-- `test_worker_restart.py` — worker resilience
+| File                                  | Purpose                                      |
+| ------------------------------------- | -------------------------------------------- |
+| `test_full_case_lifecycle.py`         | 11-stage case + document pipeline happy path |
+| `test_dispute_letter_lifecycle.py`    | Dispute draft → review → approve → send      |
+| `test_import_to_dispute_lifecycle.py` | Import through dispute letter outcome        |
+
+Keep `test_full_case_lifecycle.py` as the fast, deterministic golden path.
+Additional edge cases should be **separate** tests so CI failures stay isolated.
 
 ## Layout
 
 ```
 tests/e2e/
   conftest.py                 # API reachability, DB bootstrap, HTTP client, artifacts
-  test_dispute_letter_lifecycle.py # dispute letter API happy path
-  test_import_to_dispute_lifecycle.py # import → account → dispute letter path
-  test_full_case_lifecycle.py # the 11-stage workflow test
+  test_dispute_letter_lifecycle.py
+  test_import_to_dispute_lifecycle.py
+  test_full_case_lifecycle.py
   requirements.txt            # reportlab (PDF fixture); rest comes from apps/api
   fixtures/
     organization.py           # seed an isolated org
@@ -48,9 +50,6 @@ tests/e2e/
 
 ## Prerequisites
 
-The suite talks to a **running stack**: PostgreSQL, Redis, MinIO, the **worker**,
-and the **API**. Bring them up with Docker Compose:
-
 ```bash
 docker compose up -d postgres redis minio api worker
 docker compose exec api alembic upgrade head
@@ -62,15 +61,18 @@ docker compose exec api alembic upgrade head
 # from the repository root, in the API's Python environment
 pip install -r apps/api/requirements.txt -r tests/e2e/requirements.txt
 
-# point at the running API (default shown)
-export E2E_BASE_URL=http://localhost:8000
-export DATABASE_URL_SYNC=postgresql://verdin:verdin@localhost:5432/verdin_credit
+# PowerShell example:
+$env:E2E_BASE_URL="http://localhost:8000"
+$env:DATABASE_URL_SYNC="postgresql://verdin:verdin@localhost:5432/verdin_credit_test"
+$env:E2E_REQUIRE="1"
 
 pytest tests/e2e -v
 ```
 
 If the API is not reachable the suite **skips** locally. Set `E2E_REQUIRE=1`
 (as CI does) to make an unreachable stack a hard failure.
+
+Use the **test** database (`verdin_credit_test`) for seeding so you do not wipe local demo data in `verdin_credit`.
 
 ## Configuration
 
@@ -91,5 +93,4 @@ uploaded as the `e2e-artifacts` workflow artifact.
 
 `.github/workflows/e2e.yml` builds the frontend, provisions Postgres/Redis/MinIO,
 runs migrations, starts the worker and API, waits for health, and runs this
-suite. Once stable it should be added as a **required status check** for merges
-into `main`.
+suite. It is a **required status check** for merges into `main`.

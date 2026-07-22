@@ -18,7 +18,7 @@ Skip ADRs for routine bug fixes, single-file refactors, or decisions that are ob
 1. **Check the index** below for an existing ADR on the topic.
 2. **Copy** [`template.md`](template.md) to the next numbered file (e.g. `009-my-decision.md`).
 3. **Fill in** Status, Context, Decision, and Consequences.
-4. **Open a PR** targeting `develop`. Architectural ADRs require review from at least two team members (see [`CONTRIBUTING.md`](../../CONTRIBUTING.md)).
+4. **Open a PR** targeting `main`. Architectural ADRs require review from at least two team members (see [`CONTRIBUTING.md`](../../CONTRIBUTING.md)).
 5. **Merge** once accepted. Update the ADR index in this README.
 6. **Update** the [capability matrix](../governance/capability-matrix.md) when the decision ships a new or changed capability.
 
