@@ -686,6 +686,26 @@ Requires `ENABLE_NATIVE_MOBILE_APP_STORE_DISTRIBUTION=true` (and native mobile p
 
 Endpoints return `404` when the corresponding feature flag is false.
 
+## Mortgage Partner Edition
+
+CRO↔partner (lender/realtor/broker) partnership scaffold with partnership-scoped lender RBAC matrix and partner access audits. Requires `ENABLE_MORTGAGE_PARTNER=true`. Staff JWT only in this slice (partner JWT realm deferred). No cross-tenant marketplace, live bureau soft-pull, or unsupervised filing.
+
+| Method | Path                                                          | Min role     | Description                              |
+| ------ | ------------------------------------------------------------- | ------------ | ---------------------------------------- |
+| GET    | `/mortgage-partner/status`                                    | case_manager | Feature capabilities + deferred list     |
+| GET    | `/mortgage-partner/roles`                                     | case_manager | Partner-role permission matrix           |
+| GET    | `/mortgage-partner/access-audits`                             | admin        | Partner access audit log                 |
+| POST   | `/mortgage-partner/partnerships`                              | admin        | Create CRO↔partner org partnership       |
+| GET    | `/mortgage-partner/partnerships`                              | case_manager | List partnerships for caller org         |
+| GET    | `/mortgage-partner/partnerships/{id}`                         | case_manager | Get partnership (audited)                |
+| POST   | `/mortgage-partner/partnerships/{id}/members`                 | admin        | Add partnership member + partner role    |
+| GET    | `/mortgage-partner/partnerships/{id}/members`                 | case_manager | List members (audited)                   |
+| POST   | `/mortgage-partner/partnerships/{id}/referrals`               | admin        | Attribute client referral to partnership |
+| GET    | `/mortgage-partner/partnerships/{id}/referrals`               | case_manager | List referrals (audited)                 |
+| GET    | `/mortgage-partner/partnerships/{id}/referrals/{referral_id}` | case_manager | Get referral (audited PII access)        |
+
+Tenant isolation: all queries scoped to the caller's `organization_id` as CRO org. Referrals may only reference clients/cases in that org.
+
 ## Organization admin
 
 Enterprise org administration scaffold for API key lifecycle and organization summary metrics. All endpoints require `ENABLE_ENTERPRISE=true` and **admin** role.

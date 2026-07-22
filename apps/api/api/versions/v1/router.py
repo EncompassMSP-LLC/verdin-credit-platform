@@ -24,6 +24,7 @@ from api.modules.enrollment.router import router as enrollment_router
 from api.modules.enterprise.router import router as enterprise_router
 from api.modules.llm.router import router as llm_router
 from api.modules.messaging.router import router as messaging_router
+from api.modules.mortgage_partner.router import router as mortgage_partner_router
 from api.modules.notifications.router import router as notifications_router
 from api.modules.org_admin.router import router as org_admin_router
 from api.modules.reporting.router import router as reporting_router
@@ -52,6 +53,7 @@ router.include_router(notifications_router)
 router.include_router(timeline_router)
 router.include_router(enterprise_router)
 router.include_router(org_admin_router)
+router.include_router(mortgage_partner_router)
 router.include_router(billing_router)
 router.include_router(messaging_router)
 router.include_router(llm_router)

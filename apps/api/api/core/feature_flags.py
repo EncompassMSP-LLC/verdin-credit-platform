@@ -71,6 +71,7 @@ class FeatureFlag(StrEnum):
     ENABLE_STRIPE_CHARGE_RETRY = "ENABLE_STRIPE_CHARGE_RETRY"
     ENABLE_STRIPE_LIVE_CHARGE_RETRY_EXECUTION = "ENABLE_STRIPE_LIVE_CHARGE_RETRY_EXECUTION"
     ENABLE_HRIS_LIFECYCLE_SYNC = "ENABLE_HRIS_LIFECYCLE_SYNC"
+    ENABLE_MORTGAGE_PARTNER = "ENABLE_MORTGAGE_PARTNER"
 
 
 class FeatureFlags(BaseSettings):
@@ -326,6 +327,10 @@ class FeatureFlags(BaseSettings):
         default=False,
         description="Enable admin-gated HRIS lifecycle sync audit scaffold",
     )
+    enable_mortgage_partner: bool = Field(
+        default=False,
+        description="Enable Mortgage Partner Edition (CRO↔lender partnerships, partner RBAC)",
+    )
 
 
 _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
@@ -406,6 +411,7 @@ _FLAG_FIELD_MAP: dict[FeatureFlag, str] = {
         "enable_stripe_live_charge_retry_execution"
     ),
     FeatureFlag.ENABLE_HRIS_LIFECYCLE_SYNC: "enable_hris_lifecycle_sync",
+    FeatureFlag.ENABLE_MORTGAGE_PARTNER: "enable_mortgage_partner",
 }
 
 

@@ -49,11 +49,11 @@ Ultimate Credit Repair LLC remains the system of record for credit operations. M
 
 ## Partial capability limits (29.0 targets)
 
-### Partner org model + lender RBAC (Planned)
+### Partner org model + lender RBAC (Shipped — staff scaffold)
 
-**Included:** Data model for lender org (or partnership link to CRO org); feature flag; lender-scoped read APIs for referred clients/cases; audit of partner access.
+**Included:** Data model for CRO↔partner org partnership; feature flag `ENABLE_MORTGAGE_PARTNER`; staff APIs for partnerships, members, referrals; partner-role permission matrix; audit of partner access.
 
-**Not included:** Marketplace of lenders; unrestricted PII export; cross-CRO browsing.
+**Not included:** Marketplace of lenders; unrestricted PII export; cross-CRO browsing; partner JWT realm (next slice).
 
 ### Lender dashboard + pipeline (Planned)
 
