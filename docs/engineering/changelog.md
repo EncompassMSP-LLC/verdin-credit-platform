@@ -13,6 +13,16 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — Case Dispute Playbook page
+
+**Decision:** Add `/cases/{id}/dispute-playbook` composing existing `GET …/dispute-strategy`, `GET …/litigation-strength`, and `GET …/reinvestigation-summary` into an issue-first per-account playbook with prepare-letter CTAs for recommended CRA/furnisher stages. No new recommendation engine.
+
+**Reason:** Case Detail already stacks engines as separate panels; investigators needed one navigable page that shows the best probable dispute path per tradeline with linked strength issues.
+
+**Guardrails:** Advisory recommendations; prepare creates drafts only; no auto-file; escalation stages point staff to existing checklist/packet flows.
+
+**Follow-up work:** Optional deep-links into Metro2/FCRA finding panels by `source_id`; case bulk prepare from playbook filters.
+
 ## Compliance intelligence — Version 26.0 sign-off (Phase 25)
 
 **Decision:** Close Phase 25 as shipped `v26.0.0` after Case Documents recovery panel and operator async entity re-resolve enqueue. Keep live bureau polling, automated filing, unsupervised escalation, litigation e-filing, and cross-tenant benchmarks deferred to 27.0+ or never.

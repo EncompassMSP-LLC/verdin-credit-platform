@@ -774,6 +774,7 @@ Scope: [version-26.0-scope.md](version-26.0-scope.md) · Checklist: [version-26.
 | ---------------------------------------- | ------- | ------ | ------- | -------- | --- | --- | ----- | ------------ | ----------------------------------------------------------------- |
 | Case Documents recovery panel            | 26.0    | ✅     | —       | ✅       | —   | —   | —     | Cases        | Bulk recovery actions when any case docs exist (not credit-gated) |
 | Operator async entity re-resolve enqueue | 26.0    | ✅     | ✅      | ✅       | ✅  | —   | ✅    | Documents    | Staff enqueue document_entity_resolve when metadata exists        |
+| Case Dispute Playbook page               | 26.0+   | ✅     | —       | ✅       | —   | —   | —     | Cases        | Per-case issue→stage playbook composing strategy + strength APIs  |
 
 ---
 
