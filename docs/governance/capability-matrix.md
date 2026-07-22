@@ -783,10 +783,10 @@ Scope: [version-26.0-scope.md](version-26.0-scope.md) · Checklist: [version-26.
 
 Scope: [version-27.0-scope.md](version-27.0-scope.md) · Checklist: [version-27.0-completion-checklist.md](../development/version-27.0-completion-checklist.md)
 
-| Capability                        | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                          |
-| --------------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | -------------------------------------------------------------- |
-| Playbook finding deep-links       | 27.0    | ✅      | —       | ✅       | —   | —   | —     | Cases        | Navigate from playbook issues into Case Detail finding anchors |
-| Case-level bulk entity re-resolve | 27.0    | Planned | Planned | Planned  | —   | —   | —     | Documents    | Enqueue document_entity_resolve for case docs with metadata    |
+| Capability                        | Version | Status | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                          |
+| --------------------------------- | ------- | ------ | ------- | -------- | --- | --- | ----- | ------------ | -------------------------------------------------------------- |
+| Playbook finding deep-links       | 27.0    | ✅     | —       | ✅       | —   | —   | —     | Cases        | Navigate from playbook issues into Case Detail finding anchors |
+| Case-level bulk entity re-resolve | 27.0    | ✅     | ✅      | ✅       | ✅  | —   | ✅    | Documents    | Enqueue document_entity_resolve for case docs with metadata    |
 
 ---
 

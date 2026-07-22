@@ -608,6 +608,31 @@ export async function bulkReclassifyCaseDocuments(caseId: string): Promise<CaseB
   });
 }
 
+export interface CaseEntityReresolveQueuedItem {
+  document_id: string;
+  job_id: string;
+  job_type: string;
+}
+
+export interface CaseEntityReresolveSkippedItem {
+  document_id: string;
+  reason: string;
+}
+
+export interface CaseBulkEntityReresolve {
+  case_id: string;
+  queued_count: number;
+  skipped_count: number;
+  queued: CaseEntityReresolveQueuedItem[];
+  skipped: CaseEntityReresolveSkippedItem[];
+}
+
+export async function bulkReresolveCaseEntities(caseId: string): Promise<CaseBulkEntityReresolve> {
+  return request<CaseBulkEntityReresolve>(apiPath(`/cases/${caseId}/resolutions/reresolve`), {
+    method: 'POST',
+  });
+}
+
 export interface CaseOcrRetryQueuedItem {
   document_id: string;
   job_id: string;
