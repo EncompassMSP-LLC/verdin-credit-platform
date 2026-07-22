@@ -13,6 +13,16 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Disputes — best-available FCRA legal references on letter drafts
+
+**Decision:** Dispute draft generation and mail-letter export select legal citations from the strongest matched case FCRA finding (ranked with litigation-strength heuristics), always retaining the procedural dispute right (§611 CRA / §623 furnisher). Falls back to procedural-only when no tradeline-matched finding sections exist.
+
+**Reason:** Letters previously always cited the generic procedural section regardless of stronger §605/§607 substance available from FCRA findings.
+
+**Guardrails:** Investigator aid only — not legal advice; unmatched findings never bleed onto another tradeline; max three citations in the pursuant clause.
+
+**Follow-up work:** Optional Metro 2 / cross-bureau soft mapping to §607 when no FCRA sections match; persist selected citations on the `dispute_letters` row.
+
 ## Compliance intelligence — Case bulk entity re-resolve (Phase 26)
 
 **Decision:** Add `POST /cases/{id}/resolutions/reresolve` (case_manager+) to enqueue `document_entity_resolve` for each case document with extracted metadata (soft-skip `missing_metadata` / `enqueue_failed`), plus Case Documents recovery UI action and `@verdin/api-client` helper.
