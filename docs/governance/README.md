@@ -6,7 +6,7 @@ This directory is the **governance hub** for the Verdin Credit Platform. It conn
 
 | Layer                 | Document                                                                                                                   | Audience                    | Answers                                                    |
 | --------------------- | -------------------------------------------------------------------------------------------------------------------------- | --------------------------- | ---------------------------------------------------------- |
-| **Product roadmap**   | [`../roadmap/v5.0-enterprise.md`](../roadmap/v5.0-enterprise.md)                                                           | Executives, PM, engineering | Where are we going? What domains matter?                   |
+| **Product roadmap**   | [`../roadmap/README.md`](../roadmap/README.md) · [`../roadmap/v5.0-enterprise.md`](../roadmap/v5.0-enterprise.md)          | Executives, PM, engineering | Where are we going? What domains matter?                   |
 | **Capability matrix** | [`capability-matrix.md`](capability-matrix.md)                                                                             | All stakeholders            | What exists today? What is production-ready?               |
 | **Architecture**      | [`../architecture/README.md`](../architecture/README.md)                                                                   | Engineers, architects       | How is it built? What rules apply?                         |
 | **ADRs**              | [`../adr/README.md`](../adr/README.md)                                                                                     | Engineers                   | Why was it built this way?                                 |
@@ -69,41 +69,31 @@ Release flow:
 
 ## Release history
 
-| Version | Status   | Description                                                                       |
-| ------- | -------- | --------------------------------------------------------------------------------- |
-| v4.3.0  | Released | Initial Operational Core release                                                  |
-| v4.3.1  | Released | Operational Core completion (Mission Control, governance refinements)             |
-| v4.5.0  | Released | Automation Platform release                                                       |
-| v4.8.0  | Released | Operations release (notifications, portal, LLM gates, reporting)                  |
-| v5.0.0  | Released | Enterprise Edition — compliance, identity, production email, LLM summaries, admin |
+Current tag: **[v27.0.0](../release-notes/v27.0.0.md)**. Full milestone table: [`../roadmap/README.md`](../roadmap/README.md).
 
-Release notes: [`v4.3.0-ga.md`](../release-notes/v4.3.0-ga.md), [`v4.3.1.md`](../release-notes/v4.3.1.md), [`v4.5.0.md`](../release-notes/v4.5.0.md), [`v4.8.0.md`](../release-notes/v4.8.0.md), [`v5.0.0.md`](../release-notes/v5.0.0.md)
+| Version     | Status   | Description                                                                            |
+| ----------- | -------- | -------------------------------------------------------------------------------------- |
+| v4.3.0      | Released | Initial Operational Core                                                               |
+| v4.3.1      | Released | Operational Core completion (Mission Control)                                          |
+| v4.5.0      | Released | Automation Platform                                                                    |
+| v4.8.0      | Released | Operations (notifications, portal, LLM gates, reporting)                               |
+| v5.0.0      | Released | Enterprise Edition                                                                     |
+| v5.1–5.21   | Released | Production hardening through reinvestigation analytics polish                          |
+| v16–v26     | Released | Reinvestigation ops → document pipeline resolution (Phases 15–25)                      |
+| **v27.0.0** | Released | Dispute Playbook depth & case entity re-resolve (Phase 26)                             |
+| v28.0       | Planned  | Monitoring report parser depth (IdentityIQ golden fixtures, SmartCredit) — see roadmap |
+
+Early release notes: [`v4.3.0-ga.md`](../release-notes/v4.3.0-ga.md), [`v4.3.1.md`](../release-notes/v4.3.1.md), [`v4.5.0.md`](../release-notes/v4.5.0.md), [`v4.8.0.md`](../release-notes/v4.8.0.md), [`v5.0.0.md`](../release-notes/v5.0.0.md). Latest: [`v27.0.0.md`](../release-notes/v27.0.0.md).
 
 ## Sprint history
 
-Sprints are engineering milestones — not semantic versions.
+Sprints are engineering milestones — not semantic versions. Sprint 4.3.1 (Operational Core Stabilization) **shipped**; subsequent delivery uses versioned checklists + Cursor sprint-loop rules (`.cursor/rules/version-*-sprint-loop.mdc`).
 
-| Sprint       | Status          | Description                                                                                |
-| ------------ | --------------- | ------------------------------------------------------------------------------------------ |
-| Sprint 4.3.1 | **In progress** | Operational Core Stabilization — E2E validation, performance baselines, security, coverage |
+| Sprint       | Status      | Description                                                |
+| ------------ | ----------- | ---------------------------------------------------------- |
+| Sprint 4.3.1 | **Shipped** | E2E gate, performance baselines, security review, coverage |
 
-Plan: [`docs/sprint-4.3.1/operational-core-stabilization.md`](../sprint-4.3.1/operational-core-stabilization.md)
-
-### Sprint 4.3.1 exit criteria
-
-Version 4.5 opens only after these objectives are met:
-
-- 100% end-to-end workflow pass rate in CI for the complete case lifecycle
-- Performance baselines captured and documented
-- Security review completed with tracked findings
-- Coverage target established (85–90% on core services and critical workflows)
-- No critical or high-severity defects remaining
-
-For Version 4.3 releases:
-
-- `v4.3.0` marks the initial Operational Core GA.
-- `v4.3.1` marks Operational Core completion (Mission Control and governance refinements).
-- Sprint 4.3.1 validates the release before Version 4.5 begins.
+Plan (archive): [`docs/sprint-4.3.1/operational-core-stabilization.md`](../sprint-4.3.1/operational-core-stabilization.md)
 
 ### Definition of done (capability row)
 
@@ -119,50 +109,41 @@ A capability may be marked **✅ Production** in the [capability matrix](capabil
 
 ## Recommended build order
 
-### Phase 1 — Operational Core (Version 4.3)
+Historical phases 1–4 (Operational Core → Automation → Intelligence → Enterprise) are **shipped**. See [`../roadmap/README.md`](../roadmap/README.md) for Versions 4.2–27.0.
 
-| Priority | Capability                                    | Status      | Branch / Reference                                    |
-| -------- | --------------------------------------------- | ----------- | ----------------------------------------------------- |
-| —        | Platform Foundation                           | ✅ Shipped  | `feature/platform-foundation`                         |
-| —        | Case Management                               | ✅ Shipped  | `feature/case-management`                             |
-| —        | Credit Account Intelligence                   | ✅ Shipped  | `feature/account-intelligence`                        |
-| —        | Document Foundation (M1)                      | ✅ Shipped  | `feature/document-foundation`                         |
-| —        | OCR Pipeline (M2)                             | ✅ Shipped  | `feature/document-ocr`                                |
-| —        | AI Classification (M3)                        | ✅ Shipped  | `feature/document-classification`                     |
-| —        | Metadata & Entity Resolution (M4)             | ✅ Shipped  | `feature/document-entity-resolution`                  |
-| —        | Timeline & Audit Engine (M5)                  | ✅ Shipped  | `feature/document-timeline`                           |
-| —        | Task Management                               | ✅ Shipped  | `feature/task-management`                             |
-| —        | Operational Dashboard (Mission Control)       | ✅ Shipped  | `GET /dashboard` product API — released in v4.3.1     |
-| **Next** | Sprint 4.3.1 — Operational Core Stabilization | In progress | `docs/sprint-4.3.1/operational-core-stabilization.md` |
+### Current focus
 
-> **v4.3.0** is the initial **Operational Core** release. **v4.3.1** completes it with Mission Control and governance refinements. **Sprint 4.3.1** is the stabilization gate before **Version 4.5** automation starts.
+| Priority | Capability                                        | Status     | Reference                                                                                  |
+| -------- | ------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------ |
+| —        | Version 27.0 — Playbook depth & entity re-resolve | ✅ Shipped | [`version-27.0-scope.md`](version-27.0-scope.md)                                           |
+| **Next** | Version 28.0 — Monitoring report parser depth     | Planned    | See [roadmap](../roadmap/README.md); scope/checklist land with the Version 28.0 kickoff PR |
 
-### Phase 2 — Automation (4.5)
+Live bureau polling, automated filing, and cross-tenant benchmarks remain deferred pending legal/compliance sign-off.
 
-Credit Report Import Wizard → Advanced OCR & bureau parsing → Workflow Automation Engine → Dispute Generation Engine → AI Case Assistant → Client Portal → Notifications & Messaging
+### Archive — Phase 1 Operational Core (Version 4.3)
 
-4.5 planning should use four release epics: Credit Report Intelligence, Workflow Automation, AI Assistance, and Client Experience. The engineering decision log also records the recommendation to introduce a unified `packages/job-orchestrator/` layer before background automation becomes fragmented.
+| Priority | Capability                                  | Status     |
+| -------- | ------------------------------------------- | ---------- |
+| —        | Platform Foundation through Mission Control | ✅ Shipped |
+| —        | Sprint 4.3.1 stabilization                  | ✅ Shipped |
 
-### Phase 3 — Intelligence (4.8)
+### Archive — Phases 2–4
 
-Dispute generation (full) → analytics → client portal → notifications
-
-### Phase 4 — Enterprise (5.0)
-
-Multi-tenancy → compliance center → AI case assistant → predictive analytics → enterprise administration
+- **Phase 2 — Automation (4.5):** import wizard, dispute lifecycle, workflow tasks — shipped `v4.5.0`
+- **Phase 3 — Intelligence (4.8):** portal, notifications, LLM gates, reporting — shipped `v4.8.0`
+- **Phase 4 — Enterprise (5.0+):** compliance, identity, production email — shipped `v5.0.0` onward
 
 ## Quick links
 
+- [Docs hub](../README.md)
 - [Architecture scorecard (release review)](architecture-scorecard.md)
 - [Repository health dashboard](repository-health.md)
 - [Quality hub](../quality/README.md)
 - [Capability matrix (executive view)](capability-matrix.md)
-- [Version 4.8 scope & deferrals](version-4.8-scope.md)
-- [Version 4.8 completion checklist](../development/version-4.8-completion-checklist.md)
+- [Version 27.0 scope](version-27.0-scope.md)
+- [Version 27.0 checklist](../development/version-27.0-completion-checklist.md)
 - [Roadmap index](../roadmap/README.md)
 - [Engineering Decision Log](../engineering/changelog.md)
-- [Sprint 4.3.1 stabilization](../sprint-4.3.1/operational-core-stabilization.md)
-- [Release notes — v4.3.1](../release-notes/v4.3.1.md)
-- [Release notes — v4.5.0](../release-notes/v4.5.0.md)
+- [Release notes — v27.0.0](../release-notes/v27.0.0.md)
 - [Developer guide](../developer-guide.md)
 - [ADR 009 — Architecture governance](../adr/009-architecture-governance.md)
