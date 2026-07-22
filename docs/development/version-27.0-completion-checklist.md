@@ -10,7 +10,7 @@ Scope: [`docs/governance/version-27.0-scope.md`](../governance/version-27.0-scop
 
 ## Exit criteria for "27.0 done"
 
-- [ ] Staff can deep-link from Dispute Playbook issues into Case Detail finding panels
+- [x] Staff can deep-link from Dispute Playbook issues into Case Detail finding panels
 - [ ] Staff can enqueue case-level bulk entity re-resolve when metadata exists
 - [ ] Capability matrix + API reference updated
 - [ ] Deferred items explicitly documented
@@ -23,7 +23,7 @@ Scope: [`docs/governance/version-27.0-scope.md`](../governance/version-27.0-scop
 | Order | Slice                                     | Epic       | Status |
 | ----- | ----------------------------------------- | ---------- | ------ |
 | 1     | 27.0 scope + completion checklist         | Kickoff    | ✅     |
-| 2     | Playbook finding deep-links               | Cases      | ☐      |
+| 2     | Playbook finding deep-links               | Cases      | ✅     |
 | 3     | Case-level bulk entity re-resolve enqueue | Documents  | ☐      |
 | 4     | Capability matrix 27.0 sign-off           | Governance | ☐      |
 

@@ -7,7 +7,8 @@ import {
   type FcraFindingSummary,
 } from '@verdin/api-client';
 import { Badge, Card } from '@verdin/ui';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
+import { findingMatchesSource } from '../../lib/findingDeepLink';
 
 function severityVariant(
   severity: FcraFinding['severity'],
@@ -37,10 +38,16 @@ function SummaryBadges({ summary }: { summary: FcraFindingSummary }) {
 
 function FindingsList({
   findings,
+  documentId,
   emptyMessage,
+  highlightSourceId,
+  highlightKind,
 }: {
   findings: FcraFinding[];
+  documentId: string;
   emptyMessage: string;
+  highlightSourceId?: string | null;
+  highlightKind?: 'fcra';
 }) {
   if (findings.length === 0) {
     return <p className="mt-3 text-sm text-gray-500">{emptyMessage}</p>;
@@ -48,39 +55,58 @@ function FindingsList({
 
   return (
     <ul className="mt-4 space-y-3">
-      {findings.map((finding) => (
-        <li
-          key={`${finding.rule_id}-${finding.tradeline_index}-${finding.creditor_name ?? ''}`}
-          className="rounded-md border border-gray-200 px-4 py-3"
-        >
-          <div className="flex flex-wrap items-start justify-between gap-2">
-            <div>
-              <p className="text-sm font-medium text-gray-900">{finding.title}</p>
-              <p className="mt-1 text-xs text-gray-500">{finding.rule_id}</p>
+      {findings.map((finding) => {
+        const highlighted =
+          highlightKind && highlightSourceId
+            ? findingMatchesSource(
+                {
+                  rule_id: finding.rule_id,
+                  tradeline_index: finding.tradeline_index,
+                  document_id: documentId,
+                },
+                highlightSourceId,
+                highlightKind,
+              )
+            : false;
+        return (
+          <li
+            key={`${finding.rule_id}-${finding.tradeline_index}-${finding.creditor_name ?? ''}`}
+            className={`rounded-md border px-4 py-3 ${
+              highlighted
+                ? 'border-brand-400 bg-brand-50/60 ring-2 ring-brand-200'
+                : 'border-gray-200'
+            }`}
+          >
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <div>
+                <p className="text-sm font-medium text-gray-900">{finding.title}</p>
+                <p className="mt-1 text-xs text-gray-500">{finding.rule_id}</p>
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {highlighted ? <Badge variant="success">from playbook</Badge> : null}
+                {finding.fcra_sections.map((section) => (
+                  <Badge key={section} variant="info">
+                    §{section}
+                  </Badge>
+                ))}
+                <Badge variant={severityVariant(finding.severity)}>{finding.severity}</Badge>
+              </div>
             </div>
-            <div className="flex flex-wrap gap-1">
-              {finding.fcra_sections.map((section) => (
-                <Badge key={section} variant="info">
-                  §{section}
-                </Badge>
-              ))}
-              <Badge variant={severityVariant(finding.severity)}>{finding.severity}</Badge>
-            </div>
-          </div>
-          <p className="mt-2 text-sm text-gray-700">{finding.description}</p>
-          <p className="mt-2 text-sm text-gray-600">
-            {finding.creditor_name ?? 'Unknown creditor'}
-            {finding.account_number_masked ? ` · ${finding.account_number_masked}` : ''}
-            {` · tradeline #${finding.tradeline_index + 1}`}
-          </p>
-          <p className="mt-1 text-xs text-gray-500">
-            Fields: {finding.fields.join(', ')}
-            {Object.keys(finding.observed).length > 0
-              ? ` · ${formatObserved(finding.observed)}`
-              : null}
-          </p>
-        </li>
-      ))}
+            <p className="mt-2 text-sm text-gray-700">{finding.description}</p>
+            <p className="mt-2 text-sm text-gray-600">
+              {finding.creditor_name ?? 'Unknown creditor'}
+              {finding.account_number_masked ? ` · ${finding.account_number_masked}` : ''}
+              {` · tradeline #${finding.tradeline_index + 1}`}
+            </p>
+            <p className="mt-1 text-xs text-gray-500">
+              Fields: {finding.fields.join(', ')}
+              {Object.keys(finding.observed).length > 0
+                ? ` · ${formatObserved(finding.observed)}`
+                : null}
+            </p>
+          </li>
+        );
+      })}
     </ul>
   );
 }
@@ -130,6 +156,7 @@ export function DocumentFcraFindingsPanel({
       {findingsQuery.data ? (
         <FindingsList
           findings={findingsQuery.data.findings}
+          documentId={documentId}
           emptyMessage="No FCRA checklist issues were flagged on this report."
         />
       ) : null}
@@ -146,6 +173,8 @@ export function CaseFcraFindingsPanel({
   className?: string;
   id?: string;
 }) {
+  const [searchParams] = useSearchParams();
+  const highlightSourceId = searchParams.get('finding_source');
   const findingsQuery = useQuery({
     queryKey: ['case-fcra-findings', caseId],
     queryFn: () => getCaseFcraFindings(caseId),
@@ -212,7 +241,10 @@ export function CaseFcraFindingsPanel({
                 </div>
                 <FindingsList
                   findings={documentFindings.findings}
+                  documentId={documentFindings.document_id}
                   emptyMessage="No findings for this bureau report."
+                  highlightSourceId={highlightSourceId}
+                  highlightKind="fcra"
                 />
               </div>
             ))}
