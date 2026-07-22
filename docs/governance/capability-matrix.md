@@ -803,6 +803,20 @@ Scope: [version-28.0-scope.md](version-28.0-scope.md) · Checklist: [version-28.
 
 ---
 
+## Version 29.0 — Mortgage Partner Edition (planned — 🚧)
+
+Scope: [version-29.0-scope.md](version-29.0-scope.md) · Checklist: [version-29.0-completion-checklist.md](../development/version-29.0-completion-checklist.md)
+
+**Architecture:** Edition on the shared platform — **do not fork**. Reuse FCRA/Metro2/cross-bureau/intelligence.
+
+| Capability                               | Version | Status  | Backend | Frontend | API     | AI      | Tests   | Dependencies | Notes                                               |
+| ---------------------------------------- | ------- | ------- | ------- | -------- | ------- | ------- | ------- | ------------ | --------------------------------------------------- |
+| Partner org model + lender RBAC          | 29.0    | Planned | Planned | —        | Planned | —       | Planned | Auth/orgs    | `ENABLE_MORTGAGE_PARTNER`; Lender ↔ CRO partnership |
+| Lender dashboard + pipeline + milestones | 29.0    | Planned | Planned | Planned  | Planned | —       | Planned | Cases        | Partner UI over shared clients/cases                |
+| Mortgage readiness score + report export | 29.0    | Planned | Planned | Planned  | Planned | Partial | Planned | Intelligence | Deterministic estimator; LLM only behind ADR-012    |
+
+---
+
 ## Related documents
 
 - [Governance hub](README.md) — lifecycle and build order

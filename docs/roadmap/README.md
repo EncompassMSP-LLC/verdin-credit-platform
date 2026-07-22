@@ -77,7 +77,7 @@ Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (
 | **26.0**  | Document Pipeline Resolution & Operator Surfaces | Released    | Phase 25 Case Documents recovery panel, operator async entity re-resolve enqueue (`v26.0.0`)                                                     |
 | **27.0**  | Dispute Playbook Depth & Case Entity Re-resolve  | Released    | Phase 26 playbook finding deep-links, case-level bulk entity re-resolve enqueue (`v27.0.0`)                                                      |
 | **28.0**  | Monitoring Report Parser Depth                   | Released    | Phase 27 IdentityIQ golden fixture regression, SmartCredit monitoring / tri-merge parser (`v28.0.0`)                                             |
-| **29.0**  | Mortgage Partner Edition (foundation)            | Planned     | Partner org/RBAC, lender dashboard + pipeline, mortgage readiness — edition on shared platform (no fork)                                         |
+| **29.0**  | Mortgage Partner Edition (foundation)            | Planned     | Partner org/RBAC, lender dashboard + pipeline, mortgage readiness score/export — **edition on shared platform (no fork)**                        |
 
 ### Sprint milestones
 
@@ -657,7 +657,13 @@ Compliance Intelligence Phase 27 deepened **client-sourced monitoring report** p
 
 Scope and checklist: [`docs/governance/version-29.0-scope.md`](../governance/version-29.0-scope.md) · [`docs/development/version-29.0-completion-checklist.md`](../development/version-29.0-completion-checklist.md)
 
-**Mortgage Partner Edition** packages a B2B lender surface on the **same platform** (no codebase fork): partner org/RBAC, lender dashboard + applicant pipeline, mortgage readiness score/export. See Version 29.0 scope (lands with kickoff PR if not yet on `main`).
+**Mortgage Partner Edition** packages a B2B lender surface on the **same platform** (no codebase fork): partner org/RBAC, lender dashboard + applicant pipeline, mortgage readiness score/export, reusing FCRA/Metro2/cross-bureau/intelligence. Live bureau soft-pulls, automated filing, and cross-tenant lender marketplaces remain deferred (30.0+ / never).
+
+| Epic | Theme                                    | 29.0 target | Notes                                                |
+| ---- | ---------------------------------------- | ----------- | ---------------------------------------------------- |
+| 1    | Partner org model + lender RBAC          | Planned     | Feature flag + partnership link; scoped partner APIs |
+| 2    | Lender dashboard + pipeline + milestones | Planned     | Partner UI over shared cases/clients                 |
+| 3    | Mortgage readiness score + report export | Planned     | Estimator + export; ADR-012 for any LLM augment      |
 
 ## Sprint → version mapping
 
