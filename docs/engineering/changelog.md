@@ -13,6 +13,14 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — Version 28.0 scope (Phase 27)
+
+**Decision:** Scope Version 28.0 as Monitoring Report Parser Depth — IdentityIQ golden fixture / expected-JSON regression, and a SmartCredit monitoring / tri-merge parser. Keep live bureau polling, automated filing, unsupervised escalation, litigation e-filing, cross-tenant benchmarks, and monitoring B2B pull APIs deferred to 29.0+ or never.
+
+**Reason:** After IdentityIQ shipped, CRO import reliability still needs CI regression coverage and a SmartCredit sibling; bureau soft-pull APIs remain unavailable to credit repair shops.
+
+**Follow-up work:** Slice 2 — IdentityIQ golden fixture; Slice 3 — SmartCredit parser; Slice 4 — sign-off.
+
 ## Client delete cascade — cases, accounts, and history
 
 **Decision:** `DELETE /clients/{id}` cascade soft-deletes linked cases and their accounts, documents, dispute letters/responses, communications, and tasks, plus contacts and portal user. Timeline events stay append-only.
