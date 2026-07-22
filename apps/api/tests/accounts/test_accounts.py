@@ -236,7 +236,7 @@ def test_get_account_furnisher_dispute_draft(
     assert data["recipient_type"] == "furnisher"
     assert data["template_id"] == "furnisher-direct-dispute-v1"
     assert "Direct furnisher dispute" in data["subject"]
-    assert "Fair Credit Reporting Act" in data["body"]
+    assert "FCRA Section 623" in data["body"]
     assert "furnishing to equifax" in data["body"].lower()
     assert any("furnisher-reported tradeline" in item for item in data["evidence_checklist"])
 

@@ -23,6 +23,16 @@ Use ADRs for durable architecture decisions that require formal acceptance. Use 
 
 **Follow-up work:** Optional Metro 2 / cross-bureau soft mapping to §607 when no FCRA sections match; persist selected citations on the `dispute_letters` row.
 
+## Report parsers — IdentityIQ monitoring / tri-merge layout
+
+**Decision:** Add an IdentityIQ-specific credit report parser (`identityiq`) that detects `member.identityiq.com` / IdentityIQ branding, segments Personal Information / Accounts / Inquiries / Public Records / Collections, and expands tri-bureau account columns into per-bureau tradelines. Single-bureau Experian/Equifax/TransUnion parsers return confidence `0` when IdentityIQ markers are present so the registry cannot mis-route.
+
+**Reason:** CRO workflows commonly upload IdentityIQ PDFs; bureau-only parsers treated them as unknown/fallback and lost reliable tradeline extraction.
+
+**Guardrails:** Heuristic OCR parser only — investigator aid; report-level bureau remains `unknown`; empty bureau columns are skipped.
+
+**Follow-up work:** Golden PDF fixture + expected JSON regression; SmartCredit / MyScoreIQ sibling layouts if needed.
+
 ## Compliance intelligence — Case bulk entity re-resolve (Phase 26)
 
 **Decision:** Add `POST /cases/{id}/resolutions/reresolve` (case_manager+) to enqueue `document_entity_resolve` for each case document with extracted metadata (soft-skip `missing_metadata` / `enqueue_failed`), plus Case Documents recovery UI action and `@verdin/api-client` helper.
