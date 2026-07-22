@@ -54,7 +54,10 @@ services:
       dockerfile: apps/api/Dockerfile
       target: development
     container_name: verdin-api
+    env_file:
+      - .env
     environment:
+      # Docker network overrides (win over env_file host localhost values)
       APP_ENV: development
       SECRET_KEY: dev-secret-key-change-in-production-32chars
       DATABASE_URL: postgresql+asyncpg://verdin:verdin@postgres:5432/verdin_credit
@@ -70,6 +73,8 @@ services:
       - '8000:8000'
     volumes:
       - ./apps/api:/app
+      # So pydantic Settings(env_file=".env") resolves when cwd is /app
+      - ./.env:/app/.env:ro
     depends_on:
       postgres:
         condition: service_healthy
@@ -124,6 +129,7 @@ services:
         VITE_ENABLE_IMPORTS: ${VITE_ENABLE_IMPORTS:-true}
         VITE_ENABLE_ENTERPRISE: ${VITE_ENABLE_ENTERPRISE:-false}
         VITE_ENABLE_CLIENT_PORTAL: ${VITE_ENABLE_CLIENT_PORTAL:-false}
+        VITE_ENABLE_CLIENT_ENROLLMENT: ${VITE_ENABLE_CLIENT_ENROLLMENT:-false}
         VITE_ENABLE_PORTAL_PUSH: ${VITE_ENABLE_PORTAL_PUSH:-false}
     container_name: verdin-web
     ports:

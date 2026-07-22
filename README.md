@@ -46,14 +46,14 @@ docker compose exec api python scripts/seed.py
 
 ## Environment files
 
-| File                          | Used by                                                                                                    | Notes                                                                                   |
-| ----------------------------- | ---------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| **`.env`** (repo root)        | Docker Compose variable substitution (`${VITE_*}` web build args); hybrid local API/Vite when cwd finds it | Copy from `.env.example`. This is the file used for day-to-day local work.              |
-| **`.env.example`**            | Template only                                                                                              | Commit-safe defaults                                                                    |
-| **`.env.production`**         | Local pilot / production-like stacks                                                                       | Used with `docker compose -f docker-compose.local-pilot.yml --env-file .env.production` |
-| **`.env.production.example`** | Template for production                                                                                    | Secrets go here for pilot; never commit real secrets                                    |
+| File                          | Used by                                                                                | Notes                                                                                    |
+| ----------------------------- | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| **`.env`** (repo root)        | Compose `env_file` for API (`ENABLE_*`); `${VITE_*}` web build args; host/hybrid tools | Copy from `.env.example`. Day-to-day local file. Compose overrides DB/Redis/MinIO hosts. |
+| **`.env.example`**            | Template only                                                                          | Commit-safe defaults                                                                     |
+| **`.env.production`**         | Local pilot / production-like stacks                                                   | Used with `docker compose -f docker-compose.local-pilot.yml --env-file .env.production`  |
+| **`.env.production.example`** | Template for production                                                                | Secrets go here for pilot; never commit real secrets                                     |
 
-**Important:** `docker-compose.yml` hard-codes core API/worker DB/Redis/MinIO settings in the `environment:` blocks. Feature flags (`ENABLE_*`) from root `.env` are **not** automatically injected into the API container unless you add them to compose or run the API on the host. Web feature flags (`VITE_*`) **are** read from root `.env` at **image build** time via Compose `${…}` substitution.
+**Important:** `docker-compose.yml` loads root `.env` into the API via `env_file` (and mounts it at `/app/.env`). The compose `environment:` block still **overrides** DB/Redis/MinIO to Docker service names. Web `VITE_*` flags are read from root `.env` at **image build** time — rebuild `web` after changing them.
 
 See [`docs/developer-guide.md`](docs/developer-guide.md) for hybrid (host Vite + Docker Postgres/Redis) setup.
 

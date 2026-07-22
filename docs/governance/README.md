@@ -113,10 +113,10 @@ Historical phases 1–4 (Operational Core → Automation → Intelligence → En
 
 ### Current focus
 
-| Priority | Capability                                        | Status     | Reference                                                                                  |
-| -------- | ------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------ |
-| —        | Version 27.0 — Playbook depth & entity re-resolve | ✅ Shipped | [`version-27.0-scope.md`](version-27.0-scope.md)                                           |
-| **Next** | Version 28.0 — Monitoring report parser depth     | Planned    | See [roadmap](../roadmap/README.md); scope/checklist land with the Version 28.0 kickoff PR |
+| Priority | Capability                                        | Status     | Reference                                                                                                           |
+| -------- | ------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------- |
+| —        | Version 27.0 — Playbook depth & entity re-resolve | ✅ Shipped | [`version-27.0-scope.md`](version-27.0-scope.md)                                                                    |
+| **Next** | Version 28.0 — Monitoring report parser depth     | Planned    | [`version-28.0-scope.md`](version-28.0-scope.md) · [checklist](../development/version-28.0-completion-checklist.md) |
 
 Live bureau polling, automated filing, and cross-tenant benchmarks remain deferred pending legal/compliance sign-off.
 
@@ -140,6 +140,8 @@ Live bureau polling, automated filing, and cross-tenant benchmarks remain deferr
 - [Repository health dashboard](repository-health.md)
 - [Quality hub](../quality/README.md)
 - [Capability matrix (executive view)](capability-matrix.md)
+- [Version 28.0 scope](version-28.0-scope.md)
+- [Version 28.0 checklist](../development/version-28.0-completion-checklist.md)
 - [Version 27.0 scope](version-27.0-scope.md)
 - [Version 27.0 checklist](../development/version-27.0-completion-checklist.md)
 - [Roadmap index](../roadmap/README.md)

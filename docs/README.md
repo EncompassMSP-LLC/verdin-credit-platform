@@ -24,6 +24,8 @@ Hub for product, engineering, and operations docs for Ultimate Credit Repair LLC
 | [Governance hub](governance/README.md)                                     | Lifecycle, release cadence, links |
 | [Version 27.0 scope](governance/version-27.0-scope.md)                     | Latest signed-off phase           |
 | [Version 27.0 checklist](development/version-27.0-completion-checklist.md) | Slice tracker                     |
+| [Version 28.0 scope](governance/version-28.0-scope.md)                     | Current phase                     |
+| [Version 28.0 checklist](development/version-28.0-completion-checklist.md) | Slice tracker                     |
 | [Engineering changelog](engineering/changelog.md)                          | Implementation decisions          |
 
 ## Guides
@@ -42,6 +44,12 @@ Hub for product, engineering, and operations docs for Ultimate Credit Repair LLC
 
 ## Packages of note
 
-| Package                                                       | README                                                                      |
-| ------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| Credit report parsers (Experian / EQ / TU / ACR / IdentityIQ) | [`packages/report-parsers/README.md`](../packages/report-parsers/README.md) |
+| Package                                                       | README                                                                                                                |
+| ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Credit report parsers (Experian / EQ / TU / ACR / IdentityIQ) | [`packages/report-parsers/README.md`](../packages/report-parsers/README.md)                                           |
+| API client                                                    | [`packages/api-client/README.md`](../packages/api-client/README.md)                                                   |
+| Job orchestrator                                              | [`packages/job-orchestrator/README.md`](../packages/job-orchestrator/README.md)                                       |
+| LLM gateway                                                   | [`packages/llm-gateway/README.md`](../packages/llm-gateway/README.md)                                                 |
+| API / Web / Worker                                            | [`apps/api`](../apps/api/README.md) · [`apps/web`](../apps/web/README.md) · [`apps/worker`](../apps/worker/README.md) |
+| Deployment                                                    | [`docs/deployment/README.md`](deployment/README.md)                                                                   |
+| Credit-report fixtures                                        | [`tests/fixtures/credit_reports/README.md`](../tests/fixtures/credit_reports/README.md)                               |
