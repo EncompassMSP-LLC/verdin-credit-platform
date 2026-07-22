@@ -23,7 +23,7 @@ Scope: [`docs/governance/version-28.0-scope.md`](../governance/version-28.0-scop
 | Order | Slice                                     | Epic           | Status |
 | ----- | ----------------------------------------- | -------------- | ------ |
 | 1     | 28.0 scope + completion checklist         | Kickoff        | ✅     |
-| 2     | IdentityIQ golden fixture regression      | Report parsers | ☐      |
+| 2     | IdentityIQ golden fixture regression      | Report parsers | ✅     |
 | 3     | SmartCredit monitoring / tri-merge parser | Report parsers | ☐      |
 | 4     | Capability matrix 28.0 sign-off           | Governance     | ☐      |
 

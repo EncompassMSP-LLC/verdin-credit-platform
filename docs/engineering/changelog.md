@@ -13,6 +13,16 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Mortgage Partner Edition — Version 29.0 scope (foundation)
+
+**Decision:** Scope Version 29.0 as Mortgage Partner Edition foundation on the **shared** Ultimate Credit Repair LLC platform — partner org/RBAC, lender dashboard + pipeline, mortgage readiness score/export. Explicitly **do not** fork or copy the codebase into a separate Mortgage product.
+
+**Reason:** Most lender features map to existing cases, FCRA/Metro2, cross-bureau, intelligence, and reporting; a fork doubles maintenance and compliance surface.
+
+**Guardrails:** Feature-flagged edition; partner-scoped data only; no cross-tenant lender marketplace; no live bureau soft-pull or automated filing in 29.0; ADR-012 for any LLM action-plan augment.
+
+**Follow-up work:** Slice 2 — partner org/RBAC; Slice 3 — lender dashboard/pipeline; Slice 4 — readiness score/export; Slice 5 — sign-off.
+
 ## Compliance intelligence — Version 28.0 scope (Phase 27)
 
 **Decision:** Scope Version 28.0 as Monitoring Report Parser Depth — IdentityIQ golden fixture / expected-JSON regression, and a SmartCredit monitoring / tri-merge parser. Keep live bureau polling, automated filing, unsupervised escalation, litigation e-filing, cross-tenant benchmarks, and monitoring B2B pull APIs deferred to 29.0+ or never.

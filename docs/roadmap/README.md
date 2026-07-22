@@ -76,7 +76,8 @@ Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (
 | **25.0**  | Document Pipeline Recovery Bulk Closeout         | Released    | Phase 24 case-level bulk re-classify, case-level bulk OCR retry for failed docs (`v25.0.0`)                                                      |
 | **26.0**  | Document Pipeline Resolution & Operator Surfaces | Released    | Phase 25 Case Documents recovery panel, operator async entity re-resolve enqueue (`v26.0.0`)                                                     |
 | **27.0**  | Dispute Playbook Depth & Case Entity Re-resolve  | Released    | Phase 26 playbook finding deep-links, case-level bulk entity re-resolve enqueue (`v27.0.0`)                                                      |
-| **28.0**  | Monitoring Report Parser Depth                   | Planned     | Phase 27 IdentityIQ golden fixture regression, SmartCredit monitoring / tri-merge parser                                                         |
+| **28.0**  | Monitoring Report Parser Depth                   | In progress | Phase 27 IdentityIQ golden fixture regression (`#339` shipped); SmartCredit parser (`#342` pending)                                              |
+| **29.0**  | Mortgage Partner Edition (foundation)            | Planned     | Partner org/RBAC, lender dashboard + pipeline, mortgage readiness score/export — **edition on shared platform (no fork)**                        |
 
 ### Sprint milestones
 
@@ -638,16 +639,28 @@ Compliance Intelligence Phase 26 closed remaining owned **investigator playbook*
 
 **Tag:** `v27.0.0` — Dispute Playbook Depth & Case Entity Re-resolve.
 
-### Version 28.0 — Monitoring Report Parser Depth (planned)
+### Version 28.0 — Monitoring Report Parser Depth (in progress)
 
 Scope and checklist: [`docs/governance/version-28.0-scope.md`](../governance/version-28.0-scope.md) · [`docs/development/version-28.0-completion-checklist.md`](../development/version-28.0-completion-checklist.md)
 
-Compliance Intelligence Phase 27 deepens **client-sourced monitoring report** parsing without crossing the live-bureau frontier: IdentityIQ golden fixture / expected-JSON regression, and a SmartCredit monitoring / tri-merge parser sibling. Live bureau response ingestion execution, automated re-dispute filing execution, unsupervised escalation, automated litigation filing, and cross-tenant benchmarks remain deferred (29.0+ or never) pending legal/compliance sign-off. IdentityIQ/SmartCredit B2B pull APIs remain out of scope (never for CROs).
+Compliance Intelligence Phase 27 deepens **client-sourced monitoring report** parsing without crossing the live-bureau frontier: IdentityIQ golden fixture / expected-JSON regression (shipped), and a SmartCredit monitoring / tri-merge parser sibling (in flight). Live bureau response ingestion execution, automated re-dispute filing execution, unsupervised escalation, automated litigation filing, and cross-tenant benchmarks remain deferred (29.0+ or never) pending legal/compliance sign-off. IdentityIQ/SmartCredit B2B pull APIs remain out of scope (never for CROs).
 
 | Epic | Theme                                     | 28.0 target | Notes                                                       |
 | ---- | ----------------------------------------- | ----------- | ----------------------------------------------------------- |
-| 1    | IdentityIQ golden fixture regression      | Planned     | CI golden OCR + expected JSON for IdentityIQ                |
-| 2    | SmartCredit monitoring / tri-merge parser | Planned     | Detect SmartCredit; expand tri-bureau columns to per-bureau |
+| 1    | IdentityIQ golden fixture regression      | Released    | CI golden OCR + expected JSON for IdentityIQ                |
+| 2    | SmartCredit monitoring / tri-merge parser | In progress | Detect SmartCredit; expand tri-bureau columns to per-bureau |
+
+### Version 29.0 — Mortgage Partner Edition (planned)
+
+Scope and checklist: [`docs/governance/version-29.0-scope.md`](../governance/version-29.0-scope.md) · [`docs/development/version-29.0-completion-checklist.md`](../development/version-29.0-completion-checklist.md)
+
+**Mortgage Partner Edition** packages a B2B lender surface on the **same platform** (no codebase fork): partner org/RBAC, lender dashboard + applicant pipeline, mortgage readiness score/export, reusing FCRA/Metro2/cross-bureau/intelligence. Live bureau soft-pulls, automated filing, and cross-tenant lender marketplaces remain deferred (30.0+ / never).
+
+| Epic | Theme                                    | 29.0 target | Notes                                                |
+| ---- | ---------------------------------------- | ----------- | ---------------------------------------------------- |
+| 1    | Partner org model + lender RBAC          | Planned     | Feature flag + partnership link; scoped partner APIs |
+| 2    | Lender dashboard + pipeline + milestones | Planned     | Partner UI over shared cases/clients                 |
+| 3    | Mortgage readiness score + report export | Planned     | Estimator + export; ADR-012 for any LLM augment      |
 
 ## Sprint → version mapping
 
