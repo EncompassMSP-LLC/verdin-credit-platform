@@ -27,6 +27,11 @@ _COMPETITOR_MARKERS: dict[str, tuple[re.Pattern[str], ...]] = {
 
 _COMPETITOR_PENALTY = 0.35
 
+_IDENTITYIQ_MARKERS = re.compile(
+    r"\bidentity\s*iq\b|member\.identityiq\.com|credit\s+report\s*-\s*identityiq",
+    re.I,
+)
+
 
 _STRONG_OWN_MARKERS: dict[str, re.Pattern[str]] = {
     "experian": re.compile(r"usa\.experian\.com|\bdate generated\b", re.I),
@@ -38,8 +43,16 @@ _STRONG_OWN_MARKERS: dict[str, re.Pattern[str]] = {
 }
 
 
+def is_identityiq_document(text: str) -> bool:
+    """True when OCR text is an IdentityIQ monitoring / portal report."""
+    return bool(_IDENTITYIQ_MARKERS.search(text))
+
+
 def apply_competitor_penalty(bureau: str, confidence: float, text: str) -> float:
     """Reduce layout confidence when another bureau's portal markers dominate."""
+    if is_identityiq_document(text):
+        return 0.0
+
     own_marker = _STRONG_OWN_MARKERS.get(bureau)
     if own_marker and own_marker.search(text):
         return confidence

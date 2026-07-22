@@ -153,16 +153,16 @@ Plan: [`docs/sprint-4.3.1/operational-core-stabilization.md`](../sprint-4.3.1/op
 
 Scope and deferrals: [version-4.5-scope.md](version-4.5-scope.md)
 
-| Capability                      | Version | Status  | Backend | Frontend | API | AI      | Tests | Dependencies        | Notes                                                                                    |
-| ------------------------------- | ------- | ------- | ------- | -------- | --- | ------- | ----- | ------------------- | ---------------------------------------------------------------------------------------- |
-| Workflow Automation             | 4.5     | Partial | 🚧      | 🚧       | 🚧  | —       | ✅    | Timeline, Tasks     | Auto-tasks only; BPM/cron/notifications deferred to 4.8                                  |
-| Credit Report Import Wizard     | 4.5     | ✅      | ✅      | ✅       | ✅  | —       | ✅    | Documents, OCR      | Wizard, findings, chronology, evidence, strength, strategy, identity theft, §605B packet |
-| OCR Pipeline                    | 4.3     | ✅      | ✅      | ✅       | ✅  | ✅      | ✅    | Documents, Worker   | Shipped in 4.3 Operational Core                                                          |
-| Document Classification         | 4.3     | Partial | ✅      | —        | ✅  | Partial | ✅    | OCR                 | Rules engine; LLM augmentation deferred to 4.8                                           |
-| Entity Extraction               | 4.5     | Partial | ✅      | ✅       | ✅  | Partial | ✅    | OCR, Accounts       | Canonical tradeline schema 1.1 + candidates; LLM NER deferred                            |
-| AI Case Summaries               | 4.8     | —       | —       | —        | —   | —       | —     | Cases, Documents    | **Deferred** from 4.5 — LLM requires provider + PII policy                               |
-| AI Recommendation Engine        | 4.5     | Partial | ✅      | ✅       | —   | Partial | ✅    | Accounts            | Rules: suggestions + missing evidence; LLM deferred to 4.8                               |
-| Dispute Generation (foundation) | 4.5     | Partial | ✅      | ✅       | ✅  | Partial | ✅    | Accounts, Documents | Staff-mediated lifecycle + export; auto-filing deferred to 5.0+                          |
+| Capability                      | Version | Status  | Backend | Frontend | API | AI      | Tests | Dependencies        | Notes                                                                                                                              |
+| ------------------------------- | ------- | ------- | ------- | -------- | --- | ------- | ----- | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Workflow Automation             | 4.5     | Partial | 🚧      | 🚧       | 🚧  | —       | ✅    | Timeline, Tasks     | Auto-tasks only; BPM/cron/notifications deferred to 4.8                                                                            |
+| Credit Report Import Wizard     | 4.5     | ✅      | ✅      | ✅       | ✅  | —       | ✅    | Documents, OCR      | Wizard, findings, chronology, evidence, strength, strategy, identity theft, §605B packet; parsers: Experian/EQ/TU/ACR + IdentityIQ |
+| OCR Pipeline                    | 4.3     | ✅      | ✅      | ✅       | ✅  | ✅      | ✅    | Documents, Worker   | Shipped in 4.3 Operational Core                                                                                                    |
+| Document Classification         | 4.3     | Partial | ✅      | —        | ✅  | Partial | ✅    | OCR                 | Rules engine; LLM augmentation deferred to 4.8                                                                                     |
+| Entity Extraction               | 4.5     | Partial | ✅      | ✅       | ✅  | Partial | ✅    | OCR, Accounts       | Canonical tradeline schema 1.1 + candidates; LLM NER deferred                                                                      |
+| AI Case Summaries               | 4.8     | —       | —       | —        | —   | —       | —     | Cases, Documents    | **Deferred** from 4.5 — LLM requires provider + PII policy                                                                         |
+| AI Recommendation Engine        | 4.5     | Partial | ✅      | ✅       | —   | Partial | ✅    | Accounts            | Rules: suggestions + missing evidence; LLM deferred to 4.8                                                                         |
+| Dispute Generation (foundation) | 4.5     | Partial | ✅      | ✅       | ✅  | Partial | ✅    | Accounts, Documents | Staff-mediated lifecycle + export; auto-filing deferred to 5.0+                                                                    |
 
 ### Version 4.5 epic sign-off
 
