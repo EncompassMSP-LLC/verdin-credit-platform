@@ -12,6 +12,7 @@ from verdin_report_parsers.base import CreditReportParser
 from verdin_report_parsers.models import ParsedCreditReport
 from verdin_report_parsers.parsers.equifax.parser import EquifaxParser
 from verdin_report_parsers.parsers.experian.parser import ExperianParser
+from verdin_report_parsers.parsers.identityiq.parser import IdentityIQParser
 from verdin_report_parsers.parsers.transunion.parser import TransUnionParser
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -55,6 +56,10 @@ def discover_equifax_fixtures() -> list[Path]:
 
 def discover_transunion_fixtures() -> list[Path]:
     return discover_bureau_fixtures("transunion")
+
+
+def discover_identityiq_fixtures() -> list[Path]:
+    return discover_bureau_fixtures("identityiq")
 
 
 def discover_bureau_fixtures(bureau: str) -> list[Path]:
@@ -114,6 +119,18 @@ def parse_transunion_fixture_pdf(
         pdf_path,
         parser=parser or TransUnionParser(),
         title_prefix="TransUnion Credit Report",
+    )
+
+
+def parse_identityiq_fixture_pdf(
+    pdf_path: Path,
+    *,
+    parser: IdentityIQParser | None = None,
+) -> ParsedCreditReport:
+    return parse_fixture_pdf(
+        pdf_path,
+        parser=parser or IdentityIQParser(),
+        title_prefix="IdentityIQ Credit Report",
     )
 
 

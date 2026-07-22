@@ -350,7 +350,7 @@ Secure document storage with MinIO, SHA-256 hashing, versioning, and duplicate d
 | POST | `/documents/{document_id}/resolutions/{resolution_id}/reject` | case_manager | Reject proposed match |
 | POST | `/documents/{document_id}/llm-summary` | case_manager | Generate scrubbed document summary |
 
-`POST /documents/{document_id}/parsed-credit-report/reparse` enqueues `document_credit_report_parse` when the document has OCR text and `document_type=credit_report`. Returns 422 otherwise. Staff-mediated only; no live bureau contact. Supported layouts include Experian, Equifax, TransUnion (including ACR portal variants), and IdentityIQ monitoring / tri-merge PDFs (parser `identityiq`; empty bureau columns skipped; report-level bureau `unknown`).
+`POST /documents/{document_id}/parsed-credit-report/reparse` enqueues `document_credit_report_parse` when the document has OCR text and `document_type=credit_report`. Returns 422 otherwise. Staff-mediated only; no live bureau contact. Supported layouts include Experian, Equifax, TransUnion (including ACR portal variants), and IdentityIQ monitoring / tri-merge PDFs (parser `identityiq`; empty bureau columns skipped; report-level bureau `unknown`; golden PDF + expected JSON regression under `tests/fixtures/credit_reports/identityiq/`).
 
 `POST /documents/{document_id}/metadata/reextract` enqueues `document_metadata_extract` when the document has OCR text. Returns 422 without OCR. Sync `POST .../metadata/extract` remains available for immediate extract. Staff-mediated only.
 
