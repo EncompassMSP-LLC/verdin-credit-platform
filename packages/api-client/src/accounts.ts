@@ -194,6 +194,10 @@ export interface AccountDisputeDraft {
   generated_by: 'rules';
   readiness_score: number | null;
   risk_score: number | null;
+  legal_citations?: string[];
+  legal_reference_source?: 'finding' | 'default';
+  legal_reference_rule_id?: string | null;
+  legal_pursuant?: string | null;
 }
 
 export type DisputeLetterStatus = 'draft' | 'review' | 'approved' | 'sent' | 'void';

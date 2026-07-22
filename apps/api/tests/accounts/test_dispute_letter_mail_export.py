@@ -93,6 +93,21 @@ def test_build_mail_letter_body_includes_fcra_and_excludes_internal_sections() -
     assert context.disputed_items[0] in body
 
 
+def test_build_mail_letter_body_uses_best_available_legal_pursuant() -> None:
+    context = build_mail_export_context(
+        account=_sample_account(),
+        case=_sample_case(),
+        dispute_letter=_sample_letter(),
+        legal_pursuant=(
+            "15 U.S.C. § 1681i (FCRA Section 611) and " "15 U.S.C. § 1681c (FCRA Section 605)"
+        ),
+    )
+    body = build_mail_letter_body(context)
+    assert "1681c" in body
+    assert "Section 605" in body
+    assert "Pursuant to 15 U.S.C. § 1681i" in body
+
+
 def test_build_mail_export_pdf_outputs() -> None:
     letter = _sample_letter()
     context = build_mail_export_context(
