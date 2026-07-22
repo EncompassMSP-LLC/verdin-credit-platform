@@ -16,7 +16,7 @@ Everything remains **staff-mediated and advisory**. The platform still never pol
 | Epic | Theme                                     | 28.0 target | Summary                                                                             |
 | ---- | ----------------------------------------- | ----------- | ----------------------------------------------------------------------------------- |
 | 1    | IdentityIQ golden fixture regression      | Planned     | Golden OCR fixture + expected JSON so IdentityIQ parse regressions are caught in CI |
-| 2    | SmartCredit monitoring / tri-merge parser | Planned     | Detect SmartCredit branding; expand tri-bureau columns into per-bureau tradelines   |
+| 2    | SmartCredit monitoring / tri-merge parser | Released    | Detect SmartCredit branding; expand tri-bureau columns into per-bureau tradelines   |
 | 3    | Capability matrix / governance sign-off   | Planned     | Scope, checklist, matrix rows, release notes                                        |
 
 ## Shipped from 27.0 (+ IdentityIQ foundation — do not regress)
@@ -48,7 +48,7 @@ All v27.0.0 APIs/UI remain production capabilities. The IdentityIQ parser (`iden
 
 **Not included:** Live IdentityIQ portal scraping; API pulls; changing production parse semantics beyond fixture-driven fixes.
 
-### SmartCredit monitoring / tri-merge parser (Planned)
+### SmartCredit monitoring / tri-merge parser (Released)
 
 **Included:** SmartCredit-specific parser registered ahead of single-bureau parsers; detect branding / layout signals; expand tri-bureau account columns into per-bureau tradelines; force Experian/Equifax/TransUnion confidence to `0` on SmartCredit docs; unit tests + docs.
 

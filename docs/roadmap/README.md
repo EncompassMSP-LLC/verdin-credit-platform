@@ -76,7 +76,7 @@ Semantic versions (`v4.3.0`, `v4.3.1`, `v4.5.0`) are product releases. Sprints (
 | **25.0**  | Document Pipeline Recovery Bulk Closeout         | Released    | Phase 24 case-level bulk re-classify, case-level bulk OCR retry for failed docs (`v25.0.0`)                                                      |
 | **26.0**  | Document Pipeline Resolution & Operator Surfaces | Released    | Phase 25 Case Documents recovery panel, operator async entity re-resolve enqueue (`v26.0.0`)                                                     |
 | **27.0**  | Dispute Playbook Depth & Case Entity Re-resolve  | Released    | Phase 26 playbook finding deep-links, case-level bulk entity re-resolve enqueue (`v27.0.0`)                                                      |
-| **28.0**  | Monitoring Report Parser Depth                   | In progress | Phase 27 IdentityIQ golden fixture regression (`#339` shipped); SmartCredit parser (`#342` pending)                                              |
+| **28.0**  | Monitoring Report Parser Depth                   | In progress | Phase 27 IdentityIQ golden + SmartCredit parsers shipped; sign-off next                                                                          |
 | **29.0**  | Mortgage Partner Edition (foundation)            | Planned     | Partner org/RBAC, lender dashboard + pipeline, mortgage readiness score/export — **edition on shared platform (no fork)**                        |
 
 ### Sprint milestones
@@ -643,12 +643,12 @@ Compliance Intelligence Phase 26 closed remaining owned **investigator playbook*
 
 Scope and checklist: [`docs/governance/version-28.0-scope.md`](../governance/version-28.0-scope.md) · [`docs/development/version-28.0-completion-checklist.md`](../development/version-28.0-completion-checklist.md)
 
-Compliance Intelligence Phase 27 deepens **client-sourced monitoring report** parsing without crossing the live-bureau frontier: IdentityIQ golden fixture / expected-JSON regression (shipped), and a SmartCredit monitoring / tri-merge parser sibling (in flight). Live bureau response ingestion execution, automated re-dispute filing execution, unsupervised escalation, automated litigation filing, and cross-tenant benchmarks remain deferred (29.0+ or never) pending legal/compliance sign-off. IdentityIQ/SmartCredit B2B pull APIs remain out of scope (never for CROs).
+Compliance Intelligence Phase 27 deepens **client-sourced monitoring report** parsing without crossing the live-bureau frontier: IdentityIQ golden fixture / expected-JSON regression and a SmartCredit monitoring / tri-merge parser sibling (both shipped; sign-off pending). Live bureau response ingestion execution, automated re-dispute filing execution, unsupervised escalation, automated litigation filing, and cross-tenant benchmarks remain deferred (29.0+ or never) pending legal/compliance sign-off. IdentityIQ/SmartCredit B2B pull APIs remain out of scope (never for CROs).
 
 | Epic | Theme                                     | 28.0 target | Notes                                                       |
 | ---- | ----------------------------------------- | ----------- | ----------------------------------------------------------- |
 | 1    | IdentityIQ golden fixture regression      | Released    | CI golden OCR + expected JSON for IdentityIQ                |
-| 2    | SmartCredit monitoring / tri-merge parser | In progress | Detect SmartCredit; expand tri-bureau columns to per-bureau |
+| 2    | SmartCredit monitoring / tri-merge parser | Released    | Detect SmartCredit; expand tri-bureau columns to per-bureau |
 
 ### Version 29.0 — Mortgage Partner Edition (planned)
 
