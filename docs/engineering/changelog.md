@@ -13,6 +13,16 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Report parsers — SmartCredit monitoring / tri-merge layout
+
+**Decision:** Add a SmartCredit-specific credit report parser (`smartcredit`) that detects `smartcredit.com` / SmartCredit branding, segments Personal Information / Accounts / Inquiries / Public Records / Collections, and expands tri-bureau account columns into per-bureau tradelines (shared extract helpers with IdentityIQ). Single-bureau Experian/Equifax/TransUnion parsers return confidence `0` when SmartCredit markers are present so the registry cannot mis-route.
+
+**Reason:** CRO workflows commonly upload SmartCredit PDFs alongside IdentityIQ; bureau-only parsers treated them as unknown/fallback and lost reliable tradeline extraction.
+
+**Guardrails:** Heuristic OCR aid only; no live SmartCredit B2B pulls; report-level bureau remains `unknown`; empty bureau columns skipped.
+
+**Follow-up work:** Golden PDF fixture + expected JSON regression (optional); MyScoreIQ deferred to 29.0+.
+
 ## Compliance intelligence — Version 28.0 scope (Phase 27)
 
 **Decision:** Scope Version 28.0 as Monitoring Report Parser Depth — IdentityIQ golden fixture / expected-JSON regression, and a SmartCredit monitoring / tri-merge parser. Keep live bureau polling, automated filing, unsupervised escalation, litigation e-filing, cross-tenant benchmarks, and monitoring B2B pull APIs deferred to 29.0+ or never.

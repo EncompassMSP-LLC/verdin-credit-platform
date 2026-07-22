@@ -32,6 +32,11 @@ _IDENTITYIQ_MARKERS = re.compile(
     re.I,
 )
 
+_SMARTCREDIT_MARKERS = re.compile(
+    r"\bsmart\s*credit\b|smartcredit\.com|credit\s+report\s*-\s*smart\s*credit",
+    re.I,
+)
+
 
 _STRONG_OWN_MARKERS: dict[str, re.Pattern[str]] = {
     "experian": re.compile(r"usa\.experian\.com|\bdate generated\b", re.I),
@@ -48,9 +53,14 @@ def is_identityiq_document(text: str) -> bool:
     return bool(_IDENTITYIQ_MARKERS.search(text))
 
 
+def is_smartcredit_document(text: str) -> bool:
+    """True when OCR text is a SmartCredit monitoring / portal report."""
+    return bool(_SMARTCREDIT_MARKERS.search(text))
+
+
 def apply_competitor_penalty(bureau: str, confidence: float, text: str) -> float:
     """Reduce layout confidence when another bureau's portal markers dominate."""
-    if is_identityiq_document(text):
+    if is_identityiq_document(text) or is_smartcredit_document(text):
         return 0.0
 
     own_marker = _STRONG_OWN_MARKERS.get(bureau)
