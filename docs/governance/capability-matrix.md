@@ -39,7 +39,7 @@
 **Version 24.0 sign-off:** [version-24.0-scope.md](version-24.0-scope.md) · Release notes: [v24.0.0.md](../release-notes/v24.0.0.md)
 **Version 25.0 sign-off:** [version-25.0-scope.md](version-25.0-scope.md) · Release notes: [v25.0.0.md](../release-notes/v25.0.0.md)
 **Version 26.0 sign-off:** [version-26.0-scope.md](version-26.0-scope.md) · Release notes: [v26.0.0.md](../release-notes/v26.0.0.md)
-**Version 27.0 (in progress):** [version-27.0-scope.md](version-27.0-scope.md) · Checklist: [version-27.0-completion-checklist.md](../development/version-27.0-completion-checklist.md)
+**Version 27.0 sign-off:** [version-27.0-scope.md](version-27.0-scope.md) · Release notes: [v27.0.0.md](../release-notes/v27.0.0.md)
 
 ## Status legend
 
@@ -779,9 +779,9 @@ Scope: [version-26.0-scope.md](version-26.0-scope.md) · Checklist: [version-26.
 
 ---
 
-## Version 27.0 — Dispute Playbook Depth & Case Entity Re-resolve (in progress — 🚧)
+## Version 27.0 — Dispute Playbook Depth & Case Entity Re-resolve (shipped — ✅)
 
-Scope: [version-27.0-scope.md](version-27.0-scope.md) · Checklist: [version-27.0-completion-checklist.md](../development/version-27.0-completion-checklist.md)
+Scope: [version-27.0-scope.md](version-27.0-scope.md) · Checklist: [version-27.0-completion-checklist.md](../development/version-27.0-completion-checklist.md) · Release notes: [v27.0.0.md](../release-notes/v27.0.0.md)
 
 | Capability                        | Version | Status | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                          |
 | --------------------------------- | ------- | ------ | ------- | -------- | --- | --- | ----- | ------------ | -------------------------------------------------------------- |
