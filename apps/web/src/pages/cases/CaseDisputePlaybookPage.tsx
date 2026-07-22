@@ -15,6 +15,7 @@ import {
   type RedisputeAction,
 } from '@verdin/api-client';
 import { Badge, Button, Card } from '@verdin/ui';
+import { caseFindingDeepLink } from '../../lib/findingDeepLink';
 
 const STAGE_LABELS: Record<DisputeStrategyStageKind, string> = {
   cra_dispute: 'CRA dispute',
@@ -107,11 +108,13 @@ function StageSteps({ stages }: { stages: DisputeStrategyStage[] }) {
 }
 
 function AccountPlaybookCard({
+  caseId,
   strategy,
   issues,
   pendingPrepareKey,
   onPrepare,
 }: {
+  caseId: string;
   strategy: AccountDisputeStrategy;
   issues: LitigationStrengthIssue[];
   pendingPrepareKey: string | null;
@@ -194,6 +197,12 @@ function AccountPlaybookCard({
                   </span>
                   <Badge variant={scoreVariant(issue.score)}>{issue.score}/100</Badge>
                   <Badge variant="default">{issue.source_kind}</Badge>
+                  <Link
+                    to={caseFindingDeepLink(caseId, issue.source_kind, issue.source_id)}
+                    className="text-xs text-brand-600 hover:underline"
+                  >
+                    View finding
+                  </Link>
                 </div>
                 <p className="mt-1 text-xs text-gray-500">{issue.rationale}</p>
                 {issue.factors.length > 0 ? (
@@ -509,6 +518,7 @@ export function CaseDisputePlaybookPage() {
         {strategies.map((strategy) => (
           <AccountPlaybookCard
             key={strategy.account_key}
+            caseId={caseId}
             strategy={strategy}
             issues={strengthQuery.data?.issues ?? []}
             pendingPrepareKey={pendingPrepareKey}
@@ -539,6 +549,12 @@ export function CaseDisputePlaybookPage() {
                     {issue.creditor_name ?? 'Unknown'}
                     {issue.bureau ? ` · ${issue.bureau}` : ''} · {issue.source_kind}
                   </p>
+                  <Link
+                    to={caseFindingDeepLink(caseId, issue.source_kind, issue.source_id)}
+                    className="mt-1 inline-block text-xs text-brand-600 hover:underline"
+                  >
+                    View finding on case
+                  </Link>
                 </div>
                 <Badge variant={scoreVariant(issue.score)}>{issue.score}/100</Badge>
               </li>

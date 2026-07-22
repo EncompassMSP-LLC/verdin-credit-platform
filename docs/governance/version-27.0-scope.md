@@ -15,7 +15,7 @@ Everything remains **staff-mediated and advisory**. The platform still never pol
 
 | Epic | Theme                                     | 27.0 target | Summary                                                                             |
 | ---- | ----------------------------------------- | ----------- | ----------------------------------------------------------------------------------- |
-| 1    | Playbook finding deep-links               | Planned     | From playbook issues, link into Case Detail finding panels by `source_id` / anchors |
+| 1    | Playbook finding deep-links               | Shipped     | From playbook issues, link into Case Detail finding panels by `source_id` / anchors |
 | 2    | Case-level bulk entity re-resolve enqueue | Planned     | Staff enqueue `document_entity_resolve` for case docs with extracted metadata       |
 | 3    | Capability matrix / governance sign-off   | Planned     | Scope, checklist, matrix rows, release notes                                        |
 
@@ -40,9 +40,9 @@ All v26.0.0 APIs/UI remain production capabilities. The Case Dispute Playbook (`
 
 ## Partial capability limits (27.0 targets)
 
-### Playbook finding deep-links (Planned)
+### Playbook finding deep-links (Shipped)
 
-**Included:** From Case Dispute Playbook issue rows, navigate to Case Detail finding anchors (`#metro2-findings`, `#fcra-findings`, etc.) with `source_id` query/hash where panels can highlight or scroll; keep advisory tone.
+**Included:** From Case Dispute Playbook issue rows, navigate to Case Detail finding anchors (`#metro2-findings`, `#fcra-findings`, etc.) with `finding_source` query param where panels can highlight or scroll; keep advisory tone.
 
 **Not included:** New scoring engines; auto-file; unsupervised escalation.
 

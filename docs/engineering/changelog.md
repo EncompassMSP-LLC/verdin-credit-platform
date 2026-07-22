@@ -13,6 +13,14 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Compliance intelligence — Playbook finding deep-links (Phase 26)
+
+**Decision:** Add playbook → Case Detail deep-links via `?finding_source=` + panel hash anchors, with Metro2/FCRA row highlight and cross-bureau match_key highlight. No new backend.
+
+**Reason:** Investigators needed one click from ranked playbook issues into the underlying finding panels.
+
+**Follow-up work:** Slice 3 — case bulk entity re-resolve; Slice 4 — Version 27.0 sign-off.
+
 ## Compliance intelligence — Version 27.0 scope (Phase 26)
 
 **Decision:** Scope Version 27.0 as Dispute Playbook Depth & Case Entity Re-resolve — playbook finding deep-links into Case Detail panels, and case-level bulk entity re-resolve enqueue. Keep live bureau polling, automated filing, unsupervised escalation, litigation e-filing, and cross-tenant benchmarks deferred to 28.0+ or never.

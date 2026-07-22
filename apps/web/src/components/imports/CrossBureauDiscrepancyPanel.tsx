@@ -13,9 +13,10 @@ import {
 } from '@verdin/api-client';
 import { Badge, Button, Card } from '@verdin/ui';
 import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { ClientConsentGapsBanner } from '../compliance/ClientConsentGapsBanner';
 import { useCaseClientConsentGaps } from '../../hooks/useCaseClientConsentGaps';
+import { matchKeyFromSource } from '../../lib/findingDeepLink';
 
 function formatCurrency(value: number | null | undefined) {
   if (value === null || value === undefined) return '—';
@@ -143,12 +144,14 @@ function DiscrepancyRow({
   onPrepared,
   disputePreview,
   consentBlocked,
+  highlighted,
 }: {
   caseId: string;
   discrepancy: CrossBureauDiscrepancy;
   onPrepared: () => void;
   disputePreview: DisputePreviewTarget | null;
   consentBlocked: boolean;
+  highlighted?: boolean;
 }) {
   const prepareMutation = useMutation({
     mutationFn: () =>
@@ -168,10 +171,17 @@ function DiscrepancyRow({
   const previewTarget = preparedPreview ?? disputePreview;
 
   return (
-    <tr className="align-top">
+    <tr
+      className={`align-top ${highlighted ? 'bg-brand-50/70 ring-2 ring-inset ring-brand-200' : ''}`}
+    >
       <td className="px-3 py-3">
         <p className="font-medium text-gray-900">{discrepancy.creditor_name}</p>
         <p className="mt-1 text-xs text-gray-500">{discrepancy.account_number_masked ?? '—'}</p>
+        {highlighted ? (
+          <p className="mt-1">
+            <Badge variant="success">from playbook</Badge>
+          </p>
+        ) : null}
       </td>
       <td className="px-3 py-3">
         <div className="space-y-2">
@@ -320,6 +330,8 @@ export function CrossBureauDiscrepancyPanel({
   id?: string;
 }) {
   const queryClient = useQueryClient();
+  const [searchParams] = useSearchParams();
+  const highlightMatchKey = matchKeyFromSource(searchParams.get('finding_source'));
   const consentGaps = useCaseClientConsentGaps(caseId);
   const consentBlocked = consentGaps.requiresConsent && consentGaps.hasGaps;
   const [downloadingPackets, setDownloadingPackets] = useState(false);
@@ -592,6 +604,9 @@ export function CrossBureauDiscrepancyPanel({
                       discrepancy={discrepancy}
                       onPrepared={invalidate}
                       consentBlocked={consentBlocked}
+                      highlighted={
+                        highlightMatchKey != null && discrepancy.match_key === highlightMatchKey
+                      }
                       disputePreview={
                         disputePreviewByCreditor.get(
                           normalizeCreditorName(discrepancy.creditor_name),

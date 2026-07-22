@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { deleteCase, getCase } from '@verdin/api-client';
 import { CASE_STAGE_LABELS } from '@verdin/shared';
 import { Button, Card } from '@verdin/ui';
@@ -31,6 +31,7 @@ function formatDateTime(value: string | null) {
 export function CaseDetailPage() {
   const { caseId } = useParams<{ caseId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
   const [deleteOpen, setDeleteOpen] = useState(false);
 
@@ -39,6 +40,17 @@ export function CaseDetailPage() {
     queryFn: () => getCase(caseId!),
     enabled: Boolean(caseId),
   });
+
+  useEffect(() => {
+    if (!location.hash) {
+      return;
+    }
+    const id = location.hash.replace(/^#/, '');
+    const timer = window.setTimeout(() => {
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 150);
+    return () => window.clearTimeout(timer);
+  }, [location.hash, location.search, data]);
 
   const deleteMutation = useMutation({
     mutationFn: () => deleteCase(caseId!),

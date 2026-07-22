@@ -785,7 +785,7 @@ Scope: [version-27.0-scope.md](version-27.0-scope.md) · Checklist: [version-27.
 
 | Capability                        | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                          |
 | --------------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | -------------------------------------------------------------- |
-| Playbook finding deep-links       | 27.0    | Planned | —       | Planned  | —   | —   | —     | Cases        | Navigate from playbook issues into Case Detail finding anchors |
+| Playbook finding deep-links       | 27.0    | ✅      | —       | ✅       | —   | —   | —     | Cases        | Navigate from playbook issues into Case Detail finding anchors |
 | Case-level bulk entity re-resolve | 27.0    | Planned | Planned | Planned  | —   | —   | —     | Documents    | Enqueue document_entity_resolve for case docs with metadata    |
 
 ---
