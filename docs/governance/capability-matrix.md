@@ -39,6 +39,7 @@
 **Version 24.0 sign-off:** [version-24.0-scope.md](version-24.0-scope.md) · Release notes: [v24.0.0.md](../release-notes/v24.0.0.md)
 **Version 25.0 sign-off:** [version-25.0-scope.md](version-25.0-scope.md) · Release notes: [v25.0.0.md](../release-notes/v25.0.0.md)
 **Version 26.0 sign-off:** [version-26.0-scope.md](version-26.0-scope.md) · Release notes: [v26.0.0.md](../release-notes/v26.0.0.md)
+**Version 27.0 (in progress):** [version-27.0-scope.md](version-27.0-scope.md) · Checklist: [version-27.0-completion-checklist.md](../development/version-27.0-completion-checklist.md)
 
 ## Status legend
 
@@ -775,6 +776,17 @@ Scope: [version-26.0-scope.md](version-26.0-scope.md) · Checklist: [version-26.
 | Case Documents recovery panel            | 26.0    | ✅     | —       | ✅       | —   | —   | —     | Cases        | Bulk recovery actions when any case docs exist (not credit-gated) |
 | Operator async entity re-resolve enqueue | 26.0    | ✅     | ✅      | ✅       | ✅  | —   | ✅    | Documents    | Staff enqueue document_entity_resolve when metadata exists        |
 | Case Dispute Playbook page               | 26.0+   | ✅     | —       | ✅       | —   | —   | —     | Cases        | Per-case issue→stage playbook composing strategy + strength APIs  |
+
+---
+
+## Version 27.0 — Dispute Playbook Depth & Case Entity Re-resolve (in progress — 🚧)
+
+Scope: [version-27.0-scope.md](version-27.0-scope.md) · Checklist: [version-27.0-completion-checklist.md](../development/version-27.0-completion-checklist.md)
+
+| Capability                        | Version | Status  | Backend | Frontend | API | AI  | Tests | Dependencies | Notes                                                          |
+| --------------------------------- | ------- | ------- | ------- | -------- | --- | --- | ----- | ------------ | -------------------------------------------------------------- |
+| Playbook finding deep-links       | 27.0    | Planned | —       | Planned  | —   | —   | —     | Cases        | Navigate from playbook issues into Case Detail finding anchors |
+| Case-level bulk entity re-resolve | 27.0    | Planned | Planned | Planned  | —   | —   | —     | Documents    | Enqueue document_entity_resolve for case docs with metadata    |
 
 ---
 
