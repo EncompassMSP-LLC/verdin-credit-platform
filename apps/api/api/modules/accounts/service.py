@@ -29,6 +29,11 @@ from api.modules.accounts.dispute_drafts import (
     build_furnisher_evidence_checklist,
     detect_missing_evidence,
 )
+from api.modules.accounts.dispute_legal_references import (
+    SelectedLegalReference,
+    candidates_from_fcra_documents,
+    select_best_legal_reference,
+)
 from api.modules.accounts.dispute_letter_export import (
     DisputeLetterExportFormat,
     build_dispute_letter_export,
@@ -435,11 +440,21 @@ class AccountService:
 
         disputed_items = build_dispute_reasons(account)
         reason_suggestions = build_dispute_reason_suggestions(account)
+        legal_ref = await self._select_legal_reference_for_account(
+            user,
+            account,
+            recipient_type=recipient_type,
+        )
         if recipient_type == "furnisher":
             evidence_checklist = build_furnisher_evidence_checklist(account)
             template_id = FURNISHER_TEMPLATE_ID
             subject = f"Direct furnisher dispute — {account.creditor_name} tradeline"
-            body = build_furnisher_dispute_body(account, case, disputed_items)
+            body = build_furnisher_dispute_body(
+                account,
+                case,
+                disputed_items,
+                legal_pursuant=legal_ref.pursuant_clause,
+            )
             requested_action = (
                 "Investigate the consumer's direct furnisher dispute, correct or delete "
                 "unverifiable information, and notify all CRAs to whom you furnish data."
@@ -453,7 +468,12 @@ class AccountService:
             evidence_checklist = build_evidence_checklist(account)
             template_id = CRA_TEMPLATE_ID
             subject = f"Dispute of {account.creditor_name} tradeline"
-            body = build_dispute_body(account, case, disputed_items)
+            body = build_dispute_body(
+                account,
+                case,
+                disputed_items,
+                legal_pursuant=legal_ref.pursuant_clause,
+            )
             requested_action = (
                 "Investigate the disputed tradeline and delete or correct any information "
                 "that cannot be verified as complete and accurate."
@@ -462,6 +482,17 @@ class AccountService:
                 "Draft requires staff review before sending.",
                 "Confirm consumer authorization and supporting evidence before submission.",
             ]
+
+        if legal_ref.source == "finding" and legal_ref.source_rule_id:
+            compliance_notes.append(
+                "Legal references selected from strongest matched FCRA finding "
+                f"(`{legal_ref.source_rule_id}`). Investigator aid only — not legal advice."
+            )
+        else:
+            compliance_notes.append(
+                "Legal references use the default procedural FCRA dispute right "
+                "(§611 CRA / §623 furnisher). No matched FCRA finding sections were available."
+            )
 
         missing_evidence = detect_missing_evidence(
             account,
@@ -506,6 +537,10 @@ class AccountService:
             generated_by="rules",
             readiness_score=account.readiness_score,
             risk_score=account.risk_score,
+            legal_citations=list(legal_ref.citations),
+            legal_reference_source=legal_ref.source,
+            legal_reference_rule_id=legal_ref.source_rule_id,
+            legal_pursuant=legal_ref.pursuant_clause,
         )
 
     async def create_dispute_letter_draft(
@@ -665,6 +700,7 @@ class AccountService:
 
         if export_format in {"mail-letter", "mail-label", "mail-packet"}:
             return await self._build_mail_letter_export(
+                user=user,
                 account=account,
                 dispute_letter=dispute_letter,
                 export_format=cast(DisputeMailExportFormat, export_format),
@@ -726,11 +762,22 @@ class AccountService:
                 if not letters:
                     continue
                 dispute_letter = letters[0]
+                legal_ref = await self._select_legal_reference_for_account(
+                    user,
+                    account,
+                    recipient_type=cast(
+                        DisputeRecipientType,
+                        dispute_letter.recipient_type
+                        if dispute_letter.recipient_type in {"credit_bureau", "furnisher"}
+                        else "credit_bureau",
+                    ),
+                )
                 context = build_mail_export_context(
                     account=account,
                     case=case,
                     dispute_letter=dispute_letter,
                     consumer_address_lines=consumer_address_lines,
+                    legal_pursuant=legal_ref.pursuant_clause,
                 )
                 attachments = await self._resolve_mail_packet_attachments(
                     organization_id=organization_id,
@@ -869,6 +916,7 @@ class AccountService:
     async def _build_mail_letter_export(
         self,
         *,
+        user: User,
         account: Account,
         dispute_letter: DisputeLetter,
         export_format: DisputeMailExportFormat,
@@ -878,11 +926,20 @@ class AccountService:
             organization_id=account.organization_id,
             case_id=account.case_id,
         )
+        recipient_type: DisputeRecipientType = (
+            "furnisher" if dispute_letter.recipient_type == "furnisher" else "credit_bureau"
+        )
+        legal_ref = await self._select_legal_reference_for_account(
+            user,
+            account,
+            recipient_type=recipient_type,
+        )
         context = build_mail_export_context(
             account=account,
             case=case,
             dispute_letter=dispute_letter,
             consumer_address_lines=consumer_address_lines,
+            legal_pursuant=legal_ref.pursuant_clause,
         )
         attachments = None
         if export_format == "mail-packet":
@@ -897,6 +954,32 @@ class AccountService:
             export_format,
             attachments=attachments,
         )
+
+    async def _select_legal_reference_for_account(
+        self,
+        user: User,
+        account: Account,
+        *,
+        recipient_type: DisputeRecipientType,
+    ) -> SelectedLegalReference:
+        if self._session is None:
+            return select_best_legal_reference(recipient_type, ())
+
+        from api.modules.documents.service import DocumentService as _DocService
+
+        doc_service = _DocService.from_session(self._session)
+        try:
+            fcra = await doc_service.get_case_fcra_findings(user, account.case_id)
+        except HTTPException:
+            return select_best_legal_reference(recipient_type, ())
+
+        candidates = candidates_from_fcra_documents(
+            fcra.documents,
+            creditor_name=account.creditor_name,
+            account_number_masked=account.account_number_masked,
+            bureau=account.bureau.value,
+        )
+        return select_best_legal_reference(recipient_type, candidates)
 
     async def _resolve_mail_packet_attachments(
         self,

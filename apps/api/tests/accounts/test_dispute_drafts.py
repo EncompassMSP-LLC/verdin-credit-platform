@@ -90,5 +90,5 @@ def test_build_furnisher_dispute_body_uses_furnisher_language() -> None:
     body = build_furnisher_dispute_body(account, case, reasons)
 
     assert "Example Bank" in body
-    assert "Fair Credit Reporting Act" in body
+    assert "FCRA Section 623" in body
     assert "consumer reporting agencies" in body

@@ -50,6 +50,7 @@ class DisputeMailExportContext:
     recipient_type: str
     disputed_items: tuple[str, ...]
     requested_action: str
+    legal_pursuant: str | None = None
 
 
 def build_mail_export_context(
@@ -59,6 +60,7 @@ def build_mail_export_context(
     dispute_letter: DisputeLetter,
     consumer_address_lines: list[str] | None = None,
     organization_name: str | None = None,
+    legal_pursuant: str | None = None,
 ) -> DisputeMailExportContext:
     if dispute_letter.recipient_type == "furnisher":
         recipient = furnisher_dispute_address(account)
@@ -79,6 +81,7 @@ def build_mail_export_context(
         recipient_type=dispute_letter.recipient_type,
         disputed_items=tuple(dispute_letter.disputed_items),
         requested_action=dispute_letter.requested_action,
+        legal_pursuant=legal_pursuant,
     )
 
 
@@ -87,21 +90,29 @@ def build_mail_letter_body(context: DisputeMailExportContext) -> str:
     dispute_lines = "\n".join(f"  • {item}" for item in context.disputed_items) or "  • (none)"
     date_label = context.letter_date.strftime("%B %d, %Y")
 
-    if context.recipient_type == "furnisher":
+    if context.legal_pursuant:
+        legal_basis = (
+            f"Pursuant to {context.legal_pursuant}, I dispute the accuracy and completeness "
+            "of the following credit reporting information."
+        )
+    elif context.recipient_type == "furnisher":
         legal_basis = (
             f"Pursuant to {FCRA_FURNISHER_CITATION}, I dispute the accuracy and completeness "
             "of the information your company is furnishing to consumer reporting agencies."
-        )
-        closing = (
-            "Please investigate these items, correct or delete any information that cannot be "
-            "verified as complete and accurate, and notify all consumer reporting agencies to "
-            "whom you furnish data."
         )
     else:
         legal_basis = (
             f"Pursuant to {FCRA_CRA_CITATION}, I dispute the accuracy and completeness of the "
             f"following information appearing on my {context.bureau_label} consumer report."
         )
+
+    if context.recipient_type == "furnisher":
+        closing = (
+            "Please investigate these items, correct or delete any information that cannot be "
+            "verified as complete and accurate, and notify all consumer reporting agencies to "
+            "whom you furnish data."
+        )
+    else:
         closing = (
             "Please conduct a reasonable reinvestigation of the disputed items, provide the "
             "method of verification, and delete or correct any information that cannot be "

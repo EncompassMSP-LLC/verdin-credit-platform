@@ -132,6 +132,11 @@ def _severity_bonus(severity: str) -> int:
     return 0
 
 
+def heuristic_rule_score(rule_id: str, severity: str = "medium") -> int:
+    """Public score for ranking findings outside the full case strength payload."""
+    return _clamp_score(_base_score(rule_id) + _severity_bonus(severity))
+
+
 def _rationale(rule_id: str, score: int, factors: tuple[str, ...]) -> str:
     base = f"Heuristic score {score}/100 for `{rule_id}`."
     if factors:

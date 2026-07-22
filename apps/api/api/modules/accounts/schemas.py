@@ -278,6 +278,10 @@ class AccountDisputeDraftResponse(BaseSchema):
     generated_by: Literal["rules"]
     readiness_score: int | None
     risk_score: int | None
+    legal_citations: list[str] = []
+    legal_reference_source: Literal["finding", "default"] = "default"
+    legal_reference_rule_id: str | None = None
+    legal_pursuant: str | None = None
 
 
 class DisputeReasonSuggestionResponse(BaseSchema):
