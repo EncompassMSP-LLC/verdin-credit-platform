@@ -583,6 +583,35 @@ export {
 } from './orgAdmin';
 
 export {
+  addPartnershipMember,
+  createPartnerReferral,
+  createPartnership,
+  getMortgagePartnerStatus,
+  getPartnerReferral,
+  getPartnerRoleMatrix,
+  getPartnership,
+  listPartnerAccessAudits,
+  listPartnerReferrals,
+  listPartnershipMembers,
+  listPartnerships,
+  type MortgagePartnerStatus,
+  type PartnerAccessAction,
+  type PartnerAccessAudit,
+  type PartnerOrgType,
+  type PartnerReferral,
+  type PartnerReferralCreateInput,
+  type PartnerReferralStatus,
+  type PartnerRole,
+  type PartnerRoleMatrix,
+  type PartnerRoleMatrixItem,
+  type Partnership,
+  type PartnershipCreateInput,
+  type PartnershipMember,
+  type PartnershipMemberCreateInput,
+  type PartnershipStatus,
+} from './mortgagePartner';
+
+export {
   getCaseMessageThread,
   getMessagingCenterStatus,
   postCaseMessageThreadReply,

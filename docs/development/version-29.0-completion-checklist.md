@@ -10,7 +10,7 @@ Scope: [`docs/governance/version-29.0-scope.md`](../governance/version-29.0-scop
 
 ## Exit criteria for "29.0 done"
 
-- [ ] Lender/partner org model + RBAC + `ENABLE_MORTGAGE_PARTNER` gate
+- [x] Lender/partner org model + RBAC + `ENABLE_MORTGAGE_PARTNER` gate
 - [ ] Lender dashboard with client pipeline + loan milestones (shared case data)
 - [ ] Mortgage readiness estimator + exportable readiness report
 - [ ] Capability matrix + API reference updated
@@ -24,7 +24,7 @@ Scope: [`docs/governance/version-29.0-scope.md`](../governance/version-29.0-scop
 | Order | Slice                                              | Epic         | Status |
 | ----- | -------------------------------------------------- | ------------ | ------ |
 | 1     | 29.0 scope + completion checklist                  | Kickoff      | ✅     |
-| 2     | Partner org model + lender RBAC + feature flag     | Platform     | ☐      |
+| 2     | Partner org model + lender RBAC + feature flag     | Platform     | ✅     |
 | 3     | Lender dashboard + pipeline + loan milestones      | Partner UI   | ☐      |
 | 4     | Mortgage readiness score + readiness report export | Intelligence | ☐      |
 | 5     | Capability matrix 29.0 sign-off                    | Governance   | ☐      |

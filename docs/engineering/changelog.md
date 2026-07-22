@@ -13,6 +13,16 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## Mortgage Partner org model + RBAC (`ENABLE_MORTGAGE_PARTNER`)
+
+**Decision:** Add `mortgage_partner` module with `org_partnerships`, `org_partnership_members`, `partner_referrals`, and `partner_access_audits`, gated by `ENABLE_MORTGAGE_PARTNER`. Partnership-scoped `PartnerRole` matrix is an edition overlay (not staff `UserRole`). Staff APIs manage partnerships/referrals; partner JWT realm deferred.
+
+**Reason:** Version 29.0 Phase 1 needs a multi-tenant CRO↔lender foundation before wiring LRP lender/CRM surfaces to live APIs.
+
+**Guardrails:** Org-scoped queries; access audits on referral/partnership reads; no marketplace, live bureau soft-pull, or unsupervised filing.
+
+**Follow-up work:** Partner JWT auth; wire LRP `/lender` and `/crm`; readiness export under partner scope.
+
 ## Mortgage Partner Edition — Version 29.0 scope (foundation)
 
 **Decision:** Scope Version 29.0 as Mortgage Partner Edition foundation on the **shared** Ultimate Credit Repair LLC platform — partner org/RBAC, lender dashboard + pipeline, mortgage readiness score/export. Explicitly **do not** fork or copy the codebase into a separate Mortgage product.

@@ -182,6 +182,17 @@ from api.modules.messaging.models import (
     MessageThreadStatus,
     ThreadMessage,
 )
+from api.modules.mortgage_partner.models import (
+    OrgPartnership,
+    OrgPartnershipMember,
+    PartnerAccessAction,
+    PartnerAccessAudit,
+    PartnerOrgType,
+    PartnerReferral,
+    PartnerRole,
+    PartnershipStatus,
+    ReferralStatus,
+)
 from api.modules.notifications.models import (
     EmailDeliveryLog,
     Notification,
@@ -337,6 +348,15 @@ __all__ = [
     "MessageSenderRole",
     "MessageThread",
     "MessageThreadStatus",
+    "OrgPartnership",
+    "OrgPartnershipMember",
+    "PartnerAccessAction",
+    "PartnerAccessAudit",
+    "PartnerOrgType",
+    "PartnerReferral",
+    "PartnerRole",
+    "PartnershipStatus",
+    "ReferralStatus",
     "Notification",
     "NotificationCategory",
     "Organization",
