@@ -1,13 +1,13 @@
 # Page spec — Borrower list
 
-| Field       | Value            |
-| ----------- | ---------------- |
-| Page name   | Borrower list    |
-| Route       | `/crm/borrowers` |
-| Volume      | 21               |
-| Status      | `draft`          |
-| Actors      | Case managers+   |
-| Permissions | Case read        |
+| Field       | Value             |
+| ----------- | ----------------- |
+| Page name   | Borrower list     |
+| Route       | `/crm/borrowers`  |
+| Volume      | 21                |
+| Status      | `ready-for-build` |
+| Actors      | Case managers+    |
+| Permissions | Case read         |
 
 ## 1. Purpose
 

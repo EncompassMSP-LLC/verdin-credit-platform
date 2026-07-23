@@ -817,6 +817,7 @@ Scope: [version-29.0-scope.md](version-29.0-scope.md) · Checklist: [version-29.
 | LRP lender pipeline table (Vol 20 E4.1)  | 29.0    | Partial | ✅      | Partial  | ✅      | —       | ✅      | Mortgage partner | `apps/lrp-web` `/lender/pipeline` ← partnership referrals + `client_display_name`                |
 | LRP referral status PATCH (Vol 20 E4.2)  | 29.0    | Partial | ✅      | Partial  | ✅      | —       | ✅      | Mortgage partner | PATCH referral status + `/lender/referrals` queue (accept/decline audited)                       |
 | LRP CRM referral queue (Vol 21 E5.1)     | 29.0    | Partial | ✅      | Partial  | ✅      | —       | ✅      | Mortgage partner | `apps/lrp-web` `/crm/referrals` ← partnership referrals + accept/decline                         |
+| LRP CRM borrower list (Vol 21 E5.2)      | 29.0    | Partial | ✅      | Partial  | ✅      | —       | ✅      | Clients          | `apps/lrp-web` `/crm/borrowers` ← `GET /clients` (search/status/page)                            |
 | Lender dashboard + pipeline + milestones | 29.0    | Planned | Planned | Planned  | Planned | —       | Planned | Cases            | Partner UI over shared clients/cases                                                             |
 | Mortgage readiness score + report export | 29.0    | Planned | Planned | Planned  | Planned | Partial | Planned | Intelligence     | Deterministic estimator; LLM only behind ADR-012                                                 |
 
