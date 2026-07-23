@@ -13,6 +13,14 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## LRP Stage 5 Epic E5.4 — CRM workspace run / publish readiness (Vol 21)
+
+**Decision:** Wire `/crm/borrowers/:id` “Run / publish readiness” to `POST /cases/{id}/credit-analysis/runs` (compose + publish). Gate on CRM `borrowers.manage`. Refresh latest band/score after success. PDF export endpoint remains deferred (api-client URL helper is ahead of API).
+
+**Reason:** Completes workspace `run_analysis` / `publish_score` actions so staff can refresh the advisory band the portal reads.
+
+**Follow-up work:** Stage PATCH; tasks/docs tabs; credit-analysis PDF export route; dispute tabs.
+
 ## LRP Mortgage Partner Marketing Kit — Phase 2 premium (Vol 07)
 
 **Decision:** Ship Phase 2 premium kit manuscripts (20-page guide, deck outline, Canva specs, referral form, welcome packet, leave-behind, multi-audience drips, portal onboarding concept, 90-day calendar) plus web hubs: `/resources/partner-kit/phase-2`, `/guide`, `/referral`, `/print/leave-behind`. Designed PDF/PPT/Canva binaries remain external.
