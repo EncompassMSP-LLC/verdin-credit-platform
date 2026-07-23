@@ -172,6 +172,49 @@ def test_cluster_primary_pages_drops_distant_outliers() -> None:
     assert _cluster_primary_pages([3, 4, 5, 20]) == [3, 4, 5]
 
 
+def test_finalize_includes_spillover_page_when_header_near_bottom() -> None:
+    """Header-only bottom of page N must pull in page N+1 account body."""
+    import pdfplumber
+    from reportlab.lib.pagesizes import letter as letter_page_size
+    from reportlab.pdfgen import canvas
+
+    from api.modules.accounts.dispute_report_redaction import (
+        _creditor_tokens,
+        _finalize_tradeline_pages,
+    )
+
+    buffer = BytesIO()
+    pdf = canvas.Canvas(buffer, pagesize=letter_page_size)
+    pdf.setFont("Helvetica", 12)
+    pdf.drawString(72, 720, "PREVIOUS CREDITOR LLC")
+    pdf.drawString(72, 700, "Charge off details")
+    pdf.setFont("Helvetica-Bold", 14)
+    pdf.drawString(72, 80, "AMERICREDIT/GM FINANCIAL")
+    pdf.setFont("Helvetica", 11)
+    pdf.drawString(72, 60, "Account Name AMERICREDIT/GM FINANCIAL")
+    pdf.drawString(72, 45, "Account Number 111003XXXX")
+    pdf.showPage()
+    pdf.setFont("Helvetica", 12)
+    pdf.drawString(72, 720, "Account Type Auto Loan")
+    pdf.drawString(72, 700, "Status Paid, Closed/Never late.")
+    pdf.drawString(72, 680, "Original Balance $21,215")
+    pdf.setFont("Helvetica-Bold", 14)
+    pdf.drawString(72, 400, "TOTAL VISA BANK OF MISSOURI")
+    pdf.save()
+    pdf_bytes = buffer.getvalue()
+
+    with pdfplumber.open(BytesIO(pdf_bytes)) as report:
+        selected = _finalize_tradeline_pages(
+            (1,),
+            pdf=report,
+            target_creditor="AMERICREDIT/GM FINANCIAL",
+            target_tokens=_creditor_tokens("AMERICREDIT/GM FINANCIAL"),
+            target_account_masked="****2957",
+        )
+
+    assert selected == (1, 2)
+
+
 def test_build_redacted_tradeline_excerpt_known_empty_pages_falls_back() -> None:
     excerpt = build_redacted_tradeline_excerpt(
         _sample_report_pdf(),

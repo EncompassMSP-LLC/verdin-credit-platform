@@ -242,18 +242,39 @@ def _finalize_tradeline_pages(
         return ()
 
     # Include an immediate continuation page when the tradeline spills onto the next sheet.
+    # Experian often puts only the creditor header at the bottom of page N and the rest of
+    # Account Info / Payment History on page N+1 without repeating the creditor name.
     next_page = clustered[-1] + 1
     if next_page not in clustered and next_page <= len(pdf.pages):
-        page_text = pdf.pages[next_page - 1].extract_text() or ""
-        if _page_matches_target(
-            page_text,
+        next_text = pdf.pages[next_page - 1].extract_text() or ""
+        text_match = _page_matches_target(
+            next_text,
             target_creditor=target_creditor,
             target_tokens=target_tokens,
             target_account_masked=target_account_masked,
-        ):
+        )
+        spillover = _target_header_near_page_bottom(
+            pdf.pages[clustered[-1] - 1],
+            target_creditor=target_creditor,
+        )
+        if text_match or spillover:
             clustered.append(next_page)
 
     return tuple(clustered)
+
+
+def _target_header_near_page_bottom(
+    page: Any,
+    *,
+    target_creditor: str,
+    threshold: float = 0.55,
+) -> bool:
+    """True when the target creditor header sits in the lower portion of the page."""
+    tops = _header_tops_for_creditor(page, target_creditor)
+    if not tops:
+        return False
+    page_height = float(page.height) or 1.0
+    return max(tops) >= page_height * threshold
 
 
 def _collect_redaction_rects(
@@ -280,12 +301,26 @@ def _collect_redaction_rects(
             continue
         other_tops.extend(_header_tops_for_creditor(page, creditor))
 
-    if not other_tops:
-        return []
-
     unique_other_tops = sorted(set(round(top, 1) for top in other_tops))
     unique_target_tops = sorted(set(round(top, 1) for top in target_tops))
     rects: list[dict[str, float]] = []
+
+    # Anything above the first target header is a prior tradeline remnant — cover it
+    # even when we cannot resolve that creditor's display name from the parsed report.
+    if unique_target_tops:
+        earliest_target = unique_target_tops[0]
+        if earliest_target > _PAGE_MARGIN + 24:
+            rects.append(
+                {
+                    "x0": _PAGE_MARGIN,
+                    "top": _PAGE_MARGIN,
+                    "x1": page_width - _PAGE_MARGIN,
+                    "bottom": earliest_target - _NEXT_HEADER_GAP,
+                }
+            )
+
+    if not unique_other_tops and not rects:
+        return []
 
     for index, top in enumerate(unique_other_tops):
         boundaries: list[float] = [page_bottom]
@@ -295,8 +330,6 @@ def _collect_redaction_rects(
             if target_top > top:
                 boundaries.append(target_top - _NEXT_HEADER_GAP)
         bottom = min(boundaries)
-        # If the only stop is far below and there is no target/next header under
-        # this block, still cover a full trailing account to page bottom.
         if bottom <= top:
             continue
         rects.append(
