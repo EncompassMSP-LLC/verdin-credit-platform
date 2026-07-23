@@ -2,30 +2,38 @@
 
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import { ApiClientError } from '@verdin/api-client';
 import { PageHeader } from '@/components/crm/PageHeader';
 import { RoleGate } from '@/components/crm/RoleGate';
 import { ADVISORY_DISCLAIMER_SHORT } from '@/lib/design-tokens';
 import { useCrmAuth } from '@/lib/crm/auth';
-import { useCrmClient, useCrmClientCases, useCrmLatestAnalysis } from '@/lib/crm/client-hooks';
+import {
+  useCreateCrmCreditAnalysis,
+  useCrmClient,
+  useCrmClientCases,
+  useCrmLatestAnalysis,
+} from '@/lib/crm/client-hooks';
 import { borrowers, notes, tasks, documents } from '@/lib/crm/data';
 import { STAGE_LABELS } from '@/lib/crm/nav';
 import { formatDate } from '@/lib/utils';
 
 /**
- * Spec: Vol 21 · pages/borrower-workspace.md (overview)
- * Platform: getClient + cases + latest credit-analysis band/score.
+ * Spec: Vol 21 · pages/borrower-workspace.md (overview + run_analysis / publish_score)
+ * Platform: getClient + cases + latest credit-analysis; POST compose+publish.
  * Demo: seed borrower. Tasks/docs/notes remain demo-linked until later slices.
  */
 export default function CrmBorrowerDetailPage() {
   const params = useParams();
   const id = String(params.id);
-  const { authMode } = useCrmAuth();
+  const { authMode, can } = useCrmAuth();
   const isDemo = authMode === 'demo';
 
   const clientQuery = useCrmClient(isDemo ? undefined : id);
   const casesQuery = useCrmClientCases(isDemo ? undefined : id);
   const primaryCase = casesQuery.data?.[0];
   const analysisQuery = useCrmLatestAnalysis(primaryCase?.id);
+  const runAnalysis = useCreateCrmCreditAnalysis(primaryCase?.id);
+  const canRunAnalysis = can('borrowers.manage');
 
   if (isDemo) {
     const borrower = borrowers.find((b) => b.id === id);
@@ -99,6 +107,13 @@ export default function CrmBorrowerDetailPage() {
       ? 'Loading…'
       : 'No published analysis';
 
+  const runError =
+    runAnalysis.error instanceof ApiClientError
+      ? runAnalysis.error.message
+      : runAnalysis.error
+        ? 'Could not run credit analysis.'
+        : null;
+
   return (
     <RoleGate
       permission="borrowers.view"
@@ -135,8 +150,24 @@ export default function CrmBorrowerDetailPage() {
               </dd>
             </div>
             <div>
-              <dt className="text-xs uppercase tracking-wider text-slate-500">Readiness</dt>
+              <dt className="text-xs uppercase tracking-wider text-slate-500">Readiness band</dt>
               <dd className="mt-1 font-medium capitalize">{readinessLabel}</dd>
+            </div>
+            <div>
+              <dt className="text-xs uppercase tracking-wider text-slate-500">
+                Mortgage readiness
+              </dt>
+              <dd className="mt-1 font-medium">
+                {analysis?.mortgage_readiness_score != null
+                  ? analysis.mortgage_readiness_score
+                  : '—'}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs uppercase tracking-wider text-slate-500">Last run</dt>
+              <dd className="mt-1 font-medium">
+                {analysis?.generated_at ? formatDate(analysis.generated_at) : '—'}
+              </dd>
             </div>
             <div>
               <dt className="text-xs uppercase tracking-wider text-slate-500">Case updated</dt>
@@ -144,7 +175,7 @@ export default function CrmBorrowerDetailPage() {
                 {primaryCase ? formatDate(primaryCase.updated_at) : '—'}
               </dd>
             </div>
-            <div>
+            <div className="sm:col-span-2">
               <dt className="text-xs uppercase tracking-wider text-slate-500">Notes</dt>
               <dd className="mt-1 font-medium whitespace-pre-wrap">
                 {client.notes?.trim() || '—'}
@@ -169,6 +200,39 @@ export default function CrmBorrowerDetailPage() {
         </section>
 
         <section className="space-y-4">
+          <div className="rounded-md border border-navy-900/10 bg-white p-4">
+            <h2 className="text-sm font-semibold">Credit analysis</h2>
+            <p className="mt-2 text-sm text-slate-500">
+              Queue a deterministic Lending Readiness compose. Latest run is what the borrower
+              portal can see (advisory band only).
+            </p>
+            {!primaryCase ? (
+              <p className="mt-3 text-sm text-amber-800">Link a case before running analysis.</p>
+            ) : canRunAnalysis ? (
+              <button
+                type="button"
+                className="mt-3 inline-flex items-center justify-center rounded-md bg-navy-900 px-3 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"
+                disabled={runAnalysis.isPending}
+                onClick={() => runAnalysis.mutate()}
+              >
+                {runAnalysis.isPending ? 'Running…' : 'Run / publish readiness'}
+              </button>
+            ) : (
+              <p className="mt-3 text-sm text-slate-500">
+                Requires borrowers.manage to queue analysis.
+              </p>
+            )}
+            {runAnalysis.isSuccess ? (
+              <p className="mt-2 text-sm text-teal-800">
+                Published band {runAnalysis.data.band}
+                {runAnalysis.data.borrower_readiness_score != null
+                  ? ` · score ${runAnalysis.data.borrower_readiness_score}`
+                  : ''}
+                .
+              </p>
+            ) : null}
+            {runError ? <p className="mt-2 text-sm text-red-700">{runError}</p> : null}
+          </div>
           <div className="rounded-md border border-navy-900/10 bg-white p-4">
             <h2 className="text-sm font-semibold">Tasks</h2>
             <p className="mt-2 text-sm text-slate-500">

@@ -2,6 +2,7 @@
 
 import {
   ApiClientError,
+  createCreditAnalysisRun,
   getClient,
   getLatestCreditAnalysisRun,
   listCases,
@@ -11,7 +12,7 @@ import {
   type ClientStatus,
   type CreditAnalysisRun,
 } from '@verdin/api-client';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCrmAuth } from '@/lib/crm/auth';
 
 export function useCrmClients(params: {
@@ -86,6 +87,26 @@ export function useCrmLatestAnalysis(caseId: string | undefined) {
     retry: (count, error) => {
       if (error instanceof ApiClientError && error.status === 404) return false;
       return count < 2;
+    },
+  });
+}
+
+/** Spec: Vol 21 · run_analysis / publish_score — POST compose + publish (Vol 22). */
+export function useCreateCrmCreditAnalysis(caseId: string | undefined) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => {
+      if (!caseId) {
+        throw new Error('A primary case is required to run credit analysis');
+      }
+      return createCreditAnalysisRun(caseId);
+    },
+    onSuccess: () => {
+      if (caseId) {
+        void queryClient.invalidateQueries({
+          queryKey: ['crm', 'credit-analysis-latest', caseId],
+        });
+      }
     },
   });
 }
