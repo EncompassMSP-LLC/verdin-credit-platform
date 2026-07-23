@@ -7,7 +7,7 @@ Status: critical pages at `review`. See [FOUNDER-REVIEW.md](../../FOUNDER-REVIEW
 | Login              | [pages/login.md](pages/login.md)                           | draft           |
 | Ops dashboard      | [pages/dashboard.md](pages/dashboard.md)                   | draft           |
 | Pipeline           | [pages/pipeline.md](pages/pipeline.md)                     | review          |
-| Borrower list      | [pages/borrowers.md](pages/borrowers.md)                   | draft           |
+| Borrower list      | [pages/borrowers.md](pages/borrowers.md)                   | ready-for-build |
 | Borrower workspace | [pages/borrower-workspace.md](pages/borrower-workspace.md) | review          |
 | Referrals          | [pages/referrals.md](pages/referrals.md)                   | ready-for-build |
 | Lenders            | [pages/lenders.md](pages/lenders.md)                       | draft           |
