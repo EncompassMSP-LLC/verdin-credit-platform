@@ -21,13 +21,13 @@ Give the borrower a single glance at readiness band, next actions, and partner-a
 ## 3. Layout
 
 1. **Greeting** — first name + advisory one-liner
-2. **Readiness summary** — band + last updated + CTA “View score”
-3. **Next up** — top 1–3 open tasks
-4. **Progress** — checklist % or task completion
-5. **Learning nudge** — optional module card
-6. **Messages preview** — unread count
+2. **Readiness summary** — band + last updated + CTA “View readiness” (band-only for borrower v1)
+3. **Next up** — top 1–3 open tasks (**DOCX §12.1:** next three actions; avoid raw complexity before the consumer understands it)
+4. **Progress** — checklist % or task completion; overdue items when present
+5. **Learning nudge** — optional module card / education progress
+6. **Messages preview** — unread count / recent updates
 
-No marketing promo strips in first viewport beyond brand shell.
+Every score or status includes explanation, date, data source, and limitation (see CLAIM-LIBRARY). No marketing promo strips in first viewport beyond brand shell.
 
 ## 4. Fields
 

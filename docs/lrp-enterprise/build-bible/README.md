@@ -1,10 +1,11 @@
 # Lending Readiness Partners — Enterprise Build Bible v2.0
 
-**Status:** P0–P2 **accepted** ([FOUNDER-REVIEW.md](./FOUNDER-REVIEW.md)). Stage 5 **E0 in progress**. Canonical: [STAGE-MODEL.md](./STAGE-MODEL.md) · [CLAIM-LIBRARY.md](./CLAIM-LIBRARY.md).  
+**Status:** P0–P2 **accepted** ([FOUNDER-REVIEW.md](./FOUNDER-REVIEW.md)). Stage 5 **E0–E3 shipped**; continue from Vol 25 backlog. Canonical: [STAGE-MODEL.md](./STAGE-MODEL.md) · [CLAIM-LIBRARY.md](./CLAIM-LIBRARY.md).  
 **Purpose:** The operating manual that turns Cursor from a _design_ tool into an _implementation_ tool.  
-**Product identity:** AI-powered **Borrower Readiness Platform** — not “another credit repair shop.”
+**Product identity:** AI-powered **Borrower Readiness Platform** — not “another credit repair shop.”  
+**Founder DOCX:** [sources/](./sources/) · map to repo vols via [VOLUME-CROSSWALK.md](./VOLUME-CROSSWALK.md) (do not renumber mid–Stage 5).
 
-> **Working rule:** Spec before screen. Screen before code. No major product UI/API work until the relevant volume is marked **Ready for build**.
+> **Working rule:** Spec before screen. Screen before code. No major product UI/API work until the relevant volume is marked **Ready for build**. Cite **repo** volume numbers in PRs.
 
 ---
 

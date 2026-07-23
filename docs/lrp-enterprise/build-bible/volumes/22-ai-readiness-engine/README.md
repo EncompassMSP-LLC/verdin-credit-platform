@@ -1,19 +1,33 @@
 ﻿# Volume 22 — AI and readiness engine specification
 
-| Field        | Value                                |
-| ------------ | ------------------------------------ |
-| Status       | `ready-for-build`                    |
-| Stage        | 2–4                                  |
-| Owner        | Product + engineering                |
-| Last updated | 2026-07-22                           |
-| Depends on   | Vol 14 · Vol 18 · Vol 19–21          |
-| Downstream   | Vol 24 ADRs · Stage 5 implementation |
+| Field        | Value                                                                                   |
+| ------------ | --------------------------------------------------------------------------------------- |
+| Status       | `ready-for-build`                                                                       |
+| Stage        | 2–4                                                                                     |
+| Owner        | Product + engineering                                                                   |
+| Last updated | 2026-07-23                                                                              |
+| Depends on   | Vol 14 · Vol 18 · Vol 19–21                                                             |
+| Downstream   | Vol 24 ADRs · Stage 5 implementation                                                    |
+| DOCX map     | §15 AI Credit Analysis · §16 Scoring ([VOLUME-CROSSWALK.md](../../VOLUME-CROSSWALK.md)) |
 
 ---
 
 ## 1. Purpose
 
 Specify the **Borrower Readiness Platform** engine end-to-end so Stage 5 implements a product with clear identity — not ad-hoc features.
+
+### AI boundaries (DOCX §15)
+
+AI may accelerate extraction, comparison, issue spotting, drafting, and explanation. AI **may not**:
+
+- Independently make legal conclusions
+- Guarantee score changes
+- Fabricate evidence
+- Submit disputes without authorized human review
+
+### Ingestion quality (DOCX §15.1)
+
+Accept supported reports through encrypted upload. Detect source, report date, bureaus, pages, and extraction quality. Preserve the original file, a normalized data representation, and a complete processing log. Low-confidence text, conflicting identifiers, missing pages, or unsupported formats must be routed for **human review** — never silently completed.
 
 ## 2. Target pipeline
 
@@ -83,6 +97,8 @@ All external LLM calls require org LLM policy / `require_llm_ready()` per platfo
 ### 6.1 Nature
 
 Advisory composite for **mortgage-intent packaging**. Not FICO, Vantage, or underwriting.
+
+**DOCX §16:** The LRP Readiness Score is an **internal educational indicator** of preparation and task completion. It organizes actions and communicates progress. It **cannot** be described as a FICO score, mortgage score, approval likelihood, underwriting recommendation, or guarantee. Every score or status shown to a consumer must include explanation, date, data source, and limitation statement.
 
 ### 6.2 Dimensions (draft weights — calibrate later)
 
