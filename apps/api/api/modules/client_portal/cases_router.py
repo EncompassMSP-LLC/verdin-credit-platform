@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.database.session import get_db
+from api.modules.accounts.credit_analysis_schemas import PortalCaseReadinessResponse
 from api.modules.client_portal.cases_service import ClientPortalCasesService
 from api.modules.client_portal.dependencies import (
     get_current_portal_user,
@@ -41,3 +42,13 @@ async def get_portal_case(
     service: ClientPortalCasesService = Depends(get_portal_cases_service),
 ) -> PortalCaseDetailResponse:
     return await service.get_case(portal_user, case_id)
+
+
+@router.get("/{case_id}/readiness", response_model=PortalCaseReadinessResponse)
+async def get_portal_case_readiness(
+    case_id: uuid.UUID,
+    _: None = Depends(require_client_portal_enabled),
+    portal_user: ClientPortalUser = Depends(get_current_portal_user),
+    service: ClientPortalCasesService = Depends(get_portal_cases_service),
+) -> PortalCaseReadinessResponse:
+    return await service.get_case_readiness(portal_user, case_id)

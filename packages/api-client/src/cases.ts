@@ -461,6 +461,8 @@ export interface CreditAnalysisRunSummary {
   borrower_readiness_score: number;
   mortgage_readiness_score: number;
   schema_version: string;
+  band: string;
+  status: string;
 }
 
 export interface CreditAnalysisRun extends CreditAnalysisRunSummary {

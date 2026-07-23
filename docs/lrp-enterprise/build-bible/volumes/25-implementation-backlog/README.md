@@ -20,8 +20,8 @@ Implement only from volumes/pages marked **`ready-for-build`**. Cite the volume 
 | ---------------------------- | --------- | --------------- | ------------------------------------------------------------ |
 | E0 Tokens + shells           | Vol 23    | **done** (#346) | CSS tokens, light-only, advisory banner on portal/lender/CRM |
 | E1 Auth realms               | Vol 24    | **done** (#347) | Portal JWT + CRM/lender staff JWT with demo fallback         |
-| E2 Borrower core             | Vol 19    | **in PR**       | Dashboard, band-only readiness, tasks, docs                  |
-| E3 Analysis pipeline         | Vol 22    | queued          | Enqueue, findings, publish score                             |
+| E2 Borrower core             | Vol 19    | **done** (#348) | Dashboard, band-only readiness, tasks, docs                  |
+| E3 Analysis pipeline         | Vol 22    | **in PR**       | Credit-analysis runs + portal readiness publish              |
 | E4 Lender referrals          | Vol 20    | queued          | Pipeline table, new referral, tracking                       |
 | E5 CRM workspace             | Vol 21    | queued          | Borrower workspace + referral queue                          |
 | E6 Partner digests / exports | Vol 20–21 | queued          | Gated exports + digests                                      |
