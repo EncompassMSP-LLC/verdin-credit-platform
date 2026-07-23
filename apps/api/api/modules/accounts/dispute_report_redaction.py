@@ -7,8 +7,11 @@ from dataclasses import dataclass
 from io import BytesIO
 from typing import Any
 
+# Fallback band when we cannot find the next account header on the page.
 _TRADELINE_BLOCK_PADDING = 110.0
 _PAGE_MARGIN = 4.0
+# Gap left above the next creditor header so labels stay readable.
+_NEXT_HEADER_GAP = 6.0
 
 
 @dataclass(frozen=True, slots=True)
@@ -93,7 +96,14 @@ def build_redacted_tradeline_excerpt(
             if known_page_numbers is not None:
                 if not known_page_numbers:
                     return _fallback_full_report(pdf_bytes)
-                for page_number in known_page_numbers:
+                selected = _finalize_tradeline_pages(
+                    known_page_numbers,
+                    pdf=pdf,
+                    target_creditor=target_creditor,
+                    target_tokens=target_tokens,
+                    target_account_masked=target_account_masked,
+                )
+                for page_number in selected:
                     index = page_number - 1
                     if 0 <= index < len(pdf.pages):
                         matching_pages.append((index, pdf.pages[index]))
@@ -107,7 +117,19 @@ def build_redacted_tradeline_excerpt(
                         target_account_masked=target_account_masked,
                     ):
                         matching_pages.append((index, page))
-                scanned_page_numbers = tuple(index + 1 for index, _ in matching_pages)
+                selected = _finalize_tradeline_pages(
+                    tuple(index + 1 for index, _ in matching_pages),
+                    pdf=pdf,
+                    target_creditor=target_creditor,
+                    target_tokens=target_tokens,
+                    target_account_masked=target_account_masked,
+                )
+                matching_pages = [
+                    (page_number - 1, pdf.pages[page_number - 1])
+                    for page_number in selected
+                    if 0 <= page_number - 1 < len(pdf.pages)
+                ]
+                scanned_page_numbers = selected
 
             if not matching_pages:
                 return _fallback_full_report(
@@ -192,31 +214,93 @@ def _page_matches_target(
     return False
 
 
+def _cluster_primary_pages(page_numbers: tuple[int, ...] | list[int]) -> list[int]:
+    """Keep the longest near-contiguous page run; drop distant false positives."""
+    sorted_pages = sorted({int(page) for page in page_numbers if int(page) > 0})
+    if not sorted_pages:
+        return []
+
+    groups: list[list[int]] = [[sorted_pages[0]]]
+    for page in sorted_pages[1:]:
+        if page - groups[-1][-1] <= 1:
+            groups[-1].append(page)
+        else:
+            groups.append([page])
+
+    # Longest cluster wins; earliest page breaks ties (tradeline detail usually first).
+    return max(groups, key=lambda group: (len(group), -group[0]))
+
+
+def _finalize_tradeline_pages(
+    page_numbers: tuple[int, ...] | list[int],
+    *,
+    pdf: Any,
+    target_creditor: str,
+    target_tokens: tuple[str, ...],
+    target_account_masked: str | None,
+) -> tuple[int, ...]:
+    clustered = _cluster_primary_pages(page_numbers)
+    if not clustered:
+        return ()
+
+    # Include an immediate continuation page when the tradeline spills onto the next sheet.
+    next_page = clustered[-1] + 1
+    if next_page not in clustered and next_page <= len(pdf.pages):
+        page_text = pdf.pages[next_page - 1].extract_text() or ""
+        if _page_matches_target(
+            page_text,
+            target_creditor=target_creditor,
+            target_tokens=target_tokens,
+            target_account_masked=target_account_masked,
+        ):
+            clustered.append(next_page)
+
+    return tuple(clustered)
+
+
 def _collect_redaction_rects(
     page: Any,
     *,
     other_creditors: tuple[str, ...],
     target_creditor: str,
 ) -> list[dict[str, float]]:
-    rects: list[dict[str, float]] = []
+    """Black out non-target tradelines on a page.
+
+    Experian (and similar) pages often end one account and start the next on the
+    same sheet. A short padding under the other creditor name leaves payment
+    history / contact blocks visible. Redact from each other-creditor header to
+    the next header (or page bottom).
+    """
     page_width = float(page.width)
     page_height = float(page.height)
 
+    header_tops: list[float] = []
     for creditor in other_creditors:
         if _creditors_match(creditor, target_creditor):
             continue
         for query in _creditor_search_queries(creditor):
             for hit in page.search(query, case=False):
-                top = max(0.0, float(hit["top"]) - 4.0)
-                bottom = min(page_height, float(hit["bottom"]) + _TRADELINE_BLOCK_PADDING)
-                rects.append(
-                    {
-                        "x0": _PAGE_MARGIN,
-                        "top": top,
-                        "x1": page_width - _PAGE_MARGIN,
-                        "bottom": bottom,
-                    }
-                )
+                header_tops.append(max(0.0, float(hit["top"]) - 4.0))
+
+    if not header_tops:
+        return []
+
+    unique_tops = sorted(set(round(top, 1) for top in header_tops))
+    rects: list[dict[str, float]] = []
+    for index, top in enumerate(unique_tops):
+        if index + 1 < len(unique_tops):
+            bottom = max(top + _TRADELINE_BLOCK_PADDING, unique_tops[index + 1] - _NEXT_HEADER_GAP)
+        else:
+            bottom = page_height - _PAGE_MARGIN
+        bottom = min(page_height - _PAGE_MARGIN, max(top + 1.0, bottom))
+        rects.append(
+            {
+                "x0": _PAGE_MARGIN,
+                "top": top,
+                "x1": page_width - _PAGE_MARGIN,
+                "bottom": bottom,
+            }
+        )
 
     return _merge_overlapping_rects(rects)
 
