@@ -5,7 +5,7 @@
 | Page name   | Referrals                      |
 | Route       | `/crm/referrals`               |
 | Volume      | 21                             |
-| Status      | `draft`                        |
+| Status      | `ready-for-build`              |
 | Actors      | Partner success, case managers |
 | Permissions | Referral accept/decline        |
 
