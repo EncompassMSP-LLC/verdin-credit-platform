@@ -324,6 +324,178 @@ export async function unsubscribePortalPush(subscriptionId: string): Promise<voi
   });
 }
 
+export interface PortalReadinessDimension {
+  key: string;
+  label: string;
+  score: number;
+  weight: number;
+}
+
+export interface PortalReadinessBlocker {
+  id: string;
+  title: string;
+  impact: string;
+  action: string;
+}
+
+export interface PortalReadinessAccount {
+  id: string;
+  creditor_label: string;
+  bureau: string;
+  readiness_score: number | null;
+  risk_score: number | null;
+  dispute_status: string;
+  recommended_action: string | null;
+}
+
+export interface PortalCaseReadiness {
+  case_id: string;
+  overall: number;
+  band: string;
+  updated_at: string;
+  trend: number | null;
+  disclaimer: string;
+  dimensions: PortalReadinessDimension[];
+  blockers: PortalReadinessBlocker[];
+  accounts: PortalReadinessAccount[];
+}
+
+export interface PortalInsightItem {
+  id: string;
+  title: string;
+  summary: string;
+  confidence: number;
+  actions: string[];
+  source: string;
+}
+
+export interface PortalCaseInsights {
+  case_id: string;
+  disclaimer: string;
+  items: PortalInsightItem[];
+}
+
+export type PortalChecklistStatus = 'open' | 'done';
+export type PortalChecklistPriority = 'high' | 'medium' | 'low';
+
+export interface PortalChecklistItem {
+  id: string;
+  case_id: string;
+  title: string;
+  category: string;
+  priority: PortalChecklistPriority;
+  status: PortalChecklistStatus;
+  due_date: string | null;
+  sort_order: number;
+  updated_at: string;
+}
+
+export interface PortalChecklistResponse {
+  case_id: string;
+  items: PortalChecklistItem[];
+}
+
+export interface PortalLearningModule {
+  id: string;
+  title: string;
+  minutes: number;
+  level: string;
+  summary: string;
+  completed: boolean;
+  completed_at: string | null;
+}
+
+export interface PortalLearningModulesResponse {
+  items: PortalLearningModule[];
+}
+
+export async function getPortalCaseReadiness(caseId: string): Promise<PortalCaseReadiness> {
+  return request<PortalCaseReadiness>(apiPath(`/portal/cases/${caseId}/readiness`));
+}
+
+export async function getPortalCaseInsights(caseId: string): Promise<PortalCaseInsights> {
+  return request<PortalCaseInsights>(apiPath(`/portal/cases/${caseId}/insights`));
+}
+
+export interface PortalCreditAnalysis {
+  run_id: string;
+  case_id: string;
+  generated_at: string;
+  borrower_readiness: {
+    overall?: number;
+    band?: string;
+    product_name?: string;
+    dimensions?: Array<{ key: string; label: string; score: number; weight: number }>;
+    disclaimer?: string;
+  };
+  mortgage_readiness: {
+    overall?: number;
+    band?: string;
+    estimated_ready_weeks?: number;
+    blockers?: Array<{ title: string; impact: string; action: string }>;
+    disclaimer?: string;
+  };
+  borrower_action_plan: {
+    title?: string;
+    items?: Array<{ priority: string; title: string; action: string }>;
+    disclaimer?: string;
+  };
+  dispute_recommendations: {
+    title?: string;
+    items: Array<{
+      creditor?: string;
+      bureau?: string;
+      recommended_action?: string;
+      priority?: string;
+    }>;
+    disclaimer?: string;
+  };
+  timeline: Array<{ at: string; type: string; title: string; detail: string }>;
+  audit_summary: Record<string, number>;
+  compliance_summary: {
+    metro2_total: number;
+    fcra_total: number;
+    identity_theft_total: number;
+  };
+  disclaimer: string;
+}
+
+export async function getPortalCaseCreditAnalysis(caseId: string): Promise<PortalCreditAnalysis> {
+  return request<PortalCreditAnalysis>(apiPath(`/portal/cases/${caseId}/credit-analysis`));
+}
+
+export async function listPortalCaseChecklist(caseId: string): Promise<PortalChecklistResponse> {
+  return request<PortalChecklistResponse>(apiPath(`/portal/cases/${caseId}/checklist`));
+}
+
+export async function updatePortalChecklistItem(
+  itemId: string,
+  status: PortalChecklistStatus,
+): Promise<PortalChecklistItem> {
+  return request<PortalChecklistItem>(apiPath(`/portal/checklist/${itemId}`), {
+    method: 'PATCH',
+    body: { status },
+  });
+}
+
+export async function listPortalLearningModules(): Promise<PortalLearningModulesResponse> {
+  return request<PortalLearningModulesResponse>(apiPath('/portal/learning/modules'));
+}
+
+export async function completePortalLearningModule(
+  moduleId: string,
+): Promise<PortalLearningModule> {
+  return request<PortalLearningModule>(apiPath(`/portal/learning/modules/${moduleId}/complete`), {
+    method: 'POST',
+  });
+}
+
+export async function reopenPortalLearningModule(moduleId: string): Promise<PortalLearningModule> {
+  return request<PortalLearningModule>(apiPath(`/portal/learning/modules/${moduleId}/reopen`), {
+    method: 'POST',
+  });
+}
+
 export async function provisionClientPortalUser(
   clientId: string,
   input: ProvisionPortalUserInput,

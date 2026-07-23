@@ -13,6 +13,24 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## LRP Stage 5 Epic E0 — design tokens + shells (Vol 23)
+
+**Decision:** After founder accepted FOUNDER-REVIEW P0–P2, land `apps/lrp-web` with Vol 23 tokens (`tokens.css` / Tailwind `lrp.*`), light-only theme (P2-13), shared stage/band enums, and advisory disclaimer banners on portal / lender / CRM shells. Bring Build Bible vols to `ready-for-build` for E0+ gates.
+
+**Reason:** Spec-before-code complete for identity/stack/UX defaults; Stage 5 may implement cited slices only.
+
+**Follow-up work:** E1 auth realms; E2 borrower core pages against Vol 19.
+
+## LRP Enterprise Build Bible v2.0 (blueprint-first pivot)
+
+**Decision:** Pause LRP product UI feature velocity in favor of a five-stage program (Company → Product → Design → Architecture → Cursor). Scaffold ~25-volume Build Bible under `docs/lrp-enterprise/build-bible/` with stage gates and a blueprint-first Cursor rule. Product identity framed as AI-powered Borrower Readiness Platform.
+
+**Reason:** Spec-before-code reduces fintech rework; Cursor becomes an implementation tool once volumes are `ready-for-build`.
+
+**Stack note:** Stage 4 defaults to shared Verdin platform; Supabase greenfield requires an explicit ADR.
+
+**Follow-up work:** Founder review accepted; Stage 5 E0 in flight.
+
 ## Mortgage Partner org model + RBAC (`ENABLE_MORTGAGE_PARTNER`)
 
 **Decision:** Add `mortgage_partner` module with `org_partnerships`, `org_partnership_members`, `partner_referrals`, and `partner_access_audits`, gated by `ENABLE_MORTGAGE_PARTNER`. Partnership-scoped `PartnerRole` matrix is an edition overlay (not staff `UserRole`). Staff APIs manage partnerships/referrals; partner JWT realm deferred.

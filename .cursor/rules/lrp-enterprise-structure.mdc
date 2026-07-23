@@ -1,0 +1,22 @@
+---
+description: LRP enterprise folder structure for Cursor — docs taxonomy, app mapping, no fork
+globs:
+  - docs/lrp-enterprise/**
+  - assets/lrp/**
+  - apps/lrp-web/**
+alwaysApply: false
+---
+
+# LRP Enterprise Structure
+
+When working on Lending Readiness Partners product, marketing, portals, CRM, or edition docs:
+
+1. **Docs** go under `docs/lrp-enterprise/` using the numbered folders `00-executive` … `15-roadmap`.
+2. **Assets** (logos, Canva, decks, brochures, social) go under `assets/lrp/`.
+3. **Apps mapping (do not fork):**
+   - Website / borrower / lender / CRM UI → `apps/lrp-web` (`/`, `/portal`, `/lender`, `/crm`)
+   - Admin (CRO staff) → `apps/web`
+   - APIs / DB → `apps/api` (shared multi-tenant platform)
+4. **Packages** stay shared (`packages/ui`, `api-client`, `report-parsers`, etc.) — do not create a parallel `packages/` under a forked root.
+5. Read `docs/lrp-enterprise/STRUCTURE.md` before inventing new top-level apps.
+6. Compliance: advisory readiness only; no unsupervised bureau filing; no cross-tenant marketplace.

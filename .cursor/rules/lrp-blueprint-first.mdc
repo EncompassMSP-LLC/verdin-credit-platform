@@ -1,0 +1,18 @@
+---
+description: LRP blueprint-first — Build Bible before product code
+globs:
+  - docs/lrp-enterprise/**
+  - apps/lrp-web/**
+alwaysApply: false
+---
+
+# LRP Blueprint-First
+
+Lending Readiness Partners is in a **spec-before-code** program.
+
+1. Read `docs/lrp-enterprise/build-bible/README.md` before building product features.
+2. Do **not** invent major new UI/API behavior unless the relevant Build Bible volume is `ready-for-build` or the user explicitly asks to draft Bible content.
+3. Prefer editing Bible volumes (Stages 1–4) over coding `apps/lrp-web` features until Stage 5 is opened.
+4. Existing LRP code is **prototype/reference** unless a volume says keep/refactor/replace.
+5. Stack default = shared Verdin platform (`apps/api` + `apps/lrp-web`). Do not migrate to Supabase unless an approved ADR in Vol 24 says so.
+6. Product identity: AI-powered Borrower Readiness Platform; advisory scores only; no unsupervised bureau filing.

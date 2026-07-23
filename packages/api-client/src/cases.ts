@@ -452,6 +452,56 @@ export async function getCaseDisputeStrategy(caseId: string): Promise<CaseDisput
   return request<CaseDisputeStrategy>(apiPath(`/cases/${caseId}/dispute-strategy`));
 }
 
+export interface CreditAnalysisRunSummary {
+  id: string;
+  case_id: string;
+  generated_at: string;
+  reports_evaluated: number;
+  tradelines_evaluated: number;
+  borrower_readiness_score: number;
+  mortgage_readiness_score: number;
+  schema_version: string;
+}
+
+export interface CreditAnalysisRun extends CreditAnalysisRunSummary {
+  payload: Record<string, unknown>;
+}
+
+export async function createCreditAnalysisRun(caseId: string): Promise<CreditAnalysisRun> {
+  return request<CreditAnalysisRun>(apiPath(`/cases/${caseId}/credit-analysis/runs`), {
+    method: 'POST',
+  });
+}
+
+export async function listCreditAnalysisRuns(
+  caseId: string,
+): Promise<{ items: CreditAnalysisRunSummary[] }> {
+  return request<{ items: CreditAnalysisRunSummary[] }>(
+    apiPath(`/cases/${caseId}/credit-analysis/runs`),
+  );
+}
+
+export async function getLatestCreditAnalysisRun(caseId: string): Promise<CreditAnalysisRun> {
+  return request<CreditAnalysisRun>(apiPath(`/cases/${caseId}/credit-analysis/runs/latest`));
+}
+
+export async function getCreditAnalysisRun(
+  caseId: string,
+  runId: string,
+): Promise<CreditAnalysisRun> {
+  return request<CreditAnalysisRun>(apiPath(`/cases/${caseId}/credit-analysis/runs/${runId}`));
+}
+
+export function getCreditAnalysisExportUrl(
+  caseId: string,
+  runId: string,
+  exportFormat: 'pdf' | 'text' = 'pdf',
+): string {
+  return apiPath(
+    `/cases/${caseId}/credit-analysis/runs/${runId}/export?export_format=${exportFormat}`,
+  );
+}
+
 export async function getLatestCaseDisputeStrategyRun(caseId: string): Promise<DisputeStrategyRun> {
   return request<DisputeStrategyRun>(apiPath(`/cases/${caseId}/dispute-strategy/runs/latest`));
 }
