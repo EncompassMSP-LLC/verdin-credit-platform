@@ -49,8 +49,8 @@ export default function DocumentsPage() {
     <div>
       <PageHeader
         eyebrow="Documents"
-        title="Secure document vault"
-        description="Files are stored on the Ultimate Credit Repair platform document store for your linked case."
+        title="Documents"
+        description="Upload ID and supporting files requested for your readiness file. Do not upload others’ documents."
         actions={
           <label
             className={`inline-flex cursor-pointer rounded-brand bg-gold-500 px-4 py-2.5 text-sm font-semibold uppercase tracking-wide text-navy-900 hover:bg-gold-400 ${

@@ -13,6 +13,14 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## LRP Stage 5 Epic E2 — borrower core (Vol 19)
+
+**Decision:** Align `apps/lrp-web` portal dashboard / readiness / tasks / documents to Vol 19 page specs. Borrower readiness is **band-only** (FOUNDER-REVIEW P0-1); numeric overall score is not shown. Dimension bars use qualitative status pills.
+
+**Reason:** First Stage 5 product surface after tokens + auth realms; keeps advisory compliance copy in-shell.
+
+**Follow-up work:** E3 analysis pipeline (Vol 22); partner name on case when mortgage_partner referral link lands.
+
 ## LRP Stage 5 Epic E1 — auth realms (Vol 24)
 
 **Decision:** Three realm-scoped cookie namespaces — portal (client JWT), CRM (staff JWT + demo fallback), lender (staff JWT interim + demo fallback). Partner-member JWT remains deferred. Role maps from platform `UserRole` into CRM/lender edition roles.
