@@ -13,6 +13,14 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## LRP Stage 5 Epic E3 — analysis pipeline (Vol 22)
+
+**Decision:** Add deterministic Lending Readiness Score™ compose + persisted `credit_analysis_runs` (staff POST/GET under `/cases/{id}/credit-analysis/runs`). Staff enqueue auto-publishes; portal `GET /portal/cases/{id}/readiness` reads the latest published run. No LLM, no bureau I/O, no export in this slice.
+
+**Reason:** Unblocks E2 borrower band UI with a real publishable score artifact; keeps numeric score staff-visible while borrower UI stays band-first (P0-1).
+
+**Follow-up work:** Explicit publish gate; findings overrides; portal credit-analysis fat surface; PDF export; inquiry/PR engines.
+
 ## LRP Stage 5 Epic E2 — borrower core (Vol 19)
 
 **Decision:** Align `apps/lrp-web` portal dashboard / readiness / tasks / documents to Vol 19 page specs. Borrower readiness is **band-only** (FOUNDER-REVIEW P0-1); numeric overall score is not shown. Dimension bars use qualitative status pills.

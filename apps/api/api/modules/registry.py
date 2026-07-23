@@ -11,6 +11,7 @@ from api.modules.accounts.bureau_unsupervised_refiling_models import (
     BureauUnsupervisedRefilingRun,
     BureauUnsupervisedRefilingRunStatus,
 )
+from api.modules.accounts.credit_analysis_run_models import CreditAnalysisRun
 from api.modules.accounts.dispute_bureau_submission_models import (
     DisputeBureauSubmissionRun,
     DisputeBureauSubmissionStatus,
@@ -328,6 +329,7 @@ __all__ = [
     "DisputeBureauSubmissionRun",
     "DisputeBureauSubmissionStatus",
     "DisputeStrategyRun",
+    "CreditAnalysisRun",
     "IdentityTheft605bReadinessRun",
     "IdentityTheftAccountReview",
     "IdentityTheftConfirmation",

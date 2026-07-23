@@ -8,6 +8,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.core.pagination import PaginatedResponse
 from api.database.session import get_db
+from api.modules.accounts.credit_analysis_schemas import (
+    CreditAnalysisRunListResponse,
+    CreditAnalysisRunResponse,
+)
+from api.modules.accounts.credit_analysis_service import CreditAnalysisService
 from api.modules.accounts.dispute_letter_export import sanitize_content_disposition_filename
 from api.modules.accounts.schemas import (
     AccountListParams,
@@ -83,6 +88,10 @@ def get_account_service(db: AsyncSession = Depends(get_db)) -> AccountService:
 
 def get_document_service(db: AsyncSession = Depends(get_db)) -> DocumentService:
     return DocumentService.from_session(db)
+
+
+def get_credit_analysis_service(db: AsyncSession = Depends(get_db)) -> CreditAnalysisService:
+    return CreditAnalysisService.from_session(db)
 
 
 def get_case_account_list_params(
@@ -354,6 +363,57 @@ async def export_case_identity_theft_605b_packet(
         media_type=media_type,
         headers={"Content-Disposition": f'attachment; filename="{safe_name}"'},
     )
+
+
+@router.post(
+    "/{case_id}/credit-analysis/runs",
+    response_model=CreditAnalysisRunResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_credit_analysis_run(
+    case_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: CreditAnalysisService = Depends(get_credit_analysis_service),
+) -> CreditAnalysisRunResponse:
+    """Deterministic Lending Readiness compose + publish (Vol 22). Advisory only."""
+    return await service.create_run(current_user, case_id)
+
+
+@router.get(
+    "/{case_id}/credit-analysis/runs",
+    response_model=CreditAnalysisRunListResponse,
+)
+async def list_credit_analysis_runs(
+    case_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: CreditAnalysisService = Depends(get_credit_analysis_service),
+) -> CreditAnalysisRunListResponse:
+    return await service.list_runs(current_user, case_id)
+
+
+@router.get(
+    "/{case_id}/credit-analysis/runs/latest",
+    response_model=CreditAnalysisRunResponse,
+)
+async def get_latest_credit_analysis_run(
+    case_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: CreditAnalysisService = Depends(get_credit_analysis_service),
+) -> CreditAnalysisRunResponse:
+    return await service.get_latest_run(current_user, case_id)
+
+
+@router.get(
+    "/{case_id}/credit-analysis/runs/{run_id}",
+    response_model=CreditAnalysisRunResponse,
+)
+async def get_credit_analysis_run(
+    case_id: uuid.UUID,
+    run_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: CreditAnalysisService = Depends(get_credit_analysis_service),
+) -> CreditAnalysisRunResponse:
+    return await service.get_run(current_user, case_id, run_id)
 
 
 @router.post(

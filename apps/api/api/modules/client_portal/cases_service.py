@@ -6,6 +6,8 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.core.feature_flags import FeatureFlag, is_feature_enabled
+from api.modules.accounts.credit_analysis_schemas import PortalCaseReadinessResponse
+from api.modules.accounts.credit_analysis_service import CreditAnalysisService
 from api.modules.client_portal.cases_repository import ClientPortalCasesRepository
 from api.modules.client_portal.models import ClientPortalUser
 from api.modules.client_portal.schemas import (
@@ -22,6 +24,7 @@ class ClientPortalCasesService:
         self._session = session
         self._cases = ClientPortalCasesRepository(session)
         self._clients = ClientRepository(session)
+        self._credit_analysis = CreditAnalysisService(session)
 
     @classmethod
     def from_session(cls, session: AsyncSession) -> "ClientPortalCasesService":
@@ -117,4 +120,29 @@ class ClientPortalCasesService:
             updated_at=case.updated_at,
             dispute_accounts=dispute_accounts,
             account_count=sum(dispute_accounts.values()),
+        )
+
+    async def get_case_readiness(
+        self,
+        portal_user: ClientPortalUser,
+        case_id: uuid.UUID,
+    ) -> PortalCaseReadinessResponse:
+        """Borrower-facing readiness from latest published run (band is source of truth)."""
+        self._require_enabled()
+        client, contact_emails = await self._resolve_client_context(portal_user)
+        case = await self._cases.get_case_for_client(
+            case_id,
+            organization_id=portal_user.organization_id,
+            client=client,
+            portal_email=portal_user.email,
+            contact_emails=contact_emails,
+        )
+        if case is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Case not found",
+            )
+        return await self._credit_analysis.get_portal_readiness(
+            organization_id=portal_user.organization_id,
+            case_id=case.id,
         )
