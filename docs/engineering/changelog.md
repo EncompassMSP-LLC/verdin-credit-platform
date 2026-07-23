@@ -13,6 +13,14 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## LRP Stage 5 Epic E4.1 — lender pipeline table (Vol 20)
+
+**Decision:** Replace lender pipeline kanban demo with a **table** of `mortgage_partner` referrals when platform-authenticated. Enrich referral DTOs with `client_display_name`. Demo auth keeps seed rows. Readiness band / next-update columns deferred until score publish is linked per partnership.
+
+**Reason:** Vol 20 P2-1 table-first; list API already exists; new-referral form blocked on client intake.
+
+**Follow-up work:** New referral form; referral status PATCH; band column from published readiness; partner JWT realm.
+
 ## LRP Build Bible — DOCX v2.0 archive + crosswalk
 
 **Decision:** Archive the founder DOCX (30-volume outline) under `docs/lrp-enterprise/build-bible/sources/` and map it to the repo’s ~25-volume scheme via `VOLUME-CROSSWALK.md`. Absorb unique locks (boundaries, brand, AI human-review, score non-claims, dashboard “next three”) into CLAIM-LIBRARY / Vol 01 / Vol 22 / Vol 19 dashboard. **Do not renumber** repo volumes during Stage 5.

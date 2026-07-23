@@ -91,6 +91,17 @@ def test_create_partnership_member_referral_and_audit(
     )
     assert viewed.status_code == 200
     assert viewed.json()["client_id"] == str(client_record.id)
+    assert viewed.json()["client_display_name"] == "Referral Borrower"
+
+    listed_referrals = api_client.get(
+        f"/api/v1/mortgage-partner/partnerships/{partnership_id}/referrals",
+        headers=case_manager_headers,
+    )
+    assert listed_referrals.status_code == 200, listed_referrals.text
+    assert any(
+        item["id"] == referral_id and item.get("client_display_name") == "Referral Borrower"
+        for item in listed_referrals.json()
+    )
 
     audits = api_client.get("/api/v1/mortgage-partner/access-audits", headers=admin_headers)
     assert audits.status_code == 200

@@ -5,7 +5,7 @@
 | Page name   | Pipeline                           |
 | Route       | `/lender`                          |
 | Volume      | 20                                 |
-| Status      | `review`                           |
+| Status      | `ready-for-build`                  |
 | Actors      | LO submitter, viewer, branch admin |
 | Permissions | Partnership-scoped referrals       |
 

@@ -83,6 +83,7 @@ class PartnerReferralResponse(BaseModel):
     referred_by_user_id: uuid.UUID | None
     created_at: datetime
     updated_at: datetime
+    client_display_name: str | None = None
 
 
 class PartnerAccessAuditResponse(BaseModel):

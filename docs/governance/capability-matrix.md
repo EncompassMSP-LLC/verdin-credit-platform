@@ -809,13 +809,14 @@ Scope: [version-29.0-scope.md](version-29.0-scope.md) · Checklist: [version-29.
 
 **Architecture:** Edition on the shared platform — **do not fork**. Reuse FCRA/Metro2/cross-bureau/intelligence.
 
-| Capability                               | Version | Status  | Backend | Frontend | API     | AI      | Tests   | Dependencies   | Notes                                                                                            |
-| ---------------------------------------- | ------- | ------- | ------- | -------- | ------- | ------- | ------- | -------------- | ------------------------------------------------------------------------------------------------ |
-| Partner org model + lender RBAC          | 29.0    | ✅      | ✅      | —        | ✅      | —       | ✅      | Auth/orgs      | `ENABLE_MORTGAGE_PARTNER`; `/mortgage-partner/*` partnerships, members, referrals, access audits |
-| LRP borrower portal core (Vol 19 E2)     | 29.0    | Partial | ✅      | Partial  | ✅      | —       | Partial | Client portal  | `apps/lrp-web` dashboard/readiness/tasks/docs; borrower band-only readiness (P0-1)               |
-| LRP credit analysis runs (Vol 22 E3)     | 29.0    | Partial | ✅      | —        | ✅      | —       | ✅      | Accounts/cases | Deterministic LRS compose; `/cases/{id}/credit-analysis/runs`; portal readiness GET              |
-| Lender dashboard + pipeline + milestones | 29.0    | Planned | Planned | Planned  | Planned | —       | Planned | Cases          | Partner UI over shared clients/cases                                                             |
-| Mortgage readiness score + report export | 29.0    | Planned | Planned | Planned  | Planned | Partial | Planned | Intelligence   | Deterministic estimator; LLM only behind ADR-012                                                 |
+| Capability                               | Version | Status  | Backend | Frontend | API     | AI      | Tests   | Dependencies     | Notes                                                                                            |
+| ---------------------------------------- | ------- | ------- | ------- | -------- | ------- | ------- | ------- | ---------------- | ------------------------------------------------------------------------------------------------ |
+| Partner org model + lender RBAC          | 29.0    | ✅      | ✅      | —        | ✅      | —       | ✅      | Auth/orgs        | `ENABLE_MORTGAGE_PARTNER`; `/mortgage-partner/*` partnerships, members, referrals, access audits |
+| LRP borrower portal core (Vol 19 E2)     | 29.0    | Partial | ✅      | Partial  | ✅      | —       | Partial | Client portal    | `apps/lrp-web` dashboard/readiness/tasks/docs; borrower band-only readiness (P0-1)               |
+| LRP credit analysis runs (Vol 22 E3)     | 29.0    | Partial | ✅      | —        | ✅      | —       | ✅      | Accounts/cases   | Deterministic LRS compose; `/cases/{id}/credit-analysis/runs`; portal readiness GET              |
+| LRP lender pipeline table (Vol 20 E4.1)  | 29.0    | Partial | ✅      | Partial  | ✅      | —       | ✅      | Mortgage partner | `apps/lrp-web` `/lender/pipeline` ← partnership referrals + `client_display_name`                |
+| Lender dashboard + pipeline + milestones | 29.0    | Planned | Planned | Planned  | Planned | —       | Planned | Cases            | Partner UI over shared clients/cases                                                             |
+| Mortgage readiness score + report export | 29.0    | Planned | Planned | Planned  | Planned | Partial | Planned | Intelligence     | Deterministic estimator; LLM only behind ADR-012                                                 |
 
 ---
 
