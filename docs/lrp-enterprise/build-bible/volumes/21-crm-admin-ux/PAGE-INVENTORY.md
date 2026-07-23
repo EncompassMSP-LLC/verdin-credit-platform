@@ -8,7 +8,7 @@ Status: critical pages at `review`. See [FOUNDER-REVIEW.md](../../FOUNDER-REVIEW
 | Ops dashboard      | [pages/dashboard.md](pages/dashboard.md)                   | draft           |
 | Pipeline           | [pages/pipeline.md](pages/pipeline.md)                     | review          |
 | Borrower list      | [pages/borrowers.md](pages/borrowers.md)                   | ready-for-build |
-| Borrower workspace | [pages/borrower-workspace.md](pages/borrower-workspace.md) | review          |
+| Borrower workspace | [pages/borrower-workspace.md](pages/borrower-workspace.md) | ready-for-build |
 | Referrals          | [pages/referrals.md](pages/referrals.md)                   | ready-for-build |
 | Lenders            | [pages/lenders.md](pages/lenders.md)                       | draft           |
 | Realtors           | [pages/realtors.md](pages/realtors.md)                     | draft           |

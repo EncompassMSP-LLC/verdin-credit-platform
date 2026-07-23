@@ -13,6 +13,14 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## LRP Stage 5 Epic E5.3 — CRM borrower workspace overview (Vol 21)
+
+**Decision:** Wire `apps/lrp-web` `/crm/borrowers/:id` to `getClient` + `listCases(client_id)` + latest credit-analysis run (band + staff-visible score). Demo keeps seed workspace. Tasks/docs/notes remain deferred.
+
+**Reason:** Completes the E5 “borrower workspace + referral queue” backlog pair with a live overview pane.
+
+**Follow-up work:** Run analysis / publish actions; dispute tabs; live tasks/documents; stage PATCH.
+
 ## LRP Stage 5 Epic E5.2 — CRM borrower list (Vol 21)
 
 **Decision:** Wire `apps/lrp-web` `/crm/borrowers` to `GET /clients` (search ≥2 chars, status filter, pagination). Demo auth keeps seed rows. Readiness band column deferred until workspace publishes band per client/case.

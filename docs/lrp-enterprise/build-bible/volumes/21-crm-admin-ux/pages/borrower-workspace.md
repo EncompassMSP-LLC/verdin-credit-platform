@@ -5,7 +5,7 @@
 | Page name   | Borrower workspace               |
 | Route       | `/crm/borrowers/:id`             |
 | Volume      | 21                               |
-| Status      | `review`                         |
+| Status      | `ready-for-build`                |
 | Actors      | Case manager, reviewer, ops lead |
 | Permissions | Case read/write by role          |
 
