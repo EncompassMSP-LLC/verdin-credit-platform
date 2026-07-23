@@ -7,11 +7,9 @@ from dataclasses import dataclass
 from io import BytesIO
 from typing import Any
 
-# Fallback band when we cannot find the next account header on the page.
-_TRADELINE_BLOCK_PADDING = 110.0
-_PAGE_MARGIN = 4.0
 # Gap left above the next creditor header so labels stay readable.
 _NEXT_HEADER_GAP = 6.0
+_PAGE_MARGIN = 4.0
 
 
 @dataclass(frozen=True, slots=True)
@@ -266,43 +264,59 @@ def _collect_redaction_rects(
 ) -> list[dict[str, float]]:
     """Black out non-target tradelines on a page.
 
-    Experian (and similar) pages often end one account and start the next on the
-    same sheet. A short padding under the other creditor name leaves payment
-    history / contact blocks visible. Redact from each other-creditor header to
-    the next header (or page bottom).
+    Experian pages often stack the previous account, the target, and the next
+    account on one sheet. Redact each other-creditor block only until the next
+    boundary: another other-creditor header, the target header, or page bottom.
+    Never paint through the target tradeline.
     """
     page_width = float(page.width)
     page_height = float(page.height)
+    page_bottom = page_height - _PAGE_MARGIN
 
-    header_tops: list[float] = []
+    target_tops = _header_tops_for_creditor(page, target_creditor)
+    other_tops: list[float] = []
     for creditor in other_creditors:
         if _creditors_match(creditor, target_creditor):
             continue
-        for query in _creditor_search_queries(creditor):
-            for hit in page.search(query, case=False):
-                header_tops.append(max(0.0, float(hit["top"]) - 4.0))
+        other_tops.extend(_header_tops_for_creditor(page, creditor))
 
-    if not header_tops:
+    if not other_tops:
         return []
 
-    unique_tops = sorted(set(round(top, 1) for top in header_tops))
+    unique_other_tops = sorted(set(round(top, 1) for top in other_tops))
+    unique_target_tops = sorted(set(round(top, 1) for top in target_tops))
     rects: list[dict[str, float]] = []
-    for index, top in enumerate(unique_tops):
-        if index + 1 < len(unique_tops):
-            bottom = max(top + _TRADELINE_BLOCK_PADDING, unique_tops[index + 1] - _NEXT_HEADER_GAP)
-        else:
-            bottom = page_height - _PAGE_MARGIN
-        bottom = min(page_height - _PAGE_MARGIN, max(top + 1.0, bottom))
+
+    for index, top in enumerate(unique_other_tops):
+        boundaries: list[float] = [page_bottom]
+        if index + 1 < len(unique_other_tops):
+            boundaries.append(unique_other_tops[index + 1] - _NEXT_HEADER_GAP)
+        for target_top in unique_target_tops:
+            if target_top > top:
+                boundaries.append(target_top - _NEXT_HEADER_GAP)
+        bottom = min(boundaries)
+        # If the only stop is far below and there is no target/next header under
+        # this block, still cover a full trailing account to page bottom.
+        if bottom <= top:
+            continue
         rects.append(
             {
                 "x0": _PAGE_MARGIN,
                 "top": top,
                 "x1": page_width - _PAGE_MARGIN,
-                "bottom": bottom,
+                "bottom": min(page_bottom, bottom),
             }
         )
 
     return _merge_overlapping_rects(rects)
+
+
+def _header_tops_for_creditor(page: Any, creditor: str) -> list[float]:
+    tops: list[float] = []
+    for query in _creditor_search_queries(creditor):
+        for hit in page.search(query, case=False):
+            tops.append(max(0.0, float(hit["top"]) - 4.0))
+    return tops
 
 
 def _build_redaction_overlay(

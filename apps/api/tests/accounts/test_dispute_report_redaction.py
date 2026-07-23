@@ -83,6 +83,49 @@ def test_collect_redaction_rects_covers_to_page_bottom_after_next_account() -> N
     assert any(rect["bottom"] - rect["top"] > 200 for rect in rects)
 
 
+def test_collect_redaction_rects_stops_at_target_after_previous_account() -> None:
+    """Previous account must not redact through the target tradeline."""
+    from reportlab.lib.pagesizes import letter as letter_page_size
+    from reportlab.pdfgen import canvas
+
+    from api.modules.accounts.dispute_report_redaction import _collect_redaction_rects
+
+    buffer = BytesIO()
+    pdf = canvas.Canvas(buffer, pagesize=letter_page_size)
+    pdf.setFont("Helvetica-Bold", 14)
+    pdf.drawString(72, 740, "FLAGSTAR BANK")
+    pdf.setFont("Helvetica", 11)
+    pdf.drawString(72, 720, "Account ****6044")
+    pdf.setFont("Helvetica-Bold", 14)
+    pdf.drawString(72, 500, "AMERICREDIT/GM FINANCIAL")
+    pdf.setFont("Helvetica", 11)
+    pdf.drawString(72, 480, "Account ****2957 Status Paid Closed")
+    pdf.drawString(72, 460, "Payment History OK")
+    pdf.setFont("Helvetica-Bold", 14)
+    pdf.drawString(72, 200, "TOTAL VISA BANK OF MISSOURI")
+    pdf.setFont("Helvetica", 11)
+    pdf.drawString(72, 180, "Balance $489")
+    pdf.save()
+    pdf_bytes = buffer.getvalue()
+
+    import pdfplumber
+
+    with pdfplumber.open(BytesIO(pdf_bytes)) as report:
+        page = report.pages[0]
+        rects = _collect_redaction_rects(
+            page,
+            other_creditors=("FLAGSTAR BANK", "TOTAL VISA BANK OF MISSOURI"),
+            target_creditor="AMERICREDIT/GM FINANCIAL",
+        )
+
+    assert len(rects) >= 2
+    # Previous-account band must end before the target header region.
+    previous = min(rects, key=lambda rect: rect["top"])
+    assert previous["bottom"] < 520
+    # Following-account band still reaches the page bottom.
+    assert max(rect["bottom"] for rect in rects) >= float(page.height) - 10
+
+
 def test_build_redacted_tradeline_excerpt_falls_back_when_target_missing() -> None:
     excerpt = build_redacted_tradeline_excerpt(
         _sample_report_pdf(),
