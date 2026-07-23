@@ -30,8 +30,8 @@ export default function TasksPage() {
     <div>
       <PageHeader
         eyebrow="Tasks"
-        title="Your readiness checklist"
-        description="Complete advisor-seeded actions to keep your file moving. Progress syncs to your portal account on the shared platform."
+        title="Your action plan"
+        description="Complete these tasks to move your readiness forward. Due dates are set by your advisor (not editable here)."
       />
 
       {!primary ? (

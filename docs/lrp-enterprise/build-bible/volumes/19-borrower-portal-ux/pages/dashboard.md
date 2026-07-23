@@ -5,7 +5,7 @@
 | Page name   | Dashboard                          |
 | Route       | `/portal` (or `/portal/dashboard`) |
 | Volume      | 19                                 |
-| Status      | `review`                           |
+| Status      | `ready-for-build`                  |
 | Actors      | Borrower                           |
 | Permissions | Authenticated client; own org/case |
 
