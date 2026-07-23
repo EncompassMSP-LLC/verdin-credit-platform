@@ -1,20 +1,25 @@
 ﻿# Volume 01 — Vision, mission, market
 
-| Field        | Value                                                      |
-| ------------ | ---------------------------------------------------------- |
-| Status       | `draft`                                                    |
-| Stage        | 1 — Company Blueprint                                      |
-| Owner        | Founder                                                    |
-| Last updated | 2026-07-22                                                 |
-| Downstream   | Vol 02 Business plan · Vol 07 Marketing · Vol 22 AI engine |
+| Field        | Value                                                                    |
+| ------------ | ------------------------------------------------------------------------ |
+| Status       | `draft`                                                                  |
+| Stage        | 1 — Company Blueprint                                                    |
+| Owner        | Founder                                                                  |
+| Last updated | 2026-07-23                                                               |
+| Downstream   | Vol 02 Business plan · Vol 07 Marketing · Vol 22 AI engine               |
+| DOCX map     | §01 Executive Charter ([VOLUME-CROSSWALK.md](../../VOLUME-CROSSWALK.md)) |
 
 ---
 
 ## 1. Vision
 
-A world where mortgage-intent borrowers, lenders, and realtors share a **clear, compliant signal** of lending readiness — so credit work is measurable progress toward homeownership, not opaque “repair” theater.
+Become the most trusted borrower-readiness platform connecting consumers and authorized financial professionals through transparent education, technology, and accountable progress management.
+
+_(Repo framing:)_ A world where mortgage-intent borrowers, lenders, and realtors share a **clear, compliant signal** of lending readiness — so credit work is measurable progress toward homeownership, not opaque “repair” theater.
 
 ## 2. Mission
+
+Empower borrowers with understandable information, responsible strategies, and practical tools that improve their readiness for financing opportunities.
 
 Operate an **AI-powered Borrower Readiness Platform** that:
 
@@ -24,7 +29,10 @@ Operate an **AI-powered Borrower Readiness Platform** that:
 4. Gives lenders and realtors pipeline visibility without turning them into credit operators.
 5. Keeps high-risk dispute actions **staff-mediated** and auditable.
 
-**Tagline:** _Helping More Borrowers Become Lending Ready._
+**Tagline:** _Helping More Borrowers Become Lending Ready._  
+**Supporting line (DOCX §02):** Education, strategy, and progress for the next financing opportunity.
+
+**Five-year ambition (DOCX §01.2):** Repeatable partner network, secure multi-tenant platform, documented outcome measurement, and nationally adaptable compliance operations.
 
 ## 3. Product identity (locked intent)
 
@@ -34,6 +42,14 @@ Operate an **AI-powered Borrower Readiness Platform** that:
 | Partner-channel infrastructure   | Lender LOS / underwriting system |
 | Advisory readiness packaging     | Approval or funding guarantee    |
 | Edition on a shared CRO platform | Forked “mortgage-only” codebase  |
+
+### Company definition and boundaries (DOCX §01.1)
+
+Lending Readiness Partners prepares consumers for future financing through education, credit-profile analysis, action planning, progress tracking, and partner communication **authorized by the consumer**.
+
+**LRP does not:** make credit decisions; represent that any lender will approve a borrower; select loan products; quote rates; negotiate terms; take applications; or direct underwriting decisions.
+
+Strategic advantage: structured credit-report analysis + individualized readiness planning + education + progress management + transparent communication with authorized partners.
 
 ### North-star workflow
 

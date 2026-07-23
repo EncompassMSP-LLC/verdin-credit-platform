@@ -13,6 +13,14 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## LRP Build Bible — DOCX v2.0 archive + crosswalk
+
+**Decision:** Archive the founder DOCX (30-volume outline) under `docs/lrp-enterprise/build-bible/sources/` and map it to the repo’s ~25-volume scheme via `VOLUME-CROSSWALK.md`. Absorb unique locks (boundaries, brand, AI human-review, score non-claims, dashboard “next three”) into CLAIM-LIBRARY / Vol 01 / Vol 22 / Vol 19 dashboard. **Do not renumber** repo volumes during Stage 5.
+
+**Reason:** Keeps founder DOCX as reference while Stage 5 PRs continue citing Vol 19/22/23/24/25.
+
+**Follow-up work:** Optional full remap to DOCX numbering after Stage 5 epics settle.
+
 ## LRP Stage 5 Epic E3 — analysis pipeline (Vol 22)
 
 **Decision:** Add deterministic Lending Readiness Score™ compose + persisted `credit_analysis_runs` (staff POST/GET under `/cases/{id}/credit-analysis/runs`). Staff enqueue auto-publishes; portal `GET /portal/cases/{id}/readiness` reads the latest published run. No LLM, no bureau I/O, no export in this slice.
