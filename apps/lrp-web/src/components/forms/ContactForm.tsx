@@ -25,14 +25,16 @@ export function ContactForm() {
 
   const [status, setStatus] = useState<'idle' | 'submitted'>('idle');
   const [form, setForm] = useState({
-    name: '',
-    email: '',
-    organization: '',
+    name: searchParams.get('lo') ?? '',
+    email: searchParams.get('email') ?? '',
+    organization: searchParams.get('partner') ?? '',
     role: '',
     intent: initialIntent,
-    message: searchParams.get('resource')
-      ? `Please send the resource: ${searchParams.get('resource')}`
-      : '',
+    message:
+      searchParams.get('message') ??
+      (searchParams.get('resource')
+        ? `Please send the resource: ${searchParams.get('resource')}`
+        : ''),
   });
 
   function update<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {

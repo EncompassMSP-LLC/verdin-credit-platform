@@ -1,5 +1,12 @@
 export const resources = [
   {
+    title: 'Premium Partner Sales Kit (Phase 2)',
+    description:
+      'Partnership guide, referral form, leave-behind print sheet, deck outline, and 90-day campaign hub.',
+    audience: 'Lenders & BD',
+    href: '/resources/partner-kit/phase-2',
+  },
+  {
     title: 'Mortgage Partner Marketing Kit',
     description:
       'Claim-safe letters, brochure, flyer, LO one-pager, checklist, and campaign outlines for lender and realtor channels.',
