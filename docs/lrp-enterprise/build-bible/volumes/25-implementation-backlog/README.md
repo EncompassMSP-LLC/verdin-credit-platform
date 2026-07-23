@@ -18,8 +18,8 @@ Implement only from volumes/pages marked **`ready-for-build`**. Cite the volume 
 
 | Epic                         | Cite      | Status             | Notes                                                        |
 | ---------------------------- | --------- | ------------------ | ------------------------------------------------------------ |
-| E0 Tokens + shells           | Vol 23    | **done** (this PR) | CSS tokens, light-only, advisory banner on portal/lender/CRM |
-| E1 Auth realms               | Vol 24    | next               | Borrower / lender / CRM login → platform JWT                 |
+| E0 Tokens + shells           | Vol 23    | **done** (#346)    | CSS tokens, light-only, advisory banner on portal/lender/CRM |
+| E1 Auth realms               | Vol 24    | **done** (this PR) | Portal JWT + CRM/lender staff JWT with demo fallback         |
 | E2 Borrower core             | Vol 19    | queued             | Dashboard, readiness, tasks, docs                            |
 | E3 Analysis pipeline         | Vol 22    | queued             | Enqueue, findings, publish score                             |
 | E4 Lender referrals          | Vol 20    | queued             | Pipeline table, new referral, tracking                       |

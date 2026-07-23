@@ -22,7 +22,7 @@ const groupLabels = {
 export function CrmShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, isLoading, isAuthenticated, logout, can } = useCrmAuth();
+  const { user, isLoading, isAuthenticated, logout, can, authMode } = useCrmAuth();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -173,6 +173,11 @@ export function CrmShell({ children }: { children: ReactNode }) {
               <div className="min-w-0">
                 <p className="truncate text-[0.65rem] font-medium uppercase tracking-eyebrow text-gold-600">
                   {user.organizationName} · Enterprise CRM
+                  {authMode === 'demo'
+                    ? ' · demo auth'
+                    : authMode === 'platform'
+                      ? ' · platform'
+                      : ''}
                 </p>
                 <p className="truncate text-sm font-semibold">
                   Helping More Borrowers Become Lending Ready.

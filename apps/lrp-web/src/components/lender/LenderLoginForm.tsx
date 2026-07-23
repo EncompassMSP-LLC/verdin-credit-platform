@@ -8,7 +8,7 @@ export function LenderLoginForm() {
   const { login } = useLenderAuth();
   const router = useRouter();
   const search = useSearchParams();
-  const [email, setEmail] = useState('lo@lrp.lender');
+  const [email, setEmail] = useState('owner@verdin.demo');
   const [password, setPassword] = useState('changeme123');
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -41,7 +41,7 @@ export function LenderLoginForm() {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="mt-1.5 w-full rounded-md border border-navy-900/15 bg-white px-3 py-2.5 text-sm dark:border-white/15 dark:bg-navy-900"
+          className="mt-1.5 w-full rounded-md border border-lrp-border bg-lrp-surface-elevated px-3 py-2.5 text-sm"
         />
       </div>
       <div>
@@ -55,7 +55,7 @@ export function LenderLoginForm() {
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="mt-1.5 w-full rounded-md border border-navy-900/15 bg-white px-3 py-2.5 text-sm dark:border-white/15 dark:bg-navy-900"
+          className="mt-1.5 w-full rounded-md border border-lrp-border bg-lrp-surface-elevated px-3 py-2.5 text-sm"
         />
       </div>
       {error ? (
@@ -66,14 +66,20 @@ export function LenderLoginForm() {
       <button
         type="submit"
         disabled={pending}
-        className="w-full rounded-md bg-navy-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy-700 disabled:opacity-60 dark:bg-gold-500 dark:text-navy-900"
+        className="w-full rounded-md bg-navy-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy-700 disabled:opacity-60"
       >
         {pending ? 'Signing in…' : 'Sign in to lender workspace'}
       </button>
-      <p className="text-xs text-slate-500 dark:text-white/55">
-        Demo: <code>lo@lrp.lender</code> / <code>admin@lrp.lender</code> /{' '}
-        <code>ops@lrp.lender</code> / <code>uw@lrp.lender</code> — password <code>changeme123</code>
-      </p>
+      <div className="space-y-1 text-xs text-slate-500">
+        <p>
+          Platform staff (interim): <code>owner@verdin.demo</code> / <code>changeme123</code>
+        </p>
+        <p>
+          Demo LO fallback: <code>lo@lrp.lender</code> / <code>admin@lrp.lender</code> —{' '}
+          <code>changeme123</code>
+        </p>
+        <p>Partner-member JWT is deferred (mortgage_partner realm).</p>
+      </div>
     </form>
   );
 }

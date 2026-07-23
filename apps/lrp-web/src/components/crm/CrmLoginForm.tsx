@@ -8,7 +8,7 @@ export function CrmLoginForm() {
   const { login } = useCrmAuth();
   const router = useRouter();
   const search = useSearchParams();
-  const [email, setEmail] = useState('lo@lrp.crm');
+  const [email, setEmail] = useState('owner@verdin.demo');
   const [password, setPassword] = useState('changeme123');
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -41,7 +41,7 @@ export function CrmLoginForm() {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="mt-1.5 w-full rounded-md border border-navy-900/15 bg-white px-3 py-2.5 text-sm dark:border-white/15 dark:bg-navy-900"
+          className="mt-1.5 w-full rounded-md border border-lrp-border bg-lrp-surface-elevated px-3 py-2.5 text-sm"
         />
       </div>
       <div>
@@ -55,7 +55,7 @@ export function CrmLoginForm() {
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="mt-1.5 w-full rounded-md border border-navy-900/15 bg-white px-3 py-2.5 text-sm dark:border-white/15 dark:bg-navy-900"
+          className="mt-1.5 w-full rounded-md border border-lrp-border bg-lrp-surface-elevated px-3 py-2.5 text-sm"
         />
       </div>
       {error ? (
@@ -66,14 +66,19 @@ export function CrmLoginForm() {
       <button
         type="submit"
         disabled={pending}
-        className="w-full rounded-md bg-navy-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy-700 disabled:opacity-60 dark:bg-gold-500 dark:text-navy-900"
+        className="w-full rounded-md bg-navy-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy-700 disabled:opacity-60"
       >
         {pending ? 'Signing in…' : 'Sign in to CRM'}
       </button>
-      <p className="text-xs text-slate-500 dark:text-white/55">
-        Demo: <code>admin@lrp.crm</code> / <code>lo@lrp.crm</code> / <code>partners@lrp.crm</code> /{' '}
-        <code>ops@lrp.crm</code> — password <code>changeme123</code>
-      </p>
+      <div className="space-y-1 text-xs text-slate-500">
+        <p>
+          Platform staff: <code>owner@verdin.demo</code> / <code>changeme123</code> (API required)
+        </p>
+        <p>
+          Demo fallback: <code>admin@lrp.crm</code> / <code>lo@lrp.crm</code> — password{' '}
+          <code>changeme123</code>
+        </p>
+      </div>
     </form>
   );
 }
