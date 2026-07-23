@@ -45,6 +45,27 @@ class MortgagePartnerService:
     def from_session(cls, session: AsyncSession) -> "MortgagePartnerService":
         return cls(MortgagePartnerRepository(session), session)
 
+    def _referral_response(
+        self,
+        row: PartnerReferral,
+        *,
+        client_display_name: str | None,
+    ) -> PartnerReferralResponse:
+        return PartnerReferralResponse(
+            id=row.id,
+            partnership_id=row.partnership_id,
+            cro_organization_id=row.cro_organization_id,
+            client_id=row.client_id,
+            case_id=row.case_id,
+            status=row.status,
+            source_label=row.source_label,
+            notes=row.notes,
+            referred_by_user_id=row.referred_by_user_id,
+            created_at=row.created_at,
+            updated_at=row.updated_at,
+            client_display_name=client_display_name,
+        )
+
     def _require_organization(self, user: User) -> uuid.UUID:
         if user.organization_id is None:
             raise HTTPException(
@@ -338,7 +359,7 @@ class MortgagePartnerService:
             detail=f"client_id={payload.client_id}",
         )
         await self._session.commit()
-        return PartnerReferralResponse.model_validate(created)
+        return self._referral_response(created, client_display_name=client.display_name)
 
     async def list_referrals(
         self, user: User, partnership_id: uuid.UUID
@@ -352,6 +373,10 @@ class MortgagePartnerService:
                 detail="Partnership not found",
             )
         rows = await self._repo.list_referrals(partnership_id, cro_org_id)
+        names = await self._repo.map_client_display_names(
+            cro_org_id,
+            [row.client_id for row in rows],
+        )
         await self._audit(
             cro_organization_id=cro_org_id,
             actor=user,
@@ -362,7 +387,10 @@ class MortgagePartnerService:
             detail=f"count={len(rows)}",
         )
         await self._session.commit()
-        return [PartnerReferralResponse.model_validate(row) for row in rows]
+        return [
+            self._referral_response(row, client_display_name=names.get(row.client_id))
+            for row in rows
+        ]
 
     async def get_referral(
         self,
@@ -384,6 +412,7 @@ class MortgagePartnerService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Referral not found",
             )
+        names = await self._repo.map_client_display_names(cro_org_id, [referral.client_id])
         await self._audit(
             cro_organization_id=cro_org_id,
             actor=user,
@@ -394,7 +423,10 @@ class MortgagePartnerService:
             detail=f"client_id={referral.client_id}",
         )
         await self._session.commit()
-        return PartnerReferralResponse.model_validate(referral)
+        return self._referral_response(
+            referral,
+            client_display_name=names.get(referral.client_id),
+        )
 
     async def list_access_audits(self, user: User) -> list[PartnerAccessAuditResponse]:
         self._require_write(user)  # admin-only evidence export surface

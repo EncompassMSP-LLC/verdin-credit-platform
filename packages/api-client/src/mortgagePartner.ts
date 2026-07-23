@@ -69,6 +69,8 @@ export interface PartnerReferral {
   referred_by_user_id: string | null;
   created_at: string;
   updated_at: string;
+  /** CRO client display name for lender pipeline tables (Vol 20). */
+  client_display_name?: string | null;
 }
 
 export interface PartnerReferralCreateInput {

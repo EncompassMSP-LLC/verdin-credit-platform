@@ -51,6 +51,22 @@ class MortgagePartnerRepository:
         )
         return result.scalar_one_or_none()
 
+    async def map_client_display_names(
+        self,
+        organization_id: uuid.UUID,
+        client_ids: list[uuid.UUID],
+    ) -> dict[uuid.UUID, str]:
+        if not client_ids:
+            return {}
+        result = await self._session.execute(
+            select(Client.id, Client.display_name).where(
+                Client.organization_id == organization_id,
+                Client.id.in_(client_ids),
+                Client.deleted_at.is_(None),
+            )
+        )
+        return {row[0]: row[1] for row in result.all()}
+
     async def get_case_in_org(self, case_id: uuid.UUID, organization_id: uuid.UUID) -> Case | None:
         result = await self._session.execute(
             select(Case).where(
