@@ -1,5 +1,12 @@
 export const resources = [
   {
+    title: 'Mortgage Partner Marketing Kit',
+    description:
+      'Claim-safe letters, brochure, flyer, LO one-pager, checklist, and campaign outlines for lender and realtor channels.',
+    audience: 'Lenders & Realtors',
+    href: '/resources/partner-kit',
+  },
+  {
     title: 'Lender readiness briefing one-pager',
     description:
       'A concise overview of fallout recovery, evidenced readiness signals, and compliance-minded controls for production and credit stakeholders.',

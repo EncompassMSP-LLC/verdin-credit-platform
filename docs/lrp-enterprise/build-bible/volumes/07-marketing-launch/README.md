@@ -1,12 +1,12 @@
 ﻿# Volume 07 — Marketing strategy and launch plan
 
-| Field        | Value                    |
-| ------------ | ------------------------ |
-| Status       | `draft`                  |
-| Stage        | 1                        |
-| Owner        | Founder → Marketing      |
-| Last updated | 2026-07-22               |
-| Depends on   | Vol 01 · Vol 04 · Vol 16 |
+| Field        | Value                             |
+| ------------ | --------------------------------- |
+| Status       | `ready-for-build`                 |
+| Stage        | 1                                 |
+| Owner        | Founder → Marketing               |
+| Last updated | 2026-07-23                        |
+| Depends on   | Vol 01 · Vol 04 · Vol 16 · Vol 18 |
 
 ---
 
@@ -58,14 +58,22 @@ Create **trusted demand** among operators, lenders, and realtors for a Borrower 
 
 Asset homes: `assets/lrp/social/`, `brochures/`, `presentations/`.
 
+## 5b. Mortgage Partner Marketing Kit (Phase 1)
+
+Canonical claim-safe sales kit for LOs, lenders, and realtor co-channel:
+
+**[partner-kit/](./partner-kit/)** — letters, brochure, flyer, one-pager, checklist, social/email/LinkedIn, landing spec, realtor variant, Phase 2 backlog.
+
+Web mirrors: `/lenders`, `/realtors`, `/resources/partner-kit`.
+
 ## 6. Launch plan (90 days)
 
 ### Phase A — Soft launch (Days 1–30)
 
 - [ ] Brand basics live (domain, Workspace, handles) — Vol 16
-- [ ] Website messaging v1 (advisory disclaimers)
+- [x] Website messaging v1 (advisory disclaimers) — partner kit + `/lenders`
 - [ ] 3–5 design-partner conversations booked
-- [ ] Partner Kit one-pager PDF
+- [x] Partner Kit one-pager + full Phase 1 copy kit — [partner-kit/](./partner-kit/)
 
 ### Phase B — Design partners (Days 31–60)
 
