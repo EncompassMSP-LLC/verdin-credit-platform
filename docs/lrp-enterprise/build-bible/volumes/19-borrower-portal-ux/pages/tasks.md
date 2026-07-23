@@ -1,13 +1,13 @@
 # Page spec — Tasks (Action plan)
 
-| Field       | Value           |
-| ----------- | --------------- |
-| Page name   | Tasks           |
-| Route       | `/portal/tasks` |
-| Volume      | 19              |
-| Status      | `review`        |
-| Actors      | Borrower        |
-| Permissions | Own tasks       |
+| Field       | Value             |
+| ----------- | ----------------- |
+| Page name   | Tasks             |
+| Route       | `/portal/tasks`   |
+| Volume      | 19                |
+| Status      | `ready-for-build` |
+| Actors      | Borrower          |
+| Permissions | Own tasks         |
 
 ## 1. Purpose
 

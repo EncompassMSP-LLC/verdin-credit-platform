@@ -5,7 +5,7 @@
 | Page name   | Documents           |
 | Route       | `/portal/documents` |
 | Volume      | 19                  |
-| Status      | `draft`             |
+| Status      | `ready-for-build`   |
 | Actors      | Borrower            |
 | Permissions | Own documents       |
 

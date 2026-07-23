@@ -809,11 +809,12 @@ Scope: [version-29.0-scope.md](version-29.0-scope.md) · Checklist: [version-29.
 
 **Architecture:** Edition on the shared platform — **do not fork**. Reuse FCRA/Metro2/cross-bureau/intelligence.
 
-| Capability                               | Version | Status  | Backend | Frontend | API     | AI      | Tests   | Dependencies | Notes                                                                                            |
-| ---------------------------------------- | ------- | ------- | ------- | -------- | ------- | ------- | ------- | ------------ | ------------------------------------------------------------------------------------------------ |
-| Partner org model + lender RBAC          | 29.0    | ✅      | ✅      | —        | ✅      | —       | ✅      | Auth/orgs    | `ENABLE_MORTGAGE_PARTNER`; `/mortgage-partner/*` partnerships, members, referrals, access audits |
-| Lender dashboard + pipeline + milestones | 29.0    | Planned | Planned | Planned  | Planned | —       | Planned | Cases        | Partner UI over shared clients/cases                                                             |
-| Mortgage readiness score + report export | 29.0    | Planned | Planned | Planned  | Planned | Partial | Planned | Intelligence | Deterministic estimator; LLM only behind ADR-012                                                 |
+| Capability                               | Version | Status  | Backend | Frontend | API     | AI      | Tests   | Dependencies  | Notes                                                                                            |
+| ---------------------------------------- | ------- | ------- | ------- | -------- | ------- | ------- | ------- | ------------- | ------------------------------------------------------------------------------------------------ |
+| Partner org model + lender RBAC          | 29.0    | ✅      | ✅      | —        | ✅      | —       | ✅      | Auth/orgs     | `ENABLE_MORTGAGE_PARTNER`; `/mortgage-partner/*` partnerships, members, referrals, access audits |
+| LRP borrower portal core (Vol 19 E2)     | 29.0    | Partial | ✅      | Partial  | ✅      | —       | Partial | Client portal | `apps/lrp-web` dashboard/readiness/tasks/docs; borrower band-only readiness (P0-1)               |
+| Lender dashboard + pipeline + milestones | 29.0    | Planned | Planned | Planned  | Planned | —       | Planned | Cases         | Partner UI over shared clients/cases                                                             |
+| Mortgage readiness score + report export | 29.0    | Planned | Planned | Planned  | Planned | Partial | Planned | Intelligence  | Deterministic estimator; LLM only behind ADR-012                                                 |
 
 ---
 

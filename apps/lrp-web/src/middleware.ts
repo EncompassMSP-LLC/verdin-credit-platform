@@ -1,7 +1,11 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { CRM_SESSION_COOKIE } from '@/lib/crm/config';
-import { LENDER_SESSION_COOKIE } from '@/lib/lender/config';
+import { CRM_ACCESS_COOKIE, CRM_SESSION_COOKIE } from '@/lib/crm/config';
+import { LENDER_ACCESS_COOKIE, LENDER_SESSION_COOKIE } from '@/lib/lender/config';
 import { PLATFORM_ACCESS_COOKIE } from '@/lib/platform/config';
+
+function hasAnyCookie(request: NextRequest, names: string[]) {
+  return names.some((name) => Boolean(request.cookies.get(name)?.value));
+}
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -30,7 +34,7 @@ export function middleware(request: NextRequest) {
 
   const isLenderLogin = pathname.startsWith('/lender/login');
   const isLenderApp = pathname.startsWith('/lender') && !isLenderLogin;
-  const hasLenderSession = Boolean(request.cookies.get(LENDER_SESSION_COOKIE)?.value);
+  const hasLenderSession = hasAnyCookie(request, [LENDER_ACCESS_COOKIE, LENDER_SESSION_COOKIE]);
 
   if (isLenderApp && !hasLenderSession) {
     const url = request.nextUrl.clone();
@@ -47,7 +51,7 @@ export function middleware(request: NextRequest) {
 
   const isCrmLogin = pathname.startsWith('/crm/login');
   const isCrmApp = pathname.startsWith('/crm') && !isCrmLogin;
-  const hasCrmSession = Boolean(request.cookies.get(CRM_SESSION_COOKIE)?.value);
+  const hasCrmSession = hasAnyCookie(request, [CRM_ACCESS_COOKIE, CRM_SESSION_COOKIE]);
 
   if (isCrmApp && !hasCrmSession) {
     const url = request.nextUrl.clone();
