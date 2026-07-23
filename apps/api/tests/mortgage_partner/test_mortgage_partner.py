@@ -103,12 +103,29 @@ def test_create_partnership_member_referral_and_audit(
         for item in listed_referrals.json()
     )
 
+    accepted = api_client.patch(
+        f"/api/v1/mortgage-partner/partnerships/{partnership_id}/referrals/{referral_id}",
+        headers=admin_headers,
+        json={"status": "accepted"},
+    )
+    assert accepted.status_code == 200, accepted.text
+    assert accepted.json()["status"] == "accepted"
+    assert accepted.json()["client_display_name"] == "Referral Borrower"
+
+    forbidden_patch = api_client.patch(
+        f"/api/v1/mortgage-partner/partnerships/{partnership_id}/referrals/{referral_id}",
+        headers=case_manager_headers,
+        json={"status": "declined"},
+    )
+    assert forbidden_patch.status_code == 403
+
     audits = api_client.get("/api/v1/mortgage-partner/access-audits", headers=admin_headers)
     assert audits.status_code == 200
     actions = {row["action"] for row in audits.json()}
     assert "partnership_create" in actions
     assert "referral_view" in actions
     assert "member_create" in actions
+    assert "referral_update" in actions
 
 
 def test_case_manager_cannot_create_partnership(

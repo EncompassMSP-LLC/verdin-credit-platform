@@ -53,6 +53,7 @@ class PartnerAccessAction(StrEnum):
     MEMBER_CREATE = "member_create"
     PARTNERSHIP_CREATE = "partnership_create"
     REFERRAL_CREATE = "referral_create"
+    REFERRAL_UPDATE = "referral_update"
 
 
 class OrgPartnership(Base, TimestampMixin, SoftDeleteMixin, AuditMixin):

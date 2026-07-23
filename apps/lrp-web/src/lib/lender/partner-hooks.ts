@@ -4,10 +4,12 @@ import {
   getMortgagePartnerStatus,
   listPartnerReferrals,
   listPartnerships,
+  updatePartnerReferral,
   type PartnerReferral,
+  type PartnerReferralStatus,
   type Partnership,
 } from '@verdin/api-client';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useLenderAuth } from '@/lib/lender/auth';
 
 export function useMortgagePartnerStatus() {
@@ -45,4 +47,21 @@ export function useLenderReferrals(partnershipId: string | undefined) {
   });
 }
 
-export type { PartnerReferral, Partnership };
+export function useUpdateLenderReferral(partnershipId: string | undefined) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ referralId, status }: { referralId: string; status: PartnerReferralStatus }) => {
+      if (!partnershipId) {
+        throw new Error('Partnership is required to update a referral');
+      }
+      return updatePartnerReferral(partnershipId, referralId, { status });
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: ['lender', 'mortgage-partner', 'referrals', partnershipId],
+      });
+    },
+  });
+}
+
+export type { PartnerReferral, PartnerReferralStatus, Partnership };
