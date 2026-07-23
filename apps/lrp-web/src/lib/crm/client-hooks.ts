@@ -1,6 +1,16 @@
 'use client';
 
-import { listClients, type Client, type ClientStatus } from '@verdin/api-client';
+import {
+  ApiClientError,
+  getClient,
+  getLatestCreditAnalysisRun,
+  listCases,
+  listClients,
+  type Case,
+  type Client,
+  type ClientStatus,
+  type CreditAnalysisRun,
+} from '@verdin/api-client';
 import { useQuery } from '@tanstack/react-query';
 import { useCrmAuth } from '@/lib/crm/auth';
 
@@ -36,4 +46,48 @@ export function useCrmClients(params: {
   });
 }
 
-export type { Client, ClientStatus };
+export function useCrmClient(clientId: string | undefined) {
+  const { isAuthenticated, authMode } = useCrmAuth();
+  return useQuery({
+    queryKey: ['crm', 'client', clientId],
+    enabled: isAuthenticated && authMode === 'platform' && Boolean(clientId),
+    queryFn: () => getClient(clientId!),
+    retry: (count, error) => {
+      if (error instanceof ApiClientError && error.status === 404) return false;
+      return count < 2;
+    },
+  });
+}
+
+export function useCrmClientCases(clientId: string | undefined) {
+  const { isAuthenticated, authMode } = useCrmAuth();
+  return useQuery({
+    queryKey: ['crm', 'client-cases', clientId],
+    enabled: isAuthenticated && authMode === 'platform' && Boolean(clientId),
+    queryFn: async () => {
+      const response = await listCases({
+        client_id: clientId,
+        page: 1,
+        page_size: 10,
+        sort_by: 'updated_at',
+        sort_order: 'desc',
+      });
+      return response.items;
+    },
+  });
+}
+
+export function useCrmLatestAnalysis(caseId: string | undefined) {
+  const { isAuthenticated, authMode } = useCrmAuth();
+  return useQuery({
+    queryKey: ['crm', 'credit-analysis-latest', caseId],
+    enabled: isAuthenticated && authMode === 'platform' && Boolean(caseId),
+    queryFn: () => getLatestCreditAnalysisRun(caseId!),
+    retry: (count, error) => {
+      if (error instanceof ApiClientError && error.status === 404) return false;
+      return count < 2;
+    },
+  });
+}
+
+export type { Case, Client, ClientStatus, CreditAnalysisRun };
