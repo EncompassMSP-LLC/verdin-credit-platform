@@ -13,6 +13,14 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## LRP Stage 5 Epic E5.1 — CRM referral queue (Vol 21)
+
+**Decision:** Wire `apps/lrp-web` `/crm/referrals` to `mortgage_partner` partnership referrals (list + Accept/Decline PATCH). Tabs: New · Accepted · Declined · All. Demo auth keeps seed rows. Accept navigates to `/crm/borrowers/{client_id}` when a client is linked.
+
+**Reason:** First E5 slice after E4 lender queue; operators triage the same referral records from the CRM realm.
+
+**Follow-up work:** Borrower list/workspace live clients; assign owner; decline reason; multi-partnership picker.
+
 ## LRP Stage 5 Epic E4.2 — referral status PATCH + referrals queue (Vol 20)
 
 **Decision:** Add `PATCH /mortgage-partner/partnerships/{id}/referrals/{referral_id}` for staff-mediated status updates (accept/decline) with `referral_update` access audits. Wire `apps/lrp-web` `/lender/referrals` to the live list + PATCH; demo auth keeps local seed state.
