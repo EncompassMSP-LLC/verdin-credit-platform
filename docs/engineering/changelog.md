@@ -13,6 +13,14 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## LRP Mortgage Partner Marketing Kit — Phase 1 (Vol 07)
+
+**Decision:** Ship a claim-library-compliant Mortgage Partner Marketing Kit under `docs/.../07-marketing-launch/partner-kit/` (letter, brochure, flyer, LO one-pager, checklist, social/email/LinkedIn, landing spec, realtor variant) and mirror it on `/lenders`, `/realtors`, and `/resources/partner-kit`. Soften draft “approval/funding/score” language into advisory readiness partnership messaging.
+
+**Reason:** Position LRP as a lender-grade Mortgage Readiness partner, not CRO hype.
+
+**Follow-up work:** Phase 2 premium kit (designed PDF, PPT, Canva, fillable forms, 90-day calendar) per `11-phase-2-premium-kit.md`.
+
 ## LRP Stage 5 Epic E5.3 — CRM borrower workspace overview (Vol 21)
 
 **Decision:** Wire `apps/lrp-web` `/crm/borrowers/:id` to `getClient` + `listCases(client_id)` + latest credit-analysis run (band + staff-visible score). Demo keeps seed workspace. Tasks/docs/notes remain deferred.
