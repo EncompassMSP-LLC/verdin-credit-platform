@@ -13,6 +13,14 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## LRP Mortgage Partner Marketing Kit — Phase 2 premium (Vol 07)
+
+**Decision:** Ship Phase 2 premium kit manuscripts (20-page guide, deck outline, Canva specs, referral form, welcome packet, leave-behind, multi-audience drips, portal onboarding concept, 90-day calendar) plus web hubs: `/resources/partner-kit/phase-2`, `/guide`, `/referral`, `/print/leave-behind`. Designed PDF/PPT/Canva binaries remain external.
+
+**Reason:** Position LRP as Mortgage Readiness Solutions collateral lenders can treat as an extension of their team.
+
+**Follow-up work:** Designer production of PDF/PPT/Canva; wire referral form to mortgage_partner API when client intake is linked; partner JWT onboarding UX.
+
 ## LRP Mortgage Partner Marketing Kit — Phase 1 (Vol 07)
 
 **Decision:** Ship a claim-library-compliant Mortgage Partner Marketing Kit under `docs/.../07-marketing-launch/partner-kit/` (letter, brochure, flyer, LO one-pager, checklist, social/email/LinkedIn, landing spec, realtor variant) and mirror it on `/lenders`, `/realtors`, and `/resources/partner-kit`. Soften draft “approval/funding/score” language into advisory readiness partnership messaging.

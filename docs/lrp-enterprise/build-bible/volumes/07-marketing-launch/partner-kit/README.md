@@ -12,19 +12,28 @@ Canonical sales kit for **loan officers, lender partnerships, and realtor co-cha
 
 ## Package contents
 
-| #   | Asset                        | File                                                                     |
-| --- | ---------------------------- | ------------------------------------------------------------------------ |
-| 1   | Cover / welcome letter       | [01-cover-letter.md](01-cover-letter.md)                                 |
-| 2   | Trifold brochure copy        | [02-trifold-brochure.md](02-trifold-brochure.md)                         |
-| 3   | Referral flyer               | [03-referral-flyer.md](03-referral-flyer.md)                             |
-| 4   | Loan officer one-pager       | [04-loan-officer-one-pager.md](04-loan-officer-one-pager.md)             |
-| 5   | Mortgage readiness checklist | [05-mortgage-readiness-checklist.md](05-mortgage-readiness-checklist.md) |
-| 6   | Social campaign (5 posts)    | [06-social-campaign.md](06-social-campaign.md)                           |
-| 7   | Email drip (5)               | [07-email-campaign.md](07-email-campaign.md)                             |
-| 8   | LinkedIn themes              | [08-linkedin-campaign.md](08-linkedin-campaign.md)                       |
-| 9   | Landing page spec            | [09-landing-page-spec.md](09-landing-page-spec.md)                       |
-| 10  | Realtor co-channel kit       | [10-realtor-version.md](10-realtor-version.md)                           |
-| 11  | Phase 2 premium backlog      | [11-phase-2-premium-kit.md](11-phase-2-premium-kit.md)                   |
+| #   | Asset                        | File                                                                          |
+| --- | ---------------------------- | ----------------------------------------------------------------------------- |
+| 1   | Cover / welcome letter       | [01-cover-letter.md](01-cover-letter.md)                                      |
+| 2   | Trifold brochure copy        | [02-trifold-brochure.md](02-trifold-brochure.md)                              |
+| 3   | Referral flyer               | [03-referral-flyer.md](03-referral-flyer.md)                                  |
+| 4   | Loan officer one-pager       | [04-loan-officer-one-pager.md](04-loan-officer-one-pager.md)                  |
+| 5   | Mortgage readiness checklist | [05-mortgage-readiness-checklist.md](05-mortgage-readiness-checklist.md)      |
+| 6   | Social campaign (5 posts)    | [06-social-campaign.md](06-social-campaign.md)                                |
+| 7   | Email drip (5)               | [07-email-campaign.md](07-email-campaign.md)                                  |
+| 8   | LinkedIn themes              | [08-linkedin-campaign.md](08-linkedin-campaign.md)                            |
+| 9   | Landing page spec            | [09-landing-page-spec.md](09-landing-page-spec.md)                            |
+| 10  | Realtor co-channel kit       | [10-realtor-version.md](10-realtor-version.md)                                |
+| 11  | Phase 2 premium kit          | [11-phase-2-premium-kit.md](11-phase-2-premium-kit.md) · [phase-2/](phase-2/) |
+
+## Phase 2 web
+
+| Path                                        | Purpose                            |
+| ------------------------------------------- | ---------------------------------- |
+| `/resources/partner-kit/phase-2`            | Premium kit hub                    |
+| `/resources/partner-kit/guide`              | Partnership Guide (readable/print) |
+| `/resources/partner-kit/referral`           | Fillable referral form             |
+| `/resources/partner-kit/print/leave-behind` | Print leave-behind                 |
 
 ## Folder insert order (print)
 
@@ -58,3 +67,4 @@ Canonical sales kit for **loan officers, lender partnerships, and realtor co-cha
 - Lenders: `apps/lrp-web` `/lenders`
 - Realtors: `/realtors`
 - Kit hub: `/resources/partner-kit`
+- Phase 2 hub: `/resources/partner-kit/phase-2`
