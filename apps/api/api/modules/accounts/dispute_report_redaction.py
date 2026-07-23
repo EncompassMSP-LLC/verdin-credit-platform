@@ -7,7 +7,8 @@ from dataclasses import dataclass
 from io import BytesIO
 from typing import Any
 
-_TRADELINE_BLOCK_PADDING = 110.0
+# Gap left above the next creditor header so labels stay readable.
+_NEXT_HEADER_GAP = 6.0
 _PAGE_MARGIN = 4.0
 
 
@@ -93,7 +94,14 @@ def build_redacted_tradeline_excerpt(
             if known_page_numbers is not None:
                 if not known_page_numbers:
                     return _fallback_full_report(pdf_bytes)
-                for page_number in known_page_numbers:
+                selected = _finalize_tradeline_pages(
+                    known_page_numbers,
+                    pdf=pdf,
+                    target_creditor=target_creditor,
+                    target_tokens=target_tokens,
+                    target_account_masked=target_account_masked,
+                )
+                for page_number in selected:
                     index = page_number - 1
                     if 0 <= index < len(pdf.pages):
                         matching_pages.append((index, pdf.pages[index]))
@@ -107,7 +115,19 @@ def build_redacted_tradeline_excerpt(
                         target_account_masked=target_account_masked,
                     ):
                         matching_pages.append((index, page))
-                scanned_page_numbers = tuple(index + 1 for index, _ in matching_pages)
+                selected = _finalize_tradeline_pages(
+                    tuple(index + 1 for index, _ in matching_pages),
+                    pdf=pdf,
+                    target_creditor=target_creditor,
+                    target_tokens=target_tokens,
+                    target_account_masked=target_account_masked,
+                )
+                matching_pages = [
+                    (page_number - 1, pdf.pages[page_number - 1])
+                    for page_number in selected
+                    if 0 <= page_number - 1 < len(pdf.pages)
+                ]
+                scanned_page_numbers = selected
 
             if not matching_pages:
                 return _fallback_full_report(
@@ -192,33 +212,144 @@ def _page_matches_target(
     return False
 
 
+def _cluster_primary_pages(page_numbers: tuple[int, ...] | list[int]) -> list[int]:
+    """Keep the longest near-contiguous page run; drop distant false positives."""
+    sorted_pages = sorted({int(page) for page in page_numbers if int(page) > 0})
+    if not sorted_pages:
+        return []
+
+    groups: list[list[int]] = [[sorted_pages[0]]]
+    for page in sorted_pages[1:]:
+        if page - groups[-1][-1] <= 1:
+            groups[-1].append(page)
+        else:
+            groups.append([page])
+
+    # Longest cluster wins; earliest page breaks ties (tradeline detail usually first).
+    return max(groups, key=lambda group: (len(group), -group[0]))
+
+
+def _finalize_tradeline_pages(
+    page_numbers: tuple[int, ...] | list[int],
+    *,
+    pdf: Any,
+    target_creditor: str,
+    target_tokens: tuple[str, ...],
+    target_account_masked: str | None,
+) -> tuple[int, ...]:
+    clustered = _cluster_primary_pages(page_numbers)
+    if not clustered:
+        return ()
+
+    # Include an immediate continuation page when the tradeline spills onto the next sheet.
+    # Experian often puts only the creditor header at the bottom of page N and the rest of
+    # Account Info / Payment History on page N+1 without repeating the creditor name.
+    next_page = clustered[-1] + 1
+    if next_page not in clustered and next_page <= len(pdf.pages):
+        next_text = pdf.pages[next_page - 1].extract_text() or ""
+        text_match = _page_matches_target(
+            next_text,
+            target_creditor=target_creditor,
+            target_tokens=target_tokens,
+            target_account_masked=target_account_masked,
+        )
+        spillover = _target_header_near_page_bottom(
+            pdf.pages[clustered[-1] - 1],
+            target_creditor=target_creditor,
+        )
+        if text_match or spillover:
+            clustered.append(next_page)
+
+    return tuple(clustered)
+
+
+def _target_header_near_page_bottom(
+    page: Any,
+    *,
+    target_creditor: str,
+    threshold: float = 0.55,
+) -> bool:
+    """True when the target creditor header sits in the lower portion of the page."""
+    tops = _header_tops_for_creditor(page, target_creditor)
+    if not tops:
+        return False
+    page_height = float(page.height) or 1.0
+    return max(tops) >= page_height * threshold
+
+
 def _collect_redaction_rects(
     page: Any,
     *,
     other_creditors: tuple[str, ...],
     target_creditor: str,
 ) -> list[dict[str, float]]:
-    rects: list[dict[str, float]] = []
+    """Black out non-target tradelines on a page.
+
+    Experian pages often stack the previous account, the target, and the next
+    account on one sheet. Redact each other-creditor block only until the next
+    boundary: another other-creditor header, the target header, or page bottom.
+    Never paint through the target tradeline.
+    """
     page_width = float(page.width)
     page_height = float(page.height)
+    page_bottom = page_height - _PAGE_MARGIN
 
+    target_tops = _header_tops_for_creditor(page, target_creditor)
+    other_tops: list[float] = []
     for creditor in other_creditors:
         if _creditors_match(creditor, target_creditor):
             continue
-        for query in _creditor_search_queries(creditor):
-            for hit in page.search(query, case=False):
-                top = max(0.0, float(hit["top"]) - 4.0)
-                bottom = min(page_height, float(hit["bottom"]) + _TRADELINE_BLOCK_PADDING)
-                rects.append(
-                    {
-                        "x0": _PAGE_MARGIN,
-                        "top": top,
-                        "x1": page_width - _PAGE_MARGIN,
-                        "bottom": bottom,
-                    }
-                )
+        other_tops.extend(_header_tops_for_creditor(page, creditor))
+
+    unique_other_tops = sorted(set(round(top, 1) for top in other_tops))
+    unique_target_tops = sorted(set(round(top, 1) for top in target_tops))
+    rects: list[dict[str, float]] = []
+
+    # Anything above the first target header is a prior tradeline remnant — cover it
+    # even when we cannot resolve that creditor's display name from the parsed report.
+    if unique_target_tops:
+        earliest_target = unique_target_tops[0]
+        if earliest_target > _PAGE_MARGIN + 24:
+            rects.append(
+                {
+                    "x0": _PAGE_MARGIN,
+                    "top": _PAGE_MARGIN,
+                    "x1": page_width - _PAGE_MARGIN,
+                    "bottom": earliest_target - _NEXT_HEADER_GAP,
+                }
+            )
+
+    if not unique_other_tops and not rects:
+        return []
+
+    for index, top in enumerate(unique_other_tops):
+        boundaries: list[float] = [page_bottom]
+        if index + 1 < len(unique_other_tops):
+            boundaries.append(unique_other_tops[index + 1] - _NEXT_HEADER_GAP)
+        for target_top in unique_target_tops:
+            if target_top > top:
+                boundaries.append(target_top - _NEXT_HEADER_GAP)
+        bottom = min(boundaries)
+        if bottom <= top:
+            continue
+        rects.append(
+            {
+                "x0": _PAGE_MARGIN,
+                "top": top,
+                "x1": page_width - _PAGE_MARGIN,
+                "bottom": min(page_bottom, bottom),
+            }
+        )
 
     return _merge_overlapping_rects(rects)
+
+
+def _header_tops_for_creditor(page: Any, creditor: str) -> list[float]:
+    tops: list[float] = []
+    for query in _creditor_search_queries(creditor):
+        for hit in page.search(query, case=False):
+            tops.append(max(0.0, float(hit["top"]) - 4.0))
+    return tops
 
 
 def _build_redaction_overlay(
