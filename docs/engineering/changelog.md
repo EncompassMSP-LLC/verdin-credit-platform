@@ -13,6 +13,14 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## LRP Stage 5 Epic E4.2 — referral status PATCH + referrals queue (Vol 20)
+
+**Decision:** Add `PATCH /mortgage-partner/partnerships/{id}/referrals/{referral_id}` for staff-mediated status updates (accept/decline) with `referral_update` access audits. Wire `apps/lrp-web` `/lender/referrals` to the live list + PATCH; demo auth keeps local seed state.
+
+**Reason:** Completes Vol 20 referral-management Accept/Decline against the partnership referral API after E4.1 pipeline table.
+
+**Follow-up work:** New referral form; LO assignment columns; readiness band on queue; partner JWT realm.
+
 ## LRP Stage 5 Epic E4.1 — lender pipeline table (Vol 20)
 
 **Decision:** Replace lender pipeline kanban demo with a **table** of `mortgage_partner` referrals when platform-authenticated. Enrich referral DTOs with `client_display_name`. Demo auth keeps seed rows. Readiness band / next-update columns deferred until score publish is linked per partnership.

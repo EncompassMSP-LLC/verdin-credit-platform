@@ -16,18 +16,18 @@ Implement only from volumes/pages marked **`ready-for-build`**. Cite the volume 
 
 ## 2. Suggested build order
 
-| Epic                         | Cite      | Status          | Notes                                                        |
-| ---------------------------- | --------- | --------------- | ------------------------------------------------------------ |
-| E0 Tokens + shells           | Vol 23    | **done** (#346) | CSS tokens, light-only, advisory banner on portal/lender/CRM |
-| E1 Auth realms               | Vol 24    | **done** (#347) | Portal JWT + CRM/lender staff JWT with demo fallback         |
-| E2 Borrower core             | Vol 19    | **done** (#348) | Dashboard, band-only readiness, tasks, docs                  |
-| E3 Analysis pipeline         | Vol 22    | **done** (#350) | Credit-analysis runs + portal readiness publish              |
-| E4 Lender referrals          | Vol 20    | **partial**     | E4.1 pipeline table ← referrals API; new-referral deferred   |
-| E5 CRM workspace             | Vol 21    | queued          | Borrower workspace + referral queue                          |
-| E6 Partner digests / exports | Vol 20–21 | queued          | Gated exports + digests                                      |
-| E7 Learning                  | Vol 19    | queued          | Static modules                                               |
-| E8 Automations (safe)        | Vol 21    | queued          | Allowlist only                                               |
-| E9 Hardening                 | Vol 18·24 | queued          | Audit, lint, DR drills                                       |
+| Epic                         | Cite      | Status          | Notes                                                          |
+| ---------------------------- | --------- | --------------- | -------------------------------------------------------------- |
+| E0 Tokens + shells           | Vol 23    | **done** (#346) | CSS tokens, light-only, advisory banner on portal/lender/CRM   |
+| E1 Auth realms               | Vol 24    | **done** (#347) | Portal JWT + CRM/lender staff JWT with demo fallback           |
+| E2 Borrower core             | Vol 19    | **done** (#348) | Dashboard, band-only readiness, tasks, docs                    |
+| E3 Analysis pipeline         | Vol 22    | **done** (#350) | Credit-analysis runs + portal readiness publish                |
+| E4 Lender referrals          | Vol 20    | **partial**     | E4.1 pipeline + E4.2 status PATCH/queue; new-referral deferred |
+| E5 CRM workspace             | Vol 21    | queued          | Borrower workspace + referral queue                            |
+| E6 Partner digests / exports | Vol 20–21 | queued          | Gated exports + digests                                        |
+| E7 Learning                  | Vol 19    | queued          | Static modules                                                 |
+| E8 Automations (safe)        | Vol 21    | queued          | Allowlist only                                                 |
+| E9 Hardening                 | Vol 18·24 | queued          | Audit, lint, DR drills                                         |
 
 ## 3. Slice template (per PR)
 

@@ -708,6 +708,7 @@ CRO↔partner (lender/realtor/broker) partnership scaffold with partnership-scop
 | POST   | `/mortgage-partner/partnerships/{id}/referrals`               | admin        | Attribute client referral to partnership                          |
 | GET    | `/mortgage-partner/partnerships/{id}/referrals`               | case_manager | List referrals (audited; includes `client_display_name`)          |
 | GET    | `/mortgage-partner/partnerships/{id}/referrals/{referral_id}` | case_manager | Get referral (audited PII access; includes `client_display_name`) |
+| PATCH  | `/mortgage-partner/partnerships/{id}/referrals/{referral_id}` | admin        | Update referral status (accept/decline; audited)                  |
 
 Tenant isolation: all queries scoped to the caller's `organization_id` as CRO org. Referrals may only reference clients/cases in that org.
 

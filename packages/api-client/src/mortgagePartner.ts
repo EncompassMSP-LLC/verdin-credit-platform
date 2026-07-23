@@ -12,7 +12,8 @@ export type PartnerAccessAction =
   | 'member_list'
   | 'member_create'
   | 'partnership_create'
-  | 'referral_create';
+  | 'referral_create'
+  | 'referral_update';
 
 export interface MortgagePartnerStatus {
   mortgage_partner_enabled: boolean;
@@ -78,6 +79,11 @@ export interface PartnerReferralCreateInput {
   case_id?: string | null;
   status?: PartnerReferralStatus;
   source_label?: string | null;
+  notes?: string | null;
+}
+
+export interface PartnerReferralUpdateInput {
+  status: PartnerReferralStatus;
   notes?: string | null;
 }
 
@@ -159,5 +165,16 @@ export function listPartnerReferrals(partnershipId: string) {
 export function getPartnerReferral(partnershipId: string, referralId: string) {
   return request<PartnerReferral>(
     apiPath(`/mortgage-partner/partnerships/${partnershipId}/referrals/${referralId}`),
+  );
+}
+
+export function updatePartnerReferral(
+  partnershipId: string,
+  referralId: string,
+  body: PartnerReferralUpdateInput,
+) {
+  return request<PartnerReferral>(
+    apiPath(`/mortgage-partner/partnerships/${partnershipId}/referrals/${referralId}`),
+    { method: 'PATCH', body },
   );
 }

@@ -14,6 +14,7 @@ from api.modules.mortgage_partner.schemas import (
     PartnerAccessAuditResponse,
     PartnerReferralCreate,
     PartnerReferralResponse,
+    PartnerReferralUpdate,
     PartnerRoleMatrixResponse,
     PartnershipCreate,
     PartnershipMemberCreate,
@@ -153,3 +154,18 @@ async def get_partner_referral(
     service: MortgagePartnerService = Depends(get_mortgage_partner_service),
 ) -> PartnerReferralResponse:
     return await service.get_referral(current_user, partnership_id, referral_id)
+
+
+@router.patch(
+    "/partnerships/{partnership_id}/referrals/{referral_id}",
+    response_model=PartnerReferralResponse,
+)
+async def update_partner_referral(
+    partnership_id: uuid.UUID,
+    referral_id: uuid.UUID,
+    payload: PartnerReferralUpdate,
+    _: None = Depends(require_mortgage_partner_enabled),
+    current_user: User = Depends(get_current_user),
+    service: MortgagePartnerService = Depends(get_mortgage_partner_service),
+) -> PartnerReferralResponse:
+    return await service.update_referral(current_user, partnership_id, referral_id, payload)

@@ -6,7 +6,7 @@ from datetime import UTC, datetime
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.core.audit import apply_audit_on_create
+from api.core.audit import apply_audit_on_create, apply_audit_on_update
 from api.core.permissions import has_permission
 from api.modules.auth.models import User
 from api.modules.mortgage_partner.models import (
@@ -27,6 +27,7 @@ from api.modules.mortgage_partner.schemas import (
     PartnerAccessAuditResponse,
     PartnerReferralCreate,
     PartnerReferralResponse,
+    PartnerReferralUpdate,
     PartnerRoleMatrixItem,
     PartnerRoleMatrixResponse,
     PartnershipCreate,
@@ -426,6 +427,49 @@ class MortgagePartnerService:
         return self._referral_response(
             referral,
             client_display_name=names.get(referral.client_id),
+        )
+
+    async def update_referral(
+        self,
+        user: User,
+        partnership_id: uuid.UUID,
+        referral_id: uuid.UUID,
+        payload: PartnerReferralUpdate,
+    ) -> PartnerReferralResponse:
+        self._require_write(user)
+        cro_org_id = self._require_organization(user)
+        partnership = await self._repo.get_partnership(partnership_id, cro_org_id)
+        if partnership is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Partnership not found",
+            )
+        referral = await self._repo.get_referral(referral_id, partnership_id, cro_org_id)
+        if referral is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Referral not found",
+            )
+        previous = referral.status
+        referral.status = payload.status
+        if payload.notes is not None:
+            referral.notes = payload.notes
+        apply_audit_on_update(referral, user.id)
+        updated = await self._repo.save_referral(referral)
+        names = await self._repo.map_client_display_names(cro_org_id, [updated.client_id])
+        await self._audit(
+            cro_organization_id=cro_org_id,
+            actor=user,
+            action=PartnerAccessAction.REFERRAL_UPDATE,
+            resource_type="partner_referral",
+            resource_id=updated.id,
+            partnership_id=partnership_id,
+            detail=f"status={previous.value}->{payload.status.value}",
+        )
+        await self._session.commit()
+        return self._referral_response(
+            updated,
+            client_display_name=names.get(updated.client_id),
         )
 
     async def list_access_audits(self, user: User) -> list[PartnerAccessAuditResponse]:

@@ -5,7 +5,7 @@
 | Page name   | Referral management |
 | Route       | `/lender/referrals` |
 | Volume      | 20                  |
-| Status      | `draft`             |
+| Status      | `ready-for-build`   |
 | Actors      | LO roles            |
 | Permissions | Partnership-scoped  |
 

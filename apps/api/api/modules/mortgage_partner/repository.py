@@ -187,6 +187,11 @@ class MortgagePartnerRepository:
         )
         return result.scalar_one_or_none()
 
+    async def save_referral(self, referral: PartnerReferral) -> PartnerReferral:
+        await self._session.flush()
+        await self._session.refresh(referral)
+        return referral
+
     async def create_access_audit(self, audit: PartnerAccessAudit) -> PartnerAccessAudit:
         self._session.add(audit)
         await self._session.flush()

@@ -69,6 +69,13 @@ class PartnerReferralCreate(BaseModel):
     notes: str | None = None
 
 
+class PartnerReferralUpdate(BaseModel):
+    """Staff-mediated referral status update (Vol 20 accept/decline)."""
+
+    status: ReferralStatus
+    notes: str | None = None
+
+
 class PartnerReferralResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
