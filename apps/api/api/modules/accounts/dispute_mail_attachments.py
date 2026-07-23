@@ -294,10 +294,10 @@ async def _load_credit_report_attachment(
     if document is None:
         return None
 
-        from api.modules.accounts.dispute_report_redaction import (
-            build_redacted_tradeline_excerpt,
-            parsed_creditor_names,
-        )
+    from api.modules.accounts.dispute_report_redaction import (
+        build_redacted_tradeline_excerpt,
+        parsed_creditor_names,
+    )
 
     content = await async_get(storage, document.storage_key)
     mime_type = document.mime_type or "application/octet-stream"
