@@ -1056,6 +1056,8 @@ class AccountService:
 
         from sqlalchemy import select
 
+        from api.modules.clients.address import format_client_mailing_address
+        from api.modules.clients.models import Client
         from api.modules.documents.metadata_models import DocumentMetadata
         from api.modules.documents.models import Document
 
@@ -1073,7 +1075,29 @@ class AccountService:
         for addresses in result.scalars():
             if addresses:
                 return normalize_consumer_address_lines([line for line in addresses if line])
-        return []
+
+        if self._cases is None:
+            return []
+
+        case = await self._cases.get_by_id(case_id, organization_id=organization_id)
+        if case is None or case.client_id is None:
+            return []
+
+        client_result = await self._session.execute(
+            select(Client).where(
+                Client.id == case.client_id,
+                Client.organization_id == organization_id,
+                Client.deleted_at.is_(None),
+            )
+        )
+        client = client_result.scalar_one_or_none()
+        if client is None:
+            return []
+
+        formatted = format_client_mailing_address(client)
+        if not formatted:
+            return []
+        return normalize_consumer_address_lines([formatted])
 
     async def create_dispute_letter_review_task(
         self,
