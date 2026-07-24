@@ -2,7 +2,7 @@
 
 | Field        | Value                                            |
 | ------------ | ------------------------------------------------ |
-| Status       | `in-progress`                                    |
+| Status       | `ready-for-build`                                |
 | Parent       | [Phase 1](../README.md) · [Phase 2](../phase-2/) |
 | Brand        | Lending Readiness Partners (LRP)                 |
 | Tagline      | Helping More Borrowers Become Lending Ready.     |
