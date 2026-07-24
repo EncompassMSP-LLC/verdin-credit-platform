@@ -27,7 +27,7 @@ Ordered slices for LRP Phase 3 company ops. Sprint loop: `.cursor/rules/lrp-ops-
 | 7     | Section 6 — Status Reports                      | ✅     |
 | 8     | Section 7 — Mortgage Readiness Reports          | ✅     |
 | 9     | Section 8 — Presentation Package                | ☐      |
-| 10    | Section 9 — Sales Package                       | ☐      |
+| 10    | Section 9 — Sales Package                       | ✅     |
 | 11    | Section 10 — Marketing Expansion (banks)        | ☐      |
 | 12    | Section 11 — Print Marketing                    | ☐      |
 | 13    | Section 12 — Website                            | ☐      |
@@ -81,3 +81,8 @@ Ordered slices for LRP Phase 3 company ops. Sprint loop: `.cursor/rules/lrp-ops-
 ### Slice 8 — Section 7 (2026-07-24)
 
 - Initial / 30-day / 60-day / Final readiness report templates (claim-library locked)
+
+### Slice 10 — Section 9 (2026-07-24)
+
+- Cold call, discovery, appointment, follow-up, networking, voicemail scripts
+- Email, LinkedIn, and SMS templates (TCPA-aware)
