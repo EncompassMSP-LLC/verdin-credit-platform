@@ -10,7 +10,11 @@
 
 Turnkey **white-labeled Mortgage Readiness Partner Program**: sales system, print kit, borrower education, partner enablement, digital kit, and portal concepts — comparable to a national franchise leave-behind stack.
 
-All copy is claim-library locked ([CLAIM-LIBRARY.md](../../../CLAIM-LIBRARY.md)). Binary Canva/PPT/PDF press files remain external; manuscripts and specs here are the source of truth.
+All copy is claim-library locked ([CLAIM-LIBRARY.md](../../../CLAIM-LIBRARY.md)).
+
+**Office / PDF binaries (imported):** [`assets/lrp/marketing-package/v2/`](../../../../../../assets/lrp/marketing-package/v2/) — Welcome Packet, Partnership Guide, Borrower Guide, referral forms, pitch deck, email/social banks, Canva guide, outreach playbook, calendars.
+
+Manuscripts and specs in this folder remain the claim-safe source of truth for web print surfaces and future design revisions.
 
 ## Program pillars
 
