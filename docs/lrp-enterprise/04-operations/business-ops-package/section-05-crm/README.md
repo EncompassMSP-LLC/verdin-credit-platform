@@ -4,6 +4,7 @@ Partner relationship databases for Lending Readiness Partners. Use as spreadshee
 
 | Document                   | File                                                             |
 | -------------------------- | ---------------------------------------------------------------- |
+| CRM data model (entities)  | [`01-crm-data-model.md`](01-crm-data-model.md)                   |
 | CRM operating model        | [`crm-operating-model.md`](crm-operating-model.md)               |
 | Mortgage Company Database  | [`mortgage-company-database.md`](mortgage-company-database.md)   |
 | Loan Officer Database      | [`loan-officer-database.md`](loan-officer-database.md)           |
