@@ -1,5 +1,12 @@
 # Section 7 — Mortgage Readiness Reports
 
-**Status:** Pending
+Claim-library locked templates. Prefer platform readiness export when available; these manuscripts define narrative sections.
 
-Initial / 30-day / 60-day / Final report templates. Claim-library locked: no fabricated FICO before/after; Lending Readiness Score™ advisory only. Align with partner readiness export APIs where available.
+| Document           | File                                             |
+| ------------------ | ------------------------------------------------ |
+| Initial Assessment | [`initial-assessment.md`](initial-assessment.md) |
+| 30-Day Report      | [`30-day-report.md`](30-day-report.md)           |
+| 60-Day Report      | [`60-day-report.md`](60-day-report.md)           |
+| Final Report       | [`final-report.md`](final-report.md)             |
+
+**Forbidden:** fabricated before/after FICO; guaranteed approval; unsupervised filing claims.
