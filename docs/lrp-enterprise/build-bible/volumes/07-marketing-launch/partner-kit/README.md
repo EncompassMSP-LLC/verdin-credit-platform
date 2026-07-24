@@ -25,6 +25,7 @@ Canonical sales kit for **loan officers, lender partnerships, and realtor co-cha
 | 9   | Landing page spec            | [09-landing-page-spec.md](09-landing-page-spec.md)                            |
 | 10  | Realtor co-channel kit       | [10-realtor-version.md](10-realtor-version.md)                                |
 | 11  | Phase 2 premium kit          | [11-phase-2-premium-kit.md](11-phase-2-premium-kit.md) · [phase-2/](phase-2/) |
+| 12  | Phase 3 complete program     | [phase-3/](phase-3/) — turnkey Mortgage Readiness Partner Program             |
 
 ## Phase 2 web
 
