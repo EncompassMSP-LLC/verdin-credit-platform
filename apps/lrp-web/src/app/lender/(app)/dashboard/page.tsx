@@ -8,16 +8,41 @@ import { DataTable } from '@/components/lender/DataTable';
 import { useLenderAuth } from '@/lib/lender/auth';
 import { analytics, borrowers, notifications } from '@/lib/lender/data';
 import { STAGE_LABELS } from '@/lib/lender/nav';
+import {
+  pickPrimaryPartnership,
+  useLenderDashboardSummary,
+  useLenderPartnerships,
+  useMortgagePartnerStatus,
+} from '@/lib/lender/partner-hooks';
 import type { Borrower } from '@/lib/lender/types';
 import { formatDate } from '@/lib/utils';
 
 export default function LenderDashboardPage() {
-  const { user } = useLenderAuth();
+  const { user, authMode } = useLenderAuth();
+
+  const statusQuery = useMortgagePartnerStatus();
+  const partnershipsQuery = useLenderPartnerships();
+  const partnership = pickPrimaryPartnership(partnershipsQuery.data);
+  const summaryQuery = useLenderDashboardSummary(partnership?.id);
+
+  const isDemo = authMode === 'demo';
+  const platformEnabled = statusQuery.data?.mortgage_partner_enabled === true;
+
+  // Demo data fallback
   const nearReady = borrowers.filter((b) => ['near_ready', 'mortgage_ready'].includes(b.stage));
   const unread = notifications.filter((n) => !n.read);
-  const activeBorrowers = borrowers.filter(
-    (b) => !['declined', 'withdrawn', 'funded'].includes(b.stage),
-  );
+
+  // Live stat tiles — prefer API summary when platform mode is active
+  const totalReferrals = isDemo ? borrowers.length : (summaryQuery.data?.total_referrals ?? '—');
+  const nearReadyCount = isDemo
+    ? nearReady.length
+    : summaryQuery.data
+      ? summaryQuery.data.near_ready_count + summaryQuery.data.mortgage_ready_count
+      : '—';
+  const fundedCount = isDemo ? analytics.fundedCount : (summaryQuery.data?.funded_count ?? '—');
+  const inUnderwritingCount = isDemo
+    ? borrowers.filter((b) => b.stage === 'in_underwriting').length
+    : (summaryQuery.data?.in_underwriting_count ?? '—');
 
   return (
     <RoleGate permission="dashboard.view">
@@ -44,54 +69,92 @@ export default function LenderDashboardPage() {
           }
         />
 
+        {isDemo ? (
+          <p className="mb-4 rounded-brand border border-gold-500/30 bg-gold-500/10 px-4 py-3 text-sm text-navy-900">
+            Demo mode — showing sample data. Sign in with a platform staff account to load live
+            partnership stats.
+          </p>
+        ) : null}
+
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <StatTile
-            label="Active borrowers"
-            value={`${activeBorrowers.length}`}
-            hint={`${borrowers.length} total in demo cohort`}
+            label="Total referrals"
+            value={`${totalReferrals}`}
+            hint={
+              isDemo
+                ? `${borrowers.length} in demo cohort`
+                : (partnership?.display_name ?? 'Active partnership')
+            }
           />
           <StatTile
             label="Near / mortgage ready"
-            value={`${nearReady.length}`}
+            value={`${nearReadyCount}`}
             hint="Advisory readiness bands"
             tone="good"
           />
           <StatTile
-            label="Referrals accepted (90d)"
-            value={`${analytics.referralsAccepted}`}
-            hint={analytics.periodLabel}
+            label="In underwriting"
+            value={`${inUnderwritingCount}`}
+            hint="Referred to UW review"
           />
           <StatTile
-            label="Pull-through rate"
-            value={`${Math.round(analytics.pullThroughRate * 100)}%`}
-            hint={`${analytics.fundedCount} funded in period`}
+            label="Funded"
+            value={`${fundedCount}`}
+            hint="Closed in this partnership"
+            tone="good"
           />
         </div>
 
-        <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <StatTile
-            label="Avg days to near ready"
-            value={`${analytics.avgDaysToNearReady}`}
-            hint="Trailing operational metric"
-          />
-          <StatTile
-            label="Mortgage-ready count"
-            value={`${analytics.mortgageReadyCount}`}
-            hint="Eligible for UW handoff review"
-            tone="good"
-          />
-          <StatTile
-            label="Unread notifications"
-            value={`${unread.length}`}
-            hint="Partner alerts"
-            tone={unread.length ? 'warn' : 'default'}
-          />
-          <StatTile
-            label="New referrals"
-            value={`${borrowers.filter((b) => b.stage === 'referred').length}`}
-            hint="Awaiting intake"
-          />
-        </div>
+        {!isDemo && platformEnabled && summaryQuery.data ? (
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <StatTile
+              label="In repair"
+              value={`${summaryQuery.data.counts_by_stage['in_repair'] ?? 0}`}
+              hint="Active credit work"
+            />
+            <StatTile
+              label="Intake"
+              value={`${summaryQuery.data.counts_by_stage['intake'] ?? 0}`}
+              hint="Onboarding in progress"
+            />
+            <StatTile
+              label="Declined"
+              value={`${summaryQuery.data.declined_count}`}
+              hint="Not proceeded"
+              tone={summaryQuery.data.declined_count > 0 ? 'warn' : 'default'}
+            />
+            <StatTile
+              label="New referrals"
+              value={`${summaryQuery.data.counts_by_stage['referred'] ?? 0}`}
+              hint="Awaiting intake"
+            />
+          </div>
+        ) : isDemo ? (
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <StatTile
+              label="Avg days to near ready"
+              value={`${analytics.avgDaysToNearReady}`}
+              hint="Trailing operational metric"
+            />
+            <StatTile
+              label="Mortgage-ready count"
+              value={`${analytics.mortgageReadyCount}`}
+              hint="Eligible for UW handoff review"
+              tone="good"
+            />
+            <StatTile
+              label="Unread notifications"
+              value={`${unread.length}`}
+              hint="Partner alerts"
+              tone={unread.length ? 'warn' : 'default'}
+            />
+            <StatTile
+              label="New referrals"
+              value={`${borrowers.filter((b) => b.stage === 'referred').length}`}
+              hint="Awaiting intake"
+            />
+          </div>
+        ) : null}
 
         <div className="mt-6 grid gap-6 xl:grid-cols-[1.4fr_1fr]">
           <PortalCard

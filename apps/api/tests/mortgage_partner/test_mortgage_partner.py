@@ -1,4 +1,4 @@
-"""Mortgage partner partnership + RBAC + isolation tests."""
+"""Mortgage partner partnership + RBAC + pipeline + milestone + isolation tests."""
 
 import uuid
 
@@ -28,6 +28,8 @@ def test_status_and_role_matrix(
     body = status.json()
     assert body["mortgage_partner_enabled"] is True
     assert "partnerships" in body["capabilities"]
+    assert "partner_pipeline" in body["capabilities"]
+    assert "partner_milestones" in body["capabilities"]
     assert "cross_tenant_marketplace" in body["deferred_capabilities"]
 
     roles = api_client.get("/api/v1/mortgage-partner/roles", headers=admin_headers)
@@ -84,6 +86,15 @@ def test_create_partnership_member_referral_and_audit(
     )
     assert referral.status_code == 201, referral.text
     referral_id = referral.json()["id"]
+    # pipeline defaults
+    assert referral.json()["pipeline_stage"] == "referred"
+    assert referral.json()["pipeline_stage_changed_at"] is not None
+    # default milestones seeded
+    milestones = referral.json()["milestones"]
+    assert len(milestones) == 5
+    assert milestones[0]["label"] == "Referral received"
+    assert milestones[0]["complete"] is True
+    assert milestones[1]["complete"] is False
 
     viewed = api_client.get(
         f"/api/v1/mortgage-partner/partnerships/{partnership_id}/referrals/{referral_id}",
@@ -92,6 +103,7 @@ def test_create_partnership_member_referral_and_audit(
     assert viewed.status_code == 200
     assert viewed.json()["client_id"] == str(client_record.id)
     assert viewed.json()["client_display_name"] == "Referral Borrower"
+    assert len(viewed.json()["milestones"]) == 5
 
     listed_referrals = api_client.get(
         f"/api/v1/mortgage-partner/partnerships/{partnership_id}/referrals",
@@ -126,6 +138,201 @@ def test_create_partnership_member_referral_and_audit(
     assert "referral_view" in actions
     assert "member_create" in actions
     assert "referral_update" in actions
+
+
+def test_pipeline_stage_update(
+    api_client: TestClient,
+    mortgage_partner_enabled: None,
+    admin_headers: dict[str, str],
+    case_manager_headers: dict[str, str],
+    partner_org: Organization,
+    client_record: Client,
+) -> None:
+    partnership = api_client.post(
+        "/api/v1/mortgage-partner/partnerships",
+        headers=admin_headers,
+        json={
+            "partner_organization_id": str(partner_org.id),
+            "display_name": "Stage Test Lender",
+        },
+    )
+    partnership_id = partnership.json()["id"]
+
+    referral = api_client.post(
+        f"/api/v1/mortgage-partner/partnerships/{partnership_id}/referrals",
+        headers=admin_headers,
+        json={"client_id": str(client_record.id)},
+    )
+    assert referral.status_code == 201, referral.text
+    referral_id = referral.json()["id"]
+    assert referral.json()["pipeline_stage"] == "referred"
+    original_changed_at = referral.json()["pipeline_stage_changed_at"]
+
+    # advance stage
+    patched = api_client.patch(
+        f"/api/v1/mortgage-partner/partnerships/{partnership_id}/referrals/{referral_id}",
+        headers=admin_headers,
+        json={"pipeline_stage": "intake"},
+    )
+    assert patched.status_code == 200, patched.text
+    assert patched.json()["pipeline_stage"] == "intake"
+    assert patched.json()["pipeline_stage_changed_at"] != original_changed_at
+
+    # patch with no fields → 422
+    empty_patch = api_client.patch(
+        f"/api/v1/mortgage-partner/partnerships/{partnership_id}/referrals/{referral_id}",
+        headers=admin_headers,
+        json={},
+    )
+    assert empty_patch.status_code == 422
+
+
+def test_dashboard_summary(
+    api_client: TestClient,
+    mortgage_partner_enabled: None,
+    admin_headers: dict[str, str],
+    partner_org: Organization,
+    client_record: Client,
+) -> None:
+    partnership = api_client.post(
+        "/api/v1/mortgage-partner/partnerships",
+        headers=admin_headers,
+        json={
+            "partner_organization_id": str(partner_org.id),
+            "display_name": "Dashboard Summary Lender",
+        },
+    )
+    partnership_id = partnership.json()["id"]
+
+    for stage in ["referred", "near_ready", "mortgage_ready"]:
+        api_client.post(
+            f"/api/v1/mortgage-partner/partnerships/{partnership_id}/referrals",
+            headers=admin_headers,
+            json={"client_id": str(client_record.id), "pipeline_stage": stage},
+        )
+
+    summary = api_client.get(
+        f"/api/v1/mortgage-partner/partnerships/{partnership_id}/dashboard-summary",
+        headers=admin_headers,
+    )
+    assert summary.status_code == 200, summary.text
+    body = summary.json()
+    assert body["total_referrals"] == 3
+    assert body["counts_by_stage"]["referred"] == 1
+    assert body["near_ready_count"] == 1
+    assert body["mortgage_ready_count"] == 1
+    assert body["funded_count"] == 0
+
+
+def test_pipeline_endpoint(
+    api_client: TestClient,
+    mortgage_partner_enabled: None,
+    admin_headers: dict[str, str],
+    partner_org: Organization,
+    client_record: Client,
+) -> None:
+    partnership = api_client.post(
+        "/api/v1/mortgage-partner/partnerships",
+        headers=admin_headers,
+        json={
+            "partner_organization_id": str(partner_org.id),
+            "display_name": "Pipeline Lender",
+        },
+    )
+    partnership_id = partnership.json()["id"]
+
+    api_client.post(
+        f"/api/v1/mortgage-partner/partnerships/{partnership_id}/referrals",
+        headers=admin_headers,
+        json={
+            "client_id": str(client_record.id),
+            "pipeline_stage": "in_repair",
+            "source_label": "LO desk",
+        },
+    )
+
+    pipeline = api_client.get(
+        f"/api/v1/mortgage-partner/partnerships/{partnership_id}/pipeline",
+        headers=admin_headers,
+    )
+    assert pipeline.status_code == 200, pipeline.text
+    cards = pipeline.json()
+    assert len(cards) == 1
+    card = cards[0]
+    assert card["pipeline_stage"] == "in_repair"
+    assert card["client_display_name"] == "Referral Borrower"
+    assert card["source_label"] == "LO desk"
+    assert "days_in_stage" in card
+    assert "stage_changed_at" in card
+
+
+def test_milestone_get_and_replace(
+    api_client: TestClient,
+    mortgage_partner_enabled: None,
+    admin_headers: dict[str, str],
+    case_manager_headers: dict[str, str],
+    partner_org: Organization,
+    client_record: Client,
+) -> None:
+    partnership = api_client.post(
+        "/api/v1/mortgage-partner/partnerships",
+        headers=admin_headers,
+        json={
+            "partner_organization_id": str(partner_org.id),
+            "display_name": "Milestone Lender",
+        },
+    )
+    partnership_id = partnership.json()["id"]
+
+    referral = api_client.post(
+        f"/api/v1/mortgage-partner/partnerships/{partnership_id}/referrals",
+        headers=admin_headers,
+        json={"client_id": str(client_record.id)},
+    )
+    referral_id = referral.json()["id"]
+
+    # GET milestones — 5 defaults
+    get_ms = api_client.get(
+        f"/api/v1/mortgage-partner/partnerships/{partnership_id}/referrals/{referral_id}/milestones",
+        headers=case_manager_headers,
+    )
+    assert get_ms.status_code == 200
+    assert len(get_ms.json()) == 5
+
+    # PUT replace milestones
+    put_ms = api_client.put(
+        f"/api/v1/mortgage-partner/partnerships/{partnership_id}/referrals/{referral_id}/milestones",
+        headers=admin_headers,
+        json={
+            "milestones": [
+                {"label": "Custom step 1", "sort_order": 0, "complete": True},
+                {"label": "Custom step 2", "sort_order": 1, "complete": False},
+            ]
+        },
+    )
+    assert put_ms.status_code == 200, put_ms.text
+    new_ms = put_ms.json()
+    assert len(new_ms) == 2
+    assert new_ms[0]["label"] == "Custom step 1"
+    assert new_ms[0]["complete"] is True
+    assert new_ms[0]["completed_at"] is not None
+    assert new_ms[1]["complete"] is False
+    assert new_ms[1]["completed_at"] is None
+
+    # verify list reflects replacement
+    get_after = api_client.get(
+        f"/api/v1/mortgage-partner/partnerships/{partnership_id}/referrals/{referral_id}/milestones",
+        headers=case_manager_headers,
+    )
+    assert len(get_after.json()) == 2
+
+    # case_manager cannot replace milestones (write-only)
+    forbidden = api_client.put(
+        f"/api/v1/mortgage-partner/partnerships/{partnership_id}/referrals/{referral_id}/milestones",
+        headers=case_manager_headers,
+        json={"milestones": []},
+    )
+    assert forbidden.status_code == 403
 
 
 def test_case_manager_cannot_create_partnership(
@@ -174,6 +381,43 @@ def test_tenant_isolation_hides_other_org_partnership(
         headers=other_admin_headers,
     )
     assert other_get.status_code == 404
+
+
+def test_tenant_isolation_pipeline_and_dashboard(
+    api_client: TestClient,
+    mortgage_partner_enabled: None,
+    admin_headers: dict[str, str],
+    other_admin_headers: dict[str, str],
+    partner_org: Organization,
+    client_record: Client,
+) -> None:
+    """Other-org admin cannot access pipeline or dashboard of foreign partnership."""
+    create = api_client.post(
+        "/api/v1/mortgage-partner/partnerships",
+        headers=admin_headers,
+        json={
+            "partner_organization_id": str(partner_org.id),
+            "display_name": "Isolated Pipeline",
+        },
+    )
+    partnership_id = create.json()["id"]
+    api_client.post(
+        f"/api/v1/mortgage-partner/partnerships/{partnership_id}/referrals",
+        headers=admin_headers,
+        json={"client_id": str(client_record.id)},
+    )
+
+    other_pipeline = api_client.get(
+        f"/api/v1/mortgage-partner/partnerships/{partnership_id}/pipeline",
+        headers=other_admin_headers,
+    )
+    assert other_pipeline.status_code == 404
+
+    other_summary = api_client.get(
+        f"/api/v1/mortgage-partner/partnerships/{partnership_id}/dashboard-summary",
+        headers=other_admin_headers,
+    )
+    assert other_summary.status_code == 404
 
 
 def test_cannot_refer_foreign_client(

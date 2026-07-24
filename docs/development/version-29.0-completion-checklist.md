@@ -11,7 +11,7 @@ Scope: [`docs/governance/version-29.0-scope.md`](../governance/version-29.0-scop
 ## Exit criteria for "29.0 done"
 
 - [x] Lender/partner org model + RBAC + `ENABLE_MORTGAGE_PARTNER` gate
-- [ ] Lender dashboard with client pipeline + loan milestones (shared case data)
+- [x] Lender dashboard with client pipeline + loan milestones (shared case data)
 - [ ] Mortgage readiness estimator + exportable readiness report
 - [ ] Capability matrix + API reference updated
 - [ ] Deferred items explicitly documented (no fork; no live bureau; no cross-tenant marketplace)
@@ -25,11 +25,22 @@ Scope: [`docs/governance/version-29.0-scope.md`](../governance/version-29.0-scop
 | ----- | -------------------------------------------------- | ------------ | ------ |
 | 1     | 29.0 scope + completion checklist                  | Kickoff      | ✅     |
 | 2     | Partner org model + lender RBAC + feature flag     | Platform     | ✅     |
-| 3     | Lender dashboard + pipeline + loan milestones      | Partner UI   | ☐      |
+| 3     | Lender dashboard + pipeline + loan milestones      | Partner UI   | ✅     |
 | 4     | Mortgage readiness score + readiness report export | Intelligence | ☐      |
 | 5     | Capability matrix 29.0 sign-off                    | Governance   | ☐      |
 
 Architecture rule: **edition on the shared platform** — same monorepo/API. Do not clone the product. Optional `apps/lender-web` only if UX divergence requires it.
+
+---
+
+## Slice 3 implementation notes (2026-07-23)
+
+- Migration `097_partner_loan_pipeline`: `loan_pipeline_stage` enum + `pipeline_stage` / `pipeline_stage_changed_at` columns on `partner_referrals`; `partner_loan_milestones` table; `pipeline_view`, `pipeline_update`, `milestone_update` enum values on `partner_access_action`.
+- New endpoints: `GET /partnerships/{id}/pipeline`, `GET /partnerships/{id}/dashboard-summary`, `GET/PUT /partnerships/{id}/referrals/{rid}/milestones`.
+- Default milestone checklist (5 items) seeded on referral create.
+- `PartnerReferralUpdate` now accepts optional `pipeline_stage` (at least one of status/stage/notes required).
+- `@verdin/api-client` updated: `LoanPipelineStage`, `PipelineCard`, `PartnerDashboardSummary`, `PartnerLoanMilestone`, `getPartnershipPipeline`, `getPartnerDashboardSummary`, `listReferralMilestones`, `replaceReferralMilestones`.
+- `apps/lrp-web` partner-hooks extended with `useLenderPipeline`, `useLenderDashboardSummary`, `useReferralMilestones`, `useReplaceReferralMilestones`; pipeline and dashboard pages wired to live API with demo fallback.
 
 ---
 

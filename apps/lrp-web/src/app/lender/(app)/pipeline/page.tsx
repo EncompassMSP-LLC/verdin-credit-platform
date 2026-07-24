@@ -9,40 +9,37 @@ import { RoleGate } from '@/components/lender/RoleGate';
 import { ADVISORY_DISCLAIMER_SHORT } from '@/lib/design-tokens';
 import { useLenderAuth } from '@/lib/lender/auth';
 import { pipelineCards } from '@/lib/lender/data';
+import { STAGE_LABELS } from '@/lib/lender/nav';
 import {
   pickPrimaryPartnership,
   useLenderPartnerships,
-  useLenderReferrals,
+  useLenderPipeline,
   useMortgagePartnerStatus,
-  type PartnerReferral,
+  type PipelineCard,
 } from '@/lib/lender/partner-hooks';
 import { formatDate } from '@/lib/utils';
-
-const STATUS_LABELS: Record<string, string> = {
-  new: 'New',
-  accepted: 'Accepted',
-  in_progress: 'In progress',
-  completed: 'Completed',
-  declined: 'Declined',
-};
 
 type PipelineRow = {
   id: string;
   borrower: string;
-  status: string;
+  stage: string;
+  stageRaw: string;
+  daysInStage: number;
   source: string;
-  updatedAt: string;
+  changedAt: string | null;
   href?: string;
 };
 
-function referralToRow(row: PartnerReferral): PipelineRow {
+function apiCardToRow(card: PipelineCard): PipelineRow {
   return {
-    id: row.id,
-    borrower: row.client_display_name?.trim() || `Client ${row.client_id.slice(0, 8)}`,
-    status: STATUS_LABELS[row.status] ?? row.status,
-    source: row.source_label?.trim() || '—',
-    updatedAt: row.updated_at,
-    href: `/lender/borrowers/${row.client_id}`,
+    id: card.referral_id,
+    borrower: card.client_display_name?.trim() || `Client ${card.client_id.slice(0, 8)}`,
+    stage: STAGE_LABELS[card.pipeline_stage] ?? card.pipeline_stage.replace(/_/g, ' '),
+    stageRaw: card.pipeline_stage,
+    daysInStage: card.days_in_stage,
+    source: card.source_label?.trim() || '—',
+    changedAt: card.stage_changed_at,
+    href: `/lender/borrowers/${card.client_id}`,
   };
 }
 
@@ -50,28 +47,40 @@ function demoRows(): PipelineRow[] {
   return pipelineCards.map((card) => ({
     id: card.id,
     borrower: card.borrowerName,
-    status: card.stage.replace(/_/g, ' '),
+    stage: STAGE_LABELS[card.stage] ?? card.stage.replace(/_/g, ' '),
+    stageRaw: card.stage,
+    daysInStage: 0,
     source: card.loName,
-    updatedAt: card.estimatedReadyDate ?? new Date().toISOString(),
+    changedAt: card.estimatedReadyDate ?? null,
     href: `/lender/borrowers/${card.borrowerId}`,
   }));
+}
+
+function stageTone(stage: string): 'good' | 'info' | 'warn' | 'neutral' | undefined {
+  if (stage === 'mortgage_ready' || stage === 'funded') return 'good';
+  if (stage === 'declined' || stage === 'withdrawn') return 'warn';
+  return 'info';
 }
 
 const columns: Column<PipelineRow>[] = [
   {
     key: 'borrower',
     header: 'Borrower',
-    cell: (row) => <span className="font-medium text-navy-900">{row.borrower}</span>,
+    cell: (row) => (
+      <span className="font-medium text-navy-900 dark:text-white">{row.borrower}</span>
+    ),
   },
   {
-    key: 'status',
-    header: 'Status',
-    cell: (row) => <StatusPill tone="info">{row.status}</StatusPill>,
+    key: 'stage',
+    header: 'Pipeline stage',
+    cell: (row) => <StatusPill tone={stageTone(row.stageRaw)}>{row.stage}</StatusPill>,
   },
   {
-    key: 'band',
-    header: 'Readiness band',
-    cell: () => <span className="text-slate-400">—</span>,
+    key: 'daysInStage',
+    header: 'Days in stage',
+    cell: (row) => (
+      <span className="tabular-nums text-slate-700 dark:text-slate-300">{row.daysInStage}</span>
+    ),
   },
   {
     key: 'source',
@@ -79,15 +88,15 @@ const columns: Column<PipelineRow>[] = [
     cell: (row) => row.source,
   },
   {
-    key: 'updated',
-    header: 'Updated',
-    cell: (row) => formatDate(row.updatedAt),
+    key: 'changedAt',
+    header: 'Stage updated',
+    cell: (row) => (row.changedAt ? formatDate(row.changedAt) : '—'),
   },
 ];
 
 /**
  * Spec: Vol 20 · pages/pipeline.md (table-first; kanban deferred)
- * Platform auth → mortgage_partner referrals; demo → seed rows.
+ * Platform auth → /partnerships/{id}/pipeline cards; demo → seed rows.
  */
 export default function PipelinePage() {
   const router = useRouter();
@@ -95,7 +104,7 @@ export default function PipelinePage() {
   const statusQuery = useMortgagePartnerStatus();
   const partnershipsQuery = useLenderPartnerships();
   const partnership = pickPrimaryPartnership(partnershipsQuery.data);
-  const referralsQuery = useLenderReferrals(partnership?.id);
+  const pipelineQuery = useLenderPipeline(partnership?.id);
 
   const isDemo = authMode === 'demo';
   const platformEnabled = statusQuery.data?.mortgage_partner_enabled === true;
@@ -106,17 +115,17 @@ export default function PipelinePage() {
 
   if (isDemo) {
     rows = demoRows();
-  } else if (statusQuery.isLoading || partnershipsQuery.isLoading || referralsQuery.isLoading) {
+  } else if (statusQuery.isLoading || partnershipsQuery.isLoading || pipelineQuery.isLoading) {
     loading = true;
-  } else if (statusQuery.isError || partnershipsQuery.isError || referralsQuery.isError) {
+  } else if (statusQuery.isError || partnershipsQuery.isError || pipelineQuery.isError) {
     errorMessage =
-      'Could not load partnership referrals. Confirm the API is running and ENABLE_MORTGAGE_PARTNER=true.';
+      'Could not load partnership pipeline. Confirm the API is running and ENABLE_MORTGAGE_PARTNER=true.';
   } else if (!platformEnabled) {
     errorMessage = 'Mortgage Partner edition is not enabled on this API.';
   } else if (!partnership) {
     errorMessage = 'No partnerships found for this organization yet.';
   } else {
-    rows = (referralsQuery.data ?? []).map(referralToRow);
+    rows = (pipelineQuery.data ?? []).map(apiCardToRow);
   }
 
   return (
@@ -125,7 +134,7 @@ export default function PipelinePage() {
         <PageHeader
           eyebrow="Pipeline"
           title="Referral pipeline"
-          description={`${ADVISORY_DISCLAIMER_SHORT} Referral status is operational tracking—not underwriting.`}
+          description={`${ADVISORY_DISCLAIMER_SHORT} Referral stage is operational tracking—not underwriting.`}
           actions={
             <Link
               href="/lender/referrals"
@@ -139,7 +148,7 @@ export default function PipelinePage() {
         {isDemo ? (
           <p className="mb-4 rounded-brand border border-gold-500/30 bg-gold-500/10 px-4 py-3 text-sm text-navy-900">
             Demo mode — showing sample pipeline rows. Sign in with a platform staff account to load
-            live partnership referrals.
+            live partnership pipeline.
           </p>
         ) : null}
 
@@ -151,11 +160,11 @@ export default function PipelinePage() {
         ) : null}
 
         <PortalCard
-          title="Open referrals"
-          description="Table view of partnership referrals (Vol 20). Readiness band and next-update columns land when score publish is linked."
+          title="Pipeline board"
+          description="Ordered by most-recent stage change. Stage updates reflect CRO-mediated progress — advisory tracking only."
         >
           {loading ? (
-            <p className="text-sm text-slate-500">Loading referrals…</p>
+            <p className="text-sm text-slate-500">Loading pipeline…</p>
           ) : errorMessage ? (
             <p className="rounded-brand border border-critical/30 bg-critical/10 px-4 py-3 text-sm text-critical">
               {errorMessage}
