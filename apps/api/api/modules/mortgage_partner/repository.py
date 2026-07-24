@@ -6,6 +6,7 @@ from datetime import UTC, datetime
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from api.modules.accounts.credit_analysis_run_models import CreditAnalysisRun
 from api.modules.auth.models import Organization, User
 from api.modules.cases.models import Case
 from api.modules.clients.models import Client
@@ -277,6 +278,42 @@ class MortgagePartnerRepository:
         await self._session.flush()
         await self._session.refresh(audit)
         return audit
+
+    async def get_latest_published_run_for_case(
+        self,
+        case_id: uuid.UUID,
+        organization_id: uuid.UUID,
+    ) -> CreditAnalysisRun | None:
+        """Return the most-recent published credit-analysis run for a case."""
+        result = await self._session.execute(
+            select(CreditAnalysisRun)
+            .where(
+                CreditAnalysisRun.case_id == case_id,
+                CreditAnalysisRun.organization_id == organization_id,
+                CreditAnalysisRun.status == "published",
+            )
+            .order_by(CreditAnalysisRun.generated_at.desc())
+            .limit(1)
+        )
+        return result.scalar_one_or_none()
+
+    async def list_referrals_with_case(
+        self,
+        partnership_id: uuid.UUID,
+        cro_organization_id: uuid.UUID,
+    ) -> list[PartnerReferral]:
+        """All non-deleted referrals that have a case_id (needed for readiness list)."""
+        result = await self._session.execute(
+            select(PartnerReferral)
+            .where(
+                PartnerReferral.partnership_id == partnership_id,
+                PartnerReferral.cro_organization_id == cro_organization_id,
+                PartnerReferral.deleted_at.is_(None),
+                PartnerReferral.case_id.is_not(None),
+            )
+            .order_by(PartnerReferral.created_at.desc())
+        )
+        return list(result.scalars().all())
 
     async def list_access_audits(
         self, cro_organization_id: uuid.UUID, *, limit: int = 100

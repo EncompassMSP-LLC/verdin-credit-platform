@@ -1067,6 +1067,10 @@ export {
   type PartnerDashboardSummary,
   type PartnerLoanMilestone,
   type PartnerOrgType,
+  getReferralReadinessReport,
+  getReferralReadinessReportExportUrl,
+  listPartnershipReadinessReports,
+  type MortgageReadinessReport,
   type PartnerReferral,
   type PartnerReferralCreateInput,
   type PartnerReferralStatus,
@@ -1080,6 +1084,10 @@ export {
   type PartnershipMemberCreateInput,
   type PartnershipStatus,
   type PipelineCard,
+  type ReadinessBlocker,
+  type ReadinessDimension,
+  type ReadinessPriorityTask,
+  type ReadinessReportSummary,
 } from './mortgagePartner';
 
 export interface HealthResponse {

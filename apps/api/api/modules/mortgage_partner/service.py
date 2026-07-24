@@ -2,12 +2,22 @@
 
 import uuid
 from datetime import UTC, datetime
+from typing import Any
 
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.core.audit import apply_audit_on_create, apply_audit_on_update
 from api.core.permissions import has_permission
+from api.modules.accounts.credit_analysis import ADVISORY_DISCLAIMER
+from api.modules.accounts.credit_analysis_export import (
+    CreditAnalysisExportFormat,
+    build_credit_analysis_export,
+)
+from api.modules.accounts.credit_analysis_run_models import CreditAnalysisRun
+from api.modules.accounts.credit_analysis_schemas import (
+    CreditAnalysisRunResponse,
+)
 from api.modules.auth.models import User
 from api.modules.mortgage_partner.models import (
     LoanPipelineStage,
@@ -28,6 +38,7 @@ from api.modules.mortgage_partner.schemas import (
     DashboardSummaryResponse,
     MilestoneReplacePayload,
     MortgagePartnerStatusResponse,
+    MortgageReadinessReportResponse,
     PartnerAccessAuditResponse,
     PartnerLoanMilestoneResponse,
     PartnerReferralCreate,
@@ -40,6 +51,10 @@ from api.modules.mortgage_partner.schemas import (
     PartnershipMemberResponse,
     PartnershipResponse,
     PipelineCardResponse,
+    ReadinessBlocker,
+    ReadinessDimension,
+    ReadinessPriorityTask,
+    ReadinessReportSummary,
 )
 
 # Default milestone labels seeded on every new referral
@@ -202,6 +217,8 @@ class MortgagePartnerService:
                 "partner_role_matrix",
                 "partner_pipeline",
                 "partner_milestones",
+                "partner_readiness_report",
+                "partner_readiness_export",
             ],
             deferred_capabilities=[
                 "partner_jwt_realm",
@@ -658,6 +675,231 @@ class MortgagePartnerService:
         )
         await self._session.commit()
         return [PartnerLoanMilestoneResponse.model_validate(m) for m in created]
+
+    # --- Readiness reports (slice 4) ---
+
+    def _run_to_readiness_report(
+        self,
+        *,
+        referral: PartnerReferral,
+        run: CreditAnalysisRun,
+        client_display_name: str | None,
+        milestones: list[PartnerLoanMilestone],
+    ) -> MortgageReadinessReportResponse:
+        payload: dict[str, Any] = run.payload or {}
+        disclaimer = payload.get("disclaimer") or ADVISORY_DISCLAIMER
+
+        dimensions = [
+            ReadinessDimension(
+                key=d["key"],
+                label=d["label"],
+                score=d["score"],
+                weight=d["weight"],
+            )
+            for d in payload.get("dimensions", [])
+        ]
+        blockers = [
+            ReadinessBlocker(
+                id=b["id"],
+                title=b["title"],
+                impact=b["impact"],
+                action=b["action"],
+            )
+            for b in payload.get("blockers", [])
+        ]
+        priority_tasks = [
+            ReadinessPriorityTask(
+                id=str(m.id),
+                label=m.label,
+                complete=m.complete,
+                completed_at=m.completed_at,
+            )
+            for m in milestones
+        ]
+        return MortgageReadinessReportResponse(
+            referral_id=referral.id,
+            case_id=referral.case_id,  # type: ignore[arg-type]
+            credit_analysis_run_id=run.id,
+            client_display_name=client_display_name,
+            mortgage_readiness_score=run.mortgage_readiness_score,
+            band=run.band,
+            generated_at=run.generated_at,
+            dimensions=dimensions,
+            blockers=blockers,
+            priority_tasks=priority_tasks,
+            docs_status="unknown",
+            partner_notes=referral.notes,
+            formula_version=run.formula_version,
+            score_version=run.score_version,
+            disclaimer=disclaimer,
+        )
+
+    def _run_to_readiness_summary(
+        self,
+        *,
+        referral: PartnerReferral,
+        run: CreditAnalysisRun,
+        client_display_name: str | None,
+    ) -> ReadinessReportSummary:
+        payload: dict[str, Any] = run.payload or {}
+        return ReadinessReportSummary(
+            referral_id=referral.id,
+            case_id=referral.case_id,  # type: ignore[arg-type]
+            credit_analysis_run_id=run.id,
+            client_display_name=client_display_name,
+            mortgage_readiness_score=run.mortgage_readiness_score,
+            band=run.band,
+            generated_at=run.generated_at,
+            formula_version=run.formula_version,
+            score_version=run.score_version,
+            disclaimer=payload.get("disclaimer") or ADVISORY_DISCLAIMER,
+        )
+
+    async def get_readiness_report(
+        self,
+        user: User,
+        partnership_id: uuid.UUID,
+        referral_id: uuid.UUID,
+    ) -> MortgageReadinessReportResponse:
+        self._require_read(user)
+        cro_org_id = self._require_organization(user)
+        await self._require_partnership(partnership_id, cro_org_id)
+        referral = await self._require_referral(referral_id, partnership_id, cro_org_id)
+
+        if referral.case_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Referral has no linked case — readiness report unavailable",
+            )
+
+        run = await self._repo.get_latest_published_run_for_case(referral.case_id, cro_org_id)
+        if run is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No published credit-analysis run found for this referral's case",
+            )
+
+        names = await self._repo.map_client_display_names(cro_org_id, [referral.client_id])
+        milestones = await self._repo.list_milestones(referral.id, cro_org_id)
+
+        await self._audit(
+            cro_organization_id=cro_org_id,
+            actor=user,
+            action=PartnerAccessAction.READINESS_VIEW,
+            resource_type="partner_referral",
+            resource_id=referral.id,
+            partnership_id=partnership_id,
+            detail=f"run_id={run.id}",
+        )
+        await self._session.commit()
+        return self._run_to_readiness_report(
+            referral=referral,
+            run=run,
+            client_display_name=names.get(referral.client_id),
+            milestones=milestones,
+        )
+
+    async def export_readiness_report(
+        self,
+        user: User,
+        partnership_id: uuid.UUID,
+        referral_id: uuid.UUID,
+        *,
+        export_format: CreditAnalysisExportFormat,
+    ) -> tuple[bytes, str, str]:
+        """Operator-gated export of the readiness report (text/pdf).
+
+        Disclaimer is reproduced prominently. Never auto-transmitted.
+        """
+        self._require_read(user)
+        cro_org_id = self._require_organization(user)
+        await self._require_partnership(partnership_id, cro_org_id)
+        referral = await self._require_referral(referral_id, partnership_id, cro_org_id)
+
+        if referral.case_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Referral has no linked case — readiness export unavailable",
+            )
+
+        run = await self._repo.get_latest_published_run_for_case(referral.case_id, cro_org_id)
+        if run is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No published credit-analysis run found for this referral's case",
+            )
+
+        await self._audit(
+            cro_organization_id=cro_org_id,
+            actor=user,
+            action=PartnerAccessAction.READINESS_EXPORT,
+            resource_type="partner_referral",
+            resource_id=referral.id,
+            partnership_id=partnership_id,
+            detail=f"format={export_format} run_id={run.id}",
+        )
+        await self._session.commit()
+
+        # Build a CreditAnalysisRunResponse to reuse the export formatter
+
+        run_response = CreditAnalysisRunResponse(
+            id=run.id,
+            case_id=run.case_id,
+            generated_at=run.generated_at,
+            reports_evaluated=run.reports_evaluated,
+            tradelines_evaluated=run.tradelines_evaluated,
+            borrower_readiness_score=run.borrower_readiness_score,
+            mortgage_readiness_score=run.mortgage_readiness_score,
+            schema_version=run.schema_version,
+            band=run.band,
+            status=run.status,
+            payload=run.payload,
+            formula_version=run.formula_version,
+            score_version=run.score_version,
+            inputs_hash=run.inputs_hash,
+            published_at=run.published_at,
+        )
+        return build_credit_analysis_export(run_response, export_format)
+
+    async def list_readiness_reports(
+        self,
+        user: User,
+        partnership_id: uuid.UUID,
+    ) -> list[ReadinessReportSummary]:
+        """List readiness-report summaries for all referrals with published runs."""
+        self._require_read(user)
+        cro_org_id = self._require_organization(user)
+        await self._require_partnership(partnership_id, cro_org_id)
+
+        referrals = await self._repo.list_referrals_with_case(partnership_id, cro_org_id)
+        names = await self._repo.map_client_display_names(
+            cro_org_id, [r.client_id for r in referrals]
+        )
+        summaries: list[ReadinessReportSummary] = []
+        for referral in referrals:
+            if referral.case_id is None:
+                continue
+            run = await self._repo.get_latest_published_run_for_case(referral.case_id, cro_org_id)
+            if run is None:
+                continue
+            summaries.append(
+                self._run_to_readiness_summary(
+                    referral=referral,
+                    run=run,
+                    client_display_name=names.get(referral.client_id),
+                )
+            )
+        await self._audit(
+            cro_organization_id=cro_org_id,
+            actor=user,
+            action=PartnerAccessAction.READINESS_VIEW,
+            resource_type="org_partnership",
+            resource_id=partnership_id,
+            partnership_id=partnership_id,
+            detail=f"count={len(summaries)}",
+        )
+        await self._session.commit()
+        return summaries
 
     # --- Access audits ---
 

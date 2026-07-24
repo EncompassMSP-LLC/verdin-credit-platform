@@ -69,6 +69,8 @@ class PartnerAccessAction(StrEnum):
     PIPELINE_VIEW = "pipeline_view"
     PIPELINE_UPDATE = "pipeline_update"
     MILESTONE_UPDATE = "milestone_update"
+    READINESS_VIEW = "readiness_view"
+    READINESS_EXPORT = "readiness_export"
 
 
 class OrgPartnership(Base, TimestampMixin, SoftDeleteMixin, AuditMixin):

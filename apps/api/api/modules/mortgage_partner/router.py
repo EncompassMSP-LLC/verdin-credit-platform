@@ -1,11 +1,16 @@
 """Mortgage Partner Edition endpoints."""
 
 import uuid
+from typing import Literal
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
+from fastapi.responses import Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.database.session import get_db
+from api.modules.accounts.credit_analysis_export import (
+    sanitize_content_disposition_filename as sanitize_readiness_filename,
+)
 from api.modules.auth.dependencies import get_current_user
 from api.modules.auth.models import User
 from api.modules.mortgage_partner.dependencies import require_mortgage_partner_enabled
@@ -13,6 +18,7 @@ from api.modules.mortgage_partner.schemas import (
     DashboardSummaryResponse,
     MilestoneReplacePayload,
     MortgagePartnerStatusResponse,
+    MortgageReadinessReportResponse,
     PartnerAccessAuditResponse,
     PartnerLoanMilestoneResponse,
     PartnerReferralCreate,
@@ -24,6 +30,7 @@ from api.modules.mortgage_partner.schemas import (
     PartnershipMemberResponse,
     PartnershipResponse,
     PipelineCardResponse,
+    ReadinessReportSummary,
 )
 from api.modules.mortgage_partner.service import MortgagePartnerService
 
@@ -228,3 +235,73 @@ async def replace_referral_milestones(
     service: MortgagePartnerService = Depends(get_mortgage_partner_service),
 ) -> list[PartnerLoanMilestoneResponse]:
     return await service.replace_milestones(current_user, partnership_id, referral_id, payload)
+
+
+# ---------------------------------------------------------------------------
+# Readiness reports (slice 4)
+# ---------------------------------------------------------------------------
+
+
+@router.get(
+    "/partnerships/{partnership_id}/readiness-reports",
+    response_model=list[ReadinessReportSummary],
+)
+async def list_partnership_readiness_reports(
+    partnership_id: uuid.UUID,
+    _: None = Depends(require_mortgage_partner_enabled),
+    current_user: User = Depends(get_current_user),
+    service: MortgagePartnerService = Depends(get_mortgage_partner_service),
+) -> list[ReadinessReportSummary]:
+    """List advisory readiness-report summaries for all referrals with published runs."""
+    return await service.list_readiness_reports(current_user, partnership_id)
+
+
+@router.get(
+    "/partnerships/{partnership_id}/referrals/{referral_id}/readiness-report",
+    response_model=MortgageReadinessReportResponse,
+)
+async def get_referral_readiness_report(
+    partnership_id: uuid.UUID,
+    referral_id: uuid.UUID,
+    _: None = Depends(require_mortgage_partner_enabled),
+    current_user: User = Depends(get_current_user),
+    service: MortgagePartnerService = Depends(get_mortgage_partner_service),
+) -> MortgageReadinessReportResponse:
+    """Get the advisory mortgage readiness report for a referral.
+
+    Lending Readiness Score™ is an advisory tool for organizing credit and
+    documentation work toward a mortgage conversation. It is not a credit score
+    from a consumer reporting agency, not an underwriting decision, and not a
+    guarantee of loan approval or terms.
+    """
+    return await service.get_readiness_report(current_user, partnership_id, referral_id)
+
+
+@router.get(
+    "/partnerships/{partnership_id}/referrals/{referral_id}/readiness-report/export",
+)
+async def export_referral_readiness_report(
+    partnership_id: uuid.UUID,
+    referral_id: uuid.UUID,
+    format: Literal["text", "pdf"] = Query("text", alias="format"),
+    _: None = Depends(require_mortgage_partner_enabled),
+    current_user: User = Depends(get_current_user),
+    service: MortgagePartnerService = Depends(get_mortgage_partner_service),
+) -> Response:
+    """Operator-gated export of the advisory readiness report (text/pdf).
+
+    Disclaimer is reproduced at the top of every export.
+    The platform never auto-transmits this document.
+    """
+    content, file_name, media_type = await service.export_readiness_report(
+        current_user,
+        partnership_id,
+        referral_id,
+        export_format=format,
+    )
+    safe_name = sanitize_readiness_filename(file_name)
+    return Response(
+        content=content,
+        media_type=media_type,
+        headers={"Content-Disposition": f'attachment; filename="{safe_name}"'},
+    )

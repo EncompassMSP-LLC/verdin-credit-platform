@@ -9,6 +9,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.core.permissions import has_permission
 from api.modules.accounts.credit_analysis import ADVISORY_DISCLAIMER, compose_credit_analysis
+from api.modules.accounts.credit_analysis_export import (
+    CreditAnalysisExportFormat,
+    build_credit_analysis_export,
+)
 from api.modules.accounts.credit_analysis_run_models import CreditAnalysisRun
 from api.modules.accounts.credit_analysis_run_repository import (
     CreditAnalysisRunListFilters,
@@ -172,6 +176,18 @@ class CreditAnalysisService:
                 detail="Credit analysis run not found",
             )
         return self._to_response(row)
+
+    async def export_run(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+        run_id: uuid.UUID,
+        *,
+        export_format: CreditAnalysisExportFormat,
+    ) -> tuple[bytes, str, str]:
+        """Export a specific run as text or PDF. Operator-gated; no auto-transmit."""
+        run_response = await self.get_run(user, case_id, run_id)
+        return build_credit_analysis_export(run_response, export_format)
 
     async def get_portal_readiness(
         self,
