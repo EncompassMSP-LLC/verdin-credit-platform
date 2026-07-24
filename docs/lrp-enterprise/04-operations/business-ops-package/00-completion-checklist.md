@@ -23,7 +23,7 @@ Ordered slices for LRP Phase 3 company ops. Sprint loop: `.cursor/rules/lrp-ops-
 | 3     | Section 2 — Client Intake Package               | ✅     |
 | 4     | Section 3 — Compliance Package                  | ✅     |
 | 5     | Section 4 — Referral Management System          | ✅     |
-| 6     | Section 5 — CRM Package                         | ☐      |
+| 6     | Section 5 — CRM Package                         | ✅     |
 | 7     | Section 6 — Status Reports                      | ☐      |
 | 8     | Section 7 — Mortgage Readiness Reports          | ☐      |
 | 9     | Section 8 — Presentation Package                | ☐      |
@@ -66,3 +66,8 @@ Ordered slices for LRP Phase 3 company ops. Sprint loop: `.cursor/rules/lrp-ops-
 
 - Referral Tracker field model + CSV header
 - Ops pipeline stages mapped to `LoanPipelineStage` + milestone guidance
+
+### Slice 6 — Section 5 (2026-07-24)
+
+- CRM operating model + partner type taxonomy mapped to `PartnerOrgType`
+- Databases: mortgage company, LO, realtor, attorney, financial planner, insurance, builder, title
