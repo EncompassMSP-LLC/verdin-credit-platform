@@ -1,10 +1,10 @@
-"""Mortgage Partner Edition — partnership, membership, referral, and access audit models."""
+"""Mortgage Partner Edition — partnership, membership, referral, milestone, and access audit models."""
 
 import uuid
 from datetime import datetime
 from enum import StrEnum
 
-from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -45,6 +45,18 @@ class ReferralStatus(StrEnum):
     DECLINED = "declined"
 
 
+class LoanPipelineStage(StrEnum):
+    REFERRED = "referred"
+    INTAKE = "intake"
+    IN_REPAIR = "in_repair"
+    NEAR_READY = "near_ready"
+    MORTGAGE_READY = "mortgage_ready"
+    IN_UNDERWRITING = "in_underwriting"
+    FUNDED = "funded"
+    DECLINED = "declined"
+    WITHDRAWN = "withdrawn"
+
+
 class PartnerAccessAction(StrEnum):
     PARTNERSHIP_VIEW = "partnership_view"
     REFERRAL_LIST = "referral_list"
@@ -54,6 +66,9 @@ class PartnerAccessAction(StrEnum):
     PARTNERSHIP_CREATE = "partnership_create"
     REFERRAL_CREATE = "referral_create"
     REFERRAL_UPDATE = "referral_update"
+    PIPELINE_VIEW = "pipeline_view"
+    PIPELINE_UPDATE = "pipeline_update"
+    MILESTONE_UPDATE = "milestone_update"
 
 
 class OrgPartnership(Base, TimestampMixin, SoftDeleteMixin, AuditMixin):
@@ -188,11 +203,52 @@ class PartnerReferral(Base, TimestampMixin, SoftDeleteMixin, AuditMixin):
         default=ReferralStatus.NEW,
         index=True,
     )
+    pipeline_stage: Mapped[LoanPipelineStage] = mapped_column(
+        Enum(
+            LoanPipelineStage,
+            name="loan_pipeline_stage",
+            values_callable=lambda x: [e.value for e in x],
+        ),
+        nullable=False,
+        default=LoanPipelineStage.REFERRED,
+        index=True,
+    )
+    pipeline_stage_changed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
     source_label: Mapped[str | None] = mapped_column(String(255), nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     referred_by_user_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("users.id"),
+        nullable=True,
+    )
+
+
+class PartnerLoanMilestone(Base, TimestampMixin, SoftDeleteMixin, AuditMixin):
+    """Ordered checklist milestone for a partner referral's loan pipeline progress."""
+
+    __tablename__ = "partner_loan_milestones"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    referral_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("partner_referrals.id"),
+        nullable=False,
+        index=True,
+    )
+    organization_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("organizations.id"),
+        nullable=False,
+        index=True,
+    )
+    label: Mapped[str] = mapped_column(String(255), nullable=False)
+    sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    complete: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    completed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
         nullable=True,
     )
 

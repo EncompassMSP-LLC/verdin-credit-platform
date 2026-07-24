@@ -1,6 +1,7 @@
 """Mortgage partner persistence."""
 
 import uuid
+from datetime import UTC, datetime
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,6 +13,7 @@ from api.modules.mortgage_partner.models import (
     OrgPartnership,
     OrgPartnershipMember,
     PartnerAccessAudit,
+    PartnerLoanMilestone,
     PartnerReferral,
 )
 
@@ -191,6 +193,84 @@ class MortgagePartnerRepository:
         await self._session.flush()
         await self._session.refresh(referral)
         return referral
+
+    # --- Milestone persistence ---
+
+    async def create_milestone(self, milestone: PartnerLoanMilestone) -> PartnerLoanMilestone:
+        self._session.add(milestone)
+        await self._session.flush()
+        await self._session.refresh(milestone)
+        return milestone
+
+    async def bulk_create_milestones(
+        self, milestones: list[PartnerLoanMilestone]
+    ) -> list[PartnerLoanMilestone]:
+        for m in milestones:
+            self._session.add(m)
+        await self._session.flush()
+        for m in milestones:
+            await self._session.refresh(m)
+        return milestones
+
+    async def list_milestones(
+        self, referral_id: uuid.UUID, organization_id: uuid.UUID
+    ) -> list[PartnerLoanMilestone]:
+        result = await self._session.execute(
+            select(PartnerLoanMilestone)
+            .where(
+                PartnerLoanMilestone.referral_id == referral_id,
+                PartnerLoanMilestone.organization_id == organization_id,
+                PartnerLoanMilestone.deleted_at.is_(None),
+            )
+            .order_by(PartnerLoanMilestone.sort_order, PartnerLoanMilestone.created_at)
+        )
+        return list(result.scalars().all())
+
+    async def soft_delete_milestones_for_referral(
+        self, referral_id: uuid.UUID, organization_id: uuid.UUID
+    ) -> None:
+        """Soft-delete all non-deleted milestones for a referral (replace-all pattern)."""
+        now = datetime.now(UTC)
+        result = await self._session.execute(
+            select(PartnerLoanMilestone).where(
+                PartnerLoanMilestone.referral_id == referral_id,
+                PartnerLoanMilestone.organization_id == organization_id,
+                PartnerLoanMilestone.deleted_at.is_(None),
+            )
+        )
+        for row in result.scalars().all():
+            row.deleted_at = now
+        await self._session.flush()
+
+    # --- Pipeline / dashboard aggregation ---
+
+    async def list_pipeline_referrals(
+        self, partnership_id: uuid.UUID, cro_organization_id: uuid.UUID
+    ) -> list[PartnerReferral]:
+        """All non-deleted referrals ordered by pipeline_stage_changed_at desc."""
+        result = await self._session.execute(
+            select(PartnerReferral)
+            .where(
+                PartnerReferral.partnership_id == partnership_id,
+                PartnerReferral.cro_organization_id == cro_organization_id,
+                PartnerReferral.deleted_at.is_(None),
+            )
+            .order_by(
+                PartnerReferral.pipeline_stage_changed_at.desc().nullslast(),
+                PartnerReferral.created_at.desc(),
+            )
+        )
+        return list(result.scalars().all())
+
+    def compute_dashboard_summary(self, referrals: list[PartnerReferral]) -> dict[str, int]:
+        """Return stage-count dict from an already-fetched referral list."""
+        counts: dict[str, int] = {}
+        for ref in referrals:
+            key = ref.pipeline_stage.value
+            counts[key] = counts.get(key, 0) + 1
+        return counts
+
+    # --- Access audit ---
 
     async def create_access_audit(self, audit: PartnerAccessAudit) -> PartnerAccessAudit:
         self._session.add(audit)

@@ -10,8 +10,11 @@ from api.modules.auth.dependencies import get_current_user
 from api.modules.auth.models import User
 from api.modules.mortgage_partner.dependencies import require_mortgage_partner_enabled
 from api.modules.mortgage_partner.schemas import (
+    DashboardSummaryResponse,
+    MilestoneReplacePayload,
     MortgagePartnerStatusResponse,
     PartnerAccessAuditResponse,
+    PartnerLoanMilestoneResponse,
     PartnerReferralCreate,
     PartnerReferralResponse,
     PartnerReferralUpdate,
@@ -20,6 +23,7 @@ from api.modules.mortgage_partner.schemas import (
     PartnershipMemberCreate,
     PartnershipMemberResponse,
     PartnershipResponse,
+    PipelineCardResponse,
 )
 from api.modules.mortgage_partner.service import MortgagePartnerService
 
@@ -84,6 +88,32 @@ async def get_partnership(
     service: MortgagePartnerService = Depends(get_mortgage_partner_service),
 ) -> PartnershipResponse:
     return await service.get_partnership(current_user, partnership_id)
+
+
+@router.get(
+    "/partnerships/{partnership_id}/pipeline",
+    response_model=list[PipelineCardResponse],
+)
+async def get_partnership_pipeline(
+    partnership_id: uuid.UUID,
+    _: None = Depends(require_mortgage_partner_enabled),
+    current_user: User = Depends(get_current_user),
+    service: MortgagePartnerService = Depends(get_mortgage_partner_service),
+) -> list[PipelineCardResponse]:
+    return await service.get_pipeline(current_user, partnership_id)
+
+
+@router.get(
+    "/partnerships/{partnership_id}/dashboard-summary",
+    response_model=DashboardSummaryResponse,
+)
+async def get_partnership_dashboard_summary(
+    partnership_id: uuid.UUID,
+    _: None = Depends(require_mortgage_partner_enabled),
+    current_user: User = Depends(get_current_user),
+    service: MortgagePartnerService = Depends(get_mortgage_partner_service),
+) -> DashboardSummaryResponse:
+    return await service.get_dashboard_summary(current_user, partnership_id)
 
 
 @router.post(
@@ -169,3 +199,32 @@ async def update_partner_referral(
     service: MortgagePartnerService = Depends(get_mortgage_partner_service),
 ) -> PartnerReferralResponse:
     return await service.update_referral(current_user, partnership_id, referral_id, payload)
+
+
+@router.get(
+    "/partnerships/{partnership_id}/referrals/{referral_id}/milestones",
+    response_model=list[PartnerLoanMilestoneResponse],
+)
+async def list_referral_milestones(
+    partnership_id: uuid.UUID,
+    referral_id: uuid.UUID,
+    _: None = Depends(require_mortgage_partner_enabled),
+    current_user: User = Depends(get_current_user),
+    service: MortgagePartnerService = Depends(get_mortgage_partner_service),
+) -> list[PartnerLoanMilestoneResponse]:
+    return await service.list_milestones(current_user, partnership_id, referral_id)
+
+
+@router.put(
+    "/partnerships/{partnership_id}/referrals/{referral_id}/milestones",
+    response_model=list[PartnerLoanMilestoneResponse],
+)
+async def replace_referral_milestones(
+    partnership_id: uuid.UUID,
+    referral_id: uuid.UUID,
+    payload: MilestoneReplacePayload,
+    _: None = Depends(require_mortgage_partner_enabled),
+    current_user: User = Depends(get_current_user),
+    service: MortgagePartnerService = Depends(get_mortgage_partner_service),
+) -> list[PartnerLoanMilestoneResponse]:
+    return await service.replace_milestones(current_user, partnership_id, referral_id, payload)

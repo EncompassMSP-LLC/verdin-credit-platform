@@ -693,24 +693,34 @@ Endpoints return `404` when the corresponding feature flag is false.
 
 ## Mortgage Partner Edition
 
-CRO↔partner (lender/realtor/broker) partnership scaffold with partnership-scoped lender RBAC matrix and partner access audits. Requires `ENABLE_MORTGAGE_PARTNER=true`. Staff JWT only in this slice (partner JWT realm deferred). No cross-tenant marketplace, live bureau soft-pull, or unsupervised filing.
+CRO↔partner (lender/realtor/broker) partnership scaffold with pipeline stage tracking, loan milestones, dashboard summary, and partnership-scoped lender RBAC. Requires `ENABLE_MORTGAGE_PARTNER=true`. Staff JWT only (partner JWT realm deferred). No cross-tenant marketplace, live bureau soft-pull, or unsupervised filing.
 
-| Method | Path                                                          | Min role     | Description                                                       |
-| ------ | ------------------------------------------------------------- | ------------ | ----------------------------------------------------------------- |
-| GET    | `/mortgage-partner/status`                                    | case_manager | Feature capabilities + deferred list                              |
-| GET    | `/mortgage-partner/roles`                                     | case_manager | Partner-role permission matrix                                    |
-| GET    | `/mortgage-partner/access-audits`                             | admin        | Partner access audit log                                          |
-| POST   | `/mortgage-partner/partnerships`                              | admin        | Create CRO↔partner org partnership                                |
-| GET    | `/mortgage-partner/partnerships`                              | case_manager | List partnerships for caller org                                  |
-| GET    | `/mortgage-partner/partnerships/{id}`                         | case_manager | Get partnership (audited)                                         |
-| POST   | `/mortgage-partner/partnerships/{id}/members`                 | admin        | Add partnership member + partner role                             |
-| GET    | `/mortgage-partner/partnerships/{id}/members`                 | case_manager | List members (audited)                                            |
-| POST   | `/mortgage-partner/partnerships/{id}/referrals`               | admin        | Attribute client referral to partnership                          |
-| GET    | `/mortgage-partner/partnerships/{id}/referrals`               | case_manager | List referrals (audited; includes `client_display_name`)          |
-| GET    | `/mortgage-partner/partnerships/{id}/referrals/{referral_id}` | case_manager | Get referral (audited PII access; includes `client_display_name`) |
-| PATCH  | `/mortgage-partner/partnerships/{id}/referrals/{referral_id}` | admin        | Update referral status (accept/decline; audited)                  |
+| Method | Path                                                             | Min role     | Description                                                                                            |
+| ------ | ---------------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------ |
+| GET    | `/mortgage-partner/status`                                       | case_manager | Feature capabilities + deferred list                                                                   |
+| GET    | `/mortgage-partner/roles`                                        | case_manager | Partner-role permission matrix                                                                         |
+| GET    | `/mortgage-partner/access-audits`                                | admin        | Partner access audit log                                                                               |
+| POST   | `/mortgage-partner/partnerships`                                 | admin        | Create CRO↔partner org partnership                                                                     |
+| GET    | `/mortgage-partner/partnerships`                                 | case_manager | List partnerships for caller org                                                                       |
+| GET    | `/mortgage-partner/partnerships/{id}`                            | case_manager | Get partnership (audited)                                                                              |
+| GET    | `/mortgage-partner/partnerships/{id}/pipeline`                   | case_manager | Pipeline cards: referral_id, client, stage, days_in_stage, stage_changed_at, source (audited)          |
+| GET    | `/mortgage-partner/partnerships/{id}/dashboard-summary`          | case_manager | Aggregate stage counts: total, near_ready, mortgage_ready, in_underwriting, funded, declined (audited) |
+| POST   | `/mortgage-partner/partnerships/{id}/members`                    | admin        | Add partnership member + partner role                                                                  |
+| GET    | `/mortgage-partner/partnerships/{id}/members`                    | case_manager | List members (audited)                                                                                 |
+| POST   | `/mortgage-partner/partnerships/{id}/referrals`                  | admin        | Create referral; sets `pipeline_stage` (default `referred`) + seeds 5 default milestones               |
+| GET    | `/mortgage-partner/partnerships/{id}/referrals`                  | case_manager | List referrals (audited; includes `client_display_name`, `pipeline_stage`)                             |
+| GET    | `/mortgage-partner/partnerships/{id}/referrals/{rid}`            | case_manager | Get referral with milestones (audited PII access)                                                      |
+| PATCH  | `/mortgage-partner/partnerships/{id}/referrals/{rid}`            | admin        | Update referral: optional `status`, `pipeline_stage`, `notes` (at least one required; audited)         |
+| GET    | `/mortgage-partner/partnerships/{id}/referrals/{rid}/milestones` | case_manager | List ordered milestone checklist for a referral                                                        |
+| PUT    | `/mortgage-partner/partnerships/{id}/referrals/{rid}/milestones` | admin        | Replace milestone checklist (soft-delete existing; create new; audited)                                |
 
-Tenant isolation: all queries scoped to the caller's `organization_id` as CRO org. Referrals may only reference clients/cases in that org.
+### `LoanPipelineStage` enum values
+
+`referred` → `intake` → `in_repair` → `near_ready` → `mortgage_ready` → `in_underwriting` → `funded` | `declined` | `withdrawn`
+
+Default for new referrals: `referred`. Stage change timestamp (`pipeline_stage_changed_at`) updated automatically.
+
+Tenant isolation: all queries scoped to the caller's `organization_id` as CRO org. Referrals may only reference clients/cases in that org. Pipeline/dashboard/milestones return 404 for foreign-org partnership IDs.
 
 ## Organization admin
 

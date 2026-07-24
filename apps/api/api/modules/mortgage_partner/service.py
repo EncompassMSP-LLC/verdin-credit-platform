@@ -1,4 +1,4 @@
-"""Mortgage partner service — partnerships, members, referrals, access audits."""
+"""Mortgage partner service — partnerships, members, referrals, milestones, access audits."""
 
 import uuid
 from datetime import UTC, datetime
@@ -10,10 +10,12 @@ from api.core.audit import apply_audit_on_create, apply_audit_on_update
 from api.core.permissions import has_permission
 from api.modules.auth.models import User
 from api.modules.mortgage_partner.models import (
+    LoanPipelineStage,
     OrgPartnership,
     OrgPartnershipMember,
     PartnerAccessAction,
     PartnerAccessAudit,
+    PartnerLoanMilestone,
     PartnerReferral,
 )
 from api.modules.mortgage_partner.permissions import (
@@ -23,8 +25,11 @@ from api.modules.mortgage_partner.permissions import (
 )
 from api.modules.mortgage_partner.repository import MortgagePartnerRepository
 from api.modules.mortgage_partner.schemas import (
+    DashboardSummaryResponse,
+    MilestoneReplacePayload,
     MortgagePartnerStatusResponse,
     PartnerAccessAuditResponse,
+    PartnerLoanMilestoneResponse,
     PartnerReferralCreate,
     PartnerReferralResponse,
     PartnerReferralUpdate,
@@ -34,7 +39,17 @@ from api.modules.mortgage_partner.schemas import (
     PartnershipMemberCreate,
     PartnershipMemberResponse,
     PartnershipResponse,
+    PipelineCardResponse,
 )
+
+# Default milestone labels seeded on every new referral
+_DEFAULT_MILESTONES = [
+    ("Referral received", True),
+    ("Intake complete", False),
+    ("Readiness plan active", False),
+    ("Docs package ready", False),
+    ("Partner update cadence set", False),
+]
 
 
 class MortgagePartnerService:
@@ -46,12 +61,20 @@ class MortgagePartnerService:
     def from_session(cls, session: AsyncSession) -> "MortgagePartnerService":
         return cls(MortgagePartnerRepository(session), session)
 
+    # --- helpers ---
+
     def _referral_response(
         self,
         row: PartnerReferral,
         *,
         client_display_name: str | None,
+        milestones: list[PartnerLoanMilestone] | None = None,
     ) -> PartnerReferralResponse:
+        milestone_responses = (
+            [PartnerLoanMilestoneResponse.model_validate(m) for m in milestones]
+            if milestones is not None
+            else []
+        )
         return PartnerReferralResponse(
             id=row.id,
             partnership_id=row.partnership_id,
@@ -59,12 +82,15 @@ class MortgagePartnerService:
             client_id=row.client_id,
             case_id=row.case_id,
             status=row.status,
+            pipeline_stage=row.pipeline_stage,
+            pipeline_stage_changed_at=row.pipeline_stage_changed_at,
             source_label=row.source_label,
             notes=row.notes,
             referred_by_user_id=row.referred_by_user_id,
             created_at=row.created_at,
             updated_at=row.updated_at,
             client_display_name=client_display_name,
+            milestones=milestone_responses,
         )
 
     def _require_organization(self, user: User) -> uuid.UUID:
@@ -114,6 +140,55 @@ class MortgagePartnerService:
             )
         )
 
+    async def _seed_default_milestones(
+        self,
+        referral_id: uuid.UUID,
+        organization_id: uuid.UUID,
+        created_by_id: uuid.UUID,
+    ) -> list[PartnerLoanMilestone]:
+        now = datetime.now(UTC)
+        milestones = []
+        for idx, (label, complete) in enumerate(_DEFAULT_MILESTONES):
+            m = PartnerLoanMilestone(
+                id=uuid.uuid4(),
+                referral_id=referral_id,
+                organization_id=organization_id,
+                label=label,
+                sort_order=idx,
+                complete=complete,
+                completed_at=now if complete else None,
+            )
+            apply_audit_on_create(m, created_by_id)
+            milestones.append(m)
+        return await self._repo.bulk_create_milestones(milestones)
+
+    async def _require_partnership(
+        self, partnership_id: uuid.UUID, cro_org_id: uuid.UUID
+    ) -> OrgPartnership:
+        partnership = await self._repo.get_partnership(partnership_id, cro_org_id)
+        if partnership is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Partnership not found",
+            )
+        return partnership
+
+    async def _require_referral(
+        self,
+        referral_id: uuid.UUID,
+        partnership_id: uuid.UUID,
+        cro_org_id: uuid.UUID,
+    ) -> PartnerReferral:
+        referral = await self._repo.get_referral(referral_id, partnership_id, cro_org_id)
+        if referral is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Referral not found",
+            )
+        return referral
+
+    # --- public API ---
+
     def get_status(self, user: User) -> MortgagePartnerStatusResponse:
         self._require_read(user)
         self._require_organization(user)
@@ -125,6 +200,8 @@ class MortgagePartnerService:
                 "partner_referrals",
                 "partner_access_audits",
                 "partner_role_matrix",
+                "partner_pipeline",
+                "partner_milestones",
             ],
             deferred_capabilities=[
                 "partner_jwt_realm",
@@ -205,12 +282,7 @@ class MortgagePartnerService:
     async def get_partnership(self, user: User, partnership_id: uuid.UUID) -> PartnershipResponse:
         self._require_read(user)
         cro_org_id = self._require_organization(user)
-        partnership = await self._repo.get_partnership(partnership_id, cro_org_id)
-        if partnership is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Partnership not found",
-            )
+        partnership = await self._require_partnership(partnership_id, cro_org_id)
         await self._audit(
             cro_organization_id=cro_org_id,
             actor=user,
@@ -230,16 +302,10 @@ class MortgagePartnerService:
     ) -> PartnershipMemberResponse:
         self._require_write(user)
         cro_org_id = self._require_organization(user)
-        partnership = await self._repo.get_partnership(partnership_id, cro_org_id)
-        if partnership is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Partnership not found",
-            )
+        partnership = await self._require_partnership(partnership_id, cro_org_id)
 
         target = await self._repo.get_user_in_org(payload.user_id, cro_org_id)
         if target is None:
-            # Allow members from partner org as well (same platform user table)
             target = await self._repo.get_user_in_org(
                 payload.user_id, partnership.partner_organization_id
             )
@@ -283,12 +349,7 @@ class MortgagePartnerService:
     ) -> list[PartnershipMemberResponse]:
         self._require_read(user)
         cro_org_id = self._require_organization(user)
-        partnership = await self._repo.get_partnership(partnership_id, cro_org_id)
-        if partnership is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Partnership not found",
-            )
+        await self._require_partnership(partnership_id, cro_org_id)
         rows = await self._repo.list_members(partnership_id, cro_org_id)
         await self._audit(
             cro_organization_id=cro_org_id,
@@ -310,12 +371,7 @@ class MortgagePartnerService:
     ) -> PartnerReferralResponse:
         self._require_write(user)
         cro_org_id = self._require_organization(user)
-        partnership = await self._repo.get_partnership(partnership_id, cro_org_id)
-        if partnership is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Partnership not found",
-            )
+        await self._require_partnership(partnership_id, cro_org_id)
 
         client = await self._repo.get_client_in_org(payload.client_id, cro_org_id)
         if client is None:
@@ -337,6 +393,7 @@ class MortgagePartnerService:
                     detail="Case does not belong to the referred client",
                 )
 
+        now = datetime.now(UTC)
         referral = PartnerReferral(
             id=uuid.uuid4(),
             partnership_id=partnership_id,
@@ -344,12 +401,18 @@ class MortgagePartnerService:
             client_id=payload.client_id,
             case_id=payload.case_id,
             status=payload.status,
+            pipeline_stage=payload.pipeline_stage,
+            pipeline_stage_changed_at=now,
             source_label=payload.source_label,
             notes=payload.notes,
             referred_by_user_id=user.id,
         )
         apply_audit_on_create(referral, user.id)
         created = await self._repo.create_referral(referral)
+
+        # Seed default milestone checklist
+        milestones = await self._seed_default_milestones(created.id, cro_org_id, user.id)
+
         await self._audit(
             cro_organization_id=cro_org_id,
             actor=user,
@@ -357,22 +420,21 @@ class MortgagePartnerService:
             resource_type="partner_referral",
             resource_id=created.id,
             partnership_id=partnership_id,
-            detail=f"client_id={payload.client_id}",
+            detail=f"client_id={payload.client_id} stage={payload.pipeline_stage.value}",
         )
         await self._session.commit()
-        return self._referral_response(created, client_display_name=client.display_name)
+        return self._referral_response(
+            created,
+            client_display_name=client.display_name,
+            milestones=milestones,
+        )
 
     async def list_referrals(
         self, user: User, partnership_id: uuid.UUID
     ) -> list[PartnerReferralResponse]:
         self._require_read(user)
         cro_org_id = self._require_organization(user)
-        partnership = await self._repo.get_partnership(partnership_id, cro_org_id)
-        if partnership is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Partnership not found",
-            )
+        await self._require_partnership(partnership_id, cro_org_id)
         rows = await self._repo.list_referrals(partnership_id, cro_org_id)
         names = await self._repo.map_client_display_names(
             cro_org_id,
@@ -401,19 +463,10 @@ class MortgagePartnerService:
     ) -> PartnerReferralResponse:
         self._require_read(user)
         cro_org_id = self._require_organization(user)
-        partnership = await self._repo.get_partnership(partnership_id, cro_org_id)
-        if partnership is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Partnership not found",
-            )
-        referral = await self._repo.get_referral(referral_id, partnership_id, cro_org_id)
-        if referral is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Referral not found",
-            )
+        await self._require_partnership(partnership_id, cro_org_id)
+        referral = await self._require_referral(referral_id, partnership_id, cro_org_id)
         names = await self._repo.map_client_display_names(cro_org_id, [referral.client_id])
+        milestones = await self._repo.list_milestones(referral.id, cro_org_id)
         await self._audit(
             cro_organization_id=cro_org_id,
             actor=user,
@@ -427,6 +480,7 @@ class MortgagePartnerService:
         return self._referral_response(
             referral,
             client_display_name=names.get(referral.client_id),
+            milestones=milestones,
         )
 
     async def update_referral(
@@ -438,25 +492,28 @@ class MortgagePartnerService:
     ) -> PartnerReferralResponse:
         self._require_write(user)
         cro_org_id = self._require_organization(user)
-        partnership = await self._repo.get_partnership(partnership_id, cro_org_id)
-        if partnership is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Partnership not found",
+        await self._require_partnership(partnership_id, cro_org_id)
+        referral = await self._require_referral(referral_id, partnership_id, cro_org_id)
+
+        detail_parts: list[str] = []
+        if payload.status is not None:
+            detail_parts.append(f"status={referral.status.value}->{payload.status.value}")
+            referral.status = payload.status
+
+        if payload.pipeline_stage is not None and payload.pipeline_stage != referral.pipeline_stage:
+            detail_parts.append(
+                f"stage={referral.pipeline_stage.value}->{payload.pipeline_stage.value}"
             )
-        referral = await self._repo.get_referral(referral_id, partnership_id, cro_org_id)
-        if referral is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Referral not found",
-            )
-        previous = referral.status
-        referral.status = payload.status
+            referral.pipeline_stage = payload.pipeline_stage
+            referral.pipeline_stage_changed_at = datetime.now(UTC)
+
         if payload.notes is not None:
             referral.notes = payload.notes
+
         apply_audit_on_update(referral, user.id)
         updated = await self._repo.save_referral(referral)
         names = await self._repo.map_client_display_names(cro_org_id, [updated.client_id])
+        milestones = await self._repo.list_milestones(updated.id, cro_org_id)
         await self._audit(
             cro_organization_id=cro_org_id,
             actor=user,
@@ -464,13 +521,145 @@ class MortgagePartnerService:
             resource_type="partner_referral",
             resource_id=updated.id,
             partnership_id=partnership_id,
-            detail=f"status={previous.value}->{payload.status.value}",
+            detail="; ".join(detail_parts) or "no-op",
         )
         await self._session.commit()
         return self._referral_response(
             updated,
             client_display_name=names.get(updated.client_id),
+            milestones=milestones,
         )
+
+    # --- Pipeline board ---
+
+    async def get_pipeline(
+        self, user: User, partnership_id: uuid.UUID
+    ) -> list[PipelineCardResponse]:
+        self._require_read(user)
+        cro_org_id = self._require_organization(user)
+        await self._require_partnership(partnership_id, cro_org_id)
+        referrals = await self._repo.list_pipeline_referrals(partnership_id, cro_org_id)
+        names = await self._repo.map_client_display_names(
+            cro_org_id, [r.client_id for r in referrals]
+        )
+        now = datetime.now(UTC)
+        await self._audit(
+            cro_organization_id=cro_org_id,
+            actor=user,
+            action=PartnerAccessAction.PIPELINE_VIEW,
+            resource_type="org_partnership",
+            resource_id=partnership_id,
+            partnership_id=partnership_id,
+            detail=f"count={len(referrals)}",
+        )
+        await self._session.commit()
+
+        cards = []
+        for ref in referrals:
+            changed_at = ref.pipeline_stage_changed_at
+            days_in_stage = (now - changed_at).days if changed_at else 0
+            cards.append(
+                PipelineCardResponse(
+                    referral_id=ref.id,
+                    client_id=ref.client_id,
+                    client_display_name=names.get(ref.client_id),
+                    pipeline_stage=ref.pipeline_stage,
+                    referral_status=ref.status,
+                    days_in_stage=days_in_stage,
+                    stage_changed_at=changed_at,
+                    notes=ref.notes,
+                    source_label=ref.source_label,
+                )
+            )
+        return cards
+
+    # --- Dashboard summary ---
+
+    async def get_dashboard_summary(
+        self, user: User, partnership_id: uuid.UUID
+    ) -> DashboardSummaryResponse:
+        self._require_read(user)
+        cro_org_id = self._require_organization(user)
+        await self._require_partnership(partnership_id, cro_org_id)
+        referrals = await self._repo.list_pipeline_referrals(partnership_id, cro_org_id)
+        counts = self._repo.compute_dashboard_summary(referrals)
+        await self._audit(
+            cro_organization_id=cro_org_id,
+            actor=user,
+            action=PartnerAccessAction.PIPELINE_VIEW,
+            resource_type="org_partnership",
+            resource_id=partnership_id,
+            partnership_id=partnership_id,
+            detail="dashboard_summary",
+        )
+        await self._session.commit()
+        return DashboardSummaryResponse(
+            total_referrals=len(referrals),
+            counts_by_stage=counts,
+            near_ready_count=counts.get(LoanPipelineStage.NEAR_READY.value, 0),
+            mortgage_ready_count=counts.get(LoanPipelineStage.MORTGAGE_READY.value, 0),
+            in_underwriting_count=counts.get(LoanPipelineStage.IN_UNDERWRITING.value, 0),
+            funded_count=counts.get(LoanPipelineStage.FUNDED.value, 0),
+            declined_count=counts.get(LoanPipelineStage.DECLINED.value, 0),
+        )
+
+    # --- Milestones ---
+
+    async def list_milestones(
+        self, user: User, partnership_id: uuid.UUID, referral_id: uuid.UUID
+    ) -> list[PartnerLoanMilestoneResponse]:
+        self._require_read(user)
+        cro_org_id = self._require_organization(user)
+        await self._require_partnership(partnership_id, cro_org_id)
+        await self._require_referral(referral_id, partnership_id, cro_org_id)
+        rows = await self._repo.list_milestones(referral_id, cro_org_id)
+        await self._session.commit()
+        return [PartnerLoanMilestoneResponse.model_validate(m) for m in rows]
+
+    async def replace_milestones(
+        self,
+        user: User,
+        partnership_id: uuid.UUID,
+        referral_id: uuid.UUID,
+        payload: MilestoneReplacePayload,
+    ) -> list[PartnerLoanMilestoneResponse]:
+        self._require_write(user)
+        cro_org_id = self._require_organization(user)
+        await self._require_partnership(partnership_id, cro_org_id)
+        await self._require_referral(referral_id, partnership_id, cro_org_id)
+
+        await self._repo.soft_delete_milestones_for_referral(referral_id, cro_org_id)
+
+        now = datetime.now(UTC)
+        new_milestones: list[PartnerLoanMilestone] = []
+        for item in payload.milestones:
+            m = PartnerLoanMilestone(
+                id=uuid.uuid4(),
+                referral_id=referral_id,
+                organization_id=cro_org_id,
+                label=item.label,
+                sort_order=item.sort_order,
+                complete=item.complete,
+                completed_at=now if item.complete else None,
+            )
+            apply_audit_on_create(m, user.id)
+            new_milestones.append(m)
+
+        created = await self._repo.bulk_create_milestones(new_milestones)
+
+        await self._audit(
+            cro_organization_id=cro_org_id,
+            actor=user,
+            action=PartnerAccessAction.MILESTONE_UPDATE,
+            resource_type="partner_referral",
+            resource_id=referral_id,
+            partnership_id=partnership_id,
+            detail=f"replaced={len(created)}",
+        )
+        await self._session.commit()
+        return [PartnerLoanMilestoneResponse.model_validate(m) for m in created]
+
+    # --- Access audits ---
 
     async def list_access_audits(self, user: User) -> list[PartnerAccessAuditResponse]:
         self._require_write(user)  # admin-only evidence export surface

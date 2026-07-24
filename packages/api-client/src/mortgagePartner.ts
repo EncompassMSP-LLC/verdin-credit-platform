@@ -5,6 +5,16 @@ export type PartnershipStatus = 'pending' | 'active' | 'paused' | 'ended';
 export type PartnerRole =
   'lender_admin' | 'loan_officer' | 'credit_ops' | 'underwriter_view' | 'read_only';
 export type PartnerReferralStatus = 'new' | 'accepted' | 'in_progress' | 'completed' | 'declined';
+export type LoanPipelineStage =
+  | 'referred'
+  | 'intake'
+  | 'in_repair'
+  | 'near_ready'
+  | 'mortgage_ready'
+  | 'in_underwriting'
+  | 'funded'
+  | 'declined'
+  | 'withdrawn';
 export type PartnerAccessAction =
   | 'partnership_view'
   | 'referral_list'
@@ -13,7 +23,10 @@ export type PartnerAccessAction =
   | 'member_create'
   | 'partnership_create'
   | 'referral_create'
-  | 'referral_update';
+  | 'referral_update'
+  | 'pipeline_view'
+  | 'pipeline_update'
+  | 'milestone_update';
 
 export interface MortgagePartnerStatus {
   mortgage_partner_enabled: boolean;
@@ -58,6 +71,28 @@ export interface PartnershipMemberCreateInput {
   is_active?: boolean;
 }
 
+export interface PartnerLoanMilestone {
+  id: string;
+  referral_id: string;
+  organization_id: string;
+  label: string;
+  sort_order: number;
+  complete: boolean;
+  completed_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MilestoneReplaceItem {
+  label: string;
+  sort_order?: number;
+  complete?: boolean;
+}
+
+export interface MilestoneReplacePayload {
+  milestones: MilestoneReplaceItem[];
+}
+
 export interface PartnerReferral {
   id: string;
   partnership_id: string;
@@ -65,26 +100,53 @@ export interface PartnerReferral {
   client_id: string;
   case_id: string | null;
   status: PartnerReferralStatus;
+  pipeline_stage: LoanPipelineStage;
+  pipeline_stage_changed_at: string | null;
   source_label: string | null;
   notes: string | null;
   referred_by_user_id: string | null;
   created_at: string;
   updated_at: string;
-  /** CRO client display name for lender pipeline tables (Vol 20). */
+  /** CRO client display name for lender pipeline tables. */
   client_display_name?: string | null;
+  milestones: PartnerLoanMilestone[];
 }
 
 export interface PartnerReferralCreateInput {
   client_id: string;
   case_id?: string | null;
   status?: PartnerReferralStatus;
+  pipeline_stage?: LoanPipelineStage;
   source_label?: string | null;
   notes?: string | null;
 }
 
 export interface PartnerReferralUpdateInput {
-  status: PartnerReferralStatus;
+  status?: PartnerReferralStatus;
+  pipeline_stage?: LoanPipelineStage;
   notes?: string | null;
+}
+
+export interface PipelineCard {
+  referral_id: string;
+  client_id: string;
+  client_display_name: string | null;
+  pipeline_stage: LoanPipelineStage;
+  referral_status: PartnerReferralStatus;
+  days_in_stage: number;
+  stage_changed_at: string | null;
+  notes: string | null;
+  source_label: string | null;
+}
+
+export interface PartnerDashboardSummary {
+  total_referrals: number;
+  counts_by_stage: Record<string, number>;
+  near_ready_count: number;
+  mortgage_ready_count: number;
+  in_underwriting_count: number;
+  funded_count: number;
+  declined_count: number;
 }
 
 export interface PartnerAccessAudit {
@@ -136,6 +198,18 @@ export function getPartnership(partnershipId: string) {
   return request<Partnership>(apiPath(`/mortgage-partner/partnerships/${partnershipId}`));
 }
 
+export function getPartnershipPipeline(partnershipId: string) {
+  return request<PipelineCard[]>(
+    apiPath(`/mortgage-partner/partnerships/${partnershipId}/pipeline`),
+  );
+}
+
+export function getPartnerDashboardSummary(partnershipId: string) {
+  return request<PartnerDashboardSummary>(
+    apiPath(`/mortgage-partner/partnerships/${partnershipId}/dashboard-summary`),
+  );
+}
+
 export function addPartnershipMember(partnershipId: string, body: PartnershipMemberCreateInput) {
   return request<PartnershipMember>(
     apiPath(`/mortgage-partner/partnerships/${partnershipId}/members`),
@@ -176,5 +250,22 @@ export function updatePartnerReferral(
   return request<PartnerReferral>(
     apiPath(`/mortgage-partner/partnerships/${partnershipId}/referrals/${referralId}`),
     { method: 'PATCH', body },
+  );
+}
+
+export function listReferralMilestones(partnershipId: string, referralId: string) {
+  return request<PartnerLoanMilestone[]>(
+    apiPath(`/mortgage-partner/partnerships/${partnershipId}/referrals/${referralId}/milestones`),
+  );
+}
+
+export function replaceReferralMilestones(
+  partnershipId: string,
+  referralId: string,
+  body: MilestoneReplacePayload,
+) {
+  return request<PartnerLoanMilestone[]>(
+    apiPath(`/mortgage-partner/partnerships/${partnershipId}/referrals/${referralId}/milestones`),
+    { method: 'PUT', body },
   );
 }

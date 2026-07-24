@@ -3,9 +3,10 @@
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from api.modules.mortgage_partner.models import (
+    LoanPipelineStage,
     PartnerAccessAction,
     PartnerOrgType,
     PartnerRole,
@@ -61,19 +62,51 @@ class PartnershipMemberResponse(BaseModel):
     updated_at: datetime
 
 
+class PartnerLoanMilestoneResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    referral_id: uuid.UUID
+    organization_id: uuid.UUID
+    label: str
+    sort_order: int
+    complete: bool
+    completed_at: datetime | None
+    created_at: datetime
+    updated_at: datetime
+
+
+class MilestoneReplaceItem(BaseModel):
+    label: str = Field(min_length=1, max_length=255)
+    sort_order: int = 0
+    complete: bool = False
+
+
+class MilestoneReplacePayload(BaseModel):
+    milestones: list[MilestoneReplaceItem] = Field(default_factory=list)
+
+
 class PartnerReferralCreate(BaseModel):
     client_id: uuid.UUID
     case_id: uuid.UUID | None = None
     status: ReferralStatus = ReferralStatus.NEW
+    pipeline_stage: LoanPipelineStage = LoanPipelineStage.REFERRED
     source_label: str | None = Field(default=None, max_length=255)
     notes: str | None = None
 
 
 class PartnerReferralUpdate(BaseModel):
-    """Staff-mediated referral status update (Vol 20 accept/decline)."""
+    """Staff-mediated referral update — at least one field required."""
 
-    status: ReferralStatus
+    status: ReferralStatus | None = None
+    pipeline_stage: LoanPipelineStage | None = None
     notes: str | None = None
+
+    @model_validator(mode="after")
+    def at_least_one_field(self) -> "PartnerReferralUpdate":
+        if self.status is None and self.pipeline_stage is None and self.notes is None:
+            raise ValueError("At least one of status, pipeline_stage, or notes must be provided")
+        return self
 
 
 class PartnerReferralResponse(BaseModel):
@@ -85,12 +118,41 @@ class PartnerReferralResponse(BaseModel):
     client_id: uuid.UUID
     case_id: uuid.UUID | None
     status: ReferralStatus
+    pipeline_stage: LoanPipelineStage
+    pipeline_stage_changed_at: datetime | None
     source_label: str | None
     notes: str | None
     referred_by_user_id: uuid.UUID | None
     created_at: datetime
     updated_at: datetime
     client_display_name: str | None = None
+    milestones: list[PartnerLoanMilestoneResponse] = Field(default_factory=list)
+
+
+class PipelineCardResponse(BaseModel):
+    """Lightweight card for the pipeline board view."""
+
+    referral_id: uuid.UUID
+    client_id: uuid.UUID
+    client_display_name: str | None
+    pipeline_stage: LoanPipelineStage
+    referral_status: ReferralStatus
+    days_in_stage: int
+    stage_changed_at: datetime | None
+    notes: str | None
+    source_label: str | None
+
+
+class DashboardSummaryResponse(BaseModel):
+    """Aggregate counts for the lender dashboard."""
+
+    total_referrals: int
+    counts_by_stage: dict[str, int]
+    near_ready_count: int
+    mortgage_ready_count: int
+    in_underwriting_count: int
+    funded_count: int
+    declined_count: int
 
 
 class PartnerAccessAuditResponse(BaseModel):
