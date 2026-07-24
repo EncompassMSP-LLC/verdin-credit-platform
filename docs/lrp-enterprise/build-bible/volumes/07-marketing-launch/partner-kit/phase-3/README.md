@@ -55,12 +55,13 @@ See [00-completion-checklist.md](00-completion-checklist.md). One major asset gr
 
 ## Web / asset homes
 
-| Path                             | Purpose                                        |
-| -------------------------------- | ---------------------------------------------- |
-| `/resources/partner-kit`         | Phase 1 hub                                    |
-| `/resources/partner-kit/phase-2` | Phase 2 premium                                |
-| `/resources/partner-kit/phase-3` | Phase 3 program hub (when wired)               |
-| `assets/lrp/`                    | Logos, Canva exports, decks, brochures, social |
+| Path                             | Purpose                                                        |
+| -------------------------------- | -------------------------------------------------------------- |
+| `/resources/partner-kit`         | Phase 1 hub                                                    |
+| `/resources/partner-kit/phase-2` | Phase 2 premium                                                |
+| `/resources/partner-kit/phase-3` | Phase 3 hub — printable end products                           |
+| `/resources/partner-kit/print/*` | Browser → PDF collateral (folder, guides, flyers, racks, deck) |
+| `assets/lrp/`                    | Logos, Canva exports, decks, brochures, social                 |
 
 ## Hard rules (every piece)
 

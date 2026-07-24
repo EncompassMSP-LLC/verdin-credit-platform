@@ -66,11 +66,11 @@ export default function PartnerKitPage() {
         tone="sand"
         actions={
           <>
-            <Button href="/resources/partner-kit/phase-2" variant="primary" size="lg">
-              Phase 2 premium kit
+            <Button href="/resources/partner-kit/phase-3" variant="primary" size="lg">
+              Phase 3 print & PDF kit
             </Button>
-            <Button href="/lenders" variant="secondary" size="lg">
-              Lender landing
+            <Button href="/resources/partner-kit/phase-2" variant="secondary" size="lg">
+              Phase 2 premium kit
             </Button>
           </>
         }
@@ -102,6 +102,12 @@ export default function PartnerKitPage() {
         </div>
         <div className="mt-10 flex flex-wrap gap-4 text-sm">
           <Link
+            href="/resources/partner-kit/phase-3"
+            className="font-medium text-teal-700 hover:underline"
+          >
+            Phase 3 print & PDF kit →
+          </Link>
+          <Link
             href="/resources/partner-kit/phase-2"
             className="font-medium text-teal-700 hover:underline"
           >
@@ -115,12 +121,6 @@ export default function PartnerKitPage() {
           </Link>
           <Link href="/resources" className="font-medium text-teal-700 hover:underline">
             All resources →
-          </Link>
-          <Link
-            href="/contact?intent=lender&resource=partner-kit"
-            className="font-medium text-teal-700 hover:underline"
-          >
-            Request designed print pack →
           </Link>
         </div>
       </Section>
