@@ -56,11 +56,11 @@ export default function PartnerKitPhase2Page() {
         tone="sand"
         actions={
           <>
-            <Button href="/resources/partner-kit/guide" variant="primary" size="lg">
-              Open partnership guide
+            <Button href="/resources/partner-kit/phase-3" variant="primary" size="lg">
+              Phase 3 print kit
             </Button>
-            <Button href="/resources/partner-kit/referral" variant="secondary" size="lg">
-              Referral form
+            <Button href="/resources/partner-kit/guide" variant="secondary" size="lg">
+              Open partnership guide
             </Button>
           </>
         }

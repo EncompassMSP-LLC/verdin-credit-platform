@@ -1,5 +1,12 @@
 export const resources = [
   {
+    title: 'Phase 3 Partner Program — Print & PDF kit',
+    description:
+      'Browser-ready end products: folder, welcome packet, brochures, guides, flyers, rack cards, sales playbook, and deck. Print or Save as PDF.',
+    audience: 'Lenders & BD',
+    href: '/resources/partner-kit/phase-3',
+  },
+  {
     title: 'Premium Partner Sales Kit (Phase 2)',
     description:
       'Partnership guide, referral form, leave-behind print sheet, deck outline, and 90-day campaign hub.',
