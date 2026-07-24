@@ -10,7 +10,11 @@
 
 Turnkey **white-labeled Mortgage Readiness Partner Program**: sales system, print kit, borrower education, partner enablement, digital kit, and portal concepts — comparable to a national franchise leave-behind stack.
 
-All copy is claim-library locked ([CLAIM-LIBRARY.md](../../../CLAIM-LIBRARY.md)). Binary Canva/PPT/PDF press files remain external; manuscripts and specs here are the source of truth.
+All copy is claim-library locked ([CLAIM-LIBRARY.md](../../../CLAIM-LIBRARY.md)).
+
+**Office / PDF binaries (imported):** [`assets/lrp/marketing-package/v2/`](../../../../../../assets/lrp/marketing-package/v2/) — Welcome Packet, Partnership Guide, Borrower Guide, referral forms, pitch deck, email/social banks, Canva guide, outreach playbook, calendars.
+
+Manuscripts and specs in this folder remain the claim-safe source of truth for web print surfaces and future design revisions.
 
 ## Program pillars
 
@@ -55,12 +59,14 @@ See [00-completion-checklist.md](00-completion-checklist.md). One major asset gr
 
 ## Web / asset homes
 
-| Path                             | Purpose                                        |
-| -------------------------------- | ---------------------------------------------- |
-| `/resources/partner-kit`         | Phase 1 hub                                    |
-| `/resources/partner-kit/phase-2` | Phase 2 premium                                |
-| `/resources/partner-kit/phase-3` | Phase 3 program hub (when wired)               |
-| `assets/lrp/`                    | Logos, Canva exports, decks, brochures, social |
+| Path                               | Purpose                                        |
+| ---------------------------------- | ---------------------------------------------- |
+| `/resources/partner-kit`           | Phase 1 hub                                    |
+| `/resources/partner-kit/phase-2`   | Phase 2 premium                                |
+| `/resources/partner-kit/phase-3`   | Phase 3 hub — printable end products           |
+| `/resources/partner-kit/print/*`   | Browser → PDF collateral                       |
+| `assets/lrp/marketing-package/v2/` | DOCX/PPTX/XLSX/PDF production pack (imported)  |
+| `assets/lrp/`                      | Logos, Canva exports, decks, brochures, social |
 
 ## Hard rules (every piece)
 
