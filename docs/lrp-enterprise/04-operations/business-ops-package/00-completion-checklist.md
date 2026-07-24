@@ -7,7 +7,7 @@ Ordered slices for LRP Phase 3 company ops. Sprint loop: `.cursor/rules/lrp-ops-
 - [ ] Sections 1–7 operational manuscripts complete (onboarding through readiness reports)
 - [ ] Sections 8–11 sales/marketing expansion manuscripts complete
 - [ ] Sections 12–14 website/video/automation specs complete
-- [ ] Pipeline stages mapped to platform `LoanPipelineStage` (or documented ops overlay)
+- [x] Pipeline stages mapped to platform `LoanPipelineStage` (or documented ops overlay)
 - [ ] All public-facing copy claim-library locked
 - [ ] Legal/compliance templates marked counsel-review required
 - [ ] Cross-links to Phase 4 platform checklist (Version 29.0+)
@@ -22,7 +22,7 @@ Ordered slices for LRP Phase 3 company ops. Sprint loop: `.cursor/rules/lrp-ops-
 | 2     | Section 1 — Partner Onboarding Kit              | ✅     |
 | 3     | Section 2 — Client Intake Package               | ✅     |
 | 4     | Section 3 — Compliance Package                  | ✅     |
-| 5     | Section 4 — Referral Management System          | ☐      |
+| 5     | Section 4 — Referral Management System          | ✅     |
 | 6     | Section 5 — CRM Package                         | ☐      |
 | 7     | Section 6 — Status Reports                      | ☐      |
 | 8     | Section 7 — Mortgage Readiness Reports          | ☐      |
@@ -61,3 +61,8 @@ Ordered slices for LRP Phase 3 company ops. Sprint loop: `.cursor/rules/lrp-ops-
 - Record Retention, Identity Verification, Complaint Resolution
 - Dispute Documentation Standards (staff-mediated gate)
 - All marked counsel/compliance review required
+
+### Slice 5 — Section 4 (2026-07-24)
+
+- Referral Tracker field model + CSV header
+- Ops pipeline stages mapped to `LoanPipelineStage` + milestone guidance

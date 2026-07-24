@@ -1,5 +1,10 @@
 # Section 4 — Referral Management System
 
-**Status:** Pending
+Ops tracker + pipeline vocabulary for Lending Readiness Partners, mapped to the platform `LoanPipelineStage` enum.
 
-Ops tracker fields + pipeline stages. Must document mapping to platform `LoanPipelineStage` (`referred`, `intake`, `in_repair`, `near_ready`, `mortgage_ready`, `in_underwriting`, `funded`, `declined`, `withdrawn`).
+| Document                          | File                                         |
+| --------------------------------- | -------------------------------------------- |
+| Referral Tracker (fields + sheet) | [`referral-tracker.md`](referral-tracker.md) |
+| Pipeline stages (ops ↔ platform)  | [`pipeline-stages.md`](pipeline-stages.md)   |
+
+Platform APIs: `GET /partnerships/{id}/pipeline`, dashboard-summary, milestone update (Version 29.0).
