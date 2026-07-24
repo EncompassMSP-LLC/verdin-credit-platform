@@ -2,6 +2,12 @@
 
 Operator CRM for partners, borrowers, referrals, tasks, pipeline, and communications.
 
+## Business Ops Package (field models)
+
+Partner database schemas and operating model:
+
+→ [`../04-operations/business-ops-package/section-05-crm/`](../04-operations/business-ops-package/section-05-crm/)
+
 ## Code
 
 | Layer             | Path                                                       |

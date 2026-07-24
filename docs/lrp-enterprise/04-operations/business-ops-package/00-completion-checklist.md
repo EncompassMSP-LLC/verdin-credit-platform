@@ -4,7 +4,7 @@ Ordered slices for LRP Phase 3 company ops. Sprint loop: `.cursor/rules/lrp-ops-
 
 ## Exit criteria
 
-- [ ] Sections 1–7 operational manuscripts complete (onboarding through readiness reports)
+- [x] Sections 1–7 operational manuscripts complete (onboarding through readiness reports)
 - [ ] Sections 8–11 sales/marketing expansion manuscripts complete
 - [ ] Sections 12–14 website/video/automation specs complete
 - [x] Pipeline stages mapped to platform `LoanPipelineStage` (or documented ops overlay)
@@ -23,9 +23,9 @@ Ordered slices for LRP Phase 3 company ops. Sprint loop: `.cursor/rules/lrp-ops-
 | 3     | Section 2 — Client Intake Package               | ✅     |
 | 4     | Section 3 — Compliance Package                  | ✅     |
 | 5     | Section 4 — Referral Management System          | ✅     |
-| 6     | Section 5 — CRM Package                         | ☐      |
-| 7     | Section 6 — Status Reports                      | ☐      |
-| 8     | Section 7 — Mortgage Readiness Reports          | ☐      |
+| 6     | Section 5 — CRM Package                         | ✅     |
+| 7     | Section 6 — Status Reports                      | ✅     |
+| 8     | Section 7 — Mortgage Readiness Reports          | ✅     |
 | 9     | Section 8 — Presentation Package                | ☐      |
 | 10    | Section 9 — Sales Package                       | ☐      |
 | 11    | Section 10 — Marketing Expansion (banks)        | ☐      |
@@ -66,3 +66,18 @@ Ordered slices for LRP Phase 3 company ops. Sprint loop: `.cursor/rules/lrp-ops-
 
 - Referral Tracker field model + CSV header
 - Ops pipeline stages mapped to `LoanPipelineStage` + milestone guidance
+
+### Slice 6 — Section 5 (2026-07-24)
+
+- CRM operating model + partner type taxonomy mapped to `PartnerOrgType`
+- Databases: mortgage company, LO, realtor, attorney, financial planner, insurance, builder, title
+- CRM entity data model (`01-crm-data-model.md`)
+
+### Slice 7 — Section 6 (2026-07-24)
+
+- Weekly / monthly / quarterly report templates
+- LO, broker, and management dashboard specs
+
+### Slice 8 — Section 7 (2026-07-24)
+
+- Initial / 30-day / 60-day / Final readiness report templates (claim-library locked)
