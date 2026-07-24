@@ -21,7 +21,7 @@ Ordered slices for LRP Phase 3 company ops. Sprint loop: `.cursor/rules/lrp-ops-
 | 1     | Charter + checklist + folder map (this package) | ✅     |
 | 2     | Section 1 — Partner Onboarding Kit              | ✅     |
 | 3     | Section 2 — Client Intake Package               | ✅     |
-| 4     | Section 3 — Compliance Package                  | ☐      |
+| 4     | Section 3 — Compliance Package                  | ✅     |
 | 5     | Section 4 — Referral Management System          | ☐      |
 | 6     | Section 5 — CRM Package                         | ☐      |
 | 7     | Section 6 — Status Reports                      | ☐      |
@@ -53,3 +53,11 @@ Ordered slices for LRP Phase 3 company ops. Sprint loop: `.cursor/rules/lrp-ops-
 - Document Checklist
 - Goal Worksheet
 - Financial Snapshot Worksheet (illustrative DTI educational only)
+
+### Slice 4 — Section 3 (2026-07-24)
+
+- FCRA Disclosure, Privacy Policy, Information Security Policy
+- Electronic Consent, Communication Authorization
+- Record Retention, Identity Verification, Complaint Resolution
+- Dispute Documentation Standards (staff-mediated gate)
+- All marked counsel/compliance review required
