@@ -1,0 +1,47 @@
+# Business Operations Package — Completion Checklist
+
+Ordered slices for LRP Phase 3 company ops. Sprint loop: `.cursor/rules/lrp-ops-package-sprint-loop.mdc`.
+
+## Exit criteria
+
+- [ ] Sections 1–7 operational manuscripts complete (onboarding through readiness reports)
+- [ ] Sections 8–11 sales/marketing expansion manuscripts complete
+- [ ] Sections 12–14 website/video/automation specs complete
+- [ ] Pipeline stages mapped to platform `LoanPipelineStage` (or documented ops overlay)
+- [ ] All public-facing copy claim-library locked
+- [ ] Legal/compliance templates marked counsel-review required
+- [ ] Cross-links to Phase 4 platform checklist (Version 29.0+)
+
+---
+
+## Recommended order
+
+| Order | Slice                                           | Status |
+| ----- | ----------------------------------------------- | ------ |
+| 1     | Charter + checklist + folder map (this package) | ✅     |
+| 2     | Section 1 — Partner Onboarding Kit              | ✅     |
+| 3     | Section 2 — Client Intake Package               | ☐      |
+| 4     | Section 3 — Compliance Package                  | ☐      |
+| 5     | Section 4 — Referral Management System          | ☐      |
+| 6     | Section 5 — CRM Package                         | ☐      |
+| 7     | Section 6 — Status Reports                      | ☐      |
+| 8     | Section 7 — Mortgage Readiness Reports          | ☐      |
+| 9     | Section 8 — Presentation Package                | ☐      |
+| 10    | Section 9 — Sales Package                       | ☐      |
+| 11    | Section 10 — Marketing Expansion (banks)        | ☐      |
+| 12    | Section 11 — Print Marketing                    | ☐      |
+| 13    | Section 12 — Website                            | ☐      |
+| 14    | Section 13 — Video Marketing                    | ☐      |
+| 15    | Section 14 — Automation                         | ☐      |
+| 16    | Ops package sign-off + Phase 4 handoff note     | ☐      |
+
+---
+
+## Slice notes
+
+### Slice 2 — Section 1 (2026-07-24)
+
+- Mortgage Partner Agreement template (referral / non-exclusive / confidentiality / termination)
+- Partner Welcome Guide (full manuscript)
+- Loan Officer Quick Start Guide (5-page ops)
+- Office Training Manual (RESPA-aware communication workflow)

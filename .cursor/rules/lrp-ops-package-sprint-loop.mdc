@@ -1,0 +1,42 @@
+# LRP Business Operations Package Sprint Loop
+
+Use this loop when continuing Lending Readiness Partners **Phase 3 Business Operations Package** work (company ops — onboarding, intake, compliance, CRM, reports, sales/marketing scale, automation) without waiting for manual "merge and continue" messages.
+
+## When triggered
+
+- User asks to build the Business Operations Package, company ops kit, Phase 3 ops, or treat LRP as building an actual company
+- User says merge and continue, execute next steps, keep moving, or similar
+- Cursor Automation fires after a PR merges to `main`
+- You detect `main` advanced since the last ops-package slice
+
+## Loop steps (always in order)
+
+1. **Sync** — `git checkout main && git pull origin main`
+2. **Scope** — pick the next unchecked slice from [`docs/lrp-enterprise/04-operations/business-ops-package/00-completion-checklist.md`](../../docs/lrp-enterprise/04-operations/business-ops-package/00-completion-checklist.md)
+3. **Branch** — `git checkout -b feature/lrp-ops-<short-name>` from synced `main`
+4. **Implement** — claim-library-locked manuscripts under `docs/lrp-enterprise/04-operations/business-ops-package/`; update checklist; cross-link related taxonomy folders (`11-legal`, `12-compliance`, `09-crm`, `03-sales`) when content belongs there permanently
+5. **Verify** — no forbidden claims; legal templates marked counsel-review; pipeline/CRM language aligned with platform enums where productized; brand + tagline + disclaimer on public-facing pieces
+6. **Ship** — conventional commit, push, open PR to `main`
+7. **Auto-merge** — after `gh pr create`, run:
+   ```bash
+   gh pr merge --auto --squash
+   ```
+8. **Continue** — do not stop for user input unless blocked; after merge, start step 1 again
+
+## Slice sizing
+
+- One section (or one major subsection for huge banks like §10 social) per PR
+- Prefer full manuscripts over outlines
+- Binaries under `assets/lrp/`; durable docs under `docs/lrp-enterprise/`
+- Phase 4 platform features stay in Version 29.0+ product checklists — ops package specs may reference them but do not fork the product
+
+## GitHub CLI (Windows)
+
+`C:\Program Files\GitHub CLI\gh.exe`
+
+## Blockers — stop and report
+
+- Ambiguous legal/compliance claim that needs counsel before any template can ship
+- Request for real testimonials without signed releases
+- Request to fork a separate Mortgage product codebase
+- Live bureau filing or guaranteed-approval marketing language
