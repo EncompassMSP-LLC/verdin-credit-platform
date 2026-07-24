@@ -803,25 +803,25 @@ Scope: [version-28.0-scope.md](version-28.0-scope.md) · Checklist: [version-28.
 
 ---
 
-## Version 29.0 — Mortgage Partner Edition (planned — 🚧)
+## Version 29.0 — Mortgage Partner Edition (slice 4 shipped — 🚧)
 
 Scope: [version-29.0-scope.md](version-29.0-scope.md) · Checklist: [version-29.0-completion-checklist.md](../development/version-29.0-completion-checklist.md)
 
 **Architecture:** Edition on the shared platform — **do not fork**. Reuse FCRA/Metro2/cross-bureau/intelligence.
 
-| Capability                                    | Version | Status  | Backend | Frontend | API     | AI      | Tests   | Dependencies     | Notes                                                                                             |
-| --------------------------------------------- | ------- | ------- | ------- | -------- | ------- | ------- | ------- | ---------------- | ------------------------------------------------------------------------------------------------- |
-| Partner org model + lender RBAC               | 29.0    | ✅      | ✅      | —        | ✅      | —       | ✅      | Auth/orgs        | `ENABLE_MORTGAGE_PARTNER`; `/mortgage-partner/*` partnerships, members, referrals, access audits  |
-| LRP borrower portal core (Vol 19 E2)          | 29.0    | Partial | ✅      | Partial  | ✅      | —       | Partial | Client portal    | `apps/lrp-web` dashboard/readiness/tasks/docs; borrower band-only readiness (P0-1)                |
-| LRP credit analysis runs (Vol 22 E3)          | 29.0    | Partial | ✅      | —        | ✅      | —       | ✅      | Accounts/cases   | Deterministic LRS compose; `/cases/{id}/credit-analysis/runs`; portal readiness GET               |
-| LRP lender pipeline table (Vol 20 E4.1)       | 29.0    | Partial | ✅      | Partial  | ✅      | —       | ✅      | Mortgage partner | `apps/lrp-web` `/lender/pipeline` ← partnership referrals + `client_display_name`                 |
-| LRP referral status PATCH (Vol 20 E4.2)       | 29.0    | Partial | ✅      | Partial  | ✅      | —       | ✅      | Mortgage partner | PATCH referral status + `/lender/referrals` queue (accept/decline audited)                        |
-| LRP CRM referral queue (Vol 21 E5.1)          | 29.0    | Partial | ✅      | Partial  | ✅      | —       | ✅      | Mortgage partner | `apps/lrp-web` `/crm/referrals` ← partnership referrals + accept/decline                          |
-| LRP CRM borrower list (Vol 21 E5.2)           | 29.0    | Partial | ✅      | Partial  | ✅      | —       | ✅      | Clients          | `apps/lrp-web` `/crm/borrowers` ← `GET /clients` (search/status/page)                             |
-| LRP CRM borrower workspace (Vol 21 E5.3–E5.4) | 29.0    | Partial | ✅      | Partial  | ✅      | —       | ✅      | Clients/cases    | Overview + POST credit-analysis run/publish; tasks/docs/export deferred                           |
-| LRP Mortgage Partner Marketing Kit (Vol 07)   | 29.0    | Partial | —       | Partial  | —       | —       | ✅      | Marketing        | Vol 07 partner-kit Phase 1+2 + `/lenders` `/realtors` `/resources/partner-kit/*`                  |
-| Lender dashboard + pipeline + milestones      | 29.0    | ✅      | ✅      | ✅       | ✅      | —       | ✅      | Mortgage partner | `loan_pipeline_stage` + `partner_loan_milestones`; pipeline, dashboard-summary, milestone PUT/GET |
-| Mortgage readiness score + report export      | 29.0    | Planned | Planned | Planned  | Planned | Partial | Planned | Intelligence     | Deterministic estimator; LLM only behind ADR-012                                                  |
+| Capability                                    | Version | Status  | Backend | Frontend | API | AI  | Tests   | Dependencies     | Notes                                                                                                                                                                      |
+| --------------------------------------------- | ------- | ------- | ------- | -------- | --- | --- | ------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Partner org model + lender RBAC               | 29.0    | ✅      | ✅      | —        | ✅  | —   | ✅      | Auth/orgs        | `ENABLE_MORTGAGE_PARTNER`; `/mortgage-partner/*` partnerships, members, referrals, access audits                                                                           |
+| LRP borrower portal core (Vol 19 E2)          | 29.0    | Partial | ✅      | Partial  | ✅  | —   | Partial | Client portal    | `apps/lrp-web` dashboard/readiness/tasks/docs; borrower band-only readiness (P0-1)                                                                                         |
+| LRP credit analysis runs (Vol 22 E3)          | 29.0    | Partial | ✅      | —        | ✅  | —   | ✅      | Accounts/cases   | Deterministic LRS compose; `/cases/{id}/credit-analysis/runs`; portal readiness GET                                                                                        |
+| LRP lender pipeline table (Vol 20 E4.1)       | 29.0    | Partial | ✅      | Partial  | ✅  | —   | ✅      | Mortgage partner | `apps/lrp-web` `/lender/pipeline` ← partnership referrals + `client_display_name`                                                                                          |
+| LRP referral status PATCH (Vol 20 E4.2)       | 29.0    | Partial | ✅      | Partial  | ✅  | —   | ✅      | Mortgage partner | PATCH referral status + `/lender/referrals` queue (accept/decline audited)                                                                                                 |
+| LRP CRM referral queue (Vol 21 E5.1)          | 29.0    | Partial | ✅      | Partial  | ✅  | —   | ✅      | Mortgage partner | `apps/lrp-web` `/crm/referrals` ← partnership referrals + accept/decline                                                                                                   |
+| LRP CRM borrower list (Vol 21 E5.2)           | 29.0    | Partial | ✅      | Partial  | ✅  | —   | ✅      | Clients          | `apps/lrp-web` `/crm/borrowers` ← `GET /clients` (search/status/page)                                                                                                      |
+| LRP CRM borrower workspace (Vol 21 E5.3–E5.4) | 29.0    | Partial | ✅      | Partial  | ✅  | —   | ✅      | Clients/cases    | Overview + POST credit-analysis run/publish; tasks/docs/export deferred                                                                                                    |
+| LRP Mortgage Partner Marketing Kit (Vol 07)   | 29.0    | Partial | —       | Partial  | —   | —   | ✅      | Marketing        | Vol 07 partner-kit Phase 1+2 + `/lenders` `/realtors` `/resources/partner-kit/*`                                                                                           |
+| Lender dashboard + pipeline + milestones      | 29.0    | ✅      | ✅      | ✅       | ✅  | —   | ✅      | Mortgage partner | `loan_pipeline_stage` + `partner_loan_milestones`; pipeline, dashboard-summary, milestone PUT/GET                                                                          |
+| Mortgage readiness score + report export      | 29.0    | ✅      | ✅      | ✅       | ✅  | —   | ✅      | Intelligence     | Reuses `credit_analysis_runs`; JSON + text/PDF export; cases export endpoint; partner readiness report + list + export endpoints; disclaimer on all outputs; 26 tests pass |
 
 ---
 

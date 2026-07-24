@@ -177,3 +177,72 @@ class PartnerRoleMatrixItem(BaseModel):
 
 class PartnerRoleMatrixResponse(BaseModel):
     roles: list[PartnerRoleMatrixItem]
+
+
+# ---------------------------------------------------------------------------
+# Readiness report (slice 4) — reuses credit_analysis_runs payload
+# ---------------------------------------------------------------------------
+
+
+class ReadinessDimension(BaseModel):
+    key: str
+    label: str
+    score: int
+    weight: float
+
+
+class ReadinessBlocker(BaseModel):
+    id: str
+    title: str
+    impact: str
+    action: str
+
+
+class ReadinessPriorityTask(BaseModel):
+    """Derived from the referral's milestone checklist."""
+
+    id: str
+    label: str
+    complete: bool
+    completed_at: datetime | None
+
+
+class MortgageReadinessReportResponse(BaseModel):
+    """Advisory readiness report for a partner referral.
+
+    Disclaimer: Lending Readiness Score™ is an advisory tool for organizing
+    credit and documentation work toward a mortgage conversation. It is not a
+    credit score from a consumer reporting agency, not an underwriting decision,
+    and not a guarantee of loan approval or terms.
+    """
+
+    referral_id: uuid.UUID
+    case_id: uuid.UUID
+    credit_analysis_run_id: uuid.UUID
+    client_display_name: str | None
+    mortgage_readiness_score: int
+    band: str
+    generated_at: datetime
+    dimensions: list[ReadinessDimension]
+    blockers: list[ReadinessBlocker]
+    priority_tasks: list[ReadinessPriorityTask]
+    docs_status: str
+    partner_notes: str | None
+    formula_version: str
+    score_version: str
+    disclaimer: str
+
+
+class ReadinessReportSummary(BaseModel):
+    """Lightweight summary for the list endpoint."""
+
+    referral_id: uuid.UUID
+    case_id: uuid.UUID
+    credit_analysis_run_id: uuid.UUID
+    client_display_name: str | None
+    mortgage_readiness_score: int
+    band: str
+    generated_at: datetime
+    formula_version: str
+    score_version: str
+    disclaimer: str

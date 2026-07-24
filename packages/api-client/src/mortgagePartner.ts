@@ -26,7 +26,9 @@ export type PartnerAccessAction =
   | 'referral_update'
   | 'pipeline_view'
   | 'pipeline_update'
-  | 'milestone_update';
+  | 'milestone_update'
+  | 'readiness_view'
+  | 'readiness_export';
 
 export interface MortgagePartnerStatus {
   mortgage_partner_enabled: boolean;
@@ -267,5 +269,89 @@ export function replaceReferralMilestones(
   return request<PartnerLoanMilestone[]>(
     apiPath(`/mortgage-partner/partnerships/${partnershipId}/referrals/${referralId}/milestones`),
     { method: 'PUT', body },
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Readiness reports (slice 4)
+// ---------------------------------------------------------------------------
+
+export interface ReadinessDimension {
+  key: string;
+  label: string;
+  score: number;
+  weight: number;
+}
+
+export interface ReadinessBlocker {
+  id: string;
+  title: string;
+  impact: string;
+  action: string;
+}
+
+export interface ReadinessPriorityTask {
+  id: string;
+  label: string;
+  complete: boolean;
+  completed_at: string | null;
+}
+
+export interface MortgageReadinessReport {
+  referral_id: string;
+  case_id: string;
+  credit_analysis_run_id: string;
+  client_display_name: string | null;
+  mortgage_readiness_score: number;
+  band: string;
+  generated_at: string;
+  dimensions: ReadinessDimension[];
+  blockers: ReadinessBlocker[];
+  priority_tasks: ReadinessPriorityTask[];
+  docs_status: string;
+  partner_notes: string | null;
+  formula_version: string;
+  score_version: string;
+  /** Lending Readiness Score™ is an advisory tool for organizing credit and
+   *  documentation work toward a mortgage conversation. It is not a credit score
+   *  from a consumer reporting agency, not an underwriting decision, and not a
+   *  guarantee of loan approval or terms. */
+  disclaimer: string;
+}
+
+export interface ReadinessReportSummary {
+  referral_id: string;
+  case_id: string;
+  credit_analysis_run_id: string;
+  client_display_name: string | null;
+  mortgage_readiness_score: number;
+  band: string;
+  generated_at: string;
+  formula_version: string;
+  score_version: string;
+  disclaimer: string;
+}
+
+export function listPartnershipReadinessReports(partnershipId: string) {
+  return request<ReadinessReportSummary[]>(
+    apiPath(`/mortgage-partner/partnerships/${partnershipId}/readiness-reports`),
+  );
+}
+
+export function getReferralReadinessReport(partnershipId: string, referralId: string) {
+  return request<MortgageReadinessReport>(
+    apiPath(
+      `/mortgage-partner/partnerships/${partnershipId}/referrals/${referralId}/readiness-report`,
+    ),
+  );
+}
+
+export function getReferralReadinessReportExportUrl(
+  partnershipId: string,
+  referralId: string,
+  format: 'text' | 'pdf' = 'pdf',
+): string {
+  return apiPath(
+    `/mortgage-partner/partnerships/${partnershipId}/referrals/${referralId}/readiness-report/export?format=${format}`,
   );
 }

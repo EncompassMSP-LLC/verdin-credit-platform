@@ -8,6 +8,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.core.pagination import PaginatedResponse
 from api.database.session import get_db
+from api.modules.accounts.credit_analysis_export import (
+    sanitize_content_disposition_filename as sanitize_credit_analysis_filename,
+)
 from api.modules.accounts.credit_analysis_schemas import (
     CreditAnalysisRunListResponse,
     CreditAnalysisRunResponse,
@@ -414,6 +417,33 @@ async def get_credit_analysis_run(
     service: CreditAnalysisService = Depends(get_credit_analysis_service),
 ) -> CreditAnalysisRunResponse:
     return await service.get_run(current_user, case_id, run_id)
+
+
+@router.get("/{case_id}/credit-analysis/runs/{run_id}/export")
+async def export_credit_analysis_run(
+    case_id: uuid.UUID,
+    run_id: uuid.UUID,
+    export_format: Literal["text", "pdf"] = Query("text", alias="export_format"),
+    current_user: User = Depends(get_current_user),
+    service: CreditAnalysisService = Depends(get_credit_analysis_service),
+) -> Response:
+    """Operator-gated credit-analysis run export (text/pdf) for partner handoff.
+
+    Disclaimer is reproduced at the top of every export.
+    This endpoint never auto-transmits the document.
+    """
+    content, file_name, media_type = await service.export_run(
+        current_user,
+        case_id,
+        run_id,
+        export_format=export_format,
+    )
+    safe_name = sanitize_credit_analysis_filename(file_name)
+    return Response(
+        content=content,
+        media_type=media_type,
+        headers={"Content-Disposition": f'attachment; filename="{safe_name}"'},
+    )
 
 
 @router.post(
