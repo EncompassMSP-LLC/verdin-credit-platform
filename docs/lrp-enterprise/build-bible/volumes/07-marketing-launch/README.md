@@ -62,7 +62,7 @@ Asset homes: `assets/lrp/social/`, `brochures/`, `presentations/`.
 
 Canonical claim-safe sales kit for LOs, lenders, and realtor co-channel:
 
-**[partner-kit/](./partner-kit/)** — letters, brochure, flyer, one-pager, checklist, social/email/LinkedIn, landing spec, realtor variant, Phase 2 backlog.
+**[partner-kit/](./partner-kit/)** — letters, brochure, flyer, one-pager, checklist, social/email/LinkedIn, landing spec, realtor variant, Phase 2 premium kit, **[Phase 3 complete program](./partner-kit/phase-3/)**.
 
 Web mirrors: `/lenders`, `/realtors`, `/resources/partner-kit`.
 
