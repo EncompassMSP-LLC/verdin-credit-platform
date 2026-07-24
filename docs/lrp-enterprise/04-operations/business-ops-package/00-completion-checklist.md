@@ -28,7 +28,7 @@ Ordered slices for LRP Phase 3 company ops. Sprint loop: `.cursor/rules/lrp-ops-
 | 8     | Section 7 — Mortgage Readiness Reports          | ✅     |
 | 9     | Section 8 — Presentation Package                | ✅     |
 | 10    | Section 9 — Sales Package                       | ✅     |
-| 11    | Section 10 — Marketing Expansion (banks)        | ☐      |
+| 11    | Section 10 — Marketing Expansion (banks)        | ✅     |
 | 12    | Section 11 — Print Marketing                    | ☐      |
 | 13    | Section 12 — Website                            | ☐      |
 | 14    | Section 13 — Video Marketing                    | ☐      |
@@ -90,3 +90,8 @@ Ordered slices for LRP Phase 3 company ops. Sprint loop: `.cursor/rules/lrp-ops-
 
 - Cold call, discovery, appointment, follow-up, networking, voicemail scripts
 - Email, LinkedIn, and SMS templates (TCPA-aware)
+
+### Slice 11 — Section 10 (2026-07-24)
+
+- Generated claim-safe banks: FB/LI/IG/Threads 250 each; X 100; stories 150; reels 100; Canva carousels 100
+- Regenerator: `_generate_banks.py`
