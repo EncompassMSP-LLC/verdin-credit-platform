@@ -20,7 +20,7 @@ Ordered slices for LRP Phase 3 company ops. Sprint loop: `.cursor/rules/lrp-ops-
 | ----- | ----------------------------------------------- | ------ |
 | 1     | Charter + checklist + folder map (this package) | ✅     |
 | 2     | Section 1 — Partner Onboarding Kit              | ✅     |
-| 3     | Section 2 — Client Intake Package               | ☐      |
+| 3     | Section 2 — Client Intake Package               | ✅     |
 | 4     | Section 3 — Compliance Package                  | ☐      |
 | 5     | Section 4 — Referral Management System          | ☐      |
 | 6     | Section 5 — CRM Package                         | ☐      |
@@ -45,3 +45,11 @@ Ordered slices for LRP Phase 3 company ops. Sprint loop: `.cursor/rules/lrp-ops-
 - Partner Welcome Guide (full manuscript)
 - Loan Officer Quick Start Guide (5-page ops)
 - Office Training Manual (RESPA-aware communication workflow)
+
+### Slice 3 — Section 2 (2026-07-24)
+
+- Credit Consultation Packet (welcome letter, service overview, client roadmap)
+- Client Intake Form
+- Document Checklist
+- Goal Worksheet
+- Financial Snapshot Worksheet (illustrative DTI educational only)
