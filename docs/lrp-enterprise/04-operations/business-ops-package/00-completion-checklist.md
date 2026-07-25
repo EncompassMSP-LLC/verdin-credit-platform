@@ -5,7 +5,7 @@ Ordered slices for LRP Phase 3 company ops. Sprint loop: `.cursor/rules/lrp-ops-
 ## Exit criteria
 
 - [x] Sections 1–7 operational manuscripts complete (onboarding through readiness reports)
-- [ ] Sections 8–11 sales/marketing expansion manuscripts complete
+- [x] Sections 8–11 sales/marketing expansion manuscripts complete
 - [ ] Sections 12–14 website/video/automation specs complete
 - [x] Pipeline stages mapped to platform `LoanPipelineStage` (or documented ops overlay)
 - [ ] All public-facing copy claim-library locked
@@ -29,7 +29,7 @@ Ordered slices for LRP Phase 3 company ops. Sprint loop: `.cursor/rules/lrp-ops-
 | 9     | Section 8 — Presentation Package                | ✅     |
 | 10    | Section 9 — Sales Package                       | ✅     |
 | 11    | Section 10 — Marketing Expansion (banks)        | ✅     |
-| 12    | Section 11 — Print Marketing                    | ☐      |
+| 12    | Section 11 — Print Marketing                    | ✅     |
 | 13    | Section 12 — Website                            | ☐      |
 | 14    | Section 13 — Video Marketing                    | ☐      |
 | 15    | Section 14 — Automation                         | ☐      |
@@ -95,3 +95,9 @@ Ordered slices for LRP Phase 3 company ops. Sprint loop: `.cursor/rules/lrp-ops-
 
 - Generated claim-safe banks: FB/LI/IG/Threads 250 each; X 100; stories 150; reels 100; Canva carousels 100
 - Regenerator: `_generate_banks.py`
+
+### Slice 12 — Section 11 (2026-07-25)
+
+- Print production standards (CMYK, bleed, QR, naming, vendor brief)
+- Door hangers, flyers, rack cards, brochures, leave-behinds
+- Outdoor/office signage, vehicle wrap, trade show booth, print kit assembly SKUs
