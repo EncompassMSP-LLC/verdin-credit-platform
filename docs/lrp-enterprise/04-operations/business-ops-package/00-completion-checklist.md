@@ -30,7 +30,7 @@ Ordered slices for LRP Phase 3 company ops. Sprint loop: `.cursor/rules/lrp-ops-
 | 10    | Section 9 — Sales Package                       | ✅     |
 | 11    | Section 10 — Marketing Expansion (banks)        | ✅     |
 | 12    | Section 11 — Print Marketing                    | ✅     |
-| 13    | Section 12 — Website                            | ☐      |
+| 13    | Section 12 — Website                            | ✅     |
 | 14    | Section 13 — Video Marketing                    | ☐      |
 | 15    | Section 14 — Automation                         | ☐      |
 | 16    | Ops package sign-off + Phase 4 handoff note     | ☐      |
@@ -101,3 +101,10 @@ Ordered slices for LRP Phase 3 company ops. Sprint loop: `.cursor/rules/lrp-ops-
 - Print production standards (CMYK, bleed, QR, naming, vendor brief)
 - Door hangers, flyers, rack cards, brochures, leave-behinds
 - Outdoor/office signage, vehicle wrap, trade show booth, print kit assembly SKUs
+
+### Slice 13 — Section 12 (2026-07-25)
+
+- Site IA / route map for `apps/lrp-web`
+- Audience landings (lender, realtor, borrower, builder, attorney, advisors)
+- Thank-you pages, FAQ catalog, knowledge base, blog editorial, success-story rules
+- SEO, contact/referral forms, UTM standards
