@@ -80,6 +80,15 @@ function persistDemoSession(user: CrmUser) {
   writeDemoCookie(user.id);
 }
 
+function clearDemoSession() {
+  try {
+    localStorage.removeItem(CRM_SESSION_STORAGE_KEY);
+  } catch {
+    /* ignore */
+  }
+  document.cookie = `${CRM_SESSION_COOKIE}=; Path=/; Max-Age=0; SameSite=Lax`;
+}
+
 export function CrmAuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<CrmUser | null>(null);
   const [authMode, setAuthMode] = useState<'platform' | 'demo' | null>(null);
@@ -91,6 +100,7 @@ export function CrmAuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(() => {
     clearStaffSession(CRM_STAFF_COOKIE_NAMES);
+    clearDemoSession();
     setUser(null);
     setAuthMode(null);
   }, []);
@@ -126,11 +136,15 @@ export function CrmAuthProvider({ children }: { children: ReactNode }) {
         }
       }
 
+      const networkHint = isDemoAuthEnabled('crm')
+        ? 'Could not reach the API. Use a demo CRM account or start the platform API.'
+        : 'Could not reach the API. Start the platform API and sign in with a staff account.';
+
       return {
         ok: false as const,
         error:
           platformMessage.includes('fetch') || platformMessage.includes('Network')
-            ? 'Could not reach the API. Use a demo CRM account or start the platform API.'
+            ? networkHint
             : platformMessage || 'Invalid email or password.',
       };
     }
@@ -172,11 +186,15 @@ export function CrmAuthProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      const demo = readDemoSession();
-      if (demo) {
-        writeDemoCookie(demo.id);
-        setUser(demo);
-        setAuthMode('demo');
+      if (isDemoAuthEnabled('crm')) {
+        const demo = readDemoSession();
+        if (demo) {
+          writeDemoCookie(demo.id);
+          setUser(demo);
+          setAuthMode('demo');
+        }
+      } else {
+        clearDemoSession();
       }
       setIsLoading(false);
     };

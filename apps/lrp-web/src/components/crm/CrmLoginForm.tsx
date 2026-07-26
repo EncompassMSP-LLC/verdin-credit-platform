@@ -2,14 +2,16 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
+import { isDemoAuthEnabled } from '@/lib/auth/realms';
 import { useCrmAuth } from '@/lib/crm/auth';
 
 export function CrmLoginForm() {
   const { login } = useCrmAuth();
   const router = useRouter();
   const search = useSearchParams();
-  const [email, setEmail] = useState('owner@verdin.demo');
-  const [password, setPassword] = useState('changeme123');
+  const demoAuth = isDemoAuthEnabled('crm');
+  const [email, setEmail] = useState(demoAuth ? 'owner@verdin.demo' : '');
+  const [password, setPassword] = useState(demoAuth ? 'changeme123' : '');
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -71,13 +73,18 @@ export function CrmLoginForm() {
         {pending ? 'Signing in…' : 'Sign in to CRM'}
       </button>
       <div className="space-y-1 text-xs text-slate-500">
-        <p>
-          Platform staff: <code>owner@verdin.demo</code> / <code>changeme123</code> (API required)
-        </p>
-        <p>
-          Demo fallback: <code>admin@lrp.crm</code> / <code>lo@lrp.crm</code> — password{' '}
-          <code>changeme123</code>
-        </p>
+        <p>Sign in with a platform staff account (API required).</p>
+        {demoAuth ? (
+          <>
+            <p>
+              Local seed: <code>owner@verdin.demo</code> / <code>changeme123</code>
+            </p>
+            <p>
+              Demo fallback: <code>admin@lrp.crm</code> / <code>lo@lrp.crm</code> — password{' '}
+              <code>changeme123</code>
+            </p>
+          </>
+        ) : null}
       </div>
     </form>
   );

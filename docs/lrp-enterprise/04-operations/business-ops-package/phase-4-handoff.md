@@ -77,11 +77,11 @@ Aligned with Version 29.0 “never / later” table:
 
 ## 6. V1.0 execution plan
 
-| Doc                                          | Path                                                                                                                                   |
-| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| Release plan (gap matrix + milestones M1–M5) | [`../../15-roadmap/lending-readiness-platform-v1.0-release-plan.md`](../../15-roadmap/lending-readiness-platform-v1.0-release-plan.md) |
-| Executable checklist                         | [`../../../development/lrp-platform-v1.0-completion-checklist.md`](../../../development/lrp-platform-v1.0-completion-checklist.md)     |
-| Sprint loop                                  | `.cursor/rules/lrp-platform-v1-sprint-loop.mdc`                                                                                        |
+| Doc                                            | Path                                                                                                                                   |
+| ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Release plan (traceability + milestones M1–M6) | [`../../15-roadmap/lending-readiness-platform-v1.0-release-plan.md`](../../15-roadmap/lending-readiness-platform-v1.0-release-plan.md) |
+| Executable checklist                           | [`../../../development/lrp-platform-v1.0-completion-checklist.md`](../../../development/lrp-platform-v1.0-completion-checklist.md)     |
+| Sprint loop                                    | `.cursor/rules/lrp-platform-v1-sprint-loop.mdc`                                                                                        |
 
 ## 7. Handoff statement
 

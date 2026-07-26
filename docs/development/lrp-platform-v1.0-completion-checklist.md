@@ -4,19 +4,25 @@ Executable slices for building the platform from the Phase 3 ops package.
 
 Master plan: [`../lrp-enterprise/15-roadmap/lending-readiness-platform-v1.0-release-plan.md`](../lrp-enterprise/15-roadmap/lending-readiness-platform-v1.0-release-plan.md)
 
+Traceability: [`../lrp-enterprise/15-roadmap/v1.0-feature-traceability-matrix.md`](../lrp-enterprise/15-roadmap/v1.0-feature-traceability-matrix.md)
+
+Gap analysis: [`../lrp-enterprise/15-roadmap/v1.0-gap-analysis.md`](../lrp-enterprise/15-roadmap/v1.0-gap-analysis.md)
+
 Sprint loop: `.cursor/rules/lrp-platform-v1-sprint-loop.mdc`
 
 Ops contract: [`../lrp-enterprise/04-operations/business-ops-package/`](../lrp-enterprise/04-operations/business-ops-package/)
 
 ## Exit criteria for "LRP Platform V1.0 done"
 
-- [ ] M1 core modules production-wired (CRM, borrower portal, LO portal, referrals, readiness, notifications)
-- [ ] M2 automation workflows live (orchestrator, matrix, CRM rules, consultation pack, digests)
-- [ ] M3 partner/borrower portal UAT passed (incl. realtor MVP)
-- [ ] M4 intelligence + gated AI assistants shipped
-- [ ] M5 production hardening + tag `lrp-platform-v1.0.0`
+- [ ] M1 Core Platform production-wired (auth/RBAC, CRM, borrowers, referrals)
+- [ ] M2 Readiness (score, timeline, reports, action plans, notifications)
+- [ ] M3 Automation (email/SMS/jobs/packs/scheduling per §14)
+- [ ] M4 Partner Experience UAT (lender + realtor MVP; borrower UAT)
+- [ ] M5 Public Experience claim-safe (landings + KB/SEO scope)
+- [ ] M6 Production Readiness (security, perf, monitoring, DR, tag)
 - [ ] Capability matrix + API reference updated for LRP V1.0 surfaces
 - [ ] No unsupervised bureau filing; claim-library locked in UI
+- [ ] V1.0 exit criteria in release plan §7 all checked
 
 ---
 
@@ -24,38 +30,39 @@ Ops contract: [`../lrp-enterprise/04-operations/business-ops-package/`](../lrp-e
 
 | Order | Slice                                                 | Milestone | Status |
 | ----- | ----------------------------------------------------- | --------- | ------ |
-| 1     | Charter — this checklist + release plan               | Kickoff   | ✅     |
-| 2     | LRP-101 CRM partners/contacts live API                | M1        | ☐      |
-| 3     | LRP-102 CRM tasks + daily digest read model           | M1        | ☐      |
-| 4     | LRP-103 Referral intake from web form                 | M1        | ☐      |
-| 5     | LRP-104 Borrower portal task/readiness parity         | M1        | ☐      |
-| 6     | LRP-105 LO notifications center live                  | M1        | ☐      |
-| 7     | LRP-106 Readiness report in borrower portal           | M1        | ☐      |
-| 8     | LRP-107 Case documents in CRM borrower workspace      | M1        | ☐      |
-| 9     | LRP-108 Kill demo-mode for production orgs            | M1        | ☐      |
-| 10    | LRP-201 Referral intake orchestrator job              | M2        | ☐      |
-| 11    | LRP-202 Notification matrix v1                        | M2        | ☐      |
-| 12    | LRP-203 CRM automation rules (persist)                | M2        | ☐      |
-| 13    | LRP-204 Consultation completed pack                   | M2        | ☐      |
-| 14    | LRP-205 Appointment reminders                         | M2        | ☐      |
-| 15    | LRP-206 Partner nurture drip                          | M2        | ☐      |
-| 16    | LRP-207 Weekly status digest job                      | M2        | ☐      |
-| 17    | LRP-301 Realtor partner role + login                  | M3        | ☐      |
-| 18    | LRP-302 Realtor portal MVP                            | M3        | ☐      |
-| 19    | LRP-303 Borrower UAT script + fixes                   | M3        | ☐      |
-| 20    | LRP-304 LO UAT script + fixes                         | M3        | ☐      |
-| 21    | LRP-305 Planned marketing landings (`/builders` etc.) | M3        | ☐      |
-| 22    | LRP-401 Readiness timeline UI                         | M4        | ☐      |
-| 23    | LRP-402 Bureau + Metro2 in readiness blockers         | M4        | ☐      |
-| 24    | LRP-403 Dispute strategy suggestions (advisory)       | M4        | ☐      |
-| 25    | LRP-404 Educational credit simulator                  | M4        | ☐      |
-| 26    | LRP-405 FAQ/KB retrieval bot                          | M4        | ☐      |
-| 27    | LRP-406 Letter draft augment (staff-gated)            | M4        | ☐      |
-| 28    | LRP-501 Partner isolation audit                       | M5        | ☐      |
-| 29    | LRP-502 Automation audit events                       | M5        | ☐      |
-| 30    | LRP-503 LRP smoke E2E in CI                           | M5        | ☐      |
-| 31    | LRP-504 Perf budgets                                  | M5        | ☐      |
-| 32    | LRP-505 Release notes + tag `lrp-platform-v1.0.0`     | M5        | ☐      |
+| 1     | Charter — master release plan + living docs + ADR-013 | Kickoff   | ✅     |
+| 2     | LRP-108 Kill demo-mode for production orgs            | M1        | ✅     |
+| 3     | LRP-101 CRM partners/contacts live API                | M1        | ☐      |
+| 4     | LRP-102 CRM tasks + daily digest read model           | M1        | ☐      |
+| 5     | LRP-103 Referral intake from web form                 | M1        | ☐      |
+| 6     | LRP-107 Case documents in CRM borrower workspace      | M1        | ☐      |
+| 7     | LRP-104 Borrower portal task/readiness parity         | M2        | ☐      |
+| 8     | LRP-106 Readiness report in borrower portal           | M2        | ☐      |
+| 9     | LRP-105 LO notifications center live                  | M2        | ☐      |
+| 10    | LRP-401 Readiness timeline UI                         | M2        | ☐      |
+| 11    | LRP-402 Bureau + Metro2 in readiness blockers         | M2        | ☐      |
+| 12    | LRP-204 Consultation completed pack                   | M2        | ☐      |
+| 13    | LRP-201 Referral intake orchestrator job              | M3        | ☐      |
+| 14    | LRP-202 Notification matrix v1                        | M3        | ☐      |
+| 15    | LRP-203 CRM automation rules (persist)                | M3        | ☐      |
+| 16    | LRP-205 Appointment reminders                         | M3        | ☐      |
+| 17    | LRP-206 Partner nurture drip                          | M3        | ☐      |
+| 18    | LRP-207 Weekly status digest job                      | M3        | ☐      |
+| 19    | LRP-301 Realtor partner role + login                  | M4        | ☐      |
+| 20    | LRP-302 Realtor portal MVP                            | M4        | ☐      |
+| 21    | LRP-303 Borrower UAT script + fixes                   | M4        | ☐      |
+| 22    | LRP-304 LO UAT script + fixes                         | M4        | ☐      |
+| 23    | LRP-403 Dispute strategy suggestions (advisory)       | M4        | ☐      |
+| 24    | LRP-405 FAQ/KB retrieval bot                          | M4        | ☐      |
+| 25    | LRP-406 Letter draft augment (staff-gated)            | M4        | ☐      |
+| 26    | LRP-305 Planned marketing landings (`/builders` etc.) | M5        | ☐      |
+| 27    | LRP-501 Partner isolation audit                       | M6        | ☐      |
+| 28    | LRP-502 Automation audit events                       | M6        | ☐      |
+| 29    | LRP-503 LRP smoke E2E in CI                           | M6        | ☐      |
+| 30    | LRP-504 Perf budgets                                  | M6        | ☐      |
+| 31    | LRP-505 Release notes + tag `lrp-platform-v1.0.0`     | M6        | ☐      |
+
+Deferred to [product backlog](../lrp-enterprise/15-roadmap/product-backlog.md): LRP-404 educational simulator (PB-006); authenticated builder/attorney/advisor portals; full public KB depth.
 
 ---
 
@@ -63,9 +70,22 @@ Ops contract: [`../lrp-enterprise/04-operations/business-ops-package/`](../lrp-e
 
 ### Slice 1 — Kickoff (2026-07-26)
 
-- Release plan with gap matrix (shipped / partial / missing)
-- Milestone map M1–M5 aligned to Phase 4.1–4.6
-- Backlog IDs LRP-101…LRP-505 with acceptance criteria
+- Initial release plan (#378)
+- Master plan remapped to M1–M6 with traceability matrix, gap analysis, DoD, exit criteria
+- Living docs: backlog, roadmap, tech debt, risk register
+- ADR-013 — LRP edition on shared platform
+
+### LRP-108 — Kill demo-mode for production orgs (2026-07-26)
+
+- `resolveDemoAuthEnabled` / `isDemoAuthEnabled`: always off when `NODE_ENV=production`
+- CRM + lender providers clear stale demo sessions when demo auth is off
+- Login forms hide demo credential hints in production
+- Tests: `pnpm --filter @verdin/lrp-web test:auth`
+- Docs: AUTH-REALMS.md, `.env.example`, traceability matrix
+
+### Definition of Done (every slice)
+
+See release plan §6. Checklist row may be marked ✅ only when DoD items are satisfied or explicitly N/A in the PR.
 
 ---
 
@@ -76,3 +96,4 @@ Ops contract: [`../lrp-enterprise/04-operations/business-ops-package/`](../lrp-e
 - `pnpm --filter @verdin/web` and/or `@verdin/lrp-web` typecheck/lint when UI changes
 - Claim-library: no approval/funding/fabricated FICO language
 - No unsupervised bureau filing or dispute auto-send
+- Update traceability matrix status when shipping a High/Critical row

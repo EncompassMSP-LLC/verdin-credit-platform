@@ -80,6 +80,15 @@ function persistDemoSession(user: LenderUser) {
   writeDemoCookie(user.id);
 }
 
+function clearDemoSession() {
+  try {
+    localStorage.removeItem(LENDER_SESSION_STORAGE_KEY);
+  } catch {
+    /* ignore */
+  }
+  document.cookie = `${LENDER_SESSION_COOKIE}=; Path=/; Max-Age=0; SameSite=Lax`;
+}
+
 export function LenderAuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<LenderUser | null>(null);
   const [authMode, setAuthMode] = useState<'platform' | 'demo' | null>(null);
@@ -91,6 +100,7 @@ export function LenderAuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(() => {
     clearStaffSession(LENDER_STAFF_COOKIE_NAMES);
+    clearDemoSession();
     setUser(null);
     setAuthMode(null);
   }, []);
@@ -126,11 +136,15 @@ export function LenderAuthProvider({ children }: { children: ReactNode }) {
         }
       }
 
+      const networkHint = isDemoAuthEnabled('lender')
+        ? 'Could not reach the API. Use a demo lender account or start the platform API.'
+        : 'Could not reach the API. Start the platform API and sign in with a staff account.';
+
       return {
         ok: false as const,
         error:
           platformMessage.includes('fetch') || platformMessage.includes('Network')
-            ? 'Could not reach the API. Use a demo lender account or start the platform API.'
+            ? networkHint
             : platformMessage || 'Invalid email or password.',
       };
     }
@@ -172,11 +186,15 @@ export function LenderAuthProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      const demo = readDemoSession();
-      if (demo) {
-        writeDemoCookie(demo.id);
-        setUser(demo);
-        setAuthMode('demo');
+      if (isDemoAuthEnabled('lender')) {
+        const demo = readDemoSession();
+        if (demo) {
+          writeDemoCookie(demo.id);
+          setUser(demo);
+          setAuthMode('demo');
+        }
+      } else {
+        clearDemoSession();
       }
       setIsLoading(false);
     };

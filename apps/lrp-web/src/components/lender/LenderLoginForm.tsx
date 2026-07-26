@@ -2,14 +2,16 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
+import { isDemoAuthEnabled } from '@/lib/auth/realms';
 import { useLenderAuth } from '@/lib/lender/auth';
 
 export function LenderLoginForm() {
   const { login } = useLenderAuth();
   const router = useRouter();
   const search = useSearchParams();
-  const [email, setEmail] = useState('owner@verdin.demo');
-  const [password, setPassword] = useState('changeme123');
+  const demoAuth = isDemoAuthEnabled('lender');
+  const [email, setEmail] = useState(demoAuth ? 'owner@verdin.demo' : '');
+  const [password, setPassword] = useState(demoAuth ? 'changeme123' : '');
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -71,13 +73,18 @@ export function LenderLoginForm() {
         {pending ? 'Signing in…' : 'Sign in to lender workspace'}
       </button>
       <div className="space-y-1 text-xs text-slate-500">
-        <p>
-          Platform staff (interim): <code>owner@verdin.demo</code> / <code>changeme123</code>
-        </p>
-        <p>
-          Demo LO fallback: <code>lo@lrp.lender</code> / <code>admin@lrp.lender</code> —{' '}
-          <code>changeme123</code>
-        </p>
+        <p>Sign in with a platform staff account (API required; interim LO access).</p>
+        {demoAuth ? (
+          <>
+            <p>
+              Local seed: <code>owner@verdin.demo</code> / <code>changeme123</code>
+            </p>
+            <p>
+              Demo LO fallback: <code>lo@lrp.lender</code> / <code>admin@lrp.lender</code> —{' '}
+              <code>changeme123</code>
+            </p>
+          </>
+        ) : null}
         <p>Partner-member JWT is deferred (mortgage_partner realm).</p>
       </div>
     </form>
