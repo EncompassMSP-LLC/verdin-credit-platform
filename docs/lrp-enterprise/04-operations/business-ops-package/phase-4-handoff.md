@@ -75,7 +75,15 @@ Aligned with Version 29.0 “never / later” table:
 
 ---
 
-## 6. Handoff statement
+## 6. V1.0 execution plan
+
+| Doc                                          | Path                                                                                                                                   |
+| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Release plan (gap matrix + milestones M1–M5) | [`../../15-roadmap/lending-readiness-platform-v1.0-release-plan.md`](../../15-roadmap/lending-readiness-platform-v1.0-release-plan.md) |
+| Executable checklist                         | [`../../../development/lrp-platform-v1.0-completion-checklist.md`](../../../development/lrp-platform-v1.0-completion-checklist.md)     |
+| Sprint loop                                  | `.cursor/rules/lrp-platform-v1-sprint-loop.mdc`                                                                                        |
+
+## 7. Handoff statement
 
 Phase 3 Business Operations Package is **signed off** as documentation-complete.  
-Phase 4 work proceeds on the **Lending Readiness Platform™** using these runbooks as the ops contract — implement in-product, do not re-specify a parallel company stack.
+Phase 4 work proceeds on the **Lending Readiness Platform™** using these runbooks as the ops contract — implement in-product, do not re-specify a parallel company stack. Follow the V1.0 release plan and checklist above.

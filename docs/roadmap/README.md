@@ -653,17 +653,26 @@ Compliance Intelligence Phase 27 deepened **client-sourced monitoring report** p
 
 **Tag:** `v28.0.0` — Monitoring Report Parser Depth.
 
-### Version 29.0 — Mortgage Partner Edition (planned)
+### Version 29.0 — Mortgage Partner Edition (foundation) + LRP Platform V1.0
 
 Scope and checklist: [`docs/governance/version-29.0-scope.md`](../governance/version-29.0-scope.md) · [`docs/development/version-29.0-completion-checklist.md`](../development/version-29.0-completion-checklist.md)
 
 **Mortgage Partner Edition** packages a B2B lender surface on the **same platform** (no codebase fork): partner org/RBAC, lender dashboard + applicant pipeline, mortgage readiness score/export, reusing FCRA/Metro2/cross-bureau/intelligence. Live bureau soft-pulls, automated filing, and cross-tenant lender marketplaces remain deferred (30.0+ / never).
 
-| Epic | Theme                                    | 29.0 target | Notes                                                |
+Foundation slices 1–4 are implemented; governance sign-off remains. **Next execution track:** Lending Readiness Platform™ V1.0 — map ops package → production UX.
+
+| Doc                    | Path                                                                                                                                                             |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| LRP V1.0 release plan  | [`docs/lrp-enterprise/15-roadmap/lending-readiness-platform-v1.0-release-plan.md`](../lrp-enterprise/15-roadmap/lending-readiness-platform-v1.0-release-plan.md) |
+| LRP V1.0 checklist     | [`docs/development/lrp-platform-v1.0-completion-checklist.md`](../development/lrp-platform-v1.0-completion-checklist.md)                                         |
+| Phase 3 ops (complete) | [`docs/lrp-enterprise/04-operations/business-ops-package/`](../lrp-enterprise/04-operations/business-ops-package/)                                               |
+
+| Epic | Theme                                    | 29.0 status | Notes                                                |
 | ---- | ---------------------------------------- | ----------- | ---------------------------------------------------- |
-| 1    | Partner org model + lender RBAC          | Planned     | Feature flag + partnership link; scoped partner APIs |
-| 2    | Lender dashboard + pipeline + milestones | Planned     | Partner UI over shared cases/clients                 |
-| 3    | Mortgage readiness score + report export | Planned     | Estimator + export; ADR-012 for any LLM augment      |
+| 1    | Partner org model + lender RBAC          | Shipped     | Feature flag + partnership link; scoped partner APIs |
+| 2    | Lender dashboard + pipeline + milestones | Shipped     | Partner UI over shared cases/clients                 |
+| 3    | Mortgage readiness score + report export | Shipped     | Estimator + export; ADR-012 for any LLM augment      |
+| 4    | Governance / matrix sign-off             | Open        | Then LRP V1.0 M1–M5 implementation                   |
 
 ## Sprint → version mapping
 
