@@ -1,0 +1,57 @@
+---
+description: Lending Readiness Platform V1.0 implementation sprint loop
+globs:
+  - docs/development/lrp-platform-v1.0-completion-checklist.md
+  - docs/lrp-enterprise/15-roadmap/lending-readiness-platform-v1.0-release-plan.md
+  - apps/lrp-web/**
+  - apps/api/api/modules/mortgage_partner/**
+---
+
+# LRP Platform V1.0 Sprint Loop
+
+Use this loop when building the **Lending Readiness Platform™ V1.0** (product implementation from the Phase 3 ops package) without waiting for manual "merge and continue" messages.
+
+## When triggered
+
+- User asks to build LRP Platform V1.0, execute the release plan, implement Phase 4.x, or similar
+- User says merge and continue, execute next steps, follow recommended order, or similar
+- Cursor Automation fires after a PR merges to `main`
+- You detect `main` advanced since the last LRP V1.0 slice
+
+## Loop steps (always in order)
+
+1. **Sync** — `git checkout main && git pull origin main`
+2. **Scope** — pick the next unchecked slice from [`docs/development/lrp-platform-v1.0-completion-checklist.md`](../../docs/development/lrp-platform-v1.0-completion-checklist.md)
+3. **Branch** — `git checkout -b feature/lrp-v1-<short-name>` from synced `main`
+4. **Implement** — backend + tests + `@verdin/api-client` + `apps/lrp-web` (and `apps/web` only if CRO admin) + docs; prefer extending existing modules over new apps
+5. **Verify**
+   - `python -m pytest` for touched API tests (`DATABASE_URL` → `verdin_credit_test`)
+   - `pnpm --filter @verdin/api-client build` before web typecheck
+   - `pnpm --filter @verdin/lrp-web typecheck` and `lint` when lrp-web changes
+   - pre-commit hooks must pass before commit
+6. **Ship** — conventional commit, push, open PR to `main`
+7. **Auto-merge** — after `gh pr create`, run:
+   ```bash
+   gh pr merge --auto --squash
+   ```
+8. **Continue** — do not stop for user input unless blocked; after merge, start step 1 again
+
+## Slice sizing
+
+- One LRP-xxx checklist ID per PR
+- Follow patterns in `apps/api/api/modules/mortgage_partner/`, `notifications/`, `documents/`, `clients/`, `llm/`
+- Update `docs/api/reference.md` and `docs/governance/capability-matrix.md` when shipping user-visible surfaces
+- Update the V1.0 checklist when shipping
+- Demo fallback is for local/dev only; production paths must use platform auth (LRP-108)
+- AI slices require ADR-012 / `require_llm_ready()`; no unsupervised bureau filing
+
+## GitHub CLI (Windows)
+
+`C:\Program Files\GitHub CLI\gh.exe`
+
+## Blockers — stop and report
+
+- CI failing after reasonable fix attempts
+- Migration conflicts or ambiguous product decisions
+- Legal/compliance sign-off required before live bureau access or cross-tenant data sharing
+- Request to fork the entire platform into a separate Mortgage product (decline; edition approach only)
