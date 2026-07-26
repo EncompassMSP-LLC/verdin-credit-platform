@@ -4,7 +4,7 @@
 | ------------ | ----------------- |
 | Status       | `ready-for-build` |
 | Parent       | Vol 24            |
-| Last updated | 2026-07-22        |
+| Last updated | 2026-07-26        |
 
 ## Realms
 
@@ -39,9 +39,13 @@
 - Mortgage partner **member JWT** for true LO/realtor seats (`ENABLE_MORTGAGE_PARTNER` partnership members)
 - SSO / MFA
 
-## Demo fallback
+## Demo fallback (LRP-108)
 
-`NEXT_PUBLIC_LRP_CRM_DEMO_AUTH` / `NEXT_PUBLIC_LRP_LENDER_DEMO_AUTH` default **true**. Platform login is attempted first; demo users apply when platform auth fails and credentials match local demo tables.
+`NEXT_PUBLIC_LRP_CRM_DEMO_AUTH` / `NEXT_PUBLIC_LRP_LENDER_DEMO_AUTH` default **true** in local/dev when unset.
+
+**Production builds always disable demo auth** (`NODE_ENV=production`), even if the flags are `true`. Stale demo cookies/localStorage are cleared on init when demo auth is off.
+
+Platform login is attempted first; demo users apply only when demo auth is enabled, platform auth fails, and credentials match local demo tables.
 
 ## Implementation
 

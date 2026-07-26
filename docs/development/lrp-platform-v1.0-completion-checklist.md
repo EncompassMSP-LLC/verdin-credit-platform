@@ -31,7 +31,7 @@ Ops contract: [`../lrp-enterprise/04-operations/business-ops-package/`](../lrp-e
 | Order | Slice                                                 | Milestone | Status |
 | ----- | ----------------------------------------------------- | --------- | ------ |
 | 1     | Charter — master release plan + living docs + ADR-013 | Kickoff   | ✅     |
-| 2     | LRP-108 Kill demo-mode for production orgs            | M1        | ☐      |
+| 2     | LRP-108 Kill demo-mode for production orgs            | M1        | ✅     |
 | 3     | LRP-101 CRM partners/contacts live API                | M1        | ☐      |
 | 4     | LRP-102 CRM tasks + daily digest read model           | M1        | ☐      |
 | 5     | LRP-103 Referral intake from web form                 | M1        | ☐      |
@@ -74,6 +74,14 @@ Deferred to [product backlog](../lrp-enterprise/15-roadmap/product-backlog.md): 
 - Master plan remapped to M1–M6 with traceability matrix, gap analysis, DoD, exit criteria
 - Living docs: backlog, roadmap, tech debt, risk register
 - ADR-013 — LRP edition on shared platform
+
+### LRP-108 — Kill demo-mode for production orgs (2026-07-26)
+
+- `resolveDemoAuthEnabled` / `isDemoAuthEnabled`: always off when `NODE_ENV=production`
+- CRM + lender providers clear stale demo sessions when demo auth is off
+- Login forms hide demo credential hints in production
+- Tests: `pnpm --filter @verdin/lrp-web test:auth`
+- Docs: AUTH-REALMS.md, `.env.example`, traceability matrix
 
 ### Definition of Done (every slice)
 
