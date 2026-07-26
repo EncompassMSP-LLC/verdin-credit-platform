@@ -31,7 +31,7 @@ Ordered slices for LRP Phase 3 company ops. Sprint loop: `.cursor/rules/lrp-ops-
 | 11    | Section 10 — Marketing Expansion (banks)        | ✅     |
 | 12    | Section 11 — Print Marketing                    | ✅     |
 | 13    | Section 12 — Website                            | ✅     |
-| 14    | Section 13 — Video Marketing                    | ☐      |
+| 14    | Section 13 — Video Marketing                    | ✅     |
 | 15    | Section 14 — Automation                         | ☐      |
 | 16    | Ops package sign-off + Phase 4 handoff note     | ☐      |
 
@@ -108,3 +108,9 @@ Ordered slices for LRP Phase 3 company ops. Sprint loop: `.cursor/rules/lrp-ops-
 - Audience landings (lender, realtor, borrower, builder, attorney, advisors)
 - Thank-you pages, FAQ catalog, knowledge base, blog editorial, success-story rules
 - SEO, contact/referral forms, UTM standards
+
+### Slice 14 — Section 13 (2026-07-25)
+
+- Video production standards + YouTube channel plan
+- Scripts: welcome, partner overview, explainer, whiteboard series, composite success story
+- Realtor, bank/lender, commercial spots; short-form bridge to Section 10 reels
