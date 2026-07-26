@@ -8,6 +8,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from api.modules.mortgage_partner.models import (
     LoanPipelineStage,
     PartnerAccessAction,
+    PartnerContactRole,
     PartnerOrgType,
     PartnerRole,
     PartnershipStatus,
@@ -38,6 +39,64 @@ class PartnershipResponse(BaseModel):
     partner_type: PartnerOrgType
     status: PartnershipStatus
     display_name: str
+    notes: str | None
+    created_at: datetime
+    updated_at: datetime
+    # CRM enrichment (LRP-101) — not ORM columns
+    primary_contact_name: str | None = None
+    primary_contact_email: str | None = None
+    active_referral_count: int = 0
+
+
+class PartnerContactCreate(BaseModel):
+    first_name: str = Field(min_length=1, max_length=100)
+    last_name: str = Field(min_length=1, max_length=100)
+    email: str | None = Field(default=None, max_length=255)
+    phone: str | None = Field(default=None, max_length=40)
+    job_title: str | None = Field(default=None, max_length=120)
+    contact_role: PartnerContactRole = PartnerContactRole.OTHER
+    is_primary: bool = False
+    is_active: bool = True
+    user_id: uuid.UUID | None = None
+    notes: str | None = None
+
+
+class PartnerContactUpdate(BaseModel):
+    """Staff-mediated contact update — at least one field required."""
+
+    first_name: str | None = Field(default=None, min_length=1, max_length=100)
+    last_name: str | None = Field(default=None, min_length=1, max_length=100)
+    email: str | None = Field(default=None, max_length=255)
+    phone: str | None = Field(default=None, max_length=40)
+    job_title: str | None = Field(default=None, max_length=120)
+    contact_role: PartnerContactRole | None = None
+    is_primary: bool | None = None
+    is_active: bool | None = None
+    user_id: uuid.UUID | None = None
+    notes: str | None = None
+
+    @model_validator(mode="after")
+    def at_least_one_field(self) -> "PartnerContactUpdate":
+        if not self.model_fields_set:
+            raise ValueError("At least one field must be provided")
+        return self
+
+
+class PartnerContactResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    partnership_id: uuid.UUID
+    cro_organization_id: uuid.UUID
+    first_name: str
+    last_name: str
+    email: str | None
+    phone: str | None
+    job_title: str | None
+    contact_role: PartnerContactRole
+    is_primary: bool
+    is_active: bool
+    user_id: uuid.UUID | None
     notes: str | None
     created_at: datetime
     updated_at: datetime

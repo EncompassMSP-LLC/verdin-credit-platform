@@ -25,6 +25,7 @@ from api.modules.mortgage_partner.models import (
     OrgPartnershipMember,
     PartnerAccessAction,
     PartnerAccessAudit,
+    PartnerContact,
     PartnerLoanMilestone,
     PartnerReferral,
 )
@@ -40,6 +41,9 @@ from api.modules.mortgage_partner.schemas import (
     MortgagePartnerStatusResponse,
     MortgageReadinessReportResponse,
     PartnerAccessAuditResponse,
+    PartnerContactCreate,
+    PartnerContactResponse,
+    PartnerContactUpdate,
     PartnerLoanMilestoneResponse,
     PartnerReferralCreate,
     PartnerReferralResponse,
@@ -77,6 +81,33 @@ class MortgagePartnerService:
         return cls(MortgagePartnerRepository(session), session)
 
     # --- helpers ---
+
+    def _partnership_response(
+        self,
+        row: OrgPartnership,
+        *,
+        primary_contact: PartnerContact | None = None,
+        active_referral_count: int = 0,
+    ) -> PartnershipResponse:
+        primary_name = None
+        primary_email = None
+        if primary_contact is not None:
+            primary_name = f"{primary_contact.first_name} {primary_contact.last_name}".strip()
+            primary_email = primary_contact.email
+        return PartnershipResponse(
+            id=row.id,
+            cro_organization_id=row.cro_organization_id,
+            partner_organization_id=row.partner_organization_id,
+            partner_type=row.partner_type,
+            status=row.status,
+            display_name=row.display_name,
+            notes=row.notes,
+            created_at=row.created_at,
+            updated_at=row.updated_at,
+            primary_contact_name=primary_name,
+            primary_contact_email=primary_email,
+            active_referral_count=active_referral_count,
+        )
 
     def _referral_response(
         self,
@@ -212,6 +243,7 @@ class MortgagePartnerService:
             capabilities=[
                 "partnerships",
                 "partnership_members",
+                "partner_contacts",
                 "partner_referrals",
                 "partner_access_audits",
                 "partner_role_matrix",
@@ -288,18 +320,30 @@ class MortgagePartnerService:
             detail=f"Linked partner org {payload.partner_organization_id}",
         )
         await self._session.commit()
-        return PartnershipResponse.model_validate(created)
+        return self._partnership_response(created)
 
     async def list_partnerships(self, user: User) -> list[PartnershipResponse]:
         self._require_read(user)
         cro_org_id = self._require_organization(user)
         rows = await self._repo.list_partnerships(cro_org_id)
-        return [PartnershipResponse.model_validate(row) for row in rows]
+        partnership_ids = [row.id for row in rows]
+        primaries = await self._repo.map_primary_contacts(cro_org_id, partnership_ids)
+        counts = await self._repo.map_active_referral_counts(cro_org_id, partnership_ids)
+        return [
+            self._partnership_response(
+                row,
+                primary_contact=primaries.get(row.id),
+                active_referral_count=counts.get(row.id, 0),
+            )
+            for row in rows
+        ]
 
     async def get_partnership(self, user: User, partnership_id: uuid.UUID) -> PartnershipResponse:
         self._require_read(user)
         cro_org_id = self._require_organization(user)
         partnership = await self._require_partnership(partnership_id, cro_org_id)
+        primaries = await self._repo.map_primary_contacts(cro_org_id, [partnership.id])
+        counts = await self._repo.map_active_referral_counts(cro_org_id, [partnership.id])
         await self._audit(
             cro_organization_id=cro_org_id,
             actor=user,
@@ -309,7 +353,145 @@ class MortgagePartnerService:
             partnership_id=partnership.id,
         )
         await self._session.commit()
-        return PartnershipResponse.model_validate(partnership)
+        return self._partnership_response(
+            partnership,
+            primary_contact=primaries.get(partnership.id),
+            active_referral_count=counts.get(partnership.id, 0),
+        )
+
+    async def list_contacts(
+        self, user: User, partnership_id: uuid.UUID
+    ) -> list[PartnerContactResponse]:
+        self._require_read(user)
+        cro_org_id = self._require_organization(user)
+        await self._require_partnership(partnership_id, cro_org_id)
+        rows = await self._repo.list_contacts(partnership_id, cro_org_id)
+        await self._audit(
+            cro_organization_id=cro_org_id,
+            actor=user,
+            action=PartnerAccessAction.CONTACT_LIST,
+            resource_type="org_partnership",
+            resource_id=partnership_id,
+            partnership_id=partnership_id,
+            detail=f"count={len(rows)}",
+        )
+        await self._session.commit()
+        return [PartnerContactResponse.model_validate(row) for row in rows]
+
+    async def create_contact(
+        self,
+        user: User,
+        partnership_id: uuid.UUID,
+        payload: PartnerContactCreate,
+    ) -> PartnerContactResponse:
+        self._require_write(user)
+        cro_org_id = self._require_organization(user)
+        await self._require_partnership(partnership_id, cro_org_id)
+
+        if payload.user_id is not None:
+            linked = await self._repo.get_user_in_org(payload.user_id, cro_org_id)
+            if linked is None:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Linked user not found in organization",
+                )
+
+        if payload.is_primary:
+            await self._repo.clear_primary_contacts(partnership_id, cro_org_id)
+
+        contact = PartnerContact(
+            id=uuid.uuid4(),
+            partnership_id=partnership_id,
+            cro_organization_id=cro_org_id,
+            first_name=payload.first_name.strip(),
+            last_name=payload.last_name.strip(),
+            email=payload.email.strip() if payload.email else None,
+            phone=payload.phone.strip() if payload.phone else None,
+            job_title=payload.job_title.strip() if payload.job_title else None,
+            contact_role=payload.contact_role,
+            is_primary=payload.is_primary,
+            is_active=payload.is_active,
+            user_id=payload.user_id,
+            notes=payload.notes,
+        )
+        apply_audit_on_create(contact, user.id)
+        created = await self._repo.create_contact(contact)
+        await self._audit(
+            cro_organization_id=cro_org_id,
+            actor=user,
+            action=PartnerAccessAction.CONTACT_CREATE,
+            resource_type="partner_contact",
+            resource_id=created.id,
+            partnership_id=partnership_id,
+            detail=f"primary={payload.is_primary}",
+        )
+        await self._session.commit()
+        return PartnerContactResponse.model_validate(created)
+
+    async def update_contact(
+        self,
+        user: User,
+        partnership_id: uuid.UUID,
+        contact_id: uuid.UUID,
+        payload: PartnerContactUpdate,
+    ) -> PartnerContactResponse:
+        self._require_write(user)
+        cro_org_id = self._require_organization(user)
+        await self._require_partnership(partnership_id, cro_org_id)
+        contact = await self._repo.get_contact(contact_id, partnership_id, cro_org_id)
+        if contact is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Contact not found",
+            )
+
+        fields = payload.model_fields_set
+        if "user_id" in fields and payload.user_id is not None:
+            linked = await self._repo.get_user_in_org(payload.user_id, cro_org_id)
+            if linked is None:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Linked user not found in organization",
+                )
+
+        if "is_primary" in fields and payload.is_primary is True:
+            await self._repo.clear_primary_contacts(
+                partnership_id, cro_org_id, except_contact_id=contact.id
+            )
+
+        if "first_name" in fields and payload.first_name is not None:
+            contact.first_name = payload.first_name.strip()
+        if "last_name" in fields and payload.last_name is not None:
+            contact.last_name = payload.last_name.strip()
+        if "email" in fields:
+            contact.email = payload.email.strip() if payload.email else None
+        if "phone" in fields:
+            contact.phone = payload.phone.strip() if payload.phone else None
+        if "job_title" in fields:
+            contact.job_title = payload.job_title.strip() if payload.job_title else None
+        if "contact_role" in fields and payload.contact_role is not None:
+            contact.contact_role = payload.contact_role
+        if "is_primary" in fields and payload.is_primary is not None:
+            contact.is_primary = payload.is_primary
+        if "is_active" in fields and payload.is_active is not None:
+            contact.is_active = payload.is_active
+        if "user_id" in fields:
+            contact.user_id = payload.user_id
+        if "notes" in fields:
+            contact.notes = payload.notes
+
+        apply_audit_on_update(contact, user.id)
+        updated = await self._repo.save_contact(contact)
+        await self._audit(
+            cro_organization_id=cro_org_id,
+            actor=user,
+            action=PartnerAccessAction.CONTACT_UPDATE,
+            resource_type="partner_contact",
+            resource_id=updated.id,
+            partnership_id=partnership_id,
+        )
+        await self._session.commit()
+        return PartnerContactResponse.model_validate(updated)
 
     async def add_member(
         self,

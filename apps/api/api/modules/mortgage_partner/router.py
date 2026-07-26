@@ -20,6 +20,9 @@ from api.modules.mortgage_partner.schemas import (
     MortgagePartnerStatusResponse,
     MortgageReadinessReportResponse,
     PartnerAccessAuditResponse,
+    PartnerContactCreate,
+    PartnerContactResponse,
+    PartnerContactUpdate,
     PartnerLoanMilestoneResponse,
     PartnerReferralCreate,
     PartnerReferralResponse,
@@ -149,6 +152,49 @@ async def list_partnership_members(
     service: MortgagePartnerService = Depends(get_mortgage_partner_service),
 ) -> list[PartnershipMemberResponse]:
     return await service.list_members(current_user, partnership_id)
+
+
+@router.get(
+    "/partnerships/{partnership_id}/contacts",
+    response_model=list[PartnerContactResponse],
+)
+async def list_partner_contacts(
+    partnership_id: uuid.UUID,
+    _: None = Depends(require_mortgage_partner_enabled),
+    current_user: User = Depends(get_current_user),
+    service: MortgagePartnerService = Depends(get_mortgage_partner_service),
+) -> list[PartnerContactResponse]:
+    return await service.list_contacts(current_user, partnership_id)
+
+
+@router.post(
+    "/partnerships/{partnership_id}/contacts",
+    response_model=PartnerContactResponse,
+    status_code=201,
+)
+async def create_partner_contact(
+    partnership_id: uuid.UUID,
+    payload: PartnerContactCreate,
+    _: None = Depends(require_mortgage_partner_enabled),
+    current_user: User = Depends(get_current_user),
+    service: MortgagePartnerService = Depends(get_mortgage_partner_service),
+) -> PartnerContactResponse:
+    return await service.create_contact(current_user, partnership_id, payload)
+
+
+@router.patch(
+    "/partnerships/{partnership_id}/contacts/{contact_id}",
+    response_model=PartnerContactResponse,
+)
+async def update_partner_contact(
+    partnership_id: uuid.UUID,
+    contact_id: uuid.UUID,
+    payload: PartnerContactUpdate,
+    _: None = Depends(require_mortgage_partner_enabled),
+    current_user: User = Depends(get_current_user),
+    service: MortgagePartnerService = Depends(get_mortgage_partner_service),
+) -> PartnerContactResponse:
+    return await service.update_contact(current_user, partnership_id, contact_id, payload)
 
 
 @router.post(

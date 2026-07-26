@@ -28,6 +28,7 @@ def test_status_and_role_matrix(
     body = status.json()
     assert body["mortgage_partner_enabled"] is True
     assert "partnerships" in body["capabilities"]
+    assert "partner_contacts" in body["capabilities"]
     assert "partner_pipeline" in body["capabilities"]
     assert "partner_milestones" in body["capabilities"]
     assert "cross_tenant_marketplace" in body["deferred_capabilities"]

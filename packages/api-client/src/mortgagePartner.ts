@@ -28,7 +28,13 @@ export type PartnerAccessAction =
   | 'pipeline_update'
   | 'milestone_update'
   | 'readiness_view'
-  | 'readiness_export';
+  | 'readiness_export'
+  | 'contact_list'
+  | 'contact_create'
+  | 'contact_update';
+
+export type PartnerContactRole =
+  'loan_officer' | 'realtor' | 'branch_manager' | 'executive' | 'operations' | 'other';
 
 export interface MortgagePartnerStatus {
   mortgage_partner_enabled: boolean;
@@ -46,6 +52,53 @@ export interface Partnership {
   notes: string | null;
   created_at: string;
   updated_at: string;
+  primary_contact_name?: string | null;
+  primary_contact_email?: string | null;
+  active_referral_count?: number;
+}
+
+export interface PartnerContact {
+  id: string;
+  partnership_id: string;
+  cro_organization_id: string;
+  first_name: string;
+  last_name: string;
+  email: string | null;
+  phone: string | null;
+  job_title: string | null;
+  contact_role: PartnerContactRole;
+  is_primary: boolean;
+  is_active: boolean;
+  user_id: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PartnerContactCreateInput {
+  first_name: string;
+  last_name: string;
+  email?: string | null;
+  phone?: string | null;
+  job_title?: string | null;
+  contact_role?: PartnerContactRole;
+  is_primary?: boolean;
+  is_active?: boolean;
+  user_id?: string | null;
+  notes?: string | null;
+}
+
+export interface PartnerContactUpdateInput {
+  first_name?: string;
+  last_name?: string;
+  email?: string | null;
+  phone?: string | null;
+  job_title?: string | null;
+  contact_role?: PartnerContactRole;
+  is_primary?: boolean;
+  is_active?: boolean;
+  user_id?: string | null;
+  notes?: string | null;
 }
 
 export interface PartnershipCreateInput {
@@ -222,6 +275,30 @@ export function addPartnershipMember(partnershipId: string, body: PartnershipMem
 export function listPartnershipMembers(partnershipId: string) {
   return request<PartnershipMember[]>(
     apiPath(`/mortgage-partner/partnerships/${partnershipId}/members`),
+  );
+}
+
+export function listPartnerContacts(partnershipId: string) {
+  return request<PartnerContact[]>(
+    apiPath(`/mortgage-partner/partnerships/${partnershipId}/contacts`),
+  );
+}
+
+export function createPartnerContact(partnershipId: string, body: PartnerContactCreateInput) {
+  return request<PartnerContact>(
+    apiPath(`/mortgage-partner/partnerships/${partnershipId}/contacts`),
+    { method: 'POST', body },
+  );
+}
+
+export function updatePartnerContact(
+  partnershipId: string,
+  contactId: string,
+  body: PartnerContactUpdateInput,
+) {
+  return request<PartnerContact>(
+    apiPath(`/mortgage-partner/partnerships/${partnershipId}/contacts/${contactId}`),
+    { method: 'PATCH', body },
   );
 }
 
