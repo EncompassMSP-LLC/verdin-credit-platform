@@ -6,11 +6,11 @@ Ordered slices for LRP Phase 3 company ops. Sprint loop: `.cursor/rules/lrp-ops-
 
 - [x] Sections 1–7 operational manuscripts complete (onboarding through readiness reports)
 - [x] Sections 8–11 sales/marketing expansion manuscripts complete
-- [ ] Sections 12–14 website/video/automation specs complete
+- [x] Sections 12–14 website/video/automation specs complete
 - [x] Pipeline stages mapped to platform `LoanPipelineStage` (or documented ops overlay)
-- [ ] All public-facing copy claim-library locked
-- [ ] Legal/compliance templates marked counsel-review required
-- [ ] Cross-links to Phase 4 platform checklist (Version 29.0+)
+- [x] All public-facing copy claim-library locked
+- [x] Legal/compliance templates marked counsel-review required
+- [x] Cross-links to Phase 4 platform checklist (Version 29.0+)
 
 ---
 
@@ -31,9 +31,9 @@ Ordered slices for LRP Phase 3 company ops. Sprint loop: `.cursor/rules/lrp-ops-
 | 11    | Section 10 — Marketing Expansion (banks)        | ✅     |
 | 12    | Section 11 — Print Marketing                    | ✅     |
 | 13    | Section 12 — Website                            | ✅     |
-| 14    | Section 13 — Video Marketing                    | ☐      |
-| 15    | Section 14 — Automation                         | ☐      |
-| 16    | Ops package sign-off + Phase 4 handoff note     | ☐      |
+| 14    | Section 13 — Video Marketing                    | ✅     |
+| 15    | Section 14 — Automation                         | ✅     |
+| 16    | Ops package sign-off + Phase 4 handoff note     | ✅     |
 
 ---
 
@@ -108,3 +108,20 @@ Ordered slices for LRP Phase 3 company ops. Sprint loop: `.cursor/rules/lrp-ops-
 - Audience landings (lender, realtor, borrower, builder, attorney, advisors)
 - Thank-you pages, FAQ catalog, knowledge base, blog editorial, success-story rules
 - SEO, contact/referral forms, UTM standards
+
+### Slice 14 — Section 13 (2026-07-25)
+
+- Video production standards + YouTube channel plan
+- Scripts: welcome, partner overview, explainer, whiteboard series, composite success story
+- Realtor, bank/lender, commercial spots; short-form bridge to Section 10 reels
+
+### Slice 15 — Section 14 (2026-07-25)
+
+- Automation principles, notification matrix, email/CRM/SMS/appointment/referral automations
+- Status/report and document pipeline hooks; gated AI chatbot; portal events
+- Platform job map to `apps/api` + `apps/worker` (no unsupervised bureau filing)
+
+### Slice 16 — Sign-off + Phase 4 handoff (2026-07-25)
+
+- Ops package sign-off (`99-ops-package-signoff.md`)
+- Phase 4 handoff to Version 29.0+ Lending Readiness Platform™ (`phase-4-handoff.md`)

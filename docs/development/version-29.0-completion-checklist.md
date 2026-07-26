@@ -8,6 +8,8 @@ Linked from [`docs/roadmap/README.md`](../roadmap/README.md).
 
 Scope: [`docs/governance/version-29.0-scope.md`](../governance/version-29.0-scope.md)
 
+Phase 3 company ops runbooks (complete): [`docs/lrp-enterprise/04-operations/business-ops-package/`](../lrp-enterprise/04-operations/business-ops-package/) — sign-off + handoff in `99-ops-package-signoff.md` and `phase-4-handoff.md`.
+
 ## Exit criteria for "29.0 done"
 
 - [x] Lender/partner org model + RBAC + `ENABLE_MORTGAGE_PARTNER` gate
