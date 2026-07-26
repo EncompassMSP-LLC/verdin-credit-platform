@@ -44,20 +44,21 @@ One decision per file. Do not append new decisions to existing ADR files.
 
 ## ADR index
 
-| ADR                                   | Title                                  | Status   |
-| ------------------------------------- | -------------------------------------- | -------- |
-| [001](001-monorepo.md)                | Monorepo with pnpm and Turborepo       | Accepted |
-| [002](001-monorepo.md)                | Layered backend architecture           | Accepted |
-| [003](001-monorepo.md)                | UUID primary keys                      | Accepted |
-| [004](001-monorepo.md)                | JWT with refresh tokens                | Accepted |
-| [005](005-domain-modules.md)          | Domain-driven API modules              | Accepted |
-| [006](006-api-versioning.md)          | URL-based API versioning               | Accepted |
-| [007](007-quality-gates.md)           | Quality gates (pre-commit and CI)      | Accepted |
-| [008](008-background-jobs.md)         | Redis-backed background jobs           | Accepted |
-| [009](009-architecture-governance.md) | Architecture governance and V5 roadmap | Accepted |
-| [010](010-capability-matrix.md)       | Platform capability matrix             | Accepted |
-| [011](011-job-orchestrator.md)        | Unified job orchestration package      | Accepted |
-| [012](012-llm-provider-policy.md)     | LLM provider policy and feature gates  | Accepted |
+| ADR                                          | Title                                  | Status   |
+| -------------------------------------------- | -------------------------------------- | -------- |
+| [001](001-monorepo.md)                       | Monorepo with pnpm and Turborepo       | Accepted |
+| [002](001-monorepo.md)                       | Layered backend architecture           | Accepted |
+| [003](001-monorepo.md)                       | UUID primary keys                      | Accepted |
+| [004](001-monorepo.md)                       | JWT with refresh tokens                | Accepted |
+| [005](005-domain-modules.md)                 | Domain-driven API modules              | Accepted |
+| [006](006-api-versioning.md)                 | URL-based API versioning               | Accepted |
+| [007](007-quality-gates.md)                  | Quality gates (pre-commit and CI)      | Accepted |
+| [008](008-background-jobs.md)                | Redis-backed background jobs           | Accepted |
+| [009](009-architecture-governance.md)        | Architecture governance and V5 roadmap | Accepted |
+| [010](010-capability-matrix.md)              | Platform capability matrix             | Accepted |
+| [011](011-job-orchestrator.md)               | Unified job orchestration package      | Accepted |
+| [012](012-llm-provider-policy.md)            | LLM provider policy and feature gates  | Accepted |
+| [013](013-lrp-edition-on-shared-platform.md) | LRP edition on shared platform         | Accepted |
 
 > **Note:** ADRs 001–004 were recorded in a single legacy file before the formal template was introduced. New ADRs from 005 onward follow [`template.md`](template.md).
 

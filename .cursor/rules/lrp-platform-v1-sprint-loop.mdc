@@ -39,11 +39,13 @@ Use this loop when building the **Lending Readiness Platform™ V1.0** (product 
 ## Slice sizing
 
 - One LRP-xxx checklist ID per PR
+- Milestones: M1 Core → M2 Readiness → M3 Automation → M4 Partner → M5 Public → M6 Production
 - Follow patterns in `apps/api/api/modules/mortgage_partner/`, `notifications/`, `documents/`, `clients/`, `llm/`
-- Update `docs/api/reference.md` and `docs/governance/capability-matrix.md` when shipping user-visible surfaces
-- Update the V1.0 checklist when shipping
+- Satisfy Definition of Done in the V1.0 release plan §6
+- Update `docs/api/reference.md`, `docs/governance/capability-matrix.md`, checklist, and [`v1.0-feature-traceability-matrix.md`](../../docs/lrp-enterprise/15-roadmap/v1.0-feature-traceability-matrix.md) when shipping
 - Demo fallback is for local/dev only; production paths must use platform auth (LRP-108)
 - AI slices require ADR-012 / `require_llm_ready()`; no unsupervised bureau filing
+- Edition only — decline product forks (ADR-013)
 
 ## GitHub CLI (Windows)
 

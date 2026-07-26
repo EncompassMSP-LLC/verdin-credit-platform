@@ -24,14 +24,21 @@ Lender-ready organization runbooks (onboarding → automation):
 
 Turn ops runbooks into working software on the shared monorepo (not a product fork).
 
-| Doc                                             | Path                                                                                                                         |
-| ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| **V1.0 release plan** (gap matrix + milestones) | [`lending-readiness-platform-v1.0-release-plan.md`](lending-readiness-platform-v1.0-release-plan.md)                         |
-| **Executable checklist**                        | [`../../development/lrp-platform-v1.0-completion-checklist.md`](../../development/lrp-platform-v1.0-completion-checklist.md) |
-| Sprint loop                                     | `.cursor/rules/lrp-platform-v1-sprint-loop.mdc`                                                                              |
-| Phase 4 handoff (from ops)                      | [`../04-operations/business-ops-package/phase-4-handoff.md`](../04-operations/business-ops-package/phase-4-handoff.md)       |
+| Doc                          | Path                                                                                                                         |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| **V1.0 master release plan** | [`lending-readiness-platform-v1.0-release-plan.md`](lending-readiness-platform-v1.0-release-plan.md)                         |
+| Feature traceability matrix  | [`v1.0-feature-traceability-matrix.md`](v1.0-feature-traceability-matrix.md)                                                 |
+| Gap analysis                 | [`v1.0-gap-analysis.md`](v1.0-gap-analysis.md)                                                                               |
+| Executable checklist         | [`../../development/lrp-platform-v1.0-completion-checklist.md`](../../development/lrp-platform-v1.0-completion-checklist.md) |
+| Product backlog              | [`product-backlog.md`](product-backlog.md)                                                                                   |
+| Release roadmap (v1.1+)      | [`release-roadmap.md`](release-roadmap.md)                                                                                   |
+| Technical debt register      | [`technical-debt-register.md`](technical-debt-register.md)                                                                   |
+| Risk register                | [`risk-register.md`](risk-register.md)                                                                                       |
+| ADR-013 (edition, not fork)  | [`../../adr/013-lrp-edition-on-shared-platform.md`](../../adr/013-lrp-edition-on-shared-platform.md)                         |
+| Sprint loop                  | `.cursor/rules/lrp-platform-v1-sprint-loop.mdc`                                                                              |
+| Phase 4 handoff (from ops)   | [`../04-operations/business-ops-package/phase-4-handoff.md`](../04-operations/business-ops-package/phase-4-handoff.md)       |
 
-Milestones: **M1** core modules → **M2** automation → **M3** portals → **M4** intelligence/AI → **M5** production hardening.
+Milestones: **M1** Core → **M2** Readiness → **M3** Automation → **M4** Partner Experience → **M5** Public Experience → **M6** Production Readiness.
 
 ## Platform engineering (parallel)
 
