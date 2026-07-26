@@ -32,7 +32,7 @@ Ordered slices for LRP Phase 3 company ops. Sprint loop: `.cursor/rules/lrp-ops-
 | 12    | Section 11 — Print Marketing                    | ✅     |
 | 13    | Section 12 — Website                            | ✅     |
 | 14    | Section 13 — Video Marketing                    | ☐      |
-| 15    | Section 14 — Automation                         | ☐      |
+| 15    | Section 14 — Automation                         | ✅     |
 | 16    | Ops package sign-off + Phase 4 handoff note     | ☐      |
 
 ---
@@ -108,3 +108,9 @@ Ordered slices for LRP Phase 3 company ops. Sprint loop: `.cursor/rules/lrp-ops-
 - Audience landings (lender, realtor, borrower, builder, attorney, advisors)
 - Thank-you pages, FAQ catalog, knowledge base, blog editorial, success-story rules
 - SEO, contact/referral forms, UTM standards
+
+### Slice 15 — Section 14 (2026-07-25)
+
+- Automation principles, notification matrix, email/CRM/SMS/appointment/referral automations
+- Status/report and document pipeline hooks; gated AI chatbot; portal events
+- Platform job map to `apps/api` + `apps/worker` (no unsupervised bureau filing)
