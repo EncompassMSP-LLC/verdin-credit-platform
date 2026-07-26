@@ -57,6 +57,17 @@ class LoanPipelineStage(StrEnum):
     WITHDRAWN = "withdrawn"
 
 
+class PartnerContactRole(StrEnum):
+    """CRM contact role at a partner org (not platform UserRole / PartnerRole)."""
+
+    LOAN_OFFICER = "loan_officer"
+    REALTOR = "realtor"
+    BRANCH_MANAGER = "branch_manager"
+    EXECUTIVE = "executive"
+    OPERATIONS = "operations"
+    OTHER = "other"
+
+
 class PartnerAccessAction(StrEnum):
     PARTNERSHIP_VIEW = "partnership_view"
     REFERRAL_LIST = "referral_list"
@@ -71,6 +82,9 @@ class PartnerAccessAction(StrEnum):
     MILESTONE_UPDATE = "milestone_update"
     READINESS_VIEW = "readiness_view"
     READINESS_EXPORT = "readiness_export"
+    CONTACT_LIST = "contact_list"
+    CONTACT_CREATE = "contact_create"
+    CONTACT_UPDATE = "contact_update"
 
 
 class OrgPartnership(Base, TimestampMixin, SoftDeleteMixin, AuditMixin):
@@ -253,6 +267,51 @@ class PartnerLoanMilestone(Base, TimestampMixin, SoftDeleteMixin, AuditMixin):
         DateTime(timezone=True),
         nullable=True,
     )
+
+
+class PartnerContact(Base, TimestampMixin, SoftDeleteMixin, AuditMixin):
+    """CRM person at a partner organization (directory contact — not portal membership)."""
+
+    __tablename__ = "partner_contacts"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    partnership_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("org_partnerships.id"),
+        nullable=False,
+        index=True,
+    )
+    cro_organization_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("organizations.id"),
+        nullable=False,
+        index=True,
+        comment="CRO org that owns the partnership (tenant scope)",
+    )
+    first_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    last_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    email: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    phone: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    job_title: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    contact_role: Mapped[PartnerContactRole] = mapped_column(
+        Enum(
+            PartnerContactRole,
+            name="partner_contact_role",
+            values_callable=lambda x: [e.value for e in x],
+        ),
+        nullable=False,
+        default=PartnerContactRole.OTHER,
+    )
+    is_primary: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    user_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id"),
+        nullable=True,
+        index=True,
+        comment="Optional link when the contact also has a platform login",
+    )
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
 
 class PartnerAccessAudit(Base, TimestampMixin):

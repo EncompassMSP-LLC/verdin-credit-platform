@@ -13,7 +13,7 @@ Known shortcuts and refactoring tasks. Pay down during related feature work or d
 | ID     | Debt                                                                     | Severity | Area       | Mitigation / paydown                                           |
 | ------ | ------------------------------------------------------------------------ | -------- | ---------- | -------------------------------------------------------------- |
 | TD-001 | Dual auth modes (platform + local demo) in non-prod                      | S3       | Auth       | LRP-108 production kill-switch shipped; demo for local DX only |
-| TD-002 | CRM partners/pipeline/automations driven by `lib/crm/data.ts` mocks      | S2       | CRM        | LRP-101, LRP-102, LRP-203                                      |
+| TD-002 | CRM pipeline/automations still demo-mocked; partners/contacts live       | S2       | CRM        | LRP-101 ✅; LRP-102, LRP-203 remaining                         |
 | TD-003 | Dual auth modes increase bug surface                                     | S3       | Auth       | Consolidate on platform JWT; demo only in explicit DEV         |
 | TD-004 | Readiness UI inconsistent across portal vs lender                        | S3       | Readiness  | LRP-104, LRP-106, LRP-401 shared components                    |
 | TD-005 | Automations page is display-only scaffold                                | S2       | Automation | LRP-203 persist rules                                          |

@@ -1,10 +1,16 @@
 'use client';
 
 import {
+  createPartnerContact,
   getMortgagePartnerStatus,
+  listPartnerContacts,
   listPartnerReferrals,
   listPartnerships,
+  updatePartnerContact,
   updatePartnerReferral,
+  type PartnerContact,
+  type PartnerContactCreateInput,
+  type PartnerContactUpdateInput,
   type PartnerReferral,
   type PartnerReferralStatus,
   type Partnership,
@@ -47,6 +53,55 @@ export function useCrmReferrals(partnershipId: string | undefined) {
   });
 }
 
+export function useCrmPartnerContacts(partnershipId: string | undefined) {
+  const { isAuthenticated, authMode } = useCrmAuth();
+  return useQuery({
+    queryKey: ['crm', 'mortgage-partner', 'contacts', partnershipId],
+    enabled: isAuthenticated && authMode === 'platform' && Boolean(partnershipId),
+    queryFn: () => listPartnerContacts(partnershipId!),
+  });
+}
+
+export function useCreateCrmPartnerContact(partnershipId: string | undefined) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: PartnerContactCreateInput) => {
+      if (!partnershipId) {
+        throw new Error('Partnership is required to create a contact');
+      }
+      return createPartnerContact(partnershipId, body);
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: ['crm', 'mortgage-partner', 'contacts', partnershipId],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ['crm', 'mortgage-partner', 'partnerships'],
+      });
+    },
+  });
+}
+
+export function useUpdateCrmPartnerContact(partnershipId: string | undefined) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ contactId, body }: { contactId: string; body: PartnerContactUpdateInput }) => {
+      if (!partnershipId) {
+        throw new Error('Partnership is required to update a contact');
+      }
+      return updatePartnerContact(partnershipId, contactId, body);
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: ['crm', 'mortgage-partner', 'contacts', partnershipId],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ['crm', 'mortgage-partner', 'partnerships'],
+      });
+    },
+  });
+}
+
 export function useUpdateCrmReferral(partnershipId: string | undefined) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -64,4 +119,10 @@ export function useUpdateCrmReferral(partnershipId: string | undefined) {
   });
 }
 
-export type { PartnerReferral, PartnerReferralStatus, Partnership };
+export type {
+  PartnerContact,
+  PartnerContactCreateInput,
+  PartnerReferral,
+  PartnerReferralStatus,
+  Partnership,
+};

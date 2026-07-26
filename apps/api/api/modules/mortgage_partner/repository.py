@@ -3,7 +3,7 @@
 import uuid
 from datetime import UTC, datetime
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.modules.accounts.credit_analysis_run_models import CreditAnalysisRun
@@ -14,8 +14,10 @@ from api.modules.mortgage_partner.models import (
     OrgPartnership,
     OrgPartnershipMember,
     PartnerAccessAudit,
+    PartnerContact,
     PartnerLoanMilestone,
     PartnerReferral,
+    ReferralStatus,
 )
 
 
@@ -153,6 +155,115 @@ class MortgagePartnerRepository:
             )
         )
         return result.scalar_one_or_none()
+
+    # --- Partner CRM contacts (LRP-101) ---
+
+    async def create_contact(self, contact: PartnerContact) -> PartnerContact:
+        self._session.add(contact)
+        await self._session.flush()
+        await self._session.refresh(contact)
+        return contact
+
+    async def list_contacts(
+        self, partnership_id: uuid.UUID, cro_organization_id: uuid.UUID
+    ) -> list[PartnerContact]:
+        result = await self._session.execute(
+            select(PartnerContact)
+            .where(
+                PartnerContact.partnership_id == partnership_id,
+                PartnerContact.cro_organization_id == cro_organization_id,
+                PartnerContact.deleted_at.is_(None),
+            )
+            .order_by(
+                PartnerContact.is_primary.desc(),
+                PartnerContact.last_name,
+                PartnerContact.first_name,
+            )
+        )
+        return list(result.scalars().all())
+
+    async def get_contact(
+        self,
+        contact_id: uuid.UUID,
+        partnership_id: uuid.UUID,
+        cro_organization_id: uuid.UUID,
+    ) -> PartnerContact | None:
+        result = await self._session.execute(
+            select(PartnerContact).where(
+                PartnerContact.id == contact_id,
+                PartnerContact.partnership_id == partnership_id,
+                PartnerContact.cro_organization_id == cro_organization_id,
+                PartnerContact.deleted_at.is_(None),
+            )
+        )
+        return result.scalar_one_or_none()
+
+    async def save_contact(self, contact: PartnerContact) -> PartnerContact:
+        await self._session.flush()
+        await self._session.refresh(contact)
+        return contact
+
+    async def clear_primary_contacts(
+        self,
+        partnership_id: uuid.UUID,
+        cro_organization_id: uuid.UUID,
+        *,
+        except_contact_id: uuid.UUID | None = None,
+    ) -> None:
+        result = await self._session.execute(
+            select(PartnerContact).where(
+                PartnerContact.partnership_id == partnership_id,
+                PartnerContact.cro_organization_id == cro_organization_id,
+                PartnerContact.deleted_at.is_(None),
+                PartnerContact.is_primary.is_(True),
+            )
+        )
+        for row in result.scalars().all():
+            if except_contact_id is not None and row.id == except_contact_id:
+                continue
+            row.is_primary = False
+        await self._session.flush()
+
+    async def map_primary_contacts(
+        self, cro_organization_id: uuid.UUID, partnership_ids: list[uuid.UUID]
+    ) -> dict[uuid.UUID, PartnerContact]:
+        if not partnership_ids:
+            return {}
+        result = await self._session.execute(
+            select(PartnerContact).where(
+                PartnerContact.cro_organization_id == cro_organization_id,
+                PartnerContact.partnership_id.in_(partnership_ids),
+                PartnerContact.deleted_at.is_(None),
+                PartnerContact.is_primary.is_(True),
+                PartnerContact.is_active.is_(True),
+            )
+        )
+        mapping: dict[uuid.UUID, PartnerContact] = {}
+        for row in result.scalars().all():
+            mapping.setdefault(row.partnership_id, row)
+        return mapping
+
+    async def map_active_referral_counts(
+        self, cro_organization_id: uuid.UUID, partnership_ids: list[uuid.UUID]
+    ) -> dict[uuid.UUID, int]:
+        if not partnership_ids:
+            return {}
+        active_statuses = (
+            ReferralStatus.NEW,
+            ReferralStatus.ACCEPTED,
+            ReferralStatus.IN_PROGRESS,
+        )
+        result = await self._session.execute(
+            select(PartnerReferral.partnership_id, func.count())
+            .where(
+                PartnerReferral.cro_organization_id == cro_organization_id,
+                PartnerReferral.partnership_id.in_(partnership_ids),
+                PartnerReferral.deleted_at.is_(None),
+                PartnerReferral.status.in_(active_statuses),
+            )
+            .group_by(PartnerReferral.partnership_id)
+        )
+        return {row[0]: int(row[1]) for row in result.all()}
 
     async def create_referral(self, referral: PartnerReferral) -> PartnerReferral:
         self._session.add(referral)
