@@ -10,9 +10,12 @@ This is **company operations**, not marketing fluff. Manuscripts here are claim-
 | Tagline               | Helping More Borrowers Become Lending Ready.                                                                            |
 | Claim library         | [`../../build-bible/CLAIM-LIBRARY.md`](../../build-bible/CLAIM-LIBRARY.md)                                              |
 | Checklist             | [`00-completion-checklist.md`](00-completion-checklist.md)                                                              |
+| Sign-off              | [`99-ops-package-signoff.md`](99-ops-package-signoff.md)                                                                |
+| Phase 4 handoff       | [`phase-4-handoff.md`](phase-4-handoff.md)                                                                              |
 | Marketing kit (prior) | [`../build-bible/volumes/07-marketing-launch/partner-kit/`](../../build-bible/volumes/07-marketing-launch/partner-kit/) |
 | Office binaries       | [`../../../../assets/lrp/marketing-package/v2/`](../../../../assets/lrp/marketing-package/v2/)                          |
 | Platform (Phase 4)    | Version 29.0+ Mortgage Partner Edition — `apps/api` + `apps/lrp-web`                                                    |
+| Package status        | **COMPLETE** (Sections 1–14 + sign-off)                                                                                 |
 
 ## Sections
 
