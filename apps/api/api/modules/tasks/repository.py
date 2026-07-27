@@ -163,3 +163,74 @@ class TaskRepository:
         await self._session.flush()
         await self._session.refresh(task)
         return task
+
+    async def count_matching(
+        self,
+        *,
+        organization_id: uuid.UUID,
+        status: TaskStatus | None = None,
+        statuses_exclude: tuple[TaskStatus, ...] | None = None,
+        assigned_user_id: uuid.UUID | None = None,
+        due_before: datetime | None = None,
+        due_after: datetime | None = None,
+        due_before_exclusive: datetime | None = None,
+        completed_after: datetime | None = None,
+        completed_before: datetime | None = None,
+        require_due_date: bool = False,
+    ) -> int:
+        query = (
+            select(func.count())
+            .select_from(Task)
+            .where(
+                Task.organization_id == organization_id,
+                Task.deleted_at.is_(None),
+            )
+        )
+        if status is not None:
+            query = query.where(Task.status == status)
+        if statuses_exclude:
+            query = query.where(Task.status.notin_(statuses_exclude))
+        if assigned_user_id is not None:
+            query = query.where(Task.assigned_user_id == assigned_user_id)
+        if require_due_date or due_before is not None or due_after is not None:
+            query = query.where(Task.due_date.isnot(None))
+        if due_before is not None:
+            query = query.where(Task.due_date <= due_before)
+        if due_before_exclusive is not None:
+            query = query.where(Task.due_date.isnot(None), Task.due_date < due_before_exclusive)
+        if due_after is not None:
+            query = query.where(Task.due_date >= due_after)
+        if completed_after is not None:
+            query = query.where(Task.completed_at.isnot(None), Task.completed_at >= completed_after)
+        if completed_before is not None:
+            query = query.where(Task.completed_at.isnot(None), Task.completed_at < completed_before)
+        return int((await self._session.execute(query)).scalar_one())
+
+    async def list_for_digest(
+        self,
+        *,
+        organization_id: uuid.UUID,
+        statuses_exclude: tuple[TaskStatus, ...] = _TERMINAL_STATUSES,
+        assigned_user_id: uuid.UUID | None = None,
+        due_before_exclusive: datetime | None = None,
+        due_after: datetime | None = None,
+        due_before: datetime | None = None,
+        limit: int = 10,
+    ) -> list[Task]:
+        query = select(Task).where(
+            Task.organization_id == organization_id,
+            Task.deleted_at.is_(None),
+            Task.status.notin_(statuses_exclude),
+        )
+        if assigned_user_id is not None:
+            query = query.where(Task.assigned_user_id == assigned_user_id)
+        if due_before_exclusive is not None:
+            query = query.where(Task.due_date.isnot(None), Task.due_date < due_before_exclusive)
+        if due_after is not None:
+            query = query.where(Task.due_date.isnot(None), Task.due_date >= due_after)
+        if due_before is not None:
+            query = query.where(Task.due_date.isnot(None), Task.due_date <= due_before)
+        result = await self._session.execute(
+            query.order_by(Task.due_date.asc().nulls_last(), Task.priority.desc()).limit(limit)
+        )
+        return list(result.scalars().all())

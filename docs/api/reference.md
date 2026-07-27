@@ -431,15 +431,16 @@ Timeline events are **append-only** â€” no update or delete endpoints.
 
 ## Tasks
 
-| Method | Path                   | Role         | Description                      |
-| ------ | ---------------------- | ------------ | -------------------------------- |
-| POST   | `/tasks`               | case_manager | Create a task                    |
-| GET    | `/tasks`               | read_only    | List tasks (filterable)          |
-| GET    | `/tasks/{id}`          | read_only    | Get task details                 |
-| PATCH  | `/tasks/{id}`          | case_manager | Update a task                    |
-| POST   | `/tasks/{id}/complete` | case_manager | Mark task completed              |
-| POST   | `/tasks/{id}/reopen`   | case_manager | Reopen a completed/canceled task |
-| DELETE | `/tasks/{id}`          | admin        | Soft-delete a task               |
+| Method | Path                   | Role         | Description                                                                             |
+| ------ | ---------------------- | ------------ | --------------------------------------------------------------------------------------- |
+| POST   | `/tasks`               | case_manager | Create a task                                                                           |
+| GET    | `/tasks`               | read_only    | List tasks (filterable)                                                                 |
+| GET    | `/tasks/digest/daily`  | read_only    | CRM daily digest (LRP-102): overdue / due today / completed today counts + sample items |
+| GET    | `/tasks/{id}`          | read_only    | Get task details                                                                        |
+| PATCH  | `/tasks/{id}`          | case_manager | Update a task                                                                           |
+| POST   | `/tasks/{id}/complete` | case_manager | Mark task completed                                                                     |
+| POST   | `/tasks/{id}/reopen`   | case_manager | Reopen a completed/canceled task                                                        |
+| DELETE | `/tasks/{id}`          | admin        | Soft-delete a task                                                                      |
 
 **List query parameters:** `status`, `priority`, `case_id`, `account_id`, `document_id`, `assigned_user_id`, `source_module`, `due_before`, `due_after`, `overdue`, `search`, `sort_by`, `sort_order`, `page`, `page_size`.
 

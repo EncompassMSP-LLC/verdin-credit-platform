@@ -912,6 +912,7 @@ export {
   completeTask,
   createTask,
   deleteTask,
+  getDailyTaskDigest,
   getTask,
   listTasks,
   reopenTask,
@@ -919,6 +920,8 @@ export {
   type CreateTaskInput,
   type ListTasksParams,
   type Task,
+  type TaskDailyDigest,
+  type TaskDailyDigestCounts,
   type UpdateTaskInput,
 } from './tasks';
 

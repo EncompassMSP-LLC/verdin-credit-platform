@@ -111,3 +111,24 @@ class TaskResponse(BaseSchema):
             created_by_id=task.created_by_id,
             updated_by_id=task.updated_by_id,
         )
+
+
+class TaskDailyDigestCounts(BaseSchema):
+    open: int
+    overdue: int
+    due_today: int
+    completed_today: int
+    assigned_to_me_open: int
+
+
+class TaskDailyDigestResponse(BaseSchema):
+    """CRM command-center daily digest (LRP-102) — org-scoped, advisory."""
+
+    organization_id: uuid.UUID
+    as_of: datetime
+    day_start: datetime
+    day_end: datetime
+    counts: TaskDailyDigestCounts
+    overdue_items: list[TaskResponse]
+    due_today_items: list[TaskResponse]
+    my_open_items: list[TaskResponse]

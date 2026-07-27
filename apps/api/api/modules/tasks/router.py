@@ -13,6 +13,7 @@ from api.modules.auth.models import User
 from api.modules.tasks.models import TaskPriority, TaskStatus
 from api.modules.tasks.schemas import (
     TaskCreate,
+    TaskDailyDigestResponse,
     TaskListParams,
     TaskResponse,
     TaskSortField,
@@ -80,6 +81,15 @@ async def list_tasks(
     service: TaskService = Depends(get_task_service),
 ) -> PaginatedResponse[TaskResponse]:
     return await service.list_tasks(current_user, params)
+
+
+@router.get("/digest/daily", response_model=TaskDailyDigestResponse)
+async def get_daily_task_digest(
+    current_user: User = Depends(get_current_user),
+    service: TaskService = Depends(get_task_service),
+) -> TaskDailyDigestResponse:
+    """CRM daily digest read model (LRP-102) — overdue / due today / completed today."""
+    return await service.get_daily_digest(current_user)
 
 
 @router.get("/{task_id}", response_model=TaskResponse)
