@@ -15,6 +15,9 @@ from api.modules.auth.dependencies import get_current_user
 from api.modules.auth.models import User
 from api.modules.mortgage_partner.dependencies import require_mortgage_partner_enabled
 from api.modules.mortgage_partner.schemas import (
+    CrmAutomationRuleCreate,
+    CrmAutomationRuleResponse,
+    CrmAutomationRuleUpdate,
     DashboardSummaryResponse,
     MilestoneReplacePayload,
     MortgagePartnerStatusResponse,
@@ -55,6 +58,44 @@ async def get_mortgage_partner_status(
     service: MortgagePartnerService = Depends(get_mortgage_partner_service),
 ) -> MortgagePartnerStatusResponse:
     return service.get_status(current_user)
+
+
+@router.get("/automation-rules", response_model=list[CrmAutomationRuleResponse])
+async def list_automation_rules(
+    _: None = Depends(require_mortgage_partner_enabled),
+    current_user: User = Depends(get_current_user),
+    service: MortgagePartnerService = Depends(get_mortgage_partner_service),
+) -> list[CrmAutomationRuleResponse]:
+    """List persisted CRM automation rules; seeds defaults when empty (LRP-203)."""
+    return await service.list_automation_rules(current_user)
+
+
+@router.post(
+    "/automation-rules",
+    response_model=CrmAutomationRuleResponse,
+    status_code=201,
+)
+async def create_automation_rule(
+    payload: CrmAutomationRuleCreate,
+    _: None = Depends(require_mortgage_partner_enabled),
+    current_user: User = Depends(get_current_user),
+    service: MortgagePartnerService = Depends(get_mortgage_partner_service),
+) -> CrmAutomationRuleResponse:
+    return await service.create_automation_rule(current_user, payload)
+
+
+@router.patch(
+    "/automation-rules/{rule_id}",
+    response_model=CrmAutomationRuleResponse,
+)
+async def update_automation_rule(
+    rule_id: uuid.UUID,
+    payload: CrmAutomationRuleUpdate,
+    _: None = Depends(require_mortgage_partner_enabled),
+    current_user: User = Depends(get_current_user),
+    service: MortgagePartnerService = Depends(get_mortgage_partner_service),
+) -> CrmAutomationRuleResponse:
+    return await service.update_automation_rule(current_user, rule_id, payload)
 
 
 @router.get("/referral-intake/status", response_model=ReferralIntakeStatusResponse)

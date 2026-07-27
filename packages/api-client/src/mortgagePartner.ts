@@ -479,3 +479,64 @@ export function submitReferralIntake(input: ReferralIntakeInput): Promise<Referr
     auth: false,
   });
 }
+
+export type CrmAutomationTrigger =
+  | 'stage_enter'
+  | 'referral_created'
+  | 'task_overdue'
+  | 'score_band_change'
+  | 'document_uploaded'
+  | 'manual';
+
+export type CrmAutomationChannel = 'task' | 'email' | 'sms' | 'notification' | 'stage';
+
+export interface CrmAutomationRule {
+  id: string;
+  organization_id: string;
+  name: string;
+  description: string | null;
+  enabled: boolean;
+  trigger: CrmAutomationTrigger;
+  action: string;
+  channel: CrmAutomationChannel;
+  last_fired_at: string | null;
+  fire_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CrmAutomationRuleCreateInput {
+  name: string;
+  description?: string | null;
+  enabled?: boolean;
+  trigger: CrmAutomationTrigger;
+  action: string;
+  channel: CrmAutomationChannel;
+}
+
+export interface CrmAutomationRuleUpdateInput {
+  name?: string;
+  description?: string | null;
+  enabled?: boolean;
+  trigger?: CrmAutomationTrigger;
+  action?: string;
+  channel?: CrmAutomationChannel;
+}
+
+export function listCrmAutomationRules() {
+  return request<CrmAutomationRule[]>(apiPath('/mortgage-partner/automation-rules'));
+}
+
+export function createCrmAutomationRule(body: CrmAutomationRuleCreateInput) {
+  return request<CrmAutomationRule>(apiPath('/mortgage-partner/automation-rules'), {
+    method: 'POST',
+    body,
+  });
+}
+
+export function updateCrmAutomationRule(ruleId: string, body: CrmAutomationRuleUpdateInput) {
+  return request<CrmAutomationRule>(apiPath(`/mortgage-partner/automation-rules/${ruleId}`), {
+    method: 'PATCH',
+    body,
+  });
+}

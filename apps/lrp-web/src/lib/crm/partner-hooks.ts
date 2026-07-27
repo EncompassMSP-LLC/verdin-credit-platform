@@ -3,11 +3,14 @@
 import {
   createPartnerContact,
   getMortgagePartnerStatus,
+  listCrmAutomationRules,
   listPartnerContacts,
   listPartnerReferrals,
   listPartnerships,
+  updateCrmAutomationRule,
   updatePartnerContact,
   updatePartnerReferral,
+  type CrmAutomationRuleUpdateInput,
   type PartnerContact,
   type PartnerContactCreateInput,
   type PartnerContactUpdateInput,
@@ -97,6 +100,30 @@ export function useUpdateCrmPartnerContact(partnershipId: string | undefined) {
       });
       void queryClient.invalidateQueries({
         queryKey: ['crm', 'mortgage-partner', 'partnerships'],
+      });
+    },
+  });
+}
+
+export function useCrmAutomationRules() {
+  const { isAuthenticated, authMode } = useCrmAuth();
+  const status = useCrmMortgagePartnerStatus();
+  return useQuery({
+    queryKey: ['crm', 'mortgage-partner', 'automation-rules'],
+    enabled:
+      isAuthenticated && authMode === 'platform' && status.data?.mortgage_partner_enabled === true,
+    queryFn: listCrmAutomationRules,
+  });
+}
+
+export function useUpdateCrmAutomationRule() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ ruleId, body }: { ruleId: string; body: CrmAutomationRuleUpdateInput }) =>
+      updateCrmAutomationRule(ruleId, body),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: ['crm', 'mortgage-partner', 'automation-rules'],
       });
     },
   });

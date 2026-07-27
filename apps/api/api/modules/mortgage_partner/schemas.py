@@ -2,7 +2,7 @@
 
 import uuid
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
 
@@ -364,3 +364,55 @@ class ReferralIntakeStatusResponse(BaseModel):
     referral_intake_enabled: bool
     organization_slug: str | None
     blockers: list[str] = Field(default_factory=list)
+
+
+class CrmAutomationRuleResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    organization_id: uuid.UUID
+    name: str
+    description: str | None
+    enabled: bool
+    trigger: str
+    action: str
+    channel: str
+    last_fired_at: datetime | None
+    fire_count: int
+    created_at: datetime
+    updated_at: datetime
+
+
+class CrmAutomationRuleCreate(BaseModel):
+    name: str = Field(min_length=1, max_length=200)
+    description: str | None = None
+    enabled: bool = True
+    trigger: Literal[
+        "stage_enter",
+        "referral_created",
+        "task_overdue",
+        "score_band_change",
+        "document_uploaded",
+        "manual",
+    ]
+    action: str = Field(min_length=1, max_length=500)
+    channel: Literal["task", "email", "sms", "notification", "stage"]
+
+
+class CrmAutomationRuleUpdate(BaseModel):
+    name: str | None = Field(default=None, min_length=1, max_length=200)
+    description: str | None = None
+    enabled: bool | None = None
+    trigger: (
+        Literal[
+            "stage_enter",
+            "referral_created",
+            "task_overdue",
+            "score_band_change",
+            "document_uploaded",
+            "manual",
+        ]
+        | None
+    ) = None
+    action: str | None = Field(default=None, min_length=1, max_length=500)
+    channel: Literal["task", "email", "sms", "notification", "stage"] | None = None
