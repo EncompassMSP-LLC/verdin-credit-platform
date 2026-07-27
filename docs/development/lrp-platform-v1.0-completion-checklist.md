@@ -43,7 +43,7 @@ Ops contract: [`../lrp-enterprise/04-operations/business-ops-package/`](../lrp-e
 | 11    | LRP-401 Readiness timeline UI                         | M2        | ✅     |
 | 12    | LRP-402 Bureau + Metro2 in readiness blockers         | M2        | ✅     |
 | 13    | LRP-204 Consultation completed pack                   | M2        | ✅     |
-| 14    | LRP-201 Referral intake orchestrator job              | M3        | ☐      |
+| 14    | LRP-201 Referral intake orchestrator job              | M3        | ✅     |
 | 15    | LRP-202 Notification matrix v1                        | M3        | ☐      |
 | 16    | LRP-203 CRM automation rules (persist)                | M3        | ☐      |
 | 17    | LRP-205 Appointment reminders                         | M3        | ☐      |
@@ -145,7 +145,15 @@ Deferred to [product backlog](../lrp-enterprise/15-roadmap/product-backlog.md): 
 - Quarantines free-text containing SSN patterns; duplicate email/phone → `duplicate_review` + high-priority task
 - `apps/lrp-web` `/resources/partner-kit/referral` posts live (optional `?partnership_id=`); thanks page at `/referral/thanks`
 - Tests: `apps/api/tests/mortgage_partner/test_referral_intake.py`
-- Orchestrator notifications (thank-you emails, round-robin assign) deferred to LRP-201
+- Orchestrator notifications (thank-you emails, round-robin assign) shipped in LRP-201
+
+### LRP-201 — Referral intake orchestrator job (2026-07-27)
+
+- Post-accept `ReferralIntakeOrchestrator`: round-robin assign among case_manager/admin/owner; in-app staff notify; consultation schedule task; thank-you email drafts (or `deferred_email_not_ready`)
+- Audit table `partner_referral_intake_orchestrator_runs` (migration `104_referral_intake_orchestrator`)
+- `GET /mortgage-partner/referral-intake/{intake_id}/orchestrator` staff read; intake response includes `orchestrator_run_id` + `assigned_user_id`
+- Quarantined intakes skip orchestrator; no auto-filing / underwriting decisions
+- Tests extended in `apps/api/tests/mortgage_partner/test_referral_intake.py`
 
 ### LRP-102 — CRM tasks + daily digest (2026-07-27)
 

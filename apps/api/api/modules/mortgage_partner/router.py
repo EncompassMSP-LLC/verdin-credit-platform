@@ -35,6 +35,7 @@ from api.modules.mortgage_partner.schemas import (
     PipelineCardResponse,
     ReadinessReportSummary,
     ReferralIntakeCreate,
+    ReferralIntakeOrchestratorResponse,
     ReferralIntakeResponse,
     ReferralIntakeStatusResponse,
 )
@@ -77,6 +78,20 @@ async def submit_referral_intake(
 ) -> ReferralIntakeResponse:
     """Public web-form referral intake — creates client, case, referral, and ops task."""
     return await service.submit_referral_intake(payload)
+
+
+@router.get(
+    "/referral-intake/{intake_id}/orchestrator",
+    response_model=ReferralIntakeOrchestratorResponse,
+)
+async def get_referral_intake_orchestrator(
+    intake_id: uuid.UUID,
+    _: None = Depends(require_mortgage_partner_enabled),
+    current_user: User = Depends(get_current_user),
+    service: MortgagePartnerService = Depends(get_mortgage_partner_service),
+) -> ReferralIntakeOrchestratorResponse:
+    """Staff read of post-accept orchestrator audit (assignment + notify drafts; LRP-201)."""
+    return await service.get_referral_intake_orchestrator_run(current_user, intake_id)
 
 
 @router.get("/roles", response_model=PartnerRoleMatrixResponse)

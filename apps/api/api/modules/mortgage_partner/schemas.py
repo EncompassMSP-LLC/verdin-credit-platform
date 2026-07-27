@@ -2,6 +2,7 @@
 
 import uuid
 from datetime import datetime
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
 
@@ -342,6 +343,21 @@ class ReferralIntakeResponse(BaseModel):
     task_id: uuid.UUID | None
     message: str
     quarantine_reason: str | None = None
+    orchestrator_run_id: uuid.UUID | None = None
+    assigned_user_id: uuid.UUID | None = None
+
+
+class ReferralIntakeOrchestratorResponse(BaseModel):
+    id: uuid.UUID
+    intake_run_id: uuid.UUID
+    case_id: uuid.UUID | None
+    referral_id: uuid.UUID | None
+    assigned_user_id: uuid.UUID | None
+    status: str
+    schema_version: str
+    started_at: datetime
+    completed_at: datetime | None
+    payload: dict[str, Any]
 
 
 class ReferralIntakeStatusResponse(BaseModel):

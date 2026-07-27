@@ -198,6 +198,9 @@ from api.modules.mortgage_partner.models import (
     ReferralIntakeStatus,
     ReferralStatus,
 )
+from api.modules.mortgage_partner.referral_intake_orchestrator_models import (
+    PartnerReferralIntakeOrchestratorRun,
+)
 from api.modules.notifications.models import (
     EmailDeliveryLog,
     Notification,
@@ -364,6 +367,7 @@ __all__ = [
     "PartnerOrgType",
     "PartnerReferral",
     "PartnerReferralIntakeRun",
+    "PartnerReferralIntakeOrchestratorRun",
     "PartnerRole",
     "PartnershipStatus",
     "ReferralIntakeStatus",
