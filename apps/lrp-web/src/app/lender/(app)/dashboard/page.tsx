@@ -9,6 +9,10 @@ import { useLenderAuth } from '@/lib/lender/auth';
 import { analytics, borrowers, notifications } from '@/lib/lender/data';
 import { STAGE_LABELS } from '@/lib/lender/nav';
 import {
+  useLenderNotifications,
+  useLenderUnreadNotificationCount,
+} from '@/lib/lender/notification-hooks';
+import {
   pickPrimaryPartnership,
   useLenderDashboardSummary,
   useLenderPartnerships,
@@ -24,13 +28,17 @@ export default function LenderDashboardPage() {
   const partnershipsQuery = useLenderPartnerships();
   const partnership = pickPrimaryPartnership(partnershipsQuery.data);
   const summaryQuery = useLenderDashboardSummary(partnership?.id);
+  const unreadCountQuery = useLenderUnreadNotificationCount();
+  const unreadListQuery = useLenderNotifications({ unreadOnly: true });
 
   const isDemo = authMode === 'demo';
   const platformEnabled = statusQuery.data?.mortgage_partner_enabled === true;
 
   // Demo data fallback
   const nearReady = borrowers.filter((b) => ['near_ready', 'mortgage_ready'].includes(b.stage));
-  const unread = notifications.filter((n) => !n.read);
+  const demoUnread = notifications.filter((n) => !n.read);
+  const unreadItems = isDemo ? demoUnread : (unreadListQuery.data ?? []);
+  const unreadCount = isDemo ? demoUnread.length : (unreadCountQuery.data ?? unreadItems.length);
 
   // Live stat tiles — prefer API summary when platform mode is active
   const totalReferrals = isDemo ? borrowers.length : (summaryQuery.data?.total_referrals ?? '—');
@@ -144,9 +152,9 @@ export default function LenderDashboardPage() {
             />
             <StatTile
               label="Unread notifications"
-              value={`${unread.length}`}
+              value={`${unreadCount}`}
               hint="Partner alerts"
-              tone={unread.length ? 'warn' : 'default'}
+              tone={unreadCount ? 'warn' : 'default'}
             />
             <StatTile
               label="New referrals"
@@ -223,11 +231,13 @@ export default function LenderDashboardPage() {
               </Link>
             }
           >
-            {unread.length === 0 ? (
+            {!isDemo && unreadListQuery.isLoading ? (
+              <p className="text-sm text-slate-500">Loading notifications…</p>
+            ) : unreadItems.length === 0 ? (
               <p className="text-sm text-slate-500">No unread notifications.</p>
             ) : (
               <ul className="space-y-3">
-                {unread.slice(0, 5).map((item) => (
+                {unreadItems.slice(0, 5).map((item) => (
                   <li key={item.id}>
                     <Link
                       href={item.href}
