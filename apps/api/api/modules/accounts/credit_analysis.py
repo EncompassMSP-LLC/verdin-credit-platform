@@ -7,10 +7,15 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections import defaultdict
 from dataclasses import dataclass
 from decimal import Decimal
 from typing import Any
 
+from api.modules.accounts.cross_bureau import (
+    BureauTradelineView,
+    detect_cross_bureau_discrepancies,
+)
 from api.modules.accounts.intelligence import (
     CRITICAL_RISK_THRESHOLD,
     apply_account_intelligence,
@@ -23,8 +28,10 @@ from api.modules.accounts.models import (
     DisputeStatus,
     PaymentStatus,
 )
+from api.modules.documents.cross_bureau_comparison import tradeline_match_key
+from api.modules.documents.metro2_rules import METRO2_RULES
 
-FORMULA_VERSION = "lrs.v1.0"
+FORMULA_VERSION = "lrs.v1.1"
 SCHEMA_VERSION = "lrs.v1"
 SCORE_VERSION = "lrs.v1"
 
@@ -186,7 +193,51 @@ def _cross_bureau_score(accounts: list[Account]) -> float:
     return 45.0
 
 
-def _build_blockers(accounts: list[Account]) -> list[dict[str, str]]:
+_MAX_TRADLINE_BLOCKERS = 5
+_MAX_CROSS_BUREAU_BLOCKERS = 3
+_MAX_METRO2_BLOCKERS = 3
+_MAX_TOTAL_BLOCKERS = 8
+
+
+def _account_to_metro2_dict(account: Account) -> dict[str, Any]:
+    opened = account.date_opened.isoformat() if account.date_opened else None
+    dofd = account.date_first_delinquency.isoformat() if account.date_first_delinquency else None
+    account_status = account.account_status.value if account.account_status else "unknown"
+    payment_status = account.payment_status.value if account.payment_status else "unknown"
+    return {
+        "creditor_name": account.creditor_name,
+        "account_number_masked": account.account_number_masked,
+        "account_status": account_status.replace("_", " "),
+        "payment_status": payment_status.replace("_", " "),
+        "balance": float(account.balance) if account.balance is not None else None,
+        "past_due_amount": (
+            float(account.past_due_amount) if account.past_due_amount is not None else None
+        ),
+        "high_credit": float(account.high_balance) if account.high_balance is not None else None,
+        "open_date": opened,
+        "date_opened": opened,
+        "date_first_delinquency": dofd,
+        "date_closed": None,
+    }
+
+
+def _account_to_bureau_view(account: Account) -> BureauTradelineView:
+    return BureauTradelineView(
+        account_id=account.id,
+        bureau=account.bureau.value if account.bureau is not None else "unknown",
+        latest_outcome=None,
+        dispute_status=account.dispute_status.value if account.dispute_status else None,
+        account_status=account.account_status.value if account.account_status else None,
+        payment_status=account.payment_status.value if account.payment_status else None,
+        balance=account.balance,
+        past_due_amount=account.past_due_amount,
+        date_reported=account.date_reported,
+        high_balance=account.high_balance,
+        credit_limit=account.credit_limit,
+    )
+
+
+def _tradeline_blockers(accounts: list[Account]) -> list[dict[str, str]]:
     ranked = sorted(
         accounts,
         key=lambda a: (
@@ -219,18 +270,157 @@ def _build_blockers(accounts: list[Account]) -> list[dict[str, str]]:
                 "action": action,
             }
         )
-        if len(blockers) >= 5:
+        if len(blockers) >= _MAX_TRADLINE_BLOCKERS:
             break
-    if not accounts:
+    return blockers
+
+
+def _cross_bureau_blockers(accounts: list[Account]) -> tuple[list[dict[str, str]], int]:
+    """Surface same-creditor multi-bureau field conflicts as readiness blockers (LRP-402)."""
+    groups: dict[str, list[Account]] = defaultdict(list)
+    for account in accounts:
+        if account.bureau == AccountBureau.UNKNOWN:
+            continue
+        key = tradeline_match_key(account.creditor_name, account.account_number_masked)
+        groups[key].append(account)
+
+    blockers: list[dict[str, str]] = []
+    conflict_count = 0
+    seen: set[str] = set()
+    for match_key, group in groups.items():
+        bureaus = {a.bureau for a in group}
+        if len(bureaus) < 2:
+            continue
+        target = group[0]
+        siblings = [
+            _account_to_bureau_view(sibling)
+            for sibling in group[1:]
+            if sibling.bureau != target.bureau
+        ]
+        if not siblings:
+            continue
+        evidence = detect_cross_bureau_discrepancies(_account_to_bureau_view(target), siblings)
+        if not evidence.discrepancies:
+            continue
+        conflict_count += evidence.conflict_count
+        preferred = sorted(
+            evidence.discrepancies,
+            key=lambda d: 0
+            if d.kind in {"balance_conflict", "account_status_conflict", "payment_status_conflict"}
+            else 1,
+        )
+        disc = preferred[0]
+        blocker_id = f"cross-bureau:{match_key}:{disc.kind}"
+        if blocker_id in seen:
+            continue
+        seen.add(blocker_id)
         blockers.append(
             {
-                "id": "no-tradelines",
-                "title": "No tradelines analyzed",
-                "impact": "Upload and parse credit reports so readiness can be calculated.",
-                "action": "Ask your advisor to import bureau reports for this case.",
+                "id": blocker_id,
+                "title": f"Bureau mismatch: {target.creditor_name}",
+                "impact": (
+                    "The same tradeline reports differently across credit bureaus, which can "
+                    "delay a consistent readiness package."
+                ),
+                "action": (
+                    "Review the cross-bureau difference with your advisor before packaging "
+                    "for a lender conversation."
+                ),
             }
         )
-    return blockers
+        if len(blockers) >= _MAX_CROSS_BUREAU_BLOCKERS:
+            break
+    return blockers, conflict_count
+
+
+def _metro2_blockers(accounts: list[Account]) -> tuple[list[dict[str, str]], int]:
+    """Surface high-severity Metro 2 consistency findings as readiness blockers (LRP-402)."""
+    blockers: list[dict[str, str]] = []
+    finding_total = 0
+    for index, account in enumerate(accounts):
+        payload = _account_to_metro2_dict(account)
+        for rule in METRO2_RULES:
+            finding = rule(index, payload)
+            if finding is None:
+                continue
+            finding_total += 1
+            if finding.severity != "high":
+                continue
+            blockers.append(
+                {
+                    "id": f"metro2:{finding.rule_id}:{account.id}",
+                    "title": f"Metro 2: {finding.title}",
+                    "impact": (
+                        "Reporting consistency issues can complicate staff review and "
+                        "delay lending-readiness packaging."
+                    ),
+                    "action": (
+                        "Ask your advisor to review this Metro 2 consistency finding "
+                        "on the tradeline."
+                    ),
+                }
+            )
+            if len(blockers) >= _MAX_METRO2_BLOCKERS:
+                return blockers, finding_total
+    return blockers, finding_total
+
+
+def _coverage_blocker(accounts: list[Account]) -> dict[str, str] | None:
+    bureaus = {a.bureau for a in accounts if a.bureau != AccountBureau.UNKNOWN}
+    if len(bureaus) >= 3:
+        return None
+    return {
+        "id": "partial-bureau-coverage",
+        "title": "Incomplete bureau coverage",
+        "impact": (
+            "Fewer than three bureau views were evaluated, so readiness signals may "
+            "be incomplete."
+        ),
+        "action": "Ask your advisor to import remaining bureau reports for this case.",
+    }
+
+
+def _build_blockers(accounts: list[Account]) -> tuple[list[dict[str, str]], dict[str, int]]:
+    empty_summary = {
+        "metro2_total": 0,
+        "cross_bureau_total": 0,
+        "fcra_total": 0,
+        "identity_theft_total": 0,
+    }
+    if not accounts:
+        return (
+            [
+                {
+                    "id": "no-tradelines",
+                    "title": "No tradelines analyzed",
+                    "impact": "Upload and parse credit reports so readiness can be calculated.",
+                    "action": "Ask your advisor to import bureau reports for this case.",
+                }
+            ],
+            empty_summary,
+        )
+
+    tradeline = _tradeline_blockers(accounts)
+    cross_bureau, cross_total = _cross_bureau_blockers(accounts)
+    metro2, metro2_total = _metro2_blockers(accounts)
+    coverage = _coverage_blocker(accounts)
+
+    blockers = list(tradeline)
+    for item in [*cross_bureau, *metro2]:
+        if len(blockers) >= _MAX_TOTAL_BLOCKERS:
+            break
+        blockers.append(item)
+    if coverage is not None and len(blockers) < _MAX_TOTAL_BLOCKERS:
+        if not any(b["id"] == coverage["id"] for b in blockers):
+            blockers.append(coverage)
+
+    summary = {
+        "metro2_total": metro2_total,
+        "cross_bureau_total": cross_total,
+        "fcra_total": 0,
+        "identity_theft_total": 0,
+    }
+    return blockers[:_MAX_TOTAL_BLOCKERS], summary
 
 
 def _account_snapshots(accounts: list[Account]) -> list[dict[str, Any]]:
@@ -302,16 +492,18 @@ def compose_credit_analysis(accounts: list[Account]) -> ComposedCreditAnalysis:
         }
         for key in DIMENSION_WEIGHTS
     ]
+    blockers, compliance_summary = _build_blockers(accounts)
     payload = {
         "disclaimer": ADVISORY_DISCLAIMER,
         "dimensions": dimensions,
-        "blockers": _build_blockers(accounts),
+        "blockers": blockers,
         "accounts": _account_snapshots(accounts),
         "trend": None,
         "partial_bureau_coverage": len(
             {a.bureau for a in accounts if a.bureau != AccountBureau.UNKNOWN}
         )
         < 3,
+        "compliance_summary": compliance_summary,
         "formula_version": FORMULA_VERSION,
         "score_version": SCORE_VERSION,
     }

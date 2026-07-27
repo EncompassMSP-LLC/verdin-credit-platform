@@ -41,7 +41,7 @@ Ops contract: [`../lrp-enterprise/04-operations/business-ops-package/`](../lrp-e
 | 9     | LRP-106 Readiness report in borrower portal           | M2        | ✅     |
 | 10    | LRP-105 LO notifications center live                  | M2        | ✅     |
 | 11    | LRP-401 Readiness timeline UI                         | M2        | ✅     |
-| 12    | LRP-402 Bureau + Metro2 in readiness blockers         | M2        | ☐      |
+| 12    | LRP-402 Bureau + Metro2 in readiness blockers         | M2        | ✅     |
 | 13    | LRP-204 Consultation completed pack                   | M2        | ☐      |
 | 14    | LRP-201 Referral intake orchestrator job              | M3        | ☐      |
 | 15    | LRP-202 Notification matrix v1                        | M3        | ☐      |
@@ -75,6 +75,13 @@ Deferred to [product backlog](../lrp-enterprise/15-roadmap/product-backlog.md): 
 - Master plan remapped to M1–M6 with traceability matrix, gap analysis, DoD, exit criteria
 - Living docs: backlog, roadmap, tech debt, risk register
 - ADR-013 — LRP edition on shared platform
+
+### LRP-402 — Bureau + Metro2 in readiness blockers (2026-07-27)
+
+- Lending Readiness compose (`lrs.v1.1`) adds cross-bureau mismatch + high-severity Metro 2 consistency blockers alongside tradeline blockers
+- Payload includes `compliance_summary` counts (`metro2_total`, `cross_bureau_total`); advisory only — no bureau I/O or filing
+- Portal readiness copy mentions bureau/Metro 2 packaging blockers
+- Tests: `apps/api/tests/accounts/test_credit_analysis.py`
 
 ### LRP-401 — Readiness timeline UI (2026-07-27)
 
