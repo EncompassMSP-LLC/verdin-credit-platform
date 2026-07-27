@@ -1,6 +1,6 @@
 # Architecture Governance
 
-This directory is the **technical constitution** for the Verdin Credit Platform. It defines how the system is structured today and how it evolves toward [Version 5.0 Enterprise](../roadmap/v5.0-enterprise.md).
+This directory is the **technical constitution** for the Verdin Credit Platform. It defines how the system is structured and how it evolves across Compliance Intelligence phases (current release **v27.0.0**; see [roadmap](../roadmap/README.md)).
 
 **Capability status:** [Platform Capability Matrix](../governance/capability-matrix.md)
 
@@ -24,7 +24,7 @@ Every new feature, sprint, or ADR should align with these documents.
 
 Significant and irreversible decisions are recorded in [`docs/adr/`](../adr/README.md).
 
-**Process:** Check the ADR index → copy [`template.md`](../adr/template.md) → open PR → merge when accepted.
+**Process:** Check the ADR index → copy [`template.md`](../adr/template.md) → open PR to `main` → merge when accepted.
 
 Do not contradict an **Accepted** ADR without superseding it.
 

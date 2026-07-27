@@ -24,13 +24,13 @@ This area groups the documents that prove the platform is reliable, secure, meas
 
 ## Release Readiness Rule
 
-Before opening a major feature cycle such as Version 4.5, review:
+Before opening the next major version checklist (for example Version 28.0), review:
 
-- Architecture snapshot
+- Architecture snapshot / domain docs that the work touches
 - Capability matrix
-- Performance baseline
-- Security review
+- Performance baseline (when relevant)
+- Security review (when relevant)
 - Engineering decision log
-- Sprint results
+- Prior version sign-off / release notes
 
-The goal is alignment, not more paperwork: implementation, measurements, and governance should agree before new automation or AI features build on the Operational Core.
+The goal is alignment, not more paperwork: implementation, measurements, and governance should agree before new automation, filing, or AI features expand the frontier.
