@@ -60,6 +60,26 @@ def test_referral_intake_creates_client_case_referral_and_task(
     assert body["client_id"]
     assert body["case_id"]
     assert body["task_id"]
+    assert body["orchestrator_run_id"]
+    assert body["assigned_user_id"]  # admin fixture user is assignable
+
+    orch = api_client.get(
+        f"/api/v1/mortgage-partner/referral-intake/{body['intake_id']}/orchestrator",
+        headers=admin_headers,
+    )
+    assert orch.status_code == 200, orch.text
+    orch_body = orch.json()
+    assert orch_body["id"] == body["orchestrator_run_id"]
+    assert orch_body["status"] == "completed"
+    step_keys = {step["key"] for step in orch_body["payload"]["steps"]}
+    assert "assign_case_manager" in step_keys
+    assert "thank_you_referrer" in step_keys
+    assert "schedule_consultation_task" in step_keys
+    assert orch_body["payload"]["claim_safety"]["auto_filing"] is False
+
+    case = api_client.get(f"/api/v1/cases/{body['case_id']}", headers=admin_headers)
+    assert case.status_code == 200, case.text
+    assert case.json()["assigned_user_id"] == body["assigned_user_id"]
 
     referrals = api_client.get(
         f"/api/v1/mortgage-partner/partnerships/{partnership_id}/referrals",
@@ -111,6 +131,8 @@ def test_referral_intake_quarantines_ssn_in_notes(
     assert body["status"] == "quarantined"
     assert body["referral_id"] is None
     assert body["quarantine_reason"]
+    assert body.get("orchestrator_run_id") is None
+    assert body.get("assigned_user_id") is None
 
 
 def test_referral_intake_requires_consent(

@@ -41,6 +41,7 @@ from api.modules.mortgage_partner.permissions import (
     MORTGAGE_PARTNER_WRITE_ROLE,
     PARTNER_ROLE_PERMISSIONS,
 )
+from api.modules.mortgage_partner.referral_intake_orchestrator import ReferralIntakeOrchestrator
 from api.modules.mortgage_partner.repository import MortgagePartnerRepository
 from api.modules.mortgage_partner.schemas import (
     DashboardSummaryResponse,
@@ -67,6 +68,7 @@ from api.modules.mortgage_partner.schemas import (
     ReadinessPriorityTask,
     ReadinessReportSummary,
     ReferralIntakeCreate,
+    ReferralIntakeOrchestratorResponse,
     ReferralIntakeResponse,
     ReferralIntakeStatusResponse,
 )
@@ -266,6 +268,7 @@ class MortgagePartnerService:
                 "partner_readiness_report",
                 "partner_readiness_export",
                 "referral_web_intake",
+                "referral_intake_orchestrator",
             ],
             deferred_capabilities=[
                 "partner_jwt_realm",
@@ -273,7 +276,6 @@ class MortgagePartnerService:
                 "live_bureau_soft_pull",
                 "unsupervised_filing",
                 "custom_partner_domains",
-                "referral_intake_orchestrator_jobs",
             ],
         )
 
@@ -482,6 +484,13 @@ class MortgagePartnerService:
             consent_attested=payload.consent_attested,
         )
         await self._repo.create_intake_run(run)
+
+        orchestrator = ReferralIntakeOrchestrator(self._session)
+        orch_run = await orchestrator.run_for_intake(
+            intake=run,
+            case=case,
+            intake_task=task,
+        )
         await self._session.commit()
 
         return ReferralIntakeResponse(
@@ -497,6 +506,46 @@ class MortgagePartnerService:
                 if not duplicate
                 else "Possible duplicate contact flagged for staff review."
             ),
+            orchestrator_run_id=orch_run.id,
+            assigned_user_id=orch_run.assigned_user_id,
+        )
+
+    async def get_referral_intake_orchestrator_run(
+        self,
+        user: User,
+        intake_id: uuid.UUID,
+    ) -> ReferralIntakeOrchestratorResponse:
+        self._require_read(user)
+        organization_id = self._require_organization(user)
+        from sqlalchemy import select
+
+        from api.modules.mortgage_partner.referral_intake_orchestrator_models import (
+            PartnerReferralIntakeOrchestratorRun,
+        )
+
+        result = await self._session.execute(
+            select(PartnerReferralIntakeOrchestratorRun).where(
+                PartnerReferralIntakeOrchestratorRun.intake_run_id == intake_id,
+                PartnerReferralIntakeOrchestratorRun.organization_id == organization_id,
+            )
+        )
+        row = result.scalar_one_or_none()
+        if row is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Orchestrator run not found for this intake",
+            )
+        return ReferralIntakeOrchestratorResponse(
+            id=row.id,
+            intake_run_id=row.intake_run_id,
+            case_id=row.case_id,
+            referral_id=row.referral_id,
+            assigned_user_id=row.assigned_user_id,
+            status=row.status,
+            schema_version=row.schema_version,
+            started_at=row.started_at,
+            completed_at=row.completed_at,
+            payload=row.payload,
         )
 
     @staticmethod
