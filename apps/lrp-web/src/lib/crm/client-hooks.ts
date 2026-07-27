@@ -2,18 +2,24 @@
 
 import {
   ApiClientError,
+  createConsultationPackRun,
   createCreditAnalysisRun,
+  getAccessToken,
   getClient,
+  getConsultationPackExportUrl,
+  getLatestConsultationPackRun,
   getLatestCreditAnalysisRun,
   listCases,
   listClients,
   type Case,
   type Client,
   type ClientStatus,
+  type ConsultationPack,
   type CreditAnalysisRun,
 } from '@verdin/api-client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCrmAuth } from '@/lib/crm/auth';
+import { getApiBaseUrl } from '@/lib/platform/config';
 
 export function useCrmClients(params: {
   page: number;
@@ -111,4 +117,60 @@ export function useCreateCrmCreditAnalysis(caseId: string | undefined) {
   });
 }
 
-export type { Case, Client, ClientStatus, CreditAnalysisRun };
+export function useCrmLatestConsultationPack(caseId: string | undefined) {
+  const { isAuthenticated, authMode } = useCrmAuth();
+  return useQuery({
+    queryKey: ['crm', 'consultation-pack-latest', caseId],
+    enabled: isAuthenticated && authMode === 'platform' && Boolean(caseId),
+    queryFn: () => getLatestConsultationPackRun(caseId!),
+    retry: (count, error) => {
+      if (error instanceof ApiClientError && error.status === 404) return false;
+      return count < 2;
+    },
+  });
+}
+
+/** LRP-204 — staff-gated draft consultation pack (never auto-sent). */
+export function useCreateCrmConsultationPack(caseId: string | undefined) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => {
+      if (!caseId) {
+        throw new Error('A primary case is required to generate a consultation pack');
+      }
+      return createConsultationPackRun(caseId);
+    },
+    onSuccess: () => {
+      if (caseId) {
+        void queryClient.invalidateQueries({
+          queryKey: ['crm', 'consultation-pack-latest', caseId],
+        });
+      }
+    },
+  });
+}
+
+export async function downloadCrmConsultationPack(
+  caseId: string,
+  runId: string,
+  exportFormat: 'zip' | 'text' = 'zip',
+): Promise<void> {
+  const token = getAccessToken();
+  const path = getConsultationPackExportUrl(caseId, runId, exportFormat);
+  const url = path.startsWith('http') ? path : `${getApiBaseUrl()}${path}`;
+  const response = await fetch(url, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (!response.ok) {
+    throw new Error(`Download failed (${response.status})`);
+  }
+  const blob = await response.blob();
+  const objectUrl = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = objectUrl;
+  anchor.download = `consultation-pack-${caseId.slice(0, 8)}.${exportFormat === 'zip' ? 'zip' : 'txt'}`;
+  anchor.click();
+  URL.revokeObjectURL(objectUrl);
+}
+
+export type { Case, Client, ClientStatus, ConsultationPack, CreditAnalysisRun };
