@@ -185,6 +185,11 @@ from api.modules.messaging.models import (
     MessageThreadStatus,
     ThreadMessage,
 )
+from api.modules.mortgage_partner.automation_models import (
+    CrmAutomationChannel,
+    CrmAutomationRule,
+    CrmAutomationTrigger,
+)
 from api.modules.mortgage_partner.models import (
     OrgPartnership,
     OrgPartnershipMember,
@@ -369,6 +374,9 @@ __all__ = [
     "PartnerReferral",
     "PartnerReferralIntakeRun",
     "PartnerReferralIntakeOrchestratorRun",
+    "CrmAutomationRule",
+    "CrmAutomationTrigger",
+    "CrmAutomationChannel",
     "PartnerRole",
     "PartnershipStatus",
     "ReferralIntakeStatus",

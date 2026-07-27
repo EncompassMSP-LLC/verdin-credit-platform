@@ -44,6 +44,9 @@ from api.modules.mortgage_partner.permissions import (
 from api.modules.mortgage_partner.referral_intake_orchestrator import ReferralIntakeOrchestrator
 from api.modules.mortgage_partner.repository import MortgagePartnerRepository
 from api.modules.mortgage_partner.schemas import (
+    CrmAutomationRuleCreate,
+    CrmAutomationRuleResponse,
+    CrmAutomationRuleUpdate,
     DashboardSummaryResponse,
     MilestoneReplacePayload,
     MortgagePartnerStatusResponse,
@@ -269,6 +272,7 @@ class MortgagePartnerService:
                 "partner_readiness_export",
                 "referral_web_intake",
                 "referral_intake_orchestrator",
+                "crm_automation_rules",
             ],
             deferred_capabilities=[
                 "partner_jwt_realm",
@@ -1391,3 +1395,217 @@ class MortgagePartnerService:
         cro_org_id = self._require_organization(user)
         rows = await self._repo.list_access_audits(cro_org_id)
         return [PartnerAccessAuditResponse.model_validate(row) for row in rows]
+
+    # --- CRM automation rules (LRP-203) ---
+
+    _DEFAULT_AUTOMATION_RULES: list[dict[str, Any]] = [
+        {
+            "name": "New referral → intake task",
+            "description": ("When a referral is accepted, enqueue document + portal setup tasks."),
+            "enabled": True,
+            "trigger": "referral_created",
+            "action": "Create high-priority intake task for Ops",
+            "channel": "task",
+        },
+        {
+            "name": "Stage enter near_ready → LO email",
+            "description": "Advisory alert only; no underwriting commitment language.",
+            "enabled": True,
+            "trigger": "stage_enter",
+            "action": "Email assigned LO with readiness summary link",
+            "channel": "email",
+        },
+        {
+            "name": "Overdue task → SMS to assignee",
+            "description": "Quiet hours respected via notifications SMS policy.",
+            "enabled": True,
+            "trigger": "task_overdue",
+            "action": "SMS reminder to task assignee",
+            "channel": "sms",
+        },
+        {
+            "name": "Score band → partner notification",
+            "description": "Disabled pending partner preference review.",
+            "enabled": False,
+            "trigger": "score_band_change",
+            "action": "In-app notification to partner owner",
+            "channel": "notification",
+        },
+        {
+            "name": "Document uploaded → review task",
+            "description": "Routes to Ops for classification before readiness refresh.",
+            "enabled": True,
+            "trigger": "document_uploaded",
+            "action": "Create document review task",
+            "channel": "task",
+        },
+    ]
+
+    async def list_automation_rules(self, user: User) -> list[CrmAutomationRuleResponse]:
+        from sqlalchemy import func, select
+
+        from api.modules.mortgage_partner.automation_models import (
+            CrmAutomationChannel,
+            CrmAutomationRule,
+            CrmAutomationTrigger,
+        )
+
+        self._require_read(user)
+        organization_id = self._require_organization(user)
+
+        count_result = await self._session.execute(
+            select(func.count())
+            .select_from(CrmAutomationRule)
+            .where(
+                CrmAutomationRule.organization_id == organization_id,
+                CrmAutomationRule.deleted_at.is_(None),
+            )
+        )
+        if int(count_result.scalar_one()) == 0:
+            for spec in self._DEFAULT_AUTOMATION_RULES:
+                rule = CrmAutomationRule(
+                    id=uuid.uuid4(),
+                    organization_id=organization_id,
+                    name=spec["name"],
+                    description=spec["description"],
+                    enabled=bool(spec["enabled"]),
+                    trigger=CrmAutomationTrigger(spec["trigger"]),
+                    action=spec["action"],
+                    channel=CrmAutomationChannel(spec["channel"]),
+                    fire_count=0,
+                    created_by_id=user.id,
+                    updated_by_id=user.id,
+                )
+                self._session.add(rule)
+            await self._session.commit()
+
+        result = await self._session.execute(
+            select(CrmAutomationRule)
+            .where(
+                CrmAutomationRule.organization_id == organization_id,
+                CrmAutomationRule.deleted_at.is_(None),
+            )
+            .order_by(CrmAutomationRule.created_at.asc(), CrmAutomationRule.name.asc())
+        )
+        rows = list(result.scalars().all())
+        return [
+            CrmAutomationRuleResponse(
+                id=row.id,
+                organization_id=row.organization_id,
+                name=row.name,
+                description=row.description,
+                enabled=row.enabled,
+                trigger=row.trigger.value,
+                action=row.action,
+                channel=row.channel.value,
+                last_fired_at=row.last_fired_at,
+                fire_count=row.fire_count,
+                created_at=row.created_at,
+                updated_at=row.updated_at,
+            )
+            for row in rows
+        ]
+
+    async def create_automation_rule(
+        self,
+        user: User,
+        payload: CrmAutomationRuleCreate,
+    ) -> CrmAutomationRuleResponse:
+        from api.modules.mortgage_partner.automation_models import (
+            CrmAutomationChannel,
+            CrmAutomationRule,
+            CrmAutomationTrigger,
+        )
+
+        self._require_write(user)
+        organization_id = self._require_organization(user)
+        rule = CrmAutomationRule(
+            id=uuid.uuid4(),
+            organization_id=organization_id,
+            name=payload.name,
+            description=payload.description,
+            enabled=payload.enabled,
+            trigger=CrmAutomationTrigger(payload.trigger),
+            action=payload.action,
+            channel=CrmAutomationChannel(payload.channel),
+            fire_count=0,
+            created_by_id=user.id,
+            updated_by_id=user.id,
+        )
+        self._session.add(rule)
+        await self._session.commit()
+        await self._session.refresh(rule)
+        return CrmAutomationRuleResponse(
+            id=rule.id,
+            organization_id=rule.organization_id,
+            name=rule.name,
+            description=rule.description,
+            enabled=rule.enabled,
+            trigger=rule.trigger.value,
+            action=rule.action,
+            channel=rule.channel.value,
+            last_fired_at=rule.last_fired_at,
+            fire_count=rule.fire_count,
+            created_at=rule.created_at,
+            updated_at=rule.updated_at,
+        )
+
+    async def update_automation_rule(
+        self,
+        user: User,
+        rule_id: uuid.UUID,
+        payload: CrmAutomationRuleUpdate,
+    ) -> CrmAutomationRuleResponse:
+        from sqlalchemy import select
+
+        from api.modules.mortgage_partner.automation_models import (
+            CrmAutomationChannel,
+            CrmAutomationRule,
+            CrmAutomationTrigger,
+        )
+
+        self._require_write(user)
+        organization_id = self._require_organization(user)
+        result = await self._session.execute(
+            select(CrmAutomationRule).where(
+                CrmAutomationRule.id == rule_id,
+                CrmAutomationRule.organization_id == organization_id,
+                CrmAutomationRule.deleted_at.is_(None),
+            )
+        )
+        rule = result.scalar_one_or_none()
+        if rule is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Automation rule not found",
+            )
+        data = payload.model_dump(exclude_unset=True)
+        if "name" in data and data["name"] is not None:
+            rule.name = data["name"]
+        if "description" in data:
+            rule.description = data["description"]
+        if "enabled" in data and data["enabled"] is not None:
+            rule.enabled = data["enabled"]
+        if "trigger" in data and data["trigger"] is not None:
+            rule.trigger = CrmAutomationTrigger(data["trigger"])
+        if "action" in data and data["action"] is not None:
+            rule.action = data["action"]
+        if "channel" in data and data["channel"] is not None:
+            rule.channel = CrmAutomationChannel(data["channel"])
+        rule.updated_by_id = user.id
+        await self._session.commit()
+        await self._session.refresh(rule)
+        return CrmAutomationRuleResponse(
+            id=rule.id,
+            organization_id=rule.organization_id,
+            name=rule.name,
+            description=rule.description,
+            enabled=rule.enabled,
+            trigger=rule.trigger.value,
+            action=rule.action,
+            channel=rule.channel.value,
+            last_fired_at=rule.last_fired_at,
+            fire_count=rule.fire_count,
+            created_at=rule.created_at,
+            updated_at=rule.updated_at,
+        )

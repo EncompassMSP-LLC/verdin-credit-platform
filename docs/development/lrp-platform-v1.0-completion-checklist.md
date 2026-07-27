@@ -45,7 +45,7 @@ Ops contract: [`../lrp-enterprise/04-operations/business-ops-package/`](../lrp-e
 | 13    | LRP-204 Consultation completed pack                   | M2        | ✅     |
 | 14    | LRP-201 Referral intake orchestrator job              | M3        | ✅     |
 | 15    | LRP-202 Notification matrix v1                        | M3        | ✅     |
-| 16    | LRP-203 CRM automation rules (persist)                | M3        | ☐      |
+| 16    | LRP-203 CRM automation rules (persist)                | M3        | ✅     |
 | 17    | LRP-205 Appointment reminders                         | M3        | ☐      |
 | 18    | LRP-206 Partner nurture drip                          | M3        | ☐      |
 | 19    | LRP-207 Weekly status digest job                      | M3        | ☐      |
@@ -109,6 +109,14 @@ Deferred to [product backlog](../lrp-enterprise/15-roadmap/product-backlog.md): 
 - Staff APIs: `GET /notifications/matrix`, `/matrix/dispatches`, `/matrix/dispatches/{id}`
 - Referral intake orchestrator fans out `referral_submitted` + `referral_assigned` via the matrix (SMS TCPA-gated; realtor optional/deferred)
 - Tests: `apps/api/tests/notifications/test_notification_matrix.py` (+ referral intake coverage)
+
+### LRP-203 — CRM automation rules persist (2026-07-27)
+
+- Table `crm_automation_rules` (migration `106_crm_automation_rules`) with trigger/channel enums
+- `GET/POST/PATCH /mortgage-partner/automation-rules` — seeds default catalog when empty; admin toggle/create
+- `apps/lrp-web` `/crm/automations` loads live rules with enable/disable (demo seed fallback retained)
+- Rules are configuration only — no unsupervised bureau filing or auto-execution of dispute tools
+- Tests: `apps/api/tests/mortgage_partner/test_automation_rules.py`
 
 ### LRP-106 — Readiness report in borrower portal (2026-07-27)
 
