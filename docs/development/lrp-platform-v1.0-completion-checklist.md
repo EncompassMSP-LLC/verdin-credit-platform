@@ -36,7 +36,7 @@ Ops contract: [`../lrp-enterprise/04-operations/business-ops-package/`](../lrp-e
 | 4     | LRP-109 Production organization mode (org type/flags) | M1        | ✅     |
 | 5     | LRP-102 CRM tasks + daily digest read model           | M1        | ✅     |
 | 6     | LRP-103 Referral intake from web form                 | M1        | ✅     |
-| 7     | LRP-107 Case documents in CRM borrower workspace      | M1        | ☐      |
+| 7     | LRP-107 Case documents in CRM borrower workspace      | M1        | ✅     |
 | 8     | LRP-104 Borrower portal task/readiness parity         | M2        | ☐      |
 | 9     | LRP-106 Readiness report in borrower portal           | M2        | ☐      |
 | 10    | LRP-105 LO notifications center live                  | M2        | ☐      |
@@ -75,6 +75,13 @@ Deferred to [product backlog](../lrp-enterprise/15-roadmap/product-backlog.md): 
 - Master plan remapped to M1–M6 with traceability matrix, gap analysis, DoD, exit criteria
 - Living docs: backlog, roadmap, tech debt, risk register
 - ADR-013 — LRP edition on shared platform
+
+### LRP-107 — Case documents in CRM borrower workspace (2026-07-27)
+
+- `apps/lrp-web` borrower workspace Documents panel lists/uploads/downloads case documents via existing Documents API
+- Hooks: `useCrmCaseDocuments` / `useCrmUploadCaseDocument` / `downloadCrmDocument` (`listDocuments`, `uploadDocument`, `getDocumentDownloadUrl`)
+- Upload gated by `documents.manage`; demo seed docs retained for local demo auth
+- No new API endpoints (reuse platform Documents module)
 
 ### LRP-101 — CRM partners/contacts live API (2026-07-26)
 
