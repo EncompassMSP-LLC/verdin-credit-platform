@@ -460,19 +460,22 @@ Task lifecycle events (`TASK_CREATED`, `TASK_UPDATED`, `TASK_COMPLETED`, `TASK_R
 
 In-app notifications for staff users. Recipients only see their own notifications.
 
-| Method | Path                              | Role      | Description                                                            |
-| ------ | --------------------------------- | --------- | ---------------------------------------------------------------------- |
-| POST   | `/notifications`                  | admin     | Create notification for org user                                       |
-| GET    | `/notifications`                  | read_only | List current user's notifications (LO lender inbox uses this; LRP-105) |
-| GET    | `/notifications/unread-count`     | read_only | Unread count for current user (lender shell badge; LRP-105)            |
-| POST   | `/notifications/mark-all-read`    | read_only | Mark all notifications read                                            |
-| POST   | `/notifications/{id}/read`        | read_only | Mark one notification read                                             |
-| GET    | `/notifications/email/status`     | read_only | Email delivery readiness                                               |
-| POST   | `/notifications/email/send`       | admin     | Send email to org user via provider                                    |
-| GET    | `/notifications/email/deliveries` | admin     | List email delivery audit logs                                         |
-| GET    | `/notifications/sms/status`       | read_only | SMS delivery readiness                                                 |
-| POST   | `/notifications/sms/send`         | admin     | Send SMS to org user via provider                                      |
-| GET    | `/notifications/sms/deliveries`   | admin     | List SMS delivery audit logs                                           |
+| Method | Path                                    | Role      | Description                                                            |
+| ------ | --------------------------------------- | --------- | ---------------------------------------------------------------------- |
+| POST   | `/notifications`                        | admin     | Create notification for org user                                       |
+| GET    | `/notifications`                        | read_only | List current user's notifications (LO lender inbox uses this; LRP-105) |
+| GET    | `/notifications/unread-count`           | read_only | Unread count for current user (lender shell badge; LRP-105)            |
+| GET    | `/notifications/matrix`                 | read_only | LRP notification matrix v1 catalog (LRP-202)                           |
+| GET    | `/notifications/matrix/dispatches`      | read_only | List matrix dispatch audits (optional `?event_key=`)                   |
+| GET    | `/notifications/matrix/dispatches/{id}` | read_only | Get one matrix dispatch audit payload                                  |
+| POST   | `/notifications/mark-all-read`          | read_only | Mark all notifications read                                            |
+| POST   | `/notifications/{id}/read`              | read_only | Mark one notification read                                             |
+| GET    | `/notifications/email/status`           | read_only | Email delivery readiness                                               |
+| POST   | `/notifications/email/send`             | admin     | Send email to org user via provider                                    |
+| GET    | `/notifications/email/deliveries`       | admin     | List email delivery audit logs                                         |
+| GET    | `/notifications/sms/status`             | read_only | SMS delivery readiness                                                 |
+| POST   | `/notifications/sms/send`               | admin     | Send SMS to org user via provider                                      |
+| GET    | `/notifications/sms/deliveries`         | admin     | List SMS delivery audit logs                                           |
 
 **List query parameters:** `unread_only`, `category`, `sort_by`, `sort_order`, `page`, `page_size`.
 

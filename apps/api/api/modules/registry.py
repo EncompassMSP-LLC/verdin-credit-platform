@@ -207,6 +207,7 @@ from api.modules.notifications.models import (
     NotificationCategory,
     SmsDeliveryLog,
 )
+from api.modules.notifications.notification_matrix_models import NotificationMatrixDispatch
 from api.modules.notifications.sms_campaign_models import (
     SmsMarketingCampaignRun,
     SmsMarketingCampaignStatus,
@@ -373,6 +374,7 @@ __all__ = [
     "ReferralIntakeStatus",
     "ReferralStatus",
     "Notification",
+    "NotificationMatrixDispatch",
     "NotificationCategory",
     "Organization",
     "OrganizationType",
