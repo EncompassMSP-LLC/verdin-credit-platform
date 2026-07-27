@@ -39,7 +39,7 @@ Ops contract: [`../lrp-enterprise/04-operations/business-ops-package/`](../lrp-e
 | 7     | LRP-107 Case documents in CRM borrower workspace      | M1        | ✅     |
 | 8     | LRP-104 Borrower portal task/readiness parity         | M2        | ✅     |
 | 9     | LRP-106 Readiness report in borrower portal           | M2        | ✅     |
-| 10    | LRP-105 LO notifications center live                  | M2        | ☐      |
+| 10    | LRP-105 LO notifications center live                  | M2        | ✅     |
 | 11    | LRP-401 Readiness timeline UI                         | M2        | ☐      |
 | 12    | LRP-402 Bureau + Metro2 in readiness blockers         | M2        | ☐      |
 | 13    | LRP-204 Consultation completed pack                   | M2        | ☐      |
@@ -75,6 +75,12 @@ Deferred to [product backlog](../lrp-enterprise/15-roadmap/product-backlog.md): 
 - Master plan remapped to M1–M6 with traceability matrix, gap analysis, DoD, exit criteria
 - Living docs: backlog, roadmap, tech debt, risk register
 - ADR-013 — LRP edition on shared platform
+
+### LRP-105 — LO notifications center live (2026-07-27)
+
+- `apps/lrp-web` `/lender/notifications` loads platform `listNotifications` / mark-read APIs (demo seed retained for local demo auth)
+- Shell badge + dashboard unread strip use `getUnreadNotificationCount` + unread list in platform mode
+- Matrix-complete notification producers deferred to LRP-202
 
 ### LRP-106 — Readiness report in borrower portal (2026-07-27)
 

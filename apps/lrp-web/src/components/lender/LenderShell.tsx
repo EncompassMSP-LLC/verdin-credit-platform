@@ -8,6 +8,7 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { LenderNavIcon } from '@/components/lender/LenderNavIcon';
 import { AdvisoryDisclaimer } from '@/components/ui/AdvisoryDisclaimer';
 import { useLenderAuth } from '@/lib/lender/auth';
+import { useLenderUnreadNotificationCount } from '@/lib/lender/notification-hooks';
 import { notifications } from '@/lib/lender/data';
 import { lenderNav } from '@/lib/lender/nav';
 import { cn } from '@/lib/utils';
@@ -23,6 +24,7 @@ export function LenderShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const { user, isLoading, isAuthenticated, logout, can, authMode } = useLenderAuth();
   const [open, setOpen] = useState(false);
+  const unreadCountQuery = useLenderUnreadNotificationCount();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -32,7 +34,10 @@ export function LenderShell({ children }: { children: ReactNode }) {
 
   const visibleNav = useMemo(() => lenderNav.filter((item) => can(item.permission)), [can]);
 
-  const unread = notifications.filter((n) => !n.read).length;
+  const unread =
+    authMode === 'platform'
+      ? (unreadCountQuery.data ?? 0)
+      : notifications.filter((n) => !n.read).length;
 
   function signOut() {
     logout();
