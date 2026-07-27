@@ -242,6 +242,79 @@ class PartnerReferral(Base, TimestampMixin, SoftDeleteMixin, AuditMixin):
     )
 
 
+class ReferralIntakeStatus(StrEnum):
+    ACCEPTED = "accepted"
+    QUARANTINED = "quarantined"
+    DUPLICATE_REVIEW = "duplicate_review"
+
+
+class PartnerReferralIntakeRun(Base, TimestampMixin, SoftDeleteMixin, AuditMixin):
+    """Audit row for public web-form referral intake (LRP-103)."""
+
+    __tablename__ = "partner_referral_intake_runs"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    cro_organization_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("organizations.id"),
+        nullable=False,
+        index=True,
+    )
+    partnership_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("org_partnerships.id"),
+        nullable=True,
+        index=True,
+    )
+    client_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("clients.id"),
+        nullable=True,
+        index=True,
+    )
+    case_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("cases.id"),
+        nullable=True,
+        index=True,
+    )
+    referral_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("partner_referrals.id"),
+        nullable=True,
+        index=True,
+    )
+    task_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("tasks.id"),
+        nullable=True,
+        index=True,
+    )
+    status: Mapped[ReferralIntakeStatus] = mapped_column(
+        Enum(
+            ReferralIntakeStatus,
+            name="referral_intake_status",
+            values_callable=lambda x: [e.value for e in x],
+        ),
+        nullable=False,
+        default=ReferralIntakeStatus.ACCEPTED,
+        index=True,
+    )
+    partner_org_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    lo_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    lo_email: Mapped[str] = mapped_column(String(255), nullable=False)
+    lo_phone: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    borrower_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    borrower_email: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    borrower_phone: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    product_intent: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    known_gaps: Mapped[str | None] = mapped_column(Text, nullable=True)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    consent_attested: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    source_channel: Mapped[str] = mapped_column(String(64), nullable=False, default="web_form")
+    quarantine_reason: Mapped[str | None] = mapped_column(String(255), nullable=True)
+
+
 class PartnerLoanMilestone(Base, TimestampMixin, SoftDeleteMixin, AuditMixin):
     """Ordered checklist milestone for a partner referral's loan pipeline progress."""
 

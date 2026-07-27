@@ -34,6 +34,9 @@ from api.modules.mortgage_partner.schemas import (
     PartnershipResponse,
     PipelineCardResponse,
     ReadinessReportSummary,
+    ReferralIntakeCreate,
+    ReferralIntakeResponse,
+    ReferralIntakeStatusResponse,
 )
 from api.modules.mortgage_partner.service import MortgagePartnerService
 
@@ -51,6 +54,29 @@ async def get_mortgage_partner_status(
     service: MortgagePartnerService = Depends(get_mortgage_partner_service),
 ) -> MortgagePartnerStatusResponse:
     return service.get_status(current_user)
+
+
+@router.get("/referral-intake/status", response_model=ReferralIntakeStatusResponse)
+async def get_referral_intake_status(
+    _: None = Depends(require_mortgage_partner_enabled),
+    service: MortgagePartnerService = Depends(get_mortgage_partner_service),
+) -> ReferralIntakeStatusResponse:
+    """Public readiness check for the partner web referral form (LRP-103)."""
+    return service.get_referral_intake_status()
+
+
+@router.post(
+    "/referral-intake",
+    response_model=ReferralIntakeResponse,
+    status_code=201,
+)
+async def submit_referral_intake(
+    payload: ReferralIntakeCreate,
+    _: None = Depends(require_mortgage_partner_enabled),
+    service: MortgagePartnerService = Depends(get_mortgage_partner_service),
+) -> ReferralIntakeResponse:
+    """Public web-form referral intake — creates client, case, referral, and ops task."""
+    return await service.submit_referral_intake(payload)
 
 
 @router.get("/roles", response_model=PartnerRoleMatrixResponse)

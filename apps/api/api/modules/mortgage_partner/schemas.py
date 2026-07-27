@@ -3,7 +3,7 @@
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
 
 from api.modules.mortgage_partner.models import (
     LoanPipelineStage,
@@ -305,3 +305,46 @@ class ReadinessReportSummary(BaseModel):
     formula_version: str
     score_version: str
     disclaimer: str
+
+
+class ReferralIntakeCreate(BaseModel):
+    """Public web-form referral intake payload (LRP-103)."""
+
+    partner_org_name: str = Field(min_length=1, max_length=255)
+    lo_name: str = Field(min_length=1, max_length=255)
+    lo_email: EmailStr
+    lo_phone: str | None = Field(default=None, max_length=50)
+    borrower_name: str = Field(min_length=1, max_length=255)
+    borrower_email: EmailStr | None = None
+    borrower_phone: str | None = Field(default=None, max_length=50)
+    product_intent: str | None = Field(default=None, max_length=255)
+    known_gaps: str | None = None
+    notes: str | None = None
+    consent_attested: bool
+    partnership_id: uuid.UUID | None = None
+
+    @model_validator(mode="after")
+    def require_borrower_contact_and_consent(self) -> "ReferralIntakeCreate":
+        if not self.consent_attested:
+            raise ValueError("Borrower consent attestation is required")
+        if not self.borrower_email and not (self.borrower_phone and self.borrower_phone.strip()):
+            raise ValueError("Borrower email or phone is required")
+        return self
+
+
+class ReferralIntakeResponse(BaseModel):
+    intake_id: uuid.UUID
+    status: str
+    partnership_id: uuid.UUID | None
+    referral_id: uuid.UUID | None
+    client_id: uuid.UUID | None
+    case_id: uuid.UUID | None
+    task_id: uuid.UUID | None
+    message: str
+    quarantine_reason: str | None = None
+
+
+class ReferralIntakeStatusResponse(BaseModel):
+    referral_intake_enabled: bool
+    organization_slug: str | None
+    blockers: list[str] = Field(default_factory=list)

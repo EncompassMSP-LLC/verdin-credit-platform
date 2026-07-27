@@ -190,8 +190,10 @@ from api.modules.mortgage_partner.models import (
     PartnerAccessAudit,
     PartnerOrgType,
     PartnerReferral,
+    PartnerReferralIntakeRun,
     PartnerRole,
     PartnershipStatus,
+    ReferralIntakeStatus,
     ReferralStatus,
 )
 from api.modules.notifications.models import (
@@ -357,8 +359,10 @@ __all__ = [
     "PartnerAccessAudit",
     "PartnerOrgType",
     "PartnerReferral",
+    "PartnerReferralIntakeRun",
     "PartnerRole",
     "PartnershipStatus",
+    "ReferralIntakeStatus",
     "ReferralStatus",
     "Notification",
     "NotificationCategory",

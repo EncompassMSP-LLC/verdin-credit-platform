@@ -1,5 +1,6 @@
 """Mortgage partner service — partnerships, members, referrals, milestones, access audits."""
 
+import re
 import uuid
 from datetime import UTC, datetime
 from typing import Any
@@ -8,6 +9,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.core.audit import apply_audit_on_create, apply_audit_on_update
+from api.core.config import get_settings
 from api.core.permissions import has_permission
 from api.modules.accounts.credit_analysis import ADVISORY_DISCLAIMER
 from api.modules.accounts.credit_analysis_export import (
@@ -19,6 +21,8 @@ from api.modules.accounts.credit_analysis_schemas import (
     CreditAnalysisRunResponse,
 )
 from api.modules.auth.models import User
+from api.modules.cases.models import Case, CasePriority, CaseStage, CaseStatus
+from api.modules.clients.models import Client, ClientStatus
 from api.modules.mortgage_partner.models import (
     LoanPipelineStage,
     OrgPartnership,
@@ -28,6 +32,9 @@ from api.modules.mortgage_partner.models import (
     PartnerContact,
     PartnerLoanMilestone,
     PartnerReferral,
+    PartnerReferralIntakeRun,
+    ReferralIntakeStatus,
+    ReferralStatus,
 )
 from api.modules.mortgage_partner.permissions import (
     MORTGAGE_PARTNER_READ_ROLE,
@@ -59,7 +66,13 @@ from api.modules.mortgage_partner.schemas import (
     ReadinessDimension,
     ReadinessPriorityTask,
     ReadinessReportSummary,
+    ReferralIntakeCreate,
+    ReferralIntakeResponse,
+    ReferralIntakeStatusResponse,
 )
+from api.modules.tasks.models import Task, TaskPriority, TaskStatus
+
+_SSN_PATTERN = re.compile(r"\b(?:\d{3}-\d{2}-\d{4}|\d{9})\b")
 
 # Default milestone labels seeded on every new referral
 _DEFAULT_MILESTONES = [
@@ -190,7 +203,7 @@ class MortgagePartnerService:
         self,
         referral_id: uuid.UUID,
         organization_id: uuid.UUID,
-        created_by_id: uuid.UUID,
+        created_by_id: uuid.UUID | None,
     ) -> list[PartnerLoanMilestone]:
         now = datetime.now(UTC)
         milestones = []
@@ -204,7 +217,8 @@ class MortgagePartnerService:
                 complete=complete,
                 completed_at=now if complete else None,
             )
-            apply_audit_on_create(m, created_by_id)
+            if created_by_id is not None:
+                apply_audit_on_create(m, created_by_id)
             milestones.append(m)
         return await self._repo.bulk_create_milestones(milestones)
 
@@ -251,6 +265,7 @@ class MortgagePartnerService:
                 "partner_milestones",
                 "partner_readiness_report",
                 "partner_readiness_export",
+                "referral_web_intake",
             ],
             deferred_capabilities=[
                 "partner_jwt_realm",
@@ -258,8 +273,245 @@ class MortgagePartnerService:
                 "live_bureau_soft_pull",
                 "unsupervised_filing",
                 "custom_partner_domains",
+                "referral_intake_orchestrator_jobs",
             ],
         )
+
+    def get_referral_intake_status(self) -> ReferralIntakeStatusResponse:
+        settings = get_settings()
+        blockers: list[str] = []
+        if not settings.referral_intake_enabled:
+            blockers.append("REFERRAL_INTAKE_ENABLED is false")
+        if not settings.referral_intake_organization_slug.strip():
+            blockers.append("REFERRAL_INTAKE_ORGANIZATION_SLUG is empty")
+        return ReferralIntakeStatusResponse(
+            referral_intake_enabled=settings.referral_intake_enabled and not blockers,
+            organization_slug=settings.referral_intake_organization_slug or None,
+            blockers=blockers,
+        )
+
+    async def submit_referral_intake(self, payload: ReferralIntakeCreate) -> ReferralIntakeResponse:
+        """Public web-form intake — creates client/case/referral + ops task (no auth)."""
+        settings = get_settings()
+        status_info = self.get_referral_intake_status()
+        if not status_info.referral_intake_enabled:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Referral intake is not enabled",
+            )
+
+        free_text = " ".join(
+            part for part in (payload.known_gaps, payload.notes, payload.product_intent) if part
+        )
+        if _SSN_PATTERN.search(free_text):
+            org = await self._repo.get_organization_by_slug(
+                settings.referral_intake_organization_slug
+            )
+            if org is None:
+                raise HTTPException(
+                    status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                    detail="Referral intake organization is not configured",
+                )
+            run = PartnerReferralIntakeRun(
+                id=uuid.uuid4(),
+                cro_organization_id=org.id,
+                partnership_id=payload.partnership_id,
+                status=ReferralIntakeStatus.QUARANTINED,
+                partner_org_name=payload.partner_org_name.strip(),
+                lo_name=payload.lo_name.strip(),
+                lo_email=str(payload.lo_email).lower(),
+                lo_phone=payload.lo_phone,
+                borrower_name=payload.borrower_name.strip(),
+                borrower_email=(
+                    str(payload.borrower_email).lower() if payload.borrower_email else None
+                ),
+                borrower_phone=payload.borrower_phone,
+                product_intent=payload.product_intent,
+                known_gaps=payload.known_gaps,
+                notes=payload.notes,
+                consent_attested=payload.consent_attested,
+                quarantine_reason="Possible SSN in free-text fields",
+            )
+            await self._repo.create_intake_run(run)
+            await self._session.commit()
+            return ReferralIntakeResponse(
+                intake_id=run.id,
+                status=run.status.value,
+                partnership_id=None,
+                referral_id=None,
+                client_id=None,
+                case_id=None,
+                task_id=None,
+                message=(
+                    "Referral held for review — please remove sensitive identifiers "
+                    "(e.g. SSN) and resubmit or contact the operations team."
+                ),
+                quarantine_reason=run.quarantine_reason,
+            )
+
+        org = await self._repo.get_organization_by_slug(settings.referral_intake_organization_slug)
+        if org is None:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Referral intake organization is not configured",
+            )
+
+        partnership: OrgPartnership | None = None
+        if payload.partnership_id is not None:
+            partnership = await self._repo.get_partnership(payload.partnership_id, org.id)
+            if partnership is None:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Partnership not found for intake organization",
+                )
+        else:
+            partnership = await self._repo.get_first_active_partnership(org.id)
+            if partnership is None:
+                raise HTTPException(
+                    status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                    detail=(
+                        "No active partnership configured for web referral intake; "
+                        "pass partnership_id or create a partnership"
+                    ),
+                )
+
+        borrower_email = str(payload.borrower_email).lower() if payload.borrower_email else None
+        borrower_phone = payload.borrower_phone.strip() if payload.borrower_phone else None
+
+        existing = await self._repo.find_open_client_by_contact(
+            org.id, email=borrower_email, phone=borrower_phone
+        )
+        duplicate = existing is not None
+
+        client = existing
+        if client is None:
+            client = Client(
+                id=uuid.uuid4(),
+                organization_id=org.id,
+                display_name=payload.borrower_name.strip(),
+                email=borrower_email,
+                phone=borrower_phone,
+                status=ClientStatus.ACTIVE,
+                notes=(
+                    f"Created via partner web referral form. "
+                    f"Partner: {payload.partner_org_name}; LO: {payload.lo_name}"
+                ),
+            )
+            client = await self._repo.create_client(client)
+
+        now = datetime.now(UTC)
+        case = Case(
+            id=uuid.uuid4(),
+            organization_id=org.id,
+            client_id=client.id,
+            title=f"Partner referral — {payload.borrower_name.strip()}",
+            client_name=payload.borrower_name.strip(),
+            client_email=borrower_email,
+            case_number=f"REF-{uuid.uuid4().hex[:8].upper()}",
+            status=CaseStatus.OPEN,
+            stage=CaseStage.INTAKE,
+            priority=CasePriority.HIGH if duplicate else CasePriority.MEDIUM,
+            summary=(
+                f"Web referral from {payload.partner_org_name} / {payload.lo_name}. "
+                f"Intent: {payload.product_intent or 'n/a'}. "
+                "Advisory only — no underwriting decision."
+            ),
+            opened_at=now,
+        )
+        case = await self._repo.create_case(case)
+
+        referral = PartnerReferral(
+            id=uuid.uuid4(),
+            partnership_id=partnership.id,
+            cro_organization_id=org.id,
+            client_id=client.id,
+            case_id=case.id,
+            status=ReferralStatus.NEW,
+            pipeline_stage=LoanPipelineStage.REFERRED,
+            pipeline_stage_changed_at=now,
+            source_label=f"web_form:{payload.partner_org_name.strip()[:200]}",
+            notes=self._format_intake_notes(payload),
+            referred_by_user_id=None,
+        )
+        referral = await self._repo.create_referral(referral)
+        await self._seed_default_milestones(referral.id, org.id, created_by_id=None)
+
+        task = Task(
+            id=uuid.uuid4(),
+            organization_id=org.id,
+            case_id=case.id,
+            title=(
+                "Review duplicate web referral"
+                if duplicate
+                else "New partner web referral — assign specialist"
+            ),
+            description=(
+                f"Intake from {payload.lo_name} <{payload.lo_email}> at "
+                f"{payload.partner_org_name}. Borrower: {payload.borrower_name}."
+            ),
+            status=TaskStatus.OPEN,
+            priority=TaskPriority.HIGH if duplicate else TaskPriority.MEDIUM,
+            source_module="mortgage_partner.referral_intake",
+            source_event_id=referral.id,
+        )
+        self._session.add(task)
+        await self._session.flush()
+
+        intake_status = (
+            ReferralIntakeStatus.DUPLICATE_REVIEW if duplicate else ReferralIntakeStatus.ACCEPTED
+        )
+        run = PartnerReferralIntakeRun(
+            id=uuid.uuid4(),
+            cro_organization_id=org.id,
+            partnership_id=partnership.id,
+            client_id=client.id,
+            case_id=case.id,
+            referral_id=referral.id,
+            task_id=task.id,
+            status=intake_status,
+            partner_org_name=payload.partner_org_name.strip(),
+            lo_name=payload.lo_name.strip(),
+            lo_email=str(payload.lo_email).lower(),
+            lo_phone=payload.lo_phone,
+            borrower_name=payload.borrower_name.strip(),
+            borrower_email=borrower_email,
+            borrower_phone=borrower_phone,
+            product_intent=payload.product_intent,
+            known_gaps=payload.known_gaps,
+            notes=payload.notes,
+            consent_attested=payload.consent_attested,
+        )
+        await self._repo.create_intake_run(run)
+        await self._session.commit()
+
+        return ReferralIntakeResponse(
+            intake_id=run.id,
+            status=run.status.value,
+            partnership_id=partnership.id,
+            referral_id=referral.id,
+            client_id=client.id,
+            case_id=case.id,
+            task_id=task.id,
+            message=(
+                "Referral received. Our team will follow up — this is not an underwriting decision."
+                if not duplicate
+                else "Possible duplicate contact flagged for staff review."
+            ),
+        )
+
+    @staticmethod
+    def _format_intake_notes(payload: ReferralIntakeCreate) -> str:
+        lines = [
+            f"LO: {payload.lo_name} <{payload.lo_email}>",
+            f"LO phone: {payload.lo_phone or 'n/a'}",
+            f"Partner org: {payload.partner_org_name}",
+            f"Intent: {payload.product_intent or 'n/a'}",
+            f"Known gaps: {payload.known_gaps or 'n/a'}",
+            f"Notes: {payload.notes or 'n/a'}",
+            "Consent attested: yes",
+            "Source: public web form (LRP-103)",
+        ]
+        return "\n".join(lines)
 
     def get_role_matrix(self, user: User) -> PartnerRoleMatrixResponse:
         self._require_read(user)
