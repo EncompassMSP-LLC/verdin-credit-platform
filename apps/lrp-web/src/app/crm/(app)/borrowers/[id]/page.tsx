@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { ApiClientError } from '@verdin/api-client';
 import { PageHeader } from '@/components/crm/PageHeader';
 import { RoleGate } from '@/components/crm/RoleGate';
+import { CrmCaseDocumentsPanel } from '@/components/crm/CrmCaseDocumentsPanel';
 import { ADVISORY_DISCLAIMER_SHORT } from '@/lib/design-tokens';
 import { useCrmAuth } from '@/lib/crm/auth';
 import {
@@ -19,8 +20,8 @@ import { formatDate } from '@/lib/utils';
 
 /**
  * Spec: Vol 21 · pages/borrower-workspace.md (overview + run_analysis / publish_score)
- * Platform: getClient + cases + latest credit-analysis; POST compose+publish.
- * Demo: seed borrower. Tasks/docs/notes remain demo-linked until later slices.
+ * Platform: getClient + cases + latest credit-analysis; POST compose+publish; case documents (LRP-107).
+ * Demo: seed borrower. Tasks/notes remain demo-linked until later slices.
  */
 export default function CrmBorrowerDetailPage() {
   const params = useParams();
@@ -34,6 +35,7 @@ export default function CrmBorrowerDetailPage() {
   const analysisQuery = useCrmLatestAnalysis(primaryCase?.id);
   const runAnalysis = useCreateCrmCreditAnalysis(primaryCase?.id);
   const canRunAnalysis = can('borrowers.manage');
+  const canManageDocs = can('documents.manage');
 
   if (isDemo) {
     const borrower = borrowers.find((b) => b.id === id);
@@ -239,12 +241,7 @@ export default function CrmBorrowerDetailPage() {
               Live task queue lands in a later CRM slice.
             </p>
           </div>
-          <div className="rounded-md border border-navy-900/10 bg-white p-4">
-            <h2 className="text-sm font-semibold">Documents</h2>
-            <p className="mt-2 text-sm text-slate-500">
-              Live document queue lands in a later CRM slice.
-            </p>
-          </div>
+          <CrmCaseDocumentsPanel caseId={primaryCase?.id} canUpload={canManageDocs} />
           <div className="rounded-md border border-navy-900/10 bg-white p-4">
             <h2 className="text-sm font-semibold">Activity</h2>
             <p className="mt-2 text-sm text-slate-500">
