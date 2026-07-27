@@ -67,6 +67,7 @@ from api.modules.billing.tax_calculation_models import (
     StripeTaxCalculationRun,
     StripeTaxCalculationRunStatus,
 )
+from api.modules.cases.consultation_pack_models import ConsultationPackRun
 from api.modules.cases.models import Case, CaseStatus
 from api.modules.client_portal.checklist_models import PortalChecklistCompletion
 from api.modules.client_portal.models import ClientPortalUser
@@ -335,6 +336,7 @@ __all__ = [
     "DisputeBureauSubmissionStatus",
     "DisputeStrategyRun",
     "CreditAnalysisRun",
+    "ConsultationPackRun",
     "IdentityTheft605bReadinessRun",
     "IdentityTheftAccountReview",
     "IdentityTheftConfirmation",

@@ -9,10 +9,13 @@ import { CrmCaseDocumentsPanel } from '@/components/crm/CrmCaseDocumentsPanel';
 import { ADVISORY_DISCLAIMER_SHORT } from '@/lib/design-tokens';
 import { useCrmAuth } from '@/lib/crm/auth';
 import {
+  useCreateCrmConsultationPack,
   useCreateCrmCreditAnalysis,
   useCrmClient,
   useCrmClientCases,
   useCrmLatestAnalysis,
+  useCrmLatestConsultationPack,
+  downloadCrmConsultationPack,
 } from '@/lib/crm/client-hooks';
 import { borrowers, notes, tasks, documents } from '@/lib/crm/data';
 import { STAGE_LABELS } from '@/lib/crm/nav';
@@ -34,6 +37,8 @@ export default function CrmBorrowerDetailPage() {
   const primaryCase = casesQuery.data?.[0];
   const analysisQuery = useCrmLatestAnalysis(primaryCase?.id);
   const runAnalysis = useCreateCrmCreditAnalysis(primaryCase?.id);
+  const packQuery = useCrmLatestConsultationPack(primaryCase?.id);
+  const createPack = useCreateCrmConsultationPack(primaryCase?.id);
   const canRunAnalysis = can('borrowers.manage');
   const canManageDocs = can('documents.manage');
 
@@ -114,6 +119,12 @@ export default function CrmBorrowerDetailPage() {
       ? runAnalysis.error.message
       : runAnalysis.error
         ? 'Could not run credit analysis.'
+        : null;
+  const packError =
+    createPack.error instanceof ApiClientError
+      ? createPack.error.message
+      : createPack.error
+        ? 'Could not generate consultation pack.'
         : null;
 
   return (
@@ -234,6 +245,52 @@ export default function CrmBorrowerDetailPage() {
               </p>
             ) : null}
             {runError ? <p className="mt-2 text-sm text-red-700">{runError}</p> : null}
+          </div>
+          <div className="rounded-md border border-navy-900/10 bg-white p-4">
+            <h2 className="text-sm font-semibold">Consultation pack</h2>
+            <p className="mt-2 text-sm text-slate-500">
+              Staff-gated draft artifacts after consultation (readiness snapshot, timeline, action
+              plan, status stub, partner notification draft). Never auto-sent.
+            </p>
+            {!primaryCase ? (
+              <p className="mt-3 text-sm text-amber-800">Link a case before generating a pack.</p>
+            ) : canRunAnalysis ? (
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center rounded-md bg-navy-900 px-3 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"
+                  disabled={createPack.isPending}
+                  onClick={() => createPack.mutate()}
+                >
+                  {createPack.isPending ? 'Generating…' : 'Generate draft pack'}
+                </button>
+                {packQuery.data ? (
+                  <button
+                    type="button"
+                    className="inline-flex items-center justify-center rounded-md border border-navy-900/20 px-3 py-2 text-sm font-medium text-navy-900"
+                    onClick={() =>
+                      void downloadCrmConsultationPack(primaryCase.id, packQuery.data!.id, 'zip')
+                    }
+                  >
+                    Download ZIP
+                  </button>
+                ) : null}
+              </div>
+            ) : (
+              <p className="mt-3 text-sm text-slate-500">
+                Requires borrowers.manage to generate packs.
+              </p>
+            )}
+            {packQuery.data ? (
+              <p className="mt-2 text-sm text-slate-600">
+                Latest draft · {formatDate(packQuery.data.generated_at)} · status{' '}
+                {packQuery.data.status}
+              </p>
+            ) : null}
+            {createPack.isSuccess ? (
+              <p className="mt-2 text-sm text-teal-800">Draft pack ready for staff review.</p>
+            ) : null}
+            {packError ? <p className="mt-2 text-sm text-red-700">{packError}</p> : null}
           </div>
           <div className="rounded-md border border-navy-900/10 bg-white p-4">
             <h2 className="text-sm font-semibold">Tasks</h2>

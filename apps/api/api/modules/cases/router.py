@@ -26,6 +26,11 @@ from api.modules.accounts.schemas import (
 from api.modules.accounts.service import AccountService
 from api.modules.auth.dependencies import get_current_user
 from api.modules.auth.models import User
+from api.modules.cases.consultation_pack_schemas import (
+    ConsultationPackListResponse,
+    ConsultationPackResponse,
+)
+from api.modules.cases.consultation_pack_service import ConsultationPackService
 from api.modules.cases.llm_summary import CaseLlmSummaryService
 from api.modules.cases.models import CasePriority, CaseStage, CaseStatus
 from api.modules.cases.schemas import (
@@ -95,6 +100,10 @@ def get_document_service(db: AsyncSession = Depends(get_db)) -> DocumentService:
 
 def get_credit_analysis_service(db: AsyncSession = Depends(get_db)) -> CreditAnalysisService:
     return CreditAnalysisService.from_session(db)
+
+
+def get_consultation_pack_service(db: AsyncSession = Depends(get_db)) -> ConsultationPackService:
+    return ConsultationPackService.from_session(db)
 
 
 def get_case_account_list_params(
@@ -433,6 +442,80 @@ async def export_credit_analysis_run(
     This endpoint never auto-transmits the document.
     """
     content, file_name, media_type = await service.export_run(
+        current_user,
+        case_id,
+        run_id,
+        export_format=export_format,
+    )
+    safe_name = sanitize_credit_analysis_filename(file_name)
+    return Response(
+        content=content,
+        media_type=media_type,
+        headers={"Content-Disposition": f'attachment; filename="{safe_name}"'},
+    )
+
+
+@router.post(
+    "/{case_id}/consultation-pack/runs",
+    response_model=ConsultationPackResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_consultation_pack_run(
+    case_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: ConsultationPackService = Depends(get_consultation_pack_service),
+) -> ConsultationPackResponse:
+    """Staff-gated consultation completed pack (draft artifacts; never auto-sent)."""
+    return await service.create_pack(current_user, case_id)
+
+
+@router.get(
+    "/{case_id}/consultation-pack/runs",
+    response_model=ConsultationPackListResponse,
+)
+async def list_consultation_pack_runs(
+    case_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: ConsultationPackService = Depends(get_consultation_pack_service),
+) -> ConsultationPackListResponse:
+    return await service.list_packs(current_user, case_id)
+
+
+@router.get(
+    "/{case_id}/consultation-pack/runs/latest",
+    response_model=ConsultationPackResponse,
+)
+async def get_latest_consultation_pack_run(
+    case_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: ConsultationPackService = Depends(get_consultation_pack_service),
+) -> ConsultationPackResponse:
+    return await service.get_latest(current_user, case_id)
+
+
+@router.get(
+    "/{case_id}/consultation-pack/runs/{run_id}",
+    response_model=ConsultationPackResponse,
+)
+async def get_consultation_pack_run(
+    case_id: uuid.UUID,
+    run_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: ConsultationPackService = Depends(get_consultation_pack_service),
+) -> ConsultationPackResponse:
+    return await service.get_pack(current_user, case_id, run_id)
+
+
+@router.get("/{case_id}/consultation-pack/runs/{run_id}/export")
+async def export_consultation_pack_run(
+    case_id: uuid.UUID,
+    run_id: uuid.UUID,
+    export_format: Literal["text", "zip"] = Query("zip", alias="export_format"),
+    current_user: User = Depends(get_current_user),
+    service: ConsultationPackService = Depends(get_consultation_pack_service),
+) -> Response:
+    """Operator-gated consultation pack export (text/zip). Never auto-transmitted."""
+    content, file_name, media_type = await service.export_pack(
         current_user,
         case_id,
         run_id,

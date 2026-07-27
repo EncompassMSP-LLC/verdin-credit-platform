@@ -42,7 +42,7 @@ Ops contract: [`../lrp-enterprise/04-operations/business-ops-package/`](../lrp-e
 | 10    | LRP-105 LO notifications center live                  | M2        | ✅     |
 | 11    | LRP-401 Readiness timeline UI                         | M2        | ✅     |
 | 12    | LRP-402 Bureau + Metro2 in readiness blockers         | M2        | ✅     |
-| 13    | LRP-204 Consultation completed pack                   | M2        | ☐      |
+| 13    | LRP-204 Consultation completed pack                   | M2        | ✅     |
 | 14    | LRP-201 Referral intake orchestrator job              | M3        | ☐      |
 | 15    | LRP-202 Notification matrix v1                        | M3        | ☐      |
 | 16    | LRP-203 CRM automation rules (persist)                | M3        | ☐      |
@@ -75,6 +75,13 @@ Deferred to [product backlog](../lrp-enterprise/15-roadmap/product-backlog.md): 
 - Master plan remapped to M1–M6 with traceability matrix, gap analysis, DoD, exit criteria
 - Living docs: backlog, roadmap, tech debt, risk register
 - ADR-013 — LRP edition on shared platform
+
+### LRP-204 — Consultation completed pack (2026-07-27)
+
+- `POST /cases/{id}/consultation-pack/runs` creates staff-gated **draft** artifacts (readiness snapshot, illustrative timeline, action plan, status stub, partner notification draft)
+- Export text/ZIP; `send_guardrails.auto_transmit=false`; partner notification stays `draft_never_sent`
+- CRM borrower workspace: Generate draft pack + Download ZIP
+- Migration `103_consultation_pack`; tests: `apps/api/tests/cases/test_consultation_pack.py`
 
 ### LRP-402 — Bureau + Metro2 in readiness blockers (2026-07-27)
 

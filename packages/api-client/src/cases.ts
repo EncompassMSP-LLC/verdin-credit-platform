@@ -504,6 +504,48 @@ export function getCreditAnalysisExportUrl(
   );
 }
 
+export interface ConsultationPackSummary {
+  id: string;
+  case_id: string;
+  generated_at: string;
+  status: string;
+  schema_version: string;
+  credit_analysis_run_id: string | null;
+}
+
+export interface ConsultationPack extends ConsultationPackSummary {
+  payload: Record<string, unknown>;
+  disclaimer: string;
+}
+
+export async function createConsultationPackRun(caseId: string): Promise<ConsultationPack> {
+  return request<ConsultationPack>(apiPath(`/cases/${caseId}/consultation-pack/runs`), {
+    method: 'POST',
+  });
+}
+
+export async function listConsultationPackRuns(
+  caseId: string,
+): Promise<{ items: ConsultationPackSummary[] }> {
+  return request<{ items: ConsultationPackSummary[] }>(
+    apiPath(`/cases/${caseId}/consultation-pack/runs`),
+  );
+}
+
+export async function getLatestConsultationPackRun(caseId: string): Promise<ConsultationPack> {
+  return request<ConsultationPack>(apiPath(`/cases/${caseId}/consultation-pack/runs/latest`));
+}
+
+export function getConsultationPackExportUrl(
+  caseId: string,
+  runId: string,
+  exportFormat: 'zip' | 'text' = 'zip',
+): string {
+  return apiPath(
+    `/cases/${caseId}/consultation-pack/runs/${runId}/export?export_format=${exportFormat}`,
+  );
+}
+
 export async function getLatestCaseDisputeStrategyRun(caseId: string): Promise<DisputeStrategyRun> {
   return request<DisputeStrategyRun>(apiPath(`/cases/${caseId}/dispute-strategy/runs/latest`));
 }
