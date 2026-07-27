@@ -3,7 +3,7 @@
 from api.core.constants import UserRole
 from api.modules.accounts.dispute_letter_models import DisputeLetter, DisputeLetterStatus
 from api.modules.accounts.models import Account
-from api.modules.auth.models import Organization, User
+from api.modules.auth.models import Organization, OrganizationType, User
 from api.modules.cases.models import Case, CasePriority, CaseStage, CaseStatus
 from api.modules.client_portal.models import ClientPortalUser
 from api.modules.clients.models import Client, ClientContact, ClientStatus, ContactRelationship
@@ -14,6 +14,7 @@ from api.modules.enterprise.mobile_passkey_readiness_models import MobilePasskey
 from api.modules.enterprise.native_mobile_passkey_client_models import NativeMobilePasskeyClientRun
 from api.modules.notifications.models import Notification, NotificationCategory
 from api.modules.org_admin.oauth_marketplace_publishing_models import OAuthMarketplacePublishingRun
+from api.modules.org_context.models import OrganizationFeatureFlag, OrgDemoFeature
 from api.modules.reporting.cross_org_benchmark_models import CrossOrgBenchmarkRun
 from api.modules.tasks.models import Task, TaskPriority, TaskStatus
 from api.modules.timeline.models import Communication, TimelineEvent
@@ -44,6 +45,9 @@ __all__ = [
     "Notification",
     "NotificationCategory",
     "Organization",
+    "OrganizationType",
+    "OrganizationFeatureFlag",
+    "OrgDemoFeature",
     "Task",
     "TaskPriority",
     "TaskStatus",

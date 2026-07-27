@@ -57,6 +57,20 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:5173,http://localhost:3000"
     public_app_url: str = "http://localhost:8080"
 
+    # LRP-109 — production organization mode guardrails
+    allow_demo_orgs: bool = Field(
+        default=True,
+        description="ALLOW_DEMO_ORGS — when false, demo capabilities are disabled globally",
+    )
+    enable_sample_data: bool = Field(
+        default=True,
+        description="ENABLE_SAMPLE_DATA — allow sample/demo data APIs for non-production orgs",
+    )
+    enable_demo_login: bool = Field(
+        default=True,
+        description="ENABLE_DEMO_LOGIN — server-side hint; production UI still forces demo auth off",
+    )
+
     dispute_return_name: str = "Ultimate Credit Repair LLC"
     dispute_return_address_line1: str = ""
     dispute_return_address_line2: str = ""
@@ -86,6 +100,12 @@ class Settings(BaseSettings):
             or self.minio_secret_key == _DEVELOPMENT_MINIO_SECRET_KEY
         ):
             raise ValueError("Production MinIO credentials must be explicitly configured")
+
+        # LRP-109: never allow demo pathways when APP_ENV=production
+        # (env vars documented for clarity; production always forces them off).
+        self.allow_demo_orgs = False
+        self.enable_sample_data = False
+        self.enable_demo_login = False
 
         return self
 

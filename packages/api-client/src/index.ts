@@ -26,6 +26,17 @@ export {
 } from './auth';
 
 export {
+  canShowDemoActions,
+  generateSampleBorrowers,
+  getOrganizationContext,
+  upsertOrganizationFeatureFlag,
+  type DemoSampleBorrowersResponse,
+  type OrgDemoFeature,
+  type OrganizationContext,
+  type OrganizationType,
+} from './orgContext';
+
+export {
   getDashboard,
   type DashboardAccounts,
   type DashboardAlertItem,

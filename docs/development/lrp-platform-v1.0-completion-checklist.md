@@ -33,34 +33,35 @@ Ops contract: [`../lrp-enterprise/04-operations/business-ops-package/`](../lrp-e
 | 1     | Charter — master release plan + living docs + ADR-013 | Kickoff   | ✅     |
 | 2     | LRP-108 Kill demo-mode for production orgs            | M1        | ✅     |
 | 3     | LRP-101 CRM partners/contacts live API                | M1        | ✅     |
-| 4     | LRP-102 CRM tasks + daily digest read model           | M1        | ☐      |
-| 5     | LRP-103 Referral intake from web form                 | M1        | ☐      |
-| 6     | LRP-107 Case documents in CRM borrower workspace      | M1        | ☐      |
-| 7     | LRP-104 Borrower portal task/readiness parity         | M2        | ☐      |
-| 8     | LRP-106 Readiness report in borrower portal           | M2        | ☐      |
-| 9     | LRP-105 LO notifications center live                  | M2        | ☐      |
-| 10    | LRP-401 Readiness timeline UI                         | M2        | ☐      |
-| 11    | LRP-402 Bureau + Metro2 in readiness blockers         | M2        | ☐      |
-| 12    | LRP-204 Consultation completed pack                   | M2        | ☐      |
-| 13    | LRP-201 Referral intake orchestrator job              | M3        | ☐      |
-| 14    | LRP-202 Notification matrix v1                        | M3        | ☐      |
-| 15    | LRP-203 CRM automation rules (persist)                | M3        | ☐      |
-| 16    | LRP-205 Appointment reminders                         | M3        | ☐      |
-| 17    | LRP-206 Partner nurture drip                          | M3        | ☐      |
-| 18    | LRP-207 Weekly status digest job                      | M3        | ☐      |
-| 19    | LRP-301 Realtor partner role + login                  | M4        | ☐      |
-| 20    | LRP-302 Realtor portal MVP                            | M4        | ☐      |
-| 21    | LRP-303 Borrower UAT script + fixes                   | M4        | ☐      |
-| 22    | LRP-304 LO UAT script + fixes                         | M4        | ☐      |
-| 23    | LRP-403 Dispute strategy suggestions (advisory)       | M4        | ☐      |
-| 24    | LRP-405 FAQ/KB retrieval bot                          | M4        | ☐      |
-| 25    | LRP-406 Letter draft augment (staff-gated)            | M4        | ☐      |
-| 26    | LRP-305 Planned marketing landings (`/builders` etc.) | M5        | ☐      |
-| 27    | LRP-501 Partner isolation audit                       | M6        | ☐      |
-| 28    | LRP-502 Automation audit events                       | M6        | ☐      |
-| 29    | LRP-503 LRP smoke E2E in CI                           | M6        | ☐      |
-| 30    | LRP-504 Perf budgets                                  | M6        | ☐      |
-| 31    | LRP-505 Release notes + tag `lrp-platform-v1.0.0`     | M6        | ☐      |
+| 4     | LRP-109 Production organization mode (org type/flags) | M1        | ✅     |
+| 5     | LRP-102 CRM tasks + daily digest read model           | M1        | ☐      |
+| 6     | LRP-103 Referral intake from web form                 | M1        | ☐      |
+| 7     | LRP-107 Case documents in CRM borrower workspace      | M1        | ☐      |
+| 8     | LRP-104 Borrower portal task/readiness parity         | M2        | ☐      |
+| 9     | LRP-106 Readiness report in borrower portal           | M2        | ☐      |
+| 10    | LRP-105 LO notifications center live                  | M2        | ☐      |
+| 11    | LRP-401 Readiness timeline UI                         | M2        | ☐      |
+| 12    | LRP-402 Bureau + Metro2 in readiness blockers         | M2        | ☐      |
+| 13    | LRP-204 Consultation completed pack                   | M2        | ☐      |
+| 14    | LRP-201 Referral intake orchestrator job              | M3        | ☐      |
+| 15    | LRP-202 Notification matrix v1                        | M3        | ☐      |
+| 16    | LRP-203 CRM automation rules (persist)                | M3        | ☐      |
+| 17    | LRP-205 Appointment reminders                         | M3        | ☐      |
+| 18    | LRP-206 Partner nurture drip                          | M3        | ☐      |
+| 19    | LRP-207 Weekly status digest job                      | M3        | ☐      |
+| 20    | LRP-301 Realtor partner role + login                  | M4        | ☐      |
+| 21    | LRP-302 Realtor portal MVP                            | M4        | ☐      |
+| 22    | LRP-303 Borrower UAT script + fixes                   | M4        | ☐      |
+| 23    | LRP-304 LO UAT script + fixes                         | M4        | ☐      |
+| 24    | LRP-403 Dispute strategy suggestions (advisory)       | M4        | ☐      |
+| 25    | LRP-405 FAQ/KB retrieval bot                          | M4        | ☐      |
+| 26    | LRP-406 Letter draft augment (staff-gated)            | M4        | ☐      |
+| 27    | LRP-305 Planned marketing landings (`/builders` etc.) | M5        | ☐      |
+| 28    | LRP-501 Partner isolation audit                       | M6        | ☐      |
+| 29    | LRP-502 Automation audit events                       | M6        | ☐      |
+| 30    | LRP-503 LRP smoke E2E in CI                           | M6        | ☐      |
+| 31    | LRP-504 Perf budgets                                  | M6        | ☐      |
+| 32    | LRP-505 Release notes + tag `lrp-platform-v1.0.0`     | M6        | ☐      |
 
 Deferred to [product backlog](../lrp-enterprise/15-roadmap/product-backlog.md): LRP-404 educational simulator (PB-006); authenticated builder/attorney/advisor portals; full public KB depth.
 
@@ -90,6 +91,15 @@ Deferred to [product backlog](../lrp-enterprise/15-roadmap/product-backlog.md): 
 - Login forms hide demo credential hints in production
 - Tests: `pnpm --filter @verdin/lrp-web test:auth`
 - Docs: AUTH-REALMS.md, `.env.example`, traceability matrix
+
+### LRP-109 — Production organization mode (2026-07-27)
+
+- `organizations.organization_type` enum: `demo|internal|partner|production` (migration `100_organization_type_flags`; existing orgs default PRODUCTION; `verdin-demo` → DEMO)
+- Per-org feature flags table + `/org-context` resolve path (auth → org → flags)
+- Demo APIs reject PRODUCTION; `ALLOW_DEMO_ORGS` / `ENABLE_SAMPLE_DATA` / `ENABLE_DEMO_LOGIN` (forced off when `APP_ENV=production`)
+- Dedicated seeds: `scripts/seed_demo/seed_demo_{org,users,borrowers,referrals}.py` (refuse production)
+- CRM Admin hides Generate Demo Data / Reset Workspace for production orgs
+- Tests: `apps/api/tests/org_context/test_production_org_mode.py`
 
 ### Definition of Done (every slice)
 
