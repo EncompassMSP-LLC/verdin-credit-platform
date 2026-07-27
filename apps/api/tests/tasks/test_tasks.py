@@ -243,3 +243,44 @@ def test_complete_task_conflict_when_already_completed(
     api_client.post(f"/api/v1/tasks/{task_id}/complete", headers=manager_headers)
     again = api_client.post(f"/api/v1/tasks/{task_id}/complete", headers=manager_headers)
     assert again.status_code == 409
+
+
+def test_daily_task_digest(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    from datetime import UTC, datetime, timedelta
+
+    now = datetime.now(UTC)
+    overdue = api_client.post(
+        "/api/v1/tasks",
+        headers=manager_headers,
+        json={
+            "title": f"Overdue-{uuid.uuid4().hex[:6]}",
+            "case_id": sample_case_id,
+            "due_date": (now - timedelta(days=2)).isoformat(),
+            "priority": "high",
+        },
+    )
+    assert overdue.status_code == 201, overdue.text
+
+    due_today = api_client.post(
+        "/api/v1/tasks",
+        headers=manager_headers,
+        json={
+            "title": f"DueToday-{uuid.uuid4().hex[:6]}",
+            "case_id": sample_case_id,
+            "due_date": (now + timedelta(hours=2)).isoformat(),
+        },
+    )
+    assert due_today.status_code == 201, due_today.text
+
+    digest = api_client.get("/api/v1/tasks/digest/daily", headers=manager_headers)
+    assert digest.status_code == 200, digest.text
+    body = digest.json()
+    assert body["counts"]["open"] >= 2
+    assert body["counts"]["overdue"] >= 1
+    assert body["counts"]["due_today"] >= 1
+    assert any(item["id"] == overdue.json()["id"] for item in body["overdue_items"])
+    assert any(item["id"] == due_today.json()["id"] for item in body["due_today_items"])

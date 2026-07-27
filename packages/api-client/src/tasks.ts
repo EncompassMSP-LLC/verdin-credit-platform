@@ -90,6 +90,29 @@ export async function listTasks(params: ListTasksParams = {}): Promise<Paginated
   return request<PaginatedResponse<Task>>(`${apiPath('/tasks')}${buildQuery(params)}`);
 }
 
+export interface TaskDailyDigestCounts {
+  open: number;
+  overdue: number;
+  due_today: number;
+  completed_today: number;
+  assigned_to_me_open: number;
+}
+
+export interface TaskDailyDigest {
+  organization_id: string;
+  as_of: string;
+  day_start: string;
+  day_end: string;
+  counts: TaskDailyDigestCounts;
+  overdue_items: Task[];
+  due_today_items: Task[];
+  my_open_items: Task[];
+}
+
+export async function getDailyTaskDigest(): Promise<TaskDailyDigest> {
+  return request<TaskDailyDigest>(apiPath('/tasks/digest/daily'));
+}
+
 export async function getTask(taskId: string): Promise<Task> {
   return request<Task>(apiPath(`/tasks/${taskId}`));
 }

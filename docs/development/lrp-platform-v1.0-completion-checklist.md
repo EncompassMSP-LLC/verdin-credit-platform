@@ -34,7 +34,7 @@ Ops contract: [`../lrp-enterprise/04-operations/business-ops-package/`](../lrp-e
 | 2     | LRP-108 Kill demo-mode for production orgs            | M1        | ✅     |
 | 3     | LRP-101 CRM partners/contacts live API                | M1        | ✅     |
 | 4     | LRP-109 Production organization mode (org type/flags) | M1        | ✅     |
-| 5     | LRP-102 CRM tasks + daily digest read model           | M1        | ☐      |
+| 5     | LRP-102 CRM tasks + daily digest read model           | M1        | ✅     |
 | 6     | LRP-103 Referral intake from web form                 | M1        | ☐      |
 | 7     | LRP-107 Case documents in CRM borrower workspace      | M1        | ☐      |
 | 8     | LRP-104 Borrower portal task/readiness parity         | M2        | ☐      |
@@ -91,6 +91,14 @@ Deferred to [product backlog](../lrp-enterprise/15-roadmap/product-backlog.md): 
 - Login forms hide demo credential hints in production
 - Tests: `pnpm --filter @verdin/lrp-web test:auth`
 - Docs: AUTH-REALMS.md, `.env.example`, traceability matrix
+
+### LRP-102 — CRM tasks + daily digest (2026-07-27)
+
+- `GET /tasks/digest/daily` — org-scoped counts (open/overdue/due today/completed today/assigned to me) + sample item lists
+- `apps/lrp-web` `/crm/tasks` loads live `listTasks` + digest strip (demo seed fallback retained)
+- `@verdin/api-client` `getDailyTaskDigest`
+- Tests: `test_daily_task_digest` in `apps/api/tests/tasks/test_tasks.py`
+- Partner health scoring / full CRM activity taxonomy remain deferred (backlog / LRP-203+)
 
 ### LRP-109 — Production organization mode (2026-07-27)
 

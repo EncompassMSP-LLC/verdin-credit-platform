@@ -1,7 +1,7 @@
 """Task management service — business logic for task CRUD."""
 
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -21,6 +21,8 @@ from api.modules.tasks.permissions import TASK_DELETE_ROLE, TASK_WRITE_ROLE
 from api.modules.tasks.repository import TaskListFilters, TaskRepository
 from api.modules.tasks.schemas import (
     TaskCreate,
+    TaskDailyDigestCounts,
+    TaskDailyDigestResponse,
     TaskListParams,
     TaskResponse,
     TaskUpdate,
@@ -32,6 +34,8 @@ from api.modules.timeline.builders import (
     task_reopened_event,
     task_updated_event,
 )
+
+_TERMINAL = (TaskStatus.COMPLETED, TaskStatus.CANCELED)
 
 
 class TaskService:
@@ -225,6 +229,74 @@ class TaskService:
             total=total,
             page=params.page,
             page_size=params.page_size,
+        )
+
+    async def get_daily_digest(self, user: User) -> TaskDailyDigestResponse:
+        """Org-scoped CRM daily digest: overdue, due today, completed today, my open."""
+        organization_id = self._require_organization(user)
+        now = datetime.now(UTC)
+        day_start = datetime(now.year, now.month, now.day, tzinfo=UTC)
+        day_end = day_start + timedelta(days=1)
+
+        open_count = await self._tasks.count_matching(
+            organization_id=organization_id,
+            statuses_exclude=_TERMINAL,
+        )
+        overdue_count = await self._tasks.count_matching(
+            organization_id=organization_id,
+            statuses_exclude=_TERMINAL,
+            due_before_exclusive=day_start,
+        )
+        due_today_count = await self._tasks.count_matching(
+            organization_id=organization_id,
+            statuses_exclude=_TERMINAL,
+            due_after=day_start,
+            due_before_exclusive=day_end,
+        )
+        completed_today = await self._tasks.count_matching(
+            organization_id=organization_id,
+            status=TaskStatus.COMPLETED,
+            completed_after=day_start,
+            completed_before=day_end,
+        )
+        my_open = await self._tasks.count_matching(
+            organization_id=organization_id,
+            statuses_exclude=_TERMINAL,
+            assigned_user_id=user.id,
+        )
+
+        overdue_items = await self._tasks.list_for_digest(
+            organization_id=organization_id,
+            due_before_exclusive=day_start,
+            limit=10,
+        )
+        due_today_items = await self._tasks.list_for_digest(
+            organization_id=organization_id,
+            due_after=day_start,
+            due_before_exclusive=day_end,
+            limit=10,
+        )
+        my_open_items = await self._tasks.list_for_digest(
+            organization_id=organization_id,
+            assigned_user_id=user.id,
+            limit=10,
+        )
+
+        return TaskDailyDigestResponse(
+            organization_id=organization_id,
+            as_of=now,
+            day_start=day_start,
+            day_end=day_end,
+            counts=TaskDailyDigestCounts(
+                open=open_count,
+                overdue=overdue_count,
+                due_today=due_today_count,
+                completed_today=completed_today,
+                assigned_to_me_open=my_open,
+            ),
+            overdue_items=[TaskResponse.from_model(t) for t in overdue_items],
+            due_today_items=[TaskResponse.from_model(t) for t in due_today_items],
+            my_open_items=[TaskResponse.from_model(t) for t in my_open_items],
         )
 
     async def get_task(self, user: User, task_id: uuid.UUID) -> TaskResponse:
