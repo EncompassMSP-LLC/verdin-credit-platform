@@ -71,6 +71,16 @@ class Settings(BaseSettings):
         description="ENABLE_DEMO_LOGIN — server-side hint; production UI still forces demo auth off",
     )
 
+    # LRP-103 — public referral web-form intake
+    referral_intake_enabled: bool = Field(
+        default=True,
+        description="REFERRAL_INTAKE_ENABLED — accept public partner referral form posts",
+    )
+    referral_intake_organization_slug: str = Field(
+        default="verdin-demo",
+        description="REFERRAL_INTAKE_ORGANIZATION_SLUG — CRO org that owns web-form referrals",
+    )
+
     dispute_return_name: str = "Ultimate Credit Repair LLC"
     dispute_return_address_line1: str = ""
     dispute_return_address_line2: str = ""

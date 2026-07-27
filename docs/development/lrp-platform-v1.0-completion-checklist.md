@@ -35,7 +35,7 @@ Ops contract: [`../lrp-enterprise/04-operations/business-ops-package/`](../lrp-e
 | 3     | LRP-101 CRM partners/contacts live API                | M1        | ✅     |
 | 4     | LRP-109 Production organization mode (org type/flags) | M1        | ✅     |
 | 5     | LRP-102 CRM tasks + daily digest read model           | M1        | ✅     |
-| 6     | LRP-103 Referral intake from web form                 | M1        | ☐      |
+| 6     | LRP-103 Referral intake from web form                 | M1        | ✅     |
 | 7     | LRP-107 Case documents in CRM borrower workspace      | M1        | ☐      |
 | 8     | LRP-104 Borrower portal task/readiness parity         | M2        | ☐      |
 | 9     | LRP-106 Readiness report in borrower portal           | M2        | ☐      |
@@ -91,6 +91,15 @@ Deferred to [product backlog](../lrp-enterprise/15-roadmap/product-backlog.md): 
 - Login forms hide demo credential hints in production
 - Tests: `pnpm --filter @verdin/lrp-web test:auth`
 - Docs: AUTH-REALMS.md, `.env.example`, traceability matrix
+
+### LRP-103 — Referral intake from web form (2026-07-27)
+
+- Public `POST /mortgage-partner/referral-intake` + `GET .../status` (requires `ENABLE_MORTGAGE_PARTNER` + `REFERRAL_INTAKE_ENABLED`)
+- Creates client, intake case, partner referral (default milestones), and ops task; audit row in `partner_referral_intake_runs`
+- Quarantines free-text containing SSN patterns; duplicate email/phone → `duplicate_review` + high-priority task
+- `apps/lrp-web` `/resources/partner-kit/referral` posts live (optional `?partnership_id=`); thanks page at `/referral/thanks`
+- Tests: `apps/api/tests/mortgage_partner/test_referral_intake.py`
+- Orchestrator notifications (thank-you emails, round-robin assign) deferred to LRP-201
 
 ### LRP-102 — CRM tasks + daily digest (2026-07-27)
 

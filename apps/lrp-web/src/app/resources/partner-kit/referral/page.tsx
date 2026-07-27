@@ -1,11 +1,18 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState, type FormEvent } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import {
+  ApiClientError,
+  configureApiClient,
+  getReferralIntakeStatus,
+  submitReferralIntake,
+} from '@verdin/api-client';
 import { PageHero } from '@/components/sections/PageHero';
 import { Button } from '@/components/ui/Button';
 import { Section } from '@/components/ui/Section';
 import { ADVISORY_DISCLAIMER_SHORT } from '@/lib/design-tokens';
+import { getApiBaseUrl } from '@/lib/platform/config';
 
 type FormState = {
   partnerOrg: string;
@@ -37,14 +44,34 @@ const initial: FormState = {
 
 export default function ReferralFormPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const partnershipId = searchParams.get('partnership_id');
+
   const [form, setForm] = useState<FormState>(initial);
   const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [intakeReady, setIntakeReady] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    configureApiClient({ baseUrl: getApiBaseUrl() });
+    let cancelled = false;
+    getReferralIntakeStatus()
+      .then((status) => {
+        if (!cancelled) setIntakeReady(status.referral_intake_enabled);
+      })
+      .catch(() => {
+        if (!cancelled) setIntakeReady(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   function update<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
-  function onSubmit(event: FormEvent) {
+  async function onSubmit(event: FormEvent) {
     event.preventDefault();
     setError(null);
     if (
@@ -56,33 +83,50 @@ export default function ReferralFormPage() {
       setError('Please complete all required fields.');
       return;
     }
+    if (!form.borrowerEmail.trim() && !form.borrowerPhone.trim()) {
+      setError('Borrower email or phone is required.');
+      return;
+    }
     if (!form.consent) {
       setError('Borrower consent attestation is required before submitting a referral.');
       return;
     }
+    if (intakeReady === false) {
+      setError('Referral intake is temporarily unavailable. Please try again later.');
+      return;
+    }
 
-    const params = new URLSearchParams({
-      intent: 'lender',
-      resource: 'referral',
-      partner: form.partnerOrg.trim(),
-      lo: form.loName.trim(),
-      email: form.loEmail.trim(),
-      borrower: form.borrowerName.trim(),
-      message: [
-        `Partner: ${form.partnerOrg}`,
-        `LO: ${form.loName} <${form.loEmail}> ${form.loPhone}`,
-        `Borrower: ${form.borrowerName}`,
-        form.borrowerEmail ? `Borrower email: ${form.borrowerEmail}` : null,
-        form.borrowerPhone ? `Borrower phone: ${form.borrowerPhone}` : null,
-        form.intent ? `Intent: ${form.intent}` : null,
-        form.gaps ? `Known gaps: ${form.gaps}` : null,
-        form.notes ? `Notes: ${form.notes}` : null,
-        'Consent: partner attested borrower consented to referral contact.',
-      ]
-        .filter(Boolean)
-        .join('\n'),
-    });
-    router.push(`/contact?${params.toString()}`);
+    setSubmitting(true);
+    try {
+      const result = await submitReferralIntake({
+        partner_org_name: form.partnerOrg.trim(),
+        lo_name: form.loName.trim(),
+        lo_email: form.loEmail.trim(),
+        lo_phone: form.loPhone.trim() || null,
+        borrower_name: form.borrowerName.trim(),
+        borrower_email: form.borrowerEmail.trim() || null,
+        borrower_phone: form.borrowerPhone.trim() || null,
+        product_intent: form.intent.trim() || null,
+        known_gaps: form.gaps.trim() || null,
+        notes: form.notes.trim() || null,
+        consent_attested: true,
+        partnership_id: partnershipId,
+      });
+      const params = new URLSearchParams({
+        intake_id: result.intake_id,
+        status: result.status,
+        message: result.message,
+      });
+      router.push(`/resources/partner-kit/referral/thanks?${params.toString()}`);
+    } catch (err) {
+      const message =
+        err instanceof ApiClientError
+          ? err.message
+          : 'Could not submit referral. Confirm the API is running and try again.';
+      setError(message);
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   const fieldClass =
@@ -104,6 +148,12 @@ export default function ReferralFormPage() {
 
       <Section tone="white">
         <p className="mb-6 text-sm text-ink-700 print:mb-4">{ADVISORY_DISCLAIMER_SHORT}</p>
+        {intakeReady === false ? (
+          <p className="mb-4 rounded-md border border-gold-500/30 bg-gold-500/10 px-4 py-3 text-sm text-navy-900">
+            Live intake is offline for this environment. Form submission will be blocked until
+            referral intake is enabled on the API.
+          </p>
+        ) : null}
         {error ? (
           <p className="mb-4 rounded-md border border-critical/30 bg-critical/10 px-4 py-3 text-sm text-critical print:hidden">
             {error}
@@ -222,8 +272,8 @@ export default function ReferralFormPage() {
           </label>
 
           <div className="flex flex-wrap gap-3 print:hidden">
-            <Button type="submit" variant="primary">
-              Submit referral request
+            <Button type="submit" variant="primary" disabled={submitting || intakeReady === false}>
+              {submitting ? 'Submitting…' : 'Submit referral request'}
             </Button>
             <Button type="button" variant="secondary" onClick={() => window.print()}>
               Print

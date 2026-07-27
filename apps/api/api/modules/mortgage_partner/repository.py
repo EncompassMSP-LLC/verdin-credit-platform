@@ -17,6 +17,8 @@ from api.modules.mortgage_partner.models import (
     PartnerContact,
     PartnerLoanMilestone,
     PartnerReferral,
+    PartnerReferralIntakeRun,
+    PartnershipStatus,
     ReferralStatus,
 )
 
@@ -436,3 +438,75 @@ class MortgagePartnerRepository:
             .limit(limit)
         )
         return list(result.scalars().all())
+
+    async def get_organization_by_slug(self, slug: str) -> Organization | None:
+        result = await self._session.execute(
+            select(Organization).where(
+                Organization.slug == slug,
+                Organization.deleted_at.is_(None),
+                Organization.is_active.is_(True),
+            )
+        )
+        return result.scalar_one_or_none()
+
+    async def get_first_active_partnership(
+        self, cro_organization_id: uuid.UUID
+    ) -> OrgPartnership | None:
+        result = await self._session.execute(
+            select(OrgPartnership)
+            .where(
+                OrgPartnership.cro_organization_id == cro_organization_id,
+                OrgPartnership.status == PartnershipStatus.ACTIVE,
+                OrgPartnership.deleted_at.is_(None),
+            )
+            .order_by(OrgPartnership.created_at.asc())
+            .limit(1)
+        )
+        return result.scalar_one_or_none()
+
+    async def find_open_client_by_contact(
+        self,
+        organization_id: uuid.UUID,
+        *,
+        email: str | None,
+        phone: str | None,
+    ) -> Client | None:
+        if email:
+            result = await self._session.execute(
+                select(Client).where(
+                    Client.organization_id == organization_id,
+                    Client.email == email,
+                    Client.deleted_at.is_(None),
+                )
+            )
+            found = result.scalar_one_or_none()
+            if found is not None:
+                return found
+        if phone:
+            result = await self._session.execute(
+                select(Client).where(
+                    Client.organization_id == organization_id,
+                    Client.phone == phone,
+                    Client.deleted_at.is_(None),
+                )
+            )
+            return result.scalar_one_or_none()
+        return None
+
+    async def create_intake_run(self, run: PartnerReferralIntakeRun) -> PartnerReferralIntakeRun:
+        self._session.add(run)
+        await self._session.flush()
+        await self._session.refresh(run)
+        return run
+
+    async def create_client(self, client: Client) -> Client:
+        self._session.add(client)
+        await self._session.flush()
+        await self._session.refresh(client)
+        return client
+
+    async def create_case(self, case: Case) -> Case:
+        self._session.add(case)
+        await self._session.flush()
+        await self._session.refresh(case)
+        return case

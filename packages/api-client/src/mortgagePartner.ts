@@ -432,3 +432,50 @@ export function getReferralReadinessReportExportUrl(
     `/mortgage-partner/partnerships/${partnershipId}/referrals/${referralId}/readiness-report/export?format=${format}`,
   );
 }
+
+export interface ReferralIntakeStatus {
+  referral_intake_enabled: boolean;
+  organization_slug: string | null;
+  blockers: string[];
+}
+
+export interface ReferralIntakeInput {
+  partner_org_name: string;
+  lo_name: string;
+  lo_email: string;
+  lo_phone?: string | null;
+  borrower_name: string;
+  borrower_email?: string | null;
+  borrower_phone?: string | null;
+  product_intent?: string | null;
+  known_gaps?: string | null;
+  notes?: string | null;
+  consent_attested: boolean;
+  partnership_id?: string | null;
+}
+
+export interface ReferralIntakeResult {
+  intake_id: string;
+  status: string;
+  partnership_id: string | null;
+  referral_id: string | null;
+  client_id: string | null;
+  case_id: string | null;
+  task_id: string | null;
+  message: string;
+  quarantine_reason?: string | null;
+}
+
+export function getReferralIntakeStatus(): Promise<ReferralIntakeStatus> {
+  return request<ReferralIntakeStatus>(apiPath('/mortgage-partner/referral-intake/status'), {
+    auth: false,
+  });
+}
+
+export function submitReferralIntake(input: ReferralIntakeInput): Promise<ReferralIntakeResult> {
+  return request<ReferralIntakeResult>(apiPath('/mortgage-partner/referral-intake'), {
+    method: 'POST',
+    body: input,
+    auth: false,
+  });
+}
