@@ -100,7 +100,7 @@ export default function ReadinessPage() {
           <PortalCard
             className="mt-6"
             title="Current blockers"
-            description="Resolve these with your advisor to move toward Lending Ready."
+            description="Tradeline, bureau mismatch, and Metro 2 consistency items that may delay readiness packaging."
             action={
               <Link href="/portal/tasks" className="text-sm font-medium text-gold-700">
                 Open tasks →
