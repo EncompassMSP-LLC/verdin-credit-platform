@@ -38,7 +38,7 @@ Ops contract: [`../lrp-enterprise/04-operations/business-ops-package/`](../lrp-e
 | 6     | LRP-103 Referral intake from web form                 | M1        | ✅     |
 | 7     | LRP-107 Case documents in CRM borrower workspace      | M1        | ✅     |
 | 8     | LRP-104 Borrower portal task/readiness parity         | M2        | ✅     |
-| 9     | LRP-106 Readiness report in borrower portal           | M2        | ☐      |
+| 9     | LRP-106 Readiness report in borrower portal           | M2        | ✅     |
 | 10    | LRP-105 LO notifications center live                  | M2        | ☐      |
 | 11    | LRP-401 Readiness timeline UI                         | M2        | ☐      |
 | 12    | LRP-402 Bureau + Metro2 in readiness blockers         | M2        | ☐      |
@@ -75,6 +75,12 @@ Deferred to [product backlog](../lrp-enterprise/15-roadmap/product-backlog.md): 
 - Master plan remapped to M1–M6 with traceability matrix, gap analysis, DoD, exit criteria
 - Living docs: backlog, roadmap, tech debt, risk register
 - ADR-013 — LRP edition on shared platform
+
+### LRP-106 — Readiness report in borrower portal (2026-07-27)
+
+- `GET /portal/cases/{id}/readiness-report` + `/export?format=text|pdf` — band-first borrower report (no numeric overall score)
+- `apps/lrp-web` `/portal/reports` view + PDF/text download; nav entry
+- Tests: `apps/api/tests/client_portal/test_portal_readiness_report.py`
 
 ### LRP-104 — Borrower portal task/readiness parity (2026-07-27)
 

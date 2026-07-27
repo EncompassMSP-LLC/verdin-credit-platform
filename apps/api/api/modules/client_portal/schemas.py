@@ -2,6 +2,7 @@
 
 import uuid
 from datetime import datetime
+from typing import Any
 
 from pydantic import EmailStr
 
@@ -117,6 +118,23 @@ class PortalChecklistResponse(BaseSchema):
 
 class PortalChecklistUpdateRequest(BaseSchema):
     status: str
+
+
+class PortalReadinessReportResponse(BaseSchema):
+    """Borrower-facing readiness report (band is source of truth; LRP-106)."""
+
+    case_id: uuid.UUID
+    credit_analysis_run_id: uuid.UUID
+    band: str
+    updated_at: datetime
+    generated_at: datetime
+    reports_evaluated: int
+    tradelines_evaluated: int
+    formula_version: str
+    score_version: str
+    disclaimer: str
+    dimensions: list[dict[str, Any]]
+    blockers: list[dict[str, Any]]
 
 
 class PortalPushSubscribeRequest(BaseSchema):

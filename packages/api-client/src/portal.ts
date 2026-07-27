@@ -414,6 +414,32 @@ export async function getPortalCaseReadiness(caseId: string): Promise<PortalCase
   return request<PortalCaseReadiness>(apiPath(`/portal/cases/${caseId}/readiness`));
 }
 
+export interface PortalReadinessReport {
+  case_id: string;
+  credit_analysis_run_id: string;
+  band: string;
+  updated_at: string;
+  generated_at: string;
+  reports_evaluated: number;
+  tradelines_evaluated: number;
+  formula_version: string;
+  score_version: string;
+  disclaimer: string;
+  dimensions: Array<{ key?: string; label?: string; score?: number; weight?: number }>;
+  blockers: Array<{ id?: string; title?: string; impact?: string; action?: string }>;
+}
+
+export async function getPortalCaseReadinessReport(caseId: string): Promise<PortalReadinessReport> {
+  return request<PortalReadinessReport>(apiPath(`/portal/cases/${caseId}/readiness-report`));
+}
+
+export function getPortalCaseReadinessReportExportUrl(
+  caseId: string,
+  format: 'text' | 'pdf' = 'pdf',
+): string {
+  return apiPath(`/portal/cases/${caseId}/readiness-report/export?format=${format}`);
+}
+
 export async function getPortalCaseInsights(caseId: string): Promise<PortalCaseInsights> {
   return request<PortalCaseInsights>(apiPath(`/portal/cases/${caseId}/insights`));
 }

@@ -6,14 +6,24 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.core.feature_flags import FeatureFlag, is_feature_enabled
-from api.modules.accounts.credit_analysis_schemas import PortalCaseReadinessResponse
+from api.modules.accounts.credit_analysis import ADVISORY_DISCLAIMER
+from api.modules.accounts.credit_analysis_run_repository import CreditAnalysisRunRepository
+from api.modules.accounts.credit_analysis_schemas import (
+    CreditAnalysisRunResponse,
+    PortalCaseReadinessResponse,
+)
 from api.modules.accounts.credit_analysis_service import CreditAnalysisService
 from api.modules.client_portal.cases_repository import ClientPortalCasesRepository
 from api.modules.client_portal.models import ClientPortalUser
+from api.modules.client_portal.portal_readiness_export import (
+    PortalReadinessExportFormat,
+    build_portal_readiness_export,
+)
 from api.modules.client_portal.schemas import (
     PortalCaseDetailResponse,
     PortalCaseProgressResponse,
     PortalCaseSummaryResponse,
+    PortalReadinessReportResponse,
 )
 from api.modules.clients.models import Client
 from api.modules.clients.repository import ClientRepository
@@ -25,6 +35,7 @@ class ClientPortalCasesService:
         self._cases = ClientPortalCasesRepository(session)
         self._clients = ClientRepository(session)
         self._credit_analysis = CreditAnalysisService(session)
+        self._runs = CreditAnalysisRunRepository(session)
 
     @classmethod
     def from_session(cls, session: AsyncSession) -> "ClientPortalCasesService":
@@ -146,3 +157,100 @@ class ClientPortalCasesService:
             organization_id=portal_user.organization_id,
             case_id=case.id,
         )
+
+    async def get_case_readiness_report(
+        self,
+        portal_user: ClientPortalUser,
+        case_id: uuid.UUID,
+    ) -> PortalReadinessReportResponse:
+        """Published readiness report for borrower view/download (LRP-106)."""
+        self._require_enabled()
+        client, contact_emails = await self._resolve_client_context(portal_user)
+        case = await self._cases.get_case_for_client(
+            case_id,
+            organization_id=portal_user.organization_id,
+            client=client,
+            portal_email=portal_user.email,
+            contact_emails=contact_emails,
+        )
+        if case is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Case not found",
+            )
+        run = await self._runs.get_latest_for_case(
+            organization_id=portal_user.organization_id,
+            case_id=case.id,
+            status="published",
+        )
+        if run is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Readiness report not published yet",
+            )
+        payload = run.payload or {}
+        return PortalReadinessReportResponse(
+            case_id=case.id,
+            credit_analysis_run_id=run.id,
+            band=run.band,
+            updated_at=run.published_at or run.generated_at,
+            generated_at=run.generated_at,
+            reports_evaluated=run.reports_evaluated,
+            tradelines_evaluated=run.tradelines_evaluated,
+            formula_version=run.formula_version,
+            score_version=run.score_version,
+            disclaimer=payload.get("disclaimer") or ADVISORY_DISCLAIMER,
+            dimensions=list(payload.get("dimensions") or []),
+            blockers=list(payload.get("blockers") or []),
+        )
+
+    async def export_case_readiness_report(
+        self,
+        portal_user: ClientPortalUser,
+        case_id: uuid.UUID,
+        *,
+        export_format: PortalReadinessExportFormat,
+    ) -> tuple[bytes, str, str]:
+        """Band-first text/PDF export for the borrower. Never auto-transmitted."""
+        self._require_enabled()
+        client, contact_emails = await self._resolve_client_context(portal_user)
+        case = await self._cases.get_case_for_client(
+            case_id,
+            organization_id=portal_user.organization_id,
+            client=client,
+            portal_email=portal_user.email,
+            contact_emails=contact_emails,
+        )
+        if case is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Case not found",
+            )
+        run = await self._runs.get_latest_for_case(
+            organization_id=portal_user.organization_id,
+            case_id=case.id,
+            status="published",
+        )
+        if run is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Readiness report not published yet",
+            )
+        run_response = CreditAnalysisRunResponse(
+            id=run.id,
+            case_id=run.case_id,
+            generated_at=run.generated_at,
+            reports_evaluated=run.reports_evaluated,
+            tradelines_evaluated=run.tradelines_evaluated,
+            borrower_readiness_score=run.borrower_readiness_score,
+            mortgage_readiness_score=run.mortgage_readiness_score,
+            schema_version=run.schema_version,
+            band=run.band,
+            status=run.status,
+            payload=run.payload,
+            formula_version=run.formula_version,
+            score_version=run.score_version,
+            inputs_hash=run.inputs_hash,
+            published_at=run.published_at,
+        )
+        return build_portal_readiness_export(run_response, export_format)

@@ -14,7 +14,8 @@ export type PortalNavItem = {
     | 'learning'
     | 'notifications'
     | 'profile'
-    | 'settings';
+    | 'settings'
+    | 'reports';
   badge?: number;
 };
 
@@ -22,6 +23,7 @@ export const portalNav: PortalNavItem[] = [
   { href: '/portal/dashboard', label: 'Dashboard', icon: 'dashboard' },
   { href: '/portal/timeline', label: 'Credit Timeline', icon: 'timeline' },
   { href: '/portal/readiness', label: 'Readiness Score', icon: 'score' },
+  { href: '/portal/reports', label: 'Reports', icon: 'reports' },
   { href: '/portal/tasks', label: 'Tasks', icon: 'tasks', badge: 4 },
   { href: '/portal/documents', label: 'Documents', icon: 'documents' },
   { href: '/portal/messages', label: 'Messages', icon: 'messages', badge: 2 },
