@@ -36,7 +36,7 @@ from api.modules.accounts.unsupervised_autonomous_filing_loop_models import (
     UnsupervisedAutonomousFilingLoopRun,
     UnsupervisedAutonomousFilingLoopRunStatus,
 )
-from api.modules.auth.models import Organization, User
+from api.modules.auth.models import Organization, OrganizationType, User
 from api.modules.billing.collection_models import (
     BillingInvoiceCollectionRun,
     BillingInvoiceCollectionRunKind,
@@ -221,6 +221,7 @@ from api.modules.org_admin.public_oauth_marketplace_listing_models import (
     PublicOAuthMarketplaceListingRunStatus,
 )
 from api.modules.org_admin.rotation_models import ApiKeyRotationLog
+from api.modules.org_context.models import OrganizationFeatureFlag, OrgDemoFeature
 from api.modules.reporting.cross_org_benchmark_models import (
     CrossOrgBenchmarkRun,
     CrossOrgBenchmarkRunStatus,
@@ -362,6 +363,9 @@ __all__ = [
     "Notification",
     "NotificationCategory",
     "Organization",
+    "OrganizationType",
+    "OrganizationFeatureFlag",
+    "OrgDemoFeature",
     "OrganizationApiKey",
     "OrganizationDisputeSettings",
     "OrganizationBillingAccount",

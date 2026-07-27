@@ -1,6 +1,7 @@
 """Authentication domain models."""
 
 import uuid
+from enum import StrEnum
 
 from sqlalchemy import Boolean, Enum, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
@@ -11,6 +12,15 @@ from api.core.constants import UserRole
 from api.database.base import Base
 
 
+class OrganizationType(StrEnum):
+    """Authoritative org classification — do not use ad-hoc isDemo / demoMode flags."""
+
+    DEMO = "demo"
+    INTERNAL = "internal"
+    PARTNER = "partner"
+    PRODUCTION = "production"
+
+
 class Organization(Base, TimestampMixin, SoftDeleteMixin, AuditMixin):
     __tablename__ = "organizations"
 
@@ -18,6 +28,16 @@ class Organization(Base, TimestampMixin, SoftDeleteMixin, AuditMixin):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     slug: Mapped[str] = mapped_column(String(100), unique=True, nullable=False, index=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    organization_type: Mapped[OrganizationType] = mapped_column(
+        Enum(
+            OrganizationType,
+            name="organization_type",
+            values_callable=lambda x: [e.value for e in x],
+        ),
+        nullable=False,
+        default=OrganizationType.PRODUCTION,
+        index=True,
+    )
 
     users: Mapped[list["User"]] = relationship(back_populates="organization")
     cases: Mapped[list["Case"]] = relationship(back_populates="organization")

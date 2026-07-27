@@ -729,6 +729,25 @@ Default for new referrals: `referred`. Stage change timestamp (`pipeline_stage_c
 
 Tenant isolation: all queries scoped to the caller's `organization_id` as CRO org. Referrals may only reference clients/cases in that org. Pipeline/dashboard/milestones return 404 for foreign-org partnership IDs.
 
+## Organization context (LRP-109)
+
+Authoritative organization classification and per-org demo feature flags. Production orgs never receive demo capabilities.
+
+`organization_type`: `demo` | `internal` | `partner` | `production`
+
+Per-org flags: `demo_data`, `demo_notifications`, `sample_borrowers`, `fake_credit_reports`, `training_mode`
+
+Env guardrails: `ALLOW_DEMO_ORGS`, `ENABLE_SAMPLE_DATA`, `ENABLE_DEMO_LOGIN` (all forced off when `APP_ENV=production`).
+
+| Method | Path                                   | Min role      | Description                                                                 |
+| ------ | -------------------------------------- | ------------- | --------------------------------------------------------------------------- |
+| GET    | `/org-context`                         | authenticated | Organization type + feature flags + demo capability gate                    |
+| PUT    | `/org-context/feature-flags`           | admin         | Upsert a flag; cannot enable demo flags on `production` orgs                |
+| POST   | `/org-context/demo/sample-borrowers`   | case_manager  | Create sample clients; **403** for `production` or when flags/env disallow  |
+| POST   | `/org-context/demo/fake-credit-report` | case_manager  | Guardrail stub; **403** for production; **501** when allowed (seed scripts) |
+
+Dedicated demo seeds (never auto-run in production): `python -m scripts.seed_demo.seed_demo_org` (also `seed_demo_users`, `seed_demo_borrowers`, `seed_demo_referrals`).
+
 ## Organization admin
 
 Enterprise org administration scaffold for API key lifecycle and organization summary metrics. All endpoints require `ENABLE_ENTERPRISE=true` and **admin** role.

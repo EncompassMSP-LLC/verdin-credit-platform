@@ -20,10 +20,18 @@ from api.modules.accounts.models import (
     AccountType,
     PaymentStatus,
 )
-from api.modules.auth.models import Organization, User
+from api.modules.auth.models import Organization, OrganizationType, User
 from api.modules.billing.models import OrganizationBillingAccount, SubscriptionStatus
 from api.modules.cases.models import Case, CasePriority, CaseStage, CaseStatus
+from api.modules.org_context.models import OrganizationFeatureFlag, OrgDemoFeature
 from api.modules.tasks.models import Task, TaskPriority, TaskStatus
+
+_DEMO_FEATURES = (
+    OrgDemoFeature.DEMO_DATA,
+    OrgDemoFeature.DEMO_NOTIFICATIONS,
+    OrgDemoFeature.SAMPLE_BORROWERS,
+    OrgDemoFeature.TRAINING_MODE,
+)
 
 
 async def seed() -> None:
@@ -40,8 +48,20 @@ async def seed() -> None:
             name="Ultimate Credit Repair LLC",
             slug="verdin-demo",
             is_active=True,
+            organization_type=OrganizationType.DEMO,
         )
         session.add(org)
+        await session.flush()
+
+        for feature in _DEMO_FEATURES:
+            session.add(
+                OrganizationFeatureFlag(
+                    id=uuid.uuid4(),
+                    organization_id=org.id,
+                    feature=feature,
+                    enabled=True,
+                )
+            )
         await session.flush()
 
         owner = User(

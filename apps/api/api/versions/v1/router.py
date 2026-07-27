@@ -27,6 +27,7 @@ from api.modules.messaging.router import router as messaging_router
 from api.modules.mortgage_partner.router import router as mortgage_partner_router
 from api.modules.notifications.router import router as notifications_router
 from api.modules.org_admin.router import router as org_admin_router
+from api.modules.org_context.router import router as org_context_router
 from api.modules.reporting.router import router as reporting_router
 from api.modules.tasks.router import router as tasks_router
 from api.modules.timeline.router import router as timeline_router
@@ -34,6 +35,7 @@ from api.modules.timeline.router import router as timeline_router
 router = APIRouter()
 router.include_router(system_router)
 router.include_router(auth_router)
+router.include_router(org_context_router)
 router.include_router(cases_router)
 router.include_router(clients_router)
 router.include_router(enrollment_router)
