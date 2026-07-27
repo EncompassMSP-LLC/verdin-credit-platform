@@ -4,6 +4,7 @@ import {
   completePortalLearningModule,
   getPortalCaseInsights,
   getPortalCaseReadiness,
+  getPortalCaseReadinessReport,
   listPortalCaseChecklist,
   listPortalLearningModules,
   reopenPortalLearningModule,
@@ -12,6 +13,7 @@ import {
   type PortalCaseReadiness,
   type PortalChecklistItem,
   type PortalLearningModule,
+  type PortalReadinessReport,
 } from '@verdin/api-client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { usePlatformAuth } from '@/lib/platform/auth';
@@ -23,6 +25,15 @@ export function usePortalReadiness(caseId: string | undefined) {
     queryKey: ['portal', 'readiness', caseId],
     enabled: isAuthenticated && Boolean(caseId),
     queryFn: () => getPortalCaseReadiness(caseId!),
+  });
+}
+
+export function usePortalReadinessReport(caseId: string | undefined) {
+  const { isAuthenticated } = usePlatformAuth();
+  return useQuery({
+    queryKey: ['portal', 'readiness-report', caseId],
+    enabled: isAuthenticated && Boolean(caseId),
+    queryFn: () => getPortalCaseReadinessReport(caseId!),
   });
 }
 
@@ -101,4 +112,10 @@ export function usePrimaryCaseReadinessSurfaces() {
   };
 }
 
-export type { PortalCaseInsights, PortalCaseReadiness, PortalChecklistItem, PortalLearningModule };
+export type {
+  PortalCaseInsights,
+  PortalCaseReadiness,
+  PortalChecklistItem,
+  PortalLearningModule,
+  PortalReadinessReport,
+};

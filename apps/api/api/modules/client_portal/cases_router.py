@@ -1,8 +1,10 @@
 """Client portal read-only case progress endpoints."""
 
 import uuid
+from typing import Literal
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
+from fastapi.responses import Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.database.session import get_db
@@ -16,6 +18,7 @@ from api.modules.client_portal.models import ClientPortalUser
 from api.modules.client_portal.schemas import (
     PortalCaseDetailResponse,
     PortalCaseProgressResponse,
+    PortalReadinessReportResponse,
 )
 
 router = APIRouter(prefix="/portal/cases", tags=["Client Portal"])
@@ -52,3 +55,33 @@ async def get_portal_case_readiness(
     service: ClientPortalCasesService = Depends(get_portal_cases_service),
 ) -> PortalCaseReadinessResponse:
     return await service.get_case_readiness(portal_user, case_id)
+
+
+@router.get("/{case_id}/readiness-report", response_model=PortalReadinessReportResponse)
+async def get_portal_case_readiness_report(
+    case_id: uuid.UUID,
+    _: None = Depends(require_client_portal_enabled),
+    portal_user: ClientPortalUser = Depends(get_current_portal_user),
+    service: ClientPortalCasesService = Depends(get_portal_cases_service),
+) -> PortalReadinessReportResponse:
+    return await service.get_case_readiness_report(portal_user, case_id)
+
+
+@router.get("/{case_id}/readiness-report/export")
+async def export_portal_case_readiness_report(
+    case_id: uuid.UUID,
+    format: Literal["text", "pdf"] = Query(default="pdf", alias="format"),
+    _: None = Depends(require_client_portal_enabled),
+    portal_user: ClientPortalUser = Depends(get_current_portal_user),
+    service: ClientPortalCasesService = Depends(get_portal_cases_service),
+) -> Response:
+    content, media_type, filename = await service.export_case_readiness_report(
+        portal_user,
+        case_id,
+        export_format=format,
+    )
+    return Response(
+        content=content,
+        media_type=media_type,
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
