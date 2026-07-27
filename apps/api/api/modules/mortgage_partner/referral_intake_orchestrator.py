@@ -10,19 +10,20 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.core.constants import UserRole
-from api.core.email_delivery import (
-    EmailDeliveryNotReadyError,
-    EmailMessage,
-    require_email_delivery_ready,
-    send_email_message,
-)
 from api.modules.auth.models import User
 from api.modules.cases.models import Case
 from api.modules.mortgage_partner.models import PartnerReferralIntakeRun
 from api.modules.mortgage_partner.referral_intake_orchestrator_models import (
     PartnerReferralIntakeOrchestratorRun,
 )
-from api.modules.notifications.models import Notification, NotificationCategory
+from api.modules.notifications.notification_matrix import (
+    NotificationMatrixEvent,
+    advisory_footer,
+)
+from api.modules.notifications.notification_matrix_service import (
+    MatrixDispatchContext,
+    NotificationMatrixDispatcher,
+)
 from api.modules.tasks.models import Task, TaskPriority, TaskStatus
 
 SCHEMA_VERSION = "referral-intake-orchestrator.v1"
@@ -33,11 +34,6 @@ _ASSIGNABLE_ROLES = frozenset(
         UserRole.ADMIN,
         UserRole.OWNER,
     }
-)
-
-_ADVISORY_FOOTER = (
-    "This message is operational only — not an underwriting decision, loan approval, "
-    "or guarantee of funding."
 )
 
 
@@ -97,37 +93,6 @@ class ReferralIntakeOrchestrator:
             return candidates[(index + 1) % len(candidates)]
         except ValueError:
             return candidates[0]
-
-    async def _maybe_send_email(
-        self,
-        *,
-        to_email: str,
-        subject: str,
-        body: str,
-    ) -> dict[str, Any]:
-        draft = {
-            "to": to_email,
-            "subject": subject,
-            "body": body,
-        }
-        try:
-            require_email_delivery_ready()
-        except EmailDeliveryNotReadyError as exc:
-            return {
-                **draft,
-                "delivery_status": "deferred_email_not_ready",
-                "blockers": list(exc.blockers),
-            }
-
-        result = await send_email_message(
-            EmailMessage(to=to_email, subject=subject, body_text=body),
-        )
-        return {
-            **draft,
-            "delivery_status": "sent" if result.success else "failed",
-            "provider_message_id": result.provider_message_id,
-            "error": result.error,
-        }
 
     async def run_for_intake(
         self,
@@ -193,32 +158,6 @@ class ReferralIntakeOrchestrator:
                 )
             )
 
-            notification = Notification(
-                organization_id=intake.cro_organization_id,
-                recipient_user_id=assigned.id,
-                title="New partner web referral",
-                body=(
-                    f"{intake.borrower_name} referred by {intake.lo_name} "
-                    f"({intake.partner_org_name}). Assign specialist / schedule consultation. "
-                    f"{_ADVISORY_FOOTER}"
-                ),
-                category=NotificationCategory.WORKFLOW,
-                entity_type="case",
-                entity_id=case.id,
-                source_module="mortgage_partner.referral_intake_orchestrator",
-                action_url=f"/cases/{case.id}",
-            )
-            self._session.add(notification)
-            await self._session.flush()
-            steps.append(
-                _step(
-                    key="notify_assignee",
-                    status="created",
-                    detail="In-app workflow notification created for assignee.",
-                    notification_id=str(notification.id),
-                )
-            )
-
         consult_task = Task(
             id=uuid.uuid4(),
             organization_id=intake.cro_organization_id,
@@ -245,52 +184,68 @@ class ReferralIntakeOrchestrator:
             )
         )
 
-        referrer_body = (
-            f"Hello {intake.lo_name},\n\n"
-            f"Thank you for referring {intake.borrower_name}. We received the referral "
-            f"and our team will follow up.\n\n"
-            f"{_ADVISORY_FOOTER}\n"
+        matrix = NotificationMatrixDispatcher(self._session)
+        footer = advisory_footer()
+        matrix_context = MatrixDispatchContext(
+            organization_id=intake.cro_organization_id,
+            entity_type="referral_intake",
+            entity_id=intake.id,
+            title=f"Referral received — {intake.borrower_name}",
+            body=(
+                f"{intake.borrower_name} referred by {intake.lo_name} "
+                f"({intake.partner_org_name}). Schedule consultation / assign specialist. "
+                f"{footer}"
+            ),
+            action_url=f"/cases/{case.id}",
+            case_id=case.id,
+            assigned_user_id=assigned.id if assigned else None,
+            referring_lo_email=intake.lo_email,
+            referring_lo_name=intake.lo_name,
+            borrower_email=intake.borrower_email,
+            borrower_name=intake.borrower_name,
+            source_module="mortgage_partner.referral_intake_orchestrator",
+            create_crm_tasks=False,
         )
-        referrer_email = await self._maybe_send_email(
-            to_email=intake.lo_email,
-            subject=f"Referral received — {intake.borrower_name}",
-            body=referrer_body,
+        submitted = await matrix.dispatch(
+            NotificationMatrixEvent.REFERRAL_SUBMITTED,
+            matrix_context,
         )
         steps.append(
             _step(
-                key="thank_you_referrer",
-                status=str(referrer_email["delivery_status"]),
-                detail="Thank-you email to referring LO (claim-safe).",
-                email=referrer_email,
+                key="matrix_referral_submitted",
+                status=submitted.status,
+                detail="Notification matrix v1 fan-out for referral_submitted.",
+                dispatch_id=str(submitted.id),
             )
         )
-
-        if intake.borrower_email:
-            borrower_body = (
-                f"Hello {intake.borrower_name},\n\n"
-                "Thank you — we received your referral and will be in touch with next "
-                "steps for your lending-readiness consultation.\n\n"
-                f"{_ADVISORY_FOOTER}\n"
+        if assigned is not None:
+            assigned_ctx = MatrixDispatchContext(
+                organization_id=intake.cro_organization_id,
+                entity_type="referral_intake",
+                entity_id=intake.id,
+                title=f"Referral assigned — {intake.borrower_name}",
+                body=(
+                    f"Case assigned to {assigned.email}. "
+                    f"Borrower: {intake.borrower_name}. {footer}"
+                ),
+                action_url=f"/cases/{case.id}",
+                case_id=case.id,
+                assigned_user_id=assigned.id,
+                referring_lo_email=intake.lo_email,
+                referring_lo_name=intake.lo_name,
+                source_module="mortgage_partner.referral_intake_orchestrator",
+                create_crm_tasks=False,
             )
-            borrower_email = await self._maybe_send_email(
-                to_email=intake.borrower_email,
-                subject="We received your referral",
-                body=borrower_body,
+            assigned_run = await matrix.dispatch(
+                NotificationMatrixEvent.REFERRAL_ASSIGNED,
+                assigned_ctx,
             )
             steps.append(
                 _step(
-                    key="thank_you_borrower",
-                    status=str(borrower_email["delivery_status"]),
-                    detail="Thank-you / expectations email to borrower (claim-safe).",
-                    email=borrower_email,
-                )
-            )
-        else:
-            steps.append(
-                _step(
-                    key="thank_you_borrower",
-                    status="skipped_no_email",
-                    detail="Borrower email not provided — skipped thank-you email.",
+                    key="matrix_referral_assigned",
+                    status=assigned_run.status,
+                    detail="Notification matrix v1 fan-out for referral_assigned.",
+                    dispatch_id=str(assigned_run.id),
                 )
             )
 

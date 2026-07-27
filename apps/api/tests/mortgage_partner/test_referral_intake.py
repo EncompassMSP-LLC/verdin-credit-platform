@@ -73,9 +73,24 @@ def test_referral_intake_creates_client_case_referral_and_task(
     assert orch_body["status"] == "completed"
     step_keys = {step["key"] for step in orch_body["payload"]["steps"]}
     assert "assign_case_manager" in step_keys
-    assert "thank_you_referrer" in step_keys
+    assert "matrix_referral_submitted" in step_keys
+    assert "matrix_referral_assigned" in step_keys
     assert "schedule_consultation_task" in step_keys
     assert orch_body["payload"]["claim_safety"]["auto_filing"] is False
+
+    matrix = api_client.get("/api/v1/notifications/matrix", headers=admin_headers)
+    assert matrix.status_code == 200, matrix.text
+    assert matrix.json()["schema_version"] == "notification-matrix.v1"
+    assert any(e["event"] == "referral_submitted" for e in matrix.json()["events"])
+
+    dispatches = api_client.get(
+        "/api/v1/notifications/matrix/dispatches",
+        headers=admin_headers,
+        params={"event_key": "referral_submitted"},
+    )
+    assert dispatches.status_code == 200, dispatches.text
+    assert len(dispatches.json()) >= 1
+    assert dispatches.json()[0]["event_key"] == "referral_submitted"
 
     case = api_client.get(f"/api/v1/cases/{body['case_id']}", headers=admin_headers)
     assert case.status_code == 200, case.text

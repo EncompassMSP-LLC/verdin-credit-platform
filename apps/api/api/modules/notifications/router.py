@@ -16,6 +16,8 @@ from api.modules.notifications.schemas import (
     EmailSendRequest,
     NotificationCreate,
     NotificationListParams,
+    NotificationMatrixDispatchResponse,
+    NotificationMatrixResponse,
     NotificationResponse,
     NotificationSortField,
     NotificationSortOrder,
@@ -79,6 +81,37 @@ async def get_unread_count(
     service: NotificationService = Depends(get_notification_service),
 ) -> UnreadCountResponse:
     return await service.get_unread_count(current_user)
+
+
+@router.get("/matrix", response_model=NotificationMatrixResponse)
+async def get_notification_matrix(
+    current_user: User = Depends(get_current_user),
+    service: NotificationService = Depends(get_notification_service),
+) -> NotificationMatrixResponse:
+    """Staff read of LRP notification matrix v1 (event → audience → channel)."""
+    return service.get_notification_matrix(current_user)
+
+
+@router.get("/matrix/dispatches", response_model=list[NotificationMatrixDispatchResponse])
+async def list_notification_matrix_dispatches(
+    event_key: str | None = Query(None),
+    limit: int = Query(50, ge=1, le=100),
+    current_user: User = Depends(get_current_user),
+    service: NotificationService = Depends(get_notification_service),
+) -> list[NotificationMatrixDispatchResponse]:
+    return await service.list_matrix_dispatches(current_user, event_key=event_key, limit=limit)
+
+
+@router.get(
+    "/matrix/dispatches/{dispatch_id}",
+    response_model=NotificationMatrixDispatchResponse,
+)
+async def get_notification_matrix_dispatch(
+    dispatch_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: NotificationService = Depends(get_notification_service),
+) -> NotificationMatrixDispatchResponse:
+    return await service.get_matrix_dispatch(current_user, dispatch_id)
 
 
 @router.post("/mark-all-read", response_model=UnreadCountResponse)

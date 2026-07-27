@@ -44,7 +44,7 @@ Ops contract: [`../lrp-enterprise/04-operations/business-ops-package/`](../lrp-e
 | 12    | LRP-402 Bureau + Metro2 in readiness blockers         | M2        | ✅     |
 | 13    | LRP-204 Consultation completed pack                   | M2        | ✅     |
 | 14    | LRP-201 Referral intake orchestrator job              | M3        | ✅     |
-| 15    | LRP-202 Notification matrix v1                        | M3        | ☐      |
+| 15    | LRP-202 Notification matrix v1                        | M3        | ✅     |
 | 16    | LRP-203 CRM automation rules (persist)                | M3        | ☐      |
 | 17    | LRP-205 Appointment reminders                         | M3        | ☐      |
 | 18    | LRP-206 Partner nurture drip                          | M3        | ☐      |
@@ -100,7 +100,15 @@ Deferred to [product backlog](../lrp-enterprise/15-roadmap/product-backlog.md): 
 
 - `apps/lrp-web` `/lender/notifications` loads platform `listNotifications` / mark-read APIs (demo seed retained for local demo auth)
 - Shell badge + dashboard unread strip use `getUnreadNotificationCount` + unread list in platform mode
-- Matrix-complete notification producers deferred to LRP-202
+- Matrix-complete notification producers shipped in LRP-202
+
+### LRP-202 — Notification matrix v1 (2026-07-27)
+
+- Codified Section 14 matrix (`notification-matrix.v1`) with event → audience → channel routes
+- Idempotent dispatch audit table `notification_matrix_dispatches` (migration `105_notification_matrix`)
+- Staff APIs: `GET /notifications/matrix`, `/matrix/dispatches`, `/matrix/dispatches/{id}`
+- Referral intake orchestrator fans out `referral_submitted` + `referral_assigned` via the matrix (SMS TCPA-gated; realtor optional/deferred)
+- Tests: `apps/api/tests/notifications/test_notification_matrix.py` (+ referral intake coverage)
 
 ### LRP-106 — Readiness report in borrower portal (2026-07-27)
 

@@ -140,3 +140,42 @@ class SmsDeliveryStatusResponse(BaseModel):
     provider: str
     from_number: str | None
     blockers: list[str]
+
+
+class NotificationMatrixRouteResponse(BaseModel):
+    audience: str
+    channels: list[str]
+    optional: bool = False
+
+
+class NotificationMatrixEventResponse(BaseModel):
+    event: str
+    title: str
+    category: str
+    group: str
+    routes: list[NotificationMatrixRouteResponse]
+
+
+class NotificationMatrixResponse(BaseModel):
+    schema_version: str
+    sms_requires_tcpa_consent: bool
+    claim_safety: dict[str, bool]
+    events: list[NotificationMatrixEventResponse]
+
+
+class NotificationMatrixDispatchResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    organization_id: uuid.UUID
+    event_key: str
+    entity_type: str
+    entity_id: uuid.UUID
+    status: str
+    schema_version: str
+    triggered_by_user_id: uuid.UUID | None
+    started_at: datetime
+    completed_at: datetime | None
+    payload: dict[str, object]
+    created_at: datetime
+    updated_at: datetime

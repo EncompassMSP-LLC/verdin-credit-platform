@@ -35,6 +35,7 @@ from api.modules.notifications.models import (
     SmsDeliveryLog,
     SmsDeliveryLogStatus,
 )
+from api.modules.notifications.notification_matrix_service import NotificationMatrixDispatcher
 from api.modules.notifications.permissions import NOTIFICATION_CREATE_ROLE
 from api.modules.notifications.repository import NotificationListFilters, NotificationRepository
 from api.modules.notifications.schemas import (
@@ -44,6 +45,8 @@ from api.modules.notifications.schemas import (
     EmailSendRequest,
     NotificationCreate,
     NotificationListParams,
+    NotificationMatrixDispatchResponse,
+    NotificationMatrixResponse,
     NotificationResponse,
     SmsDeliveryAttemptResponse,
     SmsDeliveryLogResponse,
@@ -64,11 +67,13 @@ class NotificationService:
         user_repo: UserRepository | None = None,
         email_delivery_repo: EmailDeliveryLogRepository | None = None,
         sms_delivery_repo: SmsDeliveryLogRepository | None = None,
+        session: AsyncSession | None = None,
     ) -> None:
         self._notifications = notification_repo
         self._users = user_repo
         self._email_deliveries = email_delivery_repo
         self._sms_deliveries = sms_delivery_repo
+        self._session = session
 
     @classmethod
     def from_session(cls, session: AsyncSession) -> "NotificationService":
@@ -77,6 +82,7 @@ class NotificationService:
             UserRepository(session),
             EmailDeliveryLogRepository(session),
             SmsDeliveryLogRepository(session),
+            session=session,
         )
 
     def _require_organization(self, user: User) -> uuid.UUID:
@@ -674,3 +680,48 @@ class NotificationService:
             from_number=delivery_status.from_number,
             blockers=delivery_status.blockers,
         )
+
+    def _matrix(self) -> NotificationMatrixDispatcher:
+        if self._session is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Notification matrix dispatcher requires a database session",
+            )
+        return NotificationMatrixDispatcher(self._session)
+
+    def get_notification_matrix(self, user: User) -> NotificationMatrixResponse:
+        self._require_organization(user)
+        raw = self._matrix().describe_matrix()
+        return NotificationMatrixResponse.model_validate(raw)
+
+    async def list_matrix_dispatches(
+        self,
+        user: User,
+        *,
+        event_key: str | None = None,
+        limit: int = 50,
+    ) -> list[NotificationMatrixDispatchResponse]:
+        organization_id = self._require_organization(user)
+        rows = await self._matrix().list_dispatches(
+            organization_id=organization_id,
+            event_key=event_key,
+            limit=limit,
+        )
+        return [NotificationMatrixDispatchResponse.model_validate(row) for row in rows]
+
+    async def get_matrix_dispatch(
+        self,
+        user: User,
+        dispatch_id: uuid.UUID,
+    ) -> NotificationMatrixDispatchResponse:
+        organization_id = self._require_organization(user)
+        row = await self._matrix().get_dispatch(
+            organization_id=organization_id,
+            dispatch_id=dispatch_id,
+        )
+        if row is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Notification matrix dispatch not found",
+            )
+        return NotificationMatrixDispatchResponse.model_validate(row)
