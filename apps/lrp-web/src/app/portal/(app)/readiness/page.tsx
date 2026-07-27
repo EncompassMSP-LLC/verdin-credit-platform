@@ -121,6 +121,12 @@ export default function ReadinessPage() {
                     <p className="font-medium text-navy-900">{blocker.title}</p>
                     <p className="mt-2 text-sm text-slate-500">{blocker.impact}</p>
                     <p className="mt-2 text-xs font-medium text-gold-700">{blocker.action}</p>
+                    <Link
+                      href="/portal/tasks"
+                      className="mt-3 inline-block text-xs font-medium text-navy-900 underline-offset-2 hover:underline"
+                    >
+                      Work on related tasks →
+                    </Link>
                   </article>
                 ))}
               </div>

@@ -8,6 +8,7 @@ from api.modules.auth.router import router as auth_router
 from api.modules.billing.router import router as billing_router
 from api.modules.cases.router import router as cases_router
 from api.modules.client_portal.cases_router import router as client_portal_cases_router
+from api.modules.client_portal.checklist_router import router as client_portal_checklist_router
 from api.modules.client_portal.consents_router import router as client_portal_consents_router
 from api.modules.client_portal.documents_router import router as client_portal_documents_router
 from api.modules.client_portal.identity_theft_router import (
@@ -42,6 +43,7 @@ router.include_router(enrollment_router)
 router.include_router(compliance_router)
 router.include_router(client_portal_router)
 router.include_router(client_portal_cases_router)
+router.include_router(client_portal_checklist_router)
 router.include_router(client_portal_consents_router)
 router.include_router(client_portal_identity_theft_router)
 router.include_router(client_portal_documents_router)

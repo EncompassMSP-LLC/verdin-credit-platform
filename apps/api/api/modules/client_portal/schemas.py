@@ -97,6 +97,28 @@ class PortalCaseDocumentsResponse(BaseSchema):
     items: list[PortalDocumentResponse]
 
 
+class PortalChecklistItemResponse(BaseSchema):
+    id: str
+    case_id: uuid.UUID
+    title: str
+    category: str
+    priority: str
+    status: str
+    due_date: datetime | None = None
+    sort_order: int
+    updated_at: datetime
+    description: str | None = None
+
+
+class PortalChecklistResponse(BaseSchema):
+    case_id: uuid.UUID
+    items: list[PortalChecklistItemResponse]
+
+
+class PortalChecklistUpdateRequest(BaseSchema):
+    status: str
+
+
 class PortalPushSubscribeRequest(BaseSchema):
     endpoint: str
     p256dh_key: str

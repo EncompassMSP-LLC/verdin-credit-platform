@@ -68,6 +68,7 @@ from api.modules.billing.tax_calculation_models import (
     StripeTaxCalculationRunStatus,
 )
 from api.modules.cases.models import Case, CaseStatus
+from api.modules.client_portal.checklist_models import PortalChecklistCompletion
 from api.modules.client_portal.models import ClientPortalUser
 from api.modules.client_portal.push_models import (
     PortalPushDeliveryLog,
@@ -313,6 +314,7 @@ __all__ = [
     "Client",
     "ClientContact",
     "ClientPortalUser",
+    "PortalChecklistCompletion",
     "ClientStatus",
     "ConsentRecord",
     "ConsentStatus",

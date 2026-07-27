@@ -388,6 +388,7 @@ export interface PortalChecklistItem {
   due_date: string | null;
   sort_order: number;
   updated_at: string;
+  description?: string | null;
 }
 
 export interface PortalChecklistResponse {
