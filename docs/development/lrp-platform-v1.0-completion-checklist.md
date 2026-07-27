@@ -40,7 +40,7 @@ Ops contract: [`../lrp-enterprise/04-operations/business-ops-package/`](../lrp-e
 | 8     | LRP-104 Borrower portal task/readiness parity         | M2        | ✅     |
 | 9     | LRP-106 Readiness report in borrower portal           | M2        | ✅     |
 | 10    | LRP-105 LO notifications center live                  | M2        | ✅     |
-| 11    | LRP-401 Readiness timeline UI                         | M2        | ☐      |
+| 11    | LRP-401 Readiness timeline UI                         | M2        | ✅     |
 | 12    | LRP-402 Bureau + Metro2 in readiness blockers         | M2        | ☐      |
 | 13    | LRP-204 Consultation completed pack                   | M2        | ☐      |
 | 14    | LRP-201 Referral intake orchestrator job              | M3        | ☐      |
@@ -75,6 +75,12 @@ Deferred to [product backlog](../lrp-enterprise/15-roadmap/product-backlog.md): 
 - Master plan remapped to M1–M6 with traceability matrix, gap analysis, DoD, exit criteria
 - Living docs: backlog, roadmap, tech debt, risk register
 - ADR-013 — LRP edition on shared platform
+
+### LRP-401 — Readiness timeline UI (2026-07-27)
+
+- `GET /portal/cases/{id}/timeline` composes borrower-safe milestones (case opened, published readiness, documents, completed checklist tasks); optional `?event_type=`
+- `apps/lrp-web` `/portal/timeline` loads the API with type filters + deep links (no staff notes / tradeline dumps)
+- Tests: `apps/api/tests/client_portal/test_portal_timeline.py`
 
 ### LRP-105 — LO notifications center live (2026-07-27)
 

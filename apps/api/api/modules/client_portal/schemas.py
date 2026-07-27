@@ -137,6 +137,20 @@ class PortalReadinessReportResponse(BaseSchema):
     blockers: list[dict[str, Any]]
 
 
+class PortalTimelineItemResponse(BaseSchema):
+    id: str
+    event_at: datetime
+    event_type: str
+    title: str
+    detail: str | None = None
+    href: str | None = None
+
+
+class PortalTimelineResponse(BaseSchema):
+    case_id: uuid.UUID
+    items: list[PortalTimelineItemResponse]
+
+
 class PortalPushSubscribeRequest(BaseSchema):
     endpoint: str
     p256dh_key: str
