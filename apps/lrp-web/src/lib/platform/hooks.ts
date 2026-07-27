@@ -2,6 +2,7 @@
 
 import {
   getPortalCase,
+  getPortalCaseTimeline,
   listPortalCaseDocuments,
   listPortalCases,
   listPortalCaseMessages,
@@ -9,6 +10,8 @@ import {
   type PortalCaseSummary,
   type PortalDocument,
   type PortalCaseMessageThread,
+  type PortalTimelineEventType,
+  type PortalTimelineItem,
 } from '@verdin/api-client';
 import { useQuery } from '@tanstack/react-query';
 import { usePlatformAuth } from '@/lib/platform/auth';
@@ -61,4 +64,29 @@ export function usePortalMessages(caseId: string | undefined) {
   });
 }
 
-export type { PortalCaseDetail, PortalCaseSummary, PortalDocument, PortalCaseMessageThread };
+export function usePortalTimeline(
+  caseId: string | undefined,
+  eventType?: PortalTimelineEventType | 'all',
+) {
+  const { isAuthenticated } = usePlatformAuth();
+  const filter = eventType && eventType !== 'all' ? eventType : undefined;
+  return useQuery({
+    queryKey: ['portal', 'timeline', caseId, filter ?? 'all'],
+    enabled: isAuthenticated && Boolean(caseId),
+    queryFn: async () => {
+      const response = await getPortalCaseTimeline(caseId!, {
+        event_type: filter,
+      });
+      return response.items;
+    },
+  });
+}
+
+export type {
+  PortalCaseDetail,
+  PortalCaseSummary,
+  PortalDocument,
+  PortalCaseMessageThread,
+  PortalTimelineItem,
+  PortalTimelineEventType,
+};

@@ -1,56 +1,85 @@
 'use client';
 
+import { useState } from 'react';
+import Link from 'next/link';
 import { PageHeader } from '@/components/portal/PageHeader';
 import { PortalCard, StatusPill } from '@/components/portal/PortalCard';
-import { usePortalCaseDetail, usePortalDocuments, usePrimaryCase } from '@/lib/platform/hooks';
+import {
+  usePortalCaseDetail,
+  usePortalTimeline,
+  usePrimaryCase,
+  type PortalTimelineEventType,
+} from '@/lib/platform/hooks';
 import { formatDate } from '@/lib/utils';
 
-export default function TimelinePage() {
-  const { primary, data: cases, isLoading } = usePrimaryCase();
-  const detailQuery = usePortalCaseDetail(primary?.id);
-  const docsQuery = usePortalDocuments(primary?.id);
+const FILTERS: Array<{ id: 'all' | PortalTimelineEventType; label: string }> = [
+  { id: 'all', label: 'All' },
+  { id: 'readiness', label: 'Readiness' },
+  { id: 'document', label: 'Documents' },
+  { id: 'task', label: 'Tasks' },
+  { id: 'case', label: 'Case' },
+];
 
-  const events = [
-    ...(cases ?? []).map((item) => ({
-      id: `case-${item.id}`,
-      date: item.updated_at,
-      title: `Case stage: ${item.stage.replaceAll('_', ' ')}`,
-      detail: `${item.title} · ${item.status}`,
-      type: 'case' as const,
-    })),
-    ...(docsQuery.data ?? []).map((doc) => ({
-      id: `doc-${doc.id}`,
-      date: doc.created_at,
-      title: 'Document uploaded',
-      detail: doc.title,
-      type: 'document' as const,
-    })),
-  ].sort((a, b) => +new Date(b.date) - +new Date(a.date));
+export default function TimelinePage() {
+  const { primary, isLoading: casesLoading } = usePrimaryCase();
+  const [filter, setFilter] = useState<'all' | PortalTimelineEventType>('all');
+  const timelineQuery = usePortalTimeline(primary?.id, filter);
+  const detailQuery = usePortalCaseDetail(primary?.id);
+  const events = timelineQuery.data ?? [];
 
   return (
     <div>
       <PageHeader
         eyebrow="Credit Timeline"
-        title="Platform activity timeline"
-        description="Case updates and document events from your linked client record."
+        title="Your readiness timeline"
+        description="Borrower-safe milestones: case progress, published readiness updates, document uploads, and completed action-plan tasks."
       />
+
+      <div className="mb-4 flex flex-wrap gap-2">
+        {FILTERS.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            onClick={() => setFilter(item.id)}
+            className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
+              filter === item.id
+                ? 'bg-navy-800 text-white dark:bg-gold-500 dark:text-navy-950'
+                : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-white/10 dark:text-white/80'
+            }`}
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
 
       <div className="grid gap-6 xl:grid-cols-[1.3fr_1fr]">
         <PortalCard title="Timeline">
-          {isLoading ? (
+          {casesLoading || timelineQuery.isLoading ? (
             <p className="text-sm text-slate-500">Loading…</p>
+          ) : !primary ? (
+            <p className="text-sm text-slate-500">Link a case to see your readiness timeline.</p>
           ) : !events.length ? (
-            <p className="text-sm text-slate-500">No timeline events yet.</p>
+            <p className="text-sm text-slate-500">No timeline events yet for this filter.</p>
           ) : (
             <ol className="relative space-y-0 border-l border-gold-500/40 pl-6">
               {events.map((event) => (
                 <li key={event.id} className="relative pb-8 last:pb-0">
                   <span className="absolute -left-[1.64rem] top-1.5 h-3 w-3 rounded-full border-2 border-gold-500 bg-white dark:bg-navy-800" />
                   <p className="text-xs uppercase tracking-eyebrow text-slate-500">
-                    {formatDate(event.date)} · {event.type}
+                    {formatDate(event.event_at)} · {event.event_type}
                   </p>
                   <h3 className="mt-1 font-semibold">{event.title}</h3>
-                  <p className="mt-1 text-sm text-slate-500 dark:text-white/65">{event.detail}</p>
+                  {event.detail ? (
+                    <p className="mt-1 text-sm text-slate-500 dark:text-white/65">{event.detail}</p>
+                  ) : null}
+                  {event.href ? (
+                    <Link
+                      href={event.href}
+                      className="mt-2 inline-block text-sm font-medium text-gold-700"
+                    >
+                      Open related view
+                    </Link>
+                  ) : null}
                 </li>
               ))}
             </ol>
@@ -81,6 +110,17 @@ export default function TimelinePage() {
                     ))
                   )}
                 </dd>
+              </div>
+              <div className="flex flex-wrap gap-3 pt-2">
+                <Link href="/portal/reports" className="text-sm font-medium text-gold-700">
+                  Readiness report
+                </Link>
+                <Link href="/portal/tasks" className="text-sm font-medium text-gold-700">
+                  Action plan
+                </Link>
+                <Link href="/portal/documents" className="text-sm font-medium text-gold-700">
+                  Documents
+                </Link>
               </div>
             </dl>
           ) : (

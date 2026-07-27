@@ -433,6 +433,34 @@ export async function getPortalCaseReadinessReport(caseId: string): Promise<Port
   return request<PortalReadinessReport>(apiPath(`/portal/cases/${caseId}/readiness-report`));
 }
 
+export type PortalTimelineEventType = 'case' | 'readiness' | 'document' | 'task';
+
+export interface PortalTimelineItem {
+  id: string;
+  event_at: string;
+  event_type: PortalTimelineEventType | string;
+  title: string;
+  detail: string | null;
+  href: string | null;
+}
+
+export interface PortalTimelineResponse {
+  case_id: string;
+  items: PortalTimelineItem[];
+}
+
+export async function getPortalCaseTimeline(
+  caseId: string,
+  options?: { event_type?: PortalTimelineEventType | string },
+): Promise<PortalTimelineResponse> {
+  const params = new URLSearchParams();
+  if (options?.event_type) {
+    params.set('event_type', options.event_type);
+  }
+  const suffix = params.toString() ? `?${params.toString()}` : '';
+  return request<PortalTimelineResponse>(apiPath(`/portal/cases/${caseId}/timeline${suffix}`));
+}
+
 export function getPortalCaseReadinessReportExportUrl(
   caseId: string,
   format: 'text' | 'pdf' = 'pdf',

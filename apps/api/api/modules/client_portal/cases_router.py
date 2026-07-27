@@ -19,13 +19,21 @@ from api.modules.client_portal.schemas import (
     PortalCaseDetailResponse,
     PortalCaseProgressResponse,
     PortalReadinessReportResponse,
+    PortalTimelineResponse,
 )
+from api.modules.client_portal.timeline_service import ClientPortalTimelineService
 
 router = APIRouter(prefix="/portal/cases", tags=["Client Portal"])
 
 
 def get_portal_cases_service(db: AsyncSession = Depends(get_db)) -> ClientPortalCasesService:
     return ClientPortalCasesService.from_session(db)
+
+
+def get_portal_timeline_service(
+    db: AsyncSession = Depends(get_db),
+) -> ClientPortalTimelineService:
+    return ClientPortalTimelineService.from_session(db)
 
 
 @router.get("", response_model=PortalCaseProgressResponse)
@@ -55,6 +63,17 @@ async def get_portal_case_readiness(
     service: ClientPortalCasesService = Depends(get_portal_cases_service),
 ) -> PortalCaseReadinessResponse:
     return await service.get_case_readiness(portal_user, case_id)
+
+
+@router.get("/{case_id}/timeline", response_model=PortalTimelineResponse)
+async def get_portal_case_timeline(
+    case_id: uuid.UUID,
+    event_type: str | None = Query(default=None),
+    _: None = Depends(require_client_portal_enabled),
+    portal_user: ClientPortalUser = Depends(get_current_portal_user),
+    service: ClientPortalTimelineService = Depends(get_portal_timeline_service),
+) -> PortalTimelineResponse:
+    return await service.list_timeline(portal_user, case_id, event_type=event_type)
 
 
 @router.get("/{case_id}/readiness-report", response_model=PortalReadinessReportResponse)
