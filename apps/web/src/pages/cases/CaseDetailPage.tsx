@@ -17,6 +17,7 @@ import { CaseIdentityTheftPanel } from '../../components/imports/IdentityTheftPa
 import { CaseTradelineChronologyPanel } from '../../components/imports/TradelineChronologyPanel';
 import { CaseComplianceEvidencePanel } from '../../components/imports/ComplianceEvidencePanel';
 import { CaseLitigationStrengthPanel } from '../../components/imports/LitigationStrengthPanel';
+import { CaseIssueExplainabilityPanel } from '../../components/imports/IssueExplainabilityPanel';
 import { CaseDisputeStrategyPanel } from '../../components/imports/DisputeStrategyPanel';
 import { CaseReinvestigationClockPanel } from '../../components/imports/ReinvestigationClockPanel';
 import { CaseRedisputeReadinessPanel } from '../../components/imports/RedisputeReadinessPanel';
@@ -240,6 +241,12 @@ export function CaseDetailPage() {
           caseId={caseId}
           className="lg:col-span-3"
           id="litigation-strength"
+        />
+
+        <CaseIssueExplainabilityPanel
+          caseId={caseId}
+          className="lg:col-span-3"
+          id="issue-explainability"
         />
 
         <CaseDisputeStrategyPanel caseId={caseId} className="lg:col-span-3" id="dispute-strategy" />

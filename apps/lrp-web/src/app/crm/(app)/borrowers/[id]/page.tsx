@@ -6,6 +6,7 @@ import { ApiClientError } from '@verdin/api-client';
 import { PageHeader } from '@/components/crm/PageHeader';
 import { RoleGate } from '@/components/crm/RoleGate';
 import { CrmCaseDocumentsPanel } from '@/components/crm/CrmCaseDocumentsPanel';
+import { CrmIssueExplainabilityPanel } from '@/components/crm/CrmIssueExplainabilityPanel';
 import { ADVISORY_DISCLAIMER_SHORT } from '@/lib/design-tokens';
 import { useCrmAuth } from '@/lib/crm/auth';
 import {
@@ -298,6 +299,7 @@ export default function CrmBorrowerDetailPage() {
               Live task queue lands in a later CRM slice.
             </p>
           </div>
+          <CrmIssueExplainabilityPanel caseId={primaryCase?.id} />
           <CrmCaseDocumentsPanel caseId={primaryCase?.id} canUpload={canManageDocs} />
           <div className="rounded-md border border-navy-900/10 bg-white p-4">
             <h2 className="text-sm font-semibold">Activity</h2>

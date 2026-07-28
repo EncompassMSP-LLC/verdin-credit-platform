@@ -78,6 +78,7 @@ from api.modules.documents.schemas import (
     CaseEntityReresolveSkippedItem,
     CaseFcraFindingsResponse,
     CaseIdentityTheftFindingsResponse,
+    CaseIssueExplainabilityResponse,
     CaseLitigationStrengthResponse,
     CaseMetadataBulkReextractResponse,
     CaseMetadataReextractQueuedItem,
@@ -3197,6 +3198,66 @@ class DocumentService:
                     factors=list(issue.factors),
                 )
                 for issue in result.issues
+            ],
+        )
+
+    async def get_case_issue_explainability(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+    ) -> CaseIssueExplainabilityResponse:
+        """Plain-language issue cards for Case Workspace (LRP-208)."""
+        from api.modules.documents.issue_explainability import build_issue_explainability_cards
+        from api.modules.documents.schemas import (
+            IssueExplainabilityCardResponse,
+            IssueExplainabilitySummary,
+        )
+
+        strength = await self.get_case_litigation_strength(user, case_id)
+        hints_by_source: dict[str, list[str]] = {}
+        try:
+            evidence = await self.get_case_compliance_evidence_links(
+                user,
+                case_id,
+                include_page_scan=False,
+            )
+            for item in evidence.items:
+                if item.checklist_hints:
+                    hints_by_source[item.source_id] = list(item.checklist_hints)
+        except HTTPException as exc:
+            if exc.status_code != status.HTTP_404_NOT_FOUND:
+                raise
+
+        result = build_issue_explainability_cards(
+            case_id=case_id,
+            issues=[issue.model_dump(mode="json") for issue in strength.issues],
+            checklist_hints_by_source_id=hints_by_source,
+        )
+        return CaseIssueExplainabilityResponse(
+            case_id=result.case_id,
+            disclaimer=result.disclaimer,
+            summary=IssueExplainabilitySummary(**result.summary),
+            cards=[
+                IssueExplainabilityCardResponse(
+                    source_id=card.source_id,
+                    rule_id=card.rule_id,
+                    source_kind=card.source_kind,
+                    title=card.title,
+                    what_we_found=card.what_we_found,
+                    why_disputable=card.why_disputable,
+                    possible_outcomes=list(card.possible_outcomes),
+                    evidence_recommendations=list(card.evidence_recommendations),
+                    finding_strength=card.finding_strength,
+                    credit_profile_impact=card.credit_profile_impact,
+                    mortgage_readiness_impact=card.mortgage_readiness_impact,
+                    recommended_next_action=card.recommended_next_action,
+                    creditor_name=card.creditor_name,
+                    account_number_masked=card.account_number_masked,
+                    bureau=card.bureau,
+                    investigator_score=card.investigator_score,
+                    rank=card.rank,
+                )
+                for card in result.cards
             ],
         )
 
