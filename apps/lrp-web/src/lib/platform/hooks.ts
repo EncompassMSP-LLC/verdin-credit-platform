@@ -3,6 +3,7 @@
 import {
   getPortalCase,
   getPortalCaseTimeline,
+  getPortalDisputeStrategySuggestions,
   listPortalCaseDocuments,
   listPortalCases,
   listPortalCaseMessages,
@@ -40,6 +41,15 @@ export function usePortalCaseDetail(caseId: string | undefined) {
     queryKey: ['portal', 'case', caseId],
     enabled: isAuthenticated && Boolean(caseId),
     queryFn: () => getPortalCase(caseId!),
+  });
+}
+
+export function usePortalDisputeStrategySuggestions(caseId: string | undefined) {
+  const { isAuthenticated } = usePlatformAuth();
+  return useQuery({
+    queryKey: ['portal', 'dispute-strategy-suggestions', caseId],
+    enabled: isAuthenticated && Boolean(caseId),
+    queryFn: () => getPortalDisputeStrategySuggestions(caseId!),
   });
 }
 

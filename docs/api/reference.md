@@ -199,6 +199,7 @@ Read-only case progress for portal users. Cases match when `client_id` is set to
 | GET    | `/portal/cases/{id}/readiness-report/export`        | portal JWT | Download readiness report as text/PDF (`?format=`); band-first; never auto-transmitted |
 | GET    | `/portal/cases/{id}/checklist`                      | portal JWT | Action-plan checklist (baseline + readiness blockers; LRP-104)                         |
 | GET    | `/portal/cases/{id}/timeline`                       | portal JWT | Borrower-safe readiness timeline (`?event_type=`); LRP-401                             |
+| GET    | `/portal/cases/{id}/dispute-strategy-suggestions`   | portal JWT | Advisory dispute strategy suggestions (staff-run projection; never auto-send; LRP-403) |
 | PATCH  | `/portal/checklist/{item_id}`                       | portal JWT | Mark checklist item open/done (borrower-scoped; LRP-104)                               |
 | GET    | `/portal/cases/{id}/documents`                      | portal JWT | List documents on a linked case                                                        |
 | POST   | `/portal/cases/{id}/documents`                      | portal JWT | Upload document to a linked case (multipart: `file`, `title`, optional `description`)  |

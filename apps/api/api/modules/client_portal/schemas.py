@@ -151,6 +151,45 @@ class PortalTimelineResponse(BaseSchema):
     items: list[PortalTimelineItemResponse]
 
 
+class PortalDisputeStrategyStageSuggestion(BaseSchema):
+    stage_kind: str
+    title: str
+    objective: str
+    recommended: bool
+
+
+class PortalDisputeStrategyAccountSuggestion(BaseSchema):
+    creditor_label: str
+    account_number_masked: str | None = None
+    summary: str
+    recommended_stage_titles: list[str]
+    stages: list[PortalDisputeStrategyStageSuggestion]
+
+
+class PortalDisputeStrategySuggestionsSummary(BaseSchema):
+    accounts_planned: int = 0
+    issues_covered: int = 0
+    high_strength_accounts: int = 0
+    cfpb_recommended: int = 0
+    attorney_recommended: int = 0
+
+
+class PortalDisputeStrategySuggestionsResponse(BaseSchema):
+    """Borrower-safe advisory dispute strategy suggestions (LRP-403).
+
+    Never prepares or sends letters. Staff-mediated planning aid only.
+    """
+
+    case_id: uuid.UUID
+    disclaimer: str
+    staff_mediated: bool = True
+    auto_send: bool = False
+    source: str
+    generated_at: datetime | None = None
+    summary: PortalDisputeStrategySuggestionsSummary
+    suggestions: list[PortalDisputeStrategyAccountSuggestion]
+
+
 class PortalPushSubscribeRequest(BaseSchema):
     endpoint: str
     p256dh_key: str
