@@ -35,6 +35,8 @@ class NotificationMatrixEvent(StrEnum):
     REFERRAL_SUBMITTED = "referral_submitted"
     REFERRAL_ASSIGNED = "referral_assigned"
     CONSULTATION_SCHEDULED = "consultation_scheduled"
+    APPOINTMENT_REMINDER_T24H = "appointment_reminder_t24h"
+    APPOINTMENT_REMINDER_T1H = "appointment_reminder_t1h"
     CONSULTATION_COMPLETED = "consultation_completed"
     STATUS_REPORT_PUBLISHED = "status_report_published"
     MORTGAGE_READY = "mortgage_ready"
@@ -188,6 +190,54 @@ NOTIFICATION_MATRIX: dict[NotificationMatrixEvent, MatrixEventDefinition] = {
                         NotificationChannel.IN_APP,
                     }
                 ),
+            ),
+        ),
+    ),
+    NotificationMatrixEvent.APPOINTMENT_REMINDER_T24H: MatrixEventDefinition(
+        event=NotificationMatrixEvent.APPOINTMENT_REMINDER_T24H,
+        title="Appointment reminder (T-24h)",
+        category="workflow",
+        group="partner_referral",
+        routes=(
+            MatrixRoute(
+                NotificationAudience.BORROWER,
+                frozenset(
+                    {
+                        NotificationChannel.EMAIL,
+                        NotificationChannel.SMS,
+                        NotificationChannel.IN_APP,
+                    }
+                ),
+            ),
+            MatrixRoute(
+                NotificationAudience.CASE_OWNER,
+                frozenset({NotificationChannel.IN_APP}),
+            ),
+            MatrixRoute(
+                NotificationAudience.REFERRING_LO,
+                frozenset({NotificationChannel.IN_APP}),
+                optional=True,
+            ),
+        ),
+    ),
+    NotificationMatrixEvent.APPOINTMENT_REMINDER_T1H: MatrixEventDefinition(
+        event=NotificationMatrixEvent.APPOINTMENT_REMINDER_T1H,
+        title="Appointment reminder (T-1h)",
+        category="workflow",
+        group="partner_referral",
+        routes=(
+            MatrixRoute(
+                NotificationAudience.BORROWER,
+                frozenset(
+                    {
+                        NotificationChannel.EMAIL,
+                        NotificationChannel.SMS,
+                    }
+                ),
+            ),
+            MatrixRoute(
+                NotificationAudience.CASE_OWNER,
+                frozenset({NotificationChannel.IN_APP}),
             ),
         ),
     ),

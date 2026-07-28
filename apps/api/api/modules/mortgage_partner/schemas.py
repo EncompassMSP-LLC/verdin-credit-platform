@@ -416,3 +416,99 @@ class CrmAutomationRuleUpdate(BaseModel):
     ) = None
     action: str | None = Field(default=None, min_length=1, max_length=500)
     channel: Literal["task", "email", "sms", "notification", "stage"] | None = None
+
+
+class CrmAppointmentResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    organization_id: uuid.UUID
+    case_id: uuid.UUID | None
+    title: str
+    appointment_type: str
+    status: str
+    starts_at: datetime
+    ends_at: datetime
+    location: str | None
+    meeting_url: str | None
+    related_name: str | None
+    owner_user_id: uuid.UUID | None
+    borrower_name: str | None
+    borrower_email: str | None
+    borrower_phone: str | None
+    referring_lo_email: str | None
+    referring_lo_name: str | None
+    tcpa_consent: bool
+    notes: str | None
+    created_at: datetime
+    updated_at: datetime
+
+
+class CrmAppointmentCreate(BaseModel):
+    title: str = Field(min_length=1, max_length=255)
+    appointment_type: Literal["consultation", "call", "meeting", "follow_up", "review"] = (
+        "consultation"
+    )
+    starts_at: datetime
+    ends_at: datetime
+    case_id: uuid.UUID | None = None
+    location: str | None = Field(default=None, max_length=255)
+    meeting_url: str | None = Field(default=None, max_length=500)
+    related_name: str | None = Field(default=None, max_length=255)
+    owner_user_id: uuid.UUID | None = None
+    borrower_name: str | None = Field(default=None, max_length=255)
+    borrower_email: EmailStr | None = None
+    borrower_phone: str | None = Field(default=None, max_length=50)
+    referring_lo_email: EmailStr | None = None
+    referring_lo_name: str | None = Field(default=None, max_length=255)
+    tcpa_consent: bool = False
+    notes: str | None = None
+
+    @model_validator(mode="after")
+    def ends_after_starts(self) -> "CrmAppointmentCreate":
+        if self.ends_at <= self.starts_at:
+            raise ValueError("ends_at must be after starts_at")
+        return self
+
+
+class CrmAppointmentUpdate(BaseModel):
+    title: str | None = Field(default=None, min_length=1, max_length=255)
+    appointment_type: Literal["consultation", "call", "meeting", "follow_up", "review"] | None = (
+        None
+    )
+    status: Literal["scheduled", "completed", "cancelled", "no_show"] | None = None
+    starts_at: datetime | None = None
+    ends_at: datetime | None = None
+    location: str | None = None
+    meeting_url: str | None = None
+    related_name: str | None = None
+    owner_user_id: uuid.UUID | None = None
+    borrower_name: str | None = None
+    borrower_email: EmailStr | None = None
+    borrower_phone: str | None = None
+    referring_lo_email: EmailStr | None = None
+    referring_lo_name: str | None = None
+    tcpa_consent: bool | None = None
+    notes: str | None = None
+
+
+class AppointmentReminderRunResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    organization_id: uuid.UUID
+    appointment_id: uuid.UUID
+    offset_key: str
+    status: str
+    schema_version: str
+    matrix_dispatch_id: uuid.UUID | None
+    started_at: datetime
+    completed_at: datetime | None
+    payload: dict[str, Any]
+    created_at: datetime
+    updated_at: datetime
+
+
+class AppointmentReminderProcessResponse(BaseModel):
+    processed_count: int
+    runs: list[AppointmentReminderRunResponse]

@@ -540,3 +540,95 @@ export function updateCrmAutomationRule(ruleId: string, body: CrmAutomationRuleU
     body,
   });
 }
+
+export type CrmAppointmentType = 'consultation' | 'call' | 'meeting' | 'follow_up' | 'review';
+
+export type CrmAppointmentStatus = 'scheduled' | 'completed' | 'cancelled' | 'no_show';
+
+export interface CrmAppointment {
+  id: string;
+  organization_id: string;
+  case_id: string | null;
+  title: string;
+  appointment_type: CrmAppointmentType;
+  status: CrmAppointmentStatus;
+  starts_at: string;
+  ends_at: string;
+  location: string | null;
+  meeting_url: string | null;
+  related_name: string | null;
+  owner_user_id: string | null;
+  borrower_name: string | null;
+  borrower_email: string | null;
+  borrower_phone: string | null;
+  referring_lo_email: string | null;
+  referring_lo_name: string | null;
+  tcpa_consent: boolean;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CrmAppointmentCreateInput {
+  title: string;
+  appointment_type?: CrmAppointmentType;
+  starts_at: string;
+  ends_at: string;
+  case_id?: string | null;
+  location?: string | null;
+  meeting_url?: string | null;
+  related_name?: string | null;
+  owner_user_id?: string | null;
+  borrower_name?: string | null;
+  borrower_email?: string | null;
+  borrower_phone?: string | null;
+  referring_lo_email?: string | null;
+  referring_lo_name?: string | null;
+  tcpa_consent?: boolean;
+  notes?: string | null;
+}
+
+export interface AppointmentReminderRun {
+  id: string;
+  organization_id: string;
+  appointment_id: string;
+  offset_key: string;
+  status: string;
+  schema_version: string;
+  matrix_dispatch_id: string | null;
+  started_at: string;
+  completed_at: string | null;
+  payload: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AppointmentReminderProcessResult {
+  processed_count: number;
+  runs: AppointmentReminderRun[];
+}
+
+export function listCrmAppointments() {
+  return request<CrmAppointment[]>(apiPath('/mortgage-partner/appointments'));
+}
+
+export function createCrmAppointment(body: CrmAppointmentCreateInput) {
+  return request<CrmAppointment>(apiPath('/mortgage-partner/appointments'), {
+    method: 'POST',
+    body,
+  });
+}
+
+export function processAppointmentReminders() {
+  return request<AppointmentReminderProcessResult>(
+    apiPath('/mortgage-partner/appointments/reminders/process'),
+    { method: 'POST' },
+  );
+}
+
+export function listAppointmentReminders(appointmentId?: string) {
+  const query = appointmentId ? `?appointment_id=${encodeURIComponent(appointmentId)}` : '';
+  return request<AppointmentReminderRun[]>(
+    apiPath(`/mortgage-partner/appointments/reminders${query}`),
+  );
+}

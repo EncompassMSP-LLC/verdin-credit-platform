@@ -3,10 +3,12 @@
 import {
   createPartnerContact,
   getMortgagePartnerStatus,
+  listCrmAppointments,
   listCrmAutomationRules,
   listPartnerContacts,
   listPartnerReferrals,
   listPartnerships,
+  processAppointmentReminders,
   updateCrmAutomationRule,
   updatePartnerContact,
   updatePartnerReferral,
@@ -124,6 +126,29 @@ export function useUpdateCrmAutomationRule() {
     onSuccess: () => {
       void queryClient.invalidateQueries({
         queryKey: ['crm', 'mortgage-partner', 'automation-rules'],
+      });
+    },
+  });
+}
+
+export function useCrmAppointments() {
+  const { isAuthenticated, authMode } = useCrmAuth();
+  const status = useCrmMortgagePartnerStatus();
+  return useQuery({
+    queryKey: ['crm', 'mortgage-partner', 'appointments'],
+    enabled:
+      isAuthenticated && authMode === 'platform' && status.data?.mortgage_partner_enabled === true,
+    queryFn: listCrmAppointments,
+  });
+}
+
+export function useProcessAppointmentReminders() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: processAppointmentReminders,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: ['crm', 'mortgage-partner', 'appointments'],
       });
     },
   });

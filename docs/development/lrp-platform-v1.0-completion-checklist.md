@@ -46,7 +46,7 @@ Ops contract: [`../lrp-enterprise/04-operations/business-ops-package/`](../lrp-e
 | 14    | LRP-201 Referral intake orchestrator job              | M3        | ✅     |
 | 15    | LRP-202 Notification matrix v1                        | M3        | ✅     |
 | 16    | LRP-203 CRM automation rules (persist)                | M3        | ✅     |
-| 17    | LRP-205 Appointment reminders                         | M3        | ☐      |
+| 17    | LRP-205 Appointment reminders                         | M3        | ✅     |
 | 18    | LRP-206 Partner nurture drip                          | M3        | ☐      |
 | 19    | LRP-207 Weekly status digest job                      | M3        | ☐      |
 | 20    | LRP-301 Realtor partner role + login                  | M4        | ☐      |
@@ -117,6 +117,15 @@ Deferred to [product backlog](../lrp-enterprise/15-roadmap/product-backlog.md): 
 - `apps/lrp-web` `/crm/automations` loads live rules with enable/disable (demo seed fallback retained)
 - Rules are configuration only — no unsupervised bureau filing or auto-execution of dispute tools
 - Tests: `apps/api/tests/mortgage_partner/test_automation_rules.py`
+
+### LRP-205 — Appointment reminders (2026-07-27)
+
+- Tables `crm_appointments` + `appointment_reminder_runs` (migration `107_appointment_reminders`)
+- Create/list/patch appointments; schedule confirmation via matrix `consultation_scheduled`
+- Idempotent T-24h / T-1h reminder processor fans out through matrix events (SMS TCPA-gated)
+- Staff `POST /mortgage-partner/appointments/reminders/process` + reminder audit list
+- `apps/lrp-web` `/crm/calendar` loads live appointments + process-reminders action
+- Tests: `apps/api/tests/mortgage_partner/test_appointment_reminders.py`
 
 ### LRP-106 — Readiness report in borrower portal (2026-07-27)
 

@@ -15,6 +15,11 @@ from api.modules.auth.dependencies import get_current_user
 from api.modules.auth.models import User
 from api.modules.mortgage_partner.dependencies import require_mortgage_partner_enabled
 from api.modules.mortgage_partner.schemas import (
+    AppointmentReminderProcessResponse,
+    AppointmentReminderRunResponse,
+    CrmAppointmentCreate,
+    CrmAppointmentResponse,
+    CrmAppointmentUpdate,
     CrmAutomationRuleCreate,
     CrmAutomationRuleResponse,
     CrmAutomationRuleUpdate,
@@ -96,6 +101,70 @@ async def update_automation_rule(
     service: MortgagePartnerService = Depends(get_mortgage_partner_service),
 ) -> CrmAutomationRuleResponse:
     return await service.update_automation_rule(current_user, rule_id, payload)
+
+
+@router.get("/appointments", response_model=list[CrmAppointmentResponse])
+async def list_appointments(
+    _: None = Depends(require_mortgage_partner_enabled),
+    current_user: User = Depends(get_current_user),
+    service: MortgagePartnerService = Depends(get_mortgage_partner_service),
+) -> list[CrmAppointmentResponse]:
+    """List CRM appointments for calendar + reminder scheduling (LRP-205)."""
+    return await service.list_appointments(current_user)
+
+
+@router.post(
+    "/appointments",
+    response_model=CrmAppointmentResponse,
+    status_code=201,
+)
+async def create_appointment(
+    payload: CrmAppointmentCreate,
+    _: None = Depends(require_mortgage_partner_enabled),
+    current_user: User = Depends(get_current_user),
+    service: MortgagePartnerService = Depends(get_mortgage_partner_service),
+) -> CrmAppointmentResponse:
+    return await service.create_appointment(current_user, payload)
+
+
+@router.patch(
+    "/appointments/{appointment_id}",
+    response_model=CrmAppointmentResponse,
+)
+async def update_appointment(
+    appointment_id: uuid.UUID,
+    payload: CrmAppointmentUpdate,
+    _: None = Depends(require_mortgage_partner_enabled),
+    current_user: User = Depends(get_current_user),
+    service: MortgagePartnerService = Depends(get_mortgage_partner_service),
+) -> CrmAppointmentResponse:
+    return await service.update_appointment(current_user, appointment_id, payload)
+
+
+@router.post(
+    "/appointments/reminders/process",
+    response_model=AppointmentReminderProcessResponse,
+)
+async def process_appointment_reminders(
+    _: None = Depends(require_mortgage_partner_enabled),
+    current_user: User = Depends(get_current_user),
+    service: MortgagePartnerService = Depends(get_mortgage_partner_service),
+) -> AppointmentReminderProcessResponse:
+    """Process due T-24h / T-1h appointment reminders (idempotent; LRP-205)."""
+    return await service.process_appointment_reminders(current_user)
+
+
+@router.get(
+    "/appointments/reminders",
+    response_model=list[AppointmentReminderRunResponse],
+)
+async def list_appointment_reminders(
+    appointment_id: uuid.UUID | None = Query(None),
+    _: None = Depends(require_mortgage_partner_enabled),
+    current_user: User = Depends(get_current_user),
+    service: MortgagePartnerService = Depends(get_mortgage_partner_service),
+) -> list[AppointmentReminderRunResponse]:
+    return await service.list_appointment_reminders(current_user, appointment_id=appointment_id)
 
 
 @router.get("/referral-intake/status", response_model=ReferralIntakeStatusResponse)

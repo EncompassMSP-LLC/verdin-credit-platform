@@ -246,12 +246,15 @@ export interface ReferralRecord {
   conversionValue: number | null;
 }
 
+export type CalendarEventType =
+  'call' | 'meeting' | 'deadline' | 'follow_up' | 'review' | 'consultation';
+
 export interface CalendarEvent {
   id: string;
   title: string;
   startsAt: string;
   endsAt: string;
-  type: 'call' | 'meeting' | 'deadline' | 'follow_up' | 'review';
+  type: CalendarEventType;
   relatedName: string;
   ownerName: string;
   location: string | null;
