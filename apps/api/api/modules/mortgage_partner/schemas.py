@@ -644,3 +644,90 @@ class WeeklyDigestProcessResponse(BaseModel):
     processed_count: int
     week_key: str
     runs: list[WeeklyDigestRunResponse]
+
+
+# --- Realtor partner role + login (LRP-301) ---
+
+
+class RealtorInviteCreate(BaseModel):
+    email: EmailStr
+    first_name: str = Field(min_length=1, max_length=100)
+    last_name: str = Field(min_length=1, max_length=100)
+    notes: str | None = None
+
+
+class RealtorInviteResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    organization_id: uuid.UUID
+    partnership_id: uuid.UUID
+    partner_organization_id: uuid.UUID
+    email: str
+    first_name: str
+    last_name: str
+    expires_at: datetime
+    accepted_at: datetime | None
+    revoked_at: datetime | None
+    notes: str | None
+    created_at: datetime
+    updated_at: datetime
+    # Returned once on create for operator handoff (not stored plaintext)
+    invite_token: str | None = None
+
+
+class RealtorInvitePreviewResponse(BaseModel):
+    email: str
+    first_name: str
+    last_name: str
+    partnership_display_name: str
+    partner_organization_name: str
+    expires_at: datetime
+    already_accepted: bool
+
+
+class RealtorInviteAcceptRequest(BaseModel):
+    token: str = Field(min_length=16, max_length=512)
+    password: str = Field(min_length=8, max_length=128)
+
+
+class RealtorPasswordResetRequest(BaseModel):
+    email: EmailStr
+
+
+class RealtorPasswordResetConfirm(BaseModel):
+    token: str = Field(min_length=16, max_length=512)
+    password: str = Field(min_length=8, max_length=128)
+
+
+class RealtorPasswordResetRequestResponse(BaseModel):
+    detail: str
+    # Present only in non-production for test/operator DX — never email the raw token in prod
+    reset_token: str | None = None
+
+
+class RealtorSessionResponse(BaseModel):
+    """Authenticated realtor workspace context (LRP-301)."""
+
+    user_id: uuid.UUID
+    email: str
+    first_name: str
+    last_name: str
+    display_name: str
+    partner_role: PartnerRole
+    permissions: list[str]
+    membership_id: uuid.UUID
+    membership_active: bool
+    partnership_id: uuid.UUID
+    partnership_display_name: str
+    cro_organization_id: uuid.UUID
+    partner_organization_id: uuid.UUID
+    partner_organization_name: str
+    partner_type: PartnerOrgType
+
+
+class RealtorTokenResponse(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
+    realtor: RealtorSessionResponse

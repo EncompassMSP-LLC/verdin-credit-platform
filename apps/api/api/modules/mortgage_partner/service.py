@@ -282,6 +282,8 @@ class MortgagePartnerService:
                 "appointment_reminders",
                 "partner_nurture_drip",
                 "weekly_partner_digest",
+                "realtor_partner_role",
+                "realtor_portal_auth",
             ],
             deferred_capabilities=[
                 "partner_jwt_realm",

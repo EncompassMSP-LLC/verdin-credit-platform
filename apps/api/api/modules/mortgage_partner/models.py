@@ -35,6 +35,7 @@ class PartnerRole(StrEnum):
     CREDIT_OPS = "credit_ops"
     UNDERWRITER_VIEW = "underwriter_view"
     READ_ONLY = "read_only"
+    REALTOR = "realtor"
 
 
 class ReferralStatus(StrEnum):

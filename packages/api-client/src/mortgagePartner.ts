@@ -3,7 +3,7 @@ import { apiPath, request } from './http';
 export type PartnerOrgType = 'lender' | 'realtor' | 'broker' | 'operator' | 'other';
 export type PartnershipStatus = 'pending' | 'active' | 'paused' | 'ended';
 export type PartnerRole =
-  'lender_admin' | 'loan_officer' | 'credit_ops' | 'underwriter_view' | 'read_only';
+  'lender_admin' | 'loan_officer' | 'credit_ops' | 'underwriter_view' | 'read_only' | 'realtor';
 export type PartnerReferralStatus = 'new' | 'accepted' | 'in_progress' | 'completed' | 'declined';
 export type LoanPipelineStage =
   | 'referred'
@@ -837,4 +837,125 @@ export function processWeeklyDigests(weekKey?: string, force = true) {
 export function listWeeklyDigestRuns(partnershipId?: string) {
   const query = partnershipId ? `?partnership_id=${encodeURIComponent(partnershipId)}` : '';
   return request<WeeklyDigestRun[]>(apiPath(`/mortgage-partner/weekly-digests/runs${query}`));
+}
+
+/* --- Realtor partner role + login (LRP-301) --- */
+
+export interface RealtorSession {
+  user_id: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  display_name: string;
+  partner_role: PartnerRole;
+  permissions: string[];
+  membership_id: string;
+  membership_active: boolean;
+  partnership_id: string;
+  partnership_display_name: string;
+  cro_organization_id: string;
+  partner_organization_id: string;
+  partner_organization_name: string;
+  partner_type: PartnerOrgType;
+}
+
+export interface RealtorInvite {
+  id: string;
+  organization_id: string;
+  partnership_id: string;
+  partner_organization_id: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  expires_at: string;
+  accepted_at: string | null;
+  revoked_at: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+  invite_token?: string | null;
+}
+
+export interface RealtorInvitePreview {
+  email: string;
+  first_name: string;
+  last_name: string;
+  partnership_display_name: string;
+  partner_organization_name: string;
+  expires_at: string;
+  already_accepted: boolean;
+}
+
+export interface RealtorInviteCreateInput {
+  email: string;
+  first_name: string;
+  last_name: string;
+  notes?: string | null;
+}
+
+export interface RealtorTokenResult {
+  access_token: string;
+  refresh_token: string;
+  token_type: string;
+  realtor: RealtorSession;
+}
+
+export interface RealtorPasswordResetRequestResult {
+  detail: string;
+  reset_token: string | null;
+}
+
+export function getRealtorMe() {
+  return request<RealtorSession>(apiPath('/mortgage-partner/realtor/me'));
+}
+
+export function createRealtorInvite(partnershipId: string, body: RealtorInviteCreateInput) {
+  return request<RealtorInvite>(
+    apiPath(`/mortgage-partner/partnerships/${partnershipId}/realtor-invites`),
+    { method: 'POST', body },
+  );
+}
+
+export function disableRealtorMembership(
+  partnershipId: string,
+  memberId: string,
+  disableUser = false,
+) {
+  const query = disableUser ? '?disable_user=true' : '';
+  return request<RealtorSession>(
+    apiPath(
+      `/mortgage-partner/partnerships/${partnershipId}/realtor-members/${memberId}/disable${query}`,
+    ),
+    { method: 'POST' },
+  );
+}
+
+export function previewRealtorInvite(token: string) {
+  return request<RealtorInvitePreview>(
+    apiPath(`/mortgage-partner/realtor/invites/preview?token=${encodeURIComponent(token)}`),
+    { auth: false },
+  );
+}
+
+export function acceptRealtorInvite(token: string, password: string) {
+  return request<RealtorTokenResult>(apiPath('/mortgage-partner/realtor/invites/accept'), {
+    method: 'POST',
+    body: { token, password },
+    auth: false,
+  });
+}
+
+export function requestRealtorPasswordReset(email: string) {
+  return request<RealtorPasswordResetRequestResult>(
+    apiPath('/mortgage-partner/realtor/password-reset/request'),
+    { method: 'POST', body: { email }, auth: false },
+  );
+}
+
+export function confirmRealtorPasswordReset(token: string, password: string) {
+  return request<RealtorTokenResult>(apiPath('/mortgage-partner/realtor/password-reset/confirm'), {
+    method: 'POST',
+    body: { token, password },
+    auth: false,
+  });
 }
