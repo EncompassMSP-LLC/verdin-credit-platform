@@ -4,10 +4,13 @@ import { useState } from 'react';
 import { PageHeader } from '@/components/portal/PageHeader';
 import { PortalCard } from '@/components/portal/PortalCard';
 import { RoleGate } from '@/components/lender/RoleGate';
+import { useLenderAuth } from '@/lib/lender/auth';
 import { DEMO_USERS, orgSettings as seedSettings } from '@/lib/lender/data';
 import type { OrgAdminSettings } from '@/lib/lender/types';
 
 export default function AdminPage() {
+  const { authMode } = useLenderAuth();
+  const isDemo = authMode === 'demo';
   const [settings, setSettings] = useState<OrgAdminSettings>({ ...seedSettings });
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
 
@@ -18,7 +21,11 @@ export default function AdminPage() {
 
   function onSubmit(event: React.FormEvent) {
     event.preventDefault();
-    setSavedMessage('Settings saved locally for this demo session.');
+    setSavedMessage(
+      isDemo
+        ? 'Settings saved locally for this demo session.'
+        : 'Local preview only — partner org admin APIs are not connected yet (changes are not persisted).',
+    );
   }
 
   return (
@@ -27,8 +34,22 @@ export default function AdminPage() {
         <PageHeader
           eyebrow="Admin panel"
           title="Organization settings"
-          description="Partner configuration for the demo org. Changes are local until Mortgage Partner admin APIs ship."
+          description={
+            isDemo
+              ? 'Partner configuration for the demo org. Changes are local until Mortgage Partner admin APIs ship.'
+              : 'Preview-only partner settings. Production org admin remains staff-mediated until Mortgage Partner admin APIs ship — not part of LO UAT pass criteria.'
+          }
         />
+
+        {!isDemo ? (
+          <p
+            className="mb-4 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-navy-900 dark:text-white"
+            role="status"
+          >
+            Platform mode: this panel does not write to the API. Use CRO staff tools for live
+            partnership configuration.
+          </p>
+        ) : null}
 
         <PortalCard title="Partner profile">
           <form onSubmit={onSubmit} className="space-y-5">

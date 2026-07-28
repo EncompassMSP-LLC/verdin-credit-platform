@@ -10,9 +10,10 @@ import type { LenderThread } from '@/lib/lender/types';
 import { cn, formatDate } from '@/lib/utils';
 
 export default function MessagesPage() {
-  const { user, can } = useLenderAuth();
-  const [threads, setThreads] = useState<LenderThread[]>(seedThreads);
-  const [activeId, setActiveId] = useState(seedThreads[0]?.id ?? '');
+  const { user, can, authMode } = useLenderAuth();
+  const isDemo = authMode === 'demo';
+  const [threads, setThreads] = useState<LenderThread[]>(isDemo ? seedThreads : []);
+  const [activeId, setActiveId] = useState(isDemo ? (seedThreads[0]?.id ?? '') : '');
   const [draft, setDraft] = useState('');
 
   const active = useMemo(
@@ -22,7 +23,7 @@ export default function MessagesPage() {
 
   function sendMessage(event: React.FormEvent) {
     event.preventDefault();
-    if (!can('messages.send') || !draft.trim() || !active) return;
+    if (!isDemo || !can('messages.send') || !draft.trim() || !active) return;
 
     const message = {
       id: `tm-local-${Date.now()}`,
@@ -54,46 +55,64 @@ export default function MessagesPage() {
         <PageHeader
           eyebrow="Messages"
           title="Partner messaging"
-          description="Coordinate with CRO advisors on borrower remediation. Messages are demo-local until platform messaging APIs connect."
+          description={
+            isDemo
+              ? 'Coordinate with CRO advisors on borrower remediation. Messages are demo-local until platform messaging APIs connect.'
+              : 'Partner messaging APIs are not connected yet. This surface is deferred for LO UAT — use CRO case messaging or notifications for live coordination.'
+          }
         />
+
+        {!isDemo ? (
+          <p
+            className="mb-4 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-navy-900 dark:text-white"
+            role="status"
+          >
+            Platform mode: no live partner message threads. Seed/demo threads are hidden so UAT does
+            not treat them as real borrower conversations.
+          </p>
+        ) : null}
 
         <div className="grid gap-4 lg:grid-cols-[18rem_1fr]">
           <PortalCard title="Threads" className="p-0">
-            <ul className="divide-y divide-navy-900/8 dark:divide-white/10">
-              {threads.map((thread) => (
-                <li key={thread.id}>
-                  <button
-                    type="button"
-                    onClick={() => setActiveId(thread.id)}
-                    className={cn(
-                      'w-full px-4 py-3 text-left transition hover:bg-navy-900/[0.03] dark:hover:bg-white/[0.03]',
-                      active?.id === thread.id && 'bg-gold-500/10',
-                    )}
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <p className="text-sm font-medium text-navy-900 dark:text-white">
-                        {thread.borrowerName}
+            {threads.length === 0 ? (
+              <p className="px-4 py-6 text-sm text-slate-500">No message threads yet.</p>
+            ) : (
+              <ul className="divide-y divide-navy-900/8 dark:divide-white/10">
+                {threads.map((thread) => (
+                  <li key={thread.id}>
+                    <button
+                      type="button"
+                      onClick={() => setActiveId(thread.id)}
+                      className={cn(
+                        'w-full px-4 py-3 text-left transition hover:bg-navy-900/[0.03] dark:hover:bg-white/[0.03]',
+                        active?.id === thread.id && 'bg-gold-500/10',
+                      )}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="text-sm font-medium text-navy-900 dark:text-white">
+                          {thread.borrowerName}
+                        </p>
+                        {thread.unread > 0 ? (
+                          <StatusPill tone="warn">{thread.unread}</StatusPill>
+                        ) : null}
+                      </div>
+                      <p className="mt-0.5 text-xs font-medium text-slate-600 dark:text-white/70">
+                        {thread.subject}
                       </p>
-                      {thread.unread > 0 ? (
-                        <StatusPill tone="warn">{thread.unread}</StatusPill>
-                      ) : null}
-                    </div>
-                    <p className="mt-0.5 text-xs font-medium text-slate-600 dark:text-white/70">
-                      {thread.subject}
-                    </p>
-                    <p className="mt-1 line-clamp-2 text-xs text-slate-500">{thread.preview}</p>
-                    <p className="mt-2 text-[0.65rem] text-slate-400">
-                      {formatDate(thread.updatedAt, {
-                        month: 'short',
-                        day: 'numeric',
-                        hour: 'numeric',
-                        minute: '2-digit',
-                      })}
-                    </p>
-                  </button>
-                </li>
-              ))}
-            </ul>
+                      <p className="mt-1 line-clamp-2 text-xs text-slate-500">{thread.preview}</p>
+                      <p className="mt-2 text-[0.65rem] text-slate-400">
+                        {formatDate(thread.updatedAt, {
+                          month: 'short',
+                          day: 'numeric',
+                          hour: 'numeric',
+                          minute: '2-digit',
+                        })}
+                      </p>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </PortalCard>
 
           <PortalCard

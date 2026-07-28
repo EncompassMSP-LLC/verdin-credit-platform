@@ -712,6 +712,8 @@ Endpoints return `404` when the corresponding feature flag is false.
 
 CRO↔partner (lender/realtor/broker) partnership scaffold with pipeline stage tracking, loan milestones, dashboard summary, and partnership-scoped lender RBAC. Requires `ENABLE_MORTGAGE_PARTNER=true`. Staff JWT only (partner JWT realm deferred). No cross-tenant marketplace, live bureau soft-pull, or unsupervised filing.
 
+LO UAT (LRP-304): manual script `docs/development/lrp-lo-uat-script.md`; automated happy path `apps/api/tests/mortgage_partner/test_lo_uat_happy_path.py` (no new endpoints).
+
 | Method | Path                                                                          | Min role              | Description                                                                                                                                                         |
 | ------ | ----------------------------------------------------------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | GET    | `/mortgage-partner/status`                                                    | case_manager          | Feature capabilities + deferred list                                                                                                                                |
