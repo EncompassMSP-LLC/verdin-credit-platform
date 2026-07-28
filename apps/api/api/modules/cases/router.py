@@ -55,6 +55,7 @@ from api.modules.documents.schemas import (
     CaseDisputeStrategyResponse,
     CaseFcraFindingsResponse,
     CaseIdentityTheftFindingsResponse,
+    CaseIssueExplainabilityResponse,
     CaseLitigationStrengthResponse,
     CaseMetadataBulkReextractResponse,
     CaseMetro2FindingsResponse,
@@ -598,6 +599,19 @@ async def get_case_litigation_strength(
     service: DocumentService = Depends(get_document_service),
 ) -> CaseLitigationStrengthResponse:
     return await service.get_case_litigation_strength(current_user, case_id)
+
+
+@router.get(
+    "/{case_id}/issue-explainability",
+    response_model=CaseIssueExplainabilityResponse,
+)
+async def get_case_issue_explainability(
+    case_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> CaseIssueExplainabilityResponse:
+    """Plain-language issue cards with impact categories (LRP-208). Advisory only."""
+    return await service.get_case_issue_explainability(current_user, case_id)
 
 
 @router.get(

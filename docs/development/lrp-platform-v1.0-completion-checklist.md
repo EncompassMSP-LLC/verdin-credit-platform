@@ -54,14 +54,16 @@ Ops contract: [`../lrp-enterprise/04-operations/business-ops-package/`](../lrp-e
 | 22    | LRP-303 Borrower UAT script + fixes                   | M4        | ✅     |
 | 23    | LRP-304 LO UAT script + fixes                         | M4        | ✅     |
 | 24    | LRP-403 Dispute strategy suggestions (advisory)       | M4        | ✅     |
-| 25    | LRP-405 FAQ/KB retrieval bot                          | M4        | ☐      |
-| 26    | LRP-406 Letter draft augment (staff-gated)            | M4        | ☐      |
-| 27    | LRP-305 Planned marketing landings (`/builders` etc.) | M5        | ☐      |
-| 28    | LRP-501 Partner isolation audit                       | M6        | ☐      |
-| 29    | LRP-502 Automation audit events                       | M6        | ☐      |
-| 30    | LRP-503 LRP smoke E2E in CI                           | M6        | ☐      |
-| 31    | LRP-504 Perf budgets                                  | M6        | ☐      |
-| 32    | LRP-505 Release notes + tag `lrp-platform-v1.0.0`     | M6        | ☐      |
+| 25    | LRP-208 Case issue explainability + evidence center   | M2/M4     | ✅     |
+| 26    | LRP-209 Consumer communication preferences            | M2/M4     | ☐      |
+| 27    | LRP-405 FAQ/KB retrieval bot                          | M4        | ☐      |
+| 28    | LRP-406 Letter draft augment (staff-gated)            | M4        | ☐      |
+| 29    | LRP-305 Planned marketing landings (`/builders` etc.) | M5        | ☐      |
+| 30    | LRP-501 Partner isolation audit                       | M6        | ☐      |
+| 31    | LRP-502 Automation audit events                       | M6        | ☐      |
+| 32    | LRP-503 LRP smoke E2E in CI                           | M6        | ☐      |
+| 33    | LRP-504 Perf budgets                                  | M6        | ☐      |
+| 34    | LRP-505 Release notes + tag `lrp-platform-v1.0.0`     | M6        | ☐      |
 
 Deferred to [product backlog](../lrp-enterprise/15-roadmap/product-backlog.md): LRP-404 educational simulator (PB-006); authenticated builder/attorney/advisor portals; full public KB depth.
 
@@ -247,6 +249,15 @@ Deferred to [product backlog](../lrp-enterprise/15-roadmap/product-backlog.md): 
 - `GET /portal/cases/{id}/dispute-strategy-suggestions` — borrower-safe projection of latest staff strategy run (`auto_send=false`, staff-mediated)
 - `/portal/disputes` shows advisory suggestions (no prepare/send controls)
 - Tests: `test_portal_dispute_strategy_suggestions.py`; `@verdin/api-client` helper
+
+### LRP-208 — Case issue explainability + evidence center (2026-07-28)
+
+- `GET /cases/{id}/issue-explainability` — plain-language cards from ranked litigation-strength findings
+- Fields: what we found / why disputable / possible outcomes / evidence recommendations / finding strength + credit & mortgage impact categories
+- CRO Case Workspace panel + CRM borrower workspace panel; disclaimer forbids score-point promises
+- Tests: `apps/api/tests/documents/test_issue_explainability.py`; `@verdin/api-client` helper
+- Follow-up: evidence vault document↔issue association, action timeline persistence
+- Next planned: LRP-209 consumer communication preferences (Do Not Call guided enrollment + creditor/collector prefs; never silent third-party registration)
 
 ### Definition of Done (every slice)
 

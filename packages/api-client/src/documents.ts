@@ -565,6 +565,47 @@ export interface CaseLitigationStrength {
   issues: LitigationStrengthIssue[];
 }
 
+export type FindingStrengthBand = 'strong' | 'moderate' | 'needs_more_evidence' | 'informational';
+
+export type ImpactCategory = 'high' | 'medium' | 'low' | 'unknown' | 'no_score_impact_expected';
+
+export interface IssueExplainabilitySummary {
+  issues_explained: number;
+  strong: number;
+  moderate: number;
+  needs_more_evidence: number;
+  informational: number;
+  high_credit_impact: number;
+  high_mortgage_impact: number;
+}
+
+export interface IssueExplainabilityCard {
+  source_id: string;
+  rule_id: string;
+  source_kind: string;
+  title: string;
+  what_we_found: string;
+  why_disputable: string;
+  possible_outcomes: string[];
+  evidence_recommendations: string[];
+  finding_strength: FindingStrengthBand;
+  credit_profile_impact: ImpactCategory;
+  mortgage_readiness_impact: ImpactCategory;
+  recommended_next_action: string;
+  creditor_name?: string | null;
+  account_number_masked?: string | null;
+  bureau?: string | null;
+  investigator_score: number;
+  rank: number;
+}
+
+export interface CaseIssueExplainability {
+  case_id: string;
+  disclaimer: string;
+  summary: IssueExplainabilitySummary;
+  cards: IssueExplainabilityCard[];
+}
+
 export interface DisputeStrategySummary {
   accounts_planned: number;
   issues_covered: number;

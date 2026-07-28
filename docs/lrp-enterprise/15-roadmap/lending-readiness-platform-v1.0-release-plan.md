@@ -92,14 +92,16 @@ Detailed per-feature: existing implementation, missing APIs/UI/tests/docs, secur
 
 **Goal:** Readiness score, timeline, reports, action plans, notifications visible to borrower + LO + CRM.
 
-| Slice   | Deliverable                               |
-| ------- | ----------------------------------------- |
-| LRP-104 | Borrower portal task/readiness parity     |
-| LRP-106 | Readiness report in borrower portal       |
-| LRP-105 | LO notifications center live              |
-| LRP-401 | Readiness timeline UI                     |
-| LRP-402 | Bureau + Metro2 in readiness blockers     |
-| LRP-204 | Consultation completed pack (staff-gated) |
+| Slice   | Deliverable                                 |
+| ------- | ------------------------------------------- |
+| LRP-104 | Borrower portal task/readiness parity       |
+| LRP-106 | Readiness report in borrower portal         |
+| LRP-105 | LO notifications center live                |
+| LRP-401 | Readiness timeline UI                       |
+| LRP-402 | Bureau + Metro2 in readiness blockers       |
+| LRP-204 | Consultation completed pack (staff-gated)   |
+| LRP-208 | Case issue explainability + evidence center |
+| LRP-209 | Consumer communication preferences          |
 
 **Exit:** Advisory readiness report viewable/exportable with disclaimer; action plan tasks drive portal UX.
 

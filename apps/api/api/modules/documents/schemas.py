@@ -779,6 +779,58 @@ class CaseLitigationStrengthResponse(BaseSchema):
     issues: list[LitigationStrengthIssue]
 
 
+ImpactCategory = Literal[
+    "high",
+    "medium",
+    "low",
+    "unknown",
+    "no_score_impact_expected",
+]
+FindingStrengthBand = Literal[
+    "strong",
+    "moderate",
+    "needs_more_evidence",
+    "informational",
+]
+
+
+class IssueExplainabilitySummary(BaseSchema):
+    issues_explained: int
+    strong: int
+    moderate: int
+    needs_more_evidence: int
+    informational: int
+    high_credit_impact: int
+    high_mortgage_impact: int
+
+
+class IssueExplainabilityCardResponse(BaseSchema):
+    source_id: str
+    rule_id: str
+    source_kind: str
+    title: str
+    what_we_found: str
+    why_disputable: str
+    possible_outcomes: list[str]
+    evidence_recommendations: list[str]
+    finding_strength: FindingStrengthBand
+    credit_profile_impact: ImpactCategory
+    mortgage_readiness_impact: ImpactCategory
+    recommended_next_action: str
+    creditor_name: str | None = None
+    account_number_masked: str | None = None
+    bureau: str | None = None
+    investigator_score: int
+    rank: int
+
+
+class CaseIssueExplainabilityResponse(BaseSchema):
+    case_id: uuid.UUID
+    disclaimer: str
+    summary: IssueExplainabilitySummary
+    cards: list[IssueExplainabilityCardResponse]
+
+
 class DisputeStrategySummary(BaseSchema):
     accounts_planned: int
     issues_covered: int
