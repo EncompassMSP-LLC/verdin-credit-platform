@@ -14,6 +14,7 @@ from api.modules.accounts.credit_analysis_export import (
 from api.modules.auth.dependencies import get_current_user
 from api.modules.auth.models import User
 from api.modules.mortgage_partner.dependencies import require_mortgage_partner_enabled
+from api.modules.mortgage_partner.nurture_service import PartnerNurtureService
 from api.modules.mortgage_partner.schemas import (
     AppointmentReminderProcessResponse,
     AppointmentReminderRunResponse,
@@ -27,6 +28,12 @@ from api.modules.mortgage_partner.schemas import (
     MilestoneReplacePayload,
     MortgagePartnerStatusResponse,
     MortgageReadinessReportResponse,
+    NurtureDeliveryProcessResponse,
+    NurtureDeliveryRunResponse,
+    NurtureEnrollmentCreate,
+    NurtureEnrollmentResponse,
+    NurtureEnrollmentUpdate,
+    NurtureProgramResponse,
     PartnerAccessAuditResponse,
     PartnerContactCreate,
     PartnerContactResponse,
@@ -54,6 +61,10 @@ router = APIRouter(prefix="/mortgage-partner", tags=["Mortgage Partner"])
 
 def get_mortgage_partner_service(db: AsyncSession = Depends(get_db)) -> MortgagePartnerService:
     return MortgagePartnerService.from_session(db)
+
+
+def get_nurture_service(db: AsyncSession = Depends(get_db)) -> PartnerNurtureService:
+    return PartnerNurtureService.from_session(db)
 
 
 @router.get("/status", response_model=MortgagePartnerStatusResponse)
@@ -165,6 +176,76 @@ async def list_appointment_reminders(
     service: MortgagePartnerService = Depends(get_mortgage_partner_service),
 ) -> list[AppointmentReminderRunResponse]:
     return await service.list_appointment_reminders(current_user, appointment_id=appointment_id)
+
+
+@router.get("/nurture/programs", response_model=list[NurtureProgramResponse])
+async def list_nurture_programs(
+    _: None = Depends(require_mortgage_partner_enabled),
+    current_user: User = Depends(get_current_user),
+    nurture: PartnerNurtureService = Depends(get_nurture_service),
+) -> list[NurtureProgramResponse]:
+    """List partner nurture programs (seeds lender drip defaults when empty; LRP-206)."""
+    return await nurture.list_programs(current_user)
+
+
+@router.get("/nurture/enrollments", response_model=list[NurtureEnrollmentResponse])
+async def list_nurture_enrollments(
+    _: None = Depends(require_mortgage_partner_enabled),
+    current_user: User = Depends(get_current_user),
+    nurture: PartnerNurtureService = Depends(get_nurture_service),
+) -> list[NurtureEnrollmentResponse]:
+    return await nurture.list_enrollments(current_user)
+
+
+@router.post(
+    "/nurture/enrollments",
+    response_model=NurtureEnrollmentResponse,
+    status_code=201,
+)
+async def create_nurture_enrollment(
+    payload: NurtureEnrollmentCreate,
+    _: None = Depends(require_mortgage_partner_enabled),
+    current_user: User = Depends(get_current_user),
+    nurture: PartnerNurtureService = Depends(get_nurture_service),
+) -> NurtureEnrollmentResponse:
+    return await nurture.create_enrollment(current_user, payload)
+
+
+@router.patch(
+    "/nurture/enrollments/{enrollment_id}",
+    response_model=NurtureEnrollmentResponse,
+)
+async def update_nurture_enrollment(
+    enrollment_id: uuid.UUID,
+    payload: NurtureEnrollmentUpdate,
+    _: None = Depends(require_mortgage_partner_enabled),
+    current_user: User = Depends(get_current_user),
+    nurture: PartnerNurtureService = Depends(get_nurture_service),
+) -> NurtureEnrollmentResponse:
+    return await nurture.update_enrollment(current_user, enrollment_id, payload)
+
+
+@router.post(
+    "/nurture/process",
+    response_model=NurtureDeliveryProcessResponse,
+)
+async def process_nurture_due(
+    _: None = Depends(require_mortgage_partner_enabled),
+    current_user: User = Depends(get_current_user),
+    nurture: PartnerNurtureService = Depends(get_nurture_service),
+) -> NurtureDeliveryProcessResponse:
+    """Process due nurture steps (idempotent; consent-gated; LRP-206)."""
+    return await nurture.process_due(current_user)
+
+
+@router.get("/nurture/deliveries", response_model=list[NurtureDeliveryRunResponse])
+async def list_nurture_deliveries(
+    enrollment_id: uuid.UUID | None = Query(None),
+    _: None = Depends(require_mortgage_partner_enabled),
+    current_user: User = Depends(get_current_user),
+    nurture: PartnerNurtureService = Depends(get_nurture_service),
+) -> list[NurtureDeliveryRunResponse]:
+    return await nurture.list_deliveries(current_user, enrollment_id=enrollment_id)
 
 
 @router.get("/referral-intake/status", response_model=ReferralIntakeStatusResponse)

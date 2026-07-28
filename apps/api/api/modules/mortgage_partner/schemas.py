@@ -512,3 +512,86 @@ class AppointmentReminderRunResponse(BaseModel):
 class AppointmentReminderProcessResponse(BaseModel):
     processed_count: int
     runs: list[AppointmentReminderRunResponse]
+
+
+class NurtureStepResponse(BaseModel):
+    id: uuid.UUID
+    program_id: uuid.UUID
+    step_order: int
+    delay_days: int
+    channel: str
+    template_key: str
+    subject: str
+    body_template: str
+
+
+class NurtureProgramResponse(BaseModel):
+    id: uuid.UUID
+    organization_id: uuid.UUID
+    name: str
+    description: str | None
+    audience: str
+    enrollment_lifecycle_stage: str
+    enabled: bool
+    steps: list[NurtureStepResponse]
+    created_at: datetime
+    updated_at: datetime
+
+
+class NurtureEnrollmentResponse(BaseModel):
+    id: uuid.UUID
+    organization_id: uuid.UUID
+    program_id: uuid.UUID
+    partnership_id: uuid.UUID | None
+    contact_name: str
+    contact_email: str | None
+    contact_phone: str | None
+    status: str
+    current_step_order: int
+    next_run_at: datetime | None
+    enrolled_at: datetime
+    paused_at: datetime | None
+    completed_at: datetime | None
+    exited_at: datetime | None
+    exit_reason: str | None
+    marketing_opt_in: bool
+    tcpa_consent: bool
+    created_at: datetime
+    updated_at: datetime
+
+
+class NurtureEnrollmentCreate(BaseModel):
+    program_id: uuid.UUID
+    contact_name: str = Field(min_length=1, max_length=255)
+    contact_email: EmailStr | None = None
+    contact_phone: str | None = Field(default=None, max_length=50)
+    partnership_id: uuid.UUID | None = None
+    marketing_opt_in: bool = True
+    tcpa_consent: bool = False
+
+
+class NurtureEnrollmentUpdate(BaseModel):
+    status: Literal["active", "paused", "completed", "exited"] | None = None
+    marketing_opt_in: bool | None = None
+    tcpa_consent: bool | None = None
+    exit_reason: str | None = Field(default=None, max_length=100)
+
+
+class NurtureDeliveryRunResponse(BaseModel):
+    id: uuid.UUID
+    organization_id: uuid.UUID
+    enrollment_id: uuid.UUID
+    program_id: uuid.UUID
+    step_id: uuid.UUID
+    channel: str
+    status: str
+    schema_version: str
+    attempted_at: datetime
+    payload: dict[str, Any]
+    created_at: datetime
+    updated_at: datetime
+
+
+class NurtureDeliveryProcessResponse(BaseModel):
+    processed_count: int
+    runs: list[NurtureDeliveryRunResponse]

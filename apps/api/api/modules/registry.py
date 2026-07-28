@@ -209,6 +209,16 @@ from api.modules.mortgage_partner.models import (
     ReferralIntakeStatus,
     ReferralStatus,
 )
+from api.modules.mortgage_partner.nurture_models import (
+    NurtureAudience,
+    NurtureChannel,
+    NurtureEnrollmentStatus,
+    NurtureLifecycleStage,
+    PartnerNurtureDeliveryRun,
+    PartnerNurtureEnrollment,
+    PartnerNurtureProgram,
+    PartnerNurtureStep,
+)
 from api.modules.mortgage_partner.referral_intake_orchestrator_models import (
     PartnerReferralIntakeOrchestratorRun,
 )
@@ -387,6 +397,14 @@ __all__ = [
     "CrmAppointmentStatus",
     "CrmAppointmentType",
     "AppointmentReminderRun",
+    "NurtureAudience",
+    "NurtureChannel",
+    "NurtureEnrollmentStatus",
+    "NurtureLifecycleStage",
+    "PartnerNurtureDeliveryRun",
+    "PartnerNurtureEnrollment",
+    "PartnerNurtureProgram",
+    "PartnerNurtureStep",
     "PartnerRole",
     "PartnershipStatus",
     "ReferralIntakeStatus",
