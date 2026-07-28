@@ -11,6 +11,7 @@ export type CrmNavIcon =
   | 'pipeline'
   | 'automations'
   | 'nurture'
+  | 'digests'
   | 'sms'
   | 'email'
   | 'reporting'
@@ -106,6 +107,13 @@ export const crmNav: CrmNavItem[] = [
     icon: 'nurture',
     permission: 'nurture.view',
     group: 'engagement',
+  },
+  {
+    href: '/crm/digests',
+    label: 'Weekly Digests',
+    icon: 'digests',
+    permission: 'reporting.view',
+    group: 'insights',
   },
   {
     href: '/crm/calendar',

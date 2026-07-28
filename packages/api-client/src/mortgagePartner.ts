@@ -750,3 +750,91 @@ export function listNurtureDeliveries(enrollmentId?: string) {
   const query = enrollmentId ? `?enrollment_id=${encodeURIComponent(enrollmentId)}` : '';
   return request<NurtureDeliveryRun[]>(apiPath(`/mortgage-partner/nurture/deliveries${query}`));
 }
+
+export interface WeeklyDigestSubscription {
+  id: string;
+  organization_id: string;
+  partnership_id: string;
+  recipient_name: string;
+  recipient_email: string;
+  enabled: boolean;
+  marketing_opt_in: boolean;
+  send_weekday: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WeeklyDigestSubscriptionCreateInput {
+  partnership_id: string;
+  recipient_name: string;
+  recipient_email: string;
+  send_weekday?: number;
+  marketing_opt_in?: boolean;
+}
+
+export interface WeeklyDigestSubscriptionUpdateInput {
+  enabled?: boolean;
+  marketing_opt_in?: boolean;
+  recipient_name?: string;
+  send_weekday?: number;
+}
+
+export interface WeeklyDigestRun {
+  id: string;
+  organization_id: string;
+  partnership_id: string;
+  subscription_id: string;
+  week_key: string;
+  status: string;
+  schema_version: string;
+  attempted_at: string;
+  payload: Record<string, unknown>;
+  body_text: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WeeklyDigestProcessResult {
+  processed_count: number;
+  week_key: string;
+  runs: WeeklyDigestRun[];
+}
+
+export function listWeeklyDigestSubscriptions() {
+  return request<WeeklyDigestSubscription[]>(
+    apiPath('/mortgage-partner/weekly-digests/subscriptions'),
+  );
+}
+
+export function createWeeklyDigestSubscription(body: WeeklyDigestSubscriptionCreateInput) {
+  return request<WeeklyDigestSubscription>(
+    apiPath('/mortgage-partner/weekly-digests/subscriptions'),
+    { method: 'POST', body },
+  );
+}
+
+export function updateWeeklyDigestSubscription(
+  subscriptionId: string,
+  body: WeeklyDigestSubscriptionUpdateInput,
+) {
+  return request<WeeklyDigestSubscription>(
+    apiPath(`/mortgage-partner/weekly-digests/subscriptions/${subscriptionId}`),
+    { method: 'PATCH', body },
+  );
+}
+
+export function processWeeklyDigests(weekKey?: string, force = true) {
+  const params = new URLSearchParams();
+  if (weekKey) params.set('week_key', weekKey);
+  params.set('force', String(force));
+  const query = params.toString() ? `?${params.toString()}` : '';
+  return request<WeeklyDigestProcessResult>(
+    apiPath(`/mortgage-partner/weekly-digests/process${query}`),
+    { method: 'POST' },
+  );
+}
+
+export function listWeeklyDigestRuns(partnershipId?: string) {
+  const query = partnershipId ? `?partnership_id=${encodeURIComponent(partnershipId)}` : '';
+  return request<WeeklyDigestRun[]>(apiPath(`/mortgage-partner/weekly-digests/runs${query}`));
+}
