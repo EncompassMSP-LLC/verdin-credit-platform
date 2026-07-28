@@ -441,3 +441,81 @@ export interface LlmDisputeDraftAugmentStatus {
 export function getLlmDisputeDraftAugmentStatus() {
   return request<LlmDisputeDraftAugmentStatus>(apiPath('/llm/dispute-draft/status'));
 }
+
+export type FaqKbAudience = 'borrower' | 'lender' | 'realtor' | 'staff';
+export type FaqKbFeedbackRating = 'accurate' | 'inaccurate' | 'incomplete';
+
+export interface FaqKbCitation {
+  article_id: string;
+  title: string;
+  source_path: string;
+  excerpt: string;
+  score: number;
+}
+
+export interface FaqKbAskResponse {
+  turn_id: string;
+  question: string;
+  answer: string;
+  audience: FaqKbAudience;
+  grounded: boolean;
+  refused: boolean;
+  refusal_reason: string | null;
+  citations: FaqKbCitation[];
+  matched_article_ids: string[];
+  disclaimer: string;
+  created_at: string;
+}
+
+export interface FaqKbConversationTurn {
+  id: string;
+  organization_id: string;
+  requested_by_user_id: string | null;
+  audience: FaqKbAudience;
+  question: string;
+  answer: string;
+  grounded: boolean;
+  refused: boolean;
+  refusal_reason: string | null;
+  citations: FaqKbCitation[];
+  matched_article_ids: string[];
+  disclaimer: string;
+  feedback_rating: FaqKbFeedbackRating | null;
+  feedback_note: string | null;
+  feedback_by_user_id: string | null;
+  feedback_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FaqKbAskInput {
+  question: string;
+  audience?: FaqKbAudience;
+}
+
+export interface FaqKbFeedbackInput {
+  rating: FaqKbFeedbackRating;
+  note?: string | null;
+}
+
+export function askFaqKb(input: FaqKbAskInput): Promise<FaqKbAskResponse> {
+  return request<FaqKbAskResponse>(apiPath('/llm/faq-kb/ask'), {
+    method: 'POST',
+    body: input,
+  });
+}
+
+export function listFaqKbConversations(limit = 50): Promise<FaqKbConversationTurn[]> {
+  const query = new URLSearchParams({ limit: String(limit) });
+  return request<FaqKbConversationTurn[]>(apiPath(`/llm/faq-kb/conversations?${query}`));
+}
+
+export function submitFaqKbFeedback(
+  turnId: string,
+  input: FaqKbFeedbackInput,
+): Promise<FaqKbConversationTurn> {
+  return request<FaqKbConversationTurn>(apiPath(`/llm/faq-kb/conversations/${turnId}/feedback`), {
+    method: 'POST',
+    body: input,
+  });
+}

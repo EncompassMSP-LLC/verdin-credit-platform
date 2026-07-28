@@ -188,6 +188,11 @@ from api.modules.llm.agent_unsupervised_loop_models import (
     AgentUnsupervisedLoopRun,
     AgentUnsupervisedLoopStatus,
 )
+from api.modules.llm.faq_kb_models import (
+    FaqKbAudience,
+    FaqKbConversationTurn,
+    FaqKbFeedbackRating,
+)
 from api.modules.messaging.models import (
     MessageSenderRole,
     MessageThread,
@@ -300,6 +305,9 @@ __all__ = [
     "AgentSupervisedLoopStatus",
     "AgentUnsupervisedLoopRun",
     "AgentUnsupervisedLoopStatus",
+    "FaqKbAudience",
+    "FaqKbConversationTurn",
+    "FaqKbFeedbackRating",
     "AgentToolInvocationRequest",
     "AgentToolInvocationStatus",
     "AgentObservabilityKind",

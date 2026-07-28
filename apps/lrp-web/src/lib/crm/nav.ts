@@ -137,6 +137,13 @@ export const crmNav: CrmNavItem[] = [
     group: 'operations',
   },
   {
+    href: '/crm/faq-assistant',
+    label: 'FAQ assistant',
+    icon: 'notes',
+    permission: 'dashboard.view',
+    group: 'insights',
+  },
+  {
     href: '/crm/sms',
     label: 'SMS',
     icon: 'sms',
