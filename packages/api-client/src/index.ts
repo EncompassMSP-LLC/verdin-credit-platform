@@ -1169,6 +1169,19 @@ export {
   type ReadinessDimension,
   type ReadinessPriorityTask,
   type ReadinessReportSummary,
+  acceptRealtorInvite,
+  confirmRealtorPasswordReset,
+  createRealtorInvite,
+  disableRealtorMembership,
+  getRealtorMe,
+  previewRealtorInvite,
+  requestRealtorPasswordReset,
+  type RealtorInvite,
+  type RealtorInviteCreateInput,
+  type RealtorInvitePreview,
+  type RealtorPasswordResetRequestResult,
+  type RealtorSession,
+  type RealtorTokenResult,
 } from './mortgagePartner';
 
 export interface HealthResponse {

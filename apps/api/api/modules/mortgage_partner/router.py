@@ -15,6 +15,7 @@ from api.modules.auth.dependencies import get_current_user
 from api.modules.auth.models import User
 from api.modules.mortgage_partner.dependencies import require_mortgage_partner_enabled
 from api.modules.mortgage_partner.nurture_service import PartnerNurtureService
+from api.modules.mortgage_partner.realtor_service import RealtorPartnerService
 from api.modules.mortgage_partner.schemas import (
     AppointmentReminderProcessResponse,
     AppointmentReminderRunResponse,
@@ -49,6 +50,15 @@ from api.modules.mortgage_partner.schemas import (
     PartnershipResponse,
     PipelineCardResponse,
     ReadinessReportSummary,
+    RealtorInviteAcceptRequest,
+    RealtorInviteCreate,
+    RealtorInvitePreviewResponse,
+    RealtorInviteResponse,
+    RealtorPasswordResetConfirm,
+    RealtorPasswordResetRequest,
+    RealtorPasswordResetRequestResponse,
+    RealtorSessionResponse,
+    RealtorTokenResponse,
     ReferralIntakeCreate,
     ReferralIntakeOrchestratorResponse,
     ReferralIntakeResponse,
@@ -75,6 +85,10 @@ def get_nurture_service(db: AsyncSession = Depends(get_db)) -> PartnerNurtureSer
 
 def get_weekly_digest_service(db: AsyncSession = Depends(get_db)) -> PartnerWeeklyDigestService:
     return PartnerWeeklyDigestService.from_session(db)
+
+
+def get_realtor_service(db: AsyncSession = Depends(get_db)) -> RealtorPartnerService:
+    return RealtorPartnerService.from_session(db)
 
 
 @router.get("/status", response_model=MortgagePartnerStatusResponse)
@@ -659,3 +673,96 @@ async def export_referral_readiness_report(
         media_type=media_type,
         headers={"Content-Disposition": f'attachment; filename="{safe_name}"'},
     )
+
+
+# --- Realtor partner role + login (LRP-301) ---
+
+
+@router.post(
+    "/partnerships/{partnership_id}/realtor-invites",
+    response_model=RealtorInviteResponse,
+    status_code=201,
+)
+async def create_realtor_invite(
+    partnership_id: uuid.UUID,
+    payload: RealtorInviteCreate,
+    _: None = Depends(require_mortgage_partner_enabled),
+    current_user: User = Depends(get_current_user),
+    service: RealtorPartnerService = Depends(get_realtor_service),
+) -> RealtorInviteResponse:
+    """Staff-issued realtor workspace invitation (token returned once)."""
+    return await service.create_invite(current_user, partnership_id, payload)
+
+
+@router.post(
+    "/partnerships/{partnership_id}/realtor-members/{member_id}/disable",
+    response_model=RealtorSessionResponse,
+)
+async def disable_realtor_membership(
+    partnership_id: uuid.UUID,
+    member_id: uuid.UUID,
+    disable_user: bool = Query(default=False),
+    _: None = Depends(require_mortgage_partner_enabled),
+    current_user: User = Depends(get_current_user),
+    service: RealtorPartnerService = Depends(get_realtor_service),
+) -> RealtorSessionResponse:
+    """Disable realtor partnership membership (optional account disable)."""
+    return await service.disable_membership(
+        current_user,
+        partnership_id,
+        member_id,
+        disable_user=disable_user,
+    )
+
+
+@router.get("/realtor/me", response_model=RealtorSessionResponse)
+async def get_realtor_me(
+    _: None = Depends(require_mortgage_partner_enabled),
+    current_user: User = Depends(get_current_user),
+    service: RealtorPartnerService = Depends(get_realtor_service),
+) -> RealtorSessionResponse:
+    """Authenticated realtor session context (org + partnership isolation)."""
+    return await service.get_me(current_user)
+
+
+@router.get("/realtor/invites/preview", response_model=RealtorInvitePreviewResponse)
+async def preview_realtor_invite(
+    token: str = Query(min_length=16, max_length=512),
+    _: None = Depends(require_mortgage_partner_enabled),
+    service: RealtorPartnerService = Depends(get_realtor_service),
+) -> RealtorInvitePreviewResponse:
+    """Public invite preview for activation UI (no auth)."""
+    return await service.preview_invite(token)
+
+
+@router.post("/realtor/invites/accept", response_model=RealtorTokenResponse)
+async def accept_realtor_invite(
+    payload: RealtorInviteAcceptRequest,
+    _: None = Depends(require_mortgage_partner_enabled),
+    service: RealtorPartnerService = Depends(get_realtor_service),
+) -> RealtorTokenResponse:
+    """Accept invite, activate password, return staff JWT + realtor session."""
+    return await service.accept_invite(payload)
+
+
+@router.post(
+    "/realtor/password-reset/request",
+    response_model=RealtorPasswordResetRequestResponse,
+)
+async def request_realtor_password_reset(
+    payload: RealtorPasswordResetRequest,
+    _: None = Depends(require_mortgage_partner_enabled),
+    service: RealtorPartnerService = Depends(get_realtor_service),
+) -> RealtorPasswordResetRequestResponse:
+    """Request realtor password reset (generic response; token in dev/test only)."""
+    return await service.request_password_reset(payload)
+
+
+@router.post("/realtor/password-reset/confirm", response_model=RealtorTokenResponse)
+async def confirm_realtor_password_reset(
+    payload: RealtorPasswordResetConfirm,
+    _: None = Depends(require_mortgage_partner_enabled),
+    service: RealtorPartnerService = Depends(get_realtor_service),
+) -> RealtorTokenResponse:
+    """Confirm realtor password reset and return JWT + realtor session."""
+    return await service.confirm_password_reset(payload)

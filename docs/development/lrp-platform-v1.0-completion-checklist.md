@@ -49,7 +49,7 @@ Ops contract: [`../lrp-enterprise/04-operations/business-ops-package/`](../lrp-e
 | 17    | LRP-205 Appointment reminders                         | M3        | ✅     |
 | 18    | LRP-206 Partner nurture drip                          | M3        | ✅     |
 | 19    | LRP-207 Weekly status digest job                      | M3        | ✅     |
-| 20    | LRP-301 Realtor partner role + login                  | M4        | ☐      |
+| 20    | LRP-301 Realtor partner role + login                  | M4        | ✅     |
 | 21    | LRP-302 Realtor portal MVP                            | M4        | ☐      |
 | 22    | LRP-303 Borrower UAT script + fixes                   | M4        | ☐      |
 | 23    | LRP-304 LO UAT script + fixes                         | M4        | ☐      |
@@ -213,6 +213,15 @@ Deferred to [product backlog](../lrp-enterprise/15-roadmap/product-backlog.md): 
 - Dedicated seeds: `scripts/seed_demo/seed_demo_{org,users,borrowers,referrals}.py` (refuse production)
 - CRM Admin hides Generate Demo Data / Reset Workspace for production orgs
 - Tests: `apps/api/tests/org_context/test_production_org_mode.py`
+
+### LRP-301 — Realtor partner role + login (2026-07-28)
+
+- `PartnerRole.realtor` + limited permission matrix; migration `110_realtor_partner_role` (invites + password-reset tokens)
+- Staff invite / accept / disable; public preview + password reset; `GET /mortgage-partner/realtor/me` enforces active realtor membership + partnership isolation
+- `apps/lrp-web` `/realtor/*` realm: login, activate, forgot/reset password, shell + dashboard; middleware isolates from lender/CRM/portal
+- Demo auth: `NEXT_PUBLIC_LRP_REALTOR_DEMO_AUTH` (off in production builds)
+- Tests: `apps/api/tests/mortgage_partner/test_realtor_role_login.py`
+- Realtor referral/pipeline MVP deferred to LRP-302
 
 ### Definition of Done (every slice)
 

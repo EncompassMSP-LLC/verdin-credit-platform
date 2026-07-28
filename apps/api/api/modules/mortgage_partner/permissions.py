@@ -58,6 +58,15 @@ PARTNER_ROLE_PERMISSIONS: dict[PartnerRole, frozenset[str]] = {
             "readiness.view",
         }
     ),
+    PartnerRole.REALTOR: frozenset(
+        {
+            "partnership.view",
+            "referrals.view",
+            "referrals.create",
+            "pipeline.view",
+            # Coarse status only — no full readiness export / tradeline access
+        }
+    ),
 }
 
 

@@ -6,6 +6,7 @@
  * | portal   | Borrower / client     | Platform portal JWT (`/portal/auth/*`)            |
  * | crm      | Staff operators       | Platform staff JWT (`/auth/*`)                    |
  * | lender   | LO / partner users    | Staff JWT (interim); partner JWT deferred         |
+ * | realtor  | Realtor partners      | Staff JWT + realtor membership (LRP-301)          |
  *
  * Cookies are realm-scoped so middleware can gate routes independently.
  * `@verdin/api-client` holds one in-memory access token per tab — each
@@ -15,16 +16,17 @@
  * production builds so production orgs cannot use seed credentials.
  */
 
-export type LrpAuthRealm = 'portal' | 'crm' | 'lender';
+export type LrpAuthRealm = 'portal' | 'crm' | 'lender' | 'realtor';
 
 export const AUTH_REALM_LABELS: Record<LrpAuthRealm, string> = {
   portal: 'Borrower portal',
   crm: 'Enterprise CRM',
   lender: 'Lender workspace',
+  realtor: 'Realtor workspace',
 };
 
 /**
- * Resolve whether CRM/lender demo credential fallback is allowed.
+ * Resolve whether CRM/lender/realtor demo credential fallback is allowed.
  * Pure helper for tests and env evaluation.
  *
  * Rules (LRP-108 / LRP-109):
@@ -47,10 +49,14 @@ export function resolveDemoAuthEnabled(options: {
   return raw !== '0' && raw.toLowerCase() !== 'false';
 }
 
-/** When true, CRM/lender accept local demo users if platform login fails. */
-export function isDemoAuthEnabled(realm: 'crm' | 'lender'): boolean {
+/** When true, CRM/lender/realtor accept local demo users if platform login fails. */
+export function isDemoAuthEnabled(realm: 'crm' | 'lender' | 'realtor'): boolean {
   const key =
-    realm === 'crm' ? 'NEXT_PUBLIC_LRP_CRM_DEMO_AUTH' : 'NEXT_PUBLIC_LRP_LENDER_DEMO_AUTH';
+    realm === 'crm'
+      ? 'NEXT_PUBLIC_LRP_CRM_DEMO_AUTH'
+      : realm === 'lender'
+        ? 'NEXT_PUBLIC_LRP_LENDER_DEMO_AUTH'
+        : 'NEXT_PUBLIC_LRP_REALTOR_DEMO_AUTH';
   return resolveDemoAuthEnabled({
     nodeEnv: process.env.NODE_ENV,
     envValue: process.env[key],
