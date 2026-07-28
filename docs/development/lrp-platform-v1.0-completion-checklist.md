@@ -48,7 +48,7 @@ Ops contract: [`../lrp-enterprise/04-operations/business-ops-package/`](../lrp-e
 | 16    | LRP-203 CRM automation rules (persist)                | M3        | ✅     |
 | 17    | LRP-205 Appointment reminders                         | M3        | ✅     |
 | 18    | LRP-206 Partner nurture drip                          | M3        | ✅     |
-| 19    | LRP-207 Weekly status digest job                      | M3        | ☐      |
+| 19    | LRP-207 Weekly status digest job                      | M3        | ✅     |
 | 20    | LRP-301 Realtor partner role + login                  | M4        | ☐      |
 | 21    | LRP-302 Realtor portal MVP                            | M4        | ☐      |
 | 22    | LRP-303 Borrower UAT script + fixes                   | M4        | ☐      |
@@ -135,6 +135,14 @@ Deferred to [product backlog](../lrp-enterprise/15-roadmap/product-backlog.md): 
 - Pause / resume / exit / opt-out; delivery audit history; org isolation
 - `apps/lrp-web` `/crm/nurture` live enroll + process + status controls
 - Tests: `apps/api/tests/mortgage_partner/test_nurture_drip.py`
+
+### LRP-207 — Weekly status digest job (2026-07-28)
+
+- Tables `partner_weekly_digest_subscriptions` + `partner_weekly_digest_runs` (migration `109_weekly_partner_digest`)
+- Opt-in LO subscriptions; PII-minimized §6 weekly snapshot (stage counts, movement, needs attention)
+- Idempotent `POST /mortgage-partner/weekly-digests/process` per subscription+ISO week; claim-safe body
+- CRM archive list + `/crm/digests` subscribe/process UI
+- Tests: `apps/api/tests/mortgage_partner/test_weekly_digest.py`
 
 ### LRP-106 — Readiness report in borrower portal (2026-07-27)
 

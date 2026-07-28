@@ -2,6 +2,7 @@
 
 import {
   createNurtureEnrollment,
+  createWeeklyDigestSubscription,
   createPartnerContact,
   getMortgagePartnerStatus,
   listCrmAppointments,
@@ -12,12 +13,16 @@ import {
   listPartnerContacts,
   listPartnerReferrals,
   listPartnerships,
+  listWeeklyDigestRuns,
+  listWeeklyDigestSubscriptions,
   processAppointmentReminders,
   processNurtureDue,
+  processWeeklyDigests,
   updateCrmAutomationRule,
   updateNurtureEnrollment,
   updatePartnerContact,
   updatePartnerReferral,
+  updateWeeklyDigestSubscription,
   type CrmAutomationRuleUpdateInput,
   type NurtureEnrollmentCreateInput,
   type NurtureEnrollmentUpdateInput,
@@ -27,6 +32,8 @@ import {
   type PartnerReferral,
   type PartnerReferralStatus,
   type Partnership,
+  type WeeklyDigestSubscriptionCreateInput,
+  type WeeklyDigestSubscriptionUpdateInput,
 } from '@verdin/api-client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCrmAuth } from '@/lib/crm/auth';
@@ -235,6 +242,70 @@ export function useProcessNurtureDue() {
       });
       void queryClient.invalidateQueries({
         queryKey: ['crm', 'mortgage-partner', 'nurture-deliveries'],
+      });
+    },
+  });
+}
+
+export function useWeeklyDigestSubscriptions() {
+  const { isAuthenticated, authMode } = useCrmAuth();
+  const status = useCrmMortgagePartnerStatus();
+  return useQuery({
+    queryKey: ['crm', 'mortgage-partner', 'weekly-digest-subscriptions'],
+    enabled:
+      isAuthenticated && authMode === 'platform' && status.data?.mortgage_partner_enabled === true,
+    queryFn: listWeeklyDigestSubscriptions,
+  });
+}
+
+export function useWeeklyDigestRuns() {
+  const { isAuthenticated, authMode } = useCrmAuth();
+  const status = useCrmMortgagePartnerStatus();
+  return useQuery({
+    queryKey: ['crm', 'mortgage-partner', 'weekly-digest-runs'],
+    enabled:
+      isAuthenticated && authMode === 'platform' && status.data?.mortgage_partner_enabled === true,
+    queryFn: () => listWeeklyDigestRuns(),
+  });
+}
+
+export function useCreateWeeklyDigestSubscription() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: WeeklyDigestSubscriptionCreateInput) => createWeeklyDigestSubscription(body),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: ['crm', 'mortgage-partner', 'weekly-digest-subscriptions'],
+      });
+    },
+  });
+}
+
+export function useUpdateWeeklyDigestSubscription() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      subscriptionId,
+      body,
+    }: {
+      subscriptionId: string;
+      body: WeeklyDigestSubscriptionUpdateInput;
+    }) => updateWeeklyDigestSubscription(subscriptionId, body),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: ['crm', 'mortgage-partner', 'weekly-digest-subscriptions'],
+      });
+    },
+  });
+}
+
+export function useProcessWeeklyDigests() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => processWeeklyDigests(undefined, true),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: ['crm', 'mortgage-partner', 'weekly-digest-runs'],
       });
     },
   });

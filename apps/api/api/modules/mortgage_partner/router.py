@@ -53,8 +53,14 @@ from api.modules.mortgage_partner.schemas import (
     ReferralIntakeOrchestratorResponse,
     ReferralIntakeResponse,
     ReferralIntakeStatusResponse,
+    WeeklyDigestProcessResponse,
+    WeeklyDigestRunResponse,
+    WeeklyDigestSubscriptionCreate,
+    WeeklyDigestSubscriptionResponse,
+    WeeklyDigestSubscriptionUpdate,
 )
 from api.modules.mortgage_partner.service import MortgagePartnerService
+from api.modules.mortgage_partner.weekly_digest_service import PartnerWeeklyDigestService
 
 router = APIRouter(prefix="/mortgage-partner", tags=["Mortgage Partner"])
 
@@ -65,6 +71,10 @@ def get_mortgage_partner_service(db: AsyncSession = Depends(get_db)) -> Mortgage
 
 def get_nurture_service(db: AsyncSession = Depends(get_db)) -> PartnerNurtureService:
     return PartnerNurtureService.from_session(db)
+
+
+def get_weekly_digest_service(db: AsyncSession = Depends(get_db)) -> PartnerWeeklyDigestService:
+    return PartnerWeeklyDigestService.from_session(db)
 
 
 @router.get("/status", response_model=MortgagePartnerStatusResponse)
@@ -246,6 +256,72 @@ async def list_nurture_deliveries(
     nurture: PartnerNurtureService = Depends(get_nurture_service),
 ) -> list[NurtureDeliveryRunResponse]:
     return await nurture.list_deliveries(current_user, enrollment_id=enrollment_id)
+
+
+@router.get(
+    "/weekly-digests/subscriptions",
+    response_model=list[WeeklyDigestSubscriptionResponse],
+)
+async def list_weekly_digest_subscriptions(
+    _: None = Depends(require_mortgage_partner_enabled),
+    current_user: User = Depends(get_current_user),
+    digests: PartnerWeeklyDigestService = Depends(get_weekly_digest_service),
+) -> list[WeeklyDigestSubscriptionResponse]:
+    """List opt-in weekly partner digest subscriptions (LRP-207)."""
+    return await digests.list_subscriptions(current_user)
+
+
+@router.post(
+    "/weekly-digests/subscriptions",
+    response_model=WeeklyDigestSubscriptionResponse,
+    status_code=201,
+)
+async def create_weekly_digest_subscription(
+    payload: WeeklyDigestSubscriptionCreate,
+    _: None = Depends(require_mortgage_partner_enabled),
+    current_user: User = Depends(get_current_user),
+    digests: PartnerWeeklyDigestService = Depends(get_weekly_digest_service),
+) -> WeeklyDigestSubscriptionResponse:
+    return await digests.create_subscription(current_user, payload)
+
+
+@router.patch(
+    "/weekly-digests/subscriptions/{subscription_id}",
+    response_model=WeeklyDigestSubscriptionResponse,
+)
+async def update_weekly_digest_subscription(
+    subscription_id: uuid.UUID,
+    payload: WeeklyDigestSubscriptionUpdate,
+    _: None = Depends(require_mortgage_partner_enabled),
+    current_user: User = Depends(get_current_user),
+    digests: PartnerWeeklyDigestService = Depends(get_weekly_digest_service),
+) -> WeeklyDigestSubscriptionResponse:
+    return await digests.update_subscription(current_user, subscription_id, payload)
+
+
+@router.post(
+    "/weekly-digests/process",
+    response_model=WeeklyDigestProcessResponse,
+)
+async def process_weekly_digests(
+    week_key: str | None = Query(None),
+    force: bool = Query(True),
+    _: None = Depends(require_mortgage_partner_enabled),
+    current_user: User = Depends(get_current_user),
+    digests: PartnerWeeklyDigestService = Depends(get_weekly_digest_service),
+) -> WeeklyDigestProcessResponse:
+    """Process weekly digests for opt-in subscriptions (idempotent; LRP-207)."""
+    return await digests.process_due(current_user, week_key=week_key, force=force)
+
+
+@router.get("/weekly-digests/runs", response_model=list[WeeklyDigestRunResponse])
+async def list_weekly_digest_runs(
+    partnership_id: uuid.UUID | None = Query(None),
+    _: None = Depends(require_mortgage_partner_enabled),
+    current_user: User = Depends(get_current_user),
+    digests: PartnerWeeklyDigestService = Depends(get_weekly_digest_service),
+) -> list[WeeklyDigestRunResponse]:
+    return await digests.list_runs(current_user, partnership_id=partnership_id)
 
 
 @router.get("/referral-intake/status", response_model=ReferralIntakeStatusResponse)

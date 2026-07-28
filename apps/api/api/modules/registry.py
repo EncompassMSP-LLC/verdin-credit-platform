@@ -222,6 +222,10 @@ from api.modules.mortgage_partner.nurture_models import (
 from api.modules.mortgage_partner.referral_intake_orchestrator_models import (
     PartnerReferralIntakeOrchestratorRun,
 )
+from api.modules.mortgage_partner.weekly_digest_models import (
+    PartnerWeeklyDigestRun,
+    PartnerWeeklyDigestSubscription,
+)
 from api.modules.notifications.models import (
     EmailDeliveryLog,
     Notification,
@@ -405,6 +409,8 @@ __all__ = [
     "PartnerNurtureEnrollment",
     "PartnerNurtureProgram",
     "PartnerNurtureStep",
+    "PartnerWeeklyDigestRun",
+    "PartnerWeeklyDigestSubscription",
     "PartnerRole",
     "PartnershipStatus",
     "ReferralIntakeStatus",

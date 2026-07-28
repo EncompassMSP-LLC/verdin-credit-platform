@@ -595,3 +595,52 @@ class NurtureDeliveryRunResponse(BaseModel):
 class NurtureDeliveryProcessResponse(BaseModel):
     processed_count: int
     runs: list[NurtureDeliveryRunResponse]
+
+
+class WeeklyDigestSubscriptionResponse(BaseModel):
+    id: uuid.UUID
+    organization_id: uuid.UUID
+    partnership_id: uuid.UUID
+    recipient_name: str
+    recipient_email: str
+    enabled: bool
+    marketing_opt_in: bool
+    send_weekday: int
+    created_at: datetime
+    updated_at: datetime
+
+
+class WeeklyDigestSubscriptionCreate(BaseModel):
+    partnership_id: uuid.UUID
+    recipient_name: str = Field(min_length=1, max_length=255)
+    recipient_email: EmailStr
+    send_weekday: int = Field(default=1, ge=1, le=7)
+    marketing_opt_in: bool = True
+
+
+class WeeklyDigestSubscriptionUpdate(BaseModel):
+    enabled: bool | None = None
+    marketing_opt_in: bool | None = None
+    recipient_name: str | None = Field(default=None, min_length=1, max_length=255)
+    send_weekday: int | None = Field(default=None, ge=1, le=7)
+
+
+class WeeklyDigestRunResponse(BaseModel):
+    id: uuid.UUID
+    organization_id: uuid.UUID
+    partnership_id: uuid.UUID
+    subscription_id: uuid.UUID
+    week_key: str
+    status: str
+    schema_version: str
+    attempted_at: datetime
+    payload: dict[str, Any]
+    body_text: str | None
+    created_at: datetime
+    updated_at: datetime
+
+
+class WeeklyDigestProcessResponse(BaseModel):
+    processed_count: int
+    week_key: str
+    runs: list[WeeklyDigestRunResponse]
