@@ -17,7 +17,7 @@ Ops contract: [`../lrp-enterprise/04-operations/business-ops-package/`](../lrp-e
 - [ ] M1 Core Platform production-wired (auth/RBAC, CRM, borrowers, referrals)
 - [ ] M2 Readiness (score, timeline, reports, action plans, notifications)
 - [ ] M3 Automation (email/SMS/jobs/packs/scheduling per §14)
-- [ ] M4 Partner Experience UAT (lender + realtor MVP; borrower UAT)
+- [x] M4 Partner Experience UAT (lender + realtor MVP; borrower UAT)
 - [ ] M5 Public Experience claim-safe (landings + KB/SEO scope)
 - [ ] M6 Production Readiness (security, perf, monitoring, DR, tag)
 - [ ] Capability matrix + API reference updated for LRP V1.0 surfaces
@@ -52,7 +52,7 @@ Ops contract: [`../lrp-enterprise/04-operations/business-ops-package/`](../lrp-e
 | 20    | LRP-301 Realtor partner role + login                  | M4        | ✅     |
 | 21    | LRP-302 Realtor portal MVP                            | M4        | ✅     |
 | 22    | LRP-303 Borrower UAT script + fixes                   | M4        | ✅     |
-| 23    | LRP-304 LO UAT script + fixes                         | M4        | ☐      |
+| 23    | LRP-304 LO UAT script + fixes                         | M4        | ✅     |
 | 24    | LRP-403 Dispute strategy suggestions (advisory)       | M4        | ☐      |
 | 25    | LRP-405 FAQ/KB retrieval bot                          | M4        | ☐      |
 | 26    | LRP-406 Letter draft augment (staff-gated)            | M4        | ☐      |
@@ -234,6 +234,13 @@ Deferred to [product backlog](../lrp-enterprise/15-roadmap/product-backlog.md): 
 - Automated happy path: `apps/api/tests/client_portal/test_borrower_uat_happy_path.py` (login → me → cases → readiness → checklist → timeline → report → documents → messages + isolation)
 - Fix: remove hardcoded fake portal nav badges (tasks/messages/notifications) that could mislead UAT
 - Capability `borrower_uat_script`; no new API surface
+
+### LRP-304 — LO UAT script + fixes (2026-07-28)
+
+- Manual UAT script: `docs/development/lrp-lo-uat-script.md` (dashboard → referrals → stage → milestones → pipeline → readiness → notifications + deferred surfaces)
+- Automated happy path: `apps/api/tests/mortgage_partner/test_lo_uat_happy_path.py` (referral → milestone → report + tenant isolation)
+- Fixes: hide seed message threads in platform mode; admin panel clearly marked preview-only for platform UAT
+- Capability `lo_uat_script`; no new API surface
 
 ### Definition of Done (every slice)
 
