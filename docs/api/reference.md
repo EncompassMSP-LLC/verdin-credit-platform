@@ -216,6 +216,8 @@ Secure messaging uses one thread per case (`message_threads` + `thread_messages`
 | GET    | `/portal/cases/{id}/messages` | portal JWT | List messages on a linked case thread |
 | POST   | `/portal/cases/{id}/messages` | portal JWT | Send a secure portal message          |
 
+Borrower UAT (LRP-303): manual script `docs/development/lrp-borrower-uat-script.md`; automated happy path `apps/api/tests/client_portal/test_borrower_uat_happy_path.py` (no new endpoints).
+
 Portal push notifications require `ENABLE_PORTAL_PUSH=true` and `ENABLE_CLIENT_PORTAL=true`. Staff replies on linked cases enqueue Web Push HTTP delivery attempts for active portal subscriptions via `pywebpush` + VAPID keys; delivery is audited in `portal_push_delivery_logs`. Configure `PORTAL_PUSH_PROVIDER=web_push` with `PORTAL_PUSH_VAPID_PUBLIC_KEY`, `PORTAL_PUSH_VAPID_PRIVATE_KEY`, and `PORTAL_PUSH_VAPID_SUBJECT`.
 
 | Method | Path                              | Auth       | Description                           |
