@@ -207,3 +207,103 @@ export async function updateClientContact(
 export async function deleteClientContact(clientId: string, contactId: string): Promise<void> {
   await request<void>(apiPath(`/clients/${clientId}/contacts/${contactId}`), { method: 'DELETE' });
 }
+
+export type PreferredCommunicationChannel = 'mail' | 'phone' | 'email' | 'text';
+export type AttorneyRepresentationStatus = 'none' | 'represented' | 'unknown';
+export type DncAssistanceStatus =
+  | 'not_started'
+  | 'consent_recorded'
+  | 'registry_link_opened'
+  | 'awaiting_email_confirmation'
+  | 'completed'
+  | 'abandoned';
+
+export interface PreferenceEventItem {
+  at: string;
+  action: string;
+  actor_id?: string | null;
+  detail?: string | null;
+}
+
+export interface ClientCommunicationPreferences {
+  id: string;
+  organization_id: string;
+  client_id: string;
+  preferred_channel: PreferredCommunicationChannel;
+  do_not_text: boolean;
+  do_not_email: boolean;
+  best_calling_hours: string | null;
+  workplace_calls_prohibited: boolean;
+  attorney_representation_status: AttorneyRepresentationStatus;
+  collector_opt_out_recorded: boolean;
+  collector_opt_out_recorded_at: string | null;
+  dnc_assistance_requested: boolean;
+  dnc_consent_attested: boolean;
+  dnc_phone_ownership_confirmed: boolean;
+  dnc_disclosure_acknowledged: boolean;
+  dnc_phone_number: string | null;
+  dnc_status: DncAssistanceStatus;
+  dnc_registry_opened_at: string | null;
+  dnc_completed_at: string | null;
+  dnc_followup_due_at: string | null;
+  preference_events: PreferenceEventItem[];
+  notes: string | null;
+  official_dnc_registry_url: string;
+  dnc_disclosure: string;
+  disclaimer: string;
+  communication_request_draft: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UpdateClientCommunicationPreferencesInput {
+  preferred_channel?: PreferredCommunicationChannel;
+  do_not_text?: boolean;
+  do_not_email?: boolean;
+  best_calling_hours?: string | null;
+  workplace_calls_prohibited?: boolean;
+  attorney_representation_status?: AttorneyRepresentationStatus;
+  collector_opt_out_recorded?: boolean;
+  dnc_assistance_requested?: boolean;
+  dnc_consent_attested?: boolean;
+  dnc_phone_ownership_confirmed?: boolean;
+  dnc_disclosure_acknowledged?: boolean;
+  dnc_phone_number?: string | null;
+  notes?: string | null;
+}
+
+export async function getClientCommunicationPreferences(
+  clientId: string,
+): Promise<ClientCommunicationPreferences> {
+  return request<ClientCommunicationPreferences>(
+    apiPath(`/clients/${clientId}/communication-preferences`),
+  );
+}
+
+export async function updateClientCommunicationPreferences(
+  clientId: string,
+  input: UpdateClientCommunicationPreferencesInput,
+): Promise<ClientCommunicationPreferences> {
+  return request<ClientCommunicationPreferences>(
+    apiPath(`/clients/${clientId}/communication-preferences`),
+    { method: 'PUT', body: input },
+  );
+}
+
+export async function openClientDncRegistry(
+  clientId: string,
+): Promise<ClientCommunicationPreferences> {
+  return request<ClientCommunicationPreferences>(
+    apiPath(`/clients/${clientId}/communication-preferences/do-not-call/open-registry`),
+    { method: 'POST' },
+  );
+}
+
+export async function markClientDncCompleted(
+  clientId: string,
+): Promise<ClientCommunicationPreferences> {
+  return request<ClientCommunicationPreferences>(
+    apiPath(`/clients/${clientId}/communication-preferences/do-not-call/mark-completed`),
+    { method: 'POST' },
+  );
+}

@@ -8,7 +8,15 @@ from pydantic import EmailStr, Field
 
 from api.core.pagination import PaginationParams
 from api.core.responses import BaseSchema
-from api.modules.clients.models import Client, ClientContact, ClientStatus, ContactRelationship
+from api.modules.clients.models import (
+    AttorneyRepresentationStatus,
+    Client,
+    ClientContact,
+    ClientStatus,
+    ContactRelationship,
+    DncAssistanceStatus,
+    PreferredCommunicationChannel,
+)
 
 ClientSortField = Literal["created_at", "updated_at", "display_name", "status"]
 ClientSortOrder = Literal["asc", "desc"]
@@ -156,3 +164,57 @@ class ClientContactResponse(BaseSchema):
             created_by_id=contact.created_by_id,
             updated_by_id=contact.updated_by_id,
         )
+
+
+class PreferenceEventItem(BaseSchema):
+    at: str
+    action: str
+    actor_id: str | None = None
+    detail: str | None = None
+
+
+class ClientCommunicationPreferencesUpdate(BaseSchema):
+    preferred_channel: PreferredCommunicationChannel | None = None
+    do_not_text: bool | None = None
+    do_not_email: bool | None = None
+    best_calling_hours: str | None = Field(default=None, max_length=255)
+    workplace_calls_prohibited: bool | None = None
+    attorney_representation_status: AttorneyRepresentationStatus | None = None
+    collector_opt_out_recorded: bool | None = None
+    dnc_assistance_requested: bool | None = None
+    dnc_consent_attested: bool | None = None
+    dnc_phone_ownership_confirmed: bool | None = None
+    dnc_disclosure_acknowledged: bool | None = None
+    dnc_phone_number: str | None = Field(default=None, max_length=50)
+    notes: str | None = None
+
+
+class ClientCommunicationPreferencesResponse(BaseSchema):
+    id: uuid.UUID
+    organization_id: uuid.UUID
+    client_id: uuid.UUID
+    preferred_channel: PreferredCommunicationChannel
+    do_not_text: bool
+    do_not_email: bool
+    best_calling_hours: str | None
+    workplace_calls_prohibited: bool
+    attorney_representation_status: AttorneyRepresentationStatus
+    collector_opt_out_recorded: bool
+    collector_opt_out_recorded_at: datetime | None
+    dnc_assistance_requested: bool
+    dnc_consent_attested: bool
+    dnc_phone_ownership_confirmed: bool
+    dnc_disclosure_acknowledged: bool
+    dnc_phone_number: str | None
+    dnc_status: DncAssistanceStatus
+    dnc_registry_opened_at: datetime | None
+    dnc_completed_at: datetime | None
+    dnc_followup_due_at: datetime | None
+    preference_events: list[PreferenceEventItem]
+    notes: str | None
+    official_dnc_registry_url: str
+    dnc_disclosure: str
+    disclaimer: str
+    communication_request_draft: str
+    created_at: datetime
+    updated_at: datetime

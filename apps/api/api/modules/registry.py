@@ -76,7 +76,16 @@ from api.modules.client_portal.push_models import (
     PortalPushDeliveryStatus,
     PortalPushSubscription,
 )
-from api.modules.clients.models import Client, ClientContact, ClientStatus, ContactRelationship
+from api.modules.clients.models import (
+    AttorneyRepresentationStatus,
+    Client,
+    ClientCommunicationPreferences,
+    ClientContact,
+    ClientStatus,
+    ContactRelationship,
+    DncAssistanceStatus,
+    PreferredCommunicationChannel,
+)
 from api.modules.compliance.bureau_response_ingestion_models import (
     BureauResponseIngestionRun,
     BureauResponseIngestionRunStatus,
@@ -342,6 +351,7 @@ __all__ = [
     "BatchSummaryRunStatus",
     "BatchSummaryTriggerSource",
     "Client",
+    "ClientCommunicationPreferences",
     "ClientContact",
     "ClientPortalUser",
     "PortalChecklistCompletion",
@@ -350,6 +360,9 @@ __all__ = [
     "ConsentStatus",
     "ConsentType",
     "ContactRelationship",
+    "AttorneyRepresentationStatus",
+    "DncAssistanceStatus",
+    "PreferredCommunicationChannel",
     "Communication",
     "Document",
     "DisputeLetter",
