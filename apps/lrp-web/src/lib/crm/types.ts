@@ -26,6 +26,8 @@ export type CrmPermission =
   | 'pipeline.manage'
   | 'automations.view'
   | 'automations.manage'
+  | 'nurture.view'
+  | 'nurture.manage'
   | 'sms.view'
   | 'sms.send'
   | 'email.view'

@@ -512,6 +512,29 @@ export const workflowSteps: WorkflowStep[] = [
   },
 ];
 
+export const nurtureDemoEnrollments = [
+  {
+    id: 'n-1',
+    contactName: 'Morgan Ellis (demo)',
+    contactEmail: 'morgan.ellis@example.com',
+    status: 'active' as const,
+    currentStepOrder: 2,
+    nextRunAt: '2026-07-28T15:00:00Z',
+    marketingOptIn: true,
+    programName: 'Lender partnership drip',
+  },
+  {
+    id: 'n-2',
+    contactName: 'Casey Brooks (demo)',
+    contactEmail: 'casey.brooks@example.com',
+    status: 'paused' as const,
+    currentStepOrder: 3,
+    nextRunAt: null as string | null,
+    marketingOptIn: true,
+    programName: 'Lender partnership drip',
+  },
+];
+
 export const automations: AutomationRule[] = [
   {
     id: 'a-1',

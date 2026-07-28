@@ -1,18 +1,26 @@
 'use client';
 
 import {
+  createNurtureEnrollment,
   createPartnerContact,
   getMortgagePartnerStatus,
   listCrmAppointments,
   listCrmAutomationRules,
+  listNurtureDeliveries,
+  listNurtureEnrollments,
+  listNurturePrograms,
   listPartnerContacts,
   listPartnerReferrals,
   listPartnerships,
   processAppointmentReminders,
+  processNurtureDue,
   updateCrmAutomationRule,
+  updateNurtureEnrollment,
   updatePartnerContact,
   updatePartnerReferral,
   type CrmAutomationRuleUpdateInput,
+  type NurtureEnrollmentCreateInput,
+  type NurtureEnrollmentUpdateInput,
   type PartnerContact,
   type PartnerContactCreateInput,
   type PartnerContactUpdateInput,
@@ -149,6 +157,84 @@ export function useProcessAppointmentReminders() {
     onSuccess: () => {
       void queryClient.invalidateQueries({
         queryKey: ['crm', 'mortgage-partner', 'appointments'],
+      });
+    },
+  });
+}
+
+export function useNurturePrograms() {
+  const { isAuthenticated, authMode } = useCrmAuth();
+  const status = useCrmMortgagePartnerStatus();
+  return useQuery({
+    queryKey: ['crm', 'mortgage-partner', 'nurture-programs'],
+    enabled:
+      isAuthenticated && authMode === 'platform' && status.data?.mortgage_partner_enabled === true,
+    queryFn: listNurturePrograms,
+  });
+}
+
+export function useNurtureEnrollments() {
+  const { isAuthenticated, authMode } = useCrmAuth();
+  const status = useCrmMortgagePartnerStatus();
+  return useQuery({
+    queryKey: ['crm', 'mortgage-partner', 'nurture-enrollments'],
+    enabled:
+      isAuthenticated && authMode === 'platform' && status.data?.mortgage_partner_enabled === true,
+    queryFn: listNurtureEnrollments,
+  });
+}
+
+export function useNurtureDeliveries(enrollmentId?: string) {
+  const { isAuthenticated, authMode } = useCrmAuth();
+  const status = useCrmMortgagePartnerStatus();
+  return useQuery({
+    queryKey: ['crm', 'mortgage-partner', 'nurture-deliveries', enrollmentId ?? 'all'],
+    enabled:
+      isAuthenticated && authMode === 'platform' && status.data?.mortgage_partner_enabled === true,
+    queryFn: () => listNurtureDeliveries(enrollmentId),
+  });
+}
+
+export function useCreateNurtureEnrollment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: NurtureEnrollmentCreateInput) => createNurtureEnrollment(body),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: ['crm', 'mortgage-partner', 'nurture-enrollments'],
+      });
+    },
+  });
+}
+
+export function useUpdateNurtureEnrollment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      enrollmentId,
+      body,
+    }: {
+      enrollmentId: string;
+      body: NurtureEnrollmentUpdateInput;
+    }) => updateNurtureEnrollment(enrollmentId, body),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: ['crm', 'mortgage-partner', 'nurture-enrollments'],
+      });
+    },
+  });
+}
+
+export function useProcessNurtureDue() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: processNurtureDue,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: ['crm', 'mortgage-partner', 'nurture-enrollments'],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ['crm', 'mortgage-partner', 'nurture-deliveries'],
       });
     },
   });

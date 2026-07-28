@@ -632,3 +632,121 @@ export function listAppointmentReminders(appointmentId?: string) {
     apiPath(`/mortgage-partner/appointments/reminders${query}`),
   );
 }
+
+export type NurtureEnrollmentStatus = 'active' | 'paused' | 'completed' | 'exited';
+
+export interface NurtureStep {
+  id: string;
+  program_id: string;
+  step_order: number;
+  delay_days: number;
+  channel: string;
+  template_key: string;
+  subject: string;
+  body_template: string;
+}
+
+export interface NurtureProgram {
+  id: string;
+  organization_id: string;
+  name: string;
+  description: string | null;
+  audience: string;
+  enrollment_lifecycle_stage: string;
+  enabled: boolean;
+  steps: NurtureStep[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface NurtureEnrollment {
+  id: string;
+  organization_id: string;
+  program_id: string;
+  partnership_id: string | null;
+  contact_name: string;
+  contact_email: string | null;
+  contact_phone: string | null;
+  status: NurtureEnrollmentStatus;
+  current_step_order: number;
+  next_run_at: string | null;
+  enrolled_at: string;
+  paused_at: string | null;
+  completed_at: string | null;
+  exited_at: string | null;
+  exit_reason: string | null;
+  marketing_opt_in: boolean;
+  tcpa_consent: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface NurtureEnrollmentCreateInput {
+  program_id: string;
+  contact_name: string;
+  contact_email?: string | null;
+  contact_phone?: string | null;
+  partnership_id?: string | null;
+  marketing_opt_in?: boolean;
+  tcpa_consent?: boolean;
+}
+
+export interface NurtureEnrollmentUpdateInput {
+  status?: NurtureEnrollmentStatus;
+  marketing_opt_in?: boolean;
+  tcpa_consent?: boolean;
+  exit_reason?: string | null;
+}
+
+export interface NurtureDeliveryRun {
+  id: string;
+  organization_id: string;
+  enrollment_id: string;
+  program_id: string;
+  step_id: string;
+  channel: string;
+  status: string;
+  schema_version: string;
+  attempted_at: string;
+  payload: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface NurtureDeliveryProcessResult {
+  processed_count: number;
+  runs: NurtureDeliveryRun[];
+}
+
+export function listNurturePrograms() {
+  return request<NurtureProgram[]>(apiPath('/mortgage-partner/nurture/programs'));
+}
+
+export function listNurtureEnrollments() {
+  return request<NurtureEnrollment[]>(apiPath('/mortgage-partner/nurture/enrollments'));
+}
+
+export function createNurtureEnrollment(body: NurtureEnrollmentCreateInput) {
+  return request<NurtureEnrollment>(apiPath('/mortgage-partner/nurture/enrollments'), {
+    method: 'POST',
+    body,
+  });
+}
+
+export function updateNurtureEnrollment(enrollmentId: string, body: NurtureEnrollmentUpdateInput) {
+  return request<NurtureEnrollment>(
+    apiPath(`/mortgage-partner/nurture/enrollments/${enrollmentId}`),
+    { method: 'PATCH', body },
+  );
+}
+
+export function processNurtureDue() {
+  return request<NurtureDeliveryProcessResult>(apiPath('/mortgage-partner/nurture/process'), {
+    method: 'POST',
+  });
+}
+
+export function listNurtureDeliveries(enrollmentId?: string) {
+  const query = enrollmentId ? `?enrollment_id=${encodeURIComponent(enrollmentId)}` : '';
+  return request<NurtureDeliveryRun[]>(apiPath(`/mortgage-partner/nurture/deliveries${query}`));
+}

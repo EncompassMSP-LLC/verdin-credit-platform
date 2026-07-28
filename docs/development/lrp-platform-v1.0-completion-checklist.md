@@ -47,7 +47,7 @@ Ops contract: [`../lrp-enterprise/04-operations/business-ops-package/`](../lrp-e
 | 15    | LRP-202 Notification matrix v1                        | M3        | ✅     |
 | 16    | LRP-203 CRM automation rules (persist)                | M3        | ✅     |
 | 17    | LRP-205 Appointment reminders                         | M3        | ✅     |
-| 18    | LRP-206 Partner nurture drip                          | M3        | ☐      |
+| 18    | LRP-206 Partner nurture drip                          | M3        | ✅     |
 | 19    | LRP-207 Weekly status digest job                      | M3        | ☐      |
 | 20    | LRP-301 Realtor partner role + login                  | M4        | ☐      |
 | 21    | LRP-302 Realtor portal MVP                            | M4        | ☐      |
@@ -126,6 +126,15 @@ Deferred to [product backlog](../lrp-enterprise/15-roadmap/product-backlog.md): 
 - Staff `POST /mortgage-partner/appointments/reminders/process` + reminder audit list
 - `apps/lrp-web` `/crm/calendar` loads live appointments + process-reminders action
 - Tests: `apps/api/tests/mortgage_partner/test_appointment_reminders.py`
+
+### LRP-206 — Partner nurture drip (2026-07-28)
+
+- Tables `partner_nurture_programs` / `steps` / `enrollments` / `delivery_runs` (migration `108_partner_nurture_drip`)
+- Default 5-step lender drip seeded on first list; enroll requires marketing opt-in
+- Idempotent `POST /mortgage-partner/nurture/process`; SMS deferred without TCPA; email consent-gated
+- Pause / resume / exit / opt-out; delivery audit history; org isolation
+- `apps/lrp-web` `/crm/nurture` live enroll + process + status controls
+- Tests: `apps/api/tests/mortgage_partner/test_nurture_drip.py`
 
 ### LRP-106 — Readiness report in borrower portal (2026-07-27)
 

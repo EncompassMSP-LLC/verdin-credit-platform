@@ -280,6 +280,7 @@ class MortgagePartnerService:
                 "crm_automation_rules",
                 "crm_appointments",
                 "appointment_reminders",
+                "partner_nurture_drip",
             ],
             deferred_capabilities=[
                 "partner_jwt_realm",
