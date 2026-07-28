@@ -185,6 +185,12 @@ from api.modules.messaging.models import (
     MessageThreadStatus,
     ThreadMessage,
 )
+from api.modules.mortgage_partner.appointment_models import (
+    AppointmentReminderRun,
+    CrmAppointment,
+    CrmAppointmentStatus,
+    CrmAppointmentType,
+)
 from api.modules.mortgage_partner.automation_models import (
     CrmAutomationChannel,
     CrmAutomationRule,
@@ -377,6 +383,10 @@ __all__ = [
     "CrmAutomationRule",
     "CrmAutomationTrigger",
     "CrmAutomationChannel",
+    "CrmAppointment",
+    "CrmAppointmentStatus",
+    "CrmAppointmentType",
+    "AppointmentReminderRun",
     "PartnerRole",
     "PartnershipStatus",
     "ReferralIntakeStatus",

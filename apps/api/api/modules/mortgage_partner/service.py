@@ -44,6 +44,11 @@ from api.modules.mortgage_partner.permissions import (
 from api.modules.mortgage_partner.referral_intake_orchestrator import ReferralIntakeOrchestrator
 from api.modules.mortgage_partner.repository import MortgagePartnerRepository
 from api.modules.mortgage_partner.schemas import (
+    AppointmentReminderProcessResponse,
+    AppointmentReminderRunResponse,
+    CrmAppointmentCreate,
+    CrmAppointmentResponse,
+    CrmAppointmentUpdate,
     CrmAutomationRuleCreate,
     CrmAutomationRuleResponse,
     CrmAutomationRuleUpdate,
@@ -273,6 +278,8 @@ class MortgagePartnerService:
                 "referral_web_intake",
                 "referral_intake_orchestrator",
                 "crm_automation_rules",
+                "crm_appointments",
+                "appointment_reminders",
             ],
             deferred_capabilities=[
                 "partner_jwt_realm",
@@ -1609,3 +1616,270 @@ class MortgagePartnerService:
             created_at=rule.created_at,
             updated_at=rule.updated_at,
         )
+
+    # --- CRM appointments + reminders (LRP-205) ---
+
+    def _appointment_to_response(self, row: Any) -> CrmAppointmentResponse:
+        return CrmAppointmentResponse(
+            id=row.id,
+            organization_id=row.organization_id,
+            case_id=row.case_id,
+            title=row.title,
+            appointment_type=row.appointment_type.value,
+            status=row.status.value,
+            starts_at=row.starts_at,
+            ends_at=row.ends_at,
+            location=row.location,
+            meeting_url=row.meeting_url,
+            related_name=row.related_name,
+            owner_user_id=row.owner_user_id,
+            borrower_name=row.borrower_name,
+            borrower_email=row.borrower_email,
+            borrower_phone=row.borrower_phone,
+            referring_lo_email=row.referring_lo_email,
+            referring_lo_name=row.referring_lo_name,
+            tcpa_consent=row.tcpa_consent,
+            notes=row.notes,
+            created_at=row.created_at,
+            updated_at=row.updated_at,
+        )
+
+    def _reminder_to_response(self, row: Any) -> AppointmentReminderRunResponse:
+        return AppointmentReminderRunResponse(
+            id=row.id,
+            organization_id=row.organization_id,
+            appointment_id=row.appointment_id,
+            offset_key=row.offset_key,
+            status=row.status,
+            schema_version=row.schema_version,
+            matrix_dispatch_id=row.matrix_dispatch_id,
+            started_at=row.started_at,
+            completed_at=row.completed_at,
+            payload=row.payload,
+            created_at=row.created_at,
+            updated_at=row.updated_at,
+        )
+
+    async def list_appointments(self, user: User) -> list[CrmAppointmentResponse]:
+        from sqlalchemy import select
+
+        from api.modules.mortgage_partner.appointment_models import CrmAppointment
+
+        self._require_read(user)
+        organization_id = self._require_organization(user)
+        result = await self._session.execute(
+            select(CrmAppointment)
+            .where(
+                CrmAppointment.organization_id == organization_id,
+                CrmAppointment.deleted_at.is_(None),
+            )
+            .order_by(CrmAppointment.starts_at.asc())
+        )
+        return [self._appointment_to_response(row) for row in result.scalars().all()]
+
+    async def create_appointment(
+        self,
+        user: User,
+        payload: CrmAppointmentCreate,
+    ) -> CrmAppointmentResponse:
+        from api.modules.mortgage_partner.appointment_models import (
+            CrmAppointment,
+            CrmAppointmentStatus,
+            CrmAppointmentType,
+        )
+        from api.modules.notifications.notification_matrix import (
+            NotificationMatrixEvent,
+            advisory_footer,
+        )
+        from api.modules.notifications.notification_matrix_service import (
+            MatrixDispatchContext,
+            NotificationMatrixDispatcher,
+        )
+
+        self._require_write(user)
+        organization_id = self._require_organization(user)
+        starts = payload.starts_at
+        ends = payload.ends_at
+        if starts.tzinfo is None:
+            starts = starts.replace(tzinfo=UTC)
+        if ends.tzinfo is None:
+            ends = ends.replace(tzinfo=UTC)
+
+        appointment = CrmAppointment(
+            id=uuid.uuid4(),
+            organization_id=organization_id,
+            case_id=payload.case_id,
+            title=payload.title,
+            appointment_type=CrmAppointmentType(payload.appointment_type),
+            status=CrmAppointmentStatus.SCHEDULED,
+            starts_at=starts,
+            ends_at=ends,
+            location=payload.location,
+            meeting_url=payload.meeting_url,
+            related_name=payload.related_name or payload.borrower_name,
+            owner_user_id=payload.owner_user_id or user.id,
+            borrower_name=payload.borrower_name,
+            borrower_email=str(payload.borrower_email) if payload.borrower_email else None,
+            borrower_phone=payload.borrower_phone,
+            referring_lo_email=(
+                str(payload.referring_lo_email) if payload.referring_lo_email else None
+            ),
+            referring_lo_name=payload.referring_lo_name,
+            tcpa_consent=payload.tcpa_consent,
+            notes=payload.notes,
+            created_by_id=user.id,
+            updated_by_id=user.id,
+        )
+        self._session.add(appointment)
+        await self._session.flush()
+
+        footer = advisory_footer()
+        when_label = starts.astimezone(UTC).strftime("%Y-%m-%d %H:%M UTC")
+        matrix = NotificationMatrixDispatcher(self._session)
+        await matrix.dispatch(
+            NotificationMatrixEvent.CONSULTATION_SCHEDULED,
+            MatrixDispatchContext(
+                organization_id=organization_id,
+                entity_type="appointment",
+                entity_id=appointment.id,
+                title=f"Consultation scheduled — {appointment.title}",
+                body=(
+                    f"Your consultation with Lending Readiness Partners is scheduled for "
+                    f"{when_label}. We'll review education and next steps toward your next "
+                    f"financing conversation. {footer}"
+                ),
+                action_url="/crm/calendar",
+                case_id=appointment.case_id,
+                assigned_user_id=appointment.owner_user_id,
+                referring_lo_email=appointment.referring_lo_email,
+                referring_lo_name=appointment.referring_lo_name,
+                borrower_email=appointment.borrower_email,
+                borrower_name=appointment.borrower_name,
+                tcpa_consent=appointment.tcpa_consent,
+                sms_phone=appointment.borrower_phone,
+                triggered_by_user_id=user.id,
+                source_module="mortgage_partner.appointments",
+                create_crm_tasks=False,
+            ),
+        )
+        await self._session.commit()
+        await self._session.refresh(appointment)
+        return self._appointment_to_response(appointment)
+
+    async def update_appointment(
+        self,
+        user: User,
+        appointment_id: uuid.UUID,
+        payload: CrmAppointmentUpdate,
+    ) -> CrmAppointmentResponse:
+        from sqlalchemy import select
+
+        from api.modules.mortgage_partner.appointment_models import (
+            CrmAppointment,
+            CrmAppointmentStatus,
+            CrmAppointmentType,
+        )
+
+        self._require_write(user)
+        organization_id = self._require_organization(user)
+        result = await self._session.execute(
+            select(CrmAppointment).where(
+                CrmAppointment.id == appointment_id,
+                CrmAppointment.organization_id == organization_id,
+                CrmAppointment.deleted_at.is_(None),
+            )
+        )
+        appointment = result.scalar_one_or_none()
+        if appointment is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Appointment not found",
+            )
+        data = payload.model_dump(exclude_unset=True)
+        if "title" in data and data["title"] is not None:
+            appointment.title = data["title"]
+        if "appointment_type" in data and data["appointment_type"] is not None:
+            appointment.appointment_type = CrmAppointmentType(data["appointment_type"])
+        if "status" in data and data["status"] is not None:
+            appointment.status = CrmAppointmentStatus(data["status"])
+        if "starts_at" in data and data["starts_at"] is not None:
+            starts = data["starts_at"]
+            if starts.tzinfo is None:
+                starts = starts.replace(tzinfo=UTC)
+            appointment.starts_at = starts
+        if "ends_at" in data and data["ends_at"] is not None:
+            ends = data["ends_at"]
+            if ends.tzinfo is None:
+                ends = ends.replace(tzinfo=UTC)
+            appointment.ends_at = ends
+        for field in (
+            "location",
+            "meeting_url",
+            "related_name",
+            "owner_user_id",
+            "borrower_name",
+            "borrower_phone",
+            "referring_lo_name",
+            "notes",
+        ):
+            if field in data:
+                setattr(appointment, field, data[field])
+        if "borrower_email" in data:
+            appointment.borrower_email = (
+                str(data["borrower_email"]) if data["borrower_email"] else None
+            )
+        if "referring_lo_email" in data:
+            appointment.referring_lo_email = (
+                str(data["referring_lo_email"]) if data["referring_lo_email"] else None
+            )
+        if "tcpa_consent" in data and data["tcpa_consent"] is not None:
+            appointment.tcpa_consent = data["tcpa_consent"]
+        if appointment.ends_at <= appointment.starts_at:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="ends_at must be after starts_at",
+            )
+        appointment.updated_by_id = user.id
+        await self._session.commit()
+        await self._session.refresh(appointment)
+        return self._appointment_to_response(appointment)
+
+    async def process_appointment_reminders(
+        self,
+        user: User,
+    ) -> AppointmentReminderProcessResponse:
+        from api.modules.mortgage_partner.appointment_reminders import (
+            AppointmentReminderProcessor,
+        )
+
+        self._require_write(user)
+        organization_id = self._require_organization(user)
+        processor = AppointmentReminderProcessor(self._session)
+        runs = await processor.process_due(
+            organization_id=organization_id,
+            triggered_by_user_id=user.id,
+        )
+        await self._session.commit()
+        return AppointmentReminderProcessResponse(
+            processed_count=len(runs),
+            runs=[self._reminder_to_response(run) for run in runs],
+        )
+
+    async def list_appointment_reminders(
+        self,
+        user: User,
+        *,
+        appointment_id: uuid.UUID | None = None,
+    ) -> list[AppointmentReminderRunResponse]:
+        from api.modules.mortgage_partner.appointment_reminders import (
+            AppointmentReminderProcessor,
+        )
+
+        self._require_read(user)
+        organization_id = self._require_organization(user)
+        processor = AppointmentReminderProcessor(self._session)
+        runs = await processor.list_runs(
+            organization_id=organization_id,
+            appointment_id=appointment_id,
+        )
+        return [self._reminder_to_response(run) for run in runs]
