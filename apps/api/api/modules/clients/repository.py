@@ -14,7 +14,13 @@ from api.modules.accounts.dispute_response_models import DisputeResponse
 from api.modules.accounts.models import Account
 from api.modules.cases.models import Case
 from api.modules.client_portal.models import ClientPortalUser
-from api.modules.clients.models import Client, ClientContact, ClientStatus, ContactRelationship
+from api.modules.clients.models import (
+    Client,
+    ClientCommunicationPreferences,
+    ClientContact,
+    ClientStatus,
+    ContactRelationship,
+)
 from api.modules.clients.schemas import (
     ClientSortField,
     ClientSortOrder,
@@ -310,3 +316,42 @@ class ClientRepository:
             )
             .values(**audited)
         )
+        await self._session.execute(
+            update(ClientCommunicationPreferences)
+            .where(
+                ClientCommunicationPreferences.organization_id == organization_id,
+                ClientCommunicationPreferences.client_id == client_id,
+                ClientCommunicationPreferences.deleted_at.is_(None),
+            )
+            .values(**audited)
+        )
+
+    async def get_communication_preferences(
+        self,
+        *,
+        organization_id: uuid.UUID,
+        client_id: uuid.UUID,
+    ) -> ClientCommunicationPreferences | None:
+        result = await self._session.execute(
+            select(ClientCommunicationPreferences).where(
+                ClientCommunicationPreferences.organization_id == organization_id,
+                ClientCommunicationPreferences.client_id == client_id,
+                ClientCommunicationPreferences.deleted_at.is_(None),
+            )
+        )
+        return result.scalar_one_or_none()
+
+    async def add_communication_preferences(
+        self,
+        prefs: ClientCommunicationPreferences,
+    ) -> ClientCommunicationPreferences:
+        self._session.add(prefs)
+        await self._session.flush()
+        return prefs
+
+    async def save_communication_preferences(
+        self,
+        prefs: ClientCommunicationPreferences,
+    ) -> ClientCommunicationPreferences:
+        await self._session.flush()
+        return prefs

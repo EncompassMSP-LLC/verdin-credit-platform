@@ -31,6 +31,8 @@ from api.modules.client_portal.schemas import (
 from api.modules.client_portal.service import ClientPortalProvisioningService
 from api.modules.clients.models import ClientStatus, ContactRelationship
 from api.modules.clients.schemas import (
+    ClientCommunicationPreferencesResponse,
+    ClientCommunicationPreferencesUpdate,
     ClientContactCreate,
     ClientContactListParams,
     ClientContactResponse,
@@ -158,6 +160,56 @@ async def get_client(
     service: ClientService = Depends(get_client_service),
 ) -> ClientResponse:
     return await service.get_client(current_user, client_id)
+
+
+@router.get(
+    "/{client_id}/communication-preferences",
+    response_model=ClientCommunicationPreferencesResponse,
+)
+async def get_client_communication_preferences(
+    client_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: ClientService = Depends(get_client_service),
+) -> ClientCommunicationPreferencesResponse:
+    """Staff-mediated prefs + Do Not Call assistance (LRP-209). Never auto-registers."""
+    return await service.get_communication_preferences(current_user, client_id)
+
+
+@router.put(
+    "/{client_id}/communication-preferences",
+    response_model=ClientCommunicationPreferencesResponse,
+)
+async def update_client_communication_preferences(
+    client_id: uuid.UUID,
+    body: ClientCommunicationPreferencesUpdate,
+    current_user: User = Depends(get_current_user),
+    service: ClientService = Depends(get_client_service),
+) -> ClientCommunicationPreferencesResponse:
+    return await service.update_communication_preferences(current_user, client_id, body)
+
+
+@router.post(
+    "/{client_id}/communication-preferences/do-not-call/open-registry",
+    response_model=ClientCommunicationPreferencesResponse,
+)
+async def open_client_dnc_registry(
+    client_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: ClientService = Depends(get_client_service),
+) -> ClientCommunicationPreferencesResponse:
+    return await service.open_dnc_registry(current_user, client_id)
+
+
+@router.post(
+    "/{client_id}/communication-preferences/do-not-call/mark-completed",
+    response_model=ClientCommunicationPreferencesResponse,
+)
+async def mark_client_dnc_completed(
+    client_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: ClientService = Depends(get_client_service),
+) -> ClientCommunicationPreferencesResponse:
+    return await service.mark_dnc_completed(current_user, client_id)
 
 
 @router.get("/{client_id}/accounts", response_model=PaginatedResponse[AccountResponse])

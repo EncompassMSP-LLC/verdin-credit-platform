@@ -55,7 +55,7 @@ Ops contract: [`../lrp-enterprise/04-operations/business-ops-package/`](../lrp-e
 | 23    | LRP-304 LO UAT script + fixes                         | M4        | ✅     |
 | 24    | LRP-403 Dispute strategy suggestions (advisory)       | M4        | ✅     |
 | 25    | LRP-208 Case issue explainability + evidence center   | M2/M4     | ✅     |
-| 26    | LRP-209 Consumer communication preferences            | M2/M4     | ☐      |
+| 26    | LRP-209 Consumer communication preferences            | M2/M4     | ✅     |
 | 27    | LRP-405 FAQ/KB retrieval bot                          | M4        | ☐      |
 | 28    | LRP-406 Letter draft augment (staff-gated)            | M4        | ☐      |
 | 29    | LRP-305 Planned marketing landings (`/builders` etc.) | M5        | ☐      |
@@ -258,6 +258,14 @@ Deferred to [product backlog](../lrp-enterprise/15-roadmap/product-backlog.md): 
 - Tests: `apps/api/tests/documents/test_issue_explainability.py`; `@verdin/api-client` helper
 - Follow-up: evidence vault document↔issue association, action timeline persistence
 - Next planned: LRP-209 consumer communication preferences (Do Not Call guided enrollment + creditor/collector prefs; never silent third-party registration)
+
+### LRP-209 — Consumer communication preferences (2026-07-28)
+
+- `client_communication_preferences` table (migration `111_client_comm_prefs`)
+- `GET/PUT /clients/{id}/communication-preferences` + DNC `open-registry` / `mark-completed`
+- Explicit consent, phone ownership, telemarketing-limitation disclosure; never silent FTC registration
+- Communication-request letter draft (staff-gated text only; never auto-sent)
+- CRM borrower workspace panel; tests: `test_communication_preferences.py`
 
 ### Definition of Done (every slice)
 
