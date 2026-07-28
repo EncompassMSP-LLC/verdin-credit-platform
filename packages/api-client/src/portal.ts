@@ -461,6 +461,48 @@ export async function getPortalCaseTimeline(
   return request<PortalTimelineResponse>(apiPath(`/portal/cases/${caseId}/timeline${suffix}`));
 }
 
+export interface PortalDisputeStrategyStageSuggestion {
+  stage_kind: string;
+  title: string;
+  objective: string;
+  recommended: boolean;
+}
+
+export interface PortalDisputeStrategyAccountSuggestion {
+  creditor_label: string;
+  account_number_masked: string | null;
+  summary: string;
+  recommended_stage_titles: string[];
+  stages: PortalDisputeStrategyStageSuggestion[];
+}
+
+export interface PortalDisputeStrategySuggestionsSummary {
+  accounts_planned: number;
+  issues_covered: number;
+  high_strength_accounts: number;
+  cfpb_recommended: number;
+  attorney_recommended: number;
+}
+
+export interface PortalDisputeStrategySuggestions {
+  case_id: string;
+  disclaimer: string;
+  staff_mediated: boolean;
+  auto_send: boolean;
+  source: 'staff_run' | 'none' | string;
+  generated_at: string | null;
+  summary: PortalDisputeStrategySuggestionsSummary;
+  suggestions: PortalDisputeStrategyAccountSuggestion[];
+}
+
+export async function getPortalDisputeStrategySuggestions(
+  caseId: string,
+): Promise<PortalDisputeStrategySuggestions> {
+  return request<PortalDisputeStrategySuggestions>(
+    apiPath(`/portal/cases/${caseId}/dispute-strategy-suggestions`),
+  );
+}
+
 export function getPortalCaseReadinessReportExportUrl(
   caseId: string,
   format: 'text' | 'pdf' = 'pdf',

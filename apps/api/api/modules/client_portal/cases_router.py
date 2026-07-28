@@ -14,10 +14,12 @@ from api.modules.client_portal.dependencies import (
     get_current_portal_user,
     require_client_portal_enabled,
 )
+from api.modules.client_portal.dispute_strategy_service import ClientPortalDisputeStrategyService
 from api.modules.client_portal.models import ClientPortalUser
 from api.modules.client_portal.schemas import (
     PortalCaseDetailResponse,
     PortalCaseProgressResponse,
+    PortalDisputeStrategySuggestionsResponse,
     PortalReadinessReportResponse,
     PortalTimelineResponse,
 )
@@ -34,6 +36,12 @@ def get_portal_timeline_service(
     db: AsyncSession = Depends(get_db),
 ) -> ClientPortalTimelineService:
     return ClientPortalTimelineService.from_session(db)
+
+
+def get_portal_dispute_strategy_service(
+    db: AsyncSession = Depends(get_db),
+) -> ClientPortalDisputeStrategyService:
+    return ClientPortalDisputeStrategyService.from_session(db)
 
 
 @router.get("", response_model=PortalCaseProgressResponse)
@@ -74,6 +82,23 @@ async def get_portal_case_timeline(
     service: ClientPortalTimelineService = Depends(get_portal_timeline_service),
 ) -> PortalTimelineResponse:
     return await service.list_timeline(portal_user, case_id, event_type=event_type)
+
+
+@router.get(
+    "/{case_id}/dispute-strategy-suggestions",
+    response_model=PortalDisputeStrategySuggestionsResponse,
+)
+async def get_portal_dispute_strategy_suggestions(
+    case_id: uuid.UUID,
+    _: None = Depends(require_client_portal_enabled),
+    portal_user: ClientPortalUser = Depends(get_current_portal_user),
+    service: ClientPortalDisputeStrategyService = Depends(get_portal_dispute_strategy_service),
+) -> PortalDisputeStrategySuggestionsResponse:
+    """Advisory dispute strategy suggestions for the borrower (LRP-403).
+
+    Read-only projection of the latest staff strategy run. Never prepares or sends.
+    """
+    return await service.get_suggestions(portal_user, case_id)
 
 
 @router.get("/{case_id}/readiness-report", response_model=PortalReadinessReportResponse)

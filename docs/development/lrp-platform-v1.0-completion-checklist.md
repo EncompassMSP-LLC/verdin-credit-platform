@@ -53,7 +53,7 @@ Ops contract: [`../lrp-enterprise/04-operations/business-ops-package/`](../lrp-e
 | 21    | LRP-302 Realtor portal MVP                            | M4        | ✅     |
 | 22    | LRP-303 Borrower UAT script + fixes                   | M4        | ✅     |
 | 23    | LRP-304 LO UAT script + fixes                         | M4        | ✅     |
-| 24    | LRP-403 Dispute strategy suggestions (advisory)       | M4        | ☐      |
+| 24    | LRP-403 Dispute strategy suggestions (advisory)       | M4        | ✅     |
 | 25    | LRP-405 FAQ/KB retrieval bot                          | M4        | ☐      |
 | 26    | LRP-406 Letter draft augment (staff-gated)            | M4        | ☐      |
 | 27    | LRP-305 Planned marketing landings (`/builders` etc.) | M5        | ☐      |
@@ -241,6 +241,12 @@ Deferred to [product backlog](../lrp-enterprise/15-roadmap/product-backlog.md): 
 - Automated happy path: `apps/api/tests/mortgage_partner/test_lo_uat_happy_path.py` (referral → milestone → report + tenant isolation)
 - Fixes: hide seed message threads in platform mode; admin panel clearly marked preview-only for platform UAT
 - Capability `lo_uat_script`; no new API surface
+
+### LRP-403 — Dispute strategy suggestions (advisory) (2026-07-28)
+
+- `GET /portal/cases/{id}/dispute-strategy-suggestions` — borrower-safe projection of latest staff strategy run (`auto_send=false`, staff-mediated)
+- `/portal/disputes` shows advisory suggestions (no prepare/send controls)
+- Tests: `test_portal_dispute_strategy_suggestions.py`; `@verdin/api-client` helper
 
 ### Definition of Done (every slice)
 
