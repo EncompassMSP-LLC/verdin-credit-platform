@@ -959,3 +959,50 @@ export function confirmRealtorPasswordReset(token: string, password: string) {
     auth: false,
   });
 }
+
+/* --- Realtor portal MVP (LRP-302) --- */
+
+export interface RealtorReferralCard {
+  referral_id: string;
+  borrower_initials: string;
+  pipeline_stage: LoanPipelineStage;
+  referral_status: PartnerReferralStatus;
+  days_in_stage: number;
+  stage_changed_at: string | null;
+  source_label: string | null;
+  is_own_referral: boolean;
+  created_at: string;
+}
+
+export interface RealtorPipelineBoard {
+  partnership_id: string;
+  partnership_display_name: string;
+  cards: RealtorReferralCard[];
+}
+
+export interface RealtorPortalDashboard {
+  partnership_id: string;
+  partnership_display_name: string;
+  total_referrals: number;
+  own_referral_count: number;
+  counts_by_stage: Record<string, number>;
+  near_ready_count: number;
+  mortgage_ready_count: number;
+  in_underwriting_count: number;
+  funded_count: number;
+  declined_count: number;
+  recent: RealtorReferralCard[];
+  advisory_disclaimer: string;
+}
+
+export function getRealtorPortalDashboard() {
+  return request<RealtorPortalDashboard>(apiPath('/mortgage-partner/realtor/dashboard'));
+}
+
+export function listRealtorReferrals() {
+  return request<RealtorReferralCard[]>(apiPath('/mortgage-partner/realtor/referrals'));
+}
+
+export function getRealtorPipeline() {
+  return request<RealtorPipelineBoard>(apiPath('/mortgage-partner/realtor/pipeline'));
+}

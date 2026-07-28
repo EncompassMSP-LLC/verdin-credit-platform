@@ -731,3 +731,45 @@ class RealtorTokenResponse(BaseModel):
     refresh_token: str
     token_type: str = "bearer"
     realtor: RealtorSessionResponse
+
+
+# --- Realtor portal MVP (LRP-302) ---
+
+
+class RealtorReferralCardResponse(BaseModel):
+    """PII-minimized referral card for realtor workspace (no tradelines / notes dumps)."""
+
+    referral_id: uuid.UUID
+    borrower_initials: str
+    pipeline_stage: LoanPipelineStage
+    referral_status: ReferralStatus
+    days_in_stage: int
+    stage_changed_at: datetime | None
+    source_label: str | None
+    is_own_referral: bool
+    created_at: datetime
+
+
+class RealtorPipelineBoardResponse(BaseModel):
+    partnership_id: uuid.UUID
+    partnership_display_name: str
+    cards: list[RealtorReferralCardResponse]
+
+
+class RealtorPortalDashboardResponse(BaseModel):
+    partnership_id: uuid.UUID
+    partnership_display_name: str
+    total_referrals: int
+    own_referral_count: int
+    counts_by_stage: dict[str, int]
+    near_ready_count: int
+    mortgage_ready_count: int
+    in_underwriting_count: int
+    funded_count: int
+    declined_count: int
+    recent: list[RealtorReferralCardResponse]
+    advisory_disclaimer: str = (
+        "Lending Readiness Score™ and pipeline status are advisory organizing tools. "
+        "They are not credit scores from a consumer reporting agency, not underwriting "
+        "decisions, and not guarantees of loan approval or terms."
+    )

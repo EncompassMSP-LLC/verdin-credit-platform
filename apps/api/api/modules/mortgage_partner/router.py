@@ -57,6 +57,9 @@ from api.modules.mortgage_partner.schemas import (
     RealtorPasswordResetConfirm,
     RealtorPasswordResetRequest,
     RealtorPasswordResetRequestResponse,
+    RealtorPipelineBoardResponse,
+    RealtorPortalDashboardResponse,
+    RealtorReferralCardResponse,
     RealtorSessionResponse,
     RealtorTokenResponse,
     ReferralIntakeCreate,
@@ -723,6 +726,36 @@ async def get_realtor_me(
 ) -> RealtorSessionResponse:
     """Authenticated realtor session context (org + partnership isolation)."""
     return await service.get_me(current_user)
+
+
+@router.get("/realtor/dashboard", response_model=RealtorPortalDashboardResponse)
+async def get_realtor_portal_dashboard(
+    _: None = Depends(require_mortgage_partner_enabled),
+    current_user: User = Depends(get_current_user),
+    service: RealtorPartnerService = Depends(get_realtor_service),
+) -> RealtorPortalDashboardResponse:
+    """Coarse stage summary for the realtor partnership (LRP-302)."""
+    return await service.get_portal_dashboard(current_user)
+
+
+@router.get("/realtor/referrals", response_model=list[RealtorReferralCardResponse])
+async def list_realtor_referrals(
+    _: None = Depends(require_mortgage_partner_enabled),
+    current_user: User = Depends(get_current_user),
+    service: RealtorPartnerService = Depends(get_realtor_service),
+) -> list[RealtorReferralCardResponse]:
+    """PII-minimized partnership referrals for realtor workspace (LRP-302)."""
+    return await service.list_own_referrals(current_user)
+
+
+@router.get("/realtor/pipeline", response_model=RealtorPipelineBoardResponse)
+async def get_realtor_pipeline(
+    _: None = Depends(require_mortgage_partner_enabled),
+    current_user: User = Depends(get_current_user),
+    service: RealtorPartnerService = Depends(get_realtor_service),
+) -> RealtorPipelineBoardResponse:
+    """Coarse pipeline board for realtor partnership (LRP-302)."""
+    return await service.get_pipeline_board(current_user)
 
 
 @router.get("/realtor/invites/preview", response_model=RealtorInvitePreviewResponse)
