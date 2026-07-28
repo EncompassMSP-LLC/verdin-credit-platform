@@ -56,7 +56,7 @@ Ops contract: [`../lrp-enterprise/04-operations/business-ops-package/`](../lrp-e
 | 24    | LRP-403 Dispute strategy suggestions (advisory)       | M4        | ✅     |
 | 25    | LRP-208 Case issue explainability + evidence center   | M2/M4     | ✅     |
 | 26    | LRP-209 Consumer communication preferences            | M2/M4     | ✅     |
-| 27    | LRP-405 FAQ/KB retrieval bot                          | M4        | ☐      |
+| 27    | LRP-405 FAQ/KB retrieval bot                          | M4        | ✅     |
 | 28    | LRP-406 Letter draft augment (staff-gated)            | M4        | ☐      |
 | 29    | LRP-305 Planned marketing landings (`/builders` etc.) | M5        | ☐      |
 | 30    | LRP-501 Partner isolation audit                       | M6        | ☐      |
@@ -64,6 +64,13 @@ Ops contract: [`../lrp-enterprise/04-operations/business-ops-package/`](../lrp-e
 | 32    | LRP-503 LRP smoke E2E in CI                           | M6        | ☐      |
 | 33    | LRP-504 Perf budgets                                  | M6        | ☐      |
 | 34    | LRP-505 Release notes + tag `lrp-platform-v1.0.0`     | M6        | ☐      |
+
+Deferred follow-ups (preserve queue; do not absorb informally):
+
+| ID       | Slice                                                   | Status |
+| -------- | ------------------------------------------------------- | ------ |
+| LRP-208A | Evidence vault issue association + case action timeline | ☐      |
+| LRP-209A | Unwanted-call complaint workflow + follow-up tracking   | ☐      |
 
 Deferred to [product backlog](../lrp-enterprise/15-roadmap/product-backlog.md): LRP-404 educational simulator (PB-006); authenticated builder/attorney/advisor portals; full public KB depth.
 
@@ -266,6 +273,14 @@ Deferred to [product backlog](../lrp-enterprise/15-roadmap/product-backlog.md): 
 - Explicit consent, phone ownership, telemarketing-limitation disclosure; never silent FTC registration
 - Communication-request letter draft (staff-gated text only; never auto-sent)
 - CRM borrower workspace panel; tests: `test_communication_preferences.py`
+
+### LRP-405 — FAQ/KB retrieval bot (2026-07-28)
+
+- Approved KB catalog + deterministic retrieval (no generative external model required)
+- `POST /llm/faq-kb/ask`, conversation audit list, staff feedback
+- Audience-aware answers; citations; injection/unsupported-claim refusals
+- CRM `/crm/faq-assistant`; migration `112_faq_kb_retrieval`
+- Tests: `apps/api/tests/llm/test_faq_kb_retrieval.py`
 
 ### Definition of Done (every slice)
 

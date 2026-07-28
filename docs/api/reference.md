@@ -526,11 +526,14 @@ Returns `404` when either `ENABLE_SMS_DELIVERY` or `ENABLE_SMS_MARKETING_CAMPAIG
 
 LLM readiness and case summary generation behind ADR-012 gates.
 
-| Method | Path                           | Min role     | Description                         |
-| ------ | ------------------------------ | ------------ | ----------------------------------- |
-| GET    | `/llm/status`                  | read_only    | LLM feature + provider readiness    |
-| GET    | `/llm/dispute-draft/status`    | read_only    | LLM dispute draft augment readiness |
-| POST   | `/cases/{case_id}/llm-summary` | case_manager | Generate scrubbed case summary      |
+| Method | Path                                           | Min role     | Description                                                                  |
+| ------ | ---------------------------------------------- | ------------ | ---------------------------------------------------------------------------- |
+| GET    | `/llm/status`                                  | read_only    | LLM feature + provider readiness                                             |
+| GET    | `/llm/dispute-draft/status`                    | read_only    | LLM dispute draft augment readiness                                          |
+| POST   | `/llm/faq-kb/ask`                              | read_only    | Audience-aware FAQ answer from approved KB only (LRP-405; citations + audit) |
+| GET    | `/llm/faq-kb/conversations`                    | read_only    | Org-isolated FAQ conversation audit turns                                    |
+| POST   | `/llm/faq-kb/conversations/{turn_id}/feedback` | case_manager | Staff feedback on FAQ answers (accurate/inaccurate/incomplete)               |
+| POST   | `/cases/{case_id}/llm-summary`                 | case_manager | Generate scrubbed case summary                                               |
 
 Requires `ENABLE_LLM=true` and `LLM_PROVIDER` / `LLM_API_KEY` / `LLM_MODEL` for provider calls. See [ADR-012](../adr/012-llm-provider-policy.md).
 
