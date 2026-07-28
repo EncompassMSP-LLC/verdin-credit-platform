@@ -51,7 +51,7 @@ Ops contract: [`../lrp-enterprise/04-operations/business-ops-package/`](../lrp-e
 | 19    | LRP-207 Weekly status digest job                      | M3        | ✅     |
 | 20    | LRP-301 Realtor partner role + login                  | M4        | ✅     |
 | 21    | LRP-302 Realtor portal MVP                            | M4        | ✅     |
-| 22    | LRP-303 Borrower UAT script + fixes                   | M4        | ☐      |
+| 22    | LRP-303 Borrower UAT script + fixes                   | M4        | ✅     |
 | 23    | LRP-304 LO UAT script + fixes                         | M4        | ☐      |
 | 24    | LRP-403 Dispute strategy suggestions (advisory)       | M4        | ☐      |
 | 25    | LRP-405 FAQ/KB retrieval bot                          | M4        | ☐      |
@@ -227,6 +227,13 @@ Deferred to [product backlog](../lrp-enterprise/15-roadmap/product-backlog.md): 
 - `GET /mortgage-partner/realtor/dashboard|referrals|pipeline` — partnership-scoped, PII-minimized borrower initials + coarse stage (no notes/tradelines/exports)
 - `apps/lrp-web` dashboard / referrals / pipeline wired to live APIs (demo seed fallback retained)
 - Capability `realtor_portal_mvp`; tests: `test_realtor_portal_mvp.py`
+
+### LRP-303 — Borrower UAT script + fixes (2026-07-28)
+
+- Manual UAT script: `docs/development/lrp-borrower-uat-script.md` (happy path + isolation + claim-library gates)
+- Automated happy path: `apps/api/tests/client_portal/test_borrower_uat_happy_path.py` (login → me → cases → readiness → checklist → timeline → report → documents → messages + isolation)
+- Fix: remove hardcoded fake portal nav badges (tasks/messages/notifications) that could mislead UAT
+- Capability `borrower_uat_script`; no new API surface
 
 ### Definition of Done (every slice)
 
