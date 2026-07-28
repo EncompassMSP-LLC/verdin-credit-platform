@@ -50,7 +50,7 @@ Ops contract: [`../lrp-enterprise/04-operations/business-ops-package/`](../lrp-e
 | 18    | LRP-206 Partner nurture drip                          | M3        | ✅     |
 | 19    | LRP-207 Weekly status digest job                      | M3        | ✅     |
 | 20    | LRP-301 Realtor partner role + login                  | M4        | ✅     |
-| 21    | LRP-302 Realtor portal MVP                            | M4        | ☐      |
+| 21    | LRP-302 Realtor portal MVP                            | M4        | ✅     |
 | 22    | LRP-303 Borrower UAT script + fixes                   | M4        | ☐      |
 | 23    | LRP-304 LO UAT script + fixes                         | M4        | ☐      |
 | 24    | LRP-403 Dispute strategy suggestions (advisory)       | M4        | ☐      |
@@ -221,7 +221,12 @@ Deferred to [product backlog](../lrp-enterprise/15-roadmap/product-backlog.md): 
 - `apps/lrp-web` `/realtor/*` realm: login, activate, forgot/reset password, shell + dashboard; middleware isolates from lender/CRM/portal
 - Demo auth: `NEXT_PUBLIC_LRP_REALTOR_DEMO_AUTH` (off in production builds)
 - Tests: `apps/api/tests/mortgage_partner/test_realtor_role_login.py`
-- Realtor referral/pipeline MVP deferred to LRP-302
+
+### LRP-302 — Realtor portal MVP (2026-07-28)
+
+- `GET /mortgage-partner/realtor/dashboard|referrals|pipeline` — partnership-scoped, PII-minimized borrower initials + coarse stage (no notes/tradelines/exports)
+- `apps/lrp-web` dashboard / referrals / pipeline wired to live APIs (demo seed fallback retained)
+- Capability `realtor_portal_mvp`; tests: `test_realtor_portal_mvp.py`
 
 ### Definition of Done (every slice)
 

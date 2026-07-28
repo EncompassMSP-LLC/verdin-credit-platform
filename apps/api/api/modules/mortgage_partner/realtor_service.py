@@ -18,6 +18,7 @@ from api.core.permissions import has_permission
 from api.core.security import create_access_token, create_refresh_token, hash_password
 from api.modules.auth.models import User
 from api.modules.mortgage_partner.models import (
+    LoanPipelineStage,
     OrgPartnership,
     OrgPartnershipMember,
     PartnerAccessAction,
@@ -45,9 +46,13 @@ from api.modules.mortgage_partner.schemas import (
     RealtorPasswordResetConfirm,
     RealtorPasswordResetRequest,
     RealtorPasswordResetRequestResponse,
+    RealtorPipelineBoardResponse,
+    RealtorPortalDashboardResponse,
+    RealtorReferralCardResponse,
     RealtorSessionResponse,
     RealtorTokenResponse,
 )
+from api.modules.mortgage_partner.weekly_digest_service import borrower_initials
 
 _INVITE_TTL = timedelta(days=7)
 _RESET_TTL = timedelta(hours=1)
@@ -329,6 +334,111 @@ class RealtorPartnerService:
         member, partnership = await self._require_active_realtor_membership(user)
         partner_name = await self._org_name(partnership.partner_organization_id)
         return self._session_from_membership(user, member, partnership, partner_name)
+
+    async def list_own_referrals(self, user: User) -> list[RealtorReferralCardResponse]:
+        """Partnership-scoped referrals; marks own (referred_by) for MVP visibility."""
+        if not partner_role_has_permission(PartnerRole.REALTOR, "referrals.view"):
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+        member, partnership = await self._require_active_realtor_membership(user)
+        cards = await self._build_referral_cards(user, partnership, own_only=False)
+        await self._audit(
+            cro_organization_id=partnership.cro_organization_id,
+            actor=user,
+            action=PartnerAccessAction.REFERRAL_LIST,
+            resource_type="org_partnership",
+            resource_id=partnership.id,
+            partnership_id=partnership.id,
+            detail=f"realtor_portal count={len(cards)} member={member.id}",
+        )
+        await self._session.commit()
+        return cards
+
+    async def get_pipeline_board(self, user: User) -> RealtorPipelineBoardResponse:
+        if not partner_role_has_permission(PartnerRole.REALTOR, "pipeline.view"):
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+        _member, partnership = await self._require_active_realtor_membership(user)
+        cards = await self._build_referral_cards(user, partnership, own_only=False)
+        await self._audit(
+            cro_organization_id=partnership.cro_organization_id,
+            actor=user,
+            action=PartnerAccessAction.PIPELINE_VIEW,
+            resource_type="org_partnership",
+            resource_id=partnership.id,
+            partnership_id=partnership.id,
+            detail=f"realtor_pipeline count={len(cards)}",
+        )
+        await self._session.commit()
+        return RealtorPipelineBoardResponse(
+            partnership_id=partnership.id,
+            partnership_display_name=partnership.display_name,
+            cards=cards,
+        )
+
+    async def get_portal_dashboard(self, user: User) -> RealtorPortalDashboardResponse:
+        if not partner_role_has_permission(PartnerRole.REALTOR, "partnership.view"):
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+        _member, partnership = await self._require_active_realtor_membership(user)
+        cards = await self._build_referral_cards(user, partnership, own_only=False)
+        counts: dict[str, int] = {stage.value: 0 for stage in LoanPipelineStage}
+        for card in cards:
+            counts[card.pipeline_stage.value] = counts.get(card.pipeline_stage.value, 0) + 1
+        own_count = sum(1 for card in cards if card.is_own_referral)
+        await self._audit(
+            cro_organization_id=partnership.cro_organization_id,
+            actor=user,
+            action=PartnerAccessAction.PIPELINE_VIEW,
+            resource_type="org_partnership",
+            resource_id=partnership.id,
+            partnership_id=partnership.id,
+            detail="realtor_dashboard",
+        )
+        await self._session.commit()
+        return RealtorPortalDashboardResponse(
+            partnership_id=partnership.id,
+            partnership_display_name=partnership.display_name,
+            total_referrals=len(cards),
+            own_referral_count=own_count,
+            counts_by_stage=counts,
+            near_ready_count=counts.get(LoanPipelineStage.NEAR_READY.value, 0),
+            mortgage_ready_count=counts.get(LoanPipelineStage.MORTGAGE_READY.value, 0),
+            in_underwriting_count=counts.get(LoanPipelineStage.IN_UNDERWRITING.value, 0),
+            funded_count=counts.get(LoanPipelineStage.FUNDED.value, 0),
+            declined_count=counts.get(LoanPipelineStage.DECLINED.value, 0),
+            recent=cards[:8],
+        )
+
+    async def _build_referral_cards(
+        self,
+        user: User,
+        partnership: OrgPartnership,
+        *,
+        own_only: bool,
+    ) -> list[RealtorReferralCardResponse]:
+        referrals = await self._repo.list_referrals(partnership.id, partnership.cro_organization_id)
+        if own_only:
+            referrals = [r for r in referrals if r.referred_by_user_id == user.id]
+        names = await self._repo.map_client_display_names(
+            partnership.cro_organization_id, [r.client_id for r in referrals]
+        )
+        now = datetime.now(UTC)
+        cards: list[RealtorReferralCardResponse] = []
+        for ref in referrals:
+            changed_at = ref.pipeline_stage_changed_at
+            days_in_stage = (now - changed_at).days if changed_at else 0
+            cards.append(
+                RealtorReferralCardResponse(
+                    referral_id=ref.id,
+                    borrower_initials=borrower_initials(names.get(ref.client_id)),
+                    pipeline_stage=ref.pipeline_stage,
+                    referral_status=ref.status,
+                    days_in_stage=days_in_stage,
+                    stage_changed_at=changed_at,
+                    source_label=ref.source_label,
+                    is_own_referral=ref.referred_by_user_id == user.id,
+                    created_at=ref.created_at,
+                )
+            )
+        return cards
 
     async def disable_membership(
         self,

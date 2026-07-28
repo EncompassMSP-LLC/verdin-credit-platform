@@ -284,6 +284,7 @@ class MortgagePartnerService:
                 "weekly_partner_digest",
                 "realtor_partner_role",
                 "realtor_portal_auth",
+                "realtor_portal_mvp",
             ],
             deferred_capabilities=[
                 "partner_jwt_realm",
