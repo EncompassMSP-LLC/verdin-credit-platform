@@ -5,31 +5,64 @@ import { Section, SectionHeading } from '@/components/ui/Section';
 import { createMetadata } from '@/lib/seo';
 
 export const metadata = createMetadata({
-  title: 'For Partners & Operators',
+  title: 'Partners Hub — Choose Your Audience',
   description:
-    'Productize mortgage readiness for lender and realtor channels with Lending Readiness Partners operator workflows.',
+    'Lending Readiness Partners audience landings for lenders, realtors, builders, attorneys, advisors, and operators.',
   path: '/partners',
 });
+
+const audiences = [
+  {
+    href: '/lenders',
+    title: 'Lenders',
+    body: 'Mortgage partners who need advisory readiness visibility without approval theater.',
+  },
+  {
+    href: '/realtors',
+    title: 'Realtors',
+    body: 'Keep buyers engaged when financing needs more time—with claim-safe stage language.',
+  },
+  {
+    href: '/builders',
+    title: 'Builders',
+    body: 'Prepare community buyers for the financing conversation alongside preferred lenders.',
+  },
+  {
+    href: '/attorneys',
+    title: 'Attorneys',
+    body: 'Readiness support that stays in its lane—separate from legal advice and underwriting.',
+  },
+  {
+    href: '/advisors',
+    title: 'Advisors',
+    body: 'Financial planners and insurance professionals coordinating home goals ethically.',
+  },
+  {
+    href: '/borrowers',
+    title: 'Borrowers',
+    body: 'A dignified plan for “not yet”—guided through trusted lenders and operators.',
+  },
+];
 
 export default function PartnersPage() {
   return (
     <>
       <PageHero
-        eyebrow="For operators & partners"
-        title="Productize mortgage readiness—without the chaos."
-        description="Connect case work to partner-ready signals. Show lenders and realtors progress they can understand. Turn operational depth into a durable channel offering."
+        eyebrow="Partners hub"
+        title="Choose the partnership path that fits your role."
+        description="Lending Readiness Partners helps more borrowers become lending ready—through lenders, operators, and allied professionals. Advisory only; never a guarantee of approval or funding."
         actions={
           <>
-            <Button href="/crm/login" variant="inverse" size="lg">
-              Open enterprise CRM
+            <Button href="/contact?intent=partner" variant="inverse" size="lg">
+              Talk with partnerships
             </Button>
             <Button
-              href="/contact?intent=operator"
+              href="/resources/partner-kit"
               variant="ghost"
               size="lg"
               className="text-white hover:bg-white/10"
             >
-              Start an operator conversation
+              Open partner kit
             </Button>
           </>
         }
@@ -37,54 +70,37 @@ export default function PartnersPage() {
 
       <Section tone="white">
         <SectionHeading
-          eyebrow="Operator outcomes"
-          title="Make “mortgage ready” an operating product—not a spreadsheet."
+          eyebrow="Audiences"
+          title="One brand. Clear lanes for every partner."
+          description="Pick your landing—each page stays claim-safe and compliance-minded."
         />
-        <div className="mt-10 grid gap-6 md:grid-cols-2">
-          {[
-            {
-              title: 'Workbench depth',
-              body: 'Run credit and case workflows with ownership, status consistency, and readiness packaging designed for external partners.',
-            },
-            {
-              title: 'Partner clarity',
-              body: 'Replace ad-hoc status chasing with timelines and next actions lenders and realtors can trust.',
-            },
-            {
-              title: 'Channel packaging',
-              body: 'Use Partner Kits and stage glossaries to standardize BD conversations across your markets.',
-            },
-            {
-              title: 'Compliance-minded process',
-              body: 'Keep high-risk actions mediated and auditable so growth doesn’t outrun governance.',
-            },
-          ].map((item) => (
-            <article key={item.title} className="rounded-lg bg-sand-100 p-6 ring-1 ring-navy-900/5">
+        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {audiences.map((item) => (
+            <a
+              key={item.href}
+              href={item.href}
+              className="block rounded-lg bg-sand-100 p-6 ring-1 ring-navy-900/5 transition hover:ring-navy-900/20"
+            >
               <h3 className="font-display text-xl text-navy-900">{item.title}</h3>
               <p className="mt-3 text-sm leading-relaxed text-ink-700">{item.body}</p>
-            </article>
+              <span className="mt-4 inline-block text-sm font-medium text-teal-800">
+                View landing →
+              </span>
+            </a>
           ))}
         </div>
       </Section>
 
       <Section>
         <SectionHeading
-          title="Ideal partner profile"
-          description="High-volume or multi-location credit services firms serving mortgage-intent borrowers, with case managers, reviewers, and a compliance lead who will not accept guarantee culture."
+          title="Operators"
+          description="Credit services firms productizing mortgage readiness for lender and realtor channels."
         />
-        <ul className="mt-8 space-y-3 text-ink-700">
-          {[
-            'Realtor-fed or lender-fed pipeline looking for clearer ready-vs-not signals',
-            'Need to reduce manual status reporting across cases',
-            'Ambition to become the preferred readiness partner for local lenders',
-            'Willingness to run staff-mediated workflows with audit discipline',
-          ].map((item) => (
-            <li key={item} className="flex gap-3">
-              <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-teal-600" aria-hidden />
-              <span>{item}</span>
-            </li>
-          ))}
-        </ul>
+        <div className="mt-8">
+          <Button href="/crm/login" variant="secondary">
+            Open enterprise CRM
+          </Button>
+        </div>
       </Section>
 
       <CtaBand
