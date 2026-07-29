@@ -22,6 +22,8 @@ from api.modules.mortgage_partner.schemas import (
     CrmAppointmentCreate,
     CrmAppointmentResponse,
     CrmAppointmentUpdate,
+    CrmAutomationAuditEventResponse,
+    CrmAutomationFireRequest,
     CrmAutomationRuleCreate,
     CrmAutomationRuleResponse,
     CrmAutomationRuleUpdate,
@@ -139,6 +141,56 @@ async def update_automation_rule(
     service: MortgagePartnerService = Depends(get_mortgage_partner_service),
 ) -> CrmAutomationRuleResponse:
     return await service.update_automation_rule(current_user, rule_id, payload)
+
+
+@router.post(
+    "/automation-rules/{rule_id}/fire",
+    response_model=CrmAutomationAuditEventResponse,
+    status_code=201,
+)
+async def fire_automation_rule(
+    rule_id: uuid.UUID,
+    payload: CrmAutomationFireRequest,
+    _: None = Depends(require_mortgage_partner_enabled),
+    current_user: User = Depends(get_current_user),
+    service: MortgagePartnerService = Depends(get_mortgage_partner_service),
+) -> CrmAutomationAuditEventResponse:
+    """Staff-mediated fire/dry-run for a CRM automation rule (LRP-502)."""
+    return await service.fire_automation_rule(current_user, rule_id, payload)
+
+
+@router.get(
+    "/automation-events",
+    response_model=list[CrmAutomationAuditEventResponse],
+)
+async def list_automation_audit_events(
+    rule_id: uuid.UUID | None = Query(default=None),
+    event_kind: str | None = Query(default=None),
+    limit: int = Query(default=50, ge=1, le=200),
+    _: None = Depends(require_mortgage_partner_enabled),
+    current_user: User = Depends(get_current_user),
+    service: MortgagePartnerService = Depends(get_mortgage_partner_service),
+) -> list[CrmAutomationAuditEventResponse]:
+    """List durable CRM automation config/fire audit events (LRP-502)."""
+    return await service.list_automation_audit_events(
+        current_user,
+        rule_id=rule_id,
+        event_kind=event_kind,
+        limit=limit,
+    )
+
+
+@router.get(
+    "/automation-events/{event_id}",
+    response_model=CrmAutomationAuditEventResponse,
+)
+async def get_automation_audit_event(
+    event_id: uuid.UUID,
+    _: None = Depends(require_mortgage_partner_enabled),
+    current_user: User = Depends(get_current_user),
+    service: MortgagePartnerService = Depends(get_mortgage_partner_service),
+) -> CrmAutomationAuditEventResponse:
+    return await service.get_automation_audit_event(current_user, event_id)
 
 
 @router.get("/appointments", response_model=list[CrmAppointmentResponse])

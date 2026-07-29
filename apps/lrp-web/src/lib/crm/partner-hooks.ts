@@ -4,8 +4,10 @@ import {
   createNurtureEnrollment,
   createWeeklyDigestSubscription,
   createPartnerContact,
+  fireCrmAutomationRule,
   getMortgagePartnerStatus,
   listCrmAppointments,
+  listCrmAutomationAuditEvents,
   listCrmAutomationRules,
   listNurtureDeliveries,
   listNurtureEnrollments,
@@ -23,6 +25,7 @@ import {
   updatePartnerContact,
   updatePartnerReferral,
   updateWeeklyDigestSubscription,
+  type CrmAutomationFireInput,
   type CrmAutomationRuleUpdateInput,
   type NurtureEnrollmentCreateInput,
   type NurtureEnrollmentUpdateInput,
@@ -141,6 +144,36 @@ export function useUpdateCrmAutomationRule() {
     onSuccess: () => {
       void queryClient.invalidateQueries({
         queryKey: ['crm', 'mortgage-partner', 'automation-rules'],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ['crm', 'mortgage-partner', 'automation-events'],
+      });
+    },
+  });
+}
+
+export function useCrmAutomationAuditEvents(limit = 25) {
+  const { isAuthenticated, authMode } = useCrmAuth();
+  const status = useCrmMortgagePartnerStatus();
+  return useQuery({
+    queryKey: ['crm', 'mortgage-partner', 'automation-events', limit],
+    enabled:
+      isAuthenticated && authMode === 'platform' && status.data?.mortgage_partner_enabled === true,
+    queryFn: () => listCrmAutomationAuditEvents({ limit }),
+  });
+}
+
+export function useFireCrmAutomationRule() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ ruleId, body }: { ruleId: string; body?: CrmAutomationFireInput }) =>
+      fireCrmAutomationRule(ruleId, body ?? { dry_run: true }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: ['crm', 'mortgage-partner', 'automation-rules'],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ['crm', 'mortgage-partner', 'automation-events'],
       });
     },
   });

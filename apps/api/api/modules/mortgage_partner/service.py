@@ -49,6 +49,8 @@ from api.modules.mortgage_partner.schemas import (
     CrmAppointmentCreate,
     CrmAppointmentResponse,
     CrmAppointmentUpdate,
+    CrmAutomationAuditEventResponse,
+    CrmAutomationFireRequest,
     CrmAutomationRuleCreate,
     CrmAutomationRuleResponse,
     CrmAutomationRuleUpdate,
@@ -278,6 +280,7 @@ class MortgagePartnerService:
                 "referral_web_intake",
                 "referral_intake_orchestrator",
                 "crm_automation_rules",
+                "crm_automation_audit_events",
                 "crm_appointments",
                 "appointment_reminders",
                 "partner_nurture_drip",
@@ -1409,7 +1412,94 @@ class MortgagePartnerService:
         rows = await self._repo.list_access_audits(cro_org_id)
         return [PartnerAccessAuditResponse.model_validate(row) for row in rows]
 
-    # --- CRM automation rules (LRP-203) ---
+    # --- CRM automation rules (LRP-203) + audit events (LRP-502) ---
+
+    _LIVE_FIRE_CHANNELS = frozenset({"task", "notification"})
+
+    def _automation_rule_response(self, row: Any) -> CrmAutomationRuleResponse:
+        return CrmAutomationRuleResponse(
+            id=row.id,
+            organization_id=row.organization_id,
+            name=row.name,
+            description=row.description,
+            enabled=row.enabled,
+            trigger=row.trigger.value if hasattr(row.trigger, "value") else str(row.trigger),
+            action=row.action,
+            channel=row.channel.value if hasattr(row.channel, "value") else str(row.channel),
+            last_fired_at=row.last_fired_at,
+            fire_count=row.fire_count,
+            created_at=row.created_at,
+            updated_at=row.updated_at,
+        )
+
+    def _automation_audit_response(self, row: Any) -> CrmAutomationAuditEventResponse:
+        return CrmAutomationAuditEventResponse(
+            id=row.id,
+            organization_id=row.organization_id,
+            rule_id=row.rule_id,
+            event_kind=(
+                row.event_kind.value if hasattr(row.event_kind, "value") else str(row.event_kind)
+            ),
+            trigger=row.trigger,
+            channel=row.channel,
+            status=row.status.value if hasattr(row.status, "value") else str(row.status),
+            entity_type=row.entity_type,
+            entity_id=row.entity_id,
+            actor_user_id=row.actor_user_id,
+            schema_version=row.schema_version,
+            started_at=row.started_at,
+            completed_at=row.completed_at,
+            payload=dict(row.payload or {}),
+            created_at=row.created_at,
+        )
+
+    async def _append_automation_audit(
+        self,
+        *,
+        organization_id: uuid.UUID,
+        rule: Any | None,
+        event_kind: Any,
+        status_value: Any,
+        actor_user_id: uuid.UUID | None,
+        entity_type: str | None = None,
+        entity_id: uuid.UUID | None = None,
+        payload: dict[str, Any] | None = None,
+        commit: bool = False,
+    ) -> Any:
+        from api.modules.mortgage_partner.automation_models import CrmAutomationAuditEvent
+
+        now = datetime.now(UTC)
+        event = CrmAutomationAuditEvent(
+            id=uuid.uuid4(),
+            organization_id=organization_id,
+            rule_id=rule.id if rule is not None else None,
+            event_kind=event_kind,
+            trigger=(
+                rule.trigger.value
+                if rule is not None and hasattr(rule.trigger, "value")
+                else (str(rule.trigger) if rule is not None else None)
+            ),
+            channel=(
+                rule.channel.value
+                if rule is not None and hasattr(rule.channel, "value")
+                else (str(rule.channel) if rule is not None else None)
+            ),
+            status=status_value,
+            entity_type=entity_type,
+            entity_id=entity_id,
+            actor_user_id=actor_user_id,
+            schema_version="crm-automation-audit-v1",
+            started_at=now,
+            completed_at=now,
+            payload=payload or {},
+        )
+        self._session.add(event)
+        if commit:
+            await self._session.commit()
+            await self._session.refresh(event)
+        else:
+            await self._session.flush()
+        return event
 
     _DEFAULT_AUTOMATION_RULES: list[dict[str, Any]] = [
         {
@@ -1501,23 +1591,7 @@ class MortgagePartnerService:
             .order_by(CrmAutomationRule.created_at.asc(), CrmAutomationRule.name.asc())
         )
         rows = list(result.scalars().all())
-        return [
-            CrmAutomationRuleResponse(
-                id=row.id,
-                organization_id=row.organization_id,
-                name=row.name,
-                description=row.description,
-                enabled=row.enabled,
-                trigger=row.trigger.value,
-                action=row.action,
-                channel=row.channel.value,
-                last_fired_at=row.last_fired_at,
-                fire_count=row.fire_count,
-                created_at=row.created_at,
-                updated_at=row.updated_at,
-            )
-            for row in rows
-        ]
+        return [self._automation_rule_response(row) for row in rows]
 
     async def create_automation_rule(
         self,
@@ -1525,6 +1599,8 @@ class MortgagePartnerService:
         payload: CrmAutomationRuleCreate,
     ) -> CrmAutomationRuleResponse:
         from api.modules.mortgage_partner.automation_models import (
+            CrmAutomationAuditEventKind,
+            CrmAutomationAuditStatus,
             CrmAutomationChannel,
             CrmAutomationRule,
             CrmAutomationTrigger,
@@ -1546,22 +1622,23 @@ class MortgagePartnerService:
             updated_by_id=user.id,
         )
         self._session.add(rule)
+        await self._session.flush()
+        await self._append_automation_audit(
+            organization_id=organization_id,
+            rule=rule,
+            event_kind=CrmAutomationAuditEventKind.RULE_CREATED,
+            status_value=CrmAutomationAuditStatus.COMPLETED,
+            actor_user_id=user.id,
+            payload={
+                "name": rule.name,
+                "enabled": rule.enabled,
+                "action": rule.action,
+                "auto_filing": False,
+            },
+        )
         await self._session.commit()
         await self._session.refresh(rule)
-        return CrmAutomationRuleResponse(
-            id=rule.id,
-            organization_id=rule.organization_id,
-            name=rule.name,
-            description=rule.description,
-            enabled=rule.enabled,
-            trigger=rule.trigger.value,
-            action=rule.action,
-            channel=rule.channel.value,
-            last_fired_at=rule.last_fired_at,
-            fire_count=rule.fire_count,
-            created_at=rule.created_at,
-            updated_at=rule.updated_at,
-        )
+        return self._automation_rule_response(rule)
 
     async def update_automation_rule(
         self,
@@ -1572,6 +1649,8 @@ class MortgagePartnerService:
         from sqlalchemy import select
 
         from api.modules.mortgage_partner.automation_models import (
+            CrmAutomationAuditEventKind,
+            CrmAutomationAuditStatus,
             CrmAutomationChannel,
             CrmAutomationRule,
             CrmAutomationTrigger,
@@ -1592,6 +1671,7 @@ class MortgagePartnerService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Automation rule not found",
             )
+        previous_enabled = rule.enabled
         data = payload.model_dump(exclude_unset=True)
         if "name" in data and data["name"] is not None:
             rule.name = data["name"]
@@ -1606,22 +1686,221 @@ class MortgagePartnerService:
         if "channel" in data and data["channel"] is not None:
             rule.channel = CrmAutomationChannel(data["channel"])
         rule.updated_by_id = user.id
+
+        enabled_changed = (
+            "enabled" in data
+            and data["enabled"] is not None
+            and data["enabled"] != previous_enabled
+        )
+        other_changed = any(k for k in data if k != "enabled")
+        if enabled_changed and rule.enabled:
+            await self._append_automation_audit(
+                organization_id=organization_id,
+                rule=rule,
+                event_kind=CrmAutomationAuditEventKind.RULE_ENABLED,
+                status_value=CrmAutomationAuditStatus.COMPLETED,
+                actor_user_id=user.id,
+                payload={"enabled": True, "auto_filing": False},
+            )
+        elif enabled_changed and not rule.enabled:
+            await self._append_automation_audit(
+                organization_id=organization_id,
+                rule=rule,
+                event_kind=CrmAutomationAuditEventKind.RULE_DISABLED,
+                status_value=CrmAutomationAuditStatus.COMPLETED,
+                actor_user_id=user.id,
+                payload={"enabled": False, "auto_filing": False},
+            )
+        if other_changed or not enabled_changed:
+            await self._append_automation_audit(
+                organization_id=organization_id,
+                rule=rule,
+                event_kind=CrmAutomationAuditEventKind.RULE_UPDATED,
+                status_value=CrmAutomationAuditStatus.COMPLETED,
+                actor_user_id=user.id,
+                payload={"fields": sorted(data.keys()), "auto_filing": False},
+            )
+
         await self._session.commit()
         await self._session.refresh(rule)
-        return CrmAutomationRuleResponse(
-            id=rule.id,
-            organization_id=rule.organization_id,
-            name=rule.name,
-            description=rule.description,
-            enabled=rule.enabled,
-            trigger=rule.trigger.value,
-            action=rule.action,
-            channel=rule.channel.value,
-            last_fired_at=rule.last_fired_at,
-            fire_count=rule.fire_count,
-            created_at=rule.created_at,
-            updated_at=rule.updated_at,
+        return self._automation_rule_response(rule)
+
+    async def list_automation_audit_events(
+        self,
+        user: User,
+        *,
+        rule_id: uuid.UUID | None = None,
+        event_kind: str | None = None,
+        limit: int = 50,
+    ) -> list[CrmAutomationAuditEventResponse]:
+        from sqlalchemy import select
+
+        from api.modules.mortgage_partner.automation_models import (
+            CrmAutomationAuditEvent,
+            CrmAutomationAuditEventKind,
         )
+
+        self._require_read(user)
+        organization_id = self._require_organization(user)
+        limit = max(1, min(limit, 200))
+        stmt = (
+            select(CrmAutomationAuditEvent)
+            .where(CrmAutomationAuditEvent.organization_id == organization_id)
+            .order_by(CrmAutomationAuditEvent.started_at.desc())
+            .limit(limit)
+        )
+        if rule_id is not None:
+            stmt = stmt.where(CrmAutomationAuditEvent.rule_id == rule_id)
+        if event_kind is not None:
+            try:
+                kind = CrmAutomationAuditEventKind(event_kind)
+            except ValueError as exc:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail=f"Invalid event_kind: {event_kind}",
+                ) from exc
+            stmt = stmt.where(CrmAutomationAuditEvent.event_kind == kind)
+        result = await self._session.execute(stmt)
+        return [self._automation_audit_response(row) for row in result.scalars().all()]
+
+    async def get_automation_audit_event(
+        self,
+        user: User,
+        event_id: uuid.UUID,
+    ) -> CrmAutomationAuditEventResponse:
+        from sqlalchemy import select
+
+        from api.modules.mortgage_partner.automation_models import CrmAutomationAuditEvent
+
+        self._require_read(user)
+        organization_id = self._require_organization(user)
+        result = await self._session.execute(
+            select(CrmAutomationAuditEvent).where(
+                CrmAutomationAuditEvent.id == event_id,
+                CrmAutomationAuditEvent.organization_id == organization_id,
+            )
+        )
+        row = result.scalar_one_or_none()
+        if row is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Automation audit event not found",
+            )
+        return self._automation_audit_response(row)
+
+    async def fire_automation_rule(
+        self,
+        user: User,
+        rule_id: uuid.UUID,
+        payload: CrmAutomationFireRequest,
+    ) -> CrmAutomationAuditEventResponse:
+        from sqlalchemy import select
+
+        from api.modules.mortgage_partner.automation_models import (
+            CrmAutomationAuditEventKind,
+            CrmAutomationAuditStatus,
+            CrmAutomationRule,
+        )
+
+        self._require_write(user)
+        organization_id = self._require_organization(user)
+        result = await self._session.execute(
+            select(CrmAutomationRule).where(
+                CrmAutomationRule.id == rule_id,
+                CrmAutomationRule.organization_id == organization_id,
+                CrmAutomationRule.deleted_at.is_(None),
+            )
+        )
+        rule = result.scalar_one_or_none()
+        if rule is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Automation rule not found",
+            )
+
+        channel = rule.channel.value
+        dry_run = payload.dry_run
+        base_payload: dict[str, Any] = {
+            "rule_name": rule.name,
+            "action": rule.action,
+            "dry_run": dry_run,
+            "auto_filing": False,
+            "live_channels": sorted(self._LIVE_FIRE_CHANNELS),
+        }
+
+        if dry_run:
+            event = await self._append_automation_audit(
+                organization_id=organization_id,
+                rule=rule,
+                event_kind=CrmAutomationAuditEventKind.RULE_DRY_RUN,
+                status_value=CrmAutomationAuditStatus.DRY_RUN,
+                actor_user_id=user.id,
+                entity_type=payload.entity_type,
+                entity_id=payload.entity_id,
+                payload={**base_payload, "outcome": "dry_run_recorded"},
+                commit=True,
+            )
+            return self._automation_audit_response(event)
+
+        if channel not in self._LIVE_FIRE_CHANNELS:
+            event = await self._append_automation_audit(
+                organization_id=organization_id,
+                rule=rule,
+                event_kind=CrmAutomationAuditEventKind.RULE_SKIPPED,
+                status_value=CrmAutomationAuditStatus.SKIPPED,
+                actor_user_id=user.id,
+                entity_type=payload.entity_type,
+                entity_id=payload.entity_id,
+                payload={
+                    **base_payload,
+                    "outcome": "channel_not_live_allowed",
+                    "reason": (
+                        f"Live fire for channel '{channel}' is deferred; "
+                        "use dry_run=true or task/notification channels"
+                    ),
+                },
+                commit=True,
+            )
+            return self._automation_audit_response(event)
+
+        if not rule.enabled:
+            event = await self._append_automation_audit(
+                organization_id=organization_id,
+                rule=rule,
+                event_kind=CrmAutomationAuditEventKind.RULE_SKIPPED,
+                status_value=CrmAutomationAuditStatus.SKIPPED,
+                actor_user_id=user.id,
+                entity_type=payload.entity_type,
+                entity_id=payload.entity_id,
+                payload={**base_payload, "outcome": "rule_disabled"},
+                commit=True,
+            )
+            return self._automation_audit_response(event)
+
+        now = datetime.now(UTC)
+        rule.last_fired_at = now
+        rule.fire_count = int(rule.fire_count or 0) + 1
+        rule.updated_by_id = user.id
+        event = await self._append_automation_audit(
+            organization_id=organization_id,
+            rule=rule,
+            event_kind=CrmAutomationAuditEventKind.RULE_FIRED,
+            status_value=CrmAutomationAuditStatus.COMPLETED,
+            actor_user_id=user.id,
+            entity_type=payload.entity_type,
+            entity_id=payload.entity_id,
+            payload={
+                **base_payload,
+                "outcome": "staff_mediated_scaffold",
+                "fire_count": rule.fire_count,
+                "note": (
+                    "Recorded staff-mediated fire audit only; "
+                    "no unsupervised bureau filing or outbound blast"
+                ),
+            },
+            commit=True,
+        )
+        return self._automation_audit_response(event)
 
     # --- CRM appointments + reminders (LRP-205) ---
 

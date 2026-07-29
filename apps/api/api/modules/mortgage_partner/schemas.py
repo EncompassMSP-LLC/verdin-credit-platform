@@ -418,6 +418,34 @@ class CrmAutomationRuleUpdate(BaseModel):
     channel: Literal["task", "email", "sms", "notification", "stage"] | None = None
 
 
+class CrmAutomationFireRequest(BaseModel):
+    """Staff-mediated rule fire (LRP-502). Defaults to dry-run."""
+
+    dry_run: bool = True
+    entity_type: str | None = Field(default=None, max_length=50)
+    entity_id: uuid.UUID | None = None
+
+
+class CrmAutomationAuditEventResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    organization_id: uuid.UUID
+    rule_id: uuid.UUID | None
+    event_kind: str
+    trigger: str | None
+    channel: str | None
+    status: str
+    entity_type: str | None
+    entity_id: uuid.UUID | None
+    actor_user_id: uuid.UUID | None
+    schema_version: str
+    started_at: datetime
+    completed_at: datetime | None
+    payload: dict[str, Any]
+    created_at: datetime
+
+
 class CrmAppointmentResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
