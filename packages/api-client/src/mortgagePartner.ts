@@ -541,6 +541,72 @@ export function updateCrmAutomationRule(ruleId: string, body: CrmAutomationRuleU
   });
 }
 
+export type CrmAutomationAuditEventKind =
+  | 'rule_created'
+  | 'rule_updated'
+  | 'rule_enabled'
+  | 'rule_disabled'
+  | 'rule_fired'
+  | 'rule_dry_run'
+  | 'rule_skipped';
+
+export type CrmAutomationAuditStatus = 'completed' | 'skipped' | 'failed' | 'dry_run';
+
+export interface CrmAutomationAuditEvent {
+  id: string;
+  organization_id: string;
+  rule_id: string | null;
+  event_kind: CrmAutomationAuditEventKind;
+  trigger: string | null;
+  channel: string | null;
+  status: CrmAutomationAuditStatus;
+  entity_type: string | null;
+  entity_id: string | null;
+  actor_user_id: string | null;
+  schema_version: string;
+  started_at: string;
+  completed_at: string | null;
+  payload: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface CrmAutomationFireInput {
+  dry_run?: boolean;
+  entity_type?: string | null;
+  entity_id?: string | null;
+}
+
+export function listCrmAutomationAuditEvents(params?: {
+  rule_id?: string;
+  event_kind?: CrmAutomationAuditEventKind;
+  limit?: number;
+}) {
+  const search = new URLSearchParams();
+  if (params?.rule_id) search.set('rule_id', params.rule_id);
+  if (params?.event_kind) search.set('event_kind', params.event_kind);
+  if (params?.limit != null) search.set('limit', String(params.limit));
+  const query = search.toString();
+  return request<CrmAutomationAuditEvent[]>(
+    apiPath(`/mortgage-partner/automation-events${query ? `?${query}` : ''}`),
+  );
+}
+
+export function getCrmAutomationAuditEvent(eventId: string) {
+  return request<CrmAutomationAuditEvent>(
+    apiPath(`/mortgage-partner/automation-events/${eventId}`),
+  );
+}
+
+export function fireCrmAutomationRule(ruleId: string, body: CrmAutomationFireInput = {}) {
+  return request<CrmAutomationAuditEvent>(
+    apiPath(`/mortgage-partner/automation-rules/${ruleId}/fire`),
+    {
+      method: 'POST',
+      body,
+    },
+  );
+}
+
 export type CrmAppointmentType = 'consultation' | 'call' | 'meeting' | 'follow_up' | 'review';
 
 export type CrmAppointmentStatus = 'scheduled' | 'completed' | 'cancelled' | 'no_show';

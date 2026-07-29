@@ -210,6 +210,9 @@ from api.modules.mortgage_partner.appointment_models import (
     CrmAppointmentType,
 )
 from api.modules.mortgage_partner.automation_models import (
+    CrmAutomationAuditEvent,
+    CrmAutomationAuditEventKind,
+    CrmAutomationAuditStatus,
     CrmAutomationChannel,
     CrmAutomationRule,
     CrmAutomationTrigger,
@@ -424,6 +427,9 @@ __all__ = [
     "CrmAutomationRule",
     "CrmAutomationTrigger",
     "CrmAutomationChannel",
+    "CrmAutomationAuditEvent",
+    "CrmAutomationAuditEventKind",
+    "CrmAutomationAuditStatus",
     "CrmAppointment",
     "CrmAppointmentStatus",
     "CrmAppointmentType",
