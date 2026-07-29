@@ -19,6 +19,18 @@ Keep this test:
 - Focused on one successful customer journey.
 - Required as a release gate once branch protection is configured.
 
+## LRP smoke (LRP-503)
+
+`tests/e2e/test_lrp_smoke.py` is the Mortgage Partner Edition smoke path in the same E2E workflow:
+
+```text
+Auth → mortgage-partner status → partnership → client/case/account
+→ credit analysis → referral → pipeline/dashboard → readiness report
+→ automation rules dry-run audit
+```
+
+CI enables `ENABLE_MORTGAGE_PARTNER=true`. The smoke stays claim-safe and never exercises unsupervised filing or live bureau pulls.
+
 ## Edge-Case Scenarios
 
 Do not expand the golden-path test with edge cases. Add separate scenarios so failures remain isolated:

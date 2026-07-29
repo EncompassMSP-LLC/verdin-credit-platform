@@ -61,7 +61,7 @@ Ops contract: [`../lrp-enterprise/04-operations/business-ops-package/`](../lrp-e
 | 29    | LRP-305 Planned marketing landings (`/builders` etc.) | M5        | ✅     |
 | 30    | LRP-501 Partner isolation audit                       | M6        | ✅     |
 | 31    | LRP-502 Automation audit events                       | M6        | ✅     |
-| 32    | LRP-503 LRP smoke E2E in CI                           | M6        | ☐      |
+| 32    | LRP-503 LRP smoke E2E in CI                           | M6        | ✅     |
 | 33    | LRP-504 Perf budgets                                  | M6        | ☐      |
 | 34    | LRP-505 Release notes + tag `lrp-platform-v1.0.0`     | M6        | ☐      |
 
@@ -311,7 +311,13 @@ Deferred to [product backlog](../lrp-enterprise/15-roadmap/product-backlog.md): 
 - Live fire allowlisted to `task`/`notification` channels only; email/SMS/stage live fire records skipped
 - `GET /mortgage-partner/automation-events` (+ `/{id}`); CRM `/crm/automations` recent audit + Dry-run action
 - Tests: `apps/api/tests/mortgage_partner/test_automation_audit_events.py`
-- Next planned: LRP-503 LRP smoke E2E in CI; deferred LRP-208A / LRP-209A remain queued
+
+### LRP-503 — LRP smoke E2E in CI (2026-07-29)
+
+- `tests/e2e/test_lrp_smoke.py` — API smoke: status → partnership → referral → pipeline/dashboard → readiness → automation dry-run audit
+- CI: `ENABLE_MORTGAGE_PARTNER=true` on `.github/workflows/e2e.yml`; claim-safe disclaimer assertions
+- No unsupervised filing / live bureau / demo auth
+- Next planned: LRP-504 perf budgets; deferred LRP-208A / LRP-209A remain queued
 
 ### Definition of Done (every slice)
 

@@ -16,6 +16,7 @@ and the asynchronous document pipeline is processed by the **real worker**.
 Keep `test_full_case_lifecycle.py` as the fast, deterministic golden path.
 Additional edge cases should be separate tests so CI failures stay isolated:
 
+- `test_lrp_smoke.py` — LRP Mortgage Partner smoke (status → referral → readiness → automation audit; LRP-503)
 - `test_import_to_dispute_lifecycle.py` — import through dispute letter outcome (4.5 exit gate)
 - `test_dispute_letter_lifecycle.py` — dispute draft through CRA outcome
 - `test_entity_resolution_ambiguous.py` — ambiguous match
@@ -30,6 +31,7 @@ tests/e2e/
   conftest.py                 # API reachability, DB bootstrap, HTTP client, artifacts
   test_dispute_letter_lifecycle.py # dispute letter API happy path
   test_import_to_dispute_lifecycle.py # import → account → dispute letter path
+  test_lrp_smoke.py               # LRP mortgage-partner smoke (LRP-503)
   test_full_case_lifecycle.py # the 11-stage workflow test
   requirements.txt            # reportlab (PDF fixture); rest comes from apps/api
   fixtures/
@@ -74,11 +76,12 @@ If the API is not reachable the suite **skips** locally. Set `E2E_REQUIRE=1`
 
 ## Configuration
 
-| Variable            | Default                        | Purpose                                |
-| ------------------- | ------------------------------ | -------------------------------------- |
-| `E2E_BASE_URL`      | `http://localhost:8000`        | Base URL of the running API            |
-| `DATABASE_URL_SYNC` | local `verdin_credit_test` DSN | DB used to seed the org/user           |
-| `E2E_REQUIRE`       | unset                          | When set, unreachable stack fails (CI) |
+| Variable                  | Default                        | Purpose                                |
+| ------------------------- | ------------------------------ | -------------------------------------- |
+| `E2E_BASE_URL`            | `http://localhost:8000`        | Base URL of the running API            |
+| `DATABASE_URL_SYNC`       | local `verdin_credit_test` DSN | DB used to seed the org/user           |
+| `E2E_REQUIRE`             | unset                          | When set, unreachable stack fails (CI) |
+| `ENABLE_MORTGAGE_PARTNER` | unset / `true` in CI           | Required for `test_lrp_smoke.py`       |
 
 ## Diagnostics
 
