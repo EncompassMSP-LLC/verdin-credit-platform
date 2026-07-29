@@ -17,6 +17,15 @@ from api.modules.accounts.credit_analysis_schemas import (
 )
 from api.modules.accounts.credit_analysis_service import CreditAnalysisService
 from api.modules.accounts.dispute_letter_export import sanitize_content_disposition_filename
+from api.modules.accounts.letter_draft_builder_schemas import (
+    LetterDraftAdvanceRequest,
+    LetterDraftCreateRequest,
+    LetterDraftListResponse,
+    LetterDraftMarkSentRequest,
+    LetterDraftResponse,
+    LetterDraftSectionUpdateRequest,
+)
+from api.modules.accounts.letter_draft_builder_service import LetterDraftBuilderService
 from api.modules.accounts.schemas import (
     AccountListParams,
     AccountResponse,
@@ -105,6 +114,12 @@ def get_credit_analysis_service(db: AsyncSession = Depends(get_db)) -> CreditAna
 
 def get_consultation_pack_service(db: AsyncSession = Depends(get_db)) -> ConsultationPackService:
     return ConsultationPackService.from_session(db)
+
+
+def get_letter_draft_builder_service(
+    db: AsyncSession = Depends(get_db),
+) -> LetterDraftBuilderService:
+    return LetterDraftBuilderService.from_session(db)
 
 
 def get_case_account_list_params(
@@ -612,6 +627,105 @@ async def get_case_issue_explainability(
 ) -> CaseIssueExplainabilityResponse:
     """Plain-language issue cards with impact categories (LRP-208). Advisory only."""
     return await service.get_case_issue_explainability(current_user, case_id)
+
+
+@router.get(
+    "/{case_id}/letter-drafts",
+    response_model=LetterDraftListResponse,
+)
+async def list_letter_drafts(
+    case_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: LetterDraftBuilderService = Depends(get_letter_draft_builder_service),
+) -> LetterDraftListResponse:
+    """List Intelligent Letter Draft Builder drafts and templates (LRP-406)."""
+    return await service.list_drafts(current_user, case_id)
+
+
+@router.post(
+    "/{case_id}/letter-drafts",
+    response_model=LetterDraftResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_letter_draft(
+    case_id: uuid.UUID,
+    body: LetterDraftCreateRequest,
+    current_user: User = Depends(get_current_user),
+    service: LetterDraftBuilderService = Depends(get_letter_draft_builder_service),
+) -> LetterDraftResponse:
+    """Create a staff-gated letter draft. Never auto-transmits."""
+    return await service.create_draft(current_user, case_id, body)
+
+
+@router.get(
+    "/{case_id}/letter-drafts/{draft_id}",
+    response_model=LetterDraftResponse,
+)
+async def get_letter_draft(
+    case_id: uuid.UUID,
+    draft_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: LetterDraftBuilderService = Depends(get_letter_draft_builder_service),
+) -> LetterDraftResponse:
+    return await service.get_draft(current_user, case_id, draft_id)
+
+
+@router.patch(
+    "/{case_id}/letter-drafts/{draft_id}/sections/{section_key}",
+    response_model=LetterDraftResponse,
+)
+async def update_letter_draft_section(
+    case_id: uuid.UUID,
+    draft_id: uuid.UUID,
+    section_key: str,
+    body: LetterDraftSectionUpdateRequest,
+    current_user: User = Depends(get_current_user),
+    service: LetterDraftBuilderService = Depends(get_letter_draft_builder_service),
+) -> LetterDraftResponse:
+    return await service.update_section(current_user, case_id, draft_id, section_key, body)
+
+
+@router.post(
+    "/{case_id}/letter-drafts/{draft_id}/validate",
+    response_model=LetterDraftResponse,
+)
+async def validate_letter_draft(
+    case_id: uuid.UUID,
+    draft_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: LetterDraftBuilderService = Depends(get_letter_draft_builder_service),
+) -> LetterDraftResponse:
+    return await service.validate_draft(current_user, case_id, draft_id)
+
+
+@router.post(
+    "/{case_id}/letter-drafts/{draft_id}/advance",
+    response_model=LetterDraftResponse,
+)
+async def advance_letter_draft(
+    case_id: uuid.UUID,
+    draft_id: uuid.UUID,
+    body: LetterDraftAdvanceRequest,
+    current_user: User = Depends(get_current_user),
+    service: LetterDraftBuilderService = Depends(get_letter_draft_builder_service),
+) -> LetterDraftResponse:
+    """Advance staff workflow. Transmission statuses require mark-sent."""
+    return await service.advance_workflow(current_user, case_id, draft_id, body)
+
+
+@router.post(
+    "/{case_id}/letter-drafts/{draft_id}/mark-sent",
+    response_model=LetterDraftResponse,
+)
+async def mark_letter_draft_sent(
+    case_id: uuid.UUID,
+    draft_id: uuid.UUID,
+    body: LetterDraftMarkSentRequest,
+    current_user: User = Depends(get_current_user),
+    service: LetterDraftBuilderService = Depends(get_letter_draft_builder_service),
+) -> LetterDraftResponse:
+    """Record external transmission by staff. Platform never mails or files."""
+    return await service.mark_sent(current_user, case_id, draft_id, body)
 
 
 @router.get(

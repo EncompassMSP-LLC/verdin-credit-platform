@@ -31,6 +31,10 @@ from api.modules.accounts.fully_autonomous_bureau_api_filing_models import (
     FullyAutonomousBureauApiFilingRun,
     FullyAutonomousBureauApiFilingRunStatus,
 )
+from api.modules.accounts.letter_draft_builder_models import (
+    IntelligentLetterDraft,
+    LetterDraftWorkflowStatus,
+)
 from api.modules.accounts.models import Account
 from api.modules.accounts.unsupervised_autonomous_filing_loop_models import (
     UnsupervisedAutonomousFilingLoopRun,
@@ -375,6 +379,8 @@ __all__ = [
     "Document",
     "DisputeLetter",
     "DisputeLetterStatus",
+    "IntelligentLetterDraft",
+    "LetterDraftWorkflowStatus",
     "DisputeResponse",
     "DisputeResponseMethod",
     "DisputeResponseOutcome",

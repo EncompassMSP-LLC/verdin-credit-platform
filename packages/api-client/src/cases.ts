@@ -454,6 +454,160 @@ export async function getCaseIssueExplainability(caseId: string): Promise<CaseIs
   return request<CaseIssueExplainability>(apiPath(`/cases/${caseId}/issue-explainability`));
 }
 
+export type LetterTemplateKind =
+  | 'bureau_dispute'
+  | 'furnisher_dispute'
+  | 'method_of_verification'
+  | 'cfpb_complaint'
+  | 'ftc_identity_theft'
+  | 'debt_validation'
+  | 'goodwill'
+  | 'late_payment_forgiveness'
+  | 'pay_for_delete'
+  | 'communication_preference'
+  | 'cease_communication'
+  | 'mortgage_explanation'
+  | 'custom_staff';
+
+export type LetterDraftWorkflowStatus =
+  | 'ai_draft_created'
+  | 'staff_review'
+  | 'client_review'
+  | 'approved'
+  | 'ready_to_send'
+  | 'sent_recorded'
+  | 'delivery_confirmed'
+  | 'response_received';
+
+export type LetterFactClassification =
+  'verified' | 'client_statement' | 'document_supported' | 'staff_observation';
+
+export interface LetterDraftSection {
+  key: string;
+  heading: string;
+  body: string;
+  fact_classification: LetterFactClassification;
+  evidence_refs: Record<string, unknown>[];
+  editable: boolean;
+}
+
+export interface LetterDraftTemplateSummary {
+  kind: LetterTemplateKind;
+  title: string;
+  description: string;
+  claim_warnings: string[];
+}
+
+export interface LetterDraftSummary {
+  id: string;
+  case_id: string;
+  template_kind: LetterTemplateKind;
+  workflow_status: LetterDraftWorkflowStatus;
+  issue_source_id: string | null;
+  version: number;
+  validation_ok: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface LetterDraft {
+  id: string;
+  organization_id: string;
+  case_id: string;
+  created_by_user_id: string | null;
+  template_kind: LetterTemplateKind;
+  template_title: string | null;
+  workflow_status: LetterDraftWorkflowStatus;
+  issue_source_id: string | null;
+  account_id: string | null;
+  version: number;
+  sections: LetterDraftSection[];
+  full_text: string;
+  validation: {
+    ok?: boolean;
+    blocking_count?: number;
+    warning_count?: number;
+    findings?: { code: string; severity: string; message: string }[];
+    checklist?: { id: string; label: string; passed: boolean }[];
+  };
+  claim_warnings: string[];
+  send_guardrails: Record<string, unknown>;
+  versions_history: Record<string, unknown>[];
+  disclaimer: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface LetterDraftList {
+  items: LetterDraftSummary[];
+  templates: LetterDraftTemplateSummary[];
+}
+
+export async function listCaseLetterDrafts(caseId: string): Promise<LetterDraftList> {
+  return request<LetterDraftList>(apiPath(`/cases/${caseId}/letter-drafts`));
+}
+
+export async function createCaseLetterDraft(
+  caseId: string,
+  body: {
+    template_kind: LetterTemplateKind;
+    issue_source_id?: string | null;
+    account_id?: string | null;
+  },
+): Promise<LetterDraft> {
+  return request<LetterDraft>(apiPath(`/cases/${caseId}/letter-drafts`), {
+    method: 'POST',
+    body,
+  });
+}
+
+export async function getCaseLetterDraft(caseId: string, draftId: string): Promise<LetterDraft> {
+  return request<LetterDraft>(apiPath(`/cases/${caseId}/letter-drafts/${draftId}`));
+}
+
+export async function updateCaseLetterDraftSection(
+  caseId: string,
+  draftId: string,
+  sectionKey: string,
+  body: { body?: string; fact_classification?: LetterFactClassification },
+): Promise<LetterDraft> {
+  return request<LetterDraft>(
+    apiPath(`/cases/${caseId}/letter-drafts/${draftId}/sections/${sectionKey}`),
+    { method: 'PATCH', body },
+  );
+}
+
+export async function validateCaseLetterDraft(
+  caseId: string,
+  draftId: string,
+): Promise<LetterDraft> {
+  return request<LetterDraft>(apiPath(`/cases/${caseId}/letter-drafts/${draftId}/validate`), {
+    method: 'POST',
+  });
+}
+
+export async function advanceCaseLetterDraft(
+  caseId: string,
+  draftId: string,
+  targetStatus: LetterDraftWorkflowStatus,
+): Promise<LetterDraft> {
+  return request<LetterDraft>(apiPath(`/cases/${caseId}/letter-drafts/${draftId}/advance`), {
+    method: 'POST',
+    body: { target_status: targetStatus },
+  });
+}
+
+export async function markCaseLetterDraftSent(
+  caseId: string,
+  draftId: string,
+  note?: string,
+): Promise<LetterDraft> {
+  return request<LetterDraft>(apiPath(`/cases/${caseId}/letter-drafts/${draftId}/mark-sent`), {
+    method: 'POST',
+    body: { note: note ?? null },
+  });
+}
+
 export async function getCaseDisputeStrategy(caseId: string): Promise<CaseDisputeStrategy> {
   return request<CaseDisputeStrategy>(apiPath(`/cases/${caseId}/dispute-strategy`));
 }

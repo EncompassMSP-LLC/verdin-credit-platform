@@ -57,7 +57,7 @@ Ops contract: [`../lrp-enterprise/04-operations/business-ops-package/`](../lrp-e
 | 25    | LRP-208 Case issue explainability + evidence center   | M2/M4     | ✅     |
 | 26    | LRP-209 Consumer communication preferences            | M2/M4     | ✅     |
 | 27    | LRP-405 FAQ/KB retrieval bot                          | M4        | ✅     |
-| 28    | LRP-406 Letter draft augment (staff-gated)            | M4        | ☐      |
+| 28    | LRP-406 Letter draft augment (staff-gated)            | M4        | ✅     |
 | 29    | LRP-305 Planned marketing landings (`/builders` etc.) | M5        | ☐      |
 | 30    | LRP-501 Partner isolation audit                       | M6        | ☐      |
 | 31    | LRP-502 Automation audit events                       | M6        | ☐      |
@@ -281,6 +281,17 @@ Deferred to [product backlog](../lrp-enterprise/15-roadmap/product-backlog.md): 
 - Audience-aware answers; citations; injection/unsupported-claim refusals
 - CRM `/crm/faq-assistant`; migration `112_faq_kb_retrieval`
 - Tests: `apps/api/tests/llm/test_faq_kb_retrieval.py`
+
+### LRP-406 — Intelligent Letter Draft Builder (2026-07-29)
+
+- Template catalog (bureau/furnisher/CFPB/FTC/debt validation/goodwill/pay-for-delete/comm prefs/cease/mortgage explanation/custom)
+- Deterministic sectioned drafts with fact classifications + evidence refs from LRP-208 issue cards
+- Validation checklist blocks score guarantees / auto-removal promises; pay-for-delete requires “not guaranteed”
+- Workflow: `ai_draft_created` → staff/client review → approved → ready_to_send; `mark-sent` records external transmission only (`auto_transmit=false`)
+- `GET/POST /cases/{id}/letter-drafts`, section PATCH, validate, advance, mark-sent
+- Migration `113_letter_draft_bldr`; CRO + CRM panels; Generate letter on issue cards
+- Tests: `apps/api/tests/accounts/test_letter_draft_builder.py`
+- Next planned: LRP-305 marketing landings; deferred LRP-208A / LRP-209A remain queued
 
 ### Definition of Done (every slice)
 

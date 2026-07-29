@@ -1,13 +1,15 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ApiClientError,
+  createCaseLetterDraft,
   getCaseIssueExplainability,
   type FindingStrengthBand,
   type ImpactCategory,
   type IssueExplainabilityCard,
   type IssueExplainabilitySummary,
 } from '@verdin/api-client';
-import { Badge, Card } from '@verdin/ui';
+import { Badge, Button, Card } from '@verdin/ui';
+import { useState } from 'react';
 
 function strengthVariant(band: FindingStrengthBand): 'danger' | 'warning' | 'info' | 'default' {
   if (band === 'strong') return 'danger';
@@ -35,7 +37,30 @@ function SummaryBadges({ summary }: { summary: IssueExplainabilitySummary }) {
   );
 }
 
-function ExplainabilityCardRow({ card }: { card: IssueExplainabilityCard }) {
+function ExplainabilityCardRow({
+  caseId,
+  card,
+}: {
+  caseId: string;
+  card: IssueExplainabilityCard;
+}) {
+  const queryClient = useQueryClient();
+  const [message, setMessage] = useState<string | null>(null);
+  const generateMutation = useMutation({
+    mutationFn: () =>
+      createCaseLetterDraft(caseId, {
+        template_kind: 'bureau_dispute',
+        issue_source_id: card.source_id,
+      }),
+    onSuccess: (draft) => {
+      setMessage(`Draft created (${draft.workflow_status.replace(/_/g, ' ')}) — not sent.`);
+      void queryClient.invalidateQueries({ queryKey: ['case-letter-drafts', caseId] });
+      const el = document.getElementById('letter-draft-builder');
+      el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    },
+    onError: (err: Error) => setMessage(err.message),
+  });
+
   return (
     <li className="rounded-md border border-gray-200 px-4 py-3">
       <div className="flex flex-wrap items-start justify-between gap-2">
@@ -99,6 +124,23 @@ function ExplainabilityCardRow({ card }: { card: IssueExplainabilityCard }) {
           Recommended next action: {card.recommended_next_action}
         </p>
       </div>
+
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <Button
+          type="button"
+          size="sm"
+          variant="secondary"
+          onClick={() => {
+            setMessage(null);
+            generateMutation.mutate();
+          }}
+          loading={generateMutation.isPending}
+          disabled={generateMutation.isPending}
+        >
+          Generate letter draft
+        </Button>
+        {message ? <p className="text-xs text-gray-600">{message}</p> : null}
+      </div>
     </li>
   );
 }
@@ -123,7 +165,8 @@ export function CaseIssueExplainabilityPanel({
       <Card title="Issue explanation cards">
         <p className="text-sm text-gray-500">
           Plain-language explanations of detected issues with impact categories and evidence
-          recommendations. Advisory only — never estimates score-point changes.
+          recommendations. Advisory only — never estimates score-point changes. Generate letter
+          creates a staff-gated draft only (never auto-sent).
         </p>
 
         {explainQuery.isLoading ? (
@@ -141,22 +184,17 @@ export function CaseIssueExplainabilityPanel({
         ) : null}
 
         {explainQuery.data ? (
-          <div className="mt-4 space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <p className="text-sm text-gray-600">Strongest findings first</p>
-              <SummaryBadges summary={explainQuery.data.summary} />
-            </div>
-
-            <p className="rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-900">
+          <div className="mt-3 space-y-3">
+            <p className="rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-950">
               {explainQuery.data.disclaimer}
             </p>
-
+            <SummaryBadges summary={explainQuery.data.summary} />
             {explainQuery.data.cards.length === 0 ? (
               <p className="text-sm text-gray-500">No issues to explain yet.</p>
             ) : (
               <ul className="space-y-3">
                 {explainQuery.data.cards.map((card) => (
-                  <ExplainabilityCardRow key={card.source_id} card={card} />
+                  <ExplainabilityCardRow key={card.source_id} caseId={caseId} card={card} />
                 ))}
               </ul>
             )}
