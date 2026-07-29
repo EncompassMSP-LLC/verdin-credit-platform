@@ -71,6 +71,19 @@ async def other_cro_org(db_session: AsyncSession) -> Organization:
 
 
 @pytest.fixture
+async def second_partner_org(db_session: AsyncSession) -> Organization:
+    org = Organization(
+        id=uuid.uuid4(),
+        name="Second Realtor Partner Org",
+        slug=f"realtor-b-{uuid.uuid4().hex[:8]}",
+        is_active=True,
+    )
+    db_session.add(org)
+    await db_session.commit()
+    return org
+
+
+@pytest.fixture
 async def admin_user(db_session: AsyncSession, cro_org: Organization) -> User:
     user = User(
         id=uuid.uuid4(),

@@ -285,6 +285,7 @@ class MortgagePartnerService:
                 "realtor_partner_role",
                 "realtor_portal_auth",
                 "realtor_portal_mvp",
+                "partner_isolation_denial_suite",
             ],
             deferred_capabilities=[
                 "partner_jwt_realm",

@@ -59,7 +59,7 @@ Ops contract: [`../lrp-enterprise/04-operations/business-ops-package/`](../lrp-e
 | 27    | LRP-405 FAQ/KB retrieval bot                          | M4        | ✅     |
 | 28    | LRP-406 Letter draft augment (staff-gated)            | M4        | ✅     |
 | 29    | LRP-305 Planned marketing landings (`/builders` etc.) | M5        | ✅     |
-| 30    | LRP-501 Partner isolation audit                       | M6        | ☐      |
+| 30    | LRP-501 Partner isolation audit                       | M6        | ✅     |
 | 31    | LRP-502 Automation audit events                       | M6        | ☐      |
 | 32    | LRP-503 LRP smoke E2E in CI                           | M6        | ☐      |
 | 33    | LRP-504 Perf budgets                                  | M6        | ☐      |
@@ -297,7 +297,13 @@ Deferred to [product backlog](../lrp-enterprise/15-roadmap/product-backlog.md): 
 - Public audience pages: `/builders`, `/attorneys`, `/advisors` (+ `/financial-planners` → `/advisors`)
 - `/partners` hub chooser tiles for all audiences; footer audience links updated
 - Claim-safe copy only — no approval/funding/score guarantees; advisory disclaimer on heroes
-- Next planned: LRP-501 partner isolation audit; deferred LRP-208A / LRP-209A remain queued
+
+### LRP-501 — Partner isolation audit (2026-07-29)
+
+- Consolidated cross-tenant denial suite: `apps/api/tests/mortgage_partner/test_partner_isolation_denial_suite.py`
+- Covers appointments, automation rules, referral-intake orchestrator, access-audits list, foreign partnership surfaces, realtor partnership-scoped portal reads
+- Status capability `partner_isolation_denial_suite`; no new migration / no partner JWT (deferred)
+- Next planned: LRP-502 automation audit events; deferred LRP-208A / LRP-209A remain queued
 
 ### Definition of Done (every slice)
 
