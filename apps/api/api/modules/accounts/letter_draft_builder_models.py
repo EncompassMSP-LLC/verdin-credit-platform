@@ -14,7 +14,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from api.database.base import Base
 
 
-class LetterDraftWorkflowStatus(str, enum.Enum):
+class LetterDraftWorkflowStatus(enum.StrEnum):
     AI_DRAFT_CREATED = "ai_draft_created"
     STAFF_REVIEW = "staff_review"
     CLIENT_REVIEW = "client_review"
