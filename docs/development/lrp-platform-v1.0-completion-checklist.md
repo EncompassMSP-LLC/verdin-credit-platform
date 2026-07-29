@@ -62,7 +62,7 @@ Ops contract: [`../lrp-enterprise/04-operations/business-ops-package/`](../lrp-e
 | 30    | LRP-501 Partner isolation audit                       | M6        | ✅     |
 | 31    | LRP-502 Automation audit events                       | M6        | ✅     |
 | 32    | LRP-503 LRP smoke E2E in CI                           | M6        | ✅     |
-| 33    | LRP-504 Perf budgets                                  | M6        | ☐      |
+| 33    | LRP-504 Perf budgets                                  | M6        | ✅     |
 | 34    | LRP-505 Release notes + tag `lrp-platform-v1.0.0`     | M6        | ☐      |
 
 Deferred follow-ups (preserve queue; do not absorb informally):
@@ -317,7 +317,13 @@ Deferred to [product backlog](../lrp-enterprise/15-roadmap/product-backlog.md): 
 - `tests/e2e/test_lrp_smoke.py` — API smoke: status → partnership → referral → pipeline/dashboard → readiness → automation dry-run audit
 - CI: `ENABLE_MORTGAGE_PARTNER=true` on `.github/workflows/e2e.yml`; claim-safe disclaimer assertions
 - No unsupervised filing / live bureau / demo auth
-- Next planned: LRP-504 perf budgets; deferred LRP-208A / LRP-209A remain queued
+
+### LRP-504 — Perf budgets (2026-07-29)
+
+- Product p95 budgets for partner dashboard + readiness report/export ([lrp-v1-perf-budgets.md](../quality/performance/lrp-v1-perf-budgets.md))
+- Harness `measure_lrp_perf_budgets.py`; E2E workflow observe run + `lrp-perf-budgets` artifact
+- Soft CI ceilings only — hard enforcement deferred pending CI variance calibration
+- Next planned: LRP-505 release notes + tag `lrp-platform-v1.0.0`; deferred LRP-208A / LRP-209A remain queued
 
 ### Definition of Done (every slice)
 
