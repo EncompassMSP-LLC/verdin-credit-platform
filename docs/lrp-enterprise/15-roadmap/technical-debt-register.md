@@ -20,7 +20,7 @@ Known shortcuts and refactoring tasks. Pay down during related feature work or d
 | TD-006 | Marketing landings vs authenticated portals not clearly separated in nav | S4       | UX         | IA pass in M4/M5                                               |
 | TD-007 | Large demo datasets in client bundles                                    | S3       | Perf       | Code-split; strip from prod builds                             |
 | TD-008 | Checklist/exit criteria still open on v29.0 governance row               | S3       | Docs       | Close capability matrix sign-off                               |
-| TD-009 | E2E coverage thin for LRP happy paths                                    | S2       | QA         | LRP-503 smoke suite                                            |
+| TD-009 | E2E coverage thin for LRP happy paths                                    | S2       | QA         | LRP-503 smoke suite ✅                                         |
 | TD-010 | Section 14 jobs not yet in worker registry                               | S2       | Worker     | M3 automation slices                                           |
 
 ---
