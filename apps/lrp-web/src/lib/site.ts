@@ -55,8 +55,11 @@ export const footerNav = {
   ],
   audiences: [
     { href: '/lenders', label: 'For lenders' },
-    { href: '/partners', label: 'For operators' },
+    { href: '/partners', label: 'Partners hub' },
     { href: '/realtors', label: 'For realtors' },
+    { href: '/builders', label: 'For builders' },
+    { href: '/attorneys', label: 'For attorneys' },
+    { href: '/advisors', label: 'For advisors' },
     { href: '/borrowers', label: 'For borrowers' },
   ],
   company: [

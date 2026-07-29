@@ -57,7 +57,7 @@ Phase 3 companion: [`19-website-landing-pages.md`](../../../build-bible/volumes/
 
 ---
 
-## 4. Builder — `/builders` (planned)
+## 4. Builder — `/builders` (shipped)
 
 | Element  | Spec                                                                                                       |
 | -------- | ---------------------------------------------------------------------------------------------------------- |
@@ -69,7 +69,7 @@ Phase 3 companion: [`19-website-landing-pages.md`](../../../build-bible/volumes/
 
 ---
 
-## 5. Attorney — `/attorneys` (planned)
+## 5. Attorney — `/attorneys` (shipped)
 
 | Element  | Spec                                                                                                                      |
 | -------- | ------------------------------------------------------------------------------------------------------------------------- |
@@ -81,7 +81,7 @@ Phase 3 companion: [`19-website-landing-pages.md`](../../../build-bible/volumes/
 
 ---
 
-## 6. Financial planner / insurance — `/advisors` (planned)
+## 6. Financial planner / insurance — `/advisors` (shipped)
 
 | Element  | Spec                                                                                                    |
 | -------- | ------------------------------------------------------------------------------------------------------- |

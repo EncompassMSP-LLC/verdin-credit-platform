@@ -58,7 +58,7 @@ Ops contract: [`../lrp-enterprise/04-operations/business-ops-package/`](../lrp-e
 | 26    | LRP-209 Consumer communication preferences            | M2/M4     | ✅     |
 | 27    | LRP-405 FAQ/KB retrieval bot                          | M4        | ✅     |
 | 28    | LRP-406 Letter draft augment (staff-gated)            | M4        | ✅     |
-| 29    | LRP-305 Planned marketing landings (`/builders` etc.) | M5        | ☐      |
+| 29    | LRP-305 Planned marketing landings (`/builders` etc.) | M5        | ✅     |
 | 30    | LRP-501 Partner isolation audit                       | M6        | ☐      |
 | 31    | LRP-502 Automation audit events                       | M6        | ☐      |
 | 32    | LRP-503 LRP smoke E2E in CI                           | M6        | ☐      |
@@ -291,7 +291,13 @@ Deferred to [product backlog](../lrp-enterprise/15-roadmap/product-backlog.md): 
 - `GET/POST /cases/{id}/letter-drafts`, section PATCH, validate, advance, mark-sent
 - Migration `113_letter_draft_bldr`; CRO + CRM panels; Generate letter on issue cards
 - Tests: `apps/api/tests/accounts/test_letter_draft_builder.py`
-- Next planned: LRP-305 marketing landings; deferred LRP-208A / LRP-209A remain queued
+
+### LRP-305 — Planned marketing landings (2026-07-29)
+
+- Public audience pages: `/builders`, `/attorneys`, `/advisors` (+ `/financial-planners` → `/advisors`)
+- `/partners` hub chooser tiles for all audiences; footer audience links updated
+- Claim-safe copy only — no approval/funding/score guarantees; advisory disclaimer on heroes
+- Next planned: LRP-501 partner isolation audit; deferred LRP-208A / LRP-209A remain queued
 
 ### Definition of Done (every slice)
 
