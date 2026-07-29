@@ -2,12 +2,14 @@
 
 import {
   ApiClientError,
+  createCaseLetterDraft,
   getCaseIssueExplainability,
   type FindingStrengthBand,
   type ImpactCategory,
   type IssueExplainabilityCard,
 } from '@verdin/api-client';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 
 import { useCrmAuth } from '@/lib/crm/auth';
 
@@ -20,7 +22,26 @@ function strengthLabel(band: FindingStrengthBand): string {
   return band.replace(/_/g, ' ');
 }
 
-function CardBlock({ card }: { card: IssueExplainabilityCard }) {
+function CardBlock({ caseId, card }: { caseId: string; card: IssueExplainabilityCard }) {
+  const queryClient = useQueryClient();
+  const [message, setMessage] = useState<string | null>(null);
+  const generateMutation = useMutation({
+    mutationFn: () =>
+      createCaseLetterDraft(caseId, {
+        template_kind: 'bureau_dispute',
+        issue_source_id: card.source_id,
+      }),
+    onSuccess: (draft) => {
+      setMessage(`Draft created (${draft.workflow_status.replace(/_/g, ' ')}) — not sent.`);
+      void queryClient.invalidateQueries({ queryKey: ['crm', 'case-letter-drafts', caseId] });
+      document.getElementById('letter-draft-builder')?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    },
+    onError: (err: Error) => setMessage(err.message),
+  });
+
   return (
     <article className="rounded-md border border-navy-900/10 bg-slate-50 p-3">
       <div className="flex flex-wrap items-start justify-between gap-2">
@@ -75,6 +96,20 @@ function CardBlock({ card }: { card: IssueExplainabilityCard }) {
         </div>
       </dl>
       <p className="mt-2 text-xs text-slate-500">{card.recommended_next_action}</p>
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          className="rounded border border-navy-900/20 bg-white px-2 py-1 text-xs font-medium text-navy-900 disabled:opacity-50"
+          disabled={generateMutation.isPending}
+          onClick={() => {
+            setMessage(null);
+            generateMutation.mutate();
+          }}
+        >
+          {generateMutation.isPending ? 'Generating…' : 'Generate letter draft'}
+        </button>
+        {message ? <p className="text-xs text-slate-600">{message}</p> : null}
+      </div>
     </article>
   );
 }
@@ -151,7 +186,7 @@ export function CrmIssueExplainabilityPanel({ caseId }: Props) {
           ) : (
             <div className="space-y-3">
               {query.data.cards.map((card) => (
-                <CardBlock key={card.source_id} card={card} />
+                <CardBlock key={card.source_id} caseId={caseId} card={card} />
               ))}
             </div>
           )}
