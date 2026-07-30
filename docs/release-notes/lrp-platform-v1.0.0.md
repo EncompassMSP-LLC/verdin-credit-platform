@@ -44,8 +44,8 @@ This tag is the implementation closeout for the V1.0 slice list. Formal security
 
 | ID        | Item                                   | Notes                                                                                                 |
 | --------- | -------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| LRP-208A  | Evidence vault depth                   | Queued; do not absorb informally                                                                      |
-| LRP-209A  | Deeper DNC / preference automation     | Queued; do not absorb informally                                                                      |
+| LRP-208A  | Evidence vault depth                   | ✅ Delivered in [`lrp-platform-v1.1.0`](lrp-platform-v1.1.0.md) (#414 / #415)                         |
+| LRP-209A  | Unwanted-call complaint workflow       | ✅ Delivered in [`lrp-platform-v1.1.0`](lrp-platform-v1.1.0.md) (#416)                                |
 | Ops       | Formal security review sign-off        | Package ready — signature open ([sign-off](../quality/security/lrp-v1.0-security-officer-signoff.md)) |
 | Ops       | LRP edition DR / backup runbook        | Drafted — restore drill open ([runbook](../deployment/lrp-v1.0-disaster-recovery-runbook.md))         |
 | Hardening | Post-release checklist                 | [`lrp-v1.0-post-release-hardening.md`](../development/lrp-v1.0-post-release-hardening.md)             |

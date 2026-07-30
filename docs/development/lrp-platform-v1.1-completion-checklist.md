@@ -4,13 +4,26 @@ Post–V1.0 product depth on the shared monorepo (edition, not fork). Continue t
 
 **Prior release:** [`lrp-platform-v1.0.0`](../release-notes/lrp-platform-v1.0.0.md) · Hardening: [`lrp-v1.0-post-release-hardening.md`](lrp-v1.0-post-release-hardening.md)
 
+**Release:** [`lrp-platform-v1.1.0`](../release-notes/lrp-platform-v1.1.0.md) · Tag / GitHub Release: `lrp-platform-v1.1.0`
+
+## Exit criteria for "LRP Platform V1.1 done"
+
+- [x] Ordered slices LRP-208A → LRP-208B → LRP-209A merged to `main`
+- [x] Capability matrix + API reference updated for V1.1 surfaces
+- [x] No automatic complaint submission; eligibility remains advisory
+- [x] Release notes + tag `lrp-platform-v1.1.0`
+- [x] Smoke validation (API slice tests + CI green on #414–#416)
+
+Deferred timeline lifecycle emits (draft workflow, delivery confirmation, issue detected/resolved) stay **out of scope** unless a real operator workflow gap appears.
+
 ## Ordered slices
 
-| Order | ID       | Slice                                                       | Status |
-| ----- | -------- | ----------------------------------------------------------- | ------ |
-| 1     | LRP-208A | Evidence vault document↔issue association                   | ✅     |
-| 2     | LRP-208B | Case action timeline panel (reuse `GET /timeline?case_id=`) | ✅     |
-| 3     | LRP-209A | Unwanted-call complaint workflow + follow-up tracking       | ✅     |
+| Order | ID       | Slice                                                       | Status | PR   |
+| ----- | -------- | ----------------------------------------------------------- | ------ | ---- |
+| 1     | LRP-208A | Evidence vault document↔issue association                   | ✅     | #414 |
+| 2     | LRP-208B | Case action timeline panel (reuse `GET /timeline?case_id=`) | ✅     | #415 |
+| 3     | LRP-209A | Unwanted-call complaint workflow + follow-up tracking       | ✅     | #416 |
+| —     | Closeout | Release notes + tag `lrp-platform-v1.1.0`                   | ✅     | —    |
 
 ## Ranking notes
 
@@ -42,3 +55,9 @@ Post–V1.0 product depth on the shared monorepo (edition, not fork). Continue t
 - Timeline emits `UNWANTED_CALL_INCIDENT_RECORDED` / `UNWANTED_CALL_INCIDENT_UPDATED`
 - CRM panel next to communication preferences; never auto-submits to FTC/CFPB/DNC
 - Explicit non-goals: silent registry registration, liability conclusions, auto-transmit letters
+
+## Closeout — Release notes + tag (2026-07-30)
+
+- Release notes: [`docs/release-notes/lrp-platform-v1.1.0.md`](../release-notes/lrp-platform-v1.1.0.md)
+- Git tag / GitHub Release: `lrp-platform-v1.1.0`
+- Ordered backlog `208A → 208B → 209A` complete; do not expand deferred timeline enrichments without demonstrated need
