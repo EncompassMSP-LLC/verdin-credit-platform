@@ -6,6 +6,7 @@ import httpx
 
 from tests.e2e.helpers.artifacts import ArtifactCollector
 from tests.e2e.helpers.assertions import expect_ok
+from tests.e2e.helpers.readiness import wait_for_account_visible
 from tests.e2e.helpers.wait_for_worker import poll_until
 
 
@@ -20,6 +21,14 @@ def run_dispute_letter_lifecycle(
 ) -> None:
     """Exercise dispute draft through CRA outcome for an existing account."""
     label = f"{label_prefix}dispute"
+
+    wait_for_account_visible(
+        http,
+        headers,
+        account_id,
+        artifacts=artifacts,
+        label=f"{label}_account_ready",
+    )
 
     draft = expect_ok(
         http.get(

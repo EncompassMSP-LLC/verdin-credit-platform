@@ -71,6 +71,8 @@ def test_messaging_center_status_payload() -> None:
     assert status.thread_per_case is True
     assert "portal_client_messages" in status.capabilities
     assert "portal_web_push" in status.capabilities
+    assert "attachment_support" in status.capabilities
+    assert "attachment_support" not in status.deferred_capabilities
 
 
 def test_get_messaging_status(api_client: TestClient, readonly_headers: dict[str, str]) -> None:

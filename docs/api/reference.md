@@ -268,7 +268,20 @@ Borrower in-app notification feed (LRP-302A). Separate from staff `/notification
 | GET    | `/cases/{case_id}/message-thread`          | read_only    | List case message thread (empty if none) |
 | POST   | `/cases/{case_id}/message-thread/messages` | case_manager | Post a staff reply (creates thread)      |
 
-Staff replies require the case to be linked to a client (`client_id`). Real-time push, attachments, and email bridge are deferred to 5.0+.
+Staff replies require the case to be linked to a client (`client_id`). Real-time websocket and email bridge remain deferred. Message attachments (LRP-302B) are supported with policy scan + authenticated download.
+
+Secure messaging attachments reuse the documents store. Draft uploads are scanned (MIME/extension/magic; `MESSAGE_ATTACHMENT_SCAN_MODE=policy|required`). Only `clean` attachments can be associated on send. Downloads stream via authenticated endpoints (`Cache-Control: private, no-store`) — never public/presigned URLs. Fail-closed when scan mode is `required` and no external engine is configured.
+
+| Method | Path                                                               | Auth         | Description                          |
+| ------ | ------------------------------------------------------------------ | ------------ | ------------------------------------ |
+| POST   | `/portal/cases/{id}/messages/attachments`                          | portal JWT   | Upload + scan draft attachment       |
+| DELETE | `/portal/cases/{id}/messages/attachments/{attachment_id}`          | portal JWT   | Remove draft attachment before send  |
+| GET    | `/portal/cases/{id}/messages/attachments/{attachment_id}/download` | portal JWT   | Download clean delivered attachment  |
+| POST   | `/cases/{id}/message-thread/attachments`                           | case_manager | Staff upload + scan draft attachment |
+| DELETE | `/cases/{id}/message-thread/attachments/{attachment_id}`           | case_manager | Remove staff draft attachment        |
+| GET    | `/cases/{id}/message-thread/attachments/{attachment_id}/download`  | read_only    | Download clean delivered attachment  |
+
+`POST …/messages` accepts optional `attachment_ids[]` (max 5) and `idempotency_key`. Message list responses include `attachments[]` metadata (`scan_status`, `downloadable`).
 
 ## Accounts
 

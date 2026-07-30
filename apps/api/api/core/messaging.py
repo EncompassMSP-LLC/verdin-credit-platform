@@ -8,13 +8,14 @@ _MESSAGING_CAPABILITIES = [
     "staff_replies",
     "org_scoped_message_history",
     "portal_web_push",
+    "attachment_support",
 ]
 
 _DEFERRED_CAPABILITIES = [
     "websocket_live_feed",
     "email_bridge",
-    "attachment_support",
     "message_encryption_at_rest",
+    "external_malware_engine",
 ]
 
 

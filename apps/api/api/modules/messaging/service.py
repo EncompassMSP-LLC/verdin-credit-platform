@@ -14,6 +14,7 @@ from api.modules.cases.models import Case
 from api.modules.cases.repository import CaseRepository
 from api.modules.client_portal.models import ClientPortalUser
 from api.modules.client_portal.push_dispatcher import dispatch_staff_message_push
+from api.modules.messaging.attachment_service import MessageAttachmentService
 from api.modules.messaging.models import (
     MessageSenderRole,
     MessageThread,
@@ -24,6 +25,7 @@ from api.modules.messaging.permissions import MESSAGE_READ_ROLE, MESSAGE_WRITE_R
 from api.modules.messaging.repository import MessagingRepository
 from api.modules.messaging.schemas import (
     CaseMessageThreadResponse,
+    MessageAttachmentResponse,
     MessageCreate,
     MessagingCenterStatusResponse,
     ThreadMessageResponse,
@@ -37,14 +39,21 @@ class MessagingService:
         messaging_repo: MessagingRepository,
         case_repo: CaseRepository,
         session: AsyncSession | None = None,
+        attachment_service: MessageAttachmentService | None = None,
     ) -> None:
         self._messaging = messaging_repo
         self._cases = case_repo
         self._session = session
+        self._attachments = attachment_service
 
     @classmethod
     def from_session(cls, session: AsyncSession) -> "MessagingService":
-        return cls(MessagingRepository(session), CaseRepository(session), session=session)
+        return cls(
+            MessagingRepository(session),
+            CaseRepository(session),
+            session=session,
+            attachment_service=MessageAttachmentService.from_session(session),
+        )
 
     def _require_organization(self, user: User) -> uuid.UUID:
         if user.organization_id is None:
@@ -115,6 +124,43 @@ class MessagingService:
         apply_audit_on_create(thread, created_by_id)
         return await self._messaging.create_thread(thread)
 
+    async def _thread_response(
+        self,
+        *,
+        case_id: uuid.UUID,
+        thread: MessageThread | None,
+        messages: list[ThreadMessage],
+        organization_id: uuid.UUID,
+    ) -> CaseMessageThreadResponse:
+        attachment_map: dict[uuid.UUID, list[MessageAttachmentResponse]] = {}
+        if self._attachments is not None and messages:
+            attachment_map = await self._attachments.attachments_for_messages(
+                messages,
+                organization_id=organization_id,
+            )
+        responses = [
+            ThreadMessageResponse.from_model(
+                message,
+                attachments=attachment_map.get(message.id, []),
+            )
+            for message in messages
+        ]
+        return CaseMessageThreadResponse.from_thread(
+            case_id=case_id,
+            thread=thread,
+            messages=responses,
+        )
+
+    async def _message_response(self, message: ThreadMessage) -> ThreadMessageResponse:
+        attachments = []
+        if self._attachments is not None and self._session is not None:
+            attachment_map = await self._attachments.attachments_for_messages(
+                [message],
+                organization_id=message.organization_id,
+            )
+            attachments = attachment_map.get(message.id, [])
+        return ThreadMessageResponse.from_model(message, attachments=attachments)
+
     async def get_status(self, user: User) -> MessagingCenterStatusResponse:
         self._require_read(user)
         self._require_organization(user)
@@ -134,10 +180,11 @@ class MessagingService:
             messages = await self._messaging.list_messages(
                 thread.id, organization_id=organization_id
             )
-        return CaseMessageThreadResponse.from_thread(
+        return await self._thread_response(
             case_id=case_id,
             thread=thread,
             messages=messages,
+            organization_id=organization_id,
         )
 
     async def post_staff_message(
@@ -154,6 +201,15 @@ class MessagingService:
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail="Case must be linked to a client before messaging",
             )
+
+        if data.idempotency_key:
+            existing = await self._messaging.get_message_by_idempotency(
+                organization_id=organization_id,
+                idempotency_key=data.idempotency_key,
+                staff_user_id=user.id,
+            )
+            if existing is not None:
+                return await self._message_response(existing)
 
         thread = await self._get_or_create_thread(
             organization_id=organization_id,
@@ -173,10 +229,21 @@ class MessagingService:
             sender_role=MessageSenderRole.STAFF,
             staff_user_id=user.id,
             body=data.body,
+            idempotency_key=data.idempotency_key,
         )
         message = await self._messaging.create_message(message)
         apply_audit_on_update(thread, user.id)
         await self._messaging.save_thread(thread)
+
+        associated = []
+        if self._attachments is not None and data.attachment_ids:
+            associated = await self._attachments.associate_clean_attachments(
+                organization_id=organization_id,
+                client_id=case.client_id,
+                case_id=case.id,
+                message_id=message.id,
+                attachment_ids=data.attachment_ids,
+            )
 
         if self._session is not None:
             await publish_platform_event(
@@ -192,9 +259,16 @@ class MessagingService:
                 title="New message from your case team",
                 body_preview=data.body[:500],
             )
+            if self._attachments is not None:
+                await self._attachments.notify_borrower_of_staff_message(
+                    organization_id=organization_id,
+                    client_id=case.client_id,
+                    case_id=case.id,
+                    attachment_count=len(associated),
+                )
             await self._session.commit()
 
-        return ThreadMessageResponse.from_model(message)
+        return await self._message_response(message)
 
     async def get_portal_case_thread(
         self,
@@ -211,10 +285,11 @@ class MessagingService:
             messages = await self._messaging.list_messages(
                 thread.id, organization_id=organization_id
             )
-        return CaseMessageThreadResponse.from_thread(
+        return await self._thread_response(
             case_id=case_id,
             thread=thread,
             messages=messages,
+            organization_id=organization_id,
         )
 
     async def post_portal_message(
@@ -226,6 +301,15 @@ class MessagingService:
         organization_id = portal_user.organization_id
         case = await self._get_case(case_id, organization_id)
         client_id = await self._resolve_client_id(case, portal_user.client_id)
+
+        if data.idempotency_key:
+            existing = await self._messaging.get_message_by_idempotency(
+                organization_id=organization_id,
+                idempotency_key=data.idempotency_key,
+                portal_user_id=portal_user.id,
+            )
+            if existing is not None:
+                return await self._message_response(existing)
 
         thread = await self._get_or_create_thread(
             organization_id=organization_id,
@@ -244,9 +328,19 @@ class MessagingService:
             sender_role=MessageSenderRole.PORTAL_CLIENT,
             portal_user_id=portal_user.id,
             body=data.body,
+            idempotency_key=data.idempotency_key,
         )
         message = await self._messaging.create_message(message)
         await self._messaging.save_thread(thread)
+
+        if self._attachments is not None and data.attachment_ids:
+            await self._attachments.associate_clean_attachments(
+                organization_id=organization_id,
+                client_id=client_id,
+                case_id=case.id,
+                message_id=message.id,
+                attachment_ids=data.attachment_ids,
+            )
 
         if self._session is not None:
             await publish_platform_event(
@@ -255,4 +349,4 @@ class MessagingService:
             )
             await self._session.commit()
 
-        return ThreadMessageResponse.from_model(message)
+        return await self._message_response(message)

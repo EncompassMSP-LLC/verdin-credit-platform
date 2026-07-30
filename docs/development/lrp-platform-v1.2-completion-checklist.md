@@ -22,8 +22,8 @@ Extend the **existing** borrower client portal (`/portal/*` + `/api/v1/portal/*`
 | ----- | -------- | ------------------------------------------------ | ------ | ------- |
 | 1     | LRP-301A | Portal self-serve password reset                 | ✅     | #420    |
 | 2     | LRP-301B | Portal invite email on staff provision           | ✅     | #421    |
-| 3     | LRP-302A | Dedicated portal notifications feed + read state | ✅     | this PR |
-| 4     | LRP-302B | Portal message attachments (staff-gated)         | ☐      | —       |
+| 3     | LRP-302A | Dedicated portal notifications feed + read state | ✅     | #422    |
+| 4     | LRP-302B | Portal message attachments (staff-gated)         | ✅     | this PR |
 | 5     | LRP-303A | Borrower dashboard UX polish (Vol 19 parity)     | ☐      | —       |
 | 6     | LRP-303B | Progress / checklist empty-states + deep links   | ☐      | —       |
 | —     | Closeout | Release notes + tag `lrp-platform-v1.2.0`        | ☐      | —       |
@@ -65,4 +65,13 @@ Extend the **existing** borrower client portal (`/portal/*` + `/api/v1/portal/*`
 - lrp-web `/portal/notifications` page + shell unread badge; optimistic mark-read with rollback
 - Deep links sanitized to relative `/portal/*`; no staff metadata on responses
 - Mark-read idempotent; no per-read audit noise (creation audited via matrix dispatches)
+- Status: **shipped** (#422)
+
+### LRP-302B — Portal message attachments
+
+- Migration `119_message_attachments` (`thread_message_attachments` + message `idempotency_key`)
+- Policy scan (`pending|clean|rejected|failed`); `MESSAGE_ATTACHMENT_SCAN_MODE=policy` default; `required` fails closed
+- Portal + staff upload/delete draft + authenticated download; send with `attachment_ids`
+- Reuses documents storage; no public URLs; rate-limited uploads; cross-client isolation
+- UI: borrower `/portal/messages` + staff `CaseMessageThreadPanel` attach chips
 - Status: **this PR**

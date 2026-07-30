@@ -53,6 +53,19 @@ class Settings(BaseSettings):
     minio_secure: bool = False
 
     document_max_upload_bytes: int = 25 * 1024 * 1024
+    message_attachment_scan_mode: Literal["policy", "required"] = Field(
+        default="policy",
+        description=(
+            "MESSAGE_ATTACHMENT_SCAN_MODE — policy validates MIME/extension/magic; "
+            "required fails closed until an external malware engine is configured"
+        ),
+    )
+    message_attachment_upload_limit_per_hour: int = Field(
+        default=20,
+        ge=1,
+        le=200,
+        description="MESSAGE_ATTACHMENT_UPLOAD_LIMIT_PER_HOUR — per-actor upload rate limit",
+    )
 
     cors_origins: str = "http://localhost:5173,http://localhost:3000"
     public_app_url: str = "http://localhost:8080"

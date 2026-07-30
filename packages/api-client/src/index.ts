@@ -667,11 +667,16 @@ export {
   getCaseMessageThread,
   getMessagingCenterStatus,
   postCaseMessageThreadReply,
+  uploadCaseMessageAttachment,
+  deleteCaseMessageAttachment,
+  caseMessageAttachmentDownloadUrl,
   type CaseMessageThread,
   type MessagingCenterStatus,
   type SendMessageInput,
   type ThreadMessage,
   type MessageSenderRole,
+  type MessageAttachment,
+  type MessageAttachmentScanStatus,
 } from './messaging';
 
 export {
@@ -1076,6 +1081,9 @@ export {
   provisionClientPortalUser,
   resendClientPortalInvite,
   sendPortalCaseMessage,
+  uploadPortalMessageAttachment,
+  deletePortalMessageAttachment,
+  portalMessageAttachmentDownloadUrl,
   signPortalCaseConsent,
   subscribePortalPush,
   unsubscribePortalPush,
