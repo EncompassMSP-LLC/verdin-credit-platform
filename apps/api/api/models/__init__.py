@@ -7,6 +7,7 @@ from api.modules.auth.models import Organization, OrganizationType, User
 from api.modules.cases.models import Case, CasePriority, CaseStage, CaseStatus
 from api.modules.client_portal.models import ClientPortalUser
 from api.modules.clients.models import Client, ClientContact, ClientStatus, ContactRelationship
+from api.modules.clients.unwanted_call_models import UnwantedCallIncident
 from api.modules.documents.issue_evidence_link_models import (
     IssueEvidenceLink,
     IssueEvidenceLinkRole,
@@ -48,6 +49,7 @@ __all__ = [
     "DisputeLetterStatus",
     "IssueEvidenceLink",
     "IssueEvidenceLinkRole",
+    "UnwantedCallIncident",
     "Notification",
     "NotificationCategory",
     "Organization",

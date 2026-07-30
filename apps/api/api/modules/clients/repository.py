@@ -27,6 +27,7 @@ from api.modules.clients.schemas import (
     ContactSortField,
     ContactSortOrder,
 )
+from api.modules.clients.unwanted_call_models import UnwantedCallIncident
 from api.modules.documents.models import Document
 from api.modules.tasks.models import Task
 from api.modules.timeline.models import Communication
@@ -355,3 +356,56 @@ class ClientRepository:
     ) -> ClientCommunicationPreferences:
         await self._session.flush()
         return prefs
+
+    async def get_unwanted_call_incident(
+        self,
+        incident_id: uuid.UUID,
+        *,
+        organization_id: uuid.UUID,
+        client_id: uuid.UUID,
+    ) -> UnwantedCallIncident | None:
+        result = await self._session.execute(
+            select(UnwantedCallIncident).where(
+                UnwantedCallIncident.id == incident_id,
+                UnwantedCallIncident.organization_id == organization_id,
+                UnwantedCallIncident.client_id == client_id,
+                UnwantedCallIncident.deleted_at.is_(None),
+            )
+        )
+        return result.scalar_one_or_none()
+
+    async def list_unwanted_call_incidents(
+        self,
+        *,
+        organization_id: uuid.UUID,
+        client_id: uuid.UUID,
+        status: str | None = None,
+    ) -> list[UnwantedCallIncident]:
+        query = (
+            select(UnwantedCallIncident)
+            .where(
+                UnwantedCallIncident.organization_id == organization_id,
+                UnwantedCallIncident.client_id == client_id,
+                UnwantedCallIncident.deleted_at.is_(None),
+            )
+            .order_by(UnwantedCallIncident.called_at.desc())
+        )
+        if status is not None:
+            query = query.where(UnwantedCallIncident.status == status)
+        result = await self._session.execute(query)
+        return list(result.scalars().all())
+
+    async def add_unwanted_call_incident(
+        self,
+        incident: UnwantedCallIncident,
+    ) -> UnwantedCallIncident:
+        self._session.add(incident)
+        await self._session.flush()
+        return incident
+
+    async def save_unwanted_call_incident(
+        self,
+        incident: UnwantedCallIncident,
+    ) -> UnwantedCallIncident:
+        await self._session.flush()
+        return incident

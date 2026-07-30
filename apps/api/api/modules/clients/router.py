@@ -45,6 +45,10 @@ from api.modules.clients.schemas import (
     ClientUpdate,
     ContactSortField,
     ContactSortOrder,
+    UnwantedCallIncidentCreate,
+    UnwantedCallIncidentListResponse,
+    UnwantedCallIncidentResponse,
+    UnwantedCallIncidentUpdate,
 )
 from api.modules.clients.service import ClientService
 from api.modules.documents.schemas import DocumentResponse
@@ -210,6 +214,79 @@ async def mark_client_dnc_completed(
     service: ClientService = Depends(get_client_service),
 ) -> ClientCommunicationPreferencesResponse:
     return await service.mark_dnc_completed(current_user, client_id)
+
+
+@router.get(
+    "/{client_id}/unwanted-call-incidents",
+    response_model=UnwantedCallIncidentListResponse,
+)
+async def list_unwanted_call_incidents(
+    client_id: uuid.UUID,
+    status_filter: str | None = Query(default=None, alias="status", max_length=64),
+    current_user: User = Depends(get_current_user),
+    service: ClientService = Depends(get_client_service),
+) -> UnwantedCallIncidentListResponse:
+    """List unwanted-call incidents (LRP-209A). Staff-mediated; never auto-submitted."""
+    return await service.list_unwanted_call_incidents(
+        current_user,
+        client_id,
+        status=status_filter,
+    )
+
+
+@router.post(
+    "/{client_id}/unwanted-call-incidents",
+    response_model=UnwantedCallIncidentResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_unwanted_call_incident(
+    client_id: uuid.UUID,
+    body: UnwantedCallIncidentCreate,
+    current_user: User = Depends(get_current_user),
+    service: ClientService = Depends(get_client_service),
+) -> UnwantedCallIncidentResponse:
+    """Record an unwanted-call incident with advisory eligibility + draft (LRP-209A)."""
+    return await service.create_unwanted_call_incident(current_user, client_id, body)
+
+
+@router.get(
+    "/{client_id}/unwanted-call-incidents/{incident_id}",
+    response_model=UnwantedCallIncidentResponse,
+)
+async def get_unwanted_call_incident(
+    client_id: uuid.UUID,
+    incident_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: ClientService = Depends(get_client_service),
+) -> UnwantedCallIncidentResponse:
+    return await service.get_unwanted_call_incident(current_user, client_id, incident_id)
+
+
+@router.patch(
+    "/{client_id}/unwanted-call-incidents/{incident_id}",
+    response_model=UnwantedCallIncidentResponse,
+)
+async def update_unwanted_call_incident(
+    client_id: uuid.UUID,
+    incident_id: uuid.UUID,
+    body: UnwantedCallIncidentUpdate,
+    current_user: User = Depends(get_current_user),
+    service: ClientService = Depends(get_client_service),
+) -> UnwantedCallIncidentResponse:
+    return await service.update_unwanted_call_incident(current_user, client_id, incident_id, body)
+
+
+@router.delete(
+    "/{client_id}/unwanted-call-incidents/{incident_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def delete_unwanted_call_incident(
+    client_id: uuid.UUID,
+    incident_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: ClientService = Depends(get_client_service),
+) -> None:
+    await service.delete_unwanted_call_incident(current_user, client_id, incident_id)
 
 
 @router.get("/{client_id}/accounts", response_model=PaginatedResponse[AccountResponse])

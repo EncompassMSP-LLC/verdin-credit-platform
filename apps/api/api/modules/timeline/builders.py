@@ -475,6 +475,72 @@ def issue_evidence_removed_event(
     )
 
 
+def unwanted_call_incident_recorded_event(
+    *,
+    incident: Any,
+    performed_by: uuid.UUID,
+) -> PlatformEvent:
+    return PlatformEvent(
+        event_type="UNWANTED_CALL_INCIDENT_RECORDED",
+        event_category=EventCategory.CASE.value,
+        title="Unwanted call incident recorded",
+        description=(
+            f"Staff recorded an unwanted {incident.channel.value} call "
+            f"({incident.party_type.value})."
+        ),
+        organization_id=incident.organization_id,
+        case_id=incident.case_id,
+        account_id=incident.account_id,
+        document_id=incident.evidence_document_id,
+        performed_by=performed_by,
+        source_module="clients",
+        metadata={
+            "incident_id": str(incident.id),
+            "client_id": str(incident.client_id),
+            "channel": incident.channel.value,
+            "party_type": incident.party_type.value,
+            "called_at": incident.called_at.isoformat(),
+            "status": incident.status.value,
+            "source_record_type": "unwanted_call_incident",
+            "source_record_id": str(incident.id),
+            "actor_type": "staff",
+        },
+    )
+
+
+def unwanted_call_incident_updated_event(
+    *,
+    incident: Any,
+    performed_by: uuid.UUID,
+    previous_status: str,
+) -> PlatformEvent:
+    return PlatformEvent(
+        event_type="UNWANTED_CALL_INCIDENT_UPDATED",
+        event_category=EventCategory.CASE.value,
+        title="Unwanted call incident updated",
+        description=(f"Unwanted-call incident status {previous_status} → {incident.status.value}."),
+        organization_id=incident.organization_id,
+        case_id=incident.case_id,
+        account_id=incident.account_id,
+        document_id=incident.evidence_document_id,
+        performed_by=performed_by,
+        source_module="clients",
+        metadata={
+            "incident_id": str(incident.id),
+            "client_id": str(incident.client_id),
+            "previous_status": previous_status,
+            "status": incident.status.value,
+            "follow_up_due_at": (
+                incident.follow_up_due_at.isoformat() if incident.follow_up_due_at else None
+            ),
+            "external_submission_status": incident.external_submission_status.value,
+            "source_record_type": "unwanted_call_incident",
+            "source_record_id": str(incident.id),
+            "actor_type": "staff",
+        },
+    )
+
+
 def portal_document_uploaded_event(
     document: Document,
     *,
