@@ -54,6 +54,8 @@ class MatrixDispatchContext:
     borrower_user_id: uuid.UUID | None = None
     borrower_email: str | None = None
     borrower_name: str | None = None
+    borrower_portal_user_id: uuid.UUID | None = None
+    client_id: uuid.UUID | None = None
     realtor_user_id: uuid.UUID | None = None
     realtor_email: str | None = None
     partner_user_ids: list[uuid.UUID] = field(default_factory=list)
@@ -235,6 +237,17 @@ class NotificationMatrixDispatcher:
         results: list[dict[str, Any]] = []
         for channel in sorted(channels, key=lambda c: c.value):
             if channel is NotificationChannel.IN_APP:
+                if route_audience is NotificationAudience.BORROWER:
+                    results.append(
+                        await self._create_borrower_in_app(
+                            context=context,
+                            title=title,
+                            body=body,
+                            category=category,
+                            audience=route_audience,
+                        )
+                    )
+                    continue
                 for user_id in recipients["user_ids"]:
                     results.append(
                         await self._create_in_app(
@@ -392,6 +405,81 @@ class NotificationMatrixDispatcher:
             "status": "created",
             "notification_id": str(notification.id),
             "recipient_user_id": str(recipient_user_id),
+        }
+
+    async def _create_borrower_in_app(
+        self,
+        *,
+        context: MatrixDispatchContext,
+        title: str,
+        body: str,
+        category: NotificationCategory,
+        audience: NotificationAudience,
+    ) -> dict[str, Any]:
+        """Write BORROWER IN_APP into portal_notifications (not staff users table)."""
+        from api.modules.client_portal.models import ClientPortalUser
+        from api.modules.client_portal.notification_service import (
+            ClientPortalNotificationService,
+            sanitize_portal_action_url,
+        )
+
+        portal_user: ClientPortalUser | None = None
+        if context.borrower_portal_user_id is not None:
+            result = await self._session.execute(
+                select(ClientPortalUser).where(
+                    ClientPortalUser.id == context.borrower_portal_user_id,
+                    ClientPortalUser.organization_id == context.organization_id,
+                    ClientPortalUser.deleted_at.is_(None),
+                )
+            )
+            portal_user = result.scalar_one_or_none()
+        elif context.client_id is not None:
+            result = await self._session.execute(
+                select(ClientPortalUser).where(
+                    ClientPortalUser.client_id == context.client_id,
+                    ClientPortalUser.organization_id == context.organization_id,
+                    ClientPortalUser.deleted_at.is_(None),
+                )
+            )
+            portal_user = result.scalar_one_or_none()
+        elif context.borrower_email:
+            result = await self._session.execute(
+                select(ClientPortalUser).where(
+                    ClientPortalUser.email == context.borrower_email.lower(),
+                    ClientPortalUser.organization_id == context.organization_id,
+                    ClientPortalUser.deleted_at.is_(None),
+                )
+            )
+            portal_user = result.scalar_one_or_none()
+
+        if portal_user is None:
+            return {
+                "audience": audience.value,
+                "channel": NotificationChannel.IN_APP.value,
+                "status": "skipped_no_portal_user",
+                "detail": "Borrower in-app requires an active portal user.",
+            }
+
+        service = ClientPortalNotificationService.from_session(self._session)
+        safe_url = sanitize_portal_action_url(context.action_url)
+        notification = await service.create(
+            organization_id=context.organization_id,
+            client_id=portal_user.client_id,
+            recipient_portal_user_id=portal_user.id,
+            title=title,
+            body=body,
+            category=category,
+            entity_type=context.entity_type,
+            entity_id=context.entity_id,
+            source_module=context.source_module[:50] if context.source_module else None,
+            action_url=safe_url,
+        )
+        return {
+            "audience": audience.value,
+            "channel": NotificationChannel.IN_APP.value,
+            "status": "created",
+            "portal_notification_id": str(notification.id),
+            "recipient_portal_user_id": str(portal_user.id),
         }
 
     async def _send_or_defer_email(

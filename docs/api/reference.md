@@ -251,6 +251,15 @@ Portal push notifications require `ENABLE_PORTAL_PUSH=true` and `ENABLE_CLIENT_P
 | POST   | `/portal/push/subscribe`          | portal JWT | Register Web Push subscription keys   |
 | DELETE | `/portal/push/subscriptions/{id}` | portal JWT | Deactivate a push subscription        |
 
+Borrower in-app notification feed (LRP-302A). Separate from staff `/notifications` (FK to `users.id`). Rows live in `portal_notifications` keyed by `recipient_portal_user_id` → `client_portal_users`. Responses omit staff-only metadata. Deep links are sanitized to relative `/portal/*` paths only. Mark-read is idempotent and does not emit per-read timeline noise; matrix dispatches audit notification creation.
+
+| Method | Path                                  | Auth       | Description                                                                   |
+| ------ | ------------------------------------- | ---------- | ----------------------------------------------------------------------------- |
+| GET    | `/portal/notifications`               | portal JWT | Paginated feed (`page`, `page_size`, `unread_only`, `category`; newest first) |
+| GET    | `/portal/notifications/unread-count`  | portal JWT | Unread badge count                                                            |
+| POST   | `/portal/notifications/mark-all-read` | portal JWT | Mark all unread for this portal user as read                                  |
+| POST   | `/portal/notifications/{id}/read`     | portal JWT | Mark one notification read (idempotent)                                       |
+
 ## Secure messaging (staff)
 
 | Method | Path                                       | Min role     | Description                              |

@@ -4,13 +4,15 @@ import uuid
 from datetime import datetime
 from typing import Any
 
-from pydantic import EmailStr
+from pydantic import EmailStr, Field
 
 from api.core.responses import BaseSchema
 from api.modules.auth.schemas import LoginRequest, Password, RefreshTokenRequest, TokenResponse
 from api.modules.cases.models import CaseStage, CaseStatus
 from api.modules.client_portal.models import ClientPortalUser
 from api.modules.client_portal.push_models import PortalPushSubscription
+from api.modules.notifications.models import NotificationCategory
+from api.modules.notifications.schemas import NotificationSortField, NotificationSortOrder
 
 PortalLoginRequest = LoginRequest
 PortalRefreshTokenRequest = RefreshTokenRequest
@@ -244,6 +246,33 @@ class PortalDisputeStrategySuggestionsResponse(BaseSchema):
     generated_at: datetime | None = None
     summary: PortalDisputeStrategySuggestionsSummary
     suggestions: list[PortalDisputeStrategyAccountSuggestion]
+
+
+class PortalNotificationResponse(BaseSchema):
+    """Borrower-safe notification row (no staff recipient / org admin metadata)."""
+
+    id: uuid.UUID
+    title: str
+    body: str | None
+    category: NotificationCategory
+    read_at: datetime | None
+    entity_type: str | None
+    entity_id: uuid.UUID | None
+    action_url: str | None
+    created_at: datetime
+
+
+class PortalNotificationListParams(BaseSchema):
+    page: int = Field(default=1, ge=1)
+    page_size: int = Field(default=20, ge=1, le=100)
+    unread_only: bool | None = None
+    category: NotificationCategory | None = None
+    sort_by: NotificationSortField = "created_at"
+    sort_order: NotificationSortOrder = "desc"
+
+
+class PortalUnreadCountResponse(BaseSchema):
+    unread_count: int
 
 
 class PortalPushSubscribeRequest(BaseSchema):

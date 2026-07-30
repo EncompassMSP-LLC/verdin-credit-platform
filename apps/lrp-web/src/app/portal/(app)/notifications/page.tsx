@@ -2,59 +2,94 @@
 
 import Link from 'next/link';
 import { PageHeader } from '@/components/portal/PageHeader';
-import { PortalCard } from '@/components/portal/PortalCard';
-import { usePortalDocuments, usePortalMessages, usePrimaryCase } from '@/lib/platform/hooks';
-import { formatDate } from '@/lib/utils';
+import { PortalCard, StatusPill } from '@/components/portal/PortalCard';
+import {
+  categoryLabel,
+  safePortalHref,
+  useMarkAllPortalNotificationsRead,
+  useMarkPortalNotificationRead,
+  usePortalNotifications,
+} from '@/lib/portal/notification-hooks';
+import { cn, formatDate } from '@/lib/utils';
 
+/**
+ * Spec: Vol 19 · borrower notifications inbox
+ * Live: GET/POST /portal/notifications* (LRP-302A)
+ */
 export default function NotificationsPage() {
-  const { primary } = usePrimaryCase();
-  const docsQuery = usePortalDocuments(primary?.id);
-  const messagesQuery = usePortalMessages(primary?.id);
+  const liveQuery = usePortalNotifications();
+  const markRead = useMarkPortalNotificationRead();
+  const markAll = useMarkAllPortalNotificationsRead();
 
-  const items = [
-    ...(messagesQuery.data?.messages.slice(-5).reverse() ?? []).map((message) => ({
-      id: `msg-${message.id}`,
-      title: message.sender_role === 'staff' ? 'Staff message' : 'Your message sent',
-      body: message.body,
-      at: message.created_at,
-      href: '/portal/messages',
-    })),
-    ...(docsQuery.data?.slice(0, 5) ?? []).map((doc) => ({
-      id: `doc-${doc.id}`,
-      title: 'Document on file',
-      body: `${doc.title} · ${doc.processing_status}`,
-      at: doc.created_at,
-      href: '/portal/documents',
-    })),
-  ].sort((a, b) => +new Date(b.at) - +new Date(a.at));
+  const items = liveQuery.data?.items ?? [];
+  const unread = items.filter((n) => !n.read_at).length;
 
   return (
     <div>
       <PageHeader
         eyebrow="Notifications"
-        title="Recent platform activity"
-        description="Derived from case messages and documents until a dedicated notifications feed is exposed on the portal API."
+        title="Your alerts"
+        description={
+          liveQuery.isLoading
+            ? 'Loading your notification feed…'
+            : `${unread} unread · newest first · advisory platform updates only.`
+        }
+        actions={
+          unread > 0 ? (
+            <button
+              type="button"
+              onClick={() => markAll.mutate()}
+              disabled={markAll.isPending}
+              className="rounded-md border border-navy-900/15 px-3 py-2 text-sm font-medium hover:border-gold-500/50 disabled:opacity-60 dark:border-white/15"
+            >
+              {markAll.isPending ? 'Updating…' : 'Mark all read'}
+            </button>
+          ) : null
+        }
       />
 
-      <PortalCard>
-        {!primary ? (
-          <p className="text-sm text-slate-500">No case linked yet.</p>
-        ) : !items.length ? (
-          <p className="text-sm text-slate-500">No recent activity.</p>
-        ) : (
+      <PortalCard title="Inbox">
+        {liveQuery.isLoading ? (
+          <p className="text-sm text-slate-500">Loading notifications…</p>
+        ) : null}
+        {liveQuery.isError ? (
+          <p className="text-sm text-red-700" role="alert">
+            Could not load notifications. Try again in a moment.
+          </p>
+        ) : null}
+        {!liveQuery.isLoading && !liveQuery.isError && items.length === 0 ? (
+          <p className="text-sm text-slate-500">
+            No notifications yet. Updates about documents, tasks, and readiness will appear here.
+          </p>
+        ) : null}
+        {!liveQuery.isLoading && !liveQuery.isError && items.length > 0 ? (
           <ul className="divide-y divide-navy-900/8 dark:divide-white/10">
-            {items.map((item) => (
-              <li key={item.id}>
-                <Link
-                  href={item.href}
-                  className="flex items-start gap-3 py-4 transition hover:bg-sand-50 dark:hover:bg-navy-900/40"
+            {items.map((item) => {
+              const href = safePortalHref(item.action_url);
+              const isUnread = !item.read_at;
+              return (
+                <li
+                  key={item.id}
+                  className={cn(
+                    'flex flex-col gap-3 py-4 sm:flex-row sm:items-start sm:justify-between',
+                    isUnread && 'bg-gold-500/[0.04]',
+                  )}
                 >
-                  <span className="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full bg-gold-500" />
-                  <div>
-                    <p className="font-medium">{item.title}</p>
-                    <p className="text-sm text-slate-500 dark:text-white/65">{item.body}</p>
-                    <p className="mt-1 text-xs text-slate-400">
-                      {formatDate(item.at, {
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-medium text-navy-900 dark:text-white">{item.title}</p>
+                      <StatusPill tone="info">{categoryLabel(item.category)}</StatusPill>
+                      {isUnread ? (
+                        <span className="text-[0.65rem] font-semibold uppercase text-gold-700 dark:text-gold-400">
+                          Unread
+                        </span>
+                      ) : null}
+                    </div>
+                    {item.body ? (
+                      <p className="mt-1 text-sm text-slate-600 dark:text-white/70">{item.body}</p>
+                    ) : null}
+                    <p className="mt-2 text-xs text-slate-400">
+                      {formatDate(item.created_at, {
                         month: 'short',
                         day: 'numeric',
                         hour: 'numeric',
@@ -62,11 +97,35 @@ export default function NotificationsPage() {
                       })}
                     </p>
                   </div>
-                </Link>
-              </li>
-            ))}
+                  <div className="flex shrink-0 gap-2">
+                    <Link
+                      href={href}
+                      className="rounded-md border border-navy-900/15 px-3 py-1.5 text-sm font-medium hover:border-gold-500/50 dark:border-white/15"
+                    >
+                      Open
+                    </Link>
+                    {isUnread ? (
+                      <button
+                        type="button"
+                        onClick={() => markRead.mutate(item.id)}
+                        disabled={markRead.isPending}
+                        className="rounded-md bg-navy-900 px-3 py-1.5 text-sm font-semibold text-white hover:bg-navy-700 disabled:opacity-60 dark:bg-gold-500 dark:text-navy-900"
+                      >
+                        Mark read
+                      </button>
+                    ) : null}
+                  </div>
+                </li>
+              );
+            })}
           </ul>
-        )}
+        ) : null}
+        {liveQuery.data && liveQuery.data.pages > 1 ? (
+          <p className="mt-4 text-xs text-slate-400">
+            Showing page {liveQuery.data.page} of {liveQuery.data.pages} ({liveQuery.data.total}{' '}
+            total)
+          </p>
+        ) : null}
       </PortalCard>
     </div>
   );
