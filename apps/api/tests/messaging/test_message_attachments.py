@@ -4,12 +4,18 @@ from __future__ import annotations
 
 import io
 import uuid
+from collections.abc import Generator
 
 import pytest
 from fastapi.testclient import TestClient
 
 from api.core.feature_flags import get_feature_flags
 from api.core.messaging import get_messaging_center_status
+from api.modules.documents.storage import (
+    MemoryDocumentStorage,
+    reset_document_storage,
+    set_document_storage,
+)
 from api.modules.messaging.attachment_models import MessageAttachmentScanStatus
 from api.modules.messaging.attachment_scan import sanitize_display_filename, scan_attachment_bytes
 from tests.helpers.client_payload import sample_client_payload
@@ -21,6 +27,16 @@ def portal_enabled(monkeypatch: pytest.MonkeyPatch) -> None:
     get_feature_flags.cache_clear()
     yield
     get_feature_flags.cache_clear()
+
+
+@pytest.fixture(autouse=True)
+def memory_storage() -> Generator[MemoryDocumentStorage]:
+    """CI Python Tests has no MinIO — mirror portal document upload tests."""
+    storage = MemoryDocumentStorage()
+    reset_document_storage()
+    set_document_storage(storage)
+    yield storage
+    reset_document_storage()
 
 
 def _create_client(
