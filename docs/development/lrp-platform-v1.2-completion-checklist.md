@@ -18,15 +18,15 @@ Extend the **existing** borrower client portal (`/portal/*` + `/api/v1/portal/*`
 
 ## Ordered slices
 
-| Order | ID       | Slice                                            | Status | PR  |
-| ----- | -------- | ------------------------------------------------ | ------ | --- |
-| 1     | LRP-301A | Portal self-serve password reset                 | ✅     | —   |
-| 2     | LRP-301B | Portal invite email on staff provision           | ☐      | —   |
-| 3     | LRP-302A | Dedicated portal notifications feed + read state | ☐      | —   |
-| 4     | LRP-302B | Portal message attachments (staff-gated)         | ☐      | —   |
-| 5     | LRP-303A | Borrower dashboard UX polish (Vol 19 parity)     | ☐      | —   |
-| 6     | LRP-303B | Progress / checklist empty-states + deep links   | ☐      | —   |
-| —     | Closeout | Release notes + tag `lrp-platform-v1.2.0`        | ☐      | —   |
+| Order | ID       | Slice                                            | Status | PR   |
+| ----- | -------- | ------------------------------------------------ | ------ | ---- |
+| 1     | LRP-301A | Portal self-serve password reset                 | ✅     | #420 |
+| 2     | LRP-301B | Portal invite email on staff provision           | ✅     | —    |
+| 3     | LRP-302A | Dedicated portal notifications feed + read state | ☐      | —    |
+| 4     | LRP-302B | Portal message attachments (staff-gated)         | ☐      | —    |
+| 5     | LRP-303A | Borrower dashboard UX polish (Vol 19 parity)     | ☐      | —    |
+| 6     | LRP-303B | Progress / checklist empty-states + deep links   | ☐      | —    |
+| —     | Closeout | Release notes + tag `lrp-platform-v1.2.0`        | ☐      | —    |
 
 ## Ranking notes
 
@@ -44,4 +44,14 @@ Extend the **existing** borrower client portal (`/portal/*` + `/api/v1/portal/*`
 - `POST /portal/auth/reset-password` → new password + portal session tokens
 - Wire `apps/lrp-web` forgot + reset pages
 - Never emails secrets in responses outside app_env development/test
+- Status: **shipped** (#420)
+
+### LRP-301B — Portal invite email on staff provision
+
+- Reuses `client_portal_credential_tokens` with `purpose=invite` (no migration 118)
+- Provision creates portal user + one-time hashed invite; **never emails a password**
+- Dispatches notification matrix `PORTAL_INVITE` (email deferred when delivery not ready)
+- `POST /clients/{id}/portal-user/resend-invite` (staff-gated, 2-minute cooldown)
+- `POST /portal/auth/accept-invite` + `/portal/accept-invite` UI
+- Timeline: `PORTAL_USER_INVITED` / `PORTAL_INVITE_ACCEPTED`
 - Status: **shipped** (this PR)

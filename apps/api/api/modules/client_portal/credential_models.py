@@ -16,6 +16,7 @@ from api.database.base import Base
 
 class PortalCredentialPurpose(StrEnum):
     PASSWORD_RESET = "password_reset"
+    INVITE = "invite"
 
 
 class ClientPortalCredentialToken(Base, TimestampMixin):

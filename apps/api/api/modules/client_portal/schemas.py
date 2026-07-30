@@ -19,7 +19,8 @@ PortalTokenResponse = TokenResponse
 
 class ClientPortalUserProvision(BaseSchema):
     email: EmailStr
-    password: Password
+    password: Password | None = None
+    send_invite: bool = True
 
 
 class ClientPortalUserUpdate(BaseSchema):
@@ -37,9 +38,15 @@ class ClientPortalUserResponse(BaseSchema):
     last_login_at: datetime | None
     created_at: datetime
     updated_at: datetime
+    invitation_pending: bool = False
 
     @classmethod
-    def from_model(cls, portal_user: ClientPortalUser) -> "ClientPortalUserResponse":
+    def from_model(
+        cls,
+        portal_user: ClientPortalUser,
+        *,
+        invitation_pending: bool = False,
+    ) -> "ClientPortalUserResponse":
         return cls(
             id=portal_user.id,
             organization_id=portal_user.organization_id,
@@ -49,17 +56,37 @@ class ClientPortalUserResponse(BaseSchema):
             last_login_at=portal_user.last_login_at,
             created_at=portal_user.created_at,
             updated_at=portal_user.updated_at,
+            invitation_pending=invitation_pending,
         )
 
 
-class PortalMeResponse(BaseSchema):
-    id: uuid.UUID
-    organization_id: uuid.UUID
-    client_id: uuid.UUID
-    email: str
-    client_display_name: str
-    is_active: bool
-    last_login_at: datetime | None
+class ClientPortalInviteActionResponse(ClientPortalUserResponse):
+    """Staff provision/resend — flat user fields + invite metadata (no plaintext password)."""
+
+    detail: str = ""
+    invitation_queued: bool = False
+    invite_token: str | None = None
+
+    @classmethod
+    def from_provision(
+        cls,
+        portal_user: ClientPortalUser,
+        *,
+        detail: str,
+        invitation_queued: bool,
+        invite_token: str | None,
+        invitation_pending: bool,
+    ) -> "ClientPortalInviteActionResponse":
+        base = ClientPortalUserResponse.from_model(
+            portal_user,
+            invitation_pending=invitation_pending,
+        )
+        return cls(
+            **base.model_dump(),
+            detail=detail,
+            invitation_queued=invitation_queued,
+            invite_token=invite_token,
+        )
 
 
 class PortalPasswordResetRequest(BaseSchema):
@@ -74,6 +101,21 @@ class PortalPasswordResetRequestResponse(BaseSchema):
 class PortalPasswordResetConfirm(BaseSchema):
     token: str
     password: Password
+
+
+class PortalAcceptInviteRequest(BaseSchema):
+    token: str
+    password: Password
+
+
+class PortalMeResponse(BaseSchema):
+    id: uuid.UUID
+    organization_id: uuid.UUID
+    client_id: uuid.UUID
+    email: str
+    client_display_name: str
+    is_active: bool
+    last_login_at: datetime | None
 
 
 class PortalCaseSummaryResponse(BaseSchema):

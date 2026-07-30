@@ -24,6 +24,7 @@ from api.modules.accounts.service import AccountService
 from api.modules.auth.dependencies import get_current_user
 from api.modules.auth.models import User
 from api.modules.client_portal.schemas import (
+    ClientPortalInviteActionResponse,
     ClientPortalUserProvision,
     ClientPortalUserResponse,
     ClientPortalUserUpdate,
@@ -425,7 +426,7 @@ async def delete_client_contact(
 
 @router.post(
     "/{client_id}/portal-user",
-    response_model=ClientPortalUserResponse,
+    response_model=ClientPortalInviteActionResponse,
     status_code=status.HTTP_201_CREATED,
 )
 async def provision_client_portal_user(
@@ -433,8 +434,20 @@ async def provision_client_portal_user(
     body: ClientPortalUserProvision,
     current_user: User = Depends(get_current_user),
     service: ClientPortalProvisioningService = Depends(get_portal_provisioning_service),
-) -> ClientPortalUserResponse:
+) -> ClientPortalInviteActionResponse:
     return await service.provision_portal_user(current_user, client_id, body)
+
+
+@router.post(
+    "/{client_id}/portal-user/resend-invite",
+    response_model=ClientPortalInviteActionResponse,
+)
+async def resend_client_portal_invite(
+    client_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: ClientPortalProvisioningService = Depends(get_portal_provisioning_service),
+) -> ClientPortalInviteActionResponse:
+    return await service.resend_invite(current_user, client_id)
 
 
 @router.get("/{client_id}/portal-user", response_model=ClientPortalUserResponse)

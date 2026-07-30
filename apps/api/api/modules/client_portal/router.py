@@ -10,6 +10,7 @@ from api.modules.client_portal.dependencies import (
 )
 from api.modules.client_portal.models import ClientPortalUser
 from api.modules.client_portal.schemas import (
+    PortalAcceptInviteRequest,
     PortalLoginRequest,
     PortalMeResponse,
     PortalPasswordResetConfirm,
@@ -61,6 +62,15 @@ async def portal_reset_password(
     service: ClientPortalAuthService = Depends(get_portal_auth_service),
 ) -> PortalTokenResponse:
     return await service.confirm_password_reset(body)
+
+
+@router.post("/accept-invite", response_model=PortalTokenResponse)
+async def portal_accept_invite(
+    body: PortalAcceptInviteRequest,
+    _: None = Depends(require_client_portal_enabled),
+    service: ClientPortalAuthService = Depends(get_portal_auth_service),
+) -> PortalTokenResponse:
+    return await service.accept_invite(body)
 
 
 @router.get("/me", response_model=PortalMeResponse)
