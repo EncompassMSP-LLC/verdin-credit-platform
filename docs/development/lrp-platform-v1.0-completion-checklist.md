@@ -19,10 +19,10 @@ Ops contract: [`../lrp-enterprise/04-operations/business-ops-package/`](../lrp-e
 - [x] M3 Automation (email/SMS/jobs/packs/scheduling per §14)
 - [x] M4 Partner Experience UAT (lender + realtor MVP; borrower UAT)
 - [x] M5 Public Experience claim-safe (landings + KB/SEO scope)
-- [x] M6 Production Readiness slices LRP-501–505 (isolation, audit, smoke E2E, perf observe, tag) — formal security-officer sign-off + LRP DR runbook remain post-tag ops
+- [x] M6 Production Readiness slices LRP-501–505 (isolation, audit, smoke E2E, perf observe, tag) — formal security-officer **signature** + restore drill remain ([hardening checklist](lrp-v1.0-post-release-hardening.md))
 - [x] Capability matrix + API reference updated for LRP V1.0 surfaces
 - [x] No unsupervised bureau filing; claim-library locked in UI
-- [ ] V1.0 exit criteria in release plan §7 all checked (security-officer sign-off + DR runbook still open)
+- [ ] V1.0 exit criteria in release plan §7 all checked (officer signature + DR drill / founder RPO-RTO ack still open)
 
 ---
 

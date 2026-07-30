@@ -128,6 +128,8 @@ curl -s http://localhost/api/v1/health/ready
 | Documents  | `minio_data` volume    | Volume snapshot or `mc mirror` to S3                       |
 | Redis      | `redis_data` volume    | Optional — queue is ephemeral; AOF enabled in prod compose |
 
+LRP edition restore/smoke steps: **[LRP V1.0 Disaster Recovery Runbook](lrp-v1.0-disaster-recovery-runbook.md)**.
+
 Example Postgres backup:
 
 ```bash

@@ -10,6 +10,8 @@
 
 For a pilot deployment on a Linux server with Docker Compose, see **[Production Deployment](production.md)**.
 
+For Lending Readiness Platform™ V1.0 backup / restore / smoke after incident, see **[LRP V1.0 Disaster Recovery Runbook](lrp-v1.0-disaster-recovery-runbook.md)**.
+
 ## Local Docker (production mode, no VM)
 
 To run a production-mode pilot on **Docker Desktop** at http://localhost:8080, see **[Local Docker Pilot](local-docker-pilot.md)**.

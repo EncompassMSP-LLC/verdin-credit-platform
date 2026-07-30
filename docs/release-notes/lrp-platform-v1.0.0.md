@@ -42,13 +42,14 @@ This tag is the implementation closeout for the V1.0 slice list. Formal security
 
 ## Deferred follow-ups
 
-| ID       | Item                                   | Notes                                                    |
-| -------- | -------------------------------------- | -------------------------------------------------------- |
-| LRP-208A | Evidence vault depth                   | Queued; do not absorb informally                         |
-| LRP-209A | Deeper DNC / preference automation     | Queued; do not absorb informally                         |
-| Ops      | Formal security review sign-off        | Automated isolation suite shipped; sign-off pending      |
-| Ops      | LRP edition DR / backup runbook        | Platform DR patterns exist; edition-specific doc pending |
-| Perf     | Hard CI enforcement of LRP p95 budgets | Observe-only until CI variance calibrated                |
+| ID        | Item                                   | Notes                                                                                                 |
+| --------- | -------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| LRP-208A  | Evidence vault depth                   | Queued; do not absorb informally                                                                      |
+| LRP-209A  | Deeper DNC / preference automation     | Queued; do not absorb informally                                                                      |
+| Ops       | Formal security review sign-off        | Package ready — signature open ([sign-off](../quality/security/lrp-v1.0-security-officer-signoff.md)) |
+| Ops       | LRP edition DR / backup runbook        | Drafted — restore drill open ([runbook](../deployment/lrp-v1.0-disaster-recovery-runbook.md))         |
+| Hardening | Post-release checklist                 | [`lrp-v1.0-post-release-hardening.md`](../development/lrp-v1.0-post-release-hardening.md)             |
+| Perf      | Hard CI enforcement of LRP p95 budgets | Observe-only until CI variance calibrated                                                             |
 
 ## Related documents
 
@@ -60,3 +61,6 @@ This tag is the implementation closeout for the V1.0 slice list. Formal security
 - [API reference](../api/reference.md)
 - [LRP perf budgets](../quality/performance/lrp-v1-perf-budgets.md)
 - [E2E strategy](../quality/testing/e2e-strategy.md)
+- [Security officer sign-off package](../quality/security/lrp-v1.0-security-officer-signoff.md)
+- [LRP DR runbook](../deployment/lrp-v1.0-disaster-recovery-runbook.md)
+- [Post-release hardening](../development/lrp-v1.0-post-release-hardening.md)
