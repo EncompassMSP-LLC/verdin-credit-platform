@@ -67,10 +67,10 @@ Ops contract: [`../lrp-enterprise/04-operations/business-ops-package/`](../lrp-e
 
 Deferred follow-ups (preserve queue; do not absorb informally):
 
-| ID       | Slice                                                   | Status                                                                                           |
-| -------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| LRP-208A | Evidence vault issue association + case action timeline | ☐ → see V1.1 checklist (208A association first; 208B timeline)                                   |
-| LRP-209A | Unwanted-call complaint workflow + follow-up tracking   | ☐ → see [`lrp-platform-v1.1-completion-checklist.md`](lrp-platform-v1.1-completion-checklist.md) |
+| ID       | Slice                                                   | Status                                                                                                         |
+| -------- | ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| LRP-208A | Evidence vault issue association + case action timeline | ✅ → V1.1 (#414 / #415); see [`lrp-platform-v1.1.0`](../release-notes/lrp-platform-v1.1.0.md)                  |
+| LRP-209A | Unwanted-call complaint workflow + follow-up tracking   | ✅ → V1.1 (#416); see [`lrp-platform-v1.1-completion-checklist.md`](lrp-platform-v1.1-completion-checklist.md) |
 
 Deferred to [product backlog](../lrp-enterprise/15-roadmap/product-backlog.md): LRP-404 educational simulator (PB-006); authenticated builder/attorney/advisor portals; full public KB depth.
 
