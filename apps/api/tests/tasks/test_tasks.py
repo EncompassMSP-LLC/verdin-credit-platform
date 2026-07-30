@@ -253,13 +253,16 @@ def test_daily_task_digest(
     from datetime import UTC, datetime, timedelta
 
     now = datetime.now(UTC)
+    day_start = datetime(now.year, now.month, now.day, tzinfo=UTC)
+    # Anchor due-today mid-day so CI near UTC midnight cannot slip into tomorrow.
+    due_today_at = day_start + timedelta(hours=12)
     overdue = api_client.post(
         "/api/v1/tasks",
         headers=manager_headers,
         json={
             "title": f"Overdue-{uuid.uuid4().hex[:6]}",
             "case_id": sample_case_id,
-            "due_date": (now - timedelta(days=2)).isoformat(),
+            "due_date": (day_start - timedelta(days=2)).isoformat(),
             "priority": "high",
         },
     )
@@ -271,7 +274,7 @@ def test_daily_task_digest(
         json={
             "title": f"DueToday-{uuid.uuid4().hex[:6]}",
             "case_id": sample_case_id,
-            "due_date": (now + timedelta(hours=2)).isoformat(),
+            "due_date": due_today_at.isoformat(),
         },
     )
     assert due_today.status_code == 201, due_today.text

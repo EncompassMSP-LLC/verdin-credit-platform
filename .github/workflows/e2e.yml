@@ -129,6 +129,19 @@ jobs:
       - name: Run E2E workflow suite
         run: pytest tests/e2e -v --tb=short
 
+      - name: Measure LRP perf budgets (observe)
+        if: always()
+        env:
+          PERF_ITERATIONS: '8'
+          PERF_LRP_ENFORCE: observe
+          PERF_LRP_OUT: tests/e2e/_artifacts/lrp-perf.json
+        run: |
+          mkdir -p tests/e2e/_artifacts
+          python docs/quality/performance/measure_lrp_perf_budgets.py || {
+            echo "LRP perf observe harness exited non-zero (non-blocking)"
+            exit 0
+          }
+
       - name: Collect service logs
         if: always()
         run: |
@@ -145,3 +158,12 @@ jobs:
           path: tests/e2e/_artifacts/
           if-no-files-found: ignore
           retention-days: 7
+
+      - name: Upload LRP perf artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lrp-perf-budgets
+          path: tests/e2e/_artifacts/lrp-perf.json
+          if-no-files-found: ignore
+          retention-days: 14

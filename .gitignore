@@ -57,6 +57,7 @@ coverage/
 .pytest_cache/
 test-results/
 tests/e2e/_artifacts/
+docs/quality/performance/_artifacts/
 
 # Alembic
 # Keep migrations, ignore local state
