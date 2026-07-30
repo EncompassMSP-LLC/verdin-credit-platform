@@ -1,4 +1,9 @@
 # Production stack for a single VM / VPS pilot deployment.
+#
+# Prefer docker-compose.production.yml for DigitalOcean staging (Caddy TLS,
+# hardened defaults, deploy scripts under scripts/). This file remains for
+# legacy HTTP-only nginx pilots — see docs/deployment/production.md.
+#
 # Requires: Docker Engine 24+, Docker Compose v2, `.env.production` from `.env.production.example`
 
 services:

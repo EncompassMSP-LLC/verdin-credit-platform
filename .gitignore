@@ -19,6 +19,7 @@ build/
 .env.*
 !.env.example
 !.env.production.example
+!.env.local-pilot.example
 
 # IDE
 .idea/
@@ -51,6 +52,7 @@ logs/
 postgres_data/
 redis_data/
 minio_data/
+backups/
 
 # Test artifacts
 coverage/
