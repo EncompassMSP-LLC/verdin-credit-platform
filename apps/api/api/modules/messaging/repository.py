@@ -70,6 +70,25 @@ class MessagingRepository:
         await self._session.refresh(message)
         return message
 
+    async def get_message_by_idempotency(
+        self,
+        *,
+        organization_id: uuid.UUID,
+        idempotency_key: str,
+        staff_user_id: uuid.UUID | None = None,
+        portal_user_id: uuid.UUID | None = None,
+    ) -> ThreadMessage | None:
+        query = select(ThreadMessage).where(
+            ThreadMessage.organization_id == organization_id,
+            ThreadMessage.idempotency_key == idempotency_key,
+        )
+        if staff_user_id is not None:
+            query = query.where(ThreadMessage.staff_user_id == staff_user_id)
+        if portal_user_id is not None:
+            query = query.where(ThreadMessage.portal_user_id == portal_user_id)
+        result = await self._session.execute(query)
+        return result.scalar_one_or_none()
+
     async def save_thread(self, thread: MessageThread) -> MessageThread:
         await self._session.flush()
         await self._session.refresh(thread)

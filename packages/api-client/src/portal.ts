@@ -88,6 +88,21 @@ export interface UploadPortalCaseDocumentInput {
 
 export type PortalMessageSenderRole = 'portal_client' | 'staff';
 
+export type MessageAttachmentScanStatus = 'pending' | 'clean' | 'rejected' | 'failed';
+
+export interface MessageAttachment {
+  id: string;
+  message_id: string | null;
+  document_id: string;
+  display_filename: string;
+  mime_type: string;
+  byte_size: number;
+  scan_status: MessageAttachmentScanStatus;
+  scan_detail: string | null;
+  downloadable: boolean;
+  created_at: string;
+}
+
 export interface PortalThreadMessage {
   id: string;
   thread_id: string;
@@ -96,6 +111,7 @@ export interface PortalThreadMessage {
   staff_user_id: string | null;
   body: string;
   created_at: string;
+  attachments?: MessageAttachment[];
 }
 
 export interface PortalCaseMessageThread {
@@ -108,6 +124,8 @@ export interface PortalCaseMessageThread {
 
 export interface SendPortalMessageInput {
   body: string;
+  attachment_ids?: string[];
+  idempotency_key?: string;
 }
 
 export interface ClientPortalUser {
@@ -324,6 +342,32 @@ export async function sendPortalCaseMessage(
     method: 'POST',
     body: input,
   });
+}
+
+export async function uploadPortalMessageAttachment(
+  caseId: string,
+  file: File | Blob,
+  filename?: string,
+): Promise<MessageAttachment> {
+  const form = new FormData();
+  form.append('file', file, filename);
+  return uploadRequest<MessageAttachment>(
+    apiPath(`/portal/cases/${caseId}/messages/attachments`),
+    form,
+  );
+}
+
+export async function deletePortalMessageAttachment(
+  caseId: string,
+  attachmentId: string,
+): Promise<void> {
+  await request<void>(apiPath(`/portal/cases/${caseId}/messages/attachments/${attachmentId}`), {
+    method: 'DELETE',
+  });
+}
+
+export function portalMessageAttachmentDownloadUrl(caseId: string, attachmentId: string): string {
+  return apiPath(`/portal/cases/${caseId}/messages/attachments/${attachmentId}/download`);
 }
 
 export interface PortalPushStatus {

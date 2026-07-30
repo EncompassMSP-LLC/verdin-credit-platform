@@ -19,6 +19,7 @@ from api.modules.documents.models import Document, DocumentVersion
 from api.modules.documents.parsed_report_models import DocumentParsedCreditReport
 from api.modules.enterprise.mobile_passkey_readiness_models import MobilePasskeyReadinessRun
 from api.modules.enterprise.native_mobile_passkey_client_models import NativeMobilePasskeyClientRun
+from api.modules.messaging.attachment_models import ThreadMessageAttachment
 from api.modules.notifications.models import Notification, NotificationCategory
 from api.modules.org_admin.oauth_marketplace_publishing_models import OAuthMarketplacePublishingRun
 from api.modules.org_context.models import OrganizationFeatureFlag, OrgDemoFeature
@@ -56,6 +57,7 @@ __all__ = [
     "UnwantedCallIncident",
     "Notification",
     "NotificationCategory",
+    "ThreadMessageAttachment",
     "Organization",
     "OrganizationType",
     "OrganizationFeatureFlag",

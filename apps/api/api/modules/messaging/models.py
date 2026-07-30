@@ -77,6 +77,7 @@ class ThreadMessage(Base):
         UUID(as_uuid=True), ForeignKey("users.id"), nullable=True
     )
     body: Mapped[str] = mapped_column(Text, nullable=False)
+    idempotency_key: Mapped[str | None] = mapped_column(String(64), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
