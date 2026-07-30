@@ -107,7 +107,7 @@ smoke_fail=0
 "${COMPOSE[@]}" exec -T api \
   python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health/ready')" \
   || smoke_fail=1
-"${COMPOSE[@]}" exec -T web wget -qO- http://localhost/ >/dev/null || smoke_fail=1
+"${COMPOSE[@]}" exec -T web wget -qO- http://127.0.0.1/ >/dev/null || smoke_fail=1
 "${COMPOSE[@]}" exec -T worker \
   python -c "import os, redis; redis.from_url(os.environ['REDIS_URL']).ping()" \
   || smoke_fail=1
