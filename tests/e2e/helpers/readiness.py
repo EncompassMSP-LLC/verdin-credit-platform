@@ -32,3 +32,33 @@ def wait_for_case_visible(
     if artifacts is not None:
         artifacts.record(label, body)
     return body
+
+
+def wait_for_account_visible(
+    http: httpx.Client,
+    headers: dict[str, str],
+    account_id: str,
+    *,
+    artifacts: ArtifactCollector | None = None,
+    label: str = "account_visible",
+) -> dict:
+    """Poll until a freshly created account is readable by the API.
+
+    ``get_db`` commits after the response is sent, so a create 201 can race a
+    follow-up GET under load (same class of flake as ``wait_for_case_visible``).
+    """
+
+    def fetch() -> httpx.Response:
+        return http.get(f"/api/v1/accounts/{account_id}", headers=headers)
+
+    response = poll_until(
+        fetch,
+        lambda item: item.status_code == 200,
+        description=f"account {account_id} visible",
+        timeout=15.0,
+        interval=0.25,
+    )
+    body = response.json()
+    if artifacts is not None:
+        artifacts.record(label, body)
+    return body
