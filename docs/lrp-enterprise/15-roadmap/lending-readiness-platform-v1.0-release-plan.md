@@ -186,11 +186,11 @@ Before declaring Version 1.0 complete:
 - [ ] All **Critical** and **High** rows in the traceability matrix are **Shipped** (or explicitly waived with PO + compliance sign-off)
 - [ ] All required CI/CD checks passing on `main`
 - [ ] No open **blocker** defects
-- [ ] Security review complete (partner isolation + auth) — automated denial suite shipped (LRP-501); formal officer sign-off open
+- [ ] Security review complete (partner isolation + auth) — package ready: [`lrp-v1.0-security-officer-signoff.md`](../../quality/security/lrp-v1.0-security-officer-signoff.md); **officer signature open**
 - [x] Performance targets documented + observe harness in CI (dashboard + readiness export p95; LRP-504)
 - [x] UAT sign-off received (borrower + LO; realtor if MVP in scope) — LRP-303 / LRP-304
 - [ ] Production deployment checklist completed
-- [ ] Operations handoff completed (runbooks → on-call + §14 job map) — LRP DR runbook open
+- [ ] Operations handoff completed (runbooks → on-call + §14 job map) — DR runbook drafted: [`lrp-v1.0-disaster-recovery-runbook.md`](../../deployment/lrp-v1.0-disaster-recovery-runbook.md); restore drill + founder RPO/RTO ack open
 - [x] Tag `lrp-platform-v1.0.0` + release notes published
 
 ---
