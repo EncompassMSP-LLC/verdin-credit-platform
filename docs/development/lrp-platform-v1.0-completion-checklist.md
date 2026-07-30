@@ -14,15 +14,15 @@ Ops contract: [`../lrp-enterprise/04-operations/business-ops-package/`](../lrp-e
 
 ## Exit criteria for "LRP Platform V1.0 done"
 
-- [ ] M1 Core Platform production-wired (auth/RBAC, CRM, borrowers, referrals)
-- [ ] M2 Readiness (score, timeline, reports, action plans, notifications)
-- [ ] M3 Automation (email/SMS/jobs/packs/scheduling per §14)
+- [x] M1 Core Platform production-wired (auth/RBAC, CRM, borrowers, referrals)
+- [x] M2 Readiness (score, timeline, reports, action plans, notifications)
+- [x] M3 Automation (email/SMS/jobs/packs/scheduling per §14)
 - [x] M4 Partner Experience UAT (lender + realtor MVP; borrower UAT)
-- [ ] M5 Public Experience claim-safe (landings + KB/SEO scope)
-- [ ] M6 Production Readiness (security, perf, monitoring, DR, tag)
-- [ ] Capability matrix + API reference updated for LRP V1.0 surfaces
-- [ ] No unsupervised bureau filing; claim-library locked in UI
-- [ ] V1.0 exit criteria in release plan §7 all checked
+- [x] M5 Public Experience claim-safe (landings + KB/SEO scope)
+- [x] M6 Production Readiness slices LRP-501–505 (isolation, audit, smoke E2E, perf observe, tag) — formal security-officer sign-off + LRP DR runbook remain post-tag ops
+- [x] Capability matrix + API reference updated for LRP V1.0 surfaces
+- [x] No unsupervised bureau filing; claim-library locked in UI
+- [ ] V1.0 exit criteria in release plan §7 all checked (security-officer sign-off + DR runbook still open)
 
 ---
 
@@ -63,7 +63,7 @@ Ops contract: [`../lrp-enterprise/04-operations/business-ops-package/`](../lrp-e
 | 31    | LRP-502 Automation audit events                       | M6        | ✅     |
 | 32    | LRP-503 LRP smoke E2E in CI                           | M6        | ✅     |
 | 33    | LRP-504 Perf budgets                                  | M6        | ✅     |
-| 34    | LRP-505 Release notes + tag `lrp-platform-v1.0.0`     | M6        | ☐      |
+| 34    | LRP-505 Release notes + tag `lrp-platform-v1.0.0`     | M6        | ✅     |
 
 Deferred follow-ups (preserve queue; do not absorb informally):
 
@@ -323,7 +323,12 @@ Deferred to [product backlog](../lrp-enterprise/15-roadmap/product-backlog.md): 
 - Product p95 budgets for partner dashboard + readiness report/export ([lrp-v1-perf-budgets.md](../quality/performance/lrp-v1-perf-budgets.md))
 - Harness `measure_lrp_perf_budgets.py`; E2E workflow observe run + `lrp-perf-budgets` artifact
 - Soft CI ceilings only — hard enforcement deferred pending CI variance calibration
-- Next planned: LRP-505 release notes + tag `lrp-platform-v1.0.0`; deferred LRP-208A / LRP-209A remain queued
+
+### LRP-505 — Release notes + tag (2026-07-30)
+
+- Release notes: [`docs/release-notes/lrp-platform-v1.0.0.md`](../release-notes/lrp-platform-v1.0.0.md)
+- Git tag / GitHub Release: `lrp-platform-v1.0.0`
+- Checklist V1.0 slice list closed; deferred LRP-208A / LRP-209A + ops sign-off/DR remain queued
 
 ### Definition of Done (every slice)
 
