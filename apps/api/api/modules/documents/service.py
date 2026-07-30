@@ -3411,6 +3411,22 @@ class DocumentService:
         )
         apply_audit_on_create(link, user.id)
         await repo.create(link)
+        from api.modules.timeline.builders import issue_evidence_linked_event
+
+        await publish_platform_event(
+            self._session,
+            issue_evidence_linked_event(
+                organization_id=organization_id,
+                case_id=case_id,
+                document_id=link.document_id,
+                link_id=link.id,
+                source_id=link.source_id,
+                role=link.role.value,
+                document_title=document.title,
+                performed_by=user.id,
+                note=link.note,
+            ),
+        )
         await self._session.commit()
         await self._session.refresh(link)
 
@@ -3456,7 +3472,24 @@ class DocumentService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Issue evidence link not found",
             )
+        source_id = link.source_id
+        document_id = link.document_id
+        role = link.role.value if hasattr(link.role, "value") else str(link.role)
         await repo.soft_delete(link, actor_id=user.id)
+        from api.modules.timeline.builders import issue_evidence_removed_event
+
+        await publish_platform_event(
+            self._session,
+            issue_evidence_removed_event(
+                organization_id=organization_id,
+                case_id=case_id,
+                document_id=document_id,
+                link_id=link_id,
+                source_id=source_id,
+                role=role,
+                performed_by=user.id,
+            ),
+        )
         await self._session.commit()
 
     async def _recognized_source_ids(self, user: User, case_id: uuid.UUID) -> set[str]:

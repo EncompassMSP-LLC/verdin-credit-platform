@@ -8,6 +8,7 @@ import { RoleGate } from '@/components/crm/RoleGate';
 import { CrmCaseDocumentsPanel } from '@/components/crm/CrmCaseDocumentsPanel';
 import { CrmCommunicationPreferencesPanel } from '@/components/crm/CrmCommunicationPreferencesPanel';
 import { CrmIssueExplainabilityPanel } from '@/components/crm/CrmIssueExplainabilityPanel';
+import { CrmCaseActionTimelinePanel } from '@/components/crm/CrmCaseActionTimelinePanel';
 import { CrmLetterDraftBuilderPanel } from '@/components/crm/CrmLetterDraftBuilderPanel';
 import { ADVISORY_DISCLAIMER_SHORT } from '@/lib/design-tokens';
 import { useCrmAuth } from '@/lib/crm/auth';
@@ -305,12 +306,7 @@ export default function CrmBorrowerDetailPage() {
           <CrmIssueExplainabilityPanel caseId={primaryCase?.id} />
           <CrmLetterDraftBuilderPanel caseId={primaryCase?.id} />
           <CrmCaseDocumentsPanel caseId={primaryCase?.id} canUpload={canManageDocs} />
-          <div className="rounded-md border border-navy-900/10 bg-white p-4">
-            <h2 className="text-sm font-semibold">Activity</h2>
-            <p className="mt-2 text-sm text-slate-500">
-              Notes / timeline land in a later CRM slice.
-            </p>
-          </div>
+          <CrmCaseActionTimelinePanel caseId={primaryCase?.id} />
         </section>
       </div>
     </RoleGate>

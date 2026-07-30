@@ -28,6 +28,7 @@ export interface ListTimelineParams {
   event_type?: string;
   event_category?: string;
   performed_by?: string;
+  source_id?: string;
   occurred_from?: string;
   occurred_to?: string;
   sort_by?: 'occurred_at' | 'created_at' | 'event_type';

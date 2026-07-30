@@ -57,6 +57,7 @@ class TimelineListParams(PaginationParams):
     event_type: str | None = Field(default=None, max_length=100)
     event_category: str | None = Field(default=None, max_length=50)
     performed_by: uuid.UUID | None = None
+    source_id: str | None = Field(default=None, max_length=512)
     occurred_from: datetime | None = None
     occurred_to: datetime | None = None
     sort_by: TimelineSortField = "occurred_at"
