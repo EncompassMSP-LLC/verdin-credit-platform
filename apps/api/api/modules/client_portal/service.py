@@ -1,12 +1,18 @@
 """Client portal auth and provisioning services."""
 
+from __future__ import annotations
+
+import hashlib
+import secrets
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 from fastapi import HTTPException, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.core.audit import apply_audit_on_create, apply_audit_on_update
+from api.core.config import get_settings
 from api.core.constants import TOKEN_REALM_PORTAL, TOKEN_TYPE_REFRESH
 from api.core.feature_flags import FeatureFlag, is_feature_enabled
 from api.core.permissions import has_permission
@@ -18,6 +24,10 @@ from api.core.security import (
     verify_password,
 )
 from api.modules.auth.models import User
+from api.modules.client_portal.credential_models import (
+    ClientPortalCredentialToken,
+    PortalCredentialPurpose,
+)
 from api.modules.client_portal.models import ClientPortalUser
 from api.modules.client_portal.repository import ClientPortalUserRepository
 from api.modules.client_portal.schemas import (
@@ -26,11 +36,24 @@ from api.modules.client_portal.schemas import (
     ClientPortalUserUpdate,
     PortalLoginRequest,
     PortalMeResponse,
+    PortalPasswordResetConfirm,
+    PortalPasswordResetRequest,
+    PortalPasswordResetRequestResponse,
     PortalTokenResponse,
 )
 from api.modules.clients.models import Client
 from api.modules.clients.permissions import CLIENT_WRITE_ROLE
 from api.modules.clients.repository import ClientRepository
+
+_RESET_TTL = timedelta(hours=1)
+
+
+def _hash_token(raw: str) -> str:
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+def _mint_token() -> str:
+    return secrets.token_urlsafe(32)
 
 
 class ClientPortalAuthService:
@@ -40,7 +63,7 @@ class ClientPortalAuthService:
         self._clients = ClientRepository(session)
 
     @classmethod
-    def from_session(cls, session: AsyncSession) -> "ClientPortalAuthService":
+    def from_session(cls, session: AsyncSession) -> ClientPortalAuthService:
         return cls(session)
 
     def _require_enabled(self) -> None:
@@ -150,6 +173,104 @@ class ClientPortalAuthService:
             last_login_at=portal_user.last_login_at,
         )
 
+    async def request_password_reset(
+        self,
+        payload: PortalPasswordResetRequest,
+    ) -> PortalPasswordResetRequestResponse:
+        """Issue a one-time reset token. Always returns a generic detail (no email enumeration)."""
+        self._require_enabled()
+        email = str(payload.email).strip().lower()
+        generic = PortalPasswordResetRequestResponse(
+            detail=(
+                "If a portal account exists for that email, a password reset link was issued. "
+                "Check with your case manager if you do not receive instructions."
+            ),
+            reset_token=None,
+        )
+        portal_user = await self._portal_users.get_by_email(email)
+        if portal_user is None or not portal_user.is_active:
+            return generic
+
+        client = await self._clients.get_by_id(
+            portal_user.client_id,
+            organization_id=portal_user.organization_id,
+        )
+        if client is None or client.is_deleted:
+            return generic
+
+        raw = _mint_token()
+        row = ClientPortalCredentialToken(
+            organization_id=portal_user.organization_id,
+            portal_user_id=portal_user.id,
+            purpose=PortalCredentialPurpose.PASSWORD_RESET.value,
+            token_hash=_hash_token(raw),
+            expires_at=datetime.now(UTC) + _RESET_TTL,
+        )
+        self._session.add(row)
+        await self._session.commit()
+
+        settings = get_settings()
+        if settings.app_env in {"development", "test"}:
+            generic.reset_token = raw
+        return generic
+
+    async def confirm_password_reset(
+        self,
+        payload: PortalPasswordResetConfirm,
+    ) -> PortalTokenResponse:
+        self._require_enabled()
+        token_hash = _hash_token(payload.token)
+        result = await self._session.execute(
+            select(ClientPortalCredentialToken).where(
+                ClientPortalCredentialToken.token_hash == token_hash,
+                ClientPortalCredentialToken.purpose == PortalCredentialPurpose.PASSWORD_RESET.value,
+            )
+        )
+        row = result.scalar_one_or_none()
+        if row is None or row.used_at is not None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid or used reset token",
+            )
+        if row.expires_at <= datetime.now(UTC):
+            raise HTTPException(
+                status_code=status.HTTP_410_GONE,
+                detail="Reset token has expired",
+            )
+
+        portal_user = await self._portal_users.get_by_id(str(row.portal_user_id))
+        if portal_user is None or not portal_user.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Portal account not found",
+            )
+
+        client = await self._clients.get_by_id(
+            portal_user.client_id,
+            organization_id=portal_user.organization_id,
+        )
+        if client is None or client.is_deleted:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Client record is unavailable",
+            )
+
+        portal_user.hashed_password = hash_password(payload.password)
+        portal_user.last_login_at = datetime.now(UTC)
+        apply_audit_on_update(portal_user, None)
+        row.used_at = datetime.now(UTC)
+        await self._portal_users.save(portal_user)
+        await self._session.commit()
+
+        return PortalTokenResponse(
+            access_token=create_portal_access_token(
+                str(portal_user.id),
+                organization_id=str(portal_user.organization_id),
+                client_id=str(portal_user.client_id),
+            ),
+            refresh_token=create_portal_refresh_token(str(portal_user.id)),
+        )
+
 
 class ClientPortalProvisioningService:
     def __init__(self, session: AsyncSession) -> None:
@@ -158,7 +279,7 @@ class ClientPortalProvisioningService:
         self._clients = ClientRepository(session)
 
     @classmethod
-    def from_session(cls, session: AsyncSession) -> "ClientPortalProvisioningService":
+    def from_session(cls, session: AsyncSession) -> ClientPortalProvisioningService:
         return cls(session)
 
     def _require_enabled(self) -> None:

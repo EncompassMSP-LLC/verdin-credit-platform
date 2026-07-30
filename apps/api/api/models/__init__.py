@@ -5,6 +5,7 @@ from api.modules.accounts.dispute_letter_models import DisputeLetter, DisputeLet
 from api.modules.accounts.models import Account
 from api.modules.auth.models import Organization, OrganizationType, User
 from api.modules.cases.models import Case, CasePriority, CaseStage, CaseStatus
+from api.modules.client_portal.credential_models import ClientPortalCredentialToken
 from api.modules.client_portal.models import ClientPortalUser
 from api.modules.clients.models import Client, ClientContact, ClientStatus, ContactRelationship
 from api.modules.clients.unwanted_call_models import UnwantedCallIncident
@@ -33,6 +34,7 @@ __all__ = [
     "Client",
     "ClientContact",
     "ClientPortalUser",
+    "ClientPortalCredentialToken",
     "ClientStatus",
     "ContactRelationship",
     "CrossOrgBenchmarkRun",

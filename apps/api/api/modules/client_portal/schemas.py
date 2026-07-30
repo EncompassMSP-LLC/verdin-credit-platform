@@ -62,6 +62,20 @@ class PortalMeResponse(BaseSchema):
     last_login_at: datetime | None
 
 
+class PortalPasswordResetRequest(BaseSchema):
+    email: EmailStr
+
+
+class PortalPasswordResetRequestResponse(BaseSchema):
+    detail: str
+    reset_token: str | None = None
+
+
+class PortalPasswordResetConfirm(BaseSchema):
+    token: str
+    password: Password
+
+
 class PortalCaseSummaryResponse(BaseSchema):
     id: uuid.UUID
     case_number: str | None

@@ -12,6 +12,9 @@ from api.modules.client_portal.models import ClientPortalUser
 from api.modules.client_portal.schemas import (
     PortalLoginRequest,
     PortalMeResponse,
+    PortalPasswordResetConfirm,
+    PortalPasswordResetRequest,
+    PortalPasswordResetRequestResponse,
     PortalRefreshTokenRequest,
     PortalTokenResponse,
 )
@@ -40,6 +43,24 @@ async def portal_refresh(
     service: ClientPortalAuthService = Depends(get_portal_auth_service),
 ) -> PortalTokenResponse:
     return await service.refresh(body.refresh_token)
+
+
+@router.post("/forgot-password", response_model=PortalPasswordResetRequestResponse)
+async def portal_forgot_password(
+    body: PortalPasswordResetRequest,
+    _: None = Depends(require_client_portal_enabled),
+    service: ClientPortalAuthService = Depends(get_portal_auth_service),
+) -> PortalPasswordResetRequestResponse:
+    return await service.request_password_reset(body)
+
+
+@router.post("/reset-password", response_model=PortalTokenResponse)
+async def portal_reset_password(
+    body: PortalPasswordResetConfirm,
+    _: None = Depends(require_client_portal_enabled),
+    service: ClientPortalAuthService = Depends(get_portal_auth_service),
+) -> PortalTokenResponse:
+    return await service.confirm_password_reset(body)
 
 
 @router.get("/me", response_model=PortalMeResponse)

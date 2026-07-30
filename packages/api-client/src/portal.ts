@@ -148,6 +148,32 @@ export async function portalRefresh(refreshToken: string): Promise<PortalTokenRe
   });
 }
 
+export interface PortalPasswordResetRequestResponse {
+  detail: string;
+  reset_token?: string | null;
+}
+
+export async function portalForgotPassword(
+  email: string,
+): Promise<PortalPasswordResetRequestResponse> {
+  return request<PortalPasswordResetRequestResponse>(apiPath('/portal/auth/forgot-password'), {
+    method: 'POST',
+    body: { email },
+    auth: false,
+  });
+}
+
+export async function portalResetPassword(input: {
+  token: string;
+  password: string;
+}): Promise<PortalTokenResponse> {
+  return request<PortalTokenResponse>(apiPath('/portal/auth/reset-password'), {
+    method: 'POST',
+    body: input,
+    auth: false,
+  });
+}
+
 export async function getPortalMe(): Promise<PortalMeResponse> {
   return request<PortalMeResponse>(apiPath('/portal/auth/me'));
 }

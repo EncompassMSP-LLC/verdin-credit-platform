@@ -29,6 +29,7 @@ interface PlatformAuthContextValue {
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
+  establishSession: (accessToken: string, refreshToken: string) => Promise<void>;
   logout: () => void;
   apiConfigured: boolean;
 }
@@ -66,6 +67,13 @@ export function PlatformAuthProvider({ children }: { children: ReactNode }) {
     configureApiClient({ baseUrl: getApiBaseUrl() });
     const tokens = await apiPortalLogin({ email, password });
     persistSession(tokens.access_token, tokens.refresh_token);
+    const me = await getPortalMe();
+    setUser(me);
+  }, []);
+
+  const establishSession = useCallback(async (accessToken: string, refreshToken: string) => {
+    configureApiClient({ baseUrl: getApiBaseUrl() });
+    persistSession(accessToken, refreshToken);
     const me = await getPortalMe();
     setUser(me);
   }, []);
@@ -115,10 +123,11 @@ export function PlatformAuthProvider({ children }: { children: ReactNode }) {
       isLoading,
       isAuthenticated: user !== null,
       login,
+      establishSession,
       logout,
       apiConfigured: Boolean(getApiBaseUrl()),
     }),
-    [user, isLoading, login, logout],
+    [user, isLoading, login, establishSession, logout],
   );
 
   return <PlatformAuthContext.Provider value={value}>{children}</PlatformAuthContext.Provider>;
