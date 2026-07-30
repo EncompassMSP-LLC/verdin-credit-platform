@@ -4,15 +4,19 @@ Post–V1.0 product depth on the shared monorepo (edition, not fork). Continue t
 
 **Prior release:** [`lrp-platform-v1.0.0`](../release-notes/lrp-platform-v1.0.0.md) · Hardening: [`lrp-v1.0-post-release-hardening.md`](lrp-v1.0-post-release-hardening.md)
 
-**Release:** [`lrp-platform-v1.1.0`](../release-notes/lrp-platform-v1.1.0.md) · Tag / GitHub Release: `lrp-platform-v1.1.0`
+**Release:** [`lrp-platform-v1.1.0`](../release-notes/lrp-platform-v1.1.0.md) · Tag / GitHub Release: `lrp-platform-v1.1.0`  
+**Commit SHA:** `850e0430b34482abf0225833d38446a4fa938faf`  
+**Status:** **Formally released** (2026-07-30)
 
 ## Exit criteria for "LRP Platform V1.1 done"
 
 - [x] Ordered slices LRP-208A → LRP-208B → LRP-209A merged to `main`
 - [x] Capability matrix + API reference updated for V1.1 surfaces
 - [x] No automatic complaint submission; eligibility remains advisory
-- [x] Release notes + tag `lrp-platform-v1.1.0`
-- [x] Smoke validation (API slice tests + CI green on #414–#416)
+- [x] Migrations `115_issue_evidence_links` + `116_unwanted_call_incidents` on `main`
+- [x] Release notes + tag `lrp-platform-v1.1.0` + recorded commit SHA
+- [x] Smoke validation (API slice tests + CI green on #414–#417)
+- [x] Roadmap / changelog / product backlog updated; deferred timeline items as PB-011/PB-012
 
 Deferred timeline lifecycle emits (draft workflow, delivery confirmation, issue detected/resolved) stay **out of scope** unless a real operator workflow gap appears.
 
@@ -60,4 +64,6 @@ Deferred timeline lifecycle emits (draft workflow, delivery confirmation, issue 
 
 - Release notes: [`docs/release-notes/lrp-platform-v1.1.0.md`](../release-notes/lrp-platform-v1.1.0.md)
 - Git tag / GitHub Release: `lrp-platform-v1.1.0`
-- Ordered backlog `208A → 208B → 209A` complete; do not expand deferred timeline enrichments without demonstrated need
+- Commit SHA: `850e0430b34482abf0225833d38446a4fa938faf`
+- Ordered backlog `208A → 208B → 209A` complete; deferred timeline enrichments → PB-011 / PB-012
+- Formal status: **released**
