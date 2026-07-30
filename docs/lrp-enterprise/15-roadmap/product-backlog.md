@@ -4,12 +4,12 @@ Enhancements **after** (or explicitly deferred from) V1.0. V1.0 work lives in th
 
 | Field        | Value         |
 | ------------ | ------------- |
-| Last groomed | 2026-07-26    |
+| Last groomed | 2026-07-30    |
 | Owner        | Product + Eng |
 
 ---
 
-## Deferred from V1.0 (candidates for v1.1)
+## Deferred from V1.0 (candidates for later releases)
 
 | ID     | Item                                        | Priority | Notes                        |
 | ------ | ------------------------------------------- | -------- | ---------------------------- |
@@ -23,6 +23,17 @@ Enhancements **after** (or explicitly deferred from) V1.0. V1.0 work lives in th
 | PB-008 | LOS deep sync (Encompass, etc.)             | Low      | After PMF                    |
 | PB-009 | Calendar provider sync (Google/Microsoft)   | Low      | §14 appointments             |
 | PB-010 | Cross-bureau benchmarks (org-internal only) | Low      | Never cross-tenant           |
+
+---
+
+## Deferred from V1.1 (optional timeline enrichments)
+
+| ID     | Item                                                     | Priority | Notes                                                                 |
+| ------ | -------------------------------------------------------- | -------- | --------------------------------------------------------------------- |
+| PB-011 | Draft workflow / delivery confirmation timeline emits    | Low      | Existing CASE_/DOCUMENT_/DISPUTE_LETTER_/TASK_ events already on feed |
+| PB-012 | Explicit issue-detected / issue-resolved timeline events | Low      | Only if operators show a real gap after V1.1                          |
+
+V1.1 product slices LRP-208A / 208B / 209A shipped in [`lrp-platform-v1.1.0`](../../release-notes/lrp-platform-v1.1.0.md).
 
 ---
 

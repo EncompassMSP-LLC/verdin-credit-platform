@@ -13,6 +13,14 @@ For each sprint or milestone, record:
 
 Use ADRs for durable architecture decisions that require formal acceptance. Use release notes for user-facing changes. Use this log for technical context that future maintainers will need when debugging, refactoring, or planning.
 
+## LRP Platform V1.1.0 — Evidence-to-action closeout
+
+**Decision:** Ship V1.1 as the ordered depth sequence LRP-208A → 208B → 209A on the shared monorepo; reuse `timeline_events` instead of a second audit store; keep unwanted-call `external_submission_status` as staff attestation only (no outbound FTC/CFPB/DNC HTTP submit). Tag `lrp-platform-v1.1.0` at `850e0430b34482abf0225833d38446a4fa938faf`.
+
+**Reason:** Completes the post–V1.0 product gap (vault links → case activity → complaint drafts) without expanding scope into auto-filing or duplicate timeline systems.
+
+**Follow-up work:** Optional timeline lifecycle emits as PB-011/PB-012 only if operators show a real gap; V1.0 security-officer signature + DR restore drill remain ops hardening.
+
 ## LRP Stage 5 Epic E5.4 — CRM workspace run / publish readiness (Vol 21)
 
 **Decision:** Wire `/crm/borrowers/:id` “Run / publish readiness” to `POST /cases/{id}/credit-analysis/runs` (compose + publish). Gate on CRM `borrowers.manage`. Refresh latest band/score after success. PDF export endpoint remains deferred (api-client URL helper is ahead of API).

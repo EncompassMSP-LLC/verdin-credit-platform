@@ -328,7 +328,7 @@ Deferred to [product backlog](../lrp-enterprise/15-roadmap/product-backlog.md): 
 
 - Release notes: [`docs/release-notes/lrp-platform-v1.0.0.md`](../release-notes/lrp-platform-v1.0.0.md)
 - Git tag / GitHub Release: `lrp-platform-v1.0.0`
-- Checklist V1.0 slice list closed; deferred LRP-208A / LRP-209A + ops sign-off/DR remain queued
+- Checklist V1.0 slice list closed; LRP-208A / LRP-209A shipped in V1.1; ops sign-off/DR remain queued
 
 ### Definition of Done (every slice)
 
