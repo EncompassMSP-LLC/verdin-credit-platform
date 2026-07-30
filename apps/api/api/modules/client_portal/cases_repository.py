@@ -9,11 +9,43 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from api.modules.accounts.models import Account
 from api.modules.cases.models import Case
 from api.modules.clients.models import Client, ClientContact
+from api.modules.mortgage_partner.models import OrgPartnership, PartnerReferral
 
 
 class ClientPortalCasesRepository:
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
+
+    async def get_referring_partner_name(
+        self,
+        *,
+        organization_id: uuid.UUID,
+        client_id: uuid.UUID,
+        case_id: uuid.UUID | None = None,
+    ) -> str | None:
+        """Latest non-deleted referral partnership display name for the borrower."""
+        filters = [
+            PartnerReferral.cro_organization_id == organization_id,
+            PartnerReferral.client_id == client_id,
+            PartnerReferral.deleted_at.is_(None),
+            OrgPartnership.deleted_at.is_(None),
+        ]
+        if case_id is not None:
+            filters.append(
+                or_(
+                    PartnerReferral.case_id == case_id,
+                    PartnerReferral.case_id.is_(None),
+                )
+            )
+        result = await self._session.execute(
+            select(OrgPartnership.display_name)
+            .select_from(PartnerReferral)
+            .join(OrgPartnership, OrgPartnership.id == PartnerReferral.partnership_id)
+            .where(*filters)
+            .order_by(PartnerReferral.created_at.desc())
+            .limit(1)
+        )
+        return result.scalar_one_or_none()
 
     async def list_cases_for_client(
         self,

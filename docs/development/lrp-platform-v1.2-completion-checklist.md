@@ -23,8 +23,8 @@ Extend the **existing** borrower client portal (`/portal/*` + `/api/v1/portal/*`
 | 1     | LRP-301A | Portal self-serve password reset                 | ✅     | #420    |
 | 2     | LRP-301B | Portal invite email on staff provision           | ✅     | #421    |
 | 3     | LRP-302A | Dedicated portal notifications feed + read state | ✅     | #422    |
-| 4     | LRP-302B | Portal message attachments (staff-gated)         | ✅     | this PR |
-| 5     | LRP-303A | Borrower dashboard UX polish (Vol 19 parity)     | ☐      | —       |
+| 4     | LRP-302B | Portal message attachments (staff-gated)         | ✅     | #423    |
+| 5     | LRP-303A | Borrower dashboard UX polish (Vol 19 parity)     | ✅     | this PR |
 | 6     | LRP-303B | Progress / checklist empty-states + deep links   | ☐      | —       |
 | —     | Closeout | Release notes + tag `lrp-platform-v1.2.0`        | ☐      | —       |
 
@@ -74,4 +74,13 @@ Extend the **existing** borrower client portal (`/portal/*` + `/api/v1/portal/*`
 - Portal + staff upload/delete draft + authenticated download; send with `attachment_ids`
 - Reuses documents storage; no public URLs; rate-limited uploads; cross-client isolation
 - UI: borrower `/portal/messages` + staff `CaseMessageThreadPanel` attach chips
+- Status: **shipped** (#423)
+
+### LRP-303A — Borrower dashboard UX polish (Vol 19 parity)
+
+- Portal case summaries expose `referring_partner_name` (partnership display name; P2-3)
+- Dashboard: skeletons, retry banners, overdue callout, next-three task links, docs CTA
+- Updates card uses notification unread count + recent title (302A feed); messages deep link kept
+- Readiness disclaimer under band; multi-case list only when >1 case (single-glance layout)
+- Defer deeper checklist empty-states / task deep links to **LRP-303B**
 - Status: **this PR**

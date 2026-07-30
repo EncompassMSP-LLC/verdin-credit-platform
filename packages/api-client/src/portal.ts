@@ -53,6 +53,8 @@ export interface PortalCaseSummary {
   opened_at: string;
   closed_at: string | null;
   updated_at: string;
+  /** Partnership display name when a referral exists (Vol 19 P2-3). */
+  referring_partner_name?: string | null;
 }
 
 export interface PortalCaseDetail extends PortalCaseSummary {

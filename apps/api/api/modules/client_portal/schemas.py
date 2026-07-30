@@ -129,6 +129,7 @@ class PortalCaseSummaryResponse(BaseSchema):
     opened_at: datetime
     closed_at: datetime | None
     updated_at: datetime
+    referring_partner_name: str | None = None
 
 
 class PortalCaseDetailResponse(PortalCaseSummaryResponse):

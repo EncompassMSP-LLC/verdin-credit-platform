@@ -13,6 +13,10 @@ import {
   usePortalReadiness,
 } from '@/lib/platform/readiness-hooks';
 import {
+  usePortalNotifications,
+  usePortalUnreadNotificationCount,
+} from '@/lib/portal/notification-hooks';
+import {
   caseStageLabel,
   readinessBandClass,
   readinessBandLabel,
@@ -20,9 +24,33 @@ import {
 import { formatDate } from '@/lib/utils';
 
 /**
- * Spec: Vol 19 · pages/dashboard.md (ready-for-build / E2)
- * Band-first readiness; partner name when present; next tasks + progress.
+ * Spec: Vol 19 · pages/dashboard.md (LRP-303A polish)
+ * Band-first readiness; partner name when present; next three + overdue; unread updates.
  */
+
+function DashboardSkeleton({ lines = 3 }: { lines?: number }) {
+  return (
+    <div className="space-y-3" aria-hidden>
+      {Array.from({ length: lines }).map((_, index) => (
+        <div
+          key={index}
+          className="h-10 animate-pulse rounded-brand bg-lrp-surface"
+          style={{ opacity: 1 - index * 0.15 }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function isOverdue(dueDate: string | null | undefined): boolean {
+  if (!dueDate) return false;
+  const due = new Date(dueDate);
+  if (Number.isNaN(due.getTime())) return false;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return due < today;
+}
+
 export default function DashboardPage() {
   const { user } = usePlatformAuth();
   const casesQuery = usePortalCases();
@@ -33,23 +61,28 @@ export default function DashboardPage() {
   const insightsQuery = usePortalInsights(primary?.id);
   const checklistQuery = usePortalChecklist(primary?.id);
   const learningQuery = usePortalLearningModules();
+  const unreadNotifsQuery = usePortalUnreadNotificationCount();
+  const recentNotifsQuery = usePortalNotifications({ page: 1 });
 
   const firstName =
     user?.client_display_name?.split(' ')[0] || user?.email?.split('@')[0] || 'there';
   const readiness = readinessQuery.data;
-  const partnerName =
-    (primary as { referring_partner_name?: string | null } | undefined)?.referring_partner_name ??
-    null;
+  const partnerName = primary?.referring_partner_name ?? null;
 
   const checklist = checklistQuery.data ?? [];
   const openTasks = checklist.filter((t) => t.status === 'open').slice(0, 3);
+  const overdueCount = checklist.filter((t) => t.status === 'open' && isOverdue(t.due_date)).length;
   const doneCount = checklist.filter((t) => t.status === 'done').length;
   const progressPct =
     checklist.length > 0 ? Math.round((doneCount / checklist.length) * 100) : null;
 
+  const unreadUpdates = unreadNotifsQuery.data ?? 0;
+  const recentUpdate = recentNotifsQuery.data?.items?.[0];
   const staffMessages =
     messagesQuery.data?.messages.filter((m) => m.sender_role === 'staff').length ?? 0;
   const nextLearning = learningQuery.data?.find((m) => !m.completed);
+
+  const summaryLoading = Boolean(primary) && (readinessQuery.isLoading || checklistQuery.isLoading);
 
   return (
     <div>
@@ -58,12 +91,20 @@ export default function DashboardPage() {
         title={`Welcome back, ${firstName}`}
         description={ADVISORY_DISCLAIMER_SHORT}
         actions={
-          <Link
-            href="/portal/tasks"
-            className="inline-flex rounded-brand bg-gold-500 px-4 py-2.5 text-sm font-semibold uppercase tracking-wide text-navy-900 hover:bg-gold-400"
-          >
-            View tasks
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href="/portal/documents"
+              className="inline-flex rounded-brand border border-lrp-border bg-lrp-surface-elevated px-4 py-2.5 text-sm font-semibold text-navy-900 hover:bg-lrp-surface"
+            >
+              Upload docs
+            </Link>
+            <Link
+              href="/portal/tasks"
+              className="inline-flex rounded-brand bg-gold-500 px-4 py-2.5 text-sm font-semibold uppercase tracking-wide text-navy-900 hover:bg-gold-400"
+            >
+              View tasks
+            </Link>
+          </div>
         }
       />
 
@@ -74,10 +115,19 @@ export default function DashboardPage() {
       ) : null}
 
       {casesQuery.isError ? (
-        <p className="mb-4 rounded-brand border border-critical/30 bg-critical/10 px-4 py-3 text-sm text-critical">
-          Could not load cases from the platform API. Confirm the API is running and{' '}
-          <code>ENABLE_CLIENT_PORTAL=true</code>.
-        </p>
+        <div className="mb-4 rounded-brand border border-critical/30 bg-critical/10 px-4 py-3 text-sm text-critical">
+          <p>
+            Could not load cases from the platform API. Confirm the API is running and{' '}
+            <code>ENABLE_CLIENT_PORTAL=true</code>.
+          </p>
+          <button
+            type="button"
+            className="mt-2 font-semibold underline"
+            onClick={() => void casesQuery.refetch()}
+          >
+            Retry
+          </button>
+        </div>
       ) : null}
 
       <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">
@@ -85,8 +135,19 @@ export default function DashboardPage() {
           title="Readiness"
           description="Advisory band from your linked case — not an underwriting decision."
         >
-          {readinessQuery.isLoading ? (
-            <p className="text-sm text-slate-500">Loading readiness…</p>
+          {summaryLoading && !readiness ? (
+            <DashboardSkeleton lines={2} />
+          ) : readinessQuery.isError ? (
+            <div className="text-sm text-critical">
+              <p>Could not load readiness.</p>
+              <button
+                type="button"
+                className="mt-2 font-semibold underline"
+                onClick={() => void readinessQuery.refetch()}
+              >
+                Retry
+              </button>
+            </div>
           ) : readiness ? (
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
@@ -104,6 +165,9 @@ export default function DashboardPage() {
                     {insightsQuery.data.items[0].title}
                   </p>
                 ) : null}
+                <p className="mt-3 text-xs leading-relaxed text-slate-500">
+                  {readiness.disclaimer}
+                </p>
               </div>
               <Link
                 href="/portal/readiness"
@@ -113,19 +177,35 @@ export default function DashboardPage() {
               </Link>
             </div>
           ) : (
-            <p className="text-sm text-slate-500">
-              {primary
-                ? 'We’re preparing your readiness view — check back soon.'
-                : 'Ask your advisor to link a case to unlock readiness.'}
-            </p>
+            <div>
+              <p className="text-sm text-slate-500">
+                {primary
+                  ? 'We’re preparing your readiness view — check back soon.'
+                  : 'Ask your advisor to link a case to unlock readiness.'}
+              </p>
+              <Link
+                href="/portal/documents"
+                className="mt-3 inline-block text-sm font-medium text-gold-700"
+              >
+                Upload documents →
+              </Link>
+            </div>
           )}
         </PortalCard>
 
         <PortalCard title="Progress" description="Checklist completion on your primary case.">
           {checklistQuery.isLoading ? (
-            <p className="text-sm text-slate-500">Loading…</p>
+            <DashboardSkeleton lines={2} />
           ) : progressPct == null ? (
-            <p className="text-sm text-slate-500">No checklist items yet.</p>
+            <div>
+              <p className="text-sm text-slate-500">No checklist items yet.</p>
+              <Link
+                href="/portal/documents"
+                className="mt-3 inline-block text-sm font-medium text-gold-700"
+              >
+                Upload documents →
+              </Link>
+            </div>
           ) : (
             <>
               <p className="text-3xl font-semibold tabular-nums text-navy-900">{progressPct}%</p>
@@ -139,6 +219,12 @@ export default function DashboardPage() {
                 {doneCount} of {checklist.length} tasks complete · {docsQuery.data?.length ?? 0}{' '}
                 documents on file
               </p>
+              {overdueCount > 0 ? (
+                <p className="mt-2 text-sm font-medium text-critical">
+                  {overdueCount} overdue task{overdueCount === 1 ? '' : 's'} — review your action
+                  plan.
+                </p>
+              ) : null}
             </>
           )}
         </PortalCard>
@@ -147,7 +233,7 @@ export default function DashboardPage() {
       <div className="mt-6 grid gap-6 xl:grid-cols-[1.3fr_1fr]">
         <PortalCard
           title="Next up"
-          description="Top open tasks from your action plan."
+          description="Your next three open actions."
           action={
             <Link href="/portal/tasks" className="text-sm font-medium text-gold-700">
               All tasks →
@@ -157,41 +243,70 @@ export default function DashboardPage() {
           {!primary ? (
             <p className="text-sm text-slate-500">Link a case to see tasks.</p>
           ) : checklistQuery.isLoading ? (
-            <p className="text-sm text-slate-500">Loading tasks…</p>
+            <DashboardSkeleton lines={3} />
+          ) : checklistQuery.isError ? (
+            <div className="text-sm text-critical">
+              <p>Could not load tasks.</p>
+              <button
+                type="button"
+                className="mt-2 font-semibold underline"
+                onClick={() => void checklistQuery.refetch()}
+              >
+                Retry
+              </button>
+            </div>
           ) : openTasks.length === 0 ? (
             <p className="text-sm text-slate-500">
               No open tasks — nice work. Check learning next.
             </p>
           ) : (
             <ul className="space-y-3">
-              {openTasks.map((task) => (
-                <li
-                  key={task.id}
-                  className="rounded-brand border border-lrp-border bg-lrp-surface px-4 py-3"
-                >
-                  <p className="font-medium text-navy-900">{task.title}</p>
-                  <p className="mt-1 text-xs text-slate-500">
-                    {task.category}
-                    {task.due_date ? ` · Due ${formatDate(task.due_date)}` : null}
-                  </p>
-                </li>
-              ))}
+              {openTasks.map((task) => {
+                const overdue = isOverdue(task.due_date);
+                return (
+                  <li key={task.id}>
+                    <Link
+                      href="/portal/tasks"
+                      className="block rounded-brand border border-lrp-border bg-lrp-surface px-4 py-3 transition hover:border-gold-500/40 hover:bg-lrp-surface-elevated"
+                    >
+                      <p className="font-medium text-navy-900">{task.title}</p>
+                      <p className="mt-1 text-xs text-slate-500">
+                        {task.category}
+                        {task.due_date ? ` · Due ${formatDate(task.due_date)}` : null}
+                        {overdue ? (
+                          <span className="ml-2 font-semibold text-critical">Overdue</span>
+                        ) : null}
+                      </p>
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </PortalCard>
 
         <div className="space-y-6">
-          <PortalCard title="Messages" description="Staff updates on your case.">
+          <PortalCard title="Updates" description="Unread notifications and staff messages.">
             <p className="text-2xl font-semibold tabular-nums text-navy-900">
-              {messagesQuery.isLoading ? '—' : staffMessages}
+              {unreadNotifsQuery.isLoading ? '—' : unreadUpdates}
             </p>
-            <p className="mt-1 text-sm text-slate-500">Messages from your team</p>
-            <Link
-              href="/portal/messages"
-              className="mt-3 inline-block text-sm font-medium text-gold-700"
-            >
-              Open messages →
-            </Link>
+            <p className="mt-1 text-sm text-slate-500">
+              Unread notification{unreadUpdates === 1 ? '' : 's'}
+              {messagesQuery.isLoading
+                ? null
+                : ` · ${staffMessages} message${staffMessages === 1 ? '' : 's'} from your team`}
+            </p>
+            {recentUpdate ? (
+              <p className="mt-3 line-clamp-2 text-sm text-navy-900">{recentUpdate.title}</p>
+            ) : null}
+            <div className="mt-3 flex flex-wrap gap-3">
+              <Link href="/portal/notifications" className="text-sm font-medium text-gold-700">
+                Notifications →
+              </Link>
+              <Link href="/portal/messages" className="text-sm font-medium text-gold-700">
+                Messages →
+              </Link>
+            </div>
           </PortalCard>
 
           <PortalCard
@@ -199,7 +314,7 @@ export default function DashboardPage() {
             description="Short modules that support readiness habits."
           >
             {learningQuery.isLoading ? (
-              <p className="text-sm text-slate-500">Loading modules…</p>
+              <DashboardSkeleton lines={2} />
             ) : nextLearning ? (
               <>
                 <p className="font-medium text-navy-900">{nextLearning.title}</p>
@@ -226,11 +341,11 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {casesQuery.data && casesQuery.data.length > 0 ? (
+      {casesQuery.data && casesQuery.data.length > 1 ? (
         <PortalCard
           className="mt-6"
           title="Your cases"
-          description="Linked cases on the shared platform."
+          description="Additional linked cases on the shared platform."
         >
           <ul className="space-y-3">
             {casesQuery.data.map((item) => (

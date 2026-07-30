@@ -80,6 +80,10 @@ class ClientPortalCasesService:
             portal_email=portal_user.email,
             contact_emails=contact_emails,
         )
+        partner_name = await self._cases.get_referring_partner_name(
+            organization_id=portal_user.organization_id,
+            client_id=client.id,
+        )
         return PortalCaseProgressResponse(
             items=[
                 PortalCaseSummaryResponse(
@@ -91,6 +95,7 @@ class ClientPortalCasesService:
                     opened_at=case.opened_at,
                     closed_at=case.closed_at,
                     updated_at=case.updated_at,
+                    referring_partner_name=partner_name,
                 )
                 for case in cases
             ]
@@ -120,6 +125,11 @@ class ClientPortalCasesService:
             case.id,
             organization_id=portal_user.organization_id,
         )
+        partner_name = await self._cases.get_referring_partner_name(
+            organization_id=portal_user.organization_id,
+            client_id=client.id,
+            case_id=case.id,
+        )
         return PortalCaseDetailResponse(
             id=case.id,
             case_number=case.case_number,
@@ -129,6 +139,7 @@ class ClientPortalCasesService:
             opened_at=case.opened_at,
             closed_at=case.closed_at,
             updated_at=case.updated_at,
+            referring_partner_name=partner_name,
             dispute_accounts=dispute_accounts,
             account_count=sum(dispute_accounts.values()),
         )
