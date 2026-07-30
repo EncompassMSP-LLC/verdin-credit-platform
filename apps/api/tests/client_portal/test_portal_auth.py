@@ -170,3 +170,53 @@ def test_provision_portal_user_forbidden_for_read_only(
         json={"email": "blocked@example.com", "password": "password123"},
     )
     assert response.status_code == 403
+
+
+def test_portal_password_reset_flow(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    portal_enabled: None,
+) -> None:
+    client_id = _create_client(api_client, manager_headers)
+    email = f"portal-reset-{uuid.uuid4().hex[:8]}@example.com"
+    _provision_portal_user(api_client, manager_headers, client_id, email=email)
+
+    unknown = api_client.post(
+        "/api/v1/portal/auth/forgot-password",
+        json={"email": "nobody-exists@example.com"},
+    )
+    assert unknown.status_code == 200, unknown.text
+    assert unknown.json()["reset_token"] is None
+
+    reset_req = api_client.post(
+        "/api/v1/portal/auth/forgot-password",
+        json={"email": email},
+    )
+    assert reset_req.status_code == 200, reset_req.text
+    reset_token = reset_req.json().get("reset_token")
+    assert reset_token, "expected reset_token in test/dev env"
+
+    confirm = api_client.post(
+        "/api/v1/portal/auth/reset-password",
+        json={"token": reset_token, "password": "newpassword1"},
+    )
+    assert confirm.status_code == 200, confirm.text
+    assert confirm.json()["access_token"]
+
+    old_login = api_client.post(
+        "/api/v1/portal/auth/login",
+        json={"email": email, "password": "password123"},
+    )
+    assert old_login.status_code == 401
+
+    new_login = api_client.post(
+        "/api/v1/portal/auth/login",
+        json={"email": email, "password": "newpassword1"},
+    )
+    assert new_login.status_code == 200, new_login.text
+
+    reuse = api_client.post(
+        "/api/v1/portal/auth/reset-password",
+        json={"token": reset_token, "password": "anotherpass1"},
+    )
+    assert reuse.status_code == 400

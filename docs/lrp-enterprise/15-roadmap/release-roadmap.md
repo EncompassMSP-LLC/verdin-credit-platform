@@ -2,64 +2,80 @@
 
 Planned product releases on the shared Verdin monorepo (edition, not fork).
 
-| Field        | Value                                                                                       |
-| ------------ | ------------------------------------------------------------------------------------------- |
-| Current      | **V1.1 released** — tag [`lrp-platform-v1.1.0`](../../release-notes/lrp-platform-v1.1.0.md) |
-| Prior        | [`lrp-platform-v1.0.0`](../../release-notes/lrp-platform-v1.0.0.md)                         |
-| Last updated | 2026-07-30                                                                                  |
+| Field        | Value                                                                                                               |
+| ------------ | ------------------------------------------------------------------------------------------------------------------- |
+| Current      | **Phase 4 / V1.2** — Customer Experience ([checklist](../../development/lrp-platform-v1.2-completion-checklist.md)) |
+| Prior        | [`lrp-platform-v1.1.0`](../../release-notes/lrp-platform-v1.1.0.md)                                                 |
+| Master epic  | [#419](https://github.com/EncompassMSP-LLC/verdin-credit-platform/issues/419)                                       |
+| Phases       | [`lrp-platform-maturity-phases.md`](../../development/lrp-platform-maturity-phases.md)                              |
+| Last updated | 2026-07-30                                                                                                          |
 
 ---
 
-## Timeline (indicative)
+## Timeline
 
 ```text
-lrp-platform-v1.0.0  ← production launch (M1–M6)
+lrp-platform-v1.0.0  ← RELEASED — production launch (M1–M6)
         ↓
-lrp-platform-v1.1.0  ← RELEASED — evidence vault + case timeline + unwanted-call complaints
+lrp-platform-v1.1.0  ← RELEASED — evidence vault + case timeline + unwanted-call
         ↓
-lrp-platform-v1.2.0  — partner portal expansion + KB / white-label themes + deeper analytics
+lrp-platform-v1.2.0  ← IN PROGRESS — Customer Experience (extend existing /portal)
         ↓
-30.0+ platform epics — LOS sync, custom domains (shared roadmap)
+lrp-platform-v1.3.0  — Automation & Integrations
+        ↓
+lrp-platform-v1.4.0  — Analytics & Intelligence
+        ↓
+lrp-platform-v2.0.0  — Enterprise Platform
 ```
 
 ---
 
-## v1.0 — Production launch
+## v1.0 — Production launch (released)
 
-| Focus | Milestones M1–M6                                                                          |
-| ----- | ----------------------------------------------------------------------------------------- |
-| Theme | Wire ops package → working software                                                       |
-| Exit  | [V1.0 exit criteria](lending-readiness-platform-v1.0-release-plan.md#7-v10-exit-criteria) |
-| Tag   | `lrp-platform-v1.0.0`                                                                     |
+Tag `lrp-platform-v1.0.0` · [notes](../../release-notes/lrp-platform-v1.0.0.md)
 
 ---
 
 ## v1.1 — Evidence-to-action depth (released)
 
-| Theme    | Delivered                                                              |
-| -------- | ---------------------------------------------------------------------- |
-| Vault    | Document↔issue associations (LRP-208A)                                 |
-| Timeline | Case action feed + `source_id` filter (LRP-208B)                       |
-| Comms    | Unwanted-call incidents + advisory drafts (LRP-209A)                   |
-| Tag      | `lrp-platform-v1.1.0` @ `850e0430b34482abf0225833d38446a4fa938faf`     |
-| Notes    | [`lrp-platform-v1.1.0.md`](../../release-notes/lrp-platform-v1.1.0.md) |
-
-Deferred timeline lifecycle emits (PB-011 / PB-012) are backlog only — not V1.1 blockers.
+Tag `lrp-platform-v1.1.0` @ `850e0430` · [notes](../../release-notes/lrp-platform-v1.1.0.md)
 
 ---
 
-## v1.2 — Partner & public depth
+## v1.2 — Customer Experience (active)
 
-| Theme     | Candidates (from backlog)                        |
-| --------- | ------------------------------------------------ |
-| Portals   | Builder / attorney / advisor authenticated MVP   |
-| Public    | Full KB, stories, SEO                            |
-| Ops       | Calendar provider sync                           |
-| Analytics | Org-internal referral analytics                  |
-| Branding  | Theme/logo white-label (not full custom domains) |
+Extend existing borrower portal — do not rebuild.
+
+| Theme         | Focus                                                                                                      |
+| ------------- | ---------------------------------------------------------------------------------------------------------- |
+| Accounts      | Self-serve password reset; invite email on provision                                                       |
+| Notifications | Dedicated feed + read state                                                                                |
+| Messaging     | Attachments (staff-gated)                                                                                  |
+| UX polish     | Dashboard / progress parity with Vol 19                                                                    |
+| Checklist     | [`lrp-platform-v1.2-completion-checklist.md`](../../development/lrp-platform-v1.2-completion-checklist.md) |
+
+Partner builder/attorney/advisor portals remain PB-001–003 unless promoted.
+
+---
+
+## v1.3 — Automation & Integrations
+
+Credit refresh scheduler, reminder engine, workflow/SLA orchestration, eSignature/SMS/calendar (feature-flagged).
+
+---
+
+## v1.4 — Analytics & Intelligence
+
+Portfolio dashboards, dispute success / TTR / team KPIs, mortgage partner reporting, advisory AI summaries / recommendations / QA / risk (ADR-012 gated).
+
+---
+
+## v2.0 — Enterprise Platform
+
+Org management depth, white-label themes, regional compliance packs, advanced RBAC, public API / webhooks / API keys / developer portal.
 
 ---
 
 ## Later / never (platform policy)
 
-See Version 29.0 scope deferrals: live bureau soft-pull, unsupervised filing, cross-tenant marketplace, product fork — **not** scheduled on this roadmap.
+Live bureau soft-pull, unsupervised filing, cross-tenant marketplace, product fork — **not** scheduled.

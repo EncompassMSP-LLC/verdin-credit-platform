@@ -74,6 +74,7 @@ from api.modules.billing.tax_calculation_models import (
 from api.modules.cases.consultation_pack_models import ConsultationPackRun
 from api.modules.cases.models import Case, CaseStatus
 from api.modules.client_portal.checklist_models import PortalChecklistCompletion
+from api.modules.client_portal.credential_models import ClientPortalCredentialToken
 from api.modules.client_portal.models import ClientPortalUser
 from api.modules.client_portal.push_models import (
     PortalPushDeliveryLog,
@@ -387,6 +388,7 @@ __all__ = [
     "UnwantedCallExternalSubmissionStatus",
     "ClientContact",
     "ClientPortalUser",
+    "ClientPortalCredentialToken",
     "PortalChecklistCompletion",
     "ClientStatus",
     "ConsentRecord",

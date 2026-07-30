@@ -202,11 +202,13 @@ Only one contact per client may have `is_primary=true` at a time.
 
 Requires `ENABLE_CLIENT_PORTAL=true`. Portal JWTs use `realm=portal` and include `client_id`; staff tokens use `realm=staff`. Realms are not interchangeable.
 
-| Method | Path                   | Auth       | Description              |
-| ------ | ---------------------- | ---------- | ------------------------ |
-| POST   | `/portal/auth/login`   | public     | Portal user login        |
-| POST   | `/portal/auth/refresh` | public     | Refresh portal tokens    |
-| GET    | `/portal/auth/me`      | portal JWT | Current portal user info |
+| Method | Path                           | Auth       | Description                                                               |
+| ------ | ------------------------------ | ---------- | ------------------------------------------------------------------------- |
+| POST   | `/portal/auth/login`           | public     | Portal user login                                                         |
+| POST   | `/portal/auth/refresh`         | public     | Refresh portal tokens                                                     |
+| POST   | `/portal/auth/forgot-password` | public     | Request password reset (generic response; LRP-301A; no email enumeration) |
+| POST   | `/portal/auth/reset-password`  | public     | Confirm reset token + new password; returns portal session (LRP-301A)     |
+| GET    | `/portal/auth/me`              | portal JWT | Current portal user info                                                  |
 
 Read-only case progress for portal users. Cases match when `client_id` is set to the portal client, with email/name heuristics as fallback for unlinked cases.
 
