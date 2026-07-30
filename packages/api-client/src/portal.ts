@@ -638,6 +638,70 @@ export async function reopenPortalLearningModule(moduleId: string): Promise<Port
   });
 }
 
+export type PortalNotificationCategory = 'system' | 'task' | 'dispute' | 'document' | 'workflow';
+
+export interface PortalNotification {
+  id: string;
+  title: string;
+  body: string | null;
+  category: PortalNotificationCategory;
+  read_at: string | null;
+  entity_type: string | null;
+  entity_id: string | null;
+  action_url: string | null;
+  created_at: string;
+}
+
+export interface ListPortalNotificationsParams {
+  page?: number;
+  page_size?: number;
+  unread_only?: boolean;
+  category?: PortalNotificationCategory;
+  sort_by?: 'created_at' | 'read_at';
+  sort_order?: 'asc' | 'desc';
+}
+
+export interface PortalUnreadCountResponse {
+  unread_count: number;
+}
+
+function buildPortalNotificationQuery(params: ListPortalNotificationsParams): string {
+  const search = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      search.set(key, String(value));
+    }
+  });
+  const query = search.toString();
+  return query ? `?${query}` : '';
+}
+
+export function listPortalNotifications(params: ListPortalNotificationsParams = {}) {
+  return request<{
+    items: PortalNotification[];
+    total: number;
+    page: number;
+    page_size: number;
+    pages: number;
+  }>(apiPath(`/portal/notifications${buildPortalNotificationQuery(params)}`));
+}
+
+export function getPortalUnreadNotificationCount() {
+  return request<PortalUnreadCountResponse>(apiPath('/portal/notifications/unread-count'));
+}
+
+export function markPortalNotificationRead(notificationId: string) {
+  return request<PortalNotification>(apiPath(`/portal/notifications/${notificationId}/read`), {
+    method: 'POST',
+  });
+}
+
+export function markAllPortalNotificationsRead() {
+  return request<PortalUnreadCountResponse>(apiPath('/portal/notifications/mark-all-read'), {
+    method: 'POST',
+  });
+}
+
 export async function provisionClientPortalUser(
   clientId: string,
   input: ProvisionPortalUserInput,

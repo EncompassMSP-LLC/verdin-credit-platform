@@ -620,9 +620,11 @@ class ClientPortalProvisioningService:
                         f"(expires in 7 days): {accept_url}. "
                         f"No temporary password was sent. {footer}"
                     ),
-                    action_url=accept_url,
+                    action_url="/portal/accept-invite",
                     borrower_email=portal_user.email,
                     borrower_name=client.display_name,
+                    borrower_portal_user_id=portal_user.id,
+                    client_id=portal_user.client_id,
                     triggered_by_user_id=triggered_by.id,
                     source_module="client_portal.invite",
                     create_crm_tasks=False,

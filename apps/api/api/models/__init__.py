@@ -7,6 +7,7 @@ from api.modules.auth.models import Organization, OrganizationType, User
 from api.modules.cases.models import Case, CasePriority, CaseStage, CaseStatus
 from api.modules.client_portal.credential_models import ClientPortalCredentialToken
 from api.modules.client_portal.models import ClientPortalUser
+from api.modules.client_portal.notification_models import PortalNotification
 from api.modules.clients.models import Client, ClientContact, ClientStatus, ContactRelationship
 from api.modules.clients.unwanted_call_models import UnwantedCallIncident
 from api.modules.documents.issue_evidence_link_models import (
@@ -35,6 +36,7 @@ __all__ = [
     "ClientContact",
     "ClientPortalUser",
     "ClientPortalCredentialToken",
+    "PortalNotification",
     "ClientStatus",
     "ContactRelationship",
     "CrossOrgBenchmarkRun",

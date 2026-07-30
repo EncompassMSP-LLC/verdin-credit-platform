@@ -8,6 +8,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { PortalNavIcon } from '@/components/portal/PortalNavIcon';
 import { AdvisoryDisclaimer } from '@/components/ui/AdvisoryDisclaimer';
 import { usePlatformAuth } from '@/lib/platform/auth';
+import { usePortalUnreadNotificationCount } from '@/lib/portal/notification-hooks';
 import { portalNav } from '@/lib/portal/nav';
 import { cn } from '@/lib/utils';
 
@@ -15,6 +16,8 @@ export function PortalShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, isLoading, isAuthenticated, logout } = usePlatformAuth();
+  const unreadQuery = usePortalUnreadNotificationCount();
+  const unread = unreadQuery.data ?? 0;
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -158,9 +161,14 @@ export function PortalShell({ children }: { children: ReactNode }) {
               <Link
                 href="/portal/notifications"
                 className="relative inline-flex h-9 w-9 items-center justify-center rounded-brand border border-lrp-border bg-lrp-surface-elevated"
-                aria-label="Notifications"
+                aria-label={unread > 0 ? `Notifications, ${unread} unread` : 'Notifications'}
               >
                 <PortalNavIcon name="notifications" className="h-4 w-4" />
+                {unread > 0 ? (
+                  <span className="absolute -right-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-critical px-1 text-[0.6rem] font-bold text-white">
+                    {unread > 99 ? '99+' : unread}
+                  </span>
+                ) : null}
               </Link>
             </div>
           </header>

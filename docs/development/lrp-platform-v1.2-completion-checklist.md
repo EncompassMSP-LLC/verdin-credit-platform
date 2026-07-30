@@ -18,15 +18,15 @@ Extend the **existing** borrower client portal (`/portal/*` + `/api/v1/portal/*`
 
 ## Ordered slices
 
-| Order | ID       | Slice                                            | Status | PR   |
-| ----- | -------- | ------------------------------------------------ | ------ | ---- |
-| 1     | LRP-301A | Portal self-serve password reset                 | ✅     | #420 |
-| 2     | LRP-301B | Portal invite email on staff provision           | ✅     | —    |
-| 3     | LRP-302A | Dedicated portal notifications feed + read state | ☐      | —    |
-| 4     | LRP-302B | Portal message attachments (staff-gated)         | ☐      | —    |
-| 5     | LRP-303A | Borrower dashboard UX polish (Vol 19 parity)     | ☐      | —    |
-| 6     | LRP-303B | Progress / checklist empty-states + deep links   | ☐      | —    |
-| —     | Closeout | Release notes + tag `lrp-platform-v1.2.0`        | ☐      | —    |
+| Order | ID       | Slice                                            | Status | PR      |
+| ----- | -------- | ------------------------------------------------ | ------ | ------- |
+| 1     | LRP-301A | Portal self-serve password reset                 | ✅     | #420    |
+| 2     | LRP-301B | Portal invite email on staff provision           | ✅     | #421    |
+| 3     | LRP-302A | Dedicated portal notifications feed + read state | ✅     | this PR |
+| 4     | LRP-302B | Portal message attachments (staff-gated)         | ☐      | —       |
+| 5     | LRP-303A | Borrower dashboard UX polish (Vol 19 parity)     | ☐      | —       |
+| 6     | LRP-303B | Progress / checklist empty-states + deep links   | ☐      | —       |
+| —     | Closeout | Release notes + tag `lrp-platform-v1.2.0`        | ☐      | —       |
 
 ## Ranking notes
 
@@ -54,4 +54,15 @@ Extend the **existing** borrower client portal (`/portal/*` + `/api/v1/portal/*`
 - `POST /clients/{id}/portal-user/resend-invite` (staff-gated, 2-minute cooldown)
 - `POST /portal/auth/accept-invite` + `/portal/accept-invite` UI
 - Timeline: `PORTAL_USER_INVITED` / `PORTAL_INVITE_ACCEPTED`
-- Status: **shipped** (this PR)
+- Status: **shipped** (#421)
+
+### LRP-302A — Dedicated portal notifications feed + read state
+
+- Migration `118_portal_notifications` (`recipient_portal_user_id` → `client_portal_users`; reuses `notification_category` enum)
+- Credential tokens remain migration **117 only** (invite/reset purposes)
+- `GET /portal/notifications`, `GET /portal/notifications/unread-count`, `POST …/read`, `POST …/mark-all-read`
+- Matrix `BORROWER` + `IN_APP` writes portal rows (not staff `notifications`)
+- lrp-web `/portal/notifications` page + shell unread badge; optimistic mark-read with rollback
+- Deep links sanitized to relative `/portal/*`; no staff metadata on responses
+- Mark-read idempotent; no per-read audit noise (creation audited via matrix dispatches)
+- Status: **this PR**

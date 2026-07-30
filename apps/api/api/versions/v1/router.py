@@ -15,6 +15,9 @@ from api.modules.client_portal.identity_theft_router import (
     router as client_portal_identity_theft_router,
 )
 from api.modules.client_portal.messaging_router import router as client_portal_messaging_router
+from api.modules.client_portal.notifications_router import (
+    router as client_portal_notifications_router,
+)
 from api.modules.client_portal.push_router import router as client_portal_push_router
 from api.modules.client_portal.router import router as client_portal_router
 from api.modules.clients.router import router as clients_router
@@ -48,6 +51,7 @@ router.include_router(client_portal_consents_router)
 router.include_router(client_portal_identity_theft_router)
 router.include_router(client_portal_documents_router)
 router.include_router(client_portal_messaging_router)
+router.include_router(client_portal_notifications_router)
 router.include_router(client_portal_push_router)
 router.include_router(dashboard_router)
 router.include_router(accounts_router)
