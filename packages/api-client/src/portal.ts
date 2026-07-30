@@ -119,11 +119,19 @@ export interface ClientPortalUser {
   last_login_at: string | null;
   created_at: string;
   updated_at: string;
+  invitation_pending?: boolean;
+}
+
+export interface ClientPortalInviteActionResponse extends ClientPortalUser {
+  detail: string;
+  invitation_queued: boolean;
+  invite_token?: string | null;
 }
 
 export interface ProvisionPortalUserInput {
   email: string;
-  password: string;
+  password?: string;
+  send_invite?: boolean;
 }
 
 export interface UpdatePortalUserInput {
@@ -168,6 +176,17 @@ export async function portalResetPassword(input: {
   password: string;
 }): Promise<PortalTokenResponse> {
   return request<PortalTokenResponse>(apiPath('/portal/auth/reset-password'), {
+    method: 'POST',
+    body: input,
+    auth: false,
+  });
+}
+
+export async function portalAcceptInvite(input: {
+  token: string;
+  password: string;
+}): Promise<PortalTokenResponse> {
+  return request<PortalTokenResponse>(apiPath('/portal/auth/accept-invite'), {
     method: 'POST',
     body: input,
     auth: false,
@@ -622,11 +641,20 @@ export async function reopenPortalLearningModule(moduleId: string): Promise<Port
 export async function provisionClientPortalUser(
   clientId: string,
   input: ProvisionPortalUserInput,
-): Promise<ClientPortalUser> {
-  return request<ClientPortalUser>(apiPath(`/clients/${clientId}/portal-user`), {
+): Promise<ClientPortalInviteActionResponse> {
+  return request<ClientPortalInviteActionResponse>(apiPath(`/clients/${clientId}/portal-user`), {
     method: 'POST',
     body: input,
   });
+}
+
+export async function resendClientPortalInvite(
+  clientId: string,
+): Promise<ClientPortalInviteActionResponse> {
+  return request<ClientPortalInviteActionResponse>(
+    apiPath(`/clients/${clientId}/portal-user/resend-invite`),
+    { method: 'POST' },
+  );
 }
 
 export async function getClientPortalUser(clientId: string): Promise<ClientPortalUser> {

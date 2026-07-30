@@ -541,6 +541,61 @@ def unwanted_call_incident_updated_event(
     )
 
 
+def portal_user_invited_event(
+    *,
+    portal_user: Any,
+    performed_by: uuid.UUID,
+    case_id: uuid.UUID | None,
+    token_id: uuid.UUID,
+    invitation_queued: bool,
+) -> PlatformEvent:
+    return PlatformEvent(
+        event_type="PORTAL_USER_INVITED",
+        event_category=EventCategory.AUTH.value,
+        title="Borrower portal invitation issued",
+        description="Staff issued a one-time portal invite (no password emailed).",
+        organization_id=portal_user.organization_id,
+        case_id=case_id,
+        performed_by=performed_by,
+        source_module="client_portal",
+        metadata={
+            "portal_user_id": str(portal_user.id),
+            "client_id": str(portal_user.client_id),
+            "credential_token_id": str(token_id),
+            "invitation_queued": invitation_queued,
+            "source_record_type": "client_portal_credential_token",
+            "source_record_id": str(token_id),
+            "actor_type": "staff",
+        },
+    )
+
+
+def portal_invite_accepted_event(
+    *,
+    portal_user: Any,
+    case_id: uuid.UUID | None,
+    token_id: uuid.UUID,
+) -> PlatformEvent:
+    return PlatformEvent(
+        event_type="PORTAL_INVITE_ACCEPTED",
+        event_category=EventCategory.AUTH.value,
+        title="Borrower portal invitation accepted",
+        description="Borrower set a portal password via invite token.",
+        organization_id=portal_user.organization_id,
+        case_id=case_id,
+        performed_by=None,
+        source_module="client_portal",
+        metadata={
+            "portal_user_id": str(portal_user.id),
+            "client_id": str(portal_user.client_id),
+            "credential_token_id": str(token_id),
+            "source_record_type": "client_portal_credential_token",
+            "source_record_id": str(token_id),
+            "actor_type": "portal_user",
+        },
+    )
+
+
 def portal_document_uploaded_event(
     document: Document,
     *,

@@ -56,6 +56,7 @@ class Settings(BaseSettings):
 
     cors_origins: str = "http://localhost:5173,http://localhost:3000"
     public_app_url: str = "http://localhost:8080"
+    lrp_portal_base_url: str = "http://localhost:3100"
 
     # LRP-109 — production organization mode guardrails
     allow_demo_orgs: bool = Field(

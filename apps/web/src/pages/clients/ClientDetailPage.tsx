@@ -11,6 +11,7 @@ import {
   getClientPortalUser,
   listClientContacts,
   provisionClientPortalUser,
+  resendClientPortalInvite,
   revokeClientPortalUser,
 } from '@verdin/api-client';
 import { createClientContactSchema, type CreateClientContactInput } from '@verdin/validation';
@@ -51,8 +52,8 @@ export function ClientDetailPage() {
   const queryClient = useQueryClient();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [portalEmail, setPortalEmail] = useState('');
-  const [portalPassword, setPortalPassword] = useState('');
   const [portalError, setPortalError] = useState<string | null>(null);
+  const [portalInviteDetail, setPortalInviteDetail] = useState<string | null>(null);
 
   const clientQuery = useQuery({
     queryKey: ['client', clientId],
@@ -120,11 +121,21 @@ export function ClientDetailPage() {
     mutationFn: () =>
       provisionClientPortalUser(clientId!, {
         email: portalEmail,
-        password: portalPassword,
+        send_invite: true,
       }),
-    onSuccess: () => {
+    onSuccess: (data) => {
       setPortalError(null);
-      setPortalPassword('');
+      setPortalInviteDetail(data.detail);
+      queryClient.invalidateQueries({ queryKey: ['client-portal-user', clientId] });
+    },
+    onError: (err: Error) => setPortalError(err.message),
+  });
+
+  const resendInviteMutation = useMutation({
+    mutationFn: () => resendClientPortalInvite(clientId!),
+    onSuccess: (data) => {
+      setPortalError(null);
+      setPortalInviteDetail(data.detail);
       queryClient.invalidateQueries({ queryKey: ['client-portal-user', clientId] });
     },
     onError: (err: Error) => setPortalError(err.message),
@@ -133,6 +144,7 @@ export function ClientDetailPage() {
   const revokePortalMutation = useMutation({
     mutationFn: () => revokeClientPortalUser(clientId!),
     onSuccess: () => {
+      setPortalInviteDetail(null);
       queryClient.invalidateQueries({ queryKey: ['client-portal-user', clientId] });
     },
   });
@@ -236,7 +248,10 @@ export function ClientDetailPage() {
               <p className="mt-4 text-sm text-gray-500">Checking portal access…</p>
             ) : portalQuery.isError ? (
               <div className="mt-4 space-y-3">
-                <p className="text-sm text-gray-600">No portal user provisioned yet.</p>
+                <p className="text-sm text-gray-600">
+                  No portal user yet. Provisioning sends a one-time invite link — no password is
+                  emailed.
+                </p>
                 <div>
                   <label className="text-sm font-medium text-gray-700">Portal email</label>
                   <input
@@ -247,23 +262,15 @@ export function ClientDetailPage() {
                     placeholder={client.email ?? 'client@example.com'}
                   />
                 </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-700">Temporary password</label>
-                  <input
-                    className={inputClass}
-                    type="password"
-                    value={portalPassword}
-                    onChange={(event) => setPortalPassword(event.target.value)}
-                  />
-                </div>
                 {portalError ? <p className="text-sm text-red-600">{portalError}</p> : null}
+                {portalInviteDetail ? (
+                  <p className="text-sm text-gray-700">{portalInviteDetail}</p>
+                ) : null}
                 <Button
                   onClick={() => provisionPortalMutation.mutate()}
-                  disabled={
-                    provisionPortalMutation.isPending || !portalEmail || portalPassword.length < 8
-                  }
+                  disabled={provisionPortalMutation.isPending || !portalEmail}
                 >
-                  Provision portal user
+                  Provision &amp; send invite
                 </Button>
               </div>
             ) : portalQuery.data ? (
@@ -275,14 +282,29 @@ export function ClientDetailPage() {
                   <span className="font-medium">Status:</span>{' '}
                   {portalQuery.data.is_active ? 'Active' : 'Inactive'}
                 </p>
-                <Button
-                  variant="secondary"
-                  className="mt-3"
-                  onClick={() => revokePortalMutation.mutate()}
-                  disabled={revokePortalMutation.isPending}
-                >
-                  Revoke portal access
-                </Button>
+                {portalQuery.data.invitation_pending ? (
+                  <p className="text-amber-700">Invitation pending — borrower has not activated.</p>
+                ) : null}
+                {portalInviteDetail ? <p>{portalInviteDetail}</p> : null}
+                {portalError ? <p className="text-sm text-red-600">{portalError}</p> : null}
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {portalQuery.data.invitation_pending ? (
+                    <Button
+                      variant="secondary"
+                      onClick={() => resendInviteMutation.mutate()}
+                      disabled={resendInviteMutation.isPending}
+                    >
+                      Resend invite
+                    </Button>
+                  ) : null}
+                  <Button
+                    variant="secondary"
+                    onClick={() => revokePortalMutation.mutate()}
+                    disabled={revokePortalMutation.isPending}
+                  >
+                    Revoke portal access
+                  </Button>
+                </div>
               </div>
             ) : null}
           </Card>
