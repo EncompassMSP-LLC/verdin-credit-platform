@@ -10,7 +10,7 @@ Post–V1.0 product depth on the shared monorepo (edition, not fork). Continue t
 | ----- | -------- | ----------------------------------------------------------- | ------ |
 | 1     | LRP-208A | Evidence vault document↔issue association                   | ✅     |
 | 2     | LRP-208B | Case action timeline panel (reuse `GET /timeline?case_id=`) | ✅     |
-| 3     | LRP-209A | Unwanted-call complaint workflow + follow-up tracking       | ☐      |
+| 3     | LRP-209A | Unwanted-call complaint workflow + follow-up tracking       | ✅     |
 
 ## Ranking notes
 
@@ -34,3 +34,11 @@ Post–V1.0 product depth on the shared monorepo (edition, not fork). Continue t
 - `GET /timeline?source_id=` JSONB filter for issue-scoped views
 - CRO `CaseActionTimelinePanel` + CRM Activity panel: newest/oldest, issue filter, document/issue deep links
 - Deferred lifecycle emits (letter draft workflow, delivery confirmation, issue detected/resolved): track for follow-up slices; existing CASE_/DOCUMENT_/DISPUTE_LETTER_/TASK_ events already appear on the case feed
+
+### LRP-209A — Unwanted-call complaint workflow
+
+- Migration `116_unwanted_call_incidents`; model `UnwantedCallIncident`
+- `GET/POST/PATCH/DELETE /clients/{id}/unwanted-call-incidents` with preference snapshot + advisory eligibility + staff-gated draft text
+- Timeline emits `UNWANTED_CALL_INCIDENT_RECORDED` / `UNWANTED_CALL_INCIDENT_UPDATED`
+- CRM panel next to communication preferences; never auto-submits to FTC/CFPB/DNC
+- Explicit non-goals: silent registry registration, liability conclusions, auto-transmit letters

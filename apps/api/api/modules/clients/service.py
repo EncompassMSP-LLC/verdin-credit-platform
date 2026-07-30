@@ -42,6 +42,24 @@ from api.modules.clients.schemas import (
     ClientResponse,
     ClientUpdate,
     PreferenceEventItem,
+    UnwantedCallIncidentCreate,
+    UnwantedCallIncidentListResponse,
+    UnwantedCallIncidentResponse,
+    UnwantedCallIncidentUpdate,
+)
+from api.modules.clients.unwanted_call_helpers import (
+    UNWANTED_CALL_DISCLAIMER,
+    build_eligibility_guidance,
+    build_unwanted_call_complaint_draft,
+    snapshot_communication_preferences,
+)
+from api.modules.clients.unwanted_call_models import (
+    UnwantedCallChannel,
+    UnwantedCallComplaintTarget,
+    UnwantedCallExternalSubmissionStatus,
+    UnwantedCallIncident,
+    UnwantedCallIncidentStatus,
+    UnwantedCallPartyType,
 )
 
 
@@ -511,18 +529,295 @@ class ClientService:
         from datetime import UTC, datetime
 
         now = datetime.now(UTC)
+        prefs.dnc_status = DncAssistanceStatus.COMPLETED
         prefs.dnc_completed_at = now
         prefs.dnc_followup_due_at = followup_due_from(now)
-        prefs.dnc_status = DncAssistanceStatus.COMPLETED
         apply_audit_on_update(prefs, user.id)
         append_preference_event(
             prefs,
             action="dnc_marked_completed",
             actor_id=str(user.id),
-            detail="Client/staff marked National Do Not Call registration complete",
+            detail="Staff/client attested National DNC registry confirmation finished",
         )
         await self._clients.save_communication_preferences(prefs)
         if self._session is not None:
             await self._session.commit()
             await self._session.refresh(prefs)
         return self._preferences_response(client, prefs)
+
+    def _unwanted_call_response(
+        self,
+        incident: UnwantedCallIncident,
+    ) -> UnwantedCallIncidentResponse:
+        return UnwantedCallIncidentResponse(
+            id=incident.id,
+            organization_id=incident.organization_id,
+            client_id=incident.client_id,
+            case_id=incident.case_id,
+            account_id=incident.account_id,
+            creditor_or_collector_name=incident.creditor_or_collector_name,
+            party_type=incident.party_type.value,
+            called_at=incident.called_at,
+            caller_number=incident.caller_number,
+            called_number=incident.called_number,
+            channel=incident.channel.value,
+            notes=incident.notes,
+            preference_snapshot=dict(incident.preference_snapshot or {}),
+            eligibility_guidance=dict(incident.eligibility_guidance or {}),
+            status=incident.status.value,
+            follow_up_due_at=incident.follow_up_due_at,
+            follow_up_notes=incident.follow_up_notes,
+            complaint_target=incident.complaint_target.value,
+            external_submission_status=incident.external_submission_status.value,
+            external_reference=incident.external_reference,
+            evidence_document_id=incident.evidence_document_id,
+            draft_text=incident.draft_text,
+            disclaimer=UNWANTED_CALL_DISCLAIMER,
+            created_at=incident.created_at,
+            updated_at=incident.updated_at,
+            created_by_id=incident.created_by_id,
+        )
+
+    async def _resolve_primary_case_id(
+        self,
+        *,
+        organization_id: uuid.UUID,
+        client_id: uuid.UUID,
+    ) -> uuid.UUID | None:
+        if self._session is None:
+            return None
+        from sqlalchemy import select
+
+        from api.modules.cases.models import Case
+
+        result = await self._session.execute(
+            select(Case.id)
+            .where(
+                Case.organization_id == organization_id,
+                Case.client_id == client_id,
+                Case.deleted_at.is_(None),
+            )
+            .order_by(Case.created_at.desc())
+            .limit(1)
+        )
+        return result.scalar_one_or_none()
+
+    async def list_unwanted_call_incidents(
+        self,
+        user: User,
+        client_id: uuid.UUID,
+        *,
+        status: str | None = None,
+    ) -> UnwantedCallIncidentListResponse:
+        client = await self._get_client_for_user(client_id, user)
+        items = await self._clients.list_unwanted_call_incidents(
+            organization_id=client.organization_id,
+            client_id=client.id,
+            status=status,
+        )
+        return UnwantedCallIncidentListResponse(
+            client_id=client.id,
+            disclaimer=UNWANTED_CALL_DISCLAIMER,
+            items=[self._unwanted_call_response(item) for item in items],
+        )
+
+    async def get_unwanted_call_incident(
+        self,
+        user: User,
+        client_id: uuid.UUID,
+        incident_id: uuid.UUID,
+    ) -> UnwantedCallIncidentResponse:
+        client = await self._get_client_for_user(client_id, user)
+        incident = await self._clients.get_unwanted_call_incident(
+            incident_id,
+            organization_id=client.organization_id,
+            client_id=client.id,
+        )
+        if incident is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Unwanted call incident not found",
+            )
+        return self._unwanted_call_response(incident)
+
+    async def create_unwanted_call_incident(
+        self,
+        user: User,
+        client_id: uuid.UUID,
+        data: UnwantedCallIncidentCreate,
+    ) -> UnwantedCallIncidentResponse:
+        self._require_write(user)
+        client = await self._get_client_for_user(client_id, user)
+        prefs = await self._clients.get_communication_preferences(
+            organization_id=client.organization_id,
+            client_id=client.id,
+        )
+        case_id = data.case_id or await self._resolve_primary_case_id(
+            organization_id=client.organization_id,
+            client_id=client.id,
+        )
+        party_type = UnwantedCallPartyType(data.party_type)
+        channel = UnwantedCallChannel(data.channel)
+        snapshot = snapshot_communication_preferences(prefs)
+        guidance = build_eligibility_guidance(
+            prefs=prefs,
+            called_at=data.called_at,
+            party_type=party_type,
+            channel=channel,
+        )
+        called_number = data.called_number
+        if called_number is None and prefs is not None:
+            called_number = prefs.dnc_phone_number
+
+        incident = UnwantedCallIncident(
+            organization_id=client.organization_id,
+            client_id=client.id,
+            case_id=case_id,
+            account_id=data.account_id,
+            creditor_or_collector_name=data.creditor_or_collector_name,
+            party_type=party_type,
+            called_at=data.called_at,
+            caller_number=data.caller_number,
+            called_number=called_number,
+            channel=channel,
+            notes=data.notes,
+            preference_snapshot=snapshot,
+            eligibility_guidance=guidance,
+            status=UnwantedCallIncidentStatus(data.status),
+            follow_up_due_at=data.follow_up_due_at,
+            follow_up_notes=data.follow_up_notes,
+            complaint_target=UnwantedCallComplaintTarget(data.complaint_target),
+            external_submission_status=UnwantedCallExternalSubmissionStatus.NOT_STARTED,
+            evidence_document_id=data.evidence_document_id,
+        )
+        apply_audit_on_create(incident, user.id)
+        incident.draft_text = build_unwanted_call_complaint_draft(client=client, incident=incident)
+        if data.complaint_target != "none":
+            incident.external_submission_status = (
+                UnwantedCallExternalSubmissionStatus.DRAFT_PREPARED
+            )
+            if incident.status == UnwantedCallIncidentStatus.OPEN:
+                incident.status = UnwantedCallIncidentStatus.DRAFT_READY
+
+        await self._clients.add_unwanted_call_incident(incident)
+        if self._session is not None:
+            from api.core.events import publish_platform_event
+            from api.modules.timeline.builders import unwanted_call_incident_recorded_event
+
+            await publish_platform_event(
+                self._session,
+                unwanted_call_incident_recorded_event(incident=incident, performed_by=user.id),
+            )
+            await self._session.commit()
+            await self._session.refresh(incident)
+        return self._unwanted_call_response(incident)
+
+    async def update_unwanted_call_incident(
+        self,
+        user: User,
+        client_id: uuid.UUID,
+        incident_id: uuid.UUID,
+        data: UnwantedCallIncidentUpdate,
+    ) -> UnwantedCallIncidentResponse:
+        self._require_write(user)
+        client = await self._get_client_for_user(client_id, user)
+        incident = await self._clients.get_unwanted_call_incident(
+            incident_id,
+            organization_id=client.organization_id,
+            client_id=client.id,
+        )
+        if incident is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Unwanted call incident not found",
+            )
+
+        previous_status = incident.status.value
+        payload = data.model_dump(exclude_unset=True)
+        refresh_draft = bool(payload.pop("refresh_draft", False))
+        enum_fields = {
+            "party_type": UnwantedCallPartyType,
+            "channel": UnwantedCallChannel,
+            "status": UnwantedCallIncidentStatus,
+            "complaint_target": UnwantedCallComplaintTarget,
+            "external_submission_status": UnwantedCallExternalSubmissionStatus,
+        }
+        for key, value in payload.items():
+            if key in enum_fields and value is not None:
+                setattr(incident, key, enum_fields[key](value))
+            else:
+                setattr(incident, key, value)
+
+        if (
+            "called_at" in payload
+            or "party_type" in payload
+            or "channel" in payload
+            or refresh_draft
+        ):
+            prefs = await self._clients.get_communication_preferences(
+                organization_id=client.organization_id,
+                client_id=client.id,
+            )
+            incident.preference_snapshot = snapshot_communication_preferences(prefs)
+            incident.eligibility_guidance = build_eligibility_guidance(
+                prefs=prefs,
+                called_at=incident.called_at,
+                party_type=incident.party_type,
+                channel=incident.channel,
+            )
+            refresh_draft = True
+
+        if refresh_draft:
+            incident.draft_text = build_unwanted_call_complaint_draft(
+                client=client, incident=incident
+            )
+            if (
+                incident.external_submission_status
+                == UnwantedCallExternalSubmissionStatus.NOT_STARTED
+                and incident.complaint_target != UnwantedCallComplaintTarget.NONE
+            ):
+                incident.external_submission_status = (
+                    UnwantedCallExternalSubmissionStatus.DRAFT_PREPARED
+                )
+
+        apply_audit_on_update(incident, user.id)
+        await self._clients.save_unwanted_call_incident(incident)
+        if self._session is not None:
+            from api.core.events import publish_platform_event
+            from api.modules.timeline.builders import unwanted_call_incident_updated_event
+
+            await publish_platform_event(
+                self._session,
+                unwanted_call_incident_updated_event(
+                    incident=incident,
+                    performed_by=user.id,
+                    previous_status=previous_status,
+                ),
+            )
+            await self._session.commit()
+            await self._session.refresh(incident)
+        return self._unwanted_call_response(incident)
+
+    async def delete_unwanted_call_incident(
+        self,
+        user: User,
+        client_id: uuid.UUID,
+        incident_id: uuid.UUID,
+    ) -> None:
+        self._require_write(user)
+        client = await self._get_client_for_user(client_id, user)
+        incident = await self._clients.get_unwanted_call_incident(
+            incident_id,
+            organization_id=client.organization_id,
+            client_id=client.id,
+        )
+        if incident is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Unwanted call incident not found",
+            )
+        incident.soft_delete()
+        apply_audit_on_update(incident, user.id)
+        await self._clients.save_unwanted_call_incident(incident)
+        if self._session is not None:
+            await self._session.commit()

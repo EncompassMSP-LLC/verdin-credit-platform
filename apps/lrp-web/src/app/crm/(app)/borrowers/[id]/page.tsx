@@ -7,6 +7,7 @@ import { PageHeader } from '@/components/crm/PageHeader';
 import { RoleGate } from '@/components/crm/RoleGate';
 import { CrmCaseDocumentsPanel } from '@/components/crm/CrmCaseDocumentsPanel';
 import { CrmCommunicationPreferencesPanel } from '@/components/crm/CrmCommunicationPreferencesPanel';
+import { CrmUnwantedCallIncidentsPanel } from '@/components/crm/CrmUnwantedCallIncidentsPanel';
 import { CrmIssueExplainabilityPanel } from '@/components/crm/CrmIssueExplainabilityPanel';
 import { CrmCaseActionTimelinePanel } from '@/components/crm/CrmCaseActionTimelinePanel';
 import { CrmLetterDraftBuilderPanel } from '@/components/crm/CrmLetterDraftBuilderPanel';
@@ -303,6 +304,11 @@ export default function CrmBorrowerDetailPage() {
             </p>
           </div>
           <CrmCommunicationPreferencesPanel clientId={id} canManage={canRunAnalysis} />
+          <CrmUnwantedCallIncidentsPanel
+            clientId={id}
+            caseId={primaryCase?.id}
+            canManage={canRunAnalysis}
+          />
           <CrmIssueExplainabilityPanel caseId={primaryCase?.id} />
           <CrmLetterDraftBuilderPanel caseId={primaryCase?.id} />
           <CrmCaseDocumentsPanel caseId={primaryCase?.id} canUpload={canManageDocs} />

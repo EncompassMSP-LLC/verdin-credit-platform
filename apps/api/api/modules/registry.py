@@ -90,6 +90,14 @@ from api.modules.clients.models import (
     DncAssistanceStatus,
     PreferredCommunicationChannel,
 )
+from api.modules.clients.unwanted_call_models import (
+    UnwantedCallChannel,
+    UnwantedCallComplaintTarget,
+    UnwantedCallExternalSubmissionStatus,
+    UnwantedCallIncident,
+    UnwantedCallIncidentStatus,
+    UnwantedCallPartyType,
+)
 from api.modules.compliance.bureau_response_ingestion_models import (
     BureauResponseIngestionRun,
     BureauResponseIngestionRunStatus,
@@ -371,6 +379,12 @@ __all__ = [
     "BatchSummaryTriggerSource",
     "Client",
     "ClientCommunicationPreferences",
+    "UnwantedCallIncident",
+    "UnwantedCallIncidentStatus",
+    "UnwantedCallPartyType",
+    "UnwantedCallChannel",
+    "UnwantedCallComplaintTarget",
+    "UnwantedCallExternalSubmissionStatus",
     "ClientContact",
     "ClientPortalUser",
     "PortalChecklistCompletion",

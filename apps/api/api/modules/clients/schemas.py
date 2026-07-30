@@ -2,7 +2,7 @@
 
 import uuid
 from datetime import datetime
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import EmailStr, Field
 
@@ -218,3 +218,96 @@ class ClientCommunicationPreferencesResponse(BaseSchema):
     communication_request_draft: str
     created_at: datetime
     updated_at: datetime
+
+
+class UnwantedCallIncidentCreate(BaseSchema):
+    called_at: datetime
+    case_id: uuid.UUID | None = None
+    account_id: uuid.UUID | None = None
+    creditor_or_collector_name: str | None = Field(default=None, max_length=255)
+    party_type: Literal["creditor", "collector", "telemarketer", "unknown"] = "unknown"
+    caller_number: str | None = Field(default=None, max_length=50)
+    called_number: str | None = Field(default=None, max_length=50)
+    channel: Literal["phone", "voip", "sms", "unknown"] = "phone"
+    notes: str | None = None
+    status: Literal[
+        "open",
+        "documenting",
+        "draft_ready",
+        "submitted_externally",
+        "follow_up_due",
+        "closed",
+        "abandoned",
+    ] = "open"
+    follow_up_due_at: datetime | None = None
+    follow_up_notes: str | None = None
+    complaint_target: Literal["none", "ftc", "cfpb", "state_ag", "carrier", "other"] = "none"
+    evidence_document_id: uuid.UUID | None = None
+
+
+class UnwantedCallIncidentUpdate(BaseSchema):
+    case_id: uuid.UUID | None = None
+    account_id: uuid.UUID | None = None
+    creditor_or_collector_name: str | None = Field(default=None, max_length=255)
+    party_type: Literal["creditor", "collector", "telemarketer", "unknown"] | None = None
+    called_at: datetime | None = None
+    caller_number: str | None = Field(default=None, max_length=50)
+    called_number: str | None = Field(default=None, max_length=50)
+    channel: Literal["phone", "voip", "sms", "unknown"] | None = None
+    notes: str | None = None
+    status: (
+        Literal[
+            "open",
+            "documenting",
+            "draft_ready",
+            "submitted_externally",
+            "follow_up_due",
+            "closed",
+            "abandoned",
+        ]
+        | None
+    ) = None
+    follow_up_due_at: datetime | None = None
+    follow_up_notes: str | None = None
+    complaint_target: Literal["none", "ftc", "cfpb", "state_ag", "carrier", "other"] | None = None
+    external_submission_status: (
+        Literal["not_started", "draft_prepared", "client_submitted", "staff_recorded"] | None
+    ) = None
+    external_reference: str | None = Field(default=None, max_length=255)
+    evidence_document_id: uuid.UUID | None = None
+    refresh_draft: bool = False
+
+
+class UnwantedCallIncidentResponse(BaseSchema):
+    id: uuid.UUID
+    organization_id: uuid.UUID
+    client_id: uuid.UUID
+    case_id: uuid.UUID | None
+    account_id: uuid.UUID | None
+    creditor_or_collector_name: str | None
+    party_type: str
+    called_at: datetime
+    caller_number: str | None
+    called_number: str | None
+    channel: str
+    notes: str | None
+    preference_snapshot: dict[str, Any]
+    eligibility_guidance: dict[str, Any]
+    status: str
+    follow_up_due_at: datetime | None
+    follow_up_notes: str | None
+    complaint_target: str
+    external_submission_status: str
+    external_reference: str | None
+    evidence_document_id: uuid.UUID | None
+    draft_text: str | None
+    disclaimer: str
+    created_at: datetime
+    updated_at: datetime
+    created_by_id: uuid.UUID | None = None
+
+
+class UnwantedCallIncidentListResponse(BaseSchema):
+    client_id: uuid.UUID
+    disclaimer: str
+    items: list[UnwantedCallIncidentResponse]

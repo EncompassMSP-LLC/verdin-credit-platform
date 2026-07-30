@@ -307,3 +307,146 @@ export async function markClientDncCompleted(
     { method: 'POST' },
   );
 }
+
+export type UnwantedCallPartyType = 'creditor' | 'collector' | 'telemarketer' | 'unknown';
+export type UnwantedCallChannel = 'phone' | 'voip' | 'sms' | 'unknown';
+export type UnwantedCallIncidentStatus =
+  | 'open'
+  | 'documenting'
+  | 'draft_ready'
+  | 'submitted_externally'
+  | 'follow_up_due'
+  | 'closed'
+  | 'abandoned';
+export type UnwantedCallComplaintTarget =
+  'none' | 'ftc' | 'cfpb' | 'state_ag' | 'carrier' | 'other';
+export type UnwantedCallExternalSubmissionStatus =
+  'not_started' | 'draft_prepared' | 'client_submitted' | 'staff_recorded';
+
+export interface UnwantedCallIncident {
+  id: string;
+  organization_id: string;
+  client_id: string;
+  case_id?: string | null;
+  account_id?: string | null;
+  creditor_or_collector_name?: string | null;
+  party_type: UnwantedCallPartyType;
+  called_at: string;
+  caller_number?: string | null;
+  called_number?: string | null;
+  channel: UnwantedCallChannel;
+  notes?: string | null;
+  preference_snapshot: Record<string, unknown>;
+  eligibility_guidance: {
+    codes?: string[];
+    notes?: string[];
+    summary?: string;
+    disclaimer?: string;
+  };
+  status: UnwantedCallIncidentStatus;
+  follow_up_due_at?: string | null;
+  follow_up_notes?: string | null;
+  complaint_target: UnwantedCallComplaintTarget;
+  external_submission_status: UnwantedCallExternalSubmissionStatus;
+  external_reference?: string | null;
+  evidence_document_id?: string | null;
+  draft_text?: string | null;
+  disclaimer: string;
+  created_at: string;
+  updated_at: string;
+  created_by_id?: string | null;
+}
+
+export interface UnwantedCallIncidentList {
+  client_id: string;
+  disclaimer: string;
+  items: UnwantedCallIncident[];
+}
+
+export interface CreateUnwantedCallIncidentInput {
+  called_at: string;
+  case_id?: string | null;
+  account_id?: string | null;
+  creditor_or_collector_name?: string | null;
+  party_type?: UnwantedCallPartyType;
+  caller_number?: string | null;
+  called_number?: string | null;
+  channel?: UnwantedCallChannel;
+  notes?: string | null;
+  status?: UnwantedCallIncidentStatus;
+  follow_up_due_at?: string | null;
+  follow_up_notes?: string | null;
+  complaint_target?: UnwantedCallComplaintTarget;
+  evidence_document_id?: string | null;
+}
+
+export interface UpdateUnwantedCallIncidentInput {
+  case_id?: string | null;
+  account_id?: string | null;
+  creditor_or_collector_name?: string | null;
+  party_type?: UnwantedCallPartyType;
+  called_at?: string;
+  caller_number?: string | null;
+  called_number?: string | null;
+  channel?: UnwantedCallChannel;
+  notes?: string | null;
+  status?: UnwantedCallIncidentStatus;
+  follow_up_due_at?: string | null;
+  follow_up_notes?: string | null;
+  complaint_target?: UnwantedCallComplaintTarget;
+  external_submission_status?: UnwantedCallExternalSubmissionStatus;
+  external_reference?: string | null;
+  evidence_document_id?: string | null;
+  refresh_draft?: boolean;
+}
+
+export async function listUnwantedCallIncidents(
+  clientId: string,
+  params?: { status?: string },
+): Promise<UnwantedCallIncidentList> {
+  const query = new URLSearchParams();
+  if (params?.status) query.set('status', params.status);
+  const suffix = query.toString() ? `?${query.toString()}` : '';
+  return request<UnwantedCallIncidentList>(
+    apiPath(`/clients/${clientId}/unwanted-call-incidents${suffix}`),
+  );
+}
+
+export async function createUnwantedCallIncident(
+  clientId: string,
+  input: CreateUnwantedCallIncidentInput,
+): Promise<UnwantedCallIncident> {
+  return request<UnwantedCallIncident>(apiPath(`/clients/${clientId}/unwanted-call-incidents`), {
+    method: 'POST',
+    body: input,
+  });
+}
+
+export async function getUnwantedCallIncident(
+  clientId: string,
+  incidentId: string,
+): Promise<UnwantedCallIncident> {
+  return request<UnwantedCallIncident>(
+    apiPath(`/clients/${clientId}/unwanted-call-incidents/${incidentId}`),
+  );
+}
+
+export async function updateUnwantedCallIncident(
+  clientId: string,
+  incidentId: string,
+  input: UpdateUnwantedCallIncidentInput,
+): Promise<UnwantedCallIncident> {
+  return request<UnwantedCallIncident>(
+    apiPath(`/clients/${clientId}/unwanted-call-incidents/${incidentId}`),
+    { method: 'PATCH', body: input },
+  );
+}
+
+export async function deleteUnwantedCallIncident(
+  clientId: string,
+  incidentId: string,
+): Promise<void> {
+  await request<void>(apiPath(`/clients/${clientId}/unwanted-call-incidents/${incidentId}`), {
+    method: 'DELETE',
+  });
+}
