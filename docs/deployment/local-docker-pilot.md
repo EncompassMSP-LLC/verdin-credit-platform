@@ -8,7 +8,7 @@ Run a **production-mode** stack on Docker Desktop — no VM, no domain, no HTTPS
 cd c:\Projects\verdin-credit-platform\verdin-credit-platform
 
 # One-time config (or edit secrets if you prefer)
-copy .env.production.example .env.production
+copy .env.local-pilot.example .env.production
 
 # Build and start (first run takes several minutes)
 docker compose -f docker-compose.local-pilot.yml --env-file .env.production up -d --build
@@ -42,7 +42,7 @@ Do **not** use `seed.py` on a real production server.
 
 ## What's enabled
 
-Pilot flags in `.env.production.example`:
+Pilot flags in `.env.local-pilot.example`:
 
 - Enterprise UI (compliance, reporting, org admin)
 - Client portal

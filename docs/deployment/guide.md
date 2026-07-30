@@ -8,7 +8,9 @@
 
 ## Production (single VM / VPS)
 
-For a pilot deployment on a Linux server with Docker Compose, see **[Production Deployment](production.md)**.
+For **DigitalOcean staging** (Caddy TLS, hardened compose, deploy scripts), see **[DigitalOcean Staging](digitalocean-staging.md)**.
+
+For a legacy HTTP-only nginx pilot on a Linux server, see **[Production Deployment](production.md)**.
 
 For Lending Readiness Platform™ V1.0 backup / restore / smoke after incident, see **[LRP V1.0 Disaster Recovery Runbook](lrp-v1.0-disaster-recovery-runbook.md)**.
 
@@ -19,7 +21,7 @@ To run a production-mode pilot on **Docker Desktop** at http://localhost:8080, s
 Quick path:
 
 ```bash
-cp .env.production.example .env.production
+cp .env.local-pilot.example .env.production
 docker compose -f docker-compose.local-pilot.yml --env-file .env.production up -d --build
 ```
 

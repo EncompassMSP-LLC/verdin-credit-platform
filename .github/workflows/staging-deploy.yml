@@ -1,0 +1,76 @@
+name: Staging Deploy (DigitalOcean)
+
+# Manual only — does not deploy on every merge to main.
+on:
+  workflow_dispatch:
+    inputs:
+      git_ref:
+        description: Git ref to deploy (branch, tag, or SHA)
+        required: true
+        default: main
+      confirm_staging:
+        description: Type deploy-staging to confirm
+        required: true
+        default: ''
+
+concurrency:
+  group: staging-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to DigitalOcean staging
+    runs-on: ubuntu-latest
+    if: github.event.inputs.confirm_staging == 'deploy-staging'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.git_ref }}
+
+      - name: Resolve deploy SHA
+        id: meta
+        run: echo "sha=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          script_stop: true
+          command_timeout: 45m
+          script: |
+            set -euo pipefail
+            APP_PATH='${{ secrets.STAGING_APP_PATH }}'
+            REF='${{ github.event.inputs.git_ref }}'
+            SHA='${{ steps.meta.outputs.sha }}'
+            cd "$APP_PATH"
+
+            echo "Deploying ref=$REF sha=$SHA"
+            git fetch --prune origin
+            if git show-ref --verify --quiet "refs/remotes/origin/$REF"; then
+              git checkout -B "deploy/$SHA" "origin/$REF"
+            else
+              git fetch --depth 1 origin "$REF"
+              git checkout -f FETCH_HEAD
+            fi
+
+            if [[ ! -f .env.production ]]; then
+              echo "Missing .env.production on the server. Create it from .env.production.example first."
+              exit 1
+            fi
+
+            if grep -q '^IMAGE_TAG=' .env.production; then
+              sed -i "s/^IMAGE_TAG=.*/IMAGE_TAG=${SHA}/" .env.production
+            else
+              echo "IMAGE_TAG=${SHA}" >> .env.production
+            fi
+
+            chmod +x scripts/*.sh
+            ./scripts/deploy-production.sh
+
+      - name: Summary
+        run: |
+          echo "Deployed ref=${{ github.event.inputs.git_ref }} sha=${{ steps.meta.outputs.sha }}"
+          echo "Manual workflow only — production auto-deploy on merge is intentionally disabled."

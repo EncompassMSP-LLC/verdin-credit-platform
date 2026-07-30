@@ -1,0 +1,234 @@
+# Production-hardened staging stack (DigitalOcean Droplet).
+# Does not replace docker-compose.yml (local development).
+#
+# Usage (on the server at /opt/lrp/app):
+#   cp .env.production.example .env.production   # fill secrets
+#   ./scripts/validate-production-env.sh
+#   ./scripts/deploy-production.sh
+#
+# Only Caddy publishes host ports 80/443. Postgres, Redis, MinIO, API, worker,
+# and frontend stay on the internal Docker network.
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: '10m'
+    max-file: '3'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: lrp-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER is required}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB is required}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infrastructure/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+    logging: *default-logging
+    networks:
+      - lrp_internal
+
+  redis:
+    image: redis:7-alpine
+    container_name: lrp-redis
+    command: redis-server --appendonly yes --save 60 1
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    logging: *default-logging
+    networks:
+      - lrp_internal
+
+  minio:
+    image: minio/minio:latest
+    container_name: lrp-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?MINIO_ROOT_USER is required}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?MINIO_ROOT_PASSWORD is required}
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ['CMD', 'mc', 'ready', 'local']
+      interval: 10s
+      timeout: 5s
+      retries: 8
+      start_period: 30s
+    restart: unless-stopped
+    logging: *default-logging
+    networks:
+      - lrp_internal
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: production
+    image: lrp-api:${IMAGE_TAG:-latest}
+    container_name: lrp-api
+    env_file: .env.production
+    environment:
+      APP_ENV: ${APP_ENV:-staging}
+      SKIP_DB_MIGRATIONS: ${SKIP_DB_MIGRATIONS:-true}
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
+      DATABASE_URL_SYNC: ${DATABASE_URL_SYNC:?DATABASE_URL_SYNC is required}
+      REDIS_URL: ${REDIS_URL:?REDIS_URL is required}
+      MINIO_ENDPOINT: ${MINIO_ENDPOINT:-minio:9000}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:?MINIO_ACCESS_KEY is required}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:?MINIO_SECRET_KEY is required}
+      MINIO_BUCKET: ${MINIO_BUCKET:-verdin-documents}
+      MINIO_SECURE: ${MINIO_SECURE:-false}
+      CORS_ORIGINS: ${CORS_ORIGINS:?CORS_ORIGINS is required}
+      PUBLIC_APP_URL: ${PUBLIC_APP_URL:?PUBLIC_APP_URL is required}
+      ENABLE_CLIENT_PORTAL: ${ENABLE_CLIENT_PORTAL:-true}
+      ENABLE_AI: ${ENABLE_AI:-false}
+      ENABLE_LLM: ${ENABLE_LLM:-false}
+      ENABLE_ENTERPRISE: ${ENABLE_ENTERPRISE:-false}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'python',
+          '-c',
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health/ready')",
+        ]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 45s
+    restart: unless-stopped
+    logging: *default-logging
+    networks:
+      - lrp_internal
+
+  worker:
+    build:
+      context: .
+      dockerfile: apps/worker/Dockerfile
+    image: lrp-worker:${IMAGE_TAG:-latest}
+    container_name: lrp-worker
+    env_file: .env.production
+    environment:
+      APP_ENV: ${APP_ENV:-staging}
+      REDIS_URL: ${REDIS_URL:?REDIS_URL is required}
+      WORKER_QUEUE_NAME: ${WORKER_QUEUE_NAME:-verdin:jobs}
+      DATABASE_URL_SYNC: ${DATABASE_URL_SYNC:?DATABASE_URL_SYNC is required}
+      MINIO_ENDPOINT: ${MINIO_ENDPOINT:-minio:9000}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:?MINIO_ACCESS_KEY is required}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:?MINIO_SECRET_KEY is required}
+      MINIO_BUCKET: ${MINIO_BUCKET:-verdin-documents}
+      MINIO_SECURE: ${MINIO_SECURE:-false}
+      DOCUMENT_OCR_ENABLED: ${DOCUMENT_OCR_ENABLED:-true}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    healthcheck:
+      test:
+        ['CMD', 'python', '-c', "import os, redis; redis.from_url(os.environ['REDIS_URL']).ping()"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    logging: *default-logging
+    networks:
+      - lrp_internal
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      target: production
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-}
+        VITE_ENABLE_AI: ${VITE_ENABLE_AI:-false}
+        VITE_ENABLE_LLM: ${VITE_ENABLE_LLM:-false}
+        VITE_ENABLE_IMPORTS: ${VITE_ENABLE_IMPORTS:-true}
+        VITE_ENABLE_ENTERPRISE: ${VITE_ENABLE_ENTERPRISE:-false}
+        VITE_ENABLE_CLIENT_PORTAL: ${VITE_ENABLE_CLIENT_PORTAL:-true}
+        VITE_ENABLE_CLIENT_ENROLLMENT: ${VITE_ENABLE_CLIENT_ENROLLMENT:-false}
+        VITE_ENABLE_PORTAL_PUSH: ${VITE_ENABLE_PORTAL_PUSH:-false}
+    image: lrp-web:${IMAGE_TAG:-latest}
+    container_name: lrp-web
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://localhost/']
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    restart: unless-stopped
+    logging: *default-logging
+    networks:
+      - lrp_internal
+
+  caddy:
+    image: caddy:2.9-alpine
+    container_name: lrp-caddy
+    ports:
+      - '80:80'
+      - '443:443'
+    environment:
+      APP_HOSTNAME: ${APP_HOSTNAME:?APP_HOSTNAME is required}
+      CADDY_ACME_EMAIL: ${CADDY_ACME_EMAIL:?CADDY_ACME_EMAIL is required}
+    volumes:
+      - ./infrastructure/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      api:
+        condition: service_healthy
+      web:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://localhost:2019/config/']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped
+    logging: *default-logging
+    networks:
+      - lrp_internal
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+  caddy_data:
+  caddy_config:
+
+networks:
+  lrp_internal:
+    driver: bridge
+    name: lrp_internal

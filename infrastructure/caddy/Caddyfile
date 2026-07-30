@@ -1,0 +1,35 @@
+# DigitalOcean staging edge proxy (automatic HTTPS via Let's Encrypt).
+# APP_HOSTNAME is injected from .env.production (e.g. app.example.com).
+#
+# Same-origin routing:
+#   /     → staff/borrower frontend (web)
+#   /api* → FastAPI
+
+{
+	email {$CADDY_ACME_EMAIL}
+}
+
+{$APP_HOSTNAME} {
+	encode gzip zstd
+
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options SAMEORIGIN
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+
+	handle /api* {
+		reverse_proxy api:8000 {
+			header_up X-Forwarded-Proto {scheme}
+			header_up X-Real-IP {remote_host}
+		}
+	}
+
+	handle {
+		reverse_proxy web:80 {
+			header_up X-Forwarded-Proto {scheme}
+			header_up X-Real-IP {remote_host}
+		}
+	}
+}
