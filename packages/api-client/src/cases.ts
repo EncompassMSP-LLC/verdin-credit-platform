@@ -13,6 +13,7 @@ import type {
   CaseDisputeStrategy,
   CaseFcraFindings,
   CaseIdentityTheftFindings,
+  CaseIssueEvidenceLinks,
   CaseIssueExplainability,
   CaseLitigationStrength,
   CaseMetro2Findings,
@@ -25,6 +26,8 @@ import type {
   IdentityTheftAccountReview,
   IdentityTheftCaseCenter,
   IdentityTheftProtection,
+  IssueEvidenceLink,
+  IssueEvidenceLinkCreate,
   UpsertIdentityTheftProtectionRequest,
 } from './documents';
 
@@ -33,6 +36,7 @@ export type {
   CaseDisputeStrategy,
   CaseFcraFindings,
   CaseIdentityTheftFindings,
+  CaseIssueEvidenceLinks,
   CaseIssueExplainability,
   CaseLitigationStrength,
   CaseMetro2Findings,
@@ -44,6 +48,10 @@ export type {
   IdentityTheftAccountReview,
   IdentityTheftCaseCenter,
   IdentityTheftProtection,
+  IssueEvidenceLink,
+  IssueEvidenceLinkCreate,
+  IssueEvidenceLinkRole,
+  IssueEvidenceAssociatedDocument,
   UpsertIdentityTheftProtectionRequest,
 } from './documents';
 
@@ -452,6 +460,34 @@ export async function getCaseLitigationStrength(caseId: string): Promise<CaseLit
 
 export async function getCaseIssueExplainability(caseId: string): Promise<CaseIssueExplainability> {
   return request<CaseIssueExplainability>(apiPath(`/cases/${caseId}/issue-explainability`));
+}
+
+export async function listCaseIssueEvidenceLinks(
+  caseId: string,
+  params?: { source_id?: string },
+): Promise<CaseIssueEvidenceLinks> {
+  const query = new URLSearchParams();
+  if (params?.source_id) {
+    query.set('source_id', params.source_id);
+  }
+  const suffix = query.toString() ? `?${query.toString()}` : '';
+  return request<CaseIssueEvidenceLinks>(apiPath(`/cases/${caseId}/issue-evidence-links${suffix}`));
+}
+
+export async function createCaseIssueEvidenceLink(
+  caseId: string,
+  body: IssueEvidenceLinkCreate,
+): Promise<IssueEvidenceLink> {
+  return request<IssueEvidenceLink>(apiPath(`/cases/${caseId}/issue-evidence-links`), {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function deleteCaseIssueEvidenceLink(caseId: string, linkId: string): Promise<void> {
+  await request<void>(apiPath(`/cases/${caseId}/issue-evidence-links/${linkId}`), {
+    method: 'DELETE',
+  });
 }
 
 export type LetterTemplateKind =

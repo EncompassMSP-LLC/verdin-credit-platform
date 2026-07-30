@@ -122,6 +122,10 @@ from api.modules.documents.identity_theft_models import (
 from api.modules.documents.identity_theft_readiness_run_models import (
     IdentityTheft605bReadinessRun,
 )
+from api.modules.documents.issue_evidence_link_models import (
+    IssueEvidenceLink,
+    IssueEvidenceLinkRole,
+)
 from api.modules.documents.models import Document
 from api.modules.documents.strategy_run_models import DisputeStrategyRun
 from api.modules.enterprise.bulk_idp_provisioning_models import (
@@ -401,6 +405,8 @@ __all__ = [
     "IdentityTheftConfirmation",
     "IdentityTheftIncident",
     "IdentityTheftIncidentStatus",
+    "IssueEvidenceLink",
+    "IssueEvidenceLinkRole",
     "IdentityTheftIssueType",
     "IdentityTheftProtection",
     "IdentityTheftProtectionStatusValue",

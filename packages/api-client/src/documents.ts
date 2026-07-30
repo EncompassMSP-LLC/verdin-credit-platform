@@ -579,6 +579,16 @@ export interface IssueExplainabilitySummary {
   high_mortgage_impact: number;
 }
 
+export interface IssueEvidenceAssociatedDocument {
+  link_id: string;
+  document_id: string;
+  role: 'supporting' | 'primary' | 'identity' | 'statement';
+  note?: string | null;
+  title?: string | null;
+  file_name?: string | null;
+  document_type?: string | null;
+}
+
 export interface IssueExplainabilityCard {
   source_id: string;
   rule_id: string;
@@ -597,6 +607,7 @@ export interface IssueExplainabilityCard {
   bureau?: string | null;
   investigator_score: number;
   rank: number;
+  associated_documents?: IssueEvidenceAssociatedDocument[];
 }
 
 export interface CaseIssueExplainability {
@@ -604,6 +615,35 @@ export interface CaseIssueExplainability {
   disclaimer: string;
   summary: IssueExplainabilitySummary;
   cards: IssueExplainabilityCard[];
+}
+
+export type IssueEvidenceLinkRole = 'supporting' | 'primary' | 'identity' | 'statement';
+
+export interface IssueEvidenceLinkCreate {
+  source_id: string;
+  document_id: string;
+  role?: IssueEvidenceLinkRole;
+  note?: string | null;
+}
+
+export interface IssueEvidenceLink {
+  id: string;
+  case_id: string;
+  source_id: string;
+  document_id: string;
+  role: IssueEvidenceLinkRole;
+  note?: string | null;
+  created_at: string;
+  created_by_id?: string | null;
+  source_recognized: boolean;
+  document_title?: string | null;
+  document_file_name?: string | null;
+  document_type?: string | null;
+}
+
+export interface CaseIssueEvidenceLinks {
+  case_id: string;
+  items: IssueEvidenceLink[];
 }
 
 export interface DisputeStrategySummary {

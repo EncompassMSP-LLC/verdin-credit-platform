@@ -7,6 +7,10 @@ from api.modules.auth.models import Organization, OrganizationType, User
 from api.modules.cases.models import Case, CasePriority, CaseStage, CaseStatus
 from api.modules.client_portal.models import ClientPortalUser
 from api.modules.clients.models import Client, ClientContact, ClientStatus, ContactRelationship
+from api.modules.documents.issue_evidence_link_models import (
+    IssueEvidenceLink,
+    IssueEvidenceLinkRole,
+)
 from api.modules.documents.metadata_models import DocumentEntityResolution, DocumentMetadata
 from api.modules.documents.models import Document, DocumentVersion
 from api.modules.documents.parsed_report_models import DocumentParsedCreditReport
@@ -42,6 +46,8 @@ __all__ = [
     "DocumentVersion",
     "DisputeLetter",
     "DisputeLetterStatus",
+    "IssueEvidenceLink",
+    "IssueEvidenceLinkRole",
     "Notification",
     "NotificationCategory",
     "Organization",

@@ -2,8 +2,11 @@
 
 import {
   ApiClientError,
+  createCaseIssueEvidenceLink,
   createCaseLetterDraft,
+  deleteCaseIssueEvidenceLink,
   getCaseIssueExplainability,
+  listDocuments,
   type FindingStrengthBand,
   type ImpactCategory,
   type IssueExplainabilityCard,
@@ -25,6 +28,11 @@ function strengthLabel(band: FindingStrengthBand): string {
 function CardBlock({ caseId, card }: { caseId: string; card: IssueExplainabilityCard }) {
   const queryClient = useQueryClient();
   const [message, setMessage] = useState<string | null>(null);
+  const [documentId, setDocumentId] = useState('');
+  const docsQuery = useQuery({
+    queryKey: ['crm', 'case-documents-for-evidence', caseId],
+    queryFn: () => listDocuments({ case_id: caseId, page_size: 50 }),
+  });
   const generateMutation = useMutation({
     mutationFn: () =>
       createCaseLetterDraft(caseId, {
@@ -41,6 +49,36 @@ function CardBlock({ caseId, card }: { caseId: string; card: IssueExplainability
     },
     onError: (err: Error) => setMessage(err.message),
   });
+  const linkMutation = useMutation({
+    mutationFn: () =>
+      createCaseIssueEvidenceLink(caseId, {
+        source_id: card.source_id,
+        document_id: documentId,
+        role: 'supporting',
+      }),
+    onSuccess: () => {
+      setMessage('Evidence document linked.');
+      setDocumentId('');
+      void queryClient.invalidateQueries({
+        queryKey: ['crm', 'case-issue-explainability', caseId],
+      });
+    },
+    onError: (err: Error) => setMessage(err.message),
+  });
+  const unlinkMutation = useMutation({
+    mutationFn: (linkId: string) => deleteCaseIssueEvidenceLink(caseId, linkId),
+    onSuccess: () => {
+      setMessage('Evidence link removed.');
+      void queryClient.invalidateQueries({
+        queryKey: ['crm', 'case-issue-explainability', caseId],
+      });
+    },
+    onError: (err: Error) => setMessage(err.message),
+  });
+
+  const associated = card.associated_documents ?? [];
+  const linkedIds = new Set(associated.map((item) => item.document_id));
+  const availableDocs = (docsQuery.data?.items ?? []).filter((doc) => !linkedIds.has(doc.id));
 
   return (
     <article className="rounded-md border border-navy-900/10 bg-slate-50 p-3">
@@ -92,6 +130,62 @@ function CardBlock({ caseId, card }: { caseId: string; card: IssueExplainability
                 <li key={item}>{item}</li>
               ))}
             </ul>
+          </dd>
+        </div>
+        <div>
+          <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Evidence vault
+          </dt>
+          <dd className="mt-1 space-y-1">
+            {associated.length === 0 ? (
+              <p className="text-xs text-slate-500">No vault documents linked yet.</p>
+            ) : (
+              <ul className="space-y-1">
+                {associated.map((item) => (
+                  <li key={item.link_id} className="flex flex-wrap items-center gap-2 text-xs">
+                    <span>
+                      {item.title ?? item.file_name ?? item.document_id} ({item.role})
+                    </span>
+                    <button
+                      type="button"
+                      className="text-slate-600 underline disabled:opacity-50"
+                      disabled={unlinkMutation.isPending}
+                      onClick={() => {
+                        setMessage(null);
+                        unlinkMutation.mutate(item.link_id);
+                      }}
+                    >
+                      Unlink
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <select
+                className="rounded border border-navy-900/20 bg-white px-2 py-1 text-xs"
+                value={documentId}
+                onChange={(event) => setDocumentId(event.target.value)}
+              >
+                <option value="">Select case document…</option>
+                {availableDocs.map((doc) => (
+                  <option key={doc.id} value={doc.id}>
+                    {doc.title || doc.file_name}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                className="rounded border border-navy-900/20 bg-white px-2 py-1 text-xs font-medium text-navy-900 disabled:opacity-50"
+                disabled={!documentId || linkMutation.isPending}
+                onClick={() => {
+                  setMessage(null);
+                  linkMutation.mutate();
+                }}
+              >
+                {linkMutation.isPending ? 'Linking…' : 'Link evidence'}
+              </button>
+            </div>
           </dd>
         </div>
       </dl>
@@ -153,8 +247,8 @@ export function CrmIssueExplainabilityPanel({ caseId }: Props) {
     <div className="rounded-md border border-navy-900/10 bg-white p-4">
       <h2 className="text-sm font-semibold">Potential issues</h2>
       <p className="mt-2 text-sm text-slate-500">
-        Plain-language cards for detected findings. Impact categories only — no score-point
-        promises. Evidence vault uploads ship in a follow-up slice.
+        Plain-language cards for detected findings. Link vault documents to issues for staff review.
+        Impact categories only — no score-point promises.
       </p>
 
       {query.isLoading ? (

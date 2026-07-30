@@ -804,6 +804,18 @@ class IssueExplainabilitySummary(BaseSchema):
     high_mortgage_impact: int
 
 
+class IssueEvidenceAssociatedDocument(BaseSchema):
+    """Document summary embedded on explainability cards / link responses."""
+
+    link_id: uuid.UUID
+    document_id: uuid.UUID
+    role: Literal["supporting", "primary", "identity", "statement"]
+    note: str | None = None
+    title: str | None = None
+    file_name: str | None = None
+    document_type: str | None = None
+
+
 class IssueExplainabilityCardResponse(BaseSchema):
     source_id: str
     rule_id: str
@@ -822,6 +834,7 @@ class IssueExplainabilityCardResponse(BaseSchema):
     bureau: str | None = None
     investigator_score: int
     rank: int
+    associated_documents: list[IssueEvidenceAssociatedDocument] = Field(default_factory=list)
 
 
 class CaseIssueExplainabilityResponse(BaseSchema):
@@ -829,6 +842,33 @@ class CaseIssueExplainabilityResponse(BaseSchema):
     disclaimer: str
     summary: IssueExplainabilitySummary
     cards: list[IssueExplainabilityCardResponse]
+
+
+class IssueEvidenceLinkCreate(BaseSchema):
+    source_id: str = Field(min_length=1, max_length=512)
+    document_id: uuid.UUID
+    role: Literal["supporting", "primary", "identity", "statement"] = "supporting"
+    note: str | None = Field(default=None, max_length=2000)
+
+
+class IssueEvidenceLinkResponse(BaseSchema):
+    id: uuid.UUID
+    case_id: uuid.UUID
+    source_id: str
+    document_id: uuid.UUID
+    role: Literal["supporting", "primary", "identity", "statement"]
+    note: str | None = None
+    created_at: datetime
+    created_by_id: uuid.UUID | None = None
+    source_recognized: bool = True
+    document_title: str | None = None
+    document_file_name: str | None = None
+    document_type: str | None = None
+
+
+class CaseIssueEvidenceLinksResponse(BaseSchema):
+    case_id: uuid.UUID
+    items: list[IssueEvidenceLinkResponse]
 
 
 class DisputeStrategySummary(BaseSchema):

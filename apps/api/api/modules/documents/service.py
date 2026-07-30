@@ -78,6 +78,7 @@ from api.modules.documents.schemas import (
     CaseEntityReresolveSkippedItem,
     CaseFcraFindingsResponse,
     CaseIdentityTheftFindingsResponse,
+    CaseIssueEvidenceLinksResponse,
     CaseIssueExplainabilityResponse,
     CaseLitigationStrengthResponse,
     CaseMetadataBulkReextractResponse,
@@ -131,6 +132,9 @@ from api.modules.documents.schemas import (
     ImportedParsedReportAccountItem,
     ImportParsedReportAccountsRequest,
     ImportParsedReportAccountsResponse,
+    IssueEvidenceAssociatedDocument,
+    IssueEvidenceLinkCreate,
+    IssueEvidenceLinkResponse,
     LitigationStrengthIssue,
     LitigationStrengthSummary,
     LockedDisputePreparationItem,
@@ -3206,7 +3210,7 @@ class DocumentService:
         user: User,
         case_id: uuid.UUID,
     ) -> CaseIssueExplainabilityResponse:
-        """Plain-language issue cards for Case Workspace (LRP-208)."""
+        """Plain-language issue cards for Case Workspace (LRP-208 / LRP-208A)."""
         from api.modules.documents.issue_explainability import build_issue_explainability_cards
         from api.modules.documents.schemas import (
             IssueExplainabilityCardResponse,
@@ -3233,6 +3237,7 @@ class DocumentService:
             issues=[issue.model_dump(mode="json") for issue in strength.issues],
             checklist_hints_by_source_id=hints_by_source,
         )
+        associated = await self._associated_documents_by_source(user, case_id)
         return CaseIssueExplainabilityResponse(
             case_id=result.case_id,
             disclaimer=result.disclaimer,
@@ -3256,10 +3261,215 @@ class DocumentService:
                     bureau=card.bureau,
                     investigator_score=card.investigator_score,
                     rank=card.rank,
+                    associated_documents=associated.get(card.source_id, []),
                 )
                 for card in result.cards
             ],
         )
+
+    async def _associated_documents_by_source(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+    ) -> dict[str, list[IssueEvidenceAssociatedDocument]]:
+        organization_id = self._require_organization(user)
+        await self._validate_case(case_id, organization_id)
+        if self._session is None:
+            return {}
+        from api.modules.documents.issue_evidence_link_repository import (
+            IssueEvidenceLinkRepository,
+        )
+
+        links = await IssueEvidenceLinkRepository(self._session).list_for_case(
+            organization_id=organization_id,
+            case_id=case_id,
+        )
+        by_source: dict[str, list[IssueEvidenceAssociatedDocument]] = {}
+        for link in links:
+            doc = await self._documents.get_by_id(
+                link.document_id,
+                organization_id=organization_id,
+            )
+            role_value = link.role.value if hasattr(link.role, "value") else str(link.role)
+            by_source.setdefault(link.source_id, []).append(
+                IssueEvidenceAssociatedDocument(
+                    link_id=link.id,
+                    document_id=link.document_id,
+                    role=role_value,  # type: ignore[arg-type]
+                    note=link.note,
+                    title=doc.title if doc else None,
+                    file_name=doc.file_name if doc else None,
+                    document_type=doc.document_type if doc else None,
+                )
+            )
+        return by_source
+
+    async def list_case_issue_evidence_links(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+        *,
+        source_id: str | None = None,
+    ) -> CaseIssueEvidenceLinksResponse:
+        """List staff-mediated vault document↔issue associations (LRP-208A)."""
+        organization_id = self._require_organization(user)
+        await self._validate_case(case_id, organization_id)
+        if self._session is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Database session unavailable",
+            )
+        from api.modules.documents.issue_evidence_link_repository import (
+            IssueEvidenceLinkRepository,
+        )
+
+        links = await IssueEvidenceLinkRepository(self._session).list_for_case(
+            organization_id=organization_id,
+            case_id=case_id,
+            source_id=source_id,
+        )
+        recognized = await self._recognized_source_ids(user, case_id)
+        items: list[IssueEvidenceLinkResponse] = []
+        for link in links:
+            doc = await self._documents.get_by_id(
+                link.document_id,
+                organization_id=organization_id,
+            )
+            role_value = link.role.value if hasattr(link.role, "value") else str(link.role)
+            items.append(
+                IssueEvidenceLinkResponse(
+                    id=link.id,
+                    case_id=link.case_id,
+                    source_id=link.source_id,
+                    document_id=link.document_id,
+                    role=role_value,  # type: ignore[arg-type]
+                    note=link.note,
+                    created_at=link.created_at,
+                    created_by_id=link.created_by_id,
+                    source_recognized=link.source_id in recognized,
+                    document_title=doc.title if doc else None,
+                    document_file_name=doc.file_name if doc else None,
+                    document_type=doc.document_type if doc else None,
+                )
+            )
+        return CaseIssueEvidenceLinksResponse(case_id=case_id, items=items)
+
+    async def create_case_issue_evidence_link(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+        payload: IssueEvidenceLinkCreate,
+    ) -> IssueEvidenceLinkResponse:
+        """Associate a case vault document with an issue source_id (LRP-208A)."""
+        self._require_write(user)
+        organization_id = self._require_organization(user)
+        await self._validate_case(case_id, organization_id)
+        if self._session is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Database session unavailable",
+            )
+
+        document = await self._documents.get_by_id(
+            payload.document_id,
+            organization_id=organization_id,
+        )
+        if document is None or document.case_id != case_id:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Document must belong to the same case",
+            )
+
+        from api.modules.documents.issue_evidence_link_models import (
+            IssueEvidenceLink,
+            IssueEvidenceLinkRole,
+        )
+        from api.modules.documents.issue_evidence_link_repository import (
+            IssueEvidenceLinkRepository,
+        )
+
+        repo = IssueEvidenceLinkRepository(self._session)
+        existing = await repo.find_active(
+            organization_id=organization_id,
+            case_id=case_id,
+            source_id=payload.source_id.strip(),
+            document_id=payload.document_id,
+        )
+        if existing is not None:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Document is already linked to this issue",
+            )
+
+        link = IssueEvidenceLink(
+            organization_id=organization_id,
+            case_id=case_id,
+            source_id=payload.source_id.strip(),
+            document_id=payload.document_id,
+            role=IssueEvidenceLinkRole(payload.role),
+            note=payload.note,
+        )
+        apply_audit_on_create(link, user.id)
+        await repo.create(link)
+        await self._session.commit()
+        await self._session.refresh(link)
+
+        recognized = await self._recognized_source_ids(user, case_id)
+        return IssueEvidenceLinkResponse(
+            id=link.id,
+            case_id=link.case_id,
+            source_id=link.source_id,
+            document_id=link.document_id,
+            role=link.role.value,
+            note=link.note,
+            created_at=link.created_at,
+            created_by_id=link.created_by_id,
+            source_recognized=link.source_id in recognized,
+            document_title=document.title,
+            document_file_name=document.file_name,
+            document_type=document.document_type,
+        )
+
+    async def delete_case_issue_evidence_link(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+        link_id: uuid.UUID,
+    ) -> None:
+        """Soft-delete a vault document↔issue association (LRP-208A)."""
+        self._require_write(user)
+        organization_id = self._require_organization(user)
+        await self._validate_case(case_id, organization_id)
+        if self._session is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Database session unavailable",
+            )
+        from api.modules.documents.issue_evidence_link_repository import (
+            IssueEvidenceLinkRepository,
+        )
+
+        repo = IssueEvidenceLinkRepository(self._session)
+        link = await repo.get_by_id(link_id, organization_id=organization_id, case_id=case_id)
+        if link is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Issue evidence link not found",
+            )
+        await repo.soft_delete(link, actor_id=user.id)
+        await self._session.commit()
+
+    async def _recognized_source_ids(self, user: User, case_id: uuid.UUID) -> set[str]:
+        try:
+            strength = await self.get_case_litigation_strength(user, case_id)
+        except HTTPException as exc:
+            if exc.status_code in {
+                status.HTTP_404_NOT_FOUND,
+                status.HTTP_422_UNPROCESSABLE_ENTITY,
+            }:
+                return set()
+            raise
+        return {issue.source_id for issue in strength.issues}
 
     @staticmethod
     def _case_dispute_strategy_response_from_result(
