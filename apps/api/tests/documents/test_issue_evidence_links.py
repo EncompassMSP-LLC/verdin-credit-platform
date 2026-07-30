@@ -98,6 +98,57 @@ def test_create_list_delete_issue_evidence_link(
     assert after.json()["items"] == []
 
 
+def test_issue_evidence_link_emits_timeline_events(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    sample_case_id: str,
+) -> None:
+    document_id = _upload_doc(api_client, manager_headers, sample_case_id, title="Timeline Ev")
+    source_id = "cross_bureau:timeline:dofd"
+
+    create = api_client.post(
+        f"/api/v1/cases/{sample_case_id}/issue-evidence-links",
+        headers=manager_headers,
+        json={"source_id": source_id, "document_id": document_id, "role": "supporting"},
+    )
+    assert create.status_code == 201, create.text
+    link_id = create.json()["id"]
+
+    linked = api_client.get(
+        "/api/v1/timeline",
+        headers=manager_headers,
+        params={
+            "case_id": sample_case_id,
+            "event_type": "ISSUE_EVIDENCE_LINKED",
+            "source_id": source_id,
+        },
+    )
+    assert linked.status_code == 200, linked.text
+    assert linked.json()["total"] >= 1
+    item = linked.json()["items"][0]
+    assert item["metadata"]["source_id"] == source_id
+    assert item["metadata"]["link_id"] == link_id
+    assert item["document_id"] == document_id
+
+    deleted = api_client.delete(
+        f"/api/v1/cases/{sample_case_id}/issue-evidence-links/{link_id}",
+        headers=manager_headers,
+    )
+    assert deleted.status_code == 204
+
+    removed = api_client.get(
+        "/api/v1/timeline",
+        headers=manager_headers,
+        params={
+            "case_id": sample_case_id,
+            "event_type": "ISSUE_EVIDENCE_REMOVED",
+            "source_id": source_id,
+        },
+    )
+    assert removed.status_code == 200
+    assert removed.json()["total"] >= 1
+
+
 def test_issue_evidence_link_rejects_foreign_case_document(
     api_client: TestClient,
     manager_headers: dict[str, str],

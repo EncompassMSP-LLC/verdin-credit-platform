@@ -51,6 +51,7 @@ class TimelineService:
             event_type=params.event_type,
             event_category=params.event_category,
             performed_by=params.performed_by,
+            source_id=params.source_id,
             occurred_from=params.occurred_from,
             occurred_to=params.occurred_to,
             skip=params.offset,

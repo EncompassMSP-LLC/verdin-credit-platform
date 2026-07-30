@@ -19,6 +19,7 @@ class TimelineListFilters:
     event_type: str | None = None
     event_category: str | None = None
     performed_by: uuid.UUID | None = None
+    source_id: str | None = None
     occurred_from: datetime | None = None
     occurred_to: datetime | None = None
     skip: int = 0
@@ -58,6 +59,8 @@ class TimelineRepository:
             base = base.where(TimelineEvent.event_category == filters.event_category)
         if filters.performed_by is not None:
             base = base.where(TimelineEvent.performed_by == filters.performed_by)
+        if filters.source_id is not None:
+            base = base.where(TimelineEvent.event_metadata["source_id"].astext == filters.source_id)
         if filters.occurred_from is not None:
             base = base.where(TimelineEvent.occurred_at >= filters.occurred_from)
         if filters.occurred_to is not None:

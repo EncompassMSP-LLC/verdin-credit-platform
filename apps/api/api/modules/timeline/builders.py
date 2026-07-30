@@ -406,6 +406,75 @@ def document_uploaded_event(document: Document, performed_by: uuid.UUID) -> Plat
     )
 
 
+def issue_evidence_linked_event(
+    *,
+    organization_id: uuid.UUID,
+    case_id: uuid.UUID,
+    document_id: uuid.UUID,
+    link_id: uuid.UUID,
+    source_id: str,
+    role: str,
+    document_title: str | None,
+    performed_by: uuid.UUID,
+    note: str | None = None,
+) -> PlatformEvent:
+    title_label = document_title or str(document_id)
+    return PlatformEvent(
+        event_type="ISSUE_EVIDENCE_LINKED",
+        event_category=EventCategory.DOCUMENT.value,
+        title="Evidence linked to issue",
+        description=f"Vault document '{title_label}' was linked to issue {source_id}.",
+        organization_id=organization_id,
+        case_id=case_id,
+        document_id=document_id,
+        performed_by=performed_by,
+        source_module="documents",
+        metadata={
+            "source_id": source_id,
+            "link_id": str(link_id),
+            "role": role,
+            "document_id": str(document_id),
+            "document_title": document_title,
+            "note": note,
+            "source_record_type": "issue_evidence_link",
+            "source_record_id": str(link_id),
+            "actor_type": "staff",
+        },
+    )
+
+
+def issue_evidence_removed_event(
+    *,
+    organization_id: uuid.UUID,
+    case_id: uuid.UUID,
+    document_id: uuid.UUID,
+    link_id: uuid.UUID,
+    source_id: str,
+    role: str,
+    performed_by: uuid.UUID,
+) -> PlatformEvent:
+    return PlatformEvent(
+        event_type="ISSUE_EVIDENCE_REMOVED",
+        event_category=EventCategory.DOCUMENT.value,
+        title="Evidence unlinked from issue",
+        description=f"Vault document link removed from issue {source_id}.",
+        organization_id=organization_id,
+        case_id=case_id,
+        document_id=document_id,
+        performed_by=performed_by,
+        source_module="documents",
+        metadata={
+            "source_id": source_id,
+            "link_id": str(link_id),
+            "role": role,
+            "document_id": str(document_id),
+            "source_record_type": "issue_evidence_link",
+            "source_record_id": str(link_id),
+            "actor_type": "staff",
+        },
+    )
+
+
 def portal_document_uploaded_event(
     document: Document,
     *,
