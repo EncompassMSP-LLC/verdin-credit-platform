@@ -64,6 +64,7 @@ from api.modules.documents.schemas import (
     CaseDisputeStrategyResponse,
     CaseFcraFindingsResponse,
     CaseIdentityTheftFindingsResponse,
+    CaseIssueEvidenceLinksResponse,
     CaseIssueExplainabilityResponse,
     CaseLitigationStrengthResponse,
     CaseMetadataBulkReextractResponse,
@@ -79,6 +80,8 @@ from api.modules.documents.schemas import (
     IdentityTheftCaseCenterResponse,
     IdentityTheftIncidentResponse,
     IdentityTheftProtectionResponse,
+    IssueEvidenceLinkCreate,
+    IssueEvidenceLinkResponse,
     PrepareCreditReportDisputesRequest,
     PrepareCreditReportDisputesResponse,
     PrepareDisputeStrategyStageRequest,
@@ -627,6 +630,54 @@ async def get_case_issue_explainability(
 ) -> CaseIssueExplainabilityResponse:
     """Plain-language issue cards with impact categories (LRP-208). Advisory only."""
     return await service.get_case_issue_explainability(current_user, case_id)
+
+
+@router.get(
+    "/{case_id}/issue-evidence-links",
+    response_model=CaseIssueEvidenceLinksResponse,
+)
+async def list_case_issue_evidence_links(
+    case_id: uuid.UUID,
+    source_id: str | None = Query(default=None, max_length=512),
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> CaseIssueEvidenceLinksResponse:
+    """Staff-mediated vault document↔issue associations (LRP-208A)."""
+    return await service.list_case_issue_evidence_links(
+        current_user,
+        case_id,
+        source_id=source_id,
+    )
+
+
+@router.post(
+    "/{case_id}/issue-evidence-links",
+    response_model=IssueEvidenceLinkResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_case_issue_evidence_link(
+    case_id: uuid.UUID,
+    payload: IssueEvidenceLinkCreate,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> IssueEvidenceLinkResponse:
+    """Associate a case vault document with an issue source_id (LRP-208A)."""
+    return await service.create_case_issue_evidence_link(current_user, case_id, payload)
+
+
+@router.delete(
+    "/{case_id}/issue-evidence-links/{link_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def delete_case_issue_evidence_link(
+    case_id: uuid.UUID,
+    link_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: DocumentService = Depends(get_document_service),
+) -> Response:
+    """Remove a vault document↔issue association (LRP-208A). Soft-delete."""
+    await service.delete_case_issue_evidence_link(current_user, case_id, link_id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.get(

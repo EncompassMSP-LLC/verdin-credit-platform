@@ -1,8 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ApiClientError,
+  createCaseIssueEvidenceLink,
   createCaseLetterDraft,
+  deleteCaseIssueEvidenceLink,
   getCaseIssueExplainability,
+  listDocuments,
   type FindingStrengthBand,
   type ImpactCategory,
   type IssueExplainabilityCard,
@@ -46,6 +49,11 @@ function ExplainabilityCardRow({
 }) {
   const queryClient = useQueryClient();
   const [message, setMessage] = useState<string | null>(null);
+  const [documentId, setDocumentId] = useState('');
+  const docsQuery = useQuery({
+    queryKey: ['case-documents-for-evidence', caseId],
+    queryFn: () => listDocuments({ case_id: caseId, page_size: 50 }),
+  });
   const generateMutation = useMutation({
     mutationFn: () =>
       createCaseLetterDraft(caseId, {
@@ -60,6 +68,32 @@ function ExplainabilityCardRow({
     },
     onError: (err: Error) => setMessage(err.message),
   });
+  const linkMutation = useMutation({
+    mutationFn: () =>
+      createCaseIssueEvidenceLink(caseId, {
+        source_id: card.source_id,
+        document_id: documentId,
+        role: 'supporting',
+      }),
+    onSuccess: () => {
+      setMessage('Evidence document linked.');
+      setDocumentId('');
+      void queryClient.invalidateQueries({ queryKey: ['case-issue-explainability', caseId] });
+    },
+    onError: (err: Error) => setMessage(err.message),
+  });
+  const unlinkMutation = useMutation({
+    mutationFn: (linkId: string) => deleteCaseIssueEvidenceLink(caseId, linkId),
+    onSuccess: () => {
+      setMessage('Evidence link removed.');
+      void queryClient.invalidateQueries({ queryKey: ['case-issue-explainability', caseId] });
+    },
+    onError: (err: Error) => setMessage(err.message),
+  });
+
+  const associated = card.associated_documents ?? [];
+  const linkedIds = new Set(associated.map((item) => item.document_id));
+  const availableDocs = (docsQuery.data?.items ?? []).filter((doc) => !linkedIds.has(doc.id));
 
   return (
     <li className="rounded-md border border-gray-200 px-4 py-3">
@@ -120,6 +154,68 @@ function ExplainabilityCardRow({
             ))}
           </ul>
         </div>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+            Evidence vault associations
+          </p>
+          {associated.length === 0 ? (
+            <p className="mt-1 text-xs text-gray-500">No vault documents linked yet.</p>
+          ) : (
+            <ul className="mt-1 space-y-1">
+              {associated.map((item) => (
+                <li
+                  key={item.link_id}
+                  className="flex flex-wrap items-center justify-between gap-2 text-sm"
+                >
+                  <span>
+                    {item.title ?? item.file_name ?? item.document_id}
+                    <span className="ml-2 text-xs text-gray-500">{item.role}</span>
+                  </span>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => {
+                      setMessage(null);
+                      unlinkMutation.mutate(item.link_id);
+                    }}
+                    loading={unlinkMutation.isPending}
+                    disabled={unlinkMutation.isPending}
+                  >
+                    Unlink
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          )}
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <select
+              className="rounded border border-gray-300 px-2 py-1 text-xs"
+              value={documentId}
+              onChange={(event) => setDocumentId(event.target.value)}
+            >
+              <option value="">Select case document…</option>
+              {availableDocs.map((doc) => (
+                <option key={doc.id} value={doc.id}>
+                  {doc.title || doc.file_name}
+                </option>
+              ))}
+            </select>
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              onClick={() => {
+                setMessage(null);
+                linkMutation.mutate();
+              }}
+              loading={linkMutation.isPending}
+              disabled={!documentId || linkMutation.isPending}
+            >
+              Link evidence
+            </Button>
+          </div>
+        </div>
         <p className="text-xs text-gray-500">
           Recommended next action: {card.recommended_next_action}
         </p>
@@ -165,8 +261,9 @@ export function CaseIssueExplainabilityPanel({
       <Card title="Issue explanation cards">
         <p className="text-sm text-gray-500">
           Plain-language explanations of detected issues with impact categories and evidence
-          recommendations. Advisory only — never estimates score-point changes. Generate letter
-          creates a staff-gated draft only (never auto-sent).
+          recommendations. Link vault documents to issues for staff review. Advisory only — never
+          estimates score-point changes. Generate letter creates a staff-gated draft only (never
+          auto-sent).
         </p>
 
         {explainQuery.isLoading ? (
