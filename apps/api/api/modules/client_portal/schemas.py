@@ -150,11 +150,16 @@ class PortalDocumentResponse(BaseSchema):
     mime_type: str | None
     file_size: int | None
     processing_status: str
+    document_type: str | None = None
     created_at: datetime
 
 
 class PortalCaseDocumentsResponse(BaseSchema):
     items: list[PortalDocumentResponse]
+    identity_document_id: uuid.UUID | None = None
+    identity_document_on_file: bool = False
+    proof_of_address_document_id: uuid.UUID | None = None
+    proof_of_address_on_file: bool = False
 
 
 class PortalChecklistItemResponse(BaseSchema):

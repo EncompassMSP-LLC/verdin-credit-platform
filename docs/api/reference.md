@@ -214,21 +214,23 @@ Requires `ENABLE_CLIENT_PORTAL=true`. Portal JWTs use `realm=portal` and include
 
 Read-only case progress for portal users. Cases match when `client_id` is set to the portal client, with email/name heuristics as fallback for unlinked cases.
 
-| Method | Path                                                | Auth       | Description                                                                                           |
-| ------ | --------------------------------------------------- | ---------- | ----------------------------------------------------------------------------------------------------- |
-| GET    | `/portal/cases`                                     | portal JWT | List cases linked to portal client (includes `referring_partner_name` when referral exists; LRP-303A) |
-| GET    | `/portal/cases/{id}`                                | portal JWT | Read-only case progress and disputes (`referring_partner_name` when referral exists)                  |
-| GET    | `/portal/cases/{id}/readiness`                      | portal JWT | Latest published Lending Readiness Score™ (band + drivers; advisory)                                  |
-| GET    | `/portal/cases/{id}/readiness-report`               | portal JWT | Borrower readiness report JSON (band-first; LRP-106)                                                  |
-| GET    | `/portal/cases/{id}/readiness-report/export`        | portal JWT | Download readiness report as text/PDF (`?format=`); band-first; never auto-transmitted                |
-| GET    | `/portal/cases/{id}/checklist`                      | portal JWT | Action-plan checklist (baseline + readiness blockers; LRP-104)                                        |
-| GET    | `/portal/cases/{id}/timeline`                       | portal JWT | Borrower-safe readiness timeline (`?event_type=`); LRP-401                                            |
-| GET    | `/portal/cases/{id}/dispute-strategy-suggestions`   | portal JWT | Advisory dispute strategy suggestions (staff-run projection; never auto-send; LRP-403)                |
-| PATCH  | `/portal/checklist/{item_id}`                       | portal JWT | Mark checklist item open/done (borrower-scoped; LRP-104)                                              |
-| GET    | `/portal/cases/{id}/documents`                      | portal JWT | List documents on a linked case                                                                       |
-| POST   | `/portal/cases/{id}/documents`                      | portal JWT | Upload document to a linked case (multipart: `file`, `title`, optional `description`)                 |
-| GET    | `/portal/cases/{id}/identity-theft-center`          | portal JWT | Identity Theft Case Center (findings, reviews, attestation text)                                      |
-| POST   | `/portal/cases/{id}/identity-theft/account-reviews` | portal JWT | Consumer confirmation of a flagged tradeline (attestation required for identity_theft)                |
+| Method | Path                                                | Auth       | Description                                                                                                   |
+| ------ | --------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------- |
+| GET    | `/portal/cases`                                     | portal JWT | List cases linked to portal client (includes `referring_partner_name` when referral exists; LRP-303A)         |
+| GET    | `/portal/cases/{id}`                                | portal JWT | Read-only case progress and disputes (`referring_partner_name` when referral exists)                          |
+| GET    | `/portal/cases/{id}/readiness`                      | portal JWT | Latest published Lending Readiness Score™ (band + drivers; advisory)                                          |
+| GET    | `/portal/cases/{id}/readiness-report`               | portal JWT | Borrower readiness report JSON (band-first; LRP-106)                                                          |
+| GET    | `/portal/cases/{id}/readiness-report/export`        | portal JWT | Download readiness report as text/PDF (`?format=`); band-first; never auto-transmitted                        |
+| GET    | `/portal/cases/{id}/checklist`                      | portal JWT | Action-plan checklist (baseline + readiness blockers; LRP-104)                                                |
+| GET    | `/portal/cases/{id}/timeline`                       | portal JWT | Borrower-safe readiness timeline (`?event_type=`); LRP-401                                                    |
+| GET    | `/portal/cases/{id}/dispute-strategy-suggestions`   | portal JWT | Advisory dispute strategy suggestions (staff-run projection; never auto-send; LRP-403)                        |
+| PATCH  | `/portal/checklist/{item_id}`                       | portal JWT | Mark checklist item open/done (borrower-scoped; LRP-104)                                                      |
+| GET    | `/portal/cases/{id}/documents`                      | portal JWT | List documents on a linked case; includes `identity_document_on_file`                                         |
+| POST   | `/portal/cases/{id}/documents`                      | portal JWT | Upload document to a linked case (multipart: `file`, `title`, optional `description`)                         |
+| POST   | `/portal/cases/{id}/identity-document`              | portal JWT | Upload photo ID / driver’s license and link `case.identity_document_id` (multipart: `file`, optional `title`) |
+| POST   | `/portal/cases/{id}/proof-of-address-document`      | portal JWT | Upload proof of address and link `case.proof_of_address_document_id` (multipart: `file`, optional `title`)    |
+| GET    | `/portal/cases/{id}/identity-theft-center`          | portal JWT | Identity Theft Case Center (findings, reviews, attestation text)                                              |
+| POST   | `/portal/cases/{id}/identity-theft/account-reviews` | portal JWT | Consumer confirmation of a flagged tradeline (attestation required for identity_theft)                        |
 
 Portal uploads use the same MIME and size limits as staff `POST /documents`. Documents appear in staff document views and emit `PORTAL_DOCUMENT_UPLOADED` timeline events. Account-scoped uploads and portal document download are not included in this slice.
 
