@@ -20,6 +20,7 @@ interface PortalAuthContextValue {
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
+  establishSession: (accessToken: string, refreshToken: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -44,6 +45,14 @@ export function PortalAuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(PORTAL_ACCESS_TOKEN_KEY, tokens.access_token);
     localStorage.setItem(PORTAL_REFRESH_TOKEN_KEY, tokens.refresh_token);
     setAccessToken(tokens.access_token);
+    const me = await getPortalMe();
+    setUser(me);
+  }, []);
+
+  const establishSession = useCallback(async (accessToken: string, refreshToken: string) => {
+    localStorage.setItem(PORTAL_ACCESS_TOKEN_KEY, accessToken);
+    localStorage.setItem(PORTAL_REFRESH_TOKEN_KEY, refreshToken);
+    setAccessToken(accessToken);
     const me = await getPortalMe();
     setUser(me);
   }, []);
@@ -91,9 +100,10 @@ export function PortalAuthProvider({ children }: { children: ReactNode }) {
       isLoading,
       isAuthenticated: user !== null,
       login,
+      establishSession,
       logout,
     }),
-    [user, isLoading, login, logout],
+    [user, isLoading, login, establishSession, logout],
   );
 
   return <PortalAuthContext.Provider value={value}>{children}</PortalAuthContext.Provider>;

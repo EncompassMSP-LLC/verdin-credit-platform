@@ -36,12 +36,12 @@ export function BorrowerAuthForm() {
       if (err instanceof ApiClientError) {
         setError(
           err.status === 0 || err.message.includes('Failed to fetch')
-            ? `Cannot reach platform API at ${getApiBaseUrl()}. Start the API and ensure ENABLE_CLIENT_PORTAL=true.`
+            ? `Cannot reach platform API at ${getApiBaseUrl() || '(same origin)'}. Start the API and ensure ENABLE_CLIENT_PORTAL=true.`
             : err.message,
         );
       } else if (err instanceof TypeError) {
         setError(
-          `Cannot reach platform API at ${getApiBaseUrl()}. Start apps/api and confirm CORS allows localhost:3100.`,
+          `Cannot reach platform API at ${getApiBaseUrl() || '(same origin)'}. Confirm the API is up and CORS allows this portal origin.`,
         );
       } else {
         setError(err instanceof Error ? err.message : 'Sign-in failed.');
@@ -72,8 +72,9 @@ export function BorrowerAuthForm() {
       </div>
 
       <div className="rounded-brand border border-gold-500/30 bg-gold-500/10 px-3 py-2 text-xs text-navy-900 dark:text-white/80">
-        Uses the Ultimate Credit Repair / Verdin API at <strong>{getApiBaseUrl()}</strong>. Accounts
-        are provisioned by staff via Client → Portal user (not self-serve signup).
+        Uses the Ultimate Credit Repair / Verdin API at{' '}
+        <strong>{getApiBaseUrl() || 'same origin'}</strong>. Accounts are provisioned by staff via
+        Client → Portal user (not self-serve signup).
       </div>
 
       <div>
