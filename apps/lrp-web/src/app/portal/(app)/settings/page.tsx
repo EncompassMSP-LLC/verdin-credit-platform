@@ -55,7 +55,7 @@ export default function SettingsPage() {
           <dl className="space-y-3 text-sm">
             <div>
               <dt className="text-slate-500">API base URL</dt>
-              <dd className="mt-1 font-mono text-xs">{getApiBaseUrl()}</dd>
+              <dd className="mt-1 font-mono text-xs">{getApiBaseUrl() || 'same origin'}</dd>
             </div>
             <div>
               <dt className="text-slate-500">Auth</dt>

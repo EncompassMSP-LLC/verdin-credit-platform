@@ -69,6 +69,8 @@ class Settings(BaseSettings):
 
     cors_origins: str = "http://localhost:5173,http://localhost:3000"
     public_app_url: str = "http://localhost:8080"
+    # Borrower / LRP portal public origin (invite + reset links). Falls back to public_app_url
+    # when left at the local default in staging/production.
     lrp_portal_base_url: str = "http://localhost:3100"
 
     # LRP-109 — production organization mode guardrails
@@ -113,6 +115,12 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def validate_production_configuration(self) -> "Settings":
+        # Avoid emitting localhost portal invite links when a real public URL is configured.
+        portal = (self.lrp_portal_base_url or "").strip().rstrip("/")
+        public = (self.public_app_url or "").strip().rstrip("/")
+        if portal.startswith("http://localhost") and public.startswith("https://"):
+            self.lrp_portal_base_url = public
+
         if self.app_env != "production":
             return self
 

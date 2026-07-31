@@ -125,7 +125,8 @@ export function PlatformAuthProvider({ children }: { children: ReactNode }) {
       login,
       establishSession,
       logout,
-      apiConfigured: Boolean(getApiBaseUrl()),
+      // Empty base URL means same-origin (/api proxy) — still configured.
+      apiConfigured: true,
     }),
     [user, isLoading, login, establishSession, logout],
   );
