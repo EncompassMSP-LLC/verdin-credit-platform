@@ -93,7 +93,7 @@ export function EmailDeliverySettingsCard() {
     <Card className="mb-6" title="Email delivery">
       <p className="text-sm text-gray-600">
         Send transactional email for notifications and staff workflows. Local pilot uses Mailpit;
-        production can use SMTP or SendGrid.
+        production can use Microsoft Graph, SMTP, or SendGrid.
       </p>
 
       <div className="mt-4 flex flex-wrap gap-2">

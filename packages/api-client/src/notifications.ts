@@ -157,7 +157,7 @@ export function markAllNotificationsRead() {
 export function createNotification(input: CreateNotificationInput) {
   return request<Notification>(apiPath('/notifications'), {
     method: 'POST',
-    body: JSON.stringify(input),
+    body: input,
   });
 }
 
@@ -168,7 +168,7 @@ export function getNotificationEmailDeliveryStatus() {
 export function sendNotificationEmail(input: SendNotificationEmailInput) {
   return request<EmailDeliveryLog>(apiPath('/notifications/email/send'), {
     method: 'POST',
-    body: JSON.stringify(input),
+    body: input,
   });
 }
 
@@ -191,7 +191,7 @@ export function getNotificationSmsDeliveryStatus() {
 export function sendNotificationSms(input: SendNotificationSmsInput) {
   return request<SmsDeliveryLog>(apiPath('/notifications/sms/send'), {
     method: 'POST',
-    body: JSON.stringify(input),
+    body: input,
   });
 }
 
@@ -262,7 +262,7 @@ export function listSmsMarketingCampaignRuns(params: { page?: number; page_size?
 export function runSmsMarketingCampaign(input: SmsMarketingCampaignRunInput) {
   return request<SmsMarketingCampaignRunResult>(apiPath('/notifications/sms-campaigns/run'), {
     method: 'POST',
-    body: JSON.stringify(input),
+    body: input,
   });
 }
 
