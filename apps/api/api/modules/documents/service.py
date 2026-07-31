@@ -926,6 +926,55 @@ class DocumentService:
 
         return document
 
+    async def upload_proof_of_address_document_for_portal(
+        self,
+        *,
+        organization_id: uuid.UUID,
+        portal_user_id: uuid.UUID,
+        case_id: uuid.UUID,
+        file: UploadFile,
+        title: str | None = None,
+    ) -> Document:
+        """Upload proof of address from the borrower portal and link case/client pointers."""
+        from api.modules.clients.models import Client
+        from api.modules.documents.constants import DocumentType
+
+        await self._validate_case(case_id, organization_id)
+        case = await self._cases.get_by_id(case_id, organization_id=organization_id)
+        if case is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Case not found",
+            )
+
+        document = await self.upload_document_for_portal(
+            organization_id=organization_id,
+            portal_user_id=portal_user_id,
+            case_id=case_id,
+            file=file,
+            title=(title or "").strip() or "Proof of mailing address",
+            description="Proof of current mailing address for dispute mail packets",
+        )
+
+        document.document_type = DocumentType.PROOF_OF_ADDRESS.value
+        apply_audit_on_update(document, None)
+        await self._documents.update(document)
+
+        case.proof_of_address_document_id = document.id
+        apply_audit_on_update(case, None)
+        await self._cases.update(case)
+
+        if case.client_id is not None and self._session is not None:
+            client = await self._session.get(Client, case.client_id)
+            if client is not None and client.organization_id == organization_id:
+                client.proof_of_address_document_id = document.id
+                apply_audit_on_update(client, None)
+
+        if self._session is not None:
+            await self._session.commit()
+
+        return document
+
     async def list_documents_for_case(
         self,
         *,

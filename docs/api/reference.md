@@ -228,6 +228,7 @@ Read-only case progress for portal users. Cases match when `client_id` is set to
 | GET    | `/portal/cases/{id}/documents`                      | portal JWT | List documents on a linked case; includes `identity_document_on_file`                                         |
 | POST   | `/portal/cases/{id}/documents`                      | portal JWT | Upload document to a linked case (multipart: `file`, `title`, optional `description`)                         |
 | POST   | `/portal/cases/{id}/identity-document`              | portal JWT | Upload photo ID / driver’s license and link `case.identity_document_id` (multipart: `file`, optional `title`) |
+| POST   | `/portal/cases/{id}/proof-of-address-document`      | portal JWT | Upload proof of address and link `case.proof_of_address_document_id` (multipart: `file`, optional `title`)    |
 | GET    | `/portal/cases/{id}/identity-theft-center`          | portal JWT | Identity Theft Case Center (findings, reviews, attestation text)                                              |
 | POST   | `/portal/cases/{id}/identity-theft/account-reviews` | portal JWT | Consumer confirmation of a flagged tradeline (attestation required for identity_theft)                        |
 

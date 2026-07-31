@@ -156,9 +156,11 @@
   },
   "documents": {
     "title": "Your documents",
-    "subtitle": "Upload your photo ID and any supporting files for this case.",
+    "subtitle": "Upload your photo ID, proof of address, and any supporting files for this case.",
     "upload": "Upload other document",
     "cancelUpload": "Cancel upload",
+    "chooseFile": "Choose file",
+    "noFileChosen": "No file chosen",
     "idTitle": "Photo ID / driver’s license",
     "idSubtitle": "Upload a clear photo or scan of your government-issued photo ID. This is required for dispute mail packets.",
     "idNeeded": "Photo ID not on file yet.",
@@ -168,6 +170,15 @@
     "idSubmit": "Upload photo ID",
     "idReplaceSubmit": "Replace photo ID",
     "photoIdBadge": "Photo ID",
+    "addressTitle": "Proof of address",
+    "addressSubtitle": "Upload a recent utility bill, bank statement, or lease showing your current mailing address.",
+    "addressNeeded": "Proof of address not on file yet.",
+    "addressOnFile": "Proof of address is on file. You can upload a replacement if needed.",
+    "addressFileLabel": "Address document",
+    "addressFileHint": "PDF, JPG, or PNG. On mobile you can use your camera.",
+    "addressSubmit": "Upload proof of address",
+    "addressReplaceSubmit": "Replace proof of address",
+    "addressBadge": "Proof of address",
     "titleLabel": "Title",
     "descriptionLabel": "Description",
     "fileLabel": "File",
@@ -175,11 +186,12 @@
     "submit": "Submit document",
     "loading": "Loading documents…",
     "loadError": "Failed to load documents",
-    "empty": "No documents uploaded yet. Start with Upload photo ID, or use Upload other document for supporting files.",
+    "empty": "No documents uploaded yet. Start with photo ID or proof of address, or use Upload other document for supporting files.",
     "uploaded": "Uploaded {{date}} · {{size}}",
     "errors": {
       "titleAndFileRequired": "Title and file are required",
-      "idFileRequired": "Choose a photo ID file to upload"
+      "idFileRequired": "Choose a photo ID file to upload",
+      "addressFileRequired": "Choose a proof of address file to upload"
     }
   },
   "messages": {

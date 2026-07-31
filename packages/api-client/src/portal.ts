@@ -83,6 +83,8 @@ export interface PortalCaseDocumentsResponse {
   items: PortalDocument[];
   identity_document_id?: string | null;
   identity_document_on_file?: boolean;
+  proof_of_address_document_id?: string | null;
+  proof_of_address_on_file?: boolean;
 }
 
 export interface UploadPortalCaseDocumentInput {
@@ -92,6 +94,11 @@ export interface UploadPortalCaseDocumentInput {
 }
 
 export interface UploadPortalCaseIdentityDocumentInput {
+  file: File | Blob;
+  title?: string | null;
+}
+
+export interface UploadPortalCaseProofOfAddressDocumentInput {
   file: File | Blob;
   title?: string | null;
 }
@@ -258,6 +265,19 @@ export async function uploadPortalCaseIdentityDocument(
   form.append('file', input.file);
   if (input.title) form.append('title', input.title);
   return uploadRequest<PortalDocument>(apiPath(`/portal/cases/${caseId}/identity-document`), form);
+}
+
+export async function uploadPortalCaseProofOfAddressDocument(
+  caseId: string,
+  input: UploadPortalCaseProofOfAddressDocumentInput,
+): Promise<PortalDocument> {
+  const form = new FormData();
+  form.append('file', input.file);
+  if (input.title) form.append('title', input.title);
+  return uploadRequest<PortalDocument>(
+    apiPath(`/portal/cases/${caseId}/proof-of-address-document`),
+    form,
+  );
 }
 
 export interface PortalConsentRequirement {

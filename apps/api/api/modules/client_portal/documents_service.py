@@ -121,10 +121,13 @@ class ClientPortalDocumentsService:
             case_id=case_id,
         )
         identity_document_id = case.identity_document_id
+        proof_of_address_document_id = case.proof_of_address_document_id
         return PortalCaseDocumentsResponse(
             items=[self._to_portal_document(document) for document in documents],
             identity_document_id=identity_document_id,
             identity_document_on_file=identity_document_id is not None,
+            proof_of_address_document_id=proof_of_address_document_id,
+            proof_of_address_on_file=proof_of_address_document_id is not None,
         )
 
     async def upload_case_document(
@@ -159,6 +162,25 @@ class ClientPortalDocumentsService:
         self._require_enabled()
         await self._ensure_case_access(portal_user, case_id)
         document = await self._documents.upload_identity_document_for_portal(
+            organization_id=portal_user.organization_id,
+            portal_user_id=portal_user.id,
+            case_id=case_id,
+            file=file,
+            title=title,
+        )
+        return self._to_portal_document(document)
+
+    async def upload_case_proof_of_address_document(
+        self,
+        portal_user: ClientPortalUser,
+        case_id: uuid.UUID,
+        *,
+        file: UploadFile,
+        title: str | None = None,
+    ) -> PortalDocumentResponse:
+        self._require_enabled()
+        await self._ensure_case_access(portal_user, case_id)
+        document = await self._documents.upload_proof_of_address_document_for_portal(
             organization_id=portal_user.organization_id,
             portal_user_id=portal_user.id,
             case_id=case_id,

@@ -156,9 +156,11 @@
   },
   "documents": {
     "title": "Sus documentos",
-    "subtitle": "Suba su identificación con foto y cualquier archivo de apoyo para este caso.",
+    "subtitle": "Suba su identificación con foto, comprobante de domicilio y cualquier archivo de apoyo para este caso.",
     "upload": "Subir otro documento",
     "cancelUpload": "Cancelar carga",
+    "chooseFile": "Elegir archivo",
+    "noFileChosen": "Ningún archivo elegido",
     "idTitle": "Identificación con foto / licencia de conducir",
     "idSubtitle": "Suba una foto o escaneo claro de su identificación oficial con foto. Se requiere para paquetes de disputa por correo.",
     "idNeeded": "Aún no hay identificación con foto en el expediente.",
@@ -168,6 +170,15 @@
     "idSubmit": "Subir identificación con foto",
     "idReplaceSubmit": "Reemplazar identificación con foto",
     "photoIdBadge": "ID con foto",
+    "addressTitle": "Comprobante de domicilio",
+    "addressSubtitle": "Suba un recibo de servicios, estado de cuenta o contrato de arrendamiento reciente con su dirección actual.",
+    "addressNeeded": "Aún no hay comprobante de domicilio en el expediente.",
+    "addressOnFile": "El comprobante de domicilio está en el expediente. Puede subir un reemplazo si es necesario.",
+    "addressFileLabel": "Documento de domicilio",
+    "addressFileHint": "PDF, JPG o PNG. En el móvil puede usar la cámara.",
+    "addressSubmit": "Subir comprobante de domicilio",
+    "addressReplaceSubmit": "Reemplazar comprobante de domicilio",
+    "addressBadge": "Comprobante de domicilio",
     "titleLabel": "Título",
     "descriptionLabel": "Descripción",
     "fileLabel": "Archivo",
@@ -175,11 +186,12 @@
     "submit": "Enviar documento",
     "loading": "Cargando documentos…",
     "loadError": "No se pudieron cargar los documentos",
-    "empty": "Aún no hay documentos. Comience con Subir identificación con foto, o use Subir otro documento para archivos de apoyo.",
+    "empty": "Aún no hay documentos. Comience con identificación o domicilio, o use Subir otro documento para archivos de apoyo.",
     "uploaded": "Subido {{date}} · {{size}}",
     "errors": {
       "titleAndFileRequired": "El título y el archivo son obligatorios",
-      "idFileRequired": "Elija un archivo de identificación para subir"
+      "idFileRequired": "Elija un archivo de identificación para subir",
+      "addressFileRequired": "Elija un archivo de comprobante de domicilio para subir"
     }
   },
   "messages": {

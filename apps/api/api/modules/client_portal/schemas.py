@@ -158,6 +158,8 @@ class PortalCaseDocumentsResponse(BaseSchema):
     items: list[PortalDocumentResponse]
     identity_document_id: uuid.UUID | None = None
     identity_document_on_file: bool = False
+    proof_of_address_document_id: uuid.UUID | None = None
+    proof_of_address_on_file: bool = False
 
 
 class PortalChecklistItemResponse(BaseSchema):
