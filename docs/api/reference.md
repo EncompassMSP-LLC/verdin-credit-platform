@@ -534,10 +534,11 @@ In-app notifications for staff users. Recipients only see their own notification
 
 `/notifications/email/status` reports `enabled`, `ready`, configured provider metadata, and blockers based on `ENABLE_EMAIL_DELIVERY` plus email provider env vars.
 
-`POST /notifications/email/send` delivers via the configured provider (`smtp` or `sendgrid`) when ready. Each attempt is persisted to `email_delivery_logs`. Set `deliver_email: true` on `POST /notifications` to send email alongside the in-app notification.
+`POST /notifications/email/send` delivers via the configured provider (`smtp`, `sendgrid`, or `microsoft_graph`) when ready. Each attempt is persisted to `email_delivery_logs`. Set `deliver_email: true` on `POST /notifications` to send email alongside the in-app notification.
 
-Provider env vars: `EMAIL_PROVIDER`, `EMAIL_FROM_ADDRESS`, `EMAIL_SMTP_HOST`, `EMAIL_SMTP_PORT`, `EMAIL_SMTP_USERNAME`, `EMAIL_SMTP_PASSWORD`, `EMAIL_SENDGRID_API_KEY`.
+Provider env vars: `EMAIL_PROVIDER`, `EMAIL_FROM_ADDRESS`, `EMAIL_SMTP_HOST`, `EMAIL_SMTP_PORT`, `EMAIL_SMTP_USERNAME`, `EMAIL_SMTP_PASSWORD`, `EMAIL_SENDGRID_API_KEY`, `EMAIL_GRAPH_TENANT_ID`, `EMAIL_GRAPH_CLIENT_ID`, `EMAIL_GRAPH_CLIENT_SECRET`, `EMAIL_GRAPH_SAVE_TO_SENT_ITEMS`.
 
+**Microsoft Graph (recommended for Microsoft 365):** set `EMAIL_PROVIDER=microsoft_graph` with an Entra ID app registration that has application permission `Mail.Send` (admin consent). `EMAIL_FROM_ADDRESS` must be a mailbox the app can send as (user UPN or shared mailbox). Token flow is client credentials against `https://graph.microsoft.com/.default` — no app passwords.
 `/notifications/sms/status` reports `enabled`, `ready`, configured provider metadata, and blockers based on `ENABLE_SMS_DELIVERY` plus SMS provider env vars.
 
 `POST /notifications/sms/send` delivers via the configured provider (`twilio`) when ready. Recipients must have `phone_number` set on their user record. Each attempt is persisted to `sms_delivery_logs`. Set `deliver_sms: true` on `POST /notifications` to send SMS alongside the in-app notification.

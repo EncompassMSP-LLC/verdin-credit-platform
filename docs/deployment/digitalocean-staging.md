@@ -104,7 +104,31 @@ The droplet must already contain a configured `.env.production` (secrets are not
 | `ENABLE_CLIENT_PORTAL`     | true    | Required for borrower portal staging    |
 | `ENABLE_AI` / `ENABLE_LLM` | false   | Unfinished AI surfaces off              |
 | `ENABLE_ENTERPRISE`        | false   | Unfinished enterprise surfaces off      |
+| `ENABLE_EMAIL_DELIVERY`    | false   | Prefer `EMAIL_PROVIDER=microsoft_graph` |
 | `VITE_ENABLE_*` mirrors    | same    | Rebuild `web` after changing Vite flags |
+
+### Microsoft 365 email (Graph / OAuth)
+
+Prefer Graph over SMTP app passwords:
+
+1. Entra ID → App registration → create app (single tenant).
+2. Certificates & secrets → create a **client secret**.
+3. API permissions → Microsoft Graph → **Application** → `Mail.Send` → **Grant admin consent**.
+4. Set on the droplet `.env.production`:
+
+```env
+ENABLE_EMAIL_DELIVERY=true
+EMAIL_PROVIDER=microsoft_graph
+EMAIL_FROM_ADDRESS=info@yourdomain.com
+EMAIL_GRAPH_TENANT_ID=<directory-tenant-id>
+EMAIL_GRAPH_CLIENT_ID=<application-client-id>
+EMAIL_GRAPH_CLIENT_SECRET=<client-secret-value>
+```
+
+5. Recreate API: `docker compose -f docker-compose.production.yml --env-file .env.production up -d --force-recreate api`
+6. Org Admin → Email delivery → **Send test email**.
+
+`EMAIL_FROM_ADDRESS` must be a real mailbox (user or shared) the app can send as.
 
 ## Data policy (mandatory)
 

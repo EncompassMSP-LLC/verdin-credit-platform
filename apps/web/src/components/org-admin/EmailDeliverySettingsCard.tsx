@@ -217,11 +217,11 @@ export function EmailDeliverySettingsCard() {
         <ol className="mt-2 list-decimal space-y-1 pl-5">
           <li>
             Set <code>ENABLE_EMAIL_DELIVERY=true</code> and <code>EMAIL_PROVIDER</code> (
-            <code>smtp</code> or <code>sendgrid</code>).
+            <code>microsoft_graph</code>, <code>smtp</code>, or <code>sendgrid</code>).
           </li>
           <li>
-            Configure <code>EMAIL_FROM_ADDRESS</code> and provider credentials (SMTP host/port or{' '}
-            <code>EMAIL_SENDGRID_API_KEY</code>).
+            Configure <code>EMAIL_FROM_ADDRESS</code> and provider credentials (Graph tenant/client
+            secret, SMTP host/port, or <code>EMAIL_SENDGRID_API_KEY</code>).
           </li>
           <li>
             Use <code>deliver_email: true</code> on notification create, or send via this panel.
