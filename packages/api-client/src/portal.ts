@@ -75,17 +75,25 @@ export interface PortalDocument {
   mime_type: string | null;
   file_size: number | null;
   processing_status: string;
+  document_type?: string | null;
   created_at: string;
 }
 
 export interface PortalCaseDocumentsResponse {
   items: PortalDocument[];
+  identity_document_id?: string | null;
+  identity_document_on_file?: boolean;
 }
 
 export interface UploadPortalCaseDocumentInput {
   file: File | Blob;
   title: string;
   description?: string | null;
+}
+
+export interface UploadPortalCaseIdentityDocumentInput {
+  file: File | Blob;
+  title?: string | null;
 }
 
 export type PortalMessageSenderRole = 'portal_client' | 'staff';
@@ -240,6 +248,16 @@ export async function uploadPortalCaseDocument(
   form.append('title', input.title);
   if (input.description) form.append('description', input.description);
   return uploadRequest<PortalDocument>(apiPath(`/portal/cases/${caseId}/documents`), form);
+}
+
+export async function uploadPortalCaseIdentityDocument(
+  caseId: string,
+  input: UploadPortalCaseIdentityDocumentInput,
+): Promise<PortalDocument> {
+  const form = new FormData();
+  form.append('file', input.file);
+  if (input.title) form.append('title', input.title);
+  return uploadRequest<PortalDocument>(apiPath(`/portal/cases/${caseId}/identity-document`), form);
 }
 
 export interface PortalConsentRequirement {

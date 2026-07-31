@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   listPortalCaseDocuments,
   uploadPortalCaseDocument,
+  uploadPortalCaseIdentityDocument,
   type PortalDocument,
 } from '@verdin/api-client';
 import type { DocumentProcessingStatus } from '@verdin/shared';
@@ -39,7 +40,9 @@ export function PortalCaseDocuments({ caseId }: PortalCaseDocumentsProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [file, setFile] = useState<File | null>(null);
+  const [idFile, setIdFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [idError, setIdError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
 
   const documentsQuery = useQuery({
@@ -69,7 +72,23 @@ export function PortalCaseDocuments({ caseId }: PortalCaseDocumentsProps) {
     onError: (err: Error) => setError(err.message),
   });
 
+  const idUploadMutation = useMutation({
+    mutationFn: () => {
+      if (!idFile) {
+        throw new Error(t('documents.errors.idFileRequired'));
+      }
+      return uploadPortalCaseIdentityDocument(caseId, { file: idFile });
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['portal-case-documents', caseId] });
+      setIdFile(null);
+      setIdError(null);
+    },
+    onError: (err: Error) => setIdError(err.message),
+  });
+
   const items = documentsQuery.data?.items ?? [];
+  const identityOnFile = Boolean(documentsQuery.data?.identity_document_on_file);
 
   return (
     <div className="mt-8 border-t border-gray-200 pt-8">
@@ -91,6 +110,50 @@ export function PortalCaseDocuments({ caseId }: PortalCaseDocumentsProps) {
           {showForm ? t('documents.cancelUpload') : t('documents.upload')}
         </Button>
       </div>
+
+      <Card className="mt-4 p-6">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h3 className="text-base font-semibold text-gray-900">{t('documents.idTitle')}</h3>
+            <p className="mt-1 text-sm text-gray-600">{t('documents.idSubtitle')}</p>
+            {identityOnFile ? (
+              <p className="mt-2 text-sm font-medium text-emerald-700">{t('documents.idOnFile')}</p>
+            ) : (
+              <p className="mt-2 text-sm text-amber-700">{t('documents.idNeeded')}</p>
+            )}
+          </div>
+        </div>
+        <form
+          className="mt-4 space-y-4"
+          onSubmit={(event) => {
+            event.preventDefault();
+            setIdError(null);
+            idUploadMutation.mutate();
+          }}
+        >
+          <div>
+            <label htmlFor="portal-id-file" className="block text-sm font-medium text-gray-700">
+              {t('documents.idFileLabel')}
+            </label>
+            <input
+              id="portal-id-file"
+              type="file"
+              className={inputClass}
+              accept=".pdf,.jpg,.jpeg,.png,.heic,.webp"
+              capture="environment"
+              onChange={(event) => setIdFile(event.target.files?.[0] ?? null)}
+              required
+            />
+            <p className="mt-1 text-xs text-gray-500">{t('documents.idFileHint')}</p>
+          </div>
+          {idError ? (
+            <div className="rounded-md bg-red-50 p-3 text-sm text-red-700">{idError}</div>
+          ) : null}
+          <Button type="submit" loading={idUploadMutation.isPending}>
+            {identityOnFile ? t('documents.idReplaceSubmit') : t('documents.idSubmit')}
+          </Button>
+        </form>
+      </Card>
 
       {showForm ? (
         <Card className="mt-4 p-6">
@@ -182,6 +245,7 @@ export function PortalCaseDocuments({ caseId }: PortalCaseDocumentsProps) {
               document={document}
               locale={i18n.language}
               emptySize={tCommon('emDash')}
+              photoIdLabel={t('documents.photoIdBadge')}
               uploadedLabel={(date, size) => t('documents.uploaded', { date, size })}
             />
           ))}
@@ -195,18 +259,28 @@ function PortalDocumentRow({
   document,
   locale,
   emptySize,
+  photoIdLabel,
   uploadedLabel,
 }: {
   document: PortalDocument;
   locale: string;
   emptySize: string;
+  photoIdLabel: string;
   uploadedLabel: (date: string, size: string) => string;
 }) {
+  const isIdentity = document.document_type === 'identity_document';
   return (
     <li className="rounded-md border border-gray-200 px-4 py-3">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="font-medium text-gray-900">{document.title}</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="font-medium text-gray-900">{document.title}</p>
+            {isIdentity ? (
+              <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
+                {photoIdLabel}
+              </span>
+            ) : null}
+          </div>
           <p className="text-sm text-gray-500">{document.file_name}</p>
           {document.description ? (
             <p className="mt-1 text-sm text-gray-600">{document.description}</p>

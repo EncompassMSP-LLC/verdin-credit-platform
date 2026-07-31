@@ -60,3 +60,24 @@ async def upload_portal_case_document(
         title=title,
         description=description,
     )
+
+
+@router.post(
+    "/{case_id}/identity-document",
+    response_model=PortalDocumentResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def upload_portal_case_identity_document(
+    case_id: uuid.UUID,
+    file: UploadFile = File(...),
+    title: str | None = Form(None),
+    _: None = Depends(require_client_portal_enabled),
+    portal_user: ClientPortalUser = Depends(get_current_portal_user),
+    service: ClientPortalDocumentsService = Depends(get_portal_documents_service),
+) -> PortalDocumentResponse:
+    return await service.upload_case_identity_document(
+        portal_user,
+        case_id,
+        file=file,
+        title=title,
+    )

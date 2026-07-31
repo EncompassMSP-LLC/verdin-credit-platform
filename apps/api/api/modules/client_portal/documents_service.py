@@ -93,6 +93,7 @@ class ClientPortalDocumentsService:
             mime_type=document.mime_type,
             file_size=document.file_size,
             processing_status=document.processing_status,
+            document_type=document.document_type,
             created_at=document.created_at,
         )
 
@@ -102,13 +103,28 @@ class ClientPortalDocumentsService:
         case_id: uuid.UUID,
     ) -> PortalCaseDocumentsResponse:
         self._require_enabled()
-        await self._ensure_case_access(portal_user, case_id)
+        client, contact_emails = await self._resolve_client_context(portal_user)
+        case = await self._cases.get_case_for_client(
+            case_id,
+            organization_id=portal_user.organization_id,
+            client=client,
+            portal_email=portal_user.email,
+            contact_emails=contact_emails,
+        )
+        if case is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Case not found",
+            )
         documents = await self._documents.list_documents_for_case(
             organization_id=portal_user.organization_id,
             case_id=case_id,
         )
+        identity_document_id = case.identity_document_id
         return PortalCaseDocumentsResponse(
-            items=[self._to_portal_document(document) for document in documents]
+            items=[self._to_portal_document(document) for document in documents],
+            identity_document_id=identity_document_id,
+            identity_document_on_file=identity_document_id is not None,
         )
 
     async def upload_case_document(
@@ -129,5 +145,24 @@ class ClientPortalDocumentsService:
             file=file,
             title=title,
             description=description,
+        )
+        return self._to_portal_document(document)
+
+    async def upload_case_identity_document(
+        self,
+        portal_user: ClientPortalUser,
+        case_id: uuid.UUID,
+        *,
+        file: UploadFile,
+        title: str | None = None,
+    ) -> PortalDocumentResponse:
+        self._require_enabled()
+        await self._ensure_case_access(portal_user, case_id)
+        document = await self._documents.upload_identity_document_for_portal(
+            organization_id=portal_user.organization_id,
+            portal_user_id=portal_user.id,
+            case_id=case_id,
+            file=file,
+            title=title,
         )
         return self._to_portal_document(document)

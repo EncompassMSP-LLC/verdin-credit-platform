@@ -1088,6 +1088,7 @@ export {
   subscribePortalPush,
   unsubscribePortalPush,
   uploadPortalCaseDocument,
+  uploadPortalCaseIdentityDocument,
   getClientPortalUser,
   updateClientPortalUser,
   revokeClientPortalUser,
@@ -1141,6 +1142,7 @@ export {
   type SendPortalMessageInput,
   type UpdatePortalUserInput,
   type UploadPortalCaseDocumentInput,
+  type UploadPortalCaseIdentityDocumentInput,
 } from './portal';
 
 export {

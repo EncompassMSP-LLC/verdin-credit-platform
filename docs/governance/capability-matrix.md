@@ -222,17 +222,17 @@ Scope: [version-5.0-scope.md](version-5.0-scope.md) · Release notes: [v5.0.0.md
 
 ### Version 5.0 epic sign-off
 
-| Epic                  | v5.0.0 outcome | Exit note                                                                   |
-| --------------------- | -------------- | --------------------------------------------------------------------------- |
-| Data & client linking | Partial        | `cases.client_id` FK shipped; bulk import/CRM sync → 5.0+                   |
-| Communications        | Partial        | Production email + audit; SMS production → 5.0+                             |
-| AI Assistance (LLM)   | Partial        | Case summary post-gate; document summaries + LLM augment → 5.0+             |
-| Platform operations   | Partial        | Orchestrator retry/metrics + cron; PG job persistence → 5.0+                |
-| Enterprise identity   | Partial        | SSO/MFA readiness scaffold; IdP enrollment + SCIM → 5.0+                    |
-| Compliance            | Partial        | Consent + retention placeholders; enforcement + legal workflows → 5.0+      |
-| Client portal         | Partial        | Upload + messaging scaffold; real-time delivery + billing → 5.0+            |
-| Enterprise admin      | Partial        | API key lifecycle; usage analytics + billing admin → 5.0+                   |
-| Reporting & analytics | Partial        | Bureau + team productivity read models; materialized views + revenue → 5.0+ |
+| Epic                  | v5.0.0 outcome | Exit note                                                                                        |
+| --------------------- | -------------- | ------------------------------------------------------------------------------------------------ |
+| Data & client linking | Partial        | `cases.client_id` FK shipped; bulk import/CRM sync → 5.0+                                        |
+| Communications        | Partial        | Production email + audit; SMS production → 5.0+                                                  |
+| AI Assistance (LLM)   | Partial        | Case summary post-gate; document summaries + LLM augment → 5.0+                                  |
+| Platform operations   | Partial        | Orchestrator retry/metrics + cron; PG job persistence → 5.0+                                     |
+| Enterprise identity   | Partial        | SSO/MFA readiness scaffold; IdP enrollment + SCIM → 5.0+                                         |
+| Compliance            | Partial        | Consent + retention placeholders; enforcement + legal workflows → 5.0+                           |
+| Client portal         | Partial        | Photo ID upload links identity_document; messaging scaffold; real-time delivery + billing → 5.0+ |
+| Enterprise admin      | Partial        | API key lifecycle; usage analytics + billing admin → 5.0+                                        |
+| Reporting & analytics | Partial        | Bureau + team productivity read models; materialized views + revenue → 5.0+                      |
 
 ---
 

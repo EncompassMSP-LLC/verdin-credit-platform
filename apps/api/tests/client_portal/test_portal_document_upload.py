@@ -181,6 +181,65 @@ def test_portal_user_cannot_upload_to_unlinked_case(
     assert response.status_code == 404
 
 
+def test_portal_user_uploads_identity_document_to_linked_case(
+    api_client: TestClient,
+    manager_headers: dict[str, str],
+    portal_enabled: None,
+    memory_storage: MemoryDocumentStorage,
+) -> None:
+    email = f"portal-id-upload-{uuid.uuid4().hex[:8]}@example.com"
+    client_id = _create_client(
+        api_client,
+        manager_headers,
+        display_name=f"ID Upload Client {uuid.uuid4().hex[:6]}",
+        email=email,
+    )
+    _provision_portal_user(api_client, manager_headers, client_id, email=email)
+    linked_case = _create_case(
+        api_client,
+        manager_headers,
+        title="ID Upload Case",
+        client_id=client_id,
+    )
+
+    portal_headers = _portal_login(api_client, email)
+    filename, file_obj, content_type = sample_pdf_upload()
+    upload_response = api_client.post(
+        f"/api/v1/portal/cases/{linked_case['id']}/identity-document",
+        headers=portal_headers,
+        files={"file": (filename, file_obj, content_type)},
+    )
+    assert upload_response.status_code == 201, upload_response.text
+    uploaded = upload_response.json()
+    assert uploaded["title"] == "Driver's license"
+    assert uploaded["document_type"] == "identity_document"
+    assert uploaded["case_id"] == linked_case["id"]
+    assert len(memory_storage._objects) == 1
+
+    list_response = api_client.get(
+        f"/api/v1/portal/cases/{linked_case['id']}/documents",
+        headers=portal_headers,
+    )
+    assert list_response.status_code == 200, list_response.text
+    body = list_response.json()
+    assert body["identity_document_on_file"] is True
+    assert body["identity_document_id"] == uploaded["id"]
+
+    case_response = api_client.get(
+        f"/api/v1/cases/{linked_case['id']}",
+        headers=manager_headers,
+    )
+    assert case_response.status_code == 200, case_response.text
+    assert case_response.json()["identity_document_id"] == uploaded["id"]
+
+    client_response = api_client.get(
+        f"/api/v1/clients/{client_id}",
+        headers=manager_headers,
+    )
+    assert client_response.status_code == 200, client_response.text
+    assert client_response.json()["identity_document_id"] == uploaded["id"]
+
+
 def test_staff_can_see_portal_uploaded_document(
     api_client: TestClient,
     manager_headers: dict[str, str],
