@@ -197,6 +197,16 @@ class AccountService:
                 detail="Insufficient permissions to modify accounts",
             )
 
+    async def _organization_signer_name(self, organization_id: uuid.UUID) -> str | None:
+        if self._session is None:
+            return None
+        from api.modules.auth.models import Organization
+
+        organization = await self._session.get(Organization, organization_id)
+        if organization is None:
+            return None
+        return organization.name
+
     def _require_delete(self, user: User) -> None:
         if not has_permission(user.role, ACCOUNT_DELETE_ROLE):
             raise HTTPException(
@@ -454,6 +464,7 @@ class AccountService:
                 case,
                 disputed_items,
                 legal_pursuant=legal_ref.pursuant_clause,
+                signer_name=await self._organization_signer_name(account.organization_id),
             )
             requested_action = (
                 "Investigate the consumer's direct furnisher dispute, correct or delete "
@@ -473,6 +484,7 @@ class AccountService:
                 case,
                 disputed_items,
                 legal_pursuant=legal_ref.pursuant_clause,
+                signer_name=await self._organization_signer_name(account.organization_id),
             )
             requested_action = (
                 "Investigate the disputed tradeline and delete or correct any information "
@@ -777,6 +789,7 @@ class AccountService:
                     case=case,
                     dispute_letter=dispute_letter,
                     consumer_address_lines=consumer_address_lines,
+                    organization_name=await self._organization_signer_name(organization_id),
                     legal_pursuant=legal_ref.pursuant_clause,
                 )
                 attachments = await self._resolve_mail_packet_attachments(
@@ -939,6 +952,7 @@ class AccountService:
             case=case,
             dispute_letter=dispute_letter,
             consumer_address_lines=consumer_address_lines,
+            organization_name=await self._organization_signer_name(account.organization_id),
             legal_pursuant=legal_ref.pursuant_clause,
         )
         attachments = None

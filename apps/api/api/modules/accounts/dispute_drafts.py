@@ -267,16 +267,33 @@ def build_furnisher_evidence_checklist(account: Account) -> list[str]:
     return checklist
 
 
+def resolve_dispute_signer_name(organization_name: str | None = None) -> str:
+    """Closing signature for dispute drafts: org name, then DISPUTE_RETURN_NAME, then app name."""
+    from api.core.config import get_settings
+    from api.core.constants import APP_NAME
+
+    for candidate in (
+        (organization_name or "").strip(),
+        (get_settings().dispute_return_name or "").strip(),
+        APP_NAME,
+    ):
+        if candidate:
+            return candidate
+    return APP_NAME
+
+
 def build_dispute_body(
     account: Account,
     case: Case,
     dispute_reasons: list[str],
     *,
     legal_pursuant: str | None = None,
+    signer_name: str | None = None,
 ) -> str:
     account_identifier = account.account_number_masked or "account number not provided"
     reason_lines = "\n".join(f"- {reason}" for reason in dispute_reasons)
     pursuant = legal_pursuant or "15 U.S.C. § 1681i (FCRA Section 611)"
+    closing_name = resolve_dispute_signer_name(signer_name)
     return (
         f"To whom it may concern,\n\n"
         f"I am writing on behalf of {case.client_name} regarding the {account.bureau.value} "
@@ -286,7 +303,7 @@ def build_dispute_body(
         f"Please investigate the following items:\n{reason_lines}\n\n"
         "Please verify this information with the furnisher, provide the method of verification, "
         "and delete or correct any information that cannot be verified as complete and accurate.\n\n"
-        "Sincerely,\nUltimate Credit Repair LLC"
+        f"Sincerely,\n{closing_name}"
     )
 
 
@@ -296,11 +313,13 @@ def build_furnisher_dispute_body(
     dispute_reasons: list[str],
     *,
     legal_pursuant: str | None = None,
+    signer_name: str | None = None,
 ) -> str:
     account_identifier = account.account_number_masked or "account number not provided"
     reason_lines = "\n".join(f"- {reason}" for reason in dispute_reasons)
     furnisher_name = account.original_creditor or account.creditor_name
     pursuant = legal_pursuant or "15 U.S.C. § 1681s-2 (FCRA Section 623)"
+    closing_name = resolve_dispute_signer_name(signer_name)
     return (
         f"To whom it may concern at {furnisher_name},\n\n"
         f"I am writing on behalf of {case.client_name} regarding inaccurate information your "
@@ -310,5 +329,5 @@ def build_furnisher_dispute_body(
         f"Please investigate the following items:\n{reason_lines}\n\n"
         "Correct or delete any information that cannot be verified as complete and accurate, "
         "and notify all consumer reporting agencies to whom you furnish data.\n\n"
-        "Sincerely,\nUltimate Credit Repair LLC"
+        f"Sincerely,\n{closing_name}"
     )

@@ -74,7 +74,7 @@ def resolve_return_address(
     settings: Settings | None = None,
 ) -> MailingAddress:
     config = settings or get_settings()
-    name = config.dispute_return_name or organization_name or APP_NAME
+    name = organization_name or config.dispute_return_name or APP_NAME
     lines = [
         line.strip()
         for line in (

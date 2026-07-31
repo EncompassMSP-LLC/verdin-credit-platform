@@ -119,17 +119,30 @@ class LlmDisputeDraftAugmentService:
         account: Account,
         case: Case,
         recipient_type: DisputeRecipientType,
+        signer_name: str | None = None,
     ) -> tuple[str, str, str]:
         disputed_items = build_dispute_reasons(account)
         if recipient_type == "furnisher":
             template_id = FURNISHER_TEMPLATE_ID
             subject = f"Direct furnisher dispute — {account.creditor_name} tradeline"
-            body = build_furnisher_dispute_body(account, case, disputed_items)
+            body = build_furnisher_dispute_body(
+                account, case, disputed_items, signer_name=signer_name
+            )
         else:
             template_id = CRA_TEMPLATE_ID
             subject = f"Dispute of {account.creditor_name} tradeline"
-            body = build_dispute_body(account, case, disputed_items)
+            body = build_dispute_body(account, case, disputed_items, signer_name=signer_name)
         return template_id, subject, body
+
+    async def _organization_signer_name(self, organization_id: uuid.UUID) -> str | None:
+        if self._session is None:
+            return None
+        from api.modules.auth.models import Organization
+
+        organization = await self._session.get(Organization, organization_id)
+        if organization is None:
+            return None
+        return organization.name
 
     @staticmethod
     def _build_prompt(
@@ -232,6 +245,7 @@ class LlmDisputeDraftAugmentService:
             account=account,
             case=case,
             recipient_type=recipient_type,
+            signer_name=await self._organization_signer_name(organization_id),
         )
         requested_at = datetime.now(UTC)
 
