@@ -23,25 +23,29 @@ function isComparableCreditReport(document: {
   document_type: string | null;
   title: string;
   file_name: string;
+  description?: string | null;
 }): boolean {
-  if (document.document_type === 'signed_consent') {
-    return false;
-  }
   const title = document.title.trim().toLowerCase();
   const fileName = document.file_name.trim().toLowerCase();
-  if (title.startsWith('signed —') || title.startsWith('signed -')) {
-    return false;
-  }
-  if (fileName.startsWith('signed-consent-')) {
+  const description = (document.description ?? '').trim().toLowerCase();
+  const haystack = `${title} ${fileName} ${description}`;
+
+  // Any portal/staff signed consent/disclosure — dash character variants included.
+  if (/^signed[\s\u2010-\u2015-]/.test(title) || fileName.startsWith('signed-consent-')) {
     return false;
   }
   if (
-    title.includes('croa disclosure') ||
-    title.includes('fcra dispute authorization') ||
-    title.includes('credit repair services agreement')
+    document.document_type === 'signed_consent' ||
+    haystack.includes('signed consent') ||
+    haystack.includes('croa disclosure') ||
+    haystack.includes('fcra dispute authorization') ||
+    haystack.includes('credit repair services agreement') ||
+    haystack.includes('credit repair service agreement') ||
+    haystack.includes('notice of cancellation')
   ) {
     return false;
   }
+
   return document.document_type === 'credit_report';
 }
 
