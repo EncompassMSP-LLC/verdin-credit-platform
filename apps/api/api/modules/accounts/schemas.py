@@ -260,6 +260,16 @@ class AccountLlmRecommendationResponse(BaseSchema):
     cross_bureau_informed: bool
 
 
+class LegalReferenceAlternativeResponse(BaseSchema):
+    rule_id: str
+    score: int
+    deletion_affinity: int
+    citations: list[str]
+    sections: list[str]
+    selected: bool
+    rationale: str
+
+
 class AccountDisputeDraftResponse(BaseSchema):
     account_id: uuid.UUID
     case_id: uuid.UUID
@@ -282,6 +292,7 @@ class AccountDisputeDraftResponse(BaseSchema):
     legal_reference_source: Literal["finding", "default"] = "default"
     legal_reference_rule_id: str | None = None
     legal_pursuant: str | None = None
+    legal_alternatives: list[LegalReferenceAlternativeResponse] = []
 
 
 class DisputeReasonSuggestionResponse(BaseSchema):

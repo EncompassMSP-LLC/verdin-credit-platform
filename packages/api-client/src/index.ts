@@ -846,6 +846,7 @@ export {
   updateAccount,
   type Account,
   type AccountDisputeDraft,
+  type LegalReferenceAlternative,
   type AccountReinvestigationClock,
   type AccountReinvestigationRecipientClock,
   type AccountRedisputeReadiness,

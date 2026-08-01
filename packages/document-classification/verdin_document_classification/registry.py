@@ -14,6 +14,7 @@ from verdin_document_classification.classifiers import (
     IdentityDocumentClassifier,
     MedicalCollectionClassifier,
     ProofOfAddressClassifier,
+    SignedConsentClassifier,
     UnknownClassifier,
     UtilityBillClassifier,
 )
@@ -22,6 +23,7 @@ from verdin_document_classification.constants import DocumentType
 _MIN_CONFIDENCE = 0.5
 
 _CLASSIFIERS: tuple[DocumentClassifier, ...] = (
+    SignedConsentClassifier(),
     CreditReportClassifier(),
     BureauResponseClassifier(),
     CollectionLetterClassifier(),

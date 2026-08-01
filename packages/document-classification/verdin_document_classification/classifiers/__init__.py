@@ -18,6 +18,9 @@ from verdin_document_classification.classifiers.medical_collection import (
 from verdin_document_classification.classifiers.proof_of_address import (
     ProofOfAddressClassifier,
 )
+from verdin_document_classification.classifiers.signed_consent import (
+    SignedConsentClassifier,
+)
 from verdin_document_classification.classifiers.unknown import UnknownClassifier
 from verdin_document_classification.classifiers.utility_bill import UtilityBillClassifier
 
@@ -30,6 +33,7 @@ __all__ = [
     "IdentityDocumentClassifier",
     "MedicalCollectionClassifier",
     "ProofOfAddressClassifier",
+    "SignedConsentClassifier",
     "UnknownClassifier",
     "UtilityBillClassifier",
 ]

@@ -36,6 +36,7 @@ def test_classify_credit_report_enqueues_parse_job(
                 file_name="report.pdf",
                 title="Report",
                 mime_type="application/pdf",
+                document_type=None,
                 deleted_at=None,
             ),
         ),
@@ -79,6 +80,7 @@ def test_classify_non_credit_report_enqueues_metadata_job(
                 file_name="statement.pdf",
                 title="Statement",
                 mime_type="application/pdf",
+                document_type=None,
                 deleted_at=None,
             ),
         ),
@@ -89,6 +91,54 @@ def test_classify_non_credit_report_enqueues_metadata_job(
             JobContext(job_id="job-2", payload={"document_id": str(document_id)})
         )
 
+    mock_enqueue_job.assert_called_once_with(
+        JobType.DOCUMENT_METADATA_EXTRACT,
+        {"document_id": str(document_id)},
+    )
+
+
+@patch("worker.jobs.classify.enqueue_job")
+@patch("worker.jobs.classify.session_scope")
+@patch("worker.jobs.classify.classify_document")
+def test_classify_preserves_signed_consent_type(
+    mock_classify_document,
+    mock_session_scope,
+    mock_enqueue_job,
+) -> None:
+    document_id = uuid4()
+    mock_session = MagicMock()
+    mock_session_scope.return_value.__enter__.return_value = mock_session
+
+    mock_classify_document.return_value = MagicMock(
+        document_type=MagicMock(value="credit_report"),
+        confidence_score=0.95,
+        classification_method=MagicMock(value="rules"),
+    )
+    save_mock = MagicMock()
+
+    with (
+        patch(
+            "worker.jobs.classify.get_document_for_classification",
+            return_value=MagicMock(
+                ocr_text="FCRA authorization Equifax Experian TransUnion",
+                file_name="signed-consent-fcra.pdf",
+                title="Signed — FCRA Dispute Authorization",
+                mime_type="application/pdf",
+                document_type="signed_consent",
+                deleted_at=None,
+            ),
+        ),
+        patch("worker.jobs.classify.save_classification", save_mock),
+        patch("worker.jobs.classify.get_document_timeline_context", return_value=None),
+    ):
+        result = DocumentClassifyJob().run(
+            JobContext(job_id="job-consent", payload={"document_id": str(document_id)})
+        )
+
+    assert result.status.value == "completed"
+    assert result.data["document_type"] == "signed_consent"
+    save_mock.assert_called_once()
+    assert save_mock.call_args.kwargs["document_type"] == "signed_consent"
     mock_enqueue_job.assert_called_once_with(
         JobType.DOCUMENT_METADATA_EXTRACT,
         {"document_id": str(document_id)},

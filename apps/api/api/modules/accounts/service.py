@@ -30,8 +30,10 @@ from api.modules.accounts.dispute_drafts import (
     detect_missing_evidence,
 )
 from api.modules.accounts.dispute_legal_references import (
+    LegalCitationCandidate,
     SelectedLegalReference,
     candidates_from_fcra_documents,
+    rank_legal_alternatives,
     select_best_legal_reference,
 )
 from api.modules.accounts.dispute_letter_export import (
@@ -102,6 +104,7 @@ from api.modules.accounts.schemas import (
     DisputeReasonSuggestionResponse,
     DisputeResponseRecordOutcome,
     DisputeResponseRecordResponse,
+    LegalReferenceAlternativeResponse,
     LitigationCrossBureauDiscrepancy,
     LitigationCrossBureauEvidence,
     LitigationPacketLetter,
@@ -440,11 +443,9 @@ class AccountService:
 
         disputed_items = build_dispute_reasons(account)
         reason_suggestions = build_dispute_reason_suggestions(account)
-        legal_ref = await self._select_legal_reference_for_account(
-            user,
-            account,
-            recipient_type=recipient_type,
-        )
+        legal_candidates = await self._legal_candidates_for_account(user, account)
+        legal_ref = select_best_legal_reference(recipient_type, legal_candidates)
+        legal_alternatives = rank_legal_alternatives(recipient_type, legal_candidates)
         if recipient_type == "furnisher":
             evidence_checklist = build_furnisher_evidence_checklist(account)
             template_id = FURNISHER_TEMPLATE_ID
@@ -541,6 +542,18 @@ class AccountService:
             legal_reference_source=legal_ref.source,
             legal_reference_rule_id=legal_ref.source_rule_id,
             legal_pursuant=legal_ref.pursuant_clause,
+            legal_alternatives=[
+                LegalReferenceAlternativeResponse(
+                    rule_id=alt.rule_id,
+                    score=alt.score,
+                    deletion_affinity=alt.deletion_affinity,
+                    citations=list(alt.citations),
+                    sections=list(alt.sections),
+                    selected=alt.selected,
+                    rationale=alt.rationale,
+                )
+                for alt in legal_alternatives
+            ],
         )
 
     async def create_dispute_letter_draft(
@@ -955,15 +968,13 @@ class AccountService:
             attachments=attachments,
         )
 
-    async def _select_legal_reference_for_account(
+    async def _legal_candidates_for_account(
         self,
         user: User,
         account: Account,
-        *,
-        recipient_type: DisputeRecipientType,
-    ) -> SelectedLegalReference:
+    ) -> list[LegalCitationCandidate]:
         if self._session is None:
-            return select_best_legal_reference(recipient_type, ())
+            return []
 
         from api.modules.documents.service import DocumentService as _DocService
 
@@ -971,14 +982,23 @@ class AccountService:
         try:
             fcra = await doc_service.get_case_fcra_findings(user, account.case_id)
         except HTTPException:
-            return select_best_legal_reference(recipient_type, ())
+            return []
 
-        candidates = candidates_from_fcra_documents(
+        return candidates_from_fcra_documents(
             fcra.documents,
             creditor_name=account.creditor_name,
             account_number_masked=account.account_number_masked,
             bureau=account.bureau.value,
         )
+
+    async def _select_legal_reference_for_account(
+        self,
+        user: User,
+        account: Account,
+        *,
+        recipient_type: DisputeRecipientType,
+    ) -> SelectedLegalReference:
+        candidates = await self._legal_candidates_for_account(user, account)
         return select_best_legal_reference(recipient_type, candidates)
 
     async def _resolve_mail_packet_attachments(

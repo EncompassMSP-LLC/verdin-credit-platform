@@ -587,6 +587,13 @@ export function CaseDisputeStrategyPanel({
                           <>
                             {' · '}
                             <Link
+                              to={`/accounts/${item.account_id}?letter=${encodeURIComponent(item.dispute_letter_id)}`}
+                              className="text-brand-600 hover:underline"
+                            >
+                              open letter
+                            </Link>
+                            {' · '}
+                            <Link
                               to={`/accounts/${item.account_id}`}
                               className="text-brand-600 hover:underline"
                             >

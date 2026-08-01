@@ -11,7 +11,24 @@ from verdin_document_classification.registry import list_classifiers
 def test_registry_lists_all_classifiers() -> None:
     names = {classifier.name for classifier in list_classifiers()}
     assert "credit_report" in names
+    assert "signed_consent" in names
     assert "unknown" not in names
+
+
+def test_signed_consent_not_classified_as_credit_report() -> None:
+    context = ClassificationContext(
+        ocr_text=(
+            "CROA Disclosure Statement. Client authorizes disputes with Equifax, "
+            "Experian, and TransUnion under the Fair Credit Reporting Act. "
+            "This is not a consumer credit report tradeline pull."
+        ),
+        file_name="signed-consent-fcra_authorization.pdf",
+        title="Signed — FCRA Dispute Authorization",
+        mime_type="application/pdf",
+    )
+    result = classify_document(context)
+    assert result.document_type == DocumentType.SIGNED_CONSENT
+    assert result.confidence_score >= 0.9
 
 
 def test_classifies_credit_report_from_ocr_text() -> None:

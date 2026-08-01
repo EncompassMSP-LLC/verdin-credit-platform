@@ -53,10 +53,18 @@ class DocumentClassifyJob(BaseJob):
                 mime_type=document.mime_type,
             )
             result = classify_document(classification_context)
+            locked_types = {"signed_consent", "identity_document", "proof_of_address"}
+            document_type = result.document_type.value
+            if (
+                document.document_type in locked_types
+                and document_type not in locked_types
+            ):
+                # Preserve portal/staff assigned types; still record classifier confidence.
+                document_type = document.document_type
             save_classification(
                 session,
                 document_id,
-                document_type=result.document_type.value,
+                document_type=document_type,
                 confidence_score=result.confidence_score,
                 classification_method=result.classification_method.value,
             )
@@ -68,20 +76,20 @@ class DocumentClassifyJob(BaseJob):
                     event_type="CLASSIFICATION_COMPLETED",
                     event_category="document",
                     title="Classification completed",
-                    description=f"Document classified as {result.document_type.value}.",
+                    description=f"Document classified as {document_type}.",
                     source_module="worker",
                     case_id=timeline_context.case_id,
                     account_id=timeline_context.account_id,
                     document_id=timeline_context.id,
                     metadata={
-                        "document_type": result.document_type.value,
+                        "document_type": document_type,
                         "confidence_score": result.confidence_score,
                     },
                 )
 
         next_job = (
             JobType.DOCUMENT_CREDIT_REPORT_PARSE
-            if result.document_type.value == "credit_report"
+            if document_type == "credit_report"
             else JobType.DOCUMENT_METADATA_EXTRACT
         )
         enqueue_job(next_job, {"document_id": str(document_id)})
@@ -90,14 +98,14 @@ class DocumentClassifyJob(BaseJob):
             "document_classified",
             job_id=context.job_id,
             document_id=str(document_id),
-            document_type=result.document_type.value,
+            document_type=document_type,
             confidence=result.confidence_score,
         )
         return JobResult(
             status=JobStatus.COMPLETED,
             message="Document classified",
             data={
-                "document_type": result.document_type.value,
+                "document_type": document_type,
                 "confidence_score": result.confidence_score,
             },
         )

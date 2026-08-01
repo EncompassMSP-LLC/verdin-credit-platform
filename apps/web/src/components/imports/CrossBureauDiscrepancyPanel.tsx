@@ -266,6 +266,14 @@ function DiscrepancyRow({
             >
               Open account
             </Link>
+            {prepareMutation.data.prepared[0].dispute_letter_id ? (
+              <Link
+                to={`/accounts/${prepareMutation.data.prepared[0].account_id}?letter=${encodeURIComponent(prepareMutation.data.prepared[0].dispute_letter_id)}`}
+                className="block text-brand-600 hover:underline"
+              >
+                Open letter
+              </Link>
+            ) : null}
             <PreviewReportPageButton target={previewTarget} consentBlocked={consentBlocked} />
           </div>
         ) : previewTarget ? (
@@ -300,6 +308,12 @@ function PreparedDisputePreviewList({
         >
           <span className="font-medium text-green-900">{item.creditor_name}</span>
           <div className="flex flex-wrap items-center gap-2">
+            <Link
+              to={`/accounts/${item.account_id}?letter=${encodeURIComponent(item.dispute_letter_id!)}`}
+              className="text-sm font-medium text-brand-700 hover:underline"
+            >
+              Open letter
+            </Link>
             <PreviewReportPageButton
               target={{
                 accountId: item.account_id,

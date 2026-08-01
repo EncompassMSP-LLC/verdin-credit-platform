@@ -1780,6 +1780,24 @@ class DocumentService:
         *,
         classified_by_id: uuid.UUID | None,
     ) -> None:
+        from api.modules.documents.constants import DocumentType
+
+        # Keep staff/portal-assigned types stable when OCR classifiers misfire.
+        locked_types = {
+            DocumentType.SIGNED_CONSENT.value,
+            DocumentType.IDENTITY_DOCUMENT.value,
+            DocumentType.PROOF_OF_ADDRESS.value,
+        }
+        if (
+            document.document_type in locked_types
+            and result.document_type.value not in locked_types
+        ):
+            document.confidence_score = result.confidence_score
+            document.classification_method = result.classification_method.value
+            document.classified_at = datetime.now(UTC)
+            document.classified_by_id = classified_by_id
+            return
+
         document.document_type = result.document_type.value
         document.confidence_score = result.confidence_score
         document.classification_method = result.classification_method.value

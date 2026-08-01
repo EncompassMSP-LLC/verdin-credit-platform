@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 import {
   ApiClientError,
   createCaseIssueEvidenceLink,
@@ -13,6 +14,7 @@ import {
 } from '@verdin/api-client';
 import { Badge, Button, Card } from '@verdin/ui';
 import { useState } from 'react';
+import { caseLetterDraftPath } from '../../lib/letterDeepLink';
 
 function strengthVariant(band: FindingStrengthBand): 'danger' | 'warning' | 'info' | 'default' {
   if (band === 'strong') return 'danger';
@@ -50,6 +52,7 @@ function ExplainabilityCardRow({
   const queryClient = useQueryClient();
   const [message, setMessage] = useState<string | null>(null);
   const [documentId, setDocumentId] = useState('');
+  const [createdDraftId, setCreatedDraftId] = useState<string | null>(null);
   const docsQuery = useQuery({
     queryKey: ['case-documents-for-evidence', caseId],
     queryFn: () => listDocuments({ case_id: caseId, page_size: 50 }),
@@ -61,13 +64,16 @@ function ExplainabilityCardRow({
         issue_source_id: card.source_id,
       }),
     onSuccess: (draft) => {
+      setCreatedDraftId(draft.id);
       setMessage(`Draft created (${draft.workflow_status.replace(/_/g, ' ')}) — not sent.`);
       void queryClient.invalidateQueries({ queryKey: ['case-letter-drafts', caseId] });
       const el = document.getElementById('letter-draft-builder');
       el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      window.history.replaceState(null, '', caseLetterDraftPath(caseId, draft.id));
     },
     onError: (err: Error) => setMessage(err.message),
   });
+  const openDraftId = createdDraftId ?? generateMutation.data?.id ?? null;
   const linkMutation = useMutation({
     mutationFn: () =>
       createCaseIssueEvidenceLink(caseId, {
@@ -235,6 +241,13 @@ function ExplainabilityCardRow({
         >
           Generate letter draft
         </Button>
+        {openDraftId ? (
+          <Link to={caseLetterDraftPath(caseId, openDraftId)}>
+            <Button type="button" size="sm">
+              Open letter
+            </Button>
+          </Link>
+        ) : null}
         {message ? <p className="text-xs text-gray-600">{message}</p> : null}
       </div>
     </li>
