@@ -67,6 +67,56 @@ def test_unmatched_findings_do_not_override_default() -> None:
     assert selected.sections == ("611",)
 
 
+def test_select_prefers_deletion_affinity_when_scores_tie() -> None:
+    candidates = [
+        LegalCitationCandidate(
+            rule_id="fcra.collection_missing_original_creditor",
+            fcra_sections=("623",),
+            score=90,
+            matched=True,
+        ),
+        LegalCitationCandidate(
+            rule_id="fcra.obsolete_adverse_info",
+            fcra_sections=("605",),
+            score=90,
+            matched=True,
+        ),
+    ]
+    selected = select_best_legal_reference("credit_bureau", candidates)
+    assert selected.source_rule_id == "fcra.obsolete_adverse_info"
+    assert "605" in selected.sections
+
+
+def test_rank_legal_alternatives_marks_best_deletion_path() -> None:
+    from api.modules.accounts.dispute_legal_references import rank_legal_alternatives
+
+    candidates = [
+        LegalCitationCandidate(
+            rule_id="fcra.collection_missing_original_creditor",
+            fcra_sections=("623",),
+            score=75,
+            matched=True,
+        ),
+        LegalCitationCandidate(
+            rule_id="fcra.obsolete_adverse_info",
+            fcra_sections=("605",),
+            score=92,
+            matched=True,
+        ),
+        LegalCitationCandidate(
+            rule_id="fcra.past_due_exceeds_balance",
+            fcra_sections=("607", "623"),
+            score=88,
+            matched=True,
+        ),
+    ]
+    alternatives = rank_legal_alternatives("credit_bureau", candidates)
+    assert alternatives[0].selected is True
+    assert alternatives[0].rule_id == "fcra.obsolete_adverse_info"
+    assert alternatives[0].deletion_affinity > alternatives[1].deletion_affinity
+    assert any(not alt.selected for alt in alternatives[1:])
+
+
 def test_candidates_from_fcra_documents_match_tradeline() -> None:
     documents = [
         {

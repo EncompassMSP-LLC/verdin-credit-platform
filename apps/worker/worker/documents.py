@@ -126,6 +126,7 @@ class ClassificationDocumentRecord:
     file_name: str
     title: str
     mime_type: str | None
+    document_type: str | None
     deleted_at: datetime | None
 
 
@@ -140,6 +141,7 @@ def get_document_for_classification(
             documents_table.c.file_name,
             documents_table.c.title,
             documents_table.c.mime_type,
+            documents_table.c.document_type,
             documents_table.c.deleted_at,
         ).where(documents_table.c.id == document_id)
     ).one_or_none()
@@ -151,6 +153,7 @@ def get_document_for_classification(
         file_name=row.file_name,
         title=row.title,
         mime_type=row.mime_type,
+        document_type=row.document_type,
         deleted_at=row.deleted_at,
     )
 

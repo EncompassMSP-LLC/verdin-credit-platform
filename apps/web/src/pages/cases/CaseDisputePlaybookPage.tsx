@@ -3,6 +3,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useParams } from 'react-router-dom';
 import {
   ApiClientError,
+  downloadAccountDisputeLetterExport,
+  downloadCaseDisputeMailPackets,
   getCase,
   getCaseDisputeStrategy,
   getCaseLitigationStrength,
@@ -12,10 +14,14 @@ import {
   type DisputeStrategyStage,
   type DisputeStrategyStageKind,
   type LitigationStrengthIssue,
+  type PreparedCreditReportDisputeItem,
   type RedisputeAction,
 } from '@verdin/api-client';
 import { Badge, Button, Card } from '@verdin/ui';
+import { ClientConsentGapsBanner } from '../../components/compliance/ClientConsentGapsBanner';
+import { useCaseClientConsentGaps } from '../../hooks/useCaseClientConsentGaps';
 import { caseFindingDeepLink } from '../../lib/findingDeepLink';
+import { accountDisputeLetterPath } from '../../lib/letterDeepLink';
 
 const STAGE_LABELS: Record<DisputeStrategyStageKind, string> = {
   cra_dispute: 'CRA dispute',
@@ -107,6 +113,117 @@ function StageSteps({ stages }: { stages: DisputeStrategyStage[] }) {
   );
 }
 
+function MailPacketDownloadButton({
+  accountId,
+  letterId,
+  consentBlocked,
+  label = 'Download mail packet',
+}: {
+  accountId: string;
+  letterId: string;
+  consentBlocked: boolean;
+  label?: string;
+}) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleDownload = async () => {
+    if (consentBlocked) {
+      setError('Signed client consent is required before downloading mail packets.');
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const { blob, filename } = await downloadAccountDisputeLetterExport(
+        accountId,
+        letterId,
+        'mail-packet',
+      );
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = filename;
+      anchor.click();
+      URL.revokeObjectURL(url);
+    } catch (downloadError) {
+      setError(downloadError instanceof Error ? downloadError.message : 'Download failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div>
+      <Button
+        size="sm"
+        onClick={() => void handleDownload()}
+        loading={loading}
+        disabled={loading || consentBlocked}
+        title={
+          consentBlocked
+            ? 'Signed CROA and FCRA consents are required before downloading mail packets'
+            : undefined
+        }
+      >
+        {label}
+      </Button>
+      {error ? <p className="mt-1 text-xs text-red-600">{error}</p> : null}
+    </div>
+  );
+}
+
+function PreparedPacketActions({
+  prepared,
+  consentBlocked,
+}: {
+  prepared: PreparedCreditReportDisputeItem[];
+  consentBlocked: boolean;
+}) {
+  if (prepared.length === 0) {
+    return null;
+  }
+
+  return (
+    <ul className="mt-3 space-y-2 border-t border-gray-200 pt-3">
+      {prepared.map((item) => (
+        <li
+          key={item.match_key || item.account_id}
+          className="flex flex-col gap-2 rounded-md bg-white px-3 py-2 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <div>
+            <p className="text-sm font-medium text-gray-900">{item.creditor_name}</p>
+            <p className="text-xs text-gray-500">{item.recommended_action}</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {item.dispute_letter_id ? (
+              <>
+                <Link to={accountDisputeLetterPath(item.account_id, item.dispute_letter_id)}>
+                  <Button size="sm" variant="secondary">
+                    Open letter
+                  </Button>
+                </Link>
+                <MailPacketDownloadButton
+                  accountId={item.account_id}
+                  letterId={item.dispute_letter_id}
+                  consentBlocked={consentBlocked}
+                  label="Ready-to-mail packet"
+                />
+              </>
+            ) : (
+              <Link to={`/accounts/${item.account_id}`}>
+                <Button size="sm" variant="secondary">
+                  Open account
+                </Button>
+              </Link>
+            )}
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 function AccountPlaybookCard({
   caseId,
   strategy,
@@ -159,6 +276,11 @@ function AccountPlaybookCard({
             {STAGE_LABELS[best.stage_kind]} — {best.title}
           </p>
           <p className="mt-1 text-sm text-gray-700">{best.objective}</p>
+          <p className="mt-1 text-xs text-gray-600">
+            Prepares a staff-reviewed letter draft and mail-packet materials (letter, labels,
+            checklist, photo ID, proof of address, and report pages when available). Never
+            auto-mails.
+          </p>
           {canPrepare ? (
             <div className="mt-2">
               <Button
@@ -174,7 +296,7 @@ function AccountPlaybookCard({
                   )
                 }
               >
-                Prepare {STAGE_LABELS[best.stage_kind]} letter draft
+                Prepare letter & ready-to-mail packet
               </Button>
             </div>
           ) : (
@@ -230,12 +352,17 @@ export function CaseDisputePlaybookPage() {
   const { caseId } = useParams<{ caseId: string }>();
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState('');
+  const [casePacketsLoading, setCasePacketsLoading] = useState(false);
+  const [casePacketsError, setCasePacketsError] = useState<string | null>(null);
 
   const caseQuery = useQuery({
     queryKey: ['case', caseId],
     queryFn: () => getCase(caseId!),
     enabled: Boolean(caseId),
   });
+
+  const consentGaps = useCaseClientConsentGaps(caseId);
+  const consentBlocked = consentGaps.requiresConsent && consentGaps.hasGaps;
 
   const strategyQuery = useQuery({
     queryKey: ['case-dispute-strategy', caseId],
@@ -334,6 +461,33 @@ export function CaseDisputePlaybookPage() {
   }
 
   const caseData = caseQuery.data;
+  const hasIdentity = Boolean(caseData.identity_document_id);
+  const hasProofOfAddress = Boolean(caseData.proof_of_address_document_id);
+  const mailReady = !consentBlocked && hasIdentity && hasProofOfAddress;
+
+  const handleDownloadAllPackets = async () => {
+    if (consentBlocked) {
+      setCasePacketsError('Signed client consent is required before downloading mail packets.');
+      return;
+    }
+    setCasePacketsLoading(true);
+    setCasePacketsError(null);
+    try {
+      const { blob, filename } = await downloadCaseDisputeMailPackets(caseId);
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = filename;
+      anchor.click();
+      URL.revokeObjectURL(url);
+    } catch (downloadError) {
+      setCasePacketsError(
+        downloadError instanceof Error ? downloadError.message : 'Failed to download mail packets',
+      );
+    } finally {
+      setCasePacketsLoading(false);
+    }
+  };
 
   return (
     <div className="p-8">
@@ -348,8 +502,8 @@ export function CaseDisputePlaybookPage() {
             {caseData.case_number ? ` · ${caseData.case_number}` : null}
           </p>
           <p className="mt-2 max-w-3xl text-sm text-gray-500">
-            Issue-by-issue investigator plan using litigation-strength rankings and multi-stage
-            dispute strategy. Advisory only — prepares letter drafts; never auto-files.
+            Follow the strongest issue path for each account, prepare the letter, then download a
+            complete ready-to-mail packet. Advisory only — never auto-files.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -364,6 +518,68 @@ export function CaseDisputePlaybookPage() {
           </Link>
         </div>
       </div>
+
+      <ClientConsentGapsBanner caseId={caseId} className="mb-6" />
+
+      <Card title="Ready-to-mail checklist" className="mb-6">
+        <p className="text-sm text-gray-600">
+          Each mail packet includes mailing labels, the FCRA dispute letter, a mailing checklist,
+          photo ID, proof of address, and tradeline report pages when available.
+        </p>
+        <ul className="mt-3 space-y-2 text-sm">
+          <li className="flex flex-wrap items-center gap-2">
+            <Badge variant={!consentBlocked ? 'success' : 'warning'}>
+              {!consentBlocked ? 'Ready' : 'Needed'}
+            </Badge>
+            Signed CROA and FCRA client consent
+          </li>
+          <li className="flex flex-wrap items-center gap-2">
+            <Badge variant={hasIdentity ? 'success' : 'warning'}>
+              {hasIdentity ? 'Ready' : 'Needed'}
+            </Badge>
+            Government photo ID linked to the case
+            {!hasIdentity ? (
+              <Link to={`/cases/${caseId}`} className="text-xs text-brand-600 hover:underline">
+                Add on case / portal
+              </Link>
+            ) : null}
+          </li>
+          <li className="flex flex-wrap items-center gap-2">
+            <Badge variant={hasProofOfAddress ? 'success' : 'warning'}>
+              {hasProofOfAddress ? 'Ready' : 'Needed'}
+            </Badge>
+            Proof of address linked to the case
+            {!hasProofOfAddress ? (
+              <Link to={`/cases/${caseId}`} className="text-xs text-brand-600 hover:underline">
+                Add on case / portal
+              </Link>
+            ) : null}
+          </li>
+        </ul>
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          <Button
+            size="sm"
+            onClick={() => void handleDownloadAllPackets()}
+            loading={casePacketsLoading}
+            disabled={casePacketsLoading || consentBlocked}
+            title={
+              consentBlocked
+                ? 'Signed CROA and FCRA consents are required before downloading mail packets'
+                : undefined
+            }
+          >
+            Download all mail packets (ZIP)
+          </Button>
+          {mailReady ? (
+            <span className="text-xs text-emerald-700">Packet attachments look ready.</span>
+          ) : (
+            <span className="text-xs text-amber-800">
+              You can still prepare letters; finish checklist items before mailing.
+            </span>
+          )}
+        </div>
+        {casePacketsError ? <p className="mt-2 text-sm text-red-600">{casePacketsError}</p> : null}
+      </Card>
 
       <div className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Card title="Strategy snapshot">
@@ -483,20 +699,16 @@ export function CaseDisputePlaybookPage() {
       ) : null}
 
       {prepareMutation.data ? (
-        <div className="mb-4 rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700">
-          Prepared {prepareMutation.data.prepared.length} letter draft(s) for{' '}
-          {prepareMutation.data.stage_kind}.
-          {prepareMutation.data.prepared[0]?.account_id ? (
-            <>
-              {' '}
-              <Link
-                to={`/accounts/${prepareMutation.data.prepared[0].account_id}`}
-                className="text-brand-600 hover:underline"
-              >
-                Open account
-              </Link>
-            </>
-          ) : null}
+        <div className="mb-4 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-3 text-sm text-emerald-950">
+          <p>
+            Prepared {prepareMutation.data.prepared.length} letter draft(s) for{' '}
+            {prepareMutation.data.stage_kind}. Open the letter to review, then download the
+            ready-to-mail packet with all required attachments.
+          </p>
+          <PreparedPacketActions
+            prepared={prepareMutation.data.prepared}
+            consentBlocked={consentBlocked}
+          />
         </div>
       ) : null}
 

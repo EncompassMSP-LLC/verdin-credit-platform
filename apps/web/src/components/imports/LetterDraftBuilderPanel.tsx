@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ApiClientError,
@@ -10,6 +10,7 @@ import {
   type LetterTemplateKind,
 } from '@verdin/api-client';
 import { Badge, Button, Card } from '@verdin/ui';
+import { readCaseLetterDraftIdFromHash } from '../../lib/letterDeepLink';
 
 const DEFAULT_TEMPLATE: LetterTemplateKind = 'bureau_dispute';
 
@@ -25,10 +26,24 @@ export function CaseLetterDraftBuilderPanel({
   initialIssueSourceId?: string | null;
 }) {
   const queryClient = useQueryClient();
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(() =>
+    readCaseLetterDraftIdFromHash(window.location.hash),
+  );
   const [templateKind, setTemplateKind] = useState<LetterTemplateKind>(DEFAULT_TEMPLATE);
   const [issueSourceId, setIssueSourceId] = useState(initialIssueSourceId ?? '');
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const syncFromHash = () => {
+      const draftId = readCaseLetterDraftIdFromHash(window.location.hash);
+      if (draftId) {
+        setSelectedId(draftId);
+      }
+    };
+    syncFromHash();
+    window.addEventListener('hashchange', syncFromHash);
+    return () => window.removeEventListener('hashchange', syncFromHash);
+  }, [caseId]);
 
   const listQuery = useQuery({
     queryKey: ['case-letter-drafts', caseId],
@@ -76,7 +91,8 @@ export function CaseLetterDraftBuilderPanel({
       <Card title="Intelligent letter drafts">
         <p className="text-sm text-gray-500">
           Staff-gated letter drafts with section editing and validation. Never auto-mailed or
-          bureau-submitted. No score-increase promises.
+          bureau-submitted. No score-increase promises. Legal citations prefer the strongest
+          deletion-oriented FCRA finding when an issue is linked.
         </p>
 
         <div className="mt-4 flex flex-wrap items-end gap-3">
@@ -115,6 +131,18 @@ export function CaseLetterDraftBuilderPanel({
           >
             Generate draft
           </Button>
+          {selectedId ? (
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => {
+                const el = document.getElementById('letter-draft-detail');
+                el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }}
+            >
+              Open letter
+            </Button>
+          ) : null}
         </div>
 
         {error ? <p className="mt-3 text-sm text-red-600">{error}</p> : null}
@@ -155,7 +183,10 @@ export function CaseLetterDraftBuilderPanel({
         ) : null}
 
         {draft ? (
-          <div className="mt-4 space-y-3 rounded-md border border-gray-200 p-3">
+          <div
+            id="letter-draft-detail"
+            className="mt-4 space-y-3 rounded-md border border-gray-200 p-3"
+          >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <p className="text-sm font-medium text-gray-900">

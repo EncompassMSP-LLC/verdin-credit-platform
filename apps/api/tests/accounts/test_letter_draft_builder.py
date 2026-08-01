@@ -12,6 +12,36 @@ from api.modules.accounts.letter_draft_builder_engine import (
 )
 
 
+def test_build_bureau_dispute_uses_best_legal_pursuant() -> None:
+    case_id = uuid.uuid4()
+    built = build_letter_draft(
+        template_kind="bureau_dispute",
+        client_name="Pat Borrower",
+        case_id=case_id,
+        issue_title="Obsolete adverse info",
+        what_we_found="Adverse item appears past the reporting period.",
+        why_disputable="Obsolescence may require deletion under FCRA §605.",
+        creditor_name="Example Bank",
+        account_number_masked="****1234",
+        bureau="experian",
+        issue_source_id="src-1",
+        issue_rule_id="fcra.obsolete_adverse_info",
+        legal_pursuant="15 U.S.C. § 1681i (FCRA Section 611) and 15 U.S.C. § 1681c (FCRA Section 605)",
+        legal_citations=[
+            "15 U.S.C. § 1681i (FCRA Section 611)",
+            "15 U.S.C. § 1681c (FCRA Section 605)",
+        ],
+        legal_reference_rule_id="fcra.obsolete_adverse_info",
+        legal_alternatives_summary=[
+            "Compared `fcra.past_due_exceeds_balance` — accuracy path.",
+        ],
+    )
+    legal = next(s for s in built["sections"] if s["key"] == "legal_references")
+    assert "1681c" in legal["body"]
+    assert "fcra.obsolete_adverse_info" in legal["body"]
+    assert "not legal advice" in legal["body"].lower()
+
+
 def test_build_bureau_dispute_is_claim_safe() -> None:
     case_id = uuid.uuid4()
     built = build_letter_draft(

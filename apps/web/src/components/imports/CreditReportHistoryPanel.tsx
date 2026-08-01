@@ -18,6 +18,33 @@ function formatDateTime(value: string) {
   return new Date(value).toLocaleString();
 }
 
+/** Compare-report dropdown should only list bureau pulls, never signed consents. */
+function isComparableCreditReport(document: {
+  document_type: string | null;
+  title: string;
+  file_name: string;
+}): boolean {
+  if (document.document_type === 'signed_consent') {
+    return false;
+  }
+  const title = document.title.trim().toLowerCase();
+  const fileName = document.file_name.trim().toLowerCase();
+  if (title.startsWith('signed —') || title.startsWith('signed -')) {
+    return false;
+  }
+  if (fileName.startsWith('signed-consent-')) {
+    return false;
+  }
+  if (
+    title.includes('croa disclosure') ||
+    title.includes('fcra dispute authorization') ||
+    title.includes('credit repair services agreement')
+  ) {
+    return false;
+  }
+  return document.document_type === 'credit_report';
+}
+
 export function CreditReportHistoryPanel({
   caseId,
   highlightTradeline,
@@ -43,9 +70,7 @@ export function CreditReportHistoryPanel({
   });
 
   const creditReports = useMemo(
-    () =>
-      documentsQuery.data?.items.filter((document) => document.document_type === 'credit_report') ??
-      [],
+    () => documentsQuery.data?.items.filter(isComparableCreditReport) ?? [],
     [documentsQuery.data?.items],
   );
 

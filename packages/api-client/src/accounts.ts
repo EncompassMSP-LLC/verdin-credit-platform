@@ -176,6 +176,16 @@ export interface MissingEvidenceItem {
 
 export type DisputeRecipientType = 'credit_bureau' | 'furnisher';
 
+export interface LegalReferenceAlternative {
+  rule_id: string;
+  score: number;
+  deletion_affinity: number;
+  citations: string[];
+  sections: string[];
+  selected: boolean;
+  rationale: string;
+}
+
 export interface AccountDisputeDraft {
   account_id: string;
   case_id: string;
@@ -198,6 +208,7 @@ export interface AccountDisputeDraft {
   legal_reference_source?: 'finding' | 'default';
   legal_reference_rule_id?: string | null;
   legal_pursuant?: string | null;
+  legal_alternatives?: LegalReferenceAlternative[];
 }
 
 export type DisputeLetterStatus = 'draft' | 'review' | 'approved' | 'sent' | 'void';

@@ -173,6 +173,51 @@ class LetterDraftBuilderService:
             detail="Issue source not found on this case",
         )
 
+    async def _legal_context_for_issue(
+        self,
+        user: User,
+        case_id: uuid.UUID,
+        issue_ctx: dict[str, Any],
+        template_kind: str,
+    ) -> dict[str, Any]:
+        """Pick strongest deletion-oriented FCRA citations when issue context exists."""
+        creditor_name = issue_ctx.get("creditor_name")
+        if not creditor_name:
+            return {}
+
+        from api.modules.accounts.dispute_drafts import DisputeRecipientType
+        from api.modules.accounts.dispute_legal_references import (
+            candidates_from_fcra_documents,
+            rank_legal_alternatives,
+            select_best_legal_reference,
+        )
+
+        recipient_type: DisputeRecipientType = (
+            "furnisher" if template_kind == "furnisher_dispute" else "credit_bureau"
+        )
+        docs = DocumentService.from_session(self._session)
+        try:
+            fcra = await docs.get_case_fcra_findings(user, case_id)
+        except HTTPException:
+            return {}
+
+        candidates = candidates_from_fcra_documents(
+            fcra.documents,
+            creditor_name=str(creditor_name),
+            account_number_masked=issue_ctx.get("account_number_masked"),
+            bureau=issue_ctx.get("bureau"),
+        )
+        selected = select_best_legal_reference(recipient_type, candidates)
+        alternatives = rank_legal_alternatives(recipient_type, candidates)
+        return {
+            "legal_pursuant": selected.pursuant_clause,
+            "legal_citations": list(selected.citations),
+            "legal_reference_rule_id": selected.source_rule_id,
+            "legal_alternatives_summary": [
+                alt.rationale for alt in alternatives if not alt.selected
+            ],
+        }
+
     async def list_drafts(self, user: User, case_id: uuid.UUID) -> LetterDraftListResponse:
         organization_id = self._require_organization(user)
         await self._get_case(case_id, organization_id)
@@ -209,12 +254,16 @@ class LetterDraftBuilderService:
         case = await self._get_case(case_id, organization_id)
         client_name = await self._client_name(case, organization_id)
         issue_ctx = await self._issue_context(user, case_id, body.issue_source_id)
+        legal_ctx = await self._legal_context_for_issue(
+            user, case_id, issue_ctx, body.template_kind
+        )
 
         built = build_letter_draft(
             template_kind=body.template_kind,
             client_name=client_name,
             case_id=case.id,
             **issue_ctx,
+            **legal_ctx,
         )
 
         draft = IntelligentLetterDraft(

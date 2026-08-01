@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   approveAccountDisputeLetter,
   createAccountDisputeDraftReviewTask,
@@ -36,6 +36,7 @@ import {
 import { CreditReportHistoryPanel } from '../../components/imports/CreditReportHistoryPanel';
 import { ClientConsentGapsBanner } from '../../components/compliance/ClientConsentGapsBanner';
 import { useCaseClientConsentGaps } from '../../hooks/useCaseClientConsentGaps';
+import { readAccountLetterIdFromSearch } from '../../lib/letterDeepLink';
 
 function formatCurrency(value: string | null) {
   if (!value) return '—';
@@ -58,13 +59,15 @@ function SavedDisputeLetterRow({
   letter,
   onLetterUpdated,
   consentBlocked,
+  initialDetailsOpen = false,
 }: {
   accountId: string;
   letter: DisputeLetter;
   onLetterUpdated: () => void;
   consentBlocked: boolean;
+  initialDetailsOpen?: boolean;
 }) {
-  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(initialDetailsOpen);
   const [exportingFormat, setExportingFormat] = useState<DisputeLetterExportFormat | null>(null);
   const [exportError, setExportError] = useState<string | null>(null);
 
@@ -132,7 +135,7 @@ function SavedDisputeLetterRow({
   };
 
   return (
-    <li className="rounded-lg border border-gray-200 p-3">
+    <li id={`dispute-letter-${letter.id}`} className="rounded-lg border border-gray-200 p-3">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="text-sm font-medium text-gray-900">{letter.subject}</p>
@@ -350,10 +353,20 @@ function SavedDisputeLetterRow({
 export function AccountDetailPage() {
   const { accountId } = useParams<{ accountId: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const queryClient = useQueryClient();
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [disputeRecipientType, setDisputeRecipientType] =
     useState<DisputeRecipientType>('credit_bureau');
+  const focusLetterId = readAccountLetterIdFromSearch(searchParams.toString());
+
+  useEffect(() => {
+    if (!focusLetterId) {
+      return;
+    }
+    const el = document.getElementById(`dispute-letter-${focusLetterId}`);
+    el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [focusLetterId]);
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['account', accountId],
@@ -394,8 +407,11 @@ export function AccountDetailPage() {
 
   const saveDraftMutation = useMutation({
     mutationFn: () => createAccountDisputeLetterDraft(accountId!, disputeRecipientType),
-    onSuccess: () => {
+    onSuccess: (letter) => {
       queryClient.invalidateQueries({ queryKey: ['account-dispute-letters', accountId] });
+      navigate(`/accounts/${accountId}?letter=${encodeURIComponent(letter.id)}`, {
+        replace: true,
+      });
     },
   });
 
@@ -740,6 +756,29 @@ export function AccountDetailPage() {
                   >
                     Save draft
                   </Button>
+                  {saveDraftMutation.data ? (
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        const el = document.getElementById(
+                          `dispute-letter-${saveDraftMutation.data.id}`,
+                        );
+                        el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }}
+                    >
+                      Open letter
+                    </Button>
+                  ) : focusLetterId ? (
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        const el = document.getElementById(`dispute-letter-${focusLetterId}`);
+                        el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }}
+                    >
+                      Open letter
+                    </Button>
+                  ) : null}
                   {reviewTaskMutation.data ? (
                     <Link to={`/tasks/${reviewTaskMutation.data.id}`}>
                       <Button size="sm">View review task</Button>
@@ -774,6 +813,64 @@ export function AccountDetailPage() {
                   Failed to create the dispute draft review task.
                 </div>
               ) : null}
+
+              <div>
+                <h4 className="text-sm font-semibold text-gray-900">
+                  Best legal path for deletion
+                </h4>
+                <p className="mt-1 text-xs text-gray-500">
+                  Compared matched FCRA findings and selected the strongest deletion-oriented
+                  citations (investigator aid only — not legal advice).
+                </p>
+                {disputeDraftQuery.data.legal_pursuant ? (
+                  <p className="mt-2 text-sm text-gray-800">
+                    Selected pursuant: {disputeDraftQuery.data.legal_pursuant}
+                  </p>
+                ) : null}
+                {disputeDraftQuery.data.legal_reference_rule_id ? (
+                  <p className="mt-1 text-xs text-gray-500">
+                    Source rule: {disputeDraftQuery.data.legal_reference_rule_id} (
+                    {disputeDraftQuery.data.legal_reference_source ?? 'default'})
+                  </p>
+                ) : (
+                  <p className="mt-1 text-xs text-gray-500">
+                    Using procedural default (
+                    {disputeDraftQuery.data.legal_reference_source ?? 'default'}).
+                  </p>
+                )}
+                {(disputeDraftQuery.data.legal_alternatives ?? []).length > 0 ? (
+                  <ul className="mt-3 space-y-2">
+                    {disputeDraftQuery.data.legal_alternatives?.map((alt) => (
+                      <li
+                        key={`${alt.rule_id}-${alt.selected ? 'selected' : 'alt'}`}
+                        className={`rounded-md border px-3 py-2 text-sm ${
+                          alt.selected
+                            ? 'border-emerald-200 bg-emerald-50 text-emerald-950'
+                            : 'border-gray-200 bg-white text-gray-700'
+                        }`}
+                      >
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="font-medium">{alt.rule_id}</span>
+                          {alt.selected ? (
+                            <span className="text-xs font-medium uppercase text-emerald-700">
+                              selected
+                            </span>
+                          ) : (
+                            <span className="text-xs uppercase text-gray-500">compared</span>
+                          )}
+                          <span className="text-xs text-gray-500">
+                            strength {alt.score}/100 · deletion affinity {alt.deletion_affinity}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-xs text-gray-600">{alt.rationale}</p>
+                        {alt.citations.length > 0 ? (
+                          <p className="mt-1 text-xs text-gray-500">{alt.citations.join(' · ')}</p>
+                        ) : null}
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </div>
 
               <div>
                 <h4 className="text-sm font-semibold text-gray-900">Suggested dispute reasons</h4>
@@ -867,10 +964,11 @@ export function AccountDetailPage() {
                   <ul className="mt-2 divide-y divide-gray-200 rounded-md border border-gray-200">
                     {disputeLettersQuery.data.map((letter) => (
                       <SavedDisputeLetterRow
-                        key={letter.id}
+                        key={`${letter.id}:${letter.id === focusLetterId ? 'focus' : 'idle'}`}
                         accountId={accountId!}
                         letter={letter}
                         consentBlocked={consentBlocked}
+                        initialDetailsOpen={letter.id === focusLetterId}
                         onLetterUpdated={() => {
                           queryClient.invalidateQueries({
                             queryKey: ['account-dispute-letters', accountId],

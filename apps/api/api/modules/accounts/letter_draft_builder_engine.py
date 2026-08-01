@@ -107,6 +107,10 @@ def build_letter_draft(
     issue_source_id: str | None = None,
     issue_rule_id: str | None = None,
     evidence_refs: list[dict[str, Any]] | None = None,
+    legal_pursuant: str | None = None,
+    legal_citations: list[str] | None = None,
+    legal_reference_rule_id: str | None = None,
+    legal_alternatives_summary: list[str] | None = None,
 ) -> dict[str, Any]:
     template = get_template(template_kind)
     refs = list(evidence_refs or [])
@@ -145,11 +149,34 @@ def build_letter_draft(
         )
     issue_body = " ".join(issue_parts)
 
-    legal = (
-        "This draft references generally applicable consumer credit reporting concepts "
-        "(including accuracy and reinvestigation expectations under the FCRA where applicable). "
-        "Staff must confirm which statutory citations apply before transmission."
-    )
+    if legal_pursuant:
+        legal_bits = [
+            f"Pursuant to {legal_pursuant}, please investigate and correct or delete "
+            "any inaccurate, incomplete, or unverifiable information."
+        ]
+        if legal_reference_rule_id and legal_reference_rule_id != "default.procedural":
+            legal_bits.append(
+                f"Primary matched finding used for citation selection: {legal_reference_rule_id}."
+            )
+        if legal_citations:
+            legal_bits.append("Citations considered: " + "; ".join(legal_citations) + ".")
+        if legal_alternatives_summary:
+            legal_bits.append(
+                "Compared alternatives (investigator aid only): "
+                + " | ".join(legal_alternatives_summary[:3])
+                + "."
+            )
+        legal_bits.append(
+            "Staff must confirm which statutory citations apply before transmission. "
+            "This is not legal advice."
+        )
+        legal = " ".join(legal_bits)
+    else:
+        legal = (
+            "This draft references generally applicable consumer credit reporting concepts "
+            "(including accuracy and reinvestigation expectations under the FCRA where applicable). "
+            "Staff must confirm which statutory citations apply before transmission."
+        )
 
     resolution_by_kind: dict[str, str] = {
         "bureau_dispute": (
