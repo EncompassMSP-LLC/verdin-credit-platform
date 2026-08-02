@@ -348,3 +348,70 @@ def test_transunion_interactive_report_date_survives_ocr_flattening() -> None:
     report_date, confidence = extract_report_date(flat)
     assert report_date == "07/26/2026"
     assert confidence["report.report_date"] == 0.91
+
+
+_INTERACTIVE_OCR_SAMPLE = """
+Credit Report
+My VantageScore® 3.0
+605
+FAIR
+Credit Profile Summary
+Credit Report Date 07/26/2026
+Credit Score 605
+Balances $21,763
+Personal Information
+Name CHERIE SAMPLE
+Date of Birth 02/03/1995
+Current Address MORELAND GA 30259
+Accounts
+Account Details
+Account Number 539176127109****
+Condition Derogatory
+Responsibility Individual
+Current Balance $0
+Original Balance $420
+Limit $240
+Monthly Payment $0
+Last Payment 01/18/2020
+Status Collection / Charge-Off
+Loan Term 0
+Loan Type Charge account
+Opened 09/20/2019
+Reported 11/01/2020
+Remarks Charged off as bad debt|Purchased by another lender
+Creditor Information COMENITY BANK/VCTRSSEC PO BOX 182789
+COLUMBUS,OH 43218
+Payment Status
+Payment Status
+Account Details
+Account Number 30767****
+Condition Derogatory
+Responsibility Individual
+Current Balance $420
+Original Balance $420
+Status Collection / Charge-Off
+Opened 09/29/2020
+Reported 07/23/2026
+Remarks Account information disputed by consumer, meets
+FCRA requirements
+Creditor Information MIDLAND CREDIT MANAGEMEN 350 CAMINO DE LA
+REINA SAN DIEGO,CA 92108 Phone#: 8778220381
+Payment Status
+Public Records
+© 2026 TransUnion Interactive, Inc. | All Rights Reserved
+"""
+
+
+def test_transunion_interactive_ocr_same_line_labels() -> None:
+    """Staging OCR joins label+value on one line; must still extract tradelines."""
+    parser = TransUnionParser()
+    report = parser.parse(_transunion_document(_INTERACTIVE_OCR_SAMPLE))
+
+    assert report.consumer is not None
+    assert report.consumer.name == "CHERIE SAMPLE"
+    assert len(report.accounts) == 2
+    creditors = {account.creditor_name for account in report.accounts}
+    assert "COMENITY BANK/VCTRSSEC" in creditors
+    assert "MIDLAND CREDIT MANAGEMEN" in creditors
+    assert "no_tradelines_extracted" not in report.metadata.warnings
+    assert "report_date_missing" not in report.metadata.warnings

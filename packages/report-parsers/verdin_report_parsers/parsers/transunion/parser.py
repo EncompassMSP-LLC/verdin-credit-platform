@@ -14,7 +14,7 @@ from verdin_report_parsers.parsers.transunion.extract import (
 )
 from verdin_report_parsers.parsers.transunion.layout import is_acr_layout, score_layout, split_sections
 
-PARSER_VERSION = "1.1.0"
+PARSER_VERSION = "1.1.1"
 
 
 class TransUnionParser:

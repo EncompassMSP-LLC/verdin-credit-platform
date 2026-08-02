@@ -121,6 +121,12 @@ _PREPARED_FOR_RE = re.compile(
     re.I | re.M,
 )
 _ACR_NAME_RE = re.compile(r"^Name\s*\n([A-Z][A-Z .'-]{2,80})", re.I | re.M)
+# OCR often puts Interactive labels and values on the same line.
+_ACR_NAME_SAME_LINE_RE = re.compile(r"^Name\s+([A-Z][A-Z .'-]{2,80})\s*$", re.I | re.M)
+_DOB_SAME_LINE_RE = re.compile(
+    r"^Date of Birth\s+(\d{1,2}/\d{1,2}/\d{4})\s*$",
+    re.I | re.M,
+)
 _ACR_ACCOUNT_MARKER = re.compile(r"Account Name\s*\n", re.I)
 _ACR_INFO_MARKER = re.compile(r"Account Information\s*\n", re.I)
 _ACR_BALANCE_RE = re.compile(r"Balance\s+\$?([\d,]+)", re.I)
@@ -146,26 +152,59 @@ def _parse_money(raw: str | None) -> float | None:
     return parse_balance(cleaned)
 
 
+def _match_interactive_label(line: str) -> tuple[str, str | None] | None:
+    """Return (label_key, same_line_value_or_None) when line starts with a field label."""
+    stripped = line.strip()
+    if not stripped:
+        return None
+    lower = stripped.lower()
+    for label in sorted(_INTERACTIVE_FIELD_LABELS, key=len, reverse=True):
+        key = label.lower()
+        if lower == key:
+            return key, None
+        prefix = f"{key} "
+        prefix_colon = f"{key}:"
+        if lower.startswith(prefix):
+            return key, stripped[len(label) :].strip()
+        if lower.startswith(prefix_colon):
+            return key, stripped[len(label) + 1 :].strip()
+    return None
+
+
+def _line_is_stop_label(line: str) -> bool:
+    lower = line.strip().lower()
+    if not lower:
+        return False
+    for label in sorted(_INTERACTIVE_STOP_LABELS, key=len, reverse=True):
+        key = label.lower()
+        if lower == key or lower.startswith(f"{key} ") or lower.startswith(f"{key}:"):
+            return True
+    return False
+
+
 def _interactive_fields(block: str) -> dict[str, str]:
     """Parse label/value lines from an Interactive Account Details block.
 
-    Empty labels (common for Remarks/Limit) must not swallow the next label.
+    Supports both pdfplumber layout (label then value on the next line) and OCR
+    layout (``Account Number 5391…`` on one line). Empty labels must not swallow
+    the next label.
     """
-    field_labels = {label.lower() for label in _INTERACTIVE_FIELD_LABELS}
-    stop_labels = {label.lower() for label in _INTERACTIVE_STOP_LABELS}
     fields: dict[str, str] = {}
     lines = block.splitlines()
     index = 0
     while index < len(lines):
-        label = lines[index].strip().lower()
-        if label not in field_labels:
+        matched = _match_interactive_label(lines[index])
+        if matched is None:
             index += 1
             continue
+        label, same_line_value = matched
         index += 1
         values: list[str] = []
+        if same_line_value:
+            values.append(same_line_value)
         while index < len(lines):
             candidate = lines[index].strip()
-            if candidate.lower() in stop_labels:
+            if _line_is_stop_label(candidate):
                 break
             if candidate:
                 values.append(candidate)
@@ -222,9 +261,15 @@ def extract_consumer(section_text: str, full_text: str) -> tuple[ConsumerInfo | 
     name = (
         _first(_NAME_RE, section_text)
         or _first(_ACR_NAME_RE, section_text)
+        or _first(_ACR_NAME_SAME_LINE_RE, section_text)
+        or _first(_ACR_NAME_SAME_LINE_RE, full_text)
         or _first(_PREPARED_FOR_RE, full_text)
     )
-    dob = _first(_DOB_RE, section_text)
+    dob = (
+        _first(_DOB_RE, section_text)
+        or _first(_DOB_SAME_LINE_RE, section_text)
+        or _first(_DOB_SAME_LINE_RE, full_text)
+    )
     ssn_raw = _first(_SSN_RE, section_text)
     ssn_masked = mask_ssn(ssn_raw) if ssn_raw else mask_ssn(full_text)
 
