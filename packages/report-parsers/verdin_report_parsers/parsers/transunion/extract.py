@@ -71,8 +71,51 @@ _COLLECTION_BALANCE_RE = re.compile(r"^Balance:\s*\$?([\d,]+\.?\d*)$", re.I | re
 _COLLECTION_STATUS_RE = re.compile(r"^Status:\s*(.+)$", re.I | re.M)
 
 _REPORT_DATE_RE = re.compile(r"^Report Date:\s*(\d{1,2}/\d{1,2}/\d{4})$", re.I | re.M)
-_ACR_REPORT_DATE_RE = re.compile(r"Credit Report Date\s*\n(\d{1,2}/\d{1,2}/\d{4})", re.I)
-_DATE_CREATED_RE = re.compile(r"Date Created:\s*\n(\d{1,2}/\d{1,2}/\d{4})", re.I)
+# Allow newline or OCR-flattened spaces between label and date.
+_ACR_REPORT_DATE_RE = re.compile(
+    r"Credit Report Date\s*[:\s]+(\d{1,2}/\d{1,2}/\d{4})",
+    re.I,
+)
+_DATE_CREATED_RE = re.compile(
+    r"Date Created:\s*[:\s]*(\d{1,2}/\d{1,2}/\d{4})",
+    re.I,
+)
+_INTERACTIVE_DETAILS_RE = re.compile(
+    r"Account Details\s*\n(.*?)(?=\nAccount Details\s*\n|\Z)",
+    re.I | re.S,
+)
+_INTERACTIVE_FIELD_LABELS = (
+    "Account Number",
+    "Current Balance",
+    "Original Balance",
+    "Limit",
+    "Status",
+    "Loan Type",
+    "Opened",
+    "Reported",
+    "Remarks",
+    "Creditor Information",
+)
+_INTERACTIVE_STOP_LABELS = (
+    "Account Number",
+    "Condition",
+    "Responsibility",
+    "Current Balance",
+    "Original Balance",
+    "Limit",
+    "Monthly Payment",
+    "Last Payment",
+    "Status",
+    "Loan Term",
+    "Loan Type",
+    "Opened",
+    "Reported",
+    "Remarks",
+    "Creditor Information",
+    "Payment Status",
+    "Past Due Amount",
+    "Late Payments",
+)
 _PREPARED_FOR_RE = re.compile(
     r"Personal Credit Report for:\s*\n([A-Z][A-Z .'-]{2,80})",
     re.I | re.M,
@@ -92,6 +135,87 @@ def _first(pattern: re.Pattern[str], text: str) -> str | None:
     if not match:
         return None
     return match.group(1).strip()
+
+
+def _parse_money(raw: str | None) -> float | None:
+    if not raw:
+        return None
+    cleaned = raw.replace("$", "").replace(",", "").strip()
+    if not cleaned or cleaned in {".", "-"}:
+        return None
+    return parse_balance(cleaned)
+
+
+def _interactive_fields(block: str) -> dict[str, str]:
+    """Parse label/value lines from an Interactive Account Details block.
+
+    Empty labels (common for Remarks/Limit) must not swallow the next label.
+    """
+    field_labels = {label.lower() for label in _INTERACTIVE_FIELD_LABELS}
+    stop_labels = {label.lower() for label in _INTERACTIVE_STOP_LABELS}
+    fields: dict[str, str] = {}
+    lines = block.splitlines()
+    index = 0
+    while index < len(lines):
+        label = lines[index].strip().lower()
+        if label not in field_labels:
+            index += 1
+            continue
+        index += 1
+        values: list[str] = []
+        while index < len(lines):
+            candidate = lines[index].strip()
+            if candidate.lower() in stop_labels:
+                break
+            if candidate:
+                values.append(candidate)
+            index += 1
+        if values:
+            fields[label] = "\n".join(values)
+    return fields
+
+
+def _interactive_creditor_name(creditor_block: str | None) -> str | None:
+    if not creditor_block:
+        return None
+    first_line = creditor_block.splitlines()[0].strip()
+    if not first_line:
+        return None
+    first_line = re.split(r"\s+PO\s+BOX\b", first_line, maxsplit=1, flags=re.I)[0]
+    first_line = re.split(r"\s+Phone#?:?", first_line, maxsplit=1, flags=re.I)[0]
+    first_line = re.split(r"\s+\d{2,5}\s+[A-Z]", first_line, maxsplit=1)[0]
+    return first_line.strip(" ,") or None
+
+
+def _extract_tu_interactive_accounts(text: str) -> list[dict[str, str | None]]:
+    """Parse TransUnion Interactive (MyVantageScore) Account Details blocks."""
+    results: list[dict[str, str | None]] = []
+    seen: set[tuple[str, str]] = set()
+    for match in _INTERACTIVE_DETAILS_RE.finditer(text):
+        fields = _interactive_fields(match.group(1))
+        creditor = _interactive_creditor_name(fields.get("creditor information"))
+        account_number = fields.get("account number")
+        if not creditor and not account_number:
+            continue
+        key = (creditor or "", account_number or "")
+        if key in seen:
+            continue
+        seen.add(key)
+        results.append(
+            {
+                "creditor_name": creditor,
+                "account_number_raw": account_number,
+                "balance": fields.get("current balance"),
+                "high_credit": fields.get("original balance"),
+                "credit_limit": fields.get("limit"),
+                "account_status": fields.get("status"),
+                "account_type": fields.get("loan type"),
+                "open_date": fields.get("opened"),
+                "date_reported": fields.get("reported"),
+                "remarks": fields.get("remarks"),
+            }
+        )
+    return results
 
 
 def extract_consumer(section_text: str, full_text: str) -> tuple[ConsumerInfo | None, dict[str, float]]:
@@ -309,6 +433,67 @@ def extract_accounts(
                     balance=balance,
                     credit_limit=None,
                     payment_status=payment_status,
+                    open_date=open_date,
+                    date_reported=date_reported,
+                    bureau="transunion",
+                    confidence=max(account_scores) if account_scores else 0.0,
+                )
+            )
+
+    if not accounts:
+        interactive_source = full_text or section_text or ""
+        for index, item in enumerate(_extract_tu_interactive_accounts(interactive_source)):
+            creditor = item.get("creditor_name")
+            account_number_raw = item.get("account_number_raw")
+            balance = _parse_money(item.get("balance"))
+            high_credit = _parse_money(item.get("high_credit"))
+            credit_limit = _parse_money(item.get("credit_limit"))
+            account_status = item.get("account_status")
+            account_type = item.get("account_type")
+            open_date = item.get("open_date")
+            date_reported = item.get("date_reported")
+            remarks = item.get("remarks")
+            account_masked = (
+                mask_account_number(account_number_raw) if account_number_raw else None
+            )
+
+            prefix = f"accounts[{index}]"
+            if creditor:
+                field_confidence[f"{prefix}.creditor_name"] = _FIELD_CONFIDENCE
+            if account_masked:
+                field_confidence[f"{prefix}.account_number_masked"] = _FIELD_CONFIDENCE
+            if account_type:
+                field_confidence[f"{prefix}.account_type"] = _FIELD_CONFIDENCE
+            if balance is not None:
+                field_confidence[f"{prefix}.balance"] = _FIELD_CONFIDENCE
+            if high_credit is not None:
+                field_confidence[f"{prefix}.high_credit"] = _FIELD_CONFIDENCE
+            if credit_limit is not None:
+                field_confidence[f"{prefix}.credit_limit"] = _FIELD_CONFIDENCE
+            if account_status:
+                field_confidence[f"{prefix}.account_status"] = _FIELD_CONFIDENCE
+                field_confidence[f"{prefix}.payment_status"] = _FIELD_CONFIDENCE
+            if open_date:
+                field_confidence[f"{prefix}.open_date"] = _FIELD_CONFIDENCE
+            if date_reported:
+                field_confidence[f"{prefix}.date_reported"] = _FIELD_CONFIDENCE
+            if remarks:
+                field_confidence[f"{prefix}.remarks"] = _FIELD_CONFIDENCE
+
+            account_scores = [
+                field_confidence[key] for key in field_confidence if key.startswith(prefix)
+            ]
+            accounts.append(
+                TradelineAccount(
+                    creditor_name=creditor,
+                    account_number_masked=account_masked,
+                    account_type=account_type,
+                    account_status=account_status,
+                    balance=balance,
+                    high_credit=high_credit,
+                    credit_limit=credit_limit,
+                    payment_status=account_status,
+                    remarks=remarks,
                     open_date=open_date,
                     date_reported=date_reported,
                     bureau="transunion",

@@ -139,3 +139,212 @@ def test_transunion_pdf_fixture_text_is_extractable() -> None:
     text = extract_pdf_text(pdf_path.read_bytes())
     parser = TransUnionParser()
     assert parser.can_parse(_transunion_document(text)) >= 0.99
+
+
+_INTERACTIVE_SAMPLE = """
+Credit Report
+My VantageScore 3.0
+605
+FAIR
+Credit Profile Summary
+Credit Report Date
+07/26/2026
+Credit Score
+605
+Personal Information
+Name
+JANE SAMPLE
+Date of Birth
+01/15/1990
+Current Address
+ATLANTA GA 30301
+Inquiries
+SAMPLE AUTO
+02/25/2026
+Accounts
+Revolving
+Account Name Balance Balance Date Monthly Term
+Payment
+SAMPLEBANK $0 09/01/2020 $0 0
+Account Details
+Account Number
+539176127109****
+Condition
+Derogatory
+Responsibility
+Individual
+Current Balance
+$0
+Original Balance
+$420
+Limit
+$240
+Monthly Payment
+$0
+Last Payment
+01/18/2020
+Status
+Collection / Charge-Off
+Loan Term
+0
+Loan Type
+Charge account
+Opened
+09/20/2019
+Reported
+11/01/2020
+Remarks
+Charged off as bad debt|Purchased by another lender
+Creditor Information
+COMENITY BANK/VCTRSSEC PO BOX 182789
+COLUMBUS,OH 43218
+Payment Status
+Payment Status
+Past Due Amount
+Late Payments
+30 Days - 0
+Installment
+Account Name Balance Balance Date Monthly Term
+Payment
+BRIDGECREST $21,343 04/30/2026 $0 69
+Account Details
+Account Number
+20016626****
+Condition
+Derogatory
+Responsibility
+Joint
+Current Balance
+$21,343
+Original Balance
+$26,726
+Limit
+$0
+Monthly Payment
+$0
+Last Payment
+05/12/2026
+Status
+Loan Term
+69
+Loan Type
+Auto Loan
+Opened
+01/02/2023
+Reported
+06/30/2026
+Remarks
+Voluntary repossession|Returned voluntarily
+Creditor Information
+BRIDGECREST PO BOX 29018 PHOENIX,AZ 85038
+Phone#: 8008433825
+Payment Status
+Payment Status
+Collections
+Account Name Balance Balance Date Monthly Term
+Payment
+MIDLAND CRED $420 07/23/2026
+Account Details
+Account Number
+30767****
+Condition
+Derogatory
+Responsibility
+Individual
+Current Balance
+$420
+Original Balance
+$420
+Limit
+Monthly Payment
+Last Payment
+Status
+Collection / Charge-Off
+Loan Term
+Loan Type
+Opened
+09/29/2020
+Reported
+07/23/2026
+Remarks
+Account information disputed by consumer, meets
+FCRA requirements
+Creditor Information
+MIDLAND CREDIT MANAGEMEN 350 CAMINO DE LA
+REINA SAN DIEGO,CA 92108 Phone#: 8778220381
+Payment Status
+Payment Status
+Other
+Account Name Balance Balance Date Monthly Term
+Payment
+CHIME-STRIDE $0 01/11/2024 $0 0
+Account Details
+Account Number
+66813249****
+Condition
+Open
+Responsibility
+Individual
+Current Balance
+$0
+Original Balance
+$39
+Limit
+$0
+Monthly Payment
+$0
+Last Payment
+01/11/2024
+Status
+OK
+Loan Term
+0
+Loan Type
+Secured credit card
+Opened
+12/07/2023
+Reported
+06/02/2026
+Remarks
+Creditor Information
+CHIME - STRIDE BANK PO BOX 417 SAN
+FRANCISCO,CA 94104 Phone#: 8442446363
+Payment Status
+Payment Status
+Public Records
+© 2026 TransUnion Interactive, Inc. | All Rights Reserved
+"""
+
+
+def test_transunion_interactive_layout_extracts_tradelines_and_report_date() -> None:
+    parser = TransUnionParser()
+    report = parser.parse(_transunion_document(_INTERACTIVE_SAMPLE))
+
+    assert report.bureau == Bureau.TRANSUNION
+    assert report.consumer is not None
+    assert report.consumer.name == "JANE SAMPLE"
+    assert len(report.accounts) == 4
+    creditors = {account.creditor_name for account in report.accounts}
+    assert "COMENITY BANK/VCTRSSEC" in creditors
+    assert "BRIDGECREST" in creditors
+    assert "MIDLAND CREDIT MANAGEMEN" in creditors
+    assert "CHIME - STRIDE BANK" in creditors
+
+    midland = next(a for a in report.accounts if a.creditor_name == "MIDLAND CREDIT MANAGEMEN")
+    assert midland.balance == 420.0
+    assert midland.account_status == "Collection / Charge-Off"
+    assert midland.account_number_masked == "****0767"
+
+    assert "no_tradelines_extracted" not in report.metadata.warnings
+    assert "report_date_missing" not in report.metadata.warnings
+    assert report.metadata.field_confidence.get("report.report_date") == 0.91
+    assert report.metadata.is_partial is False
+
+
+def test_transunion_interactive_report_date_survives_ocr_flattening() -> None:
+    from verdin_report_parsers.parsers.transunion.extract import extract_report_date
+
+    flat = "Credit Report Date 07/26/2026 Credit Score 605"
+    report_date, confidence = extract_report_date(flat)
+    assert report_date == "07/26/2026"
+    assert confidence["report.report_date"] == 0.91
