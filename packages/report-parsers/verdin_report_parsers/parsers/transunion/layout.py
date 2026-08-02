@@ -16,6 +16,10 @@ _ACR_PORTAL = re.compile(
     r"annualcreditreport\.transunion\.com|personal credit report for:",
     re.I,
 )
+_INTERACTIVE_PORTAL = re.compile(
+    r"transunion interactive|my\s*vantagescore|account details\s*\n\s*account number",
+    re.I,
+)
 
 _SECTION_MARKERS: tuple[tuple[str, re.Pattern[str], float], ...] = (
     ("layout.personal_information", re.compile(r"\bpersonal\s+information\b", re.I), 0.15),
@@ -43,6 +47,7 @@ _SECTION_HEADERS: tuple[tuple[str, re.Pattern[str]], ...] = (
 _BRANDING_WEIGHT = 0.20
 _HEADER_WEIGHT = 0.15
 _ACR_PORTAL_WEIGHT = 0.20
+_INTERACTIVE_PORTAL_WEIGHT = 0.15
 
 
 @dataclass(frozen=True, slots=True)
@@ -71,6 +76,10 @@ def score_layout(text: str) -> LayoutScore:
     if _ACR_PORTAL.search(text):
         signals["layout.acr_portal"] = _ACR_PORTAL_WEIGHT
         total += _ACR_PORTAL_WEIGHT
+
+    if _INTERACTIVE_PORTAL.search(text):
+        signals["layout.interactive_portal"] = _INTERACTIVE_PORTAL_WEIGHT
+        total += _INTERACTIVE_PORTAL_WEIGHT
 
     for signal_name, pattern, weight in _SECTION_MARKERS:
         if pattern.search(searchable):

@@ -103,6 +103,20 @@ def run_dispute_letter_lifecycle(
     )
     assert approved["status"] == "approved"
 
+    # Poll: approve response can return before the GET/send session sees committed status.
+    poll_until(
+        lambda: http.get(
+            f"/api/v1/accounts/{account_id}/dispute-letters/{letter_id}",
+            headers=headers,
+        ),
+        lambda response: (
+            response.status_code == 200 and response.json().get("status") == "approved"
+        ),
+        description="dispute letter status == approved",
+        timeout=15.0,
+        interval=0.25,
+    )
+
     sent = expect_ok(
         http.post(
             f"/api/v1/accounts/{account_id}/dispute-letters/{letter_id}/send",
