@@ -61,6 +61,45 @@ export interface RequestOptions {
   headers?: Record<string, string>;
 }
 
+function formatApiErrorDetail(detail: unknown): string {
+  if (typeof detail === 'string' && detail.trim()) {
+    return detail;
+  }
+  if (Array.isArray(detail)) {
+    const parts = detail.map((item) => {
+      if (typeof item === 'string') return item;
+      if (item && typeof item === 'object') {
+        const record = item as { loc?: unknown; msg?: unknown; message?: unknown };
+        const loc = Array.isArray(record.loc)
+          ? record.loc.filter((p) => p !== 'body').join('.')
+          : '';
+        const msg =
+          typeof record.msg === 'string'
+            ? record.msg
+            : typeof record.message === 'string'
+              ? record.message
+              : '';
+        if (loc && msg) return `${loc}: ${msg}`;
+        if (msg) return msg;
+      }
+      return null;
+    });
+    const joined = parts.filter(Boolean).join('; ');
+    if (joined) return joined;
+  }
+  if (detail && typeof detail === 'object') {
+    const record = detail as { message?: unknown; msg?: unknown };
+    if (typeof record.message === 'string') return record.message;
+    if (typeof record.msg === 'string') return record.msg;
+    try {
+      return JSON.stringify(detail);
+    } catch {
+      return 'Request failed';
+    }
+  }
+  return 'Request failed';
+}
+
 export async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { method = 'GET', body, auth = true, headers = {} } = options;
 
@@ -84,9 +123,9 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
   if (!response.ok) {
     const error = (await response.json().catch(() => ({
       detail: 'Request failed',
-    }))) as ApiError;
+    }))) as ApiError & { detail?: unknown };
     throw new ApiClientError(
-      error.detail || `HTTP ${response.status}`,
+      formatApiErrorDetail(error.detail) || `HTTP ${response.status}`,
       response.status,
       error.code,
     );
@@ -115,9 +154,9 @@ export async function uploadRequest<T>(path: string, formData: FormData): Promis
   if (!response.ok) {
     const error = (await response.json().catch(() => ({
       detail: 'Request failed',
-    }))) as ApiError;
+    }))) as ApiError & { detail?: unknown };
     throw new ApiClientError(
-      error.detail || `HTTP ${response.status}`,
+      formatApiErrorDetail(error.detail) || `HTTP ${response.status}`,
       response.status,
       error.code,
     );
