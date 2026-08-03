@@ -92,3 +92,20 @@ def test_build_furnisher_dispute_body_uses_furnisher_language() -> None:
     assert "Example Bank" in body
     assert "FCRA Section 623" in body
     assert "consumer reporting agencies" in body
+    assert "Sincerely,\nUltimate Credit Repair LLC" in body
+
+
+def test_build_dispute_body_uses_org_signer_name() -> None:
+    from api.modules.accounts.dispute_drafts import build_dispute_body
+
+    account = _account(account_number_masked="****9999")
+    case = Case(client_name="Account Client", client_email="client@example.com")
+    body = build_dispute_body(
+        account,
+        case,
+        ["Verify the reported balance."],
+        signer_name="Lending Readiness Partners",
+    )
+
+    assert "Sincerely,\nLending Readiness Partners" in body
+    assert "Ultimate Credit Repair LLC" not in body
